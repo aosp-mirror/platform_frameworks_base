@@ -16,16 +16,15 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
@@ -61,8 +60,8 @@ class LegacySplitScreenToLauncher(
 ) : LegacySplitScreenTransition(testSpec) {
     private val testApp = SimpleAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 test {
                     device.wakeUpAndGoToHomeScreen()
@@ -70,7 +69,7 @@ class LegacySplitScreenToLauncher(
                 }
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    this.setRotation(configuration.endRotation)
+                    this.setRotation(testSpec.endRotation)
                     device.launchSplitScreen(wmHelper)
                     device.waitForIdle()
                 }
@@ -109,7 +108,7 @@ class LegacySplitScreenToLauncher(
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -117,11 +116,11 @@ class LegacySplitScreenToLauncher(
     @Test
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun dockedStackDividerBecomesInvisible() = testSpec.dockedStackDividerBecomesInvisible()
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun layerBecomesInvisible() {
         testSpec.assertLayers {
@@ -131,7 +130,7 @@ class LegacySplitScreenToLauncher(
         }
     }
 
-    @Postsubmit
+    @FlakyTest
     @Test
     fun focusDoesNotChange() {
         testSpec.assertEventLog {

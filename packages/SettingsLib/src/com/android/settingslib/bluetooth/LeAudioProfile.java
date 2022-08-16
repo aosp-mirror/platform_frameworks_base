@@ -145,20 +145,20 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     * @hide
     */
     public boolean connect(BluetoothDevice device) {
-       if (mService == null) {
-           return false;
-       }
-       return mService.connect(device);
+        if (mService == null) {
+            return false;
+        }
+        return mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
     }
 
     /*
     * @hide
     */
     public boolean disconnect(BluetoothDevice device) {
-       if (mService == null) {
-           return false;
-       }
-       return mService.disconnect(device);
+        if (mService == null) {
+            return false;
+        }
+        return mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_FORBIDDEN);
     }
 
     public int getConnectionStatus(BluetoothDevice device) {

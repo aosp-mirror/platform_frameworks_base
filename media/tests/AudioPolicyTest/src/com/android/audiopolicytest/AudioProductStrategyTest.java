@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
@@ -71,7 +72,7 @@ public class AudioProductStrategyTest extends AudioVolumesTestBase {
         assertNotNull(audioProductStrategies);
         assertTrue(audioProductStrategies.size() > 0);
 
-        for (final int streamType : PUBLIC_STREAM_TYPES) {
+        for (final int streamType : AudioManager.getPublicStreamTypes()) {
             AudioAttributes aaFromStreamType =
                     AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
                             streamType);

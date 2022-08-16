@@ -161,7 +161,7 @@ private:
         void                addTimeDirWatch();
 
         int mInotifyFd;
-        int mSystemWd;
+        int mBootAnimWd;
         int mTimeWd;
         BootAnimation* mBootAnimation;
     };
@@ -213,6 +213,8 @@ private:
     Texture     mAndroid[2];
     int         mWidth;
     int         mHeight;
+    int         mInitWidth;
+    int         mInitHeight;
     int         mMaxWidth = 0;
     int         mMaxHeight = 0;
     int         mCurrentInset;
@@ -228,6 +230,7 @@ private:
     bool        mTimeIsAccurate;
     bool        mTimeFormat12Hour;
     bool        mShuttingDown;
+    bool        mDynamicColorsApplied = false;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
     sp<TimeCheckThread> mTimeCheckThread = nullptr;

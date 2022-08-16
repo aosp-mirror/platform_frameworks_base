@@ -21,6 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ResourcesManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -44,24 +45,6 @@ public class ConfigurationHelper {
         if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
             Canvas.freeTextLayoutCaches();
         }
-    }
-
-    /**
-     * A helper method to filter out {@link ActivityInfo#CONFIG_SCREEN_SIZE} if the
-     * {@link Configuration#diffPublicOnly(Configuration) diff} of two {@link Configuration}
-     * doesn't cross the boundary.
-     *
-     * @see SizeConfigurationBuckets#filterDiff(int, Configuration, Configuration,
-     * SizeConfigurationBuckets)
-     */
-    public static int diffPublicWithSizeBuckets(@Nullable Configuration currentConfig,
-            @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets buckets) {
-        // If current configuration is null, it is definitely different from updated Configuration.
-        if (currentConfig == null) {
-            return 0xffffffff;
-        }
-        int publicDiff = currentConfig.diffPublicOnly(newConfig);
-        return SizeConfigurationBuckets.filterDiff(publicDiff, currentConfig, newConfig, buckets);
     }
 
     /**
@@ -99,6 +82,10 @@ public class ConfigurationHelper {
         if (shouldUpdateWindowMetricsBounds(config, newConfig)) {
             return true;
         }
+        // If the display rotation has changed, we also need to update resources.
+        if (isDisplayRotationChanged(config, newConfig)) {
+            return true;
+        }
         return configChanged == null ? config.diff(newConfig) != 0 : configChanged;
     }
 
@@ -128,5 +115,16 @@ public class ConfigurationHelper {
         final Rect newMaxBounds = newConfig.windowConfiguration.getMaxBounds();
 
         return !currentBounds.equals(newBounds) || !currentMaxBounds.equals(newMaxBounds);
+    }
+
+    private static boolean isDisplayRotationChanged(@NonNull Configuration config,
+            @NonNull Configuration newConfig) {
+        final int origRot = config.windowConfiguration.getDisplayRotation();
+        final int newRot = newConfig.windowConfiguration.getDisplayRotation();
+        if (newRot == WindowConfiguration.ROTATION_UNDEFINED
+                || origRot == WindowConfiguration.ROTATION_UNDEFINED) {
+            return false;
+        }
+        return origRot != newRot;
     }
 }

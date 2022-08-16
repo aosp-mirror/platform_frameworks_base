@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Zahtev za povezivanje"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> želi da podesi VPN vezu koja omogućava praćenje saobraćaja na mreži. Prihvatite samo ako verujete izvoru. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se prikazuje u vrhu ekrana kada je VPN aktivan."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"Aplikacija <xliff:g id="APP">%s</xliff:g> želi da podesi VPN vezu koja joj omogućava da prati mrežni saobraćaj. Prihvatite ovo samo ako imate poverenja u izvor. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se prikazuje na ekranu kada je VPN aktivan."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN je povezan"</string>
     <string name="session" msgid="6470628549473641030">"Sesija:"</string>
     <string name="duration" msgid="3584782459928719435">"Trajanje:"</string>

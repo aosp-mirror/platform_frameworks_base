@@ -24,6 +24,8 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -241,6 +243,23 @@ public class KernelSingleUidTimeReader {
         }
     }
 
+    /**
+     * Retrieves CPU time-in-state data for the specified UID and adds the accumulated
+     * delta to the supplied counter.
+     */
+    public void addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs) {
+        mInjector.addDelta(uid, counter, timestampMs, null);
+    }
+
+    /**
+     * Same as {@link #addDelta(int, LongArrayMultiStateCounter, long)}, also returning
+     * the delta in the supplied array container.
+     */
+    public void addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs,
+            LongArrayMultiStateCounter.LongArrayContainer deltaContainer) {
+        mInjector.addDelta(uid, counter, timestampMs, deltaContainer);
+    }
+
     @VisibleForTesting
     public static class Injector {
         public byte[] readData(String procFile) throws IOException {
@@ -248,6 +267,39 @@ public class KernelSingleUidTimeReader {
         }
 
         public native long[] readBpfData(int uid);
+
+        /**
+         * Reads CPU time-in-state data for the specified UID and adds the delta since the
+         * previous call to the current state stats in the LongArrayMultiStateCounter.
+         *
+         * The delta is also returned via the optional deltaOut parameter.
+         */
+        public boolean addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs,
+                LongArrayMultiStateCounter.LongArrayContainer deltaOut) {
+            return addDeltaFromBpf(uid, counter.mNativeObject, timestampMs,
+                    deltaOut != null ? deltaOut.mNativeObject : 0);
+        }
+
+        @CriticalNative
+        private static native boolean addDeltaFromBpf(int uid,
+                long longArrayMultiStateCounterNativePointer, long timestampMs,
+                long longArrayContainerNativePointer);
+
+        /**
+         * Used for testing.
+         *
+         * Takes mock cpu-time-in-frequency data and uses it the same way eBPF data would be used.
+         */
+        public boolean addDeltaForTest(int uid, LongArrayMultiStateCounter counter,
+                long timestampMs, long[][] timeInFreqDataNanos,
+                LongArrayMultiStateCounter.LongArrayContainer deltaOut) {
+            return addDeltaForTest(uid, counter.mNativeObject, timestampMs, timeInFreqDataNanos,
+                    deltaOut != null ? deltaOut.mNativeObject : 0);
+        }
+
+        private static native boolean addDeltaForTest(int uid,
+                long longArrayMultiStateCounterNativePointer, long timestampMs,
+                long[][] timeInFreqDataNanos, long longArrayContainerNativePointer);
     }
 
     @VisibleForTesting

@@ -19,6 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Picture in picture"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Programma senza titolo)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"Chiudi PIP"</string>
+    <string name="pip_close" msgid="2955969519031223530">"Chiudi"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Schermo intero"</string>
+    <string name="pip_move" msgid="158770205886688553">"Sposta"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"Espandi"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"Comprimi"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Premi due volte "<annotation icon="home_icon">" HOME "</annotation>" per aprire i controlli"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menu Picture in picture."</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Sposta a sinistra"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Sposta a destra"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Sposta su"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Sposta giù"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Fine"</string>
 </resources>

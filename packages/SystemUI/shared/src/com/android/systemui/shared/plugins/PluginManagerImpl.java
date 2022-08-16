@@ -31,13 +31,13 @@ import android.widget.Toast;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @see Plugin
@@ -61,7 +61,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     public PluginManagerImpl(Context context,
             PluginActionManager.Factory actionManagerFactory,
             boolean debuggable,
-            Optional<UncaughtExceptionHandler> defaultHandlerOptional,
+            UncaughtExceptionPreHandlerManager preHandlerManager,
             PluginEnabler pluginEnabler,
             PluginPrefs pluginPrefs,
             List<String> privilegedPlugins) {
@@ -72,9 +72,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         mPluginPrefs = pluginPrefs;
         mPluginEnabler = pluginEnabler;
 
-        PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
-                defaultHandlerOptional);
-        Thread.setUncaughtExceptionPreHandler(uncaughtExceptionHandler);
+        preHandlerManager.registerHandler(new PluginExceptionHandler());
     }
 
     public boolean isDebuggable() {
@@ -137,7 +135,8 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         filter.addAction(PLUGIN_CHANGED);
         filter.addAction(DISABLE_PLUGIN);
         filter.addDataScheme("package");
-        mContext.registerReceiver(this, filter, PluginActionManager.PLUGIN_PERMISSION, null);
+        mContext.registerReceiver(this, filter, PluginActionManager.PLUGIN_PERMISSION, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiver(this, filter);
     }
@@ -265,20 +264,12 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     private class PluginExceptionHandler implements UncaughtExceptionHandler {
-        private final Optional<UncaughtExceptionHandler> mExceptionHandlerOptional;
 
-        private PluginExceptionHandler(
-                Optional<UncaughtExceptionHandler> exceptionHandlerOptional) {
-            mExceptionHandlerOptional = exceptionHandlerOptional;
-        }
+        private PluginExceptionHandler() {}
 
         @Override
         public void uncaughtException(Thread thread, Throwable throwable) {
             if (SystemProperties.getBoolean("plugin.debugging", false)) {
-                Throwable finalThrowable = throwable;
-                mExceptionHandlerOptional.ifPresent(
-                        handler -> handler.uncaughtException(thread, finalThrowable));
-
                 return;
             }
             // Search for and disable plugins that may have been involved in this crash.
@@ -296,11 +287,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             if (disabledAny) {
                 throwable = new CrashWhilePluginActiveException(throwable);
             }
-
-            // Run the normal exception handler so we can crash and cleanup our state.
-            Throwable finalThrowable = throwable;
-            mExceptionHandlerOptional.ifPresent(
-                    handler -> handler.uncaughtException(thread, finalThrowable));
         }
 
         private boolean checkStack(Throwable throwable) {

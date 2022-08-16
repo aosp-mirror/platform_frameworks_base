@@ -16,46 +16,17 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
+import android.content.Context;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
-import androidx.annotation.NonNull;
-
 /** Fake implementation of {@link Vibrator} for service tests. */
 final class FakeVibrator extends Vibrator {
 
-    private int mDefaultHapticFeedbackIntensity = Vibrator.VIBRATION_INTENSITY_MEDIUM;
-    private int mDefaultNotificationIntensity = Vibrator.VIBRATION_INTENSITY_MEDIUM;
-    private int mDefaultRingIntensity = Vibrator.VIBRATION_INTENSITY_MEDIUM;
-
-    @Override
-    public int getDefaultHapticFeedbackIntensity() {
-        return mDefaultHapticFeedbackIntensity;
-    }
-
-    @Override
-    public int getDefaultNotificationVibrationIntensity() {
-        return mDefaultNotificationIntensity;
-    }
-
-    @Override
-    public int getDefaultRingVibrationIntensity() {
-        return mDefaultRingIntensity;
-    }
-
-    public void setDefaultHapticFeedbackIntensity(
-            @VibrationIntensity int defaultHapticFeedbackIntensity) {
-        mDefaultHapticFeedbackIntensity = defaultHapticFeedbackIntensity;
-    }
-
-    public void setDefaultNotificationVibrationIntensity(
-            @VibrationIntensity int defaultNotificationIntensity) {
-        mDefaultNotificationIntensity = defaultNotificationIntensity;
-    }
-
-    public void setDefaultRingVibrationIntensity(@VibrationIntensity int defaultRingIntensity) {
-        mDefaultRingIntensity = defaultRingIntensity;
+    FakeVibrator(Context context) {
+        super(context);
     }
 
     @Override

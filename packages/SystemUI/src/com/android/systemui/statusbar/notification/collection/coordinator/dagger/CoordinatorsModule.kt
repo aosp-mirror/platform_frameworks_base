@@ -47,7 +47,9 @@ interface CoordinatorsSubcomponent {
     }
 }
 
-@Module(includes = [SensitiveContentCoordinatorModule::class])
+@Module(includes = [
+    SensitiveContentCoordinatorModule::class,
+])
 private abstract class InternalCoordinatorsModule {
     @Binds
     @Internal

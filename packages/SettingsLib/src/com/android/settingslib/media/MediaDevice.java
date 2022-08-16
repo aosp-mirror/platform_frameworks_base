@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
@@ -29,22 +30,20 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 
+import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.NearbyDevice;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
-
-import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -59,22 +58,22 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MediaDeviceType.TYPE_UNKNOWN,
+            MediaDeviceType.TYPE_PHONE_DEVICE,
             MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE,
             MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE,
             MediaDeviceType.TYPE_FAST_PAIR_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_CAST_DEVICE,
-            MediaDeviceType.TYPE_CAST_GROUP_DEVICE,
-            MediaDeviceType.TYPE_PHONE_DEVICE})
+            MediaDeviceType.TYPE_CAST_GROUP_DEVICE})
     public @interface MediaDeviceType {
         int TYPE_UNKNOWN = 0;
-        int TYPE_USB_C_AUDIO_DEVICE = 1;
-        int TYPE_3POINT5_MM_AUDIO_DEVICE = 2;
-        int TYPE_FAST_PAIR_BLUETOOTH_DEVICE = 3;
-        int TYPE_BLUETOOTH_DEVICE = 4;
-        int TYPE_CAST_DEVICE = 5;
-        int TYPE_CAST_GROUP_DEVICE = 6;
-        int TYPE_PHONE_DEVICE = 7;
+        int TYPE_PHONE_DEVICE = 1;
+        int TYPE_USB_C_AUDIO_DEVICE = 2;
+        int TYPE_3POINT5_MM_AUDIO_DEVICE = 3;
+        int TYPE_FAST_PAIR_BLUETOOTH_DEVICE = 4;
+        int TYPE_BLUETOOTH_DEVICE = 5;
+        int TYPE_CAST_DEVICE = 6;
+        int TYPE_CAST_GROUP_DEVICE = 7;
     }
 
     @VisibleForTesting
@@ -82,6 +81,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     private int mConnectedRecord;
     private int mState;
+    @NearbyDevice.RangeZone
+    private int mRangeZone = NearbyDevice.RANGE_UNKNOWN;
 
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
@@ -141,12 +142,12 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
                 getId());
     }
 
-    void setColorFilter(Drawable drawable) {
-        final ColorStateList list =
-                mContext.getResources().getColorStateList(
-                        R.color.advanced_icon_color, mContext.getTheme());
-        drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
-                PorterDuff.Mode.SRC_IN));
+    public @NearbyDevice.RangeZone int getRangeZone() {
+        return mRangeZone;
+    }
+
+    public void setRangeZone(@NearbyDevice.RangeZone int rangeZone) {
+        mRangeZone = rangeZone;
     }
 
     /**
@@ -250,12 +251,35 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     }
 
     /**
+     * Check if the device is Bluetooth LE Audio device.
+     *
+     * @return true if the RouteInfo equals TYPE_BLE_HEADSET.
+     */
+    public boolean isBLEDevice() {
+        return mRouteInfo.getType() == TYPE_BLE_HEADSET;
+    }
+
+    /**
      * Get application label from MediaDevice.
      *
      * @return application label.
      */
     public int getDeviceType() {
         return mType;
+    }
+
+    /**
+     * Checks if route's volume is fixed, if true, we should disable volume control for the device.
+     *
+     * @return route for this device is fixed.
+     */
+    @SuppressLint("NewApi")
+    public boolean isVolumeFixed() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "RouteInfo is empty, regarded as volume fixed.");
+            return true;
+        }
+        return mRouteInfo.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
     }
 
     /**
@@ -307,12 +331,12 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * The most recent used one + device group with usage info sorted by how many times the
      * device has been used.
      * 4. The order is followed below rule:
-     *    1. USB-C audio device
-     *    2. 3.5 mm audio device
-     *    3. Bluetooth device
-     *    4. Cast device
-     *    5. Cast group device
-     *    6. Phone
+     *    1. Phone
+     *    2. USB-C audio device
+     *    3. 3.5 mm audio device
+     *    4. Bluetooth device
+     *    5. Cast device
+     *    6. Cast group device
      *
      * So the device list will look like 5 slots ranked as below.
      * Rule 4 + Rule 1 + the most recently used device + Rule 3 + Rule 2
@@ -323,6 +347,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     @Override
     public int compareTo(MediaDevice another) {
+        if (another == null) {
+            return -1;
+        }
         // Check Bluetooth device is have same connection state
         if (isConnected() ^ another.isConnected()) {
             if (isConnected()) {
@@ -332,7 +359,20 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             }
         }
 
+        if (getState() == STATE_SELECTED) {
+            return -1;
+        } else if (another.getState() == STATE_SELECTED) {
+            return 1;
+        }
+
         if (mType == another.mType) {
+            // Check device is muting expected device
+            if (isMutingExpectedDevice()) {
+                return -1;
+            } else if (another.isMutingExpectedDevice()) {
+                return 1;
+            }
+
             // Check fast pair device
             if (isFastPairDevice()) {
                 return -1;
@@ -345,6 +385,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
                 return -1;
             } else if (another.isCarKitDevice()) {
                 return 1;
+            }
+
+            // Both devices have same connection status and type, compare the range zone
+            if (NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone()) != 0) {
+                return NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone());
             }
 
             // Set last used device at the first item
@@ -368,12 +413,12 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return s1.compareToIgnoreCase(s2);
         } else {
             // Both devices have never been used, the priority is:
-            // 1. USB-C audio device
-            // 2. 3.5 mm audio device
-            // 3. Bluetooth device
-            // 4. Cast device
-            // 5. Cast group device
-            // 6. Phone
+            // 1. Phone
+            // 2. USB-C audio device
+            // 3. 3.5 mm audio device
+            // 4. Bluetooth device
+            // 5. Cast device
+            // 6. Cast group device
             return mType < another.mType ? -1 : 1;
         }
     }
@@ -402,6 +447,14 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return {@code true} if it is FastPair device, otherwise return {@code false}
      */
     protected boolean isFastPairDevice() {
+        return false;
+    }
+
+    /**
+     * Check if it is muting expected device
+     * @return {@code true} if it is muting expected device, otherwise return {@code false}
+     */
+    public boolean isMutingExpectedDevice() {
         return false;
     }
 

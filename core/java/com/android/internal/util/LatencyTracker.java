@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LatencyTracker {
     private static final String TAG = "LatencyTracker";
-    private static final String SETTINGS_ENABLED_KEY = "enabled";
+    public static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
     private static final boolean DEBUG = false;
     /** Default to being enabled on debug builds. */
@@ -122,6 +122,26 @@ public class LatencyTracker {
      */
     public static final int ACTION_USER_SWITCH = 12;
 
+    /**
+     * Time it takes to turn on the inner screen for a foldable device.
+     */
+    public static final int ACTION_SWITCH_DISPLAY_UNFOLD = 13;
+
+    /**
+     * Time it takes for a UDFPS sensor to appear ready after it is touched.
+     */
+    public static final int ACTION_UDFPS_ILLUMINATE = 14;
+
+    /**
+     * Time it takes for the gesture back affordance arrow to show up.
+     */
+    public static final int ACTION_SHOW_BACK_ARROW = 15;
+
+    /**
+     * Time it takes for loading share sheet.
+     */
+    public static final int ACTION_LOAD_SHARE_SHEET = 16;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -135,7 +155,11 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN_SENSOR,
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
-        ACTION_USER_SWITCH
+        ACTION_USER_SWITCH,
+        ACTION_SWITCH_DISPLAY_UNFOLD,
+        ACTION_UDFPS_ILLUMINATE,
+        ACTION_SHOW_BACK_ARROW,
+        ACTION_LOAD_SHARE_SHEET,
     };
 
     /** @hide */
@@ -152,7 +176,11 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN_SENSOR,
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
-        ACTION_USER_SWITCH
+        ACTION_USER_SWITCH,
+        ACTION_SWITCH_DISPLAY_UNFOLD,
+        ACTION_UDFPS_ILLUMINATE,
+        ACTION_SHOW_BACK_ARROW,
+        ACTION_LOAD_SHARE_SHEET,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -171,7 +199,11 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
-            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -257,6 +289,14 @@ public class LatencyTracker {
                 return "ACTION_LOCKSCREEN_UNLOCK";
             case 13:
                 return "ACTION_USER_SWITCH";
+            case 14:
+                return "ACTION_SWITCH_DISPLAY_UNFOLD";
+            case 15:
+                return "ACTION_UDFPS_ILLUMINATE";
+            case 16:
+                return "ACTION_SHOW_BACK_ARROW";
+            case 17:
+                return "ACTION_LOAD_SHARE_SHEET";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

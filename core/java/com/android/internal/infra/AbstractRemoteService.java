@@ -88,6 +88,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private final int mBindingFlags;
     protected I mService;
 
+    private boolean mBound;
     private boolean mConnecting;
     private boolean mDestroyed;
     private boolean mServiceDied;
@@ -255,8 +256,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 .append(String.valueOf(mDestroyed)).println();
         pw.append(prefix).append(tab).append("numUnfinishedRequests=")
                 .append(String.valueOf(mUnfinishedRequests.size())).println();
-        final boolean bound = handleIsBound();
         pw.append(prefix).append(tab).append("bound=")
+                .append(String.valueOf(mBound));
+        final boolean bound = handleIsBound();
+        pw.append(prefix).append(tab).append("connected=")
                 .append(String.valueOf(bound));
         final long idleTimeout = getTimeoutIdleBindMillis();
         if (bound) {
@@ -430,6 +433,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      */
     abstract void handleBindFailure();
 
+    // This is actually checking isConnected. TODO: rename this and other related methods (or just
+    // stop using this class..)
     private boolean handleIsBound() {
         return mService != null;
     }
@@ -445,6 +450,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                 mHandler, new UserHandle(mUserId));
+        mBound = true;
 
         if (!willBind) {
             Slog.w(mTag, "could not bind to " + mIntent + " using flags " + flags);
@@ -469,7 +475,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             }
         }
         mNextUnbind = 0;
-        mContext.unbindService(mServiceConnection);
+        if (mBound) {
+            mContext.unbindService(mServiceConnection);
+            mBound = false;
+        }
     }
 
     private class RemoteServiceConnection implements ServiceConnection {

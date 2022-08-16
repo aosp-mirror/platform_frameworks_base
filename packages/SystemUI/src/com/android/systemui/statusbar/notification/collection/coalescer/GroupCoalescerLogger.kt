@@ -32,11 +32,13 @@ class GroupCoalescerLogger @Inject constructor(
         })
     }
 
-    fun logEmitBatch(groupKey: String) {
+    fun logEmitBatch(groupKey: String, batchSize: Int, batchAgeMs: Long) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = groupKey
+            int1 = batchSize
+            long1 = batchAgeMs
         }, {
-            "Emitting event batch for group $str1"
+            "Emitting batch for group $str1 size=$int1 age=${long1}ms"
         })
     }
 

@@ -263,6 +263,25 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return null;
+            }
+            VoiceInteractionSessionConnection session =
+                    impl.mActiveSession;
+            if (session == null) {
+                return null;
+            }
+            IVoiceInteractor voiceInteractor = session.mInteractor;
+            if (voiceInteractor == null || voiceInteractor.asBinder() != callingVoiceInteractor) {
+                return null;
+            }
+            return session.mSessionComponentName.getPackageName();
+        }
+
+        @Override
         public HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity() {
             // IMPORTANT: This is called when performing permission checks; do not lock!
 
@@ -302,6 +321,16 @@ public class VoiceInteractionManagerService extends SystemService {
         VoiceInteractionManagerServiceStub() {
             mEnableService = shouldEnableService(mContext);
             new RoleObserver(mContext.getMainExecutor());
+        }
+
+        void handleUserStop(String packageName, int userHandle) {
+            synchronized (VoiceInteractionManagerServiceStub.this) {
+                ComponentName curInteractor = getCurInteractor(userHandle);
+                if (curInteractor != null && packageName.equals(curInteractor.getPackageName())) {
+                    Slog.d(TAG, "switchImplementation for user stop.");
+                    switchImplementationIfNeededLocked(true);
+                }
+            }
         }
 
         @Override
@@ -357,6 +386,7 @@ public class VoiceInteractionManagerService extends SystemService {
         void startLocalVoiceInteraction(final IBinder token, Bundle options) {
             if (mImpl == null) return;
 
+            final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
@@ -368,6 +398,12 @@ public class VoiceInteractionManagerService extends SystemService {
 
                             @Override
                             public void onShown() {
+                                synchronized (VoiceInteractionManagerServiceStub.this) {
+                                    if (mImpl != null) {
+                                        mImpl.grantImplicitAccessLocked(callingUid,
+                                                /* intent= */ null);
+                                    }
+                                }
                                 mAtmInternal.onLocalVoiceInteractionStarted(token,
                                         mImpl.mActiveSession.mSession,
                                         mImpl.mActiveSession.mInteractor);
@@ -936,8 +972,16 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startVoiceActivityLocked(callingFeatureId, callingPid, callingUid,
-                            token, intent, resolvedType);
+                    final ActivityInfo activityInfo = intent.resolveActivityInfo(
+                            mContext.getPackageManager(), PackageManager.MATCH_ALL);
+                    if (activityInfo != null) {
+                        final int activityUid = activityInfo.applicationInfo.uid;
+                        mImpl.grantImplicitAccessLocked(activityUid, intent);
+                    } else {
+                        Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
+                    }
+                    return mImpl.startVoiceActivityLocked(
+                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1805,6 +1849,32 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        public void setSessionWindowVisible(IBinder token, boolean visible) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setSessionWindowVisible called without running voice interaction "
+                            + "service");
+                    return;
+                }
+                if (mImpl.mActiveSession == null || token != mImpl.mActiveSession.mToken) {
+                    Slog.w(TAG, "setSessionWindowVisible does not match active session");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mVoiceInteractionSessionListeners.broadcast(listener -> {
+                        try {
+                            listener.onVoiceSessionWindowVisibilityChanged(visible);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Error delivering window visibility event to listener.", e);
+                        }
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -2026,6 +2096,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         PackageMonitor mPackageMonitor = new PackageMonitor() {
+
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
                 if (DEBUG) Slog.d(TAG, "onHandleForceStop uid=" + uid + " doit=" + doit);
@@ -2058,11 +2129,17 @@ public class VoiceInteractionManagerService extends SystemService {
                         }
 
                         setCurInteractor(null, userHandle);
+                        // TODO: should not reset null here. But even remove this line, the
+                        // initForUser() still reset it because the interactor will be null. Keep
+                        // it now but we should still need to fix it.
                         setCurRecognizer(null, userHandle);
                         resetCurAssistant(userHandle);
                         initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
 
+                        // When resetting the interactor, the recognizer and the assistant settings
+                        // value, we also need to reset the assistant role to keep the values
+                        // consistent. Clear the assistant role will reset to the default value.
                         Context context = getContext();
                         context.getSystemService(RoleManager.class).clearRoleHoldersAsUser(
                                 RoleManager.ROLE_ASSISTANT, 0, UserHandle.of(userHandle),

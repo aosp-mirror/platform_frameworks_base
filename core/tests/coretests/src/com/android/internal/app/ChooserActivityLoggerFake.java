@@ -44,6 +44,7 @@ public class ChooserActivityLoggerFake implements ChooserActivityLogger {
         // share completed fields
         public int targetType;
         public int positionPicked;
+        public boolean isPinned;
 
         CallRecord(int atomId, UiEventLogger.UiEventEnum eventId,
                 String packageName, InstanceId instanceId) {
@@ -68,12 +69,13 @@ public class ChooserActivityLoggerFake implements ChooserActivityLogger {
         }
 
         CallRecord(int atomId, String packageName, InstanceId instanceId, int targetType,
-                int positionPicked) {
+                int positionPicked, boolean isPinned) {
             this.atomId = atomId;
             this.packageName = packageName;
             this.instanceId = instanceId;
             this.targetType = targetType;
             this.positionPicked = positionPicked;
+            this.isPinned = isPinned;
         }
 
     }
@@ -95,6 +97,13 @@ public class ChooserActivityLoggerFake implements ChooserActivityLogger {
         return mCalls.get(index).event;
     }
 
+    public void removeCallsForUiEventsOfType(int uiEventType) {
+        mCalls.removeIf(
+                call ->
+                        (call.atomId == FrameworkStatsLog.UI_EVENT_REPORTED)
+                                && (call.event.getId() == uiEventType));
+    }
+
     @Override
     public void logShareStarted(int eventId, String packageName, String mimeType,
             int appProvidedDirect, int appProvidedApp, boolean isWorkprofile, int previewType,
@@ -105,9 +114,11 @@ public class ChooserActivityLoggerFake implements ChooserActivityLogger {
     }
 
     @Override
-    public void logShareTargetSelected(int targetType, String packageName, int positionPicked) {
+    public void logShareTargetSelected(int targetType, String packageName, int positionPicked,
+            boolean isPinned) {
         mCalls.add(new CallRecord(FrameworkStatsLog.RANKING_SELECTED, packageName, getInstanceId(),
-                SharesheetTargetSelectedEvent.fromTargetType(targetType).getId(), positionPicked));
+                SharesheetTargetSelectedEvent.fromTargetType(targetType).getId(), positionPicked,
+                isPinned));
     }
 
     @Override

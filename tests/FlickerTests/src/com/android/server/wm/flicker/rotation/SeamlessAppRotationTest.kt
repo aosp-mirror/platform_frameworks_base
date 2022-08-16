@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import android.view.WindowManager
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -76,19 +76,19 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class SeamlessAppRotationTest(
+open class SeamlessAppRotationTest(
     testSpec: FlickerTestParameter
 ) : RotationTransition(testSpec) {
     override val testApp = SeamlessRotationAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper,
-                        stringExtras = mapOf(
-                            ActivityOptions.EXTRA_STARVE_UI_THREAD to it.starveUiThread.toString())
+                        stringExtras = mapOf(ActivityOptions.EXTRA_STARVE_UI_THREAD
+                            to testSpec.starveUiThread.toString())
                     )
                 }
             }
@@ -179,21 +179,34 @@ class SeamlessAppRotationTest(
         }
     }
 
+    /**
+     * Checks that the focus doesn't change during animation
+     */
+    @Presubmit
+    @Test
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
+    }
+
     /** {@inheritDoc} */
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     companion object {
-        private val Map<String, Any?>.starveUiThread
-            get() = this.getOrDefault(ActivityOptions.EXTRA_STARVE_UI_THREAD, false) as Boolean
+        private val FlickerTestParameter.starveUiThread
+            get() = config.getOrDefault(ActivityOptions.EXTRA_STARVE_UI_THREAD, false) as Boolean
 
-        private fun FlickerTestParameter.createConfig(
+        private fun createConfig(
+            sourceConfig: FlickerTestParameter,
             starveUiThread: Boolean
-        ): MutableMap<String, Any?> {
-            val config = this.config.toMutableMap()
-            config[ActivityOptions.EXTRA_STARVE_UI_THREAD] = starveUiThread
-            return config
+        ): FlickerTestParameter {
+            val newConfig = sourceConfig.config.toMutableMap()
+                .also { it[ActivityOptions.EXTRA_STARVE_UI_THREAD] = starveUiThread }
+            val nameExt = if (starveUiThread) "_BUSY_UI_THREAD" else ""
+            return FlickerTestParameter(newConfig, nameOverride = "$sourceConfig$nameExt")
         }
 
         /**
@@ -206,15 +219,10 @@ class SeamlessAppRotationTest(
         private fun getConfigurations(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigRotationTests(repetitions = 2)
-                .flatMap {
-                    val defaultRun = it.createConfig(starveUiThread = false)
-                    val busyUiRun = it.createConfig(starveUiThread = true)
-                    listOf(
-                        FlickerTestParameter(defaultRun),
-                        FlickerTestParameter(busyUiRun,
-                            name = "${FlickerTestParameter.defaultName(busyUiRun)}_BUSY_UI_THREAD"
-                        )
-                    )
+                .flatMap { sourceConfig ->
+                    val defaultRun = createConfig(sourceConfig, starveUiThread = false)
+                    val busyUiRun = createConfig(sourceConfig, starveUiThread = true)
+                    listOf(defaultRun, busyUiRun)
                 }
         }
 

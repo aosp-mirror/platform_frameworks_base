@@ -137,6 +137,7 @@ void ProfileData::dump(int fd) const {
     histogramGPUForEach([fd](HistogramEntry entry) {
         dprintf(fd, " %ums=%u", entry.renderTimeMs, entry.frameCount);
     });
+    dprintf(fd, "\n");
 }
 
 uint32_t ProfileData::findPercentile(int percentile) const {

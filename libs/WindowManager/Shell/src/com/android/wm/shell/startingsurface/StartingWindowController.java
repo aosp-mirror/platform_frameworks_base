@@ -16,10 +16,10 @@
 package com.android.wm.shell.startingsurface;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
@@ -64,10 +64,7 @@ import com.android.wm.shell.common.TransactionPool;
  * @hide
  */
 public class StartingWindowController implements RemoteCallable<StartingWindowController> {
-    private static final String TAG = StartingWindowController.class.getSimpleName();
-
-    public static final boolean DEBUG_SPLASH_SCREEN = false;
-    public static final boolean DEBUG_TASK_SNAPSHOT = false;
+    public static final String TAG = "ShellStartingWindow";
 
     private static final long TASK_BG_COLOR_RETAIN_TIME_MS = 5000;
 
@@ -158,7 +155,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
 
     private static boolean isSplashScreenType(@StartingWindowType int suggestionType) {
         return suggestionType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
-                || suggestionType == STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+                || suggestionType == STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN
                 || suggestionType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
     }
 

@@ -125,7 +125,7 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args,
   link_args.insert(link_args.end(), {"-I", android_sdk});
 
   // Add the files from the compiled resources directory to the link file arguments
-  Maybe<std::vector<std::string>> compiled_files = file::FindFiles(flat_dir, diag);
+  std::optional<std::vector<std::string>> compiled_files = file::FindFiles(flat_dir, diag);
   if (compiled_files) {
     for (std::string& compile_file : compiled_files.value()) {
       compile_file = file::BuildPath({flat_dir, compile_file});

@@ -132,15 +132,6 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         return MetricsEvent.QS_LOCATION;
     }
 
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_location_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_location_changed_off);
-        }
-    }
-
     private final class Callback implements LocationChangeCallback,
             KeyguardStateController.Callback {
         @Override

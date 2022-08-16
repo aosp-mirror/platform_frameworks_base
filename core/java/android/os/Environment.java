@@ -29,7 +29,6 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.storage.StorageManager;
@@ -479,8 +478,32 @@ public class Environment {
     }
 
     /** {@hide} */
+    private static File getDataMiscCeDirectory(String volumeUuid, int userId) {
+        return buildPath(getDataDirectory(volumeUuid), "misc_ce", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataMiscCeSharedSdkSandboxDirectory(String volumeUuid, int userId,
+            String packageName) {
+        return buildPath(getDataMiscCeDirectory(volumeUuid, userId), "sdksandbox",
+                packageName, "shared");
+    }
+
+    /** {@hide} */
     public static File getDataMiscDeDirectory(int userId) {
         return buildPath(getDataDirectory(), "misc_de", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    private static File getDataMiscDeDirectory(String volumeUuid, int userId) {
+        return buildPath(getDataDirectory(volumeUuid), "misc_de", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataMiscDeSharedSdkSandboxDirectory(String volumeUuid, int userId,
+            String packageName) {
+        return buildPath(getDataMiscDeDirectory(volumeUuid, userId), "sdksandbox",
+                packageName, "shared");
     }
 
     private static File getDataProfilesDeDirectory(int userId) {
@@ -1343,13 +1366,25 @@ public class Environment {
         final Context context = AppGlobals.getInitialApplication();
         final int uid = context.getApplicationInfo().uid;
         // Isolated processes and Instant apps are never allowed to be in scoped storage
-        if (Process.isIsolated(uid)) {
+        if (Process.isIsolated(uid) || Process.isSdkSandboxUid(uid)) {
             return false;
         }
 
         final PackageManager packageManager = context.getPackageManager();
         if (packageManager.isInstantApp()) {
             return false;
+        }
+
+        // Apps with PROPERTY_NO_APP_DATA_STORAGE should not be allowed in scoped storage
+        final String packageName = AppGlobals.getInitialPackage();
+        try {
+            final PackageManager.Property noAppStorageProp = packageManager.getProperty(
+                    PackageManager.PROPERTY_NO_APP_DATA_STORAGE, packageName);
+            if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
+                return false;
+            }
+        } catch (PackageManager.NameNotFoundException ignore) {
+            // Property not defined for the package
         }
 
         boolean defaultScopedStorage = Compatibility.isChangeEnabled(DEFAULT_SCOPED_STORAGE);

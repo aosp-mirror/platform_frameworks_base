@@ -67,7 +67,7 @@ fun <Type> Stubber.whenever(mock: Type) = this.`when`(mock)
 fun <Type : Any?> whenever(mock: Type) = Mockito.`when`(mock)
 
 @Suppress("UNCHECKED_CAST")
-fun <Type : Any?> whenever(mock: Type, block: InvocationOnMock.() -> Any?) =
+fun <Type> whenever(mock: Type, block: InvocationOnMock.() -> Type) =
         Mockito.`when`(mock).thenAnswer { block(it) }
 
 fun whenever(mock: Unit) = Mockito.`when`(mock).thenAnswer { }

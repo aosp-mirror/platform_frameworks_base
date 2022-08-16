@@ -16,6 +16,8 @@
 package com.android.systemui.statusbar.notification;
 
 import android.annotation.Nullable;
+import android.app.NotificationChannel;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -105,5 +107,21 @@ public interface NotificationEntryListener {
      * @param rankingMap provides access to ranking information on currently active notifications
      */
     default void onNotificationRankingUpdated(RankingMap rankingMap) {
+    }
+
+    /**
+     * Called when a notification channel is modified, in response to
+     * {@link NotificationListenerService#onNotificationChannelModified}.
+     *
+     * @param pkgName the package the notification channel belongs to.
+     * @param user the user the notification channel belongs to.
+     * @param channel the channel being modified.
+     * @param modificationType the type of modification that occurred to the channel.
+     */
+    default void onNotificationChannelModified(
+            String pkgName,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType) {
     }
 }

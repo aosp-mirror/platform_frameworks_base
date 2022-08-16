@@ -19,7 +19,7 @@
 <com.android.systemui.qs.QSFooterView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/qs_footer_height"
+    android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/qs_footer_margin"
     android:layout_marginEnd="@dimen/qs_footer_margin"
     android:layout_marginBottom="@dimen/qs_footers_margin_bottom"
@@ -29,21 +29,15 @@
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/qs_footer_height"
             android:layout_gravity="center_vertical">
 
             <TextView
                 android:id="@+id/build"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingStart="@dimen/qs_tile_margin_horizontal"
                 android:paddingEnd="4dp"
                 android:layout_weight="1"
                 android:clickable="true"
@@ -61,16 +55,24 @@
                 android:layout_gravity="center_vertical"
                 android:visibility="gone" />
 
-            <View
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1">
+                <com.android.systemui.statusbar.AlphaOptimizedImageView
+                    android:id="@android:id/edit"
+                    android:layout_width="@dimen/qs_footer_action_button_size"
+                    android:layout_height="@dimen/qs_footer_action_button_size"
+                    android:layout_gravity="center_vertical|end"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:contentDescription="@string/accessibility_quick_settings_edit"
+                    android:focusable="true"
+                    android:padding="@dimen/qs_footer_icon_padding"
+                    android:src="@*android:drawable/ic_mode_edit"
+                    android:tint="?android:attr/textColorPrimary" />
+            </FrameLayout>
 
         </LinearLayout>
-
-        <include layout="@layout/footer_actions"
-            android:id="@+id/qs_footer_actions"/>
-
-    </LinearLayout>
 
 </com.android.systemui.qs.QSFooterView>

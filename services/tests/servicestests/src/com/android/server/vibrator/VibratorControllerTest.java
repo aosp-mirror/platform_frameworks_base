@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -236,7 +235,7 @@ public class VibratorControllerTest {
 
         RampSegment[] primitives = new RampSegment[]{
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequency= */ -1, /* endFrequency= */ 1, /* duration= */ 10)
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 200, /* duration= */ 10)
         };
         assertEquals(15L, controller.on(primitives, 12));
         assertTrue(controller.isVibrating());
@@ -256,6 +255,21 @@ public class VibratorControllerTest {
         controller.off();
         assertFalse(controller.isVibrating());
         verify(mNativeWrapperMock, times(2)).off();
+    }
+
+    @Test
+    public void reset_turnsOffVibratorAndDisablesExternalControl() {
+        mockVibratorCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
+        VibratorController controller = createController();
+
+        controller.on(100, 1);
+        assertTrue(controller.isVibrating());
+
+        controller.reset();
+        assertFalse(controller.isVibrating());
+        verify(mNativeWrapperMock).setExternalControl(eq(false));
+        verify(mNativeWrapperMock).off();
     }
 
     @Test
@@ -296,13 +310,13 @@ public class VibratorControllerTest {
     }
 
     private void mockVibratorCapabilities(int capabilities) {
-        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
-                Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
-        when(mNativeWrapperMock.getInfo(anyFloat(), any(VibratorInfo.Builder.class)))
+        VibratorInfo.FrequencyProfile frequencyProfile = new VibratorInfo.FrequencyProfile(
+                Float.NaN, Float.NaN, Float.NaN, null);
+        when(mNativeWrapperMock.getInfo(any(VibratorInfo.Builder.class)))
                 .then(invocation -> {
-                    ((VibratorInfo.Builder) invocation.getArgument(1))
+                    ((VibratorInfo.Builder) invocation.getArgument(0))
                             .setCapabilities(capabilities)
-                            .setFrequencyMapping(frequencyMapping);
+                            .setFrequencyProfile(frequencyProfile);
                     return true;
                 });
     }

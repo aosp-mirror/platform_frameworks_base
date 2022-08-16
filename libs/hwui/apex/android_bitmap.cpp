@@ -57,6 +57,8 @@ static AndroidBitmapFormat getFormat(const SkImageInfo& info) {
             return ANDROID_BITMAP_FORMAT_A_8;
         case kRGBA_F16_SkColorType:
             return ANDROID_BITMAP_FORMAT_RGBA_F16;
+        case kRGBA_1010102_SkColorType:
+            return ANDROID_BITMAP_FORMAT_RGBA_1010102;
         default:
             return ANDROID_BITMAP_FORMAT_NONE;
     }
@@ -74,6 +76,8 @@ static SkColorType getColorType(AndroidBitmapFormat format) {
             return kAlpha_8_SkColorType;
         case ANDROID_BITMAP_FORMAT_RGBA_F16:
             return kRGBA_F16_SkColorType;
+        case ANDROID_BITMAP_FORMAT_RGBA_1010102:
+            return kRGBA_1010102_SkColorType;
         default:
             return kUnknown_SkColorType;
     }
@@ -248,6 +252,9 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
             break;
         case ANDROID_BITMAP_FORMAT_RGBA_F16:
             colorType = kRGBA_F16_SkColorType;
+            break;
+        case ANDROID_BITMAP_FORMAT_RGBA_1010102:
+            colorType = kRGBA_1010102_SkColorType;
             break;
         default:
             return ANDROID_BITMAP_RESULT_BAD_PARAMETER;

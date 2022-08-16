@@ -15,6 +15,7 @@ per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@g
 per-file AbstractStatsBase.java = file:dex/OWNERS
 per-file BackgroundDexOptService.java = file:dex/OWNERS
 per-file CompilerStats.java = file:dex/OWNERS
+per-file DexOptHelper.java = file:dex/OWNERS
 per-file DynamicCodeLoggingService.java = file:dex/OWNERS
 per-file Installer.java = file:dex/OWNERS
 per-file InstructionSets.java = file:dex/OWNERS

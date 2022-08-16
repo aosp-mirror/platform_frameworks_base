@@ -21,15 +21,16 @@ import android.os.BatterySaverPolicyConfig;
 import android.os.ParcelDuration;
 import android.os.PowerSaveState;
 import android.os.WorkSource;
+import android.os.IWakeLockCallback;
 
 /** @hide */
 
 interface IPowerManager
 {
     void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws,
-            String historyTag, int displayId);
+            String historyTag, int displayId, IWakeLockCallback callback);
     void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
-            int uidtoblame, int displayId);
+            int uidtoblame, int displayId, IWakeLockCallback callback);
     @UnsupportedAppUsage
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
@@ -40,6 +41,7 @@ interface IPowerManager
     boolean setPowerModeChecked(int mode, boolean enabled);
 
     void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
+    void updateWakeLockCallback(IBinder lock, IWakeLockCallback callback);
     boolean isWakeLockLevelSupported(int level);
 
     void userActivity(int displayId, long time, int event, int flags);
@@ -65,6 +67,11 @@ interface IPowerManager
     boolean isBatteryDischargePredictionPersonalized();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
+    boolean isLowPowerStandbySupported();
+    boolean isLowPowerStandbyEnabled();
+    void setLowPowerStandbyEnabled(boolean enabled);
+    void setLowPowerStandbyActiveDuringMaintenance(boolean activeDuringMaintenance);
+    void forceLowPowerStandbyActive(boolean active);
 
     @UnsupportedAppUsage
     void reboot(boolean confirm, String reason, boolean wait);

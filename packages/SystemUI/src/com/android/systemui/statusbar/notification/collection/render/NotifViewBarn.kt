@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.view.textclassifier.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import javax.inject.Inject
 
 /**
@@ -26,30 +27,39 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotifViewBarn @Inject constructor() {
-    private val rowMap = mutableMapOf<String, NodeController>()
+    private val rowMap = mutableMapOf<String, NotifViewController>()
 
-    fun requireView(forEntry: ListEntry): NodeController {
+    fun requireNodeController(entry: ListEntry): NodeController {
         if (DEBUG) {
-            Log.d(TAG, "requireView: $forEntry.key")
+            Log.d(TAG, "requireNodeController: ${entry.key}")
         }
-        val li = rowMap[forEntry.key]
-        if (li == null) {
-            throw IllegalStateException("No view has been registered for entry: $forEntry")
-        }
-
-        return li
+        return rowMap[entry.key] ?: error("No view has been registered for entry: ${entry.key}")
     }
 
-    fun registerViewForEntry(entry: ListEntry, controller: NodeController) {
+    fun requireGroupController(entry: NotificationEntry): NotifGroupController {
         if (DEBUG) {
-            Log.d(TAG, "registerViewForEntry: $entry.key")
+            Log.d(TAG, "requireGroupController: ${entry.key}")
+        }
+        return rowMap[entry.key] ?: error("No view has been registered for entry: ${entry.key}")
+    }
+
+    fun requireRowController(entry: NotificationEntry): NotifRowController {
+        if (DEBUG) {
+            Log.d(TAG, "requireRowController: ${entry.key}")
+        }
+        return rowMap[entry.key] ?: error("No view has been registered for entry: ${entry.key}")
+    }
+
+    fun registerViewForEntry(entry: ListEntry, controller: NotifViewController) {
+        if (DEBUG) {
+            Log.d(TAG, "registerViewForEntry: ${entry.key}")
         }
         rowMap[entry.key] = controller
     }
 
     fun removeViewForEntry(entry: ListEntry) {
         if (DEBUG) {
-            Log.d(TAG, "removeViewForEntry: $entry.key")
+            Log.d(TAG, "removeViewForEntry: ${entry.key}")
         }
         rowMap.remove(entry.key)
     }

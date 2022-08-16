@@ -101,16 +101,23 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
         bubbleExpandedView = expandedView
         expandedView.taskView?.setObscuredTouchRect(Rect(positioner.screenRect))
 
-        layoutParams.width = if (positioner.isLargeScreen)
-            context.resources.getDimensionPixelSize(
-                    R.dimen.bubbles_user_education_width_large_screen)
+        layoutParams.width = if (positioner.isLargeScreen || positioner.isLandscape)
+            context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
         else ViewGroup.LayoutParams.MATCH_PARENT
 
         alpha = 0f
         visibility = View.VISIBLE
         expandedView.getManageButtonBoundsOnScreen(realManageButtonRect)
-        manageView.setPadding(realManageButtonRect.left - expandedView.manageButtonMargin,
-                manageView.paddingTop, manageView.paddingRight, manageView.paddingBottom)
+        val isRTL = mContext.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
+        if (isRTL) {
+            val rightPadding = positioner.screenRect.right - realManageButtonRect.right -
+                    expandedView.manageButtonMargin
+            manageView.setPadding(manageView.paddingLeft, manageView.paddingTop,
+                    rightPadding, manageView.paddingBottom)
+        } else {
+            manageView.setPadding(realManageButtonRect.left - expandedView.manageButtonMargin,
+            manageView.paddingTop, manageView.paddingRight, manageView.paddingBottom)
+        }
         post {
             manageButton
                 .setOnClickListener {
@@ -123,7 +130,11 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
             val offsetViewBounds = Rect()
             manageButton.getDrawingRect(offsetViewBounds)
             manageView.offsetDescendantRectToMyCoords(manageButton, offsetViewBounds)
-            translationX = 0f
+            if (isRTL && (positioner.isLargeScreen || positioner.isLandscape)) {
+                translationX = (positioner.screenRect.right - width).toFloat()
+            } else {
+                translationX = 0f
+            }
             translationY = (realManageButtonRect.top - offsetViewBounds.top).toFloat()
             bringToFront()
             animate()

@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import android.net.ScoredNetwork;
 import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -74,6 +76,7 @@ public class WifiUtilsTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = spy(ApplicationProvider.getApplicationContext());
+        when(mContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mock(WifiManager.class));
     }
 
     @Test
@@ -153,6 +156,27 @@ public class WifiUtilsTest {
     }
 
     @Test
+    public void getWifiDialogIntent_returnsCorrectValues() {
+        String key = "test_key";
+
+        // Test that connectForCaller is true.
+        Intent intent = WifiUtils.getWifiDialogIntent(key, true /* connectForCaller */);
+
+        assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DIALOG);
+        assertThat(intent.getStringExtra(WifiUtils.EXTRA_CHOSEN_WIFI_ENTRY_KEY)).isEqualTo(key);
+        assertThat(intent.getBooleanExtra(WifiUtils.EXTRA_CONNECT_FOR_CALLER, true))
+                .isEqualTo(true /* connectForCaller */);
+
+        // Test that connectForCaller is false.
+        intent = WifiUtils.getWifiDialogIntent(key, false /* connectForCaller */);
+
+        assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DIALOG);
+        assertThat(intent.getStringExtra(WifiUtils.EXTRA_CHOSEN_WIFI_ENTRY_KEY)).isEqualTo(key);
+        assertThat(intent.getBooleanExtra(WifiUtils.EXTRA_CONNECT_FOR_CALLER, true))
+                .isEqualTo(false /* connectForCaller */);
+    }
+
+    @Test
     public void getWifiDetailsSettingsIntent_returnsCorrectValues() {
         final String key = "test_key";
 
@@ -161,6 +185,19 @@ public class WifiUtilsTest {
         assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DETAILS_SETTINGS);
         final Bundle bundle = intent.getBundleExtra(WifiUtils.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
         assertThat(bundle.getString(WifiUtils.KEY_CHOSEN_WIFIENTRY_KEY)).isEqualTo(key);
+    }
+
+    @Test
+    public void getInternetIconResource_levelOutOfRange_shouldNotCrash() {
+        // Verify that Wi-Fi level is less than the minimum level (0)
+        int level = -1;
+        WifiUtils.getInternetIconResource(level, false /* noInternet*/);
+        WifiUtils.getInternetIconResource(level, true /* noInternet*/);
+
+        // Verify that Wi-Fi level is greater than the maximum level (4)
+        level = WifiUtils.WIFI_PIE.length;
+        WifiUtils.getInternetIconResource(level, false /* noInternet*/);
+        WifiUtils.getInternetIconResource(level, true /* noInternet*/);
     }
 
     @Test

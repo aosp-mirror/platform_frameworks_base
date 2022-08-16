@@ -16,14 +16,18 @@
 
 package android.app.usage;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessState;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.LocusId;
 import android.content.res.Configuration;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 
@@ -234,6 +238,10 @@ public abstract class UsageStatsManagerInternal {
     public abstract void setLastJobRunTime(String packageName, @UserIdInt int userId,
             long elapsedRealtime);
 
+    /** Returns the estimated time that the app will be launched, in milliseconds since epoch. */
+    @CurrentTimeMillisLong
+    public abstract long getEstimatedPackageLaunchTime(String packageName, @UserIdInt int userId);
+
     /**
      * Returns the time in millis since a job was executed for this app, in elapsed realtime
      * timebase. This value can be larger than the current elapsed realtime if the job was executed
@@ -340,4 +348,70 @@ public abstract class UsageStatsManagerInternal {
 
     /** Unregister a listener from being notified of every new usage event. */
     public abstract void unregisterListener(@NonNull UsageEventListener listener);
+
+    /**
+     * Listener interface for estimated launch time changes.
+     */
+    public interface EstimatedLaunchTimeChangedListener {
+        /** Callback to inform listeners when estimated launch times change. */
+        void onEstimatedLaunchTimeChanged(@UserIdInt int userId, @NonNull String packageName,
+                @CurrentTimeMillisLong long newEstimatedLaunchTime);
+    }
+
+    /** Register a listener that will be notified of every estimated launch time change. */
+    public abstract void registerLaunchTimeChangedListener(
+            @NonNull EstimatedLaunchTimeChangedListener listener);
+
+    /** Unregister a listener from being notified of every estimated launch time change. */
+    public abstract void unregisterLaunchTimeChangedListener(
+            @NonNull EstimatedLaunchTimeChangedListener listener);
+
+    /**
+     * Reports a broadcast dispatched event to the UsageStatsManager.
+     *
+     * @param sourceUid uid of the package that sent the broadcast.
+     * @param targetPackage name of the package that the broadcast is targeted to.
+     * @param targetUser user that {@code targetPackage} belongs to.
+     * @param idForResponseEvent ID to be used for recording any response events corresponding
+     *                           to this broadcast.
+     * @param timestampMs time (in millis) when the broadcast was dispatched, in
+     *                    {@link SystemClock#elapsedRealtime()} timebase.
+     * @param targetUidProcState process state of the uid that the broadcast is targeted to.
+     */
+    public abstract void reportBroadcastDispatched(int sourceUid, @NonNull String targetPackage,
+            @NonNull UserHandle targetUser, long idForResponseEvent,
+            @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState);
+
+    /**
+     * Reports a notification posted event to the UsageStatsManager.
+     *
+     * @param packageName name of the package which posted the notification.
+     * @param user user that {@code packageName} belongs to.
+     * @param timestampMs time (in millis) when the notification was posted, in
+     *                    {@link SystemClock#elapsedRealtime()} timebase.
+     */
+    public abstract void reportNotificationPosted(@NonNull String packageName,
+            @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs);
+
+    /**
+     * Reports a notification updated event to the UsageStatsManager.
+     *
+     * @param packageName name of the package which updated the notification.
+     * @param user user that {@code packageName} belongs to.
+     * @param timestampMs time (in millis) when the notification was updated, in
+     *                    {@link SystemClock#elapsedRealtime()} timebase.
+     */
+    public abstract void reportNotificationUpdated(@NonNull String packageName,
+            @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs);
+
+    /**
+     * Reports a notification removed event to the UsageStatsManager.
+     *
+     * @param packageName name of the package which removed the notification.
+     * @param user user that {@code packageName} belongs to.
+     * @param timestampMs time (in millis) when the notification was removed, in
+     *                    {@link SystemClock#elapsedRealtime()} timebase.
+     */
+    public abstract void reportNotificationRemoved(@NonNull String packageName,
+            @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs);
 }

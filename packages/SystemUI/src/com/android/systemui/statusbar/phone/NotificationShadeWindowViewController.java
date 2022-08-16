@@ -16,10 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-
 import android.app.StatusBarManager;
-import android.graphics.RectF;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
@@ -39,57 +36,44 @@ import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.doze.DozeLog;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
  */
+@CentralSurfacesComponent.CentralSurfacesScope
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
-    private final NotificationWakeUpCoordinator mCoordinator;
-    private final PulseExpansionHandler mPulseExpansionHandler;
-    private final DynamicPrivacyController mDynamicPrivacyController;
-    private final KeyguardBypassController mBypassController;
-    private final PluginManager mPluginManager;
     private final FalsingCollector mFalsingCollector;
     private final TunerService mTunerService;
-    private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
-    private final NotificationEntryManager mNotificationEntryManager;
-    private final KeyguardStateController mKeyguardStateController;
     private final SysuiStatusBarStateController mStatusBarStateController;
-    private final DozeLog mDozeLog;
-    private final DozeParameters mDozeParameters;
-    private final CommandQueue mCommandQueue;
     private final NotificationShadeWindowView mView;
-    private final ShadeController mShadeController;
     private final NotificationShadeDepthController mDepthController;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final LockIconViewController mLockIconViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final StatusBarWindowStateController mStatusBarWindowStateController;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final AmbientState mAmbientState;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -97,10 +81,9 @@ public class NotificationShadeWindowViewController {
     private boolean mTouchCancelled;
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
-    private PhoneStatusBarView mStatusBarView;
-    private PhoneStatusBarTransitions mBarTransitions;
-    private StatusBar mService;
-    private NotificationShadeWindowController mNotificationShadeWindowController;
+    private PhoneStatusBarViewController mStatusBarViewController;
+    private final CentralSurfaces mService;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mDoubleTapEnabled;
     private boolean mSingleTapEnabled;
@@ -108,65 +91,48 @@ public class NotificationShadeWindowViewController {
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final Optional<LowLightClockController> mLowLightClockController;
 
-    // Used for determining view / touch intersection
-    private int[] mTempLocation = new int[2];
-    private RectF mTempRect = new RectF();
     private boolean mIsTrackingBarGesture = false;
 
     @Inject
     public NotificationShadeWindowViewController(
-            NotificationWakeUpCoordinator coordinator,
-            PulseExpansionHandler pulseExpansionHandler,
-            DynamicPrivacyController dynamicPrivacyController,
-            KeyguardBypassController bypassController,
             LockscreenShadeTransitionController transitionController,
             FalsingCollector falsingCollector,
-            PluginManager pluginManager,
             TunerService tunerService,
-            NotificationLockscreenUserManager notificationLockscreenUserManager,
-            NotificationEntryManager notificationEntryManager,
-            KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
-            DozeLog dozeLog,
-            DozeParameters dozeParameters,
-            CommandQueue commandQueue,
-            ShadeController shadeController,
             DockManager dockManager,
             NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
             PanelExpansionStateManager panelExpansionStateManager,
-            StatusBarWindowController statusBarWindowController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            LockIconViewController lockIconViewController) {
-        mCoordinator = coordinator;
-        mPulseExpansionHandler = pulseExpansionHandler;
-        mDynamicPrivacyController = dynamicPrivacyController;
-        mBypassController = bypassController;
+            StatusBarWindowStateController statusBarWindowStateController,
+            LockIconViewController lockIconViewController,
+            Optional<LowLightClockController> lowLightClockController,
+            CentralSurfaces centralSurfaces,
+            NotificationShadeWindowController controller,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            AmbientState ambientState) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
-        mPluginManager = pluginManager;
         mTunerService = tunerService;
-        mNotificationLockscreenUserManager = notificationLockscreenUserManager;
-        mNotificationEntryManager = notificationEntryManager;
-        mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
-        mDozeLog = dozeLog;
-        mDozeParameters = dozeParameters;
-        mCommandQueue = commandQueue;
         mView = notificationShadeWindowView;
-        mShadeController = shadeController;
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
         mPanelExpansionStateManager = panelExpansionStateManager;
         mDepthController = depthController;
-        mStatusBarWindowController = statusBarWindowController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
+        mLowLightClockController = lowLightClockController;
+        mService = centralSurfaces;
+        mNotificationShadeWindowController = controller;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mAmbientState = ambientState;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -223,10 +189,12 @@ public class NotificationShadeWindowViewController {
                 };
         mGestureDetector = new GestureDetector(mView.getContext(), gestureListener);
 
+        mLowLightClockController.ifPresent(controller -> controller.attachLowLightClockView(mView));
+
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
-                if (mStatusBarView == null) {
+                if (mStatusBarViewController == null) { // Fix for b/192490822
                     Log.w(TAG, "Ignoring touch while statusBarView not yet set.");
                     return false;
                 }
@@ -242,20 +210,29 @@ public class NotificationShadeWindowViewController {
                 // Reset manual touch dispatch state here but make sure the UP/CANCEL event still
                 // gets
                 // delivered.
-
                 if (!isCancel && mService.shouldIgnoreTouch()) {
                     return false;
                 }
 
                 if (isDown) {
-                    setTouchActive(true);
+                    mTouchActive = true;
                     mTouchCancelled = false;
                 } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
                         || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                    setTouchActive(false);
+                    mTouchActive = false;
                 }
                 if (mTouchCancelled || mExpandAnimationRunning) {
                     return false;
+                }
+
+                if (mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+                    // If the user was sliding their finger across the lock screen,
+                    // we may have been intercepting the touch and forwarding it to the
+                    // UDFPS affordance via mStatusBarKeyguardViewManager.onTouch (see below).
+                    // If this touch ended up unlocking the device, we want to cancel the touch
+                    // immediately, so we don't cause swipe or expand animations afterwards.
+                    cancelCurrentTouch();
+                    return true;
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
@@ -275,7 +252,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mStatusBarStateController.isDozing()) {
-                    mService.mDozeScrimController.extendPulse();
+                    mService.extendDozePulse();
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,
@@ -294,27 +271,27 @@ public class NotificationShadeWindowViewController {
                     expandingBelowNotch = true;
                 }
                 if (expandingBelowNotch) {
-                    return mStatusBarView.dispatchTouchEvent(ev);
+                    return mStatusBarViewController.sendTouchToView(ev);
                 }
 
                 if (!mIsTrackingBarGesture && isDown
                         && mNotificationPanelViewController.isFullyCollapsed()) {
                     float x = ev.getRawX();
                     float y = ev.getRawY();
-                    if (isIntersecting(mStatusBarView, x, y)) {
-                        if (mService.isSameStatusBarState(WINDOW_STATE_SHOWING)) {
+                    if (mStatusBarViewController.touchIsWithinView(x, y)) {
+                        if (mStatusBarWindowStateController.windowIsShowing()) {
                             mIsTrackingBarGesture = true;
-                            return mStatusBarView.dispatchTouchEvent(ev);
+                            return mStatusBarViewController.sendTouchToView(ev);
                         } else { // it's hidden or hiding, don't send to notification shade.
                             return true;
                         }
                     }
                 } else if (mIsTrackingBarGesture) {
-                    final boolean sendToNotification = mStatusBarView.dispatchTouchEvent(ev);
+                    final boolean sendToStatusBar = mStatusBarViewController.sendTouchToView(ev);
                     if (isUp || isCancel) {
                         mIsTrackingBarGesture = false;
                     }
-                    return sendToNotification;
+                    return sendToStatusBar;
                 }
 
                 return null;
@@ -459,10 +436,6 @@ public class NotificationShadeWindowViewController {
         return mView;
     }
 
-    public void setTouchActive(boolean touchActive) {
-        mTouchActive = touchActive;
-    }
-
     public void cancelCurrentTouch() {
         if (mTouchActive) {
             final long now = SystemClock.uptimeMillis();
@@ -473,9 +446,10 @@ public class NotificationShadeWindowViewController {
             event.recycle();
             mTouchCancelled = true;
         }
+        mAmbientState.setSwipingUp(false);
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);
         pw.print("  mTouchCancelled=");
@@ -497,33 +471,27 @@ public class NotificationShadeWindowViewController {
         }
     }
 
-    public PhoneStatusBarTransitions getBarTransitions() {
-        return mBarTransitions;
+    public void setStatusBarViewController(PhoneStatusBarViewController statusBarViewController) {
+        mStatusBarViewController = statusBarViewController;
     }
 
-    public void setStatusBarView(PhoneStatusBarView statusBarView) {
-        mStatusBarView = statusBarView;
-        if (statusBarView != null) {
-            mBarTransitions = new PhoneStatusBarTransitions(
-                    statusBarView,
-                    mStatusBarWindowController.getBackgroundView());
-        }
+    /**
+     * Tell the controller that dozing has begun or ended.
+     * @param dozing True if dozing has begun.
+     */
+    public void setDozing(boolean dozing) {
+        mLowLightClockController.ifPresent(controller -> controller.showLowLightClock(dozing));
     }
 
-    public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {
-        mService = statusBar;
-        mNotificationShadeWindowController = controller;
+    /**
+     * Tell the controller to perform burn-in prevention.
+     */
+    public void dozeTimeTick() {
+        mLowLightClockController.ifPresent(LowLightClockController::dozeTimeTick);
     }
 
     @VisibleForTesting
     void setDragDownHelper(DragDownHelper dragDownHelper) {
         mDragDownHelper = dragDownHelper;
-    }
-
-    private boolean isIntersecting(View view, float x, float y) {
-        mTempLocation = view.getLocationOnScreen();
-        mTempRect.set(mTempLocation[0], mTempLocation[1], mTempLocation[0] + view.getWidth(),
-                mTempLocation[1] + view.getHeight());
-        return mTempRect.contains(x, y);
     }
 }

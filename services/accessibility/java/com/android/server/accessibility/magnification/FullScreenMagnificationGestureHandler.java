@@ -119,11 +119,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     private static final boolean DEBUG_DETECTING = false | DEBUG_ALL;
     private static final boolean DEBUG_PANNING_SCALING = false | DEBUG_ALL;
 
-    // The MIN_SCALE is different from MagnificationController.MIN_SCALE due
+    // The MIN_SCALE is different from MagnificationScaleProvider.MIN_SCALE due
     // to AccessibilityService.MagnificationController#setScale() has
     // different scale range
     private static final float MIN_SCALE = 2.0f;
-    private static final float MAX_SCALE = FullScreenMagnificationController.MAX_SCALE;
+    private static final float MAX_SCALE = MagnificationScaleProvider.MAX_SCALE;
 
     @VisibleForTesting final FullScreenMagnificationController mFullScreenMagnificationController;
 
@@ -208,8 +208,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
         mPromptController.onDestroy();
         // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
-        mFullScreenMagnificationController.resetAllIfNeeded(
-                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mFullScreenMagnificationController.resetIfNeeded(
+                mDisplayId, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         clearAndTransitionToStateDetecting();
     }
 
@@ -341,7 +341,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
 
         public void persistScaleAndTransitionTo(State state) {
-            mFullScreenMagnificationController.persistScale();
+            mFullScreenMagnificationController.persistScale(mDisplayId);
             clear();
             transitionTo(state);
         }
@@ -869,8 +869,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mPromptController.showNotificationIfNeeded();
                 zoomOn(up.getX(), up.getY());
             }
-
-            mCallback.onTripleTapped(mDisplayId, getMode());
         }
 
         private boolean isMagnifying() {
@@ -947,7 +945,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         if (DEBUG_DETECTING) Slog.i(mLogTag, "zoomOn(" + centerX + ", " + centerY + ")");
 
         final float scale = MathUtils.constrain(
-                mFullScreenMagnificationController.getPersistedScale(),
+                mFullScreenMagnificationController.getPersistedScale(mDisplayId),
                 MIN_SCALE, MAX_SCALE);
         mFullScreenMagnificationController.setScaleAndCenter(mDisplayId,
                 scale, centerX, centerY,

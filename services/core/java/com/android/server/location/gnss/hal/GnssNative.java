@@ -47,6 +47,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Entry point for most GNSS HAL commands and callbacks.
@@ -124,9 +125,12 @@ public class GnssNative {
     // IMPORTANT - must match OEM definitions, this isn't part of a hal for some reason
     public static final int AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
     public static final int AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
+    public static final int AGPS_REF_LOCATION_TYPE_LTE_CELLID = 4;
+    public static final int AGPS_REF_LOCATION_TYPE_NR_CELLID = 8;
 
     @IntDef(prefix = "AGPS_REF_LOCATION_TYPE_", value = {AGPS_REF_LOCATION_TYPE_GSM_CELLID,
-            AGPS_REF_LOCATION_TYPE_UMTS_CELLID})
+            AGPS_REF_LOCATION_TYPE_UMTS_CELLID, AGPS_REF_LOCATION_TYPE_LTE_CELLID,
+            AGPS_REF_LOCATION_TYPE_NR_CELLID})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AgpsReferenceLocationType {}
 
@@ -623,8 +627,38 @@ public class GnssNative {
     public void injectLocation(Location location) {
         Preconditions.checkState(mRegistered);
         if (location.hasAccuracy()) {
-            mGnssHal.injectLocation(location.getLatitude(), location.getLongitude(),
-                    location.getAccuracy());
+
+            int gnssLocationFlags = GNSS_LOCATION_HAS_LAT_LONG
+                    | (location.hasAltitude() ? GNSS_LOCATION_HAS_ALTITUDE : 0)
+                    | (location.hasSpeed() ? GNSS_LOCATION_HAS_SPEED : 0)
+                    | (location.hasBearing() ? GNSS_LOCATION_HAS_BEARING : 0)
+                    | (location.hasAccuracy() ? GNSS_LOCATION_HAS_HORIZONTAL_ACCURACY : 0)
+                    | (location.hasVerticalAccuracy() ? GNSS_LOCATION_HAS_VERTICAL_ACCURACY : 0)
+                    | (location.hasSpeedAccuracy() ? GNSS_LOCATION_HAS_SPEED_ACCURACY : 0)
+                    | (location.hasBearingAccuracy() ? GNSS_LOCATION_HAS_BEARING_ACCURACY : 0);
+
+            double latitudeDegrees = location.getLatitude();
+            double longitudeDegrees = location.getLongitude();
+            double altitudeMeters = location.getAltitude();
+            float speedMetersPerSec = location.getSpeed();
+            float bearingDegrees = location.getBearing();
+            float horizontalAccuracyMeters = location.getAccuracy();
+            float verticalAccuracyMeters = location.getVerticalAccuracyMeters();
+            float speedAccuracyMetersPerSecond = location.getSpeedAccuracyMetersPerSecond();
+            float bearingAccuracyDegrees = location.getBearingAccuracyDegrees();
+            long timestamp = location.getTime();
+
+            int elapsedRealtimeFlags = GNSS_REALTIME_HAS_TIMESTAMP_NS
+                    | (location.hasElapsedRealtimeUncertaintyNanos()
+                    ? GNSS_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
+            long elapsedRealtimeNanos = location.getElapsedRealtimeNanos();
+            double elapsedRealtimeUncertaintyNanos = location.getElapsedRealtimeUncertaintyNanos();
+
+            mGnssHal.injectLocation(gnssLocationFlags, latitudeDegrees, longitudeDegrees,
+                    altitudeMeters, speedMetersPerSec, bearingDegrees, horizontalAccuracyMeters,
+                    verticalAccuracyMeters, speedAccuracyMetersPerSecond, bearingAccuracyDegrees,
+                    timestamp, elapsedRealtimeFlags, elapsedRealtimeNanos,
+                    elapsedRealtimeUncertaintyNanos);
         }
     }
 
@@ -735,9 +769,10 @@ public class GnssNative {
      * Starts measurement collection.
      */
     public boolean startMeasurementCollection(boolean enableFullTracking,
-            boolean enableCorrVecOutputs) {
+            boolean enableCorrVecOutputs, int intervalMillis) {
         Preconditions.checkState(mRegistered);
-        return mGnssHal.startMeasurementCollection(enableFullTracking, enableCorrVecOutputs);
+        return mGnssHal.startMeasurementCollection(enableFullTracking, enableCorrVecOutputs,
+                intervalMillis);
     }
 
     /**
@@ -746,6 +781,38 @@ public class GnssNative {
     public boolean stopMeasurementCollection() {
         Preconditions.checkState(mRegistered);
         return mGnssHal.stopMeasurementCollection();
+    }
+
+    /**
+     * Starts sv status collection.
+     */
+    public boolean startSvStatusCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.startSvStatusCollection();
+    }
+
+    /**
+     * Stops sv status collection.
+     */
+    public boolean stopSvStatusCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.stopSvStatusCollection();
+    }
+
+    /**
+     * Starts NMEA message collection.
+     */
+    public boolean startNmeaMessageCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.startNmeaMessageCollection();
+    }
+
+    /**
+     * Stops NMEA message collection.
+     */
+    public boolean stopNmeaMessageCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.stopNmeaMessageCollection();
     }
 
     /**
@@ -783,9 +850,10 @@ public class GnssNative {
     /**
      * Start batching.
      */
-    public boolean startBatch(long periodNanos, boolean wakeOnFifoFull) {
+    public boolean startBatch(long periodNanos, float minUpdateDistanceMeters,
+            boolean wakeOnFifoFull) {
         Preconditions.checkState(mRegistered);
-        return mGnssHal.startBatch(periodNanos, wakeOnFifoFull);
+        return mGnssHal.startBatch(periodNanos, minUpdateDistanceMeters, wakeOnFifoFull);
     }
 
     /**
@@ -899,9 +967,9 @@ public class GnssNative {
      * Sets AGPS reference cell id location.
      */
     public void setAgpsReferenceLocationCellId(@AgpsReferenceLocationType int type, int mcc,
-            int mnc, int lac, int cid) {
+            int mnc, int lac, long cid, int tac, int pcid, int arfcn) {
         Preconditions.checkState(mRegistered);
-        mGnssHal.setAgpsReferenceLocationCellId(type, mcc, mnc, lac, cid);
+        mGnssHal.setAgpsReferenceLocationCellId(type, mcc, mnc, lac, cid, tac, pcid, arfcn);
     }
 
     /**
@@ -1204,7 +1272,8 @@ public class GnssNative {
     @NativeEntryPoint
     boolean isInEmergencySession() {
         return Binder.withCleanCallingIdentity(
-                () -> mEmergencyHelper.isInEmergency(mConfiguration.getEsExtensionSec()));
+                () -> mEmergencyHelper.isInEmergency(
+                        TimeUnit.SECONDS.toMillis(mConfiguration.getEsExtensionSec())));
     }
 
     /**
@@ -1262,8 +1331,15 @@ public class GnssNative {
             return native_read_nmea(buffer, bufferSize);
         }
 
-        protected void injectLocation(double latitude, double longitude, float accuracy) {
-            native_inject_location(latitude, longitude, accuracy);
+        protected void injectLocation(@GnssLocationFlags int gnssLocationFlags, double latitude,
+                double longitude, double altitude, float speed, float bearing,
+                float horizontalAccuracy, float verticalAccuracy, float speedAccuracy,
+                float bearingAccuracy, long timestamp, @GnssRealtimeFlags int elapsedRealtimeFlags,
+                long elapsedRealtimeNanos, double elapsedRealtimeUncertaintyNanos) {
+            native_inject_location(gnssLocationFlags, latitude, longitude, altitude, speed,
+                    bearing, horizontalAccuracy, verticalAccuracy, speedAccuracy, bearingAccuracy,
+                    timestamp, elapsedRealtimeFlags, elapsedRealtimeNanos,
+                    elapsedRealtimeUncertaintyNanos);
         }
 
         protected void injectBestLocation(@GnssLocationFlags int gnssLocationFlags, double latitude,
@@ -1310,8 +1386,9 @@ public class GnssNative {
         }
 
         protected boolean startMeasurementCollection(boolean enableFullTracking,
-                boolean enableCorrVecOutputs) {
-            return native_start_measurement_collection(enableFullTracking, enableCorrVecOutputs);
+                boolean enableCorrVecOutputs, int intervalMillis) {
+            return native_start_measurement_collection(enableFullTracking, enableCorrVecOutputs,
+                    intervalMillis);
         }
 
         protected boolean stopMeasurementCollection() {
@@ -1326,6 +1403,22 @@ public class GnssNative {
             return native_inject_measurement_corrections(corrections);
         }
 
+        protected boolean startSvStatusCollection() {
+            return native_start_sv_status_collection();
+        }
+
+        protected boolean stopSvStatusCollection() {
+            return native_stop_sv_status_collection();
+        }
+
+        protected boolean startNmeaMessageCollection() {
+            return native_start_nmea_message_collection();
+        }
+
+        protected boolean stopNmeaMessageCollection() {
+            return native_stop_nmea_message_collection();
+        }
+
         protected int getBatchSize() {
             return native_get_batch_size();
         }
@@ -1338,8 +1431,9 @@ public class GnssNative {
             native_cleanup_batching();
         }
 
-        protected boolean startBatch(long periodNanos, boolean wakeOnFifoFull) {
-            return native_start_batch(periodNanos, wakeOnFifoFull);
+        protected boolean startBatch(long periodNanos, float minUpdateDistanceMeters,
+                boolean wakeOnFifoFull) {
+            return native_start_batch(periodNanos, minUpdateDistanceMeters, wakeOnFifoFull);
         }
 
         protected void flushBatch() {
@@ -1394,8 +1488,8 @@ public class GnssNative {
         }
 
         protected void setAgpsReferenceLocationCellId(@AgpsReferenceLocationType int type, int mcc,
-                int mnc, int lac, int cid) {
-            native_agps_set_ref_location_cellid(type, mcc, mnc, lac, cid);
+                int mnc, int lac, long cid, int tac, int pcid, int arfcn) {
+            native_agps_set_ref_location_cellid(type, mcc, mnc, lac, cid, tac, pcid, arfcn);
         }
 
         protected boolean isPsdsSupported() {
@@ -1434,10 +1528,19 @@ public class GnssNative {
 
     private static native int native_read_nmea(byte[] buffer, int bufferSize);
 
+    private static native boolean native_start_nmea_message_collection();
+
+    private static native boolean native_stop_nmea_message_collection();
+
     // location injection APIs
 
-    private static native void native_inject_location(double latitude, double longitude,
-            float accuracy);
+    private static native void native_inject_location(
+            int gnssLocationFlags, double latitudeDegrees, double longitudeDegrees,
+            double altitudeMeters, float speedMetersPerSec, float bearingDegrees,
+            float horizontalAccuracyMeters, float verticalAccuracyMeters,
+            float speedAccuracyMetersPerSecond, float bearingAccuracyDegrees,
+            long timestamp, int elapsedRealtimeFlags, long elapsedRealtimeNanos,
+            double elapsedRealtimeUncertaintyNanos);
 
 
     private static native void native_inject_best_location(
@@ -1451,6 +1554,11 @@ public class GnssNative {
     // time injection APIs
 
     private static native void native_inject_time(long time, long timeReference, int uncertainty);
+
+    // sv status APIs
+    private static native boolean native_start_sv_status_collection();
+
+    private static native boolean native_stop_sv_status_collection();
 
     // navigation message APIs
 
@@ -1475,7 +1583,7 @@ public class GnssNative {
     private static native boolean native_is_measurement_supported();
 
     private static native boolean native_start_measurement_collection(boolean enableFullTracking,
-            boolean enableCorrVecOutputs);
+            boolean enableCorrVecOutputs, int intervalMillis);
 
     private static native boolean native_stop_measurement_collection();
 
@@ -1492,7 +1600,8 @@ public class GnssNative {
 
     private static native void native_cleanup_batching();
 
-    private static native boolean native_start_batch(long periodNanos, boolean wakeOnFifoFull);
+    private static native boolean native_start_batch(long periodNanos,
+            float minUpdateDistanceMeters, boolean wakeOnFifoFull);
 
     private static native void native_flush_batch();
 
@@ -1531,7 +1640,7 @@ public class GnssNative {
     private static native void native_agps_set_id(int type, String setid);
 
     private static native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
-            int lac, int cid);
+            int lac, long cid, int tac, int pcid, int arfcn);
 
     // PSDS APIs
 

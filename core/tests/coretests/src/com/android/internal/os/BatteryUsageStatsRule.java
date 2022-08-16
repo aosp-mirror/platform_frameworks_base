@@ -51,7 +51,7 @@ public class BatteryUsageStatsRule implements TestRule {
                     .build();
 
     private final PowerProfile mPowerProfile;
-    private final MockClocks mMockClocks = new MockClocks();
+    private final MockClock mMockClock = new MockClock();
     private final MockBatteryStatsImpl mBatteryStats;
 
     private BatteryUsageStats mBatteryUsageStats;
@@ -68,8 +68,8 @@ public class BatteryUsageStatsRule implements TestRule {
     public BatteryUsageStatsRule(long currentTime, File historyDir) {
         Context context = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
-        mMockClocks.currentTime = currentTime;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClocks, historyDir);
+        mMockClock.currentTime = currentTime;
+        mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.onSystemReady();
     }
@@ -185,12 +185,12 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public void setTime(long realtimeMs, long uptimeMs) {
-        mMockClocks.realtime = realtimeMs;
-        mMockClocks.uptime = uptimeMs;
+        mMockClock.realtime = realtimeMs;
+        mMockClock.uptime = uptimeMs;
     }
 
     public void setCurrentTime(long currentTimeMs) {
-        mMockClocks.currentTime = currentTimeMs;
+        mMockClock.currentTime = currentTimeMs;
     }
 
     BatteryUsageStats apply(PowerCalculator... calculators) {
@@ -202,16 +202,18 @@ public class BatteryUsageStatsRule implements TestRule {
         final String[] customPowerComponentNames = mBatteryStats.getCustomEnergyConsumerNames();
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
+        final boolean includeProcessStateData = (query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customPowerComponentNames, includePowerModels);
+                customPowerComponentNames, includePowerModels, includeProcessStateData);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));
         }
 
         for (PowerCalculator calculator : calculators) {
-            calculator.calculate(builder, mBatteryStats, mMockClocks.realtime, mMockClocks.uptime,
-                    query);
+            calculator.calculate(builder, mBatteryStats, mMockClock.realtime * 1000,
+                    mMockClock.uptime * 1000, query);
         }
 
         mBatteryUsageStats = builder.build();

@@ -17,24 +17,25 @@
 package com.android.systemui.media.dialog;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
+import com.android.systemui.broadcast.BroadcastSender;
 
 /**
  * Dialog for media output group.
  */
+// TODO(b/203073091): Remove this class once group logic been implemented.
 public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
 
-    MediaOutputGroupDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController, SystemUIDialogManager dialogManager) {
-        super(context, mediaOutputController, dialogManager);
+    MediaOutputGroupDialog(Context context, boolean aboveStatusbar, BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController) {
+        super(context, broadcastSender, mediaOutputController);
         mMediaOutputController.resetGroupMediaDevices();
         mAdapter = new MediaOutputGroupAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
@@ -78,12 +79,8 @@ public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
     }
 
     @Override
-    void refresh() {
-        super.refresh();
-        final int size = getHeaderIconSize();
-        final int padding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.media_output_dialog_header_icon_padding);
-        mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
+    Drawable getAppSourceIcon() {
+        return null;
     }
 
     @Override

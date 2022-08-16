@@ -26,12 +26,14 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -66,7 +68,9 @@ class LogBufferFreezerTest : SysuiTestCase() {
                         capture(receiverCaptor),
                         any(IntentFilter::class.java),
                         eq(executor),
-                        any(UserHandle::class.java))
+                        any(UserHandle::class.java),
+                        anyInt(),
+                        nullable())
         receiver = receiverCaptor.value
     }
 

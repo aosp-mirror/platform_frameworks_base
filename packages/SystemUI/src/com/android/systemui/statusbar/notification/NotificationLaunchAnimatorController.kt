@@ -8,24 +8,32 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.policy.HeadsUpUtil
+import javax.inject.Inject
 import kotlin.math.ceil
 import kotlin.math.max
 
 /** A provider of [NotificationLaunchAnimatorController]. */
-class NotificationLaunchAnimatorControllerProvider(
+@CentralSurfacesComponent.CentralSurfacesScope
+class NotificationLaunchAnimatorControllerProvider @Inject constructor(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
-    private val headsUpManager: HeadsUpManagerPhone
+    private val headsUpManager: HeadsUpManagerPhone,
+    private val jankMonitor: InteractionJankMonitor
 ) {
+    @JvmOverloads
     fun getAnimatorController(
-        notification: ExpandableNotificationRow
+        notification: ExpandableNotificationRow,
+        onFinishAnimationCallback: Runnable? = null
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
             notificationShadeWindowViewController,
             notificationListContainer,
             headsUpManager,
-            notification
+            notification,
+            jankMonitor,
+            onFinishAnimationCallback
         )
     }
 }
@@ -39,7 +47,9 @@ class NotificationLaunchAnimatorController(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
-    private val notification: ExpandableNotificationRow
+    private val notification: ExpandableNotificationRow,
+    private val jankMonitor: InteractionJankMonitor,
+    private val onFinishAnimationCallback: Runnable?
 ) : ActivityLaunchAnimator.Controller {
 
     companion object {
@@ -72,7 +82,7 @@ class NotificationLaunchAnimatorController(
         } else {
             notification.currentBackgroundRadiusTop
         }
-        val params = ExpandAnimationParameters(
+        val params = LaunchAnimationParameters(
             top = windowTop,
             bottom = location[1] + height,
             left = location[0],
@@ -113,6 +123,7 @@ class NotificationLaunchAnimatorController(
 
         if (!willAnimate) {
             removeHun(animate = true)
+            onFinishAnimationCallback?.run()
         }
     }
 
@@ -131,18 +142,19 @@ class NotificationLaunchAnimatorController(
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         removeHun(animate = true)
+        onFinishAnimationCallback?.run()
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)
 
-        InteractionJankMonitor.getInstance().begin(notification,
+        jankMonitor.begin(notification,
             InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-        InteractionJankMonitor.getInstance().end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
+        jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
@@ -150,11 +162,12 @@ class NotificationLaunchAnimatorController(
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)
         removeHun(animate = false)
+        onFinishAnimationCallback?.run()
     }
 
-    private fun applyParams(params: ExpandAnimationParameters?) {
-        notification.applyExpandAnimationParams(params)
-        notificationListContainer.applyExpandAnimationParams(params)
+    private fun applyParams(params: LaunchAnimationParameters?) {
+        notification.applyLaunchAnimationParams(params)
+        notificationListContainer.applyLaunchAnimationParams(params)
     }
 
     override fun onLaunchAnimationProgress(
@@ -162,7 +175,7 @@ class NotificationLaunchAnimatorController(
         progress: Float,
         linearProgress: Float
     ) {
-        val params = state as ExpandAnimationParameters
+        val params = state as LaunchAnimationParameters
         params.progress = progress
         params.linearProgress = linearProgress
 

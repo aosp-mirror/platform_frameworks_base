@@ -34,14 +34,12 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
-import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.Utils
-import java.io.FileDescriptor
+import com.android.systemui.util.LargeScreenUtils
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -61,19 +59,26 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val falsingCollector: FalsingCollector,
     private val ambientState: AmbientState,
     private val mediaHierarchyManager: MediaHierarchyManager,
-    private val scrimController: ScrimController,
+    private val scrimTransitionController: LockscreenShadeScrimTransitionController,
+    private val keyguardTransitionControllerFactory:
+        LockscreenShadeKeyguardTransitionController.Factory,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
+    private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
+    private val singleShadeOverScrollerFactory: SingleShadeLockScreenOverScroller.Factory,
     wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
-    dumpManager: DumpManager,
+    dumpManager: DumpManager
 ) : Dumpable {
     private var pulseHeight: Float = 0f
+    @get:VisibleForTesting
+    var fractionToShade: Float = 0f
+        private set
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var notificationPanelController: NotificationPanelViewController
-    lateinit var statusbar: StatusBar
+    lateinit var centralSurfaces: CentralSurfaces
     lateinit var qS: QS
 
     /**
@@ -99,15 +104,45 @@ class LockscreenShadeTransitionController @Inject constructor(
     internal var pulseHeightAnimator: ValueAnimator? = null
 
     /**
-     * Distance that the full shade transition takes in order for scrim to fully transition to
-     * the shade (in alpha)
-     */
-    private var scrimTransitionDistance = 0
-
-    /**
-     * Distance that the full transition takes in order for us to fully transition to the shade
+     * Distance that the full shade transition takes in order to complete.
      */
     private var fullTransitionDistance = 0
+
+    /**
+     * Distance that the full transition takes in order for us to fully transition to the shade by
+     * tapping on a button, such as "expand".
+     */
+    private var fullTransitionDistanceByTap = 0
+
+    /**
+     * Distance that the full shade transition takes in order for the notification shelf to fully
+     * expand.
+     */
+    private var notificationShelfTransitionDistance = 0
+
+    /**
+     * Distance that the full shade transition takes in order for the Quick Settings to fully fade
+     * and expand.
+     */
+    private var qsTransitionDistance = 0
+
+    /**
+     * Distance that the full shade transition takes in order for depth of the wallpaper to fully
+     * change.
+     */
+    private var depthControllerTransitionDistance = 0
+
+    /**
+     * Distance that the full shade transition takes in order for the UDFPS Keyguard View to fully
+     * fade.
+     */
+    private var udfpsTransitionDistance = 0
+
+    /**
+     * Used for StatusBar to know that a transition is in progress. At the moment it only checks
+     * whether the progress is > 0, therefore this value is not very important.
+     */
+    private var statusBarTransitionDistance = 0
 
     /**
      * Flag to make sure that the dragDownAmount is applied to the listeners even when in the
@@ -130,7 +165,7 @@ class LockscreenShadeTransitionController @Inject constructor(
      * The distance until we're showing the notifications when pulsing
      */
     val distanceUntilShowingPulsingNotifications
-        get() = scrimTransitionDistance
+        get() = fullTransitionDistance
 
     /**
      * The udfpsKeyguardViewController if it exists.
@@ -141,6 +176,31 @@ class LockscreenShadeTransitionController @Inject constructor(
      * The touch helper responsible for the drag down animation.
      */
     val touchHelper = DragDownHelper(falsingManager, falsingCollector, this, context)
+
+    private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
+        splitShadeOverScrollerFactory.create(qS, nsslController)
+    }
+
+    private val phoneShadeOverScroller: SingleShadeLockScreenOverScroller by lazy {
+        singleShadeOverScrollerFactory.create(nsslController)
+    }
+
+    private val keyguardTransitionController by lazy {
+        keyguardTransitionControllerFactory.create(notificationPanelController)
+    }
+
+    /**
+     * [LockScreenShadeOverScroller] property that delegates to either
+     * [SingleShadeLockScreenOverScroller] or [SplitShadeLockScreenOverScroller].
+     *
+     * There are currently two different implementations, as the over scroll behavior is different
+     * on single shade and split shade.
+     *
+     * On single shade, only notifications are over scrolled, whereas on split shade, everything is
+     * over scrolled.
+     */
+    private val shadeOverScroller: LockScreenShadeOverScroller
+        get() = if (useSplitShade) splitShadeOverScroller else phoneShadeOverScroller
 
     init {
         updateResources()
@@ -177,11 +237,21 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     private fun updateResources() {
-        scrimTransitionDistance = context.resources.getDimensionPixelSize(
-                R.dimen.lockscreen_shade_scrim_transition_distance)
         fullTransitionDistance = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_full_transition_distance)
+        fullTransitionDistanceByTap = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_transition_by_tap_distance)
+        notificationShelfTransitionDistance = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_notif_shelf_transition_distance)
+        qsTransitionDistance = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance)
-        useSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
+        depthControllerTransitionDistance = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_depth_controller_transition_distance)
+        udfpsTransitionDistance = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_udfps_keyguard_transition_distance)
+        statusBarTransitionDistance = context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_status_bar_transition_distance)
+        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
@@ -197,7 +267,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         // Bind the click listener of the shelf to go to the full shade
         notificationShelfController.setOnClickListener {
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-                statusbar.wakeUpIfDozing(SystemClock.uptimeMillis(), it, "SHADE_CLICK")
+                centralSurfaces.wakeUpIfDozing(SystemClock.uptimeMillis(), it, "SHADE_CLICK")
                 goToLockedShade(it)
             }
         }
@@ -224,7 +294,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (nsslController.isInLockedDownShade()) {
                 logger.logDraggedDownLockDownShade(startingChild)
                 statusBarStateController.setLeaveOpenOnKeyguardHide(true)
-                statusbar.dismissKeyguardThenExecute(OnDismissAction {
+                centralSurfaces.dismissKeyguardThenExecute(OnDismissAction {
                     nextHideKeyguardNeedsNoAnimation = true
                     false
                 }, cancelRunnable, false /* afterKeyguardGone */)
@@ -248,6 +318,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                         // override that
                         forceApplyAmount = true
                         // Reset the behavior. At this point the animation is already started
+                        logger.logDragDownAmountReset()
                         dragDownAmount = 0f
                         forceApplyAmount = false
                     }
@@ -337,26 +408,45 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (field != value || forceApplyAmount) {
                 field = value
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
-                    nsslController.setTransitionToFullShadeAmount(field)
+                    fractionToShade =
+                        MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
+                    nsslController.setTransitionToFullShadeAmount(fractionToShade)
+
+                    qSDragProgress = MathUtils.saturate(dragDownAmount / qsTransitionDistance)
+                    qS.setTransitionToFullShadeAmount(field, qSDragProgress)
+
                     notificationPanelController.setTransitionToFullShadeAmount(field,
                             false /* animate */, 0 /* delay */)
-                    val progress = MathUtils.saturate(dragDownAmount / scrimTransitionDistance)
-                    qS.setTransitionToFullShadeAmount(field, progress)
-                    // TODO: appear media also in split shade
-                    val mediaAmount = if (useSplitShade) 0f else field
-                    mediaHierarchyManager.setTransitionToFullShadeAmount(mediaAmount)
+
+                    mediaHierarchyManager.setTransitionToFullShadeAmount(field)
+                    scrimTransitionController.dragDownAmount = value
                     transitionToShadeAmountCommon(field)
+                    keyguardTransitionController.dragDownAmount = value
+                    shadeOverScroller.expansionDragDownAmount = dragDownAmount
                 }
             }
         }
 
+    /**
+     * The drag progress of the quick settings drag down amount
+     */
+    var qSDragProgress = 0f
+        private set
+
     private fun transitionToShadeAmountCommon(dragDownAmount: Float) {
-        val scrimProgress = MathUtils.saturate(dragDownAmount / scrimTransitionDistance)
-        scrimController.setTransitionToFullShadeProgress(scrimProgress)
-        // Fade out all content only visible on the lockscreen
-        notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
-        depthController.transitionToFullShadeProgress = scrimProgress
-        udfpsKeyguardViewController?.setTransitionToFullShadeProgress(scrimProgress)
+        if (depthControllerTransitionDistance == 0) { // split shade
+            depthController.transitionToFullShadeProgress = 0f
+        } else {
+            val depthProgress =
+                MathUtils.saturate(dragDownAmount / depthControllerTransitionDistance)
+            depthController.transitionToFullShadeProgress = depthProgress
+        }
+
+        val udfpsProgress = MathUtils.saturate(dragDownAmount / udfpsTransitionDistance)
+        udfpsKeyguardViewController?.setTransitionToFullShadeProgress(udfpsProgress)
+
+        val statusBarProgress = MathUtils.saturate(dragDownAmount / statusBarTransitionDistance)
+        centralSurfaces.setTransitionToFullShadeProgress(statusBarProgress)
     }
 
     private fun setDragDownAmountAnimated(
@@ -399,9 +489,10 @@ class LockscreenShadeTransitionController @Inject constructor(
         // be a couple of frames later. if we're setting it to 0, it will use the
         // default inset and therefore flicker
         dragDownAmount = 1f
-        setDragDownAmountAnimated(fullTransitionDistance.toFloat(), delay = delay) {
+        setDragDownAmountAnimated(fullTransitionDistanceByTap.toFloat(), delay = delay) {
             // End listener:
             // Reset
+            logger.logDragDownAmountReset()
             dragDownAmount = 0f
             forceApplyAmount = false
         }
@@ -456,7 +547,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         animationHandler: ((Long) -> Unit)? = null,
         cancelAction: Runnable? = null
     ) {
-        if (statusbar.isShadeDisabled) {
+        if (centralSurfaces.isShadeDisabled) {
             cancelAction?.run()
             logger.logShadeDisabledOnGoToLockedShade()
             return
@@ -498,7 +589,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 cancelAction?.run()
             }
             logger.logShowBouncerOnGoToLockedShade()
-            statusbar.showBouncerWithDimissAndCancelIfKeyguard(onDismissAction, cancelHandler)
+            centralSurfaces.showBouncerWithDimissAndCancelIfKeyguard(onDismissAction, cancelHandler)
             draggedDownEntry = entry
         } else {
             logger.logGoingToLockedShade(animationHandler != null)
@@ -607,13 +698,14 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("LSShadeTransitionController:")
             it.increaseIndent()
             it.println("pulseHeight: $pulseHeight")
             it.println("useSplitShade: $useSplitShade")
             it.println("dragDownAmount: $dragDownAmount")
+            it.println("qSDragProgress: $qSDragProgress")
             it.println("isDragDownAnywhereEnabled: $isDragDownAnywhereEnabled")
             it.println("isFalsingCheckNeeded: $isFalsingCheckNeeded")
             it.println("isWakingToShadeLocked: $isWakingToShadeLocked")

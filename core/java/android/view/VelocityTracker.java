@@ -19,7 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
-import android.os.SystemProperties;
+import android.sysprop.InputProperties;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
 
@@ -279,8 +279,7 @@ public final class VelocityTracker {
         // If user has not selected a specific strategy
         if (strategy == VELOCITY_TRACKER_STRATEGY_DEFAULT) {
             // Check if user specified strategy by overriding system property.
-            String strategyProperty =
-                                    SystemProperties.get("persist.input.velocitytracker.strategy");
+            String strategyProperty = InputProperties.velocitytracker_strategy().orElse(null);
             if (strategyProperty == null || strategyProperty.isEmpty()) {
                 mStrategy = strategy;
             } else {

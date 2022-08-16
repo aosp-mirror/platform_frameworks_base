@@ -4337,6 +4337,20 @@ public final class ContactsContract {
         public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
 
         /**
+         * A reference to indicate whether phone account migration process is pending.
+         *
+         * Before Android 13, {@link PhoneAccountHandle#getId()} returns the ICCID for Telephony
+         * PhoneAccountHandle. Starting from Android 13, {@link PhoneAccountHandle#getId()} returns
+         * the Subscription ID for Telephony PhoneAccountHandle. A phone account migration process
+         * is to ensure this PhoneAccountHandle migration process cross the Android versions in
+         * the ContactsContract database.
+         *
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        String IS_PHONE_ACCOUNT_MIGRATION_PENDING = "is_preferred_phone_account_migration_pending";
+
+        /**
          * The flattened {@link android.content.ComponentName} of a  {@link
          * android.telecom.PhoneAccountHandle} that is the preferred {@code PhoneAccountHandle} to
          * call the contact with.
@@ -8662,11 +8676,26 @@ public final class ContactsContract {
          * Type: INTEGER
          */
         public static final String UNGROUPED_WITH_PHONES = "summ_phones";
+
+        /**
+         * Flag indicating if the account is the default account for new contacts. At most one
+         * account has this flag set at a time. It can only be set to 1 on a row with null data set.
+         * <p>
+         * Type: INTEGER (boolean)
+         * @hide
+         */
+        String IS_DEFAULT = "x_is_default";
     }
 
     /**
      * <p>
      * Contacts-specific settings for various {@link Account}'s.
+     * </p>
+     * <p>
+     * A settings entry for an account is created automatically when a raw contact or group
+     * is inserted that references it. Settings entries cannot be deleted as long as raw
+     * contacts or groups continue to reference it; in order to delete a settings entry all
+     * raw contacts and groups referencing the account must be deleted first.
      * </p>
      * <h2>Columns</h2>
      * <table class="jd-sumtable">
@@ -8749,6 +8778,78 @@ public final class ContactsContract {
          * The MIME-type of {@link #CONTENT_URI} providing a single setting.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
+
+        /**
+         * Action used to launch the UI to set the default account for new contacts.
+         */
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_SET_DEFAULT_ACCOUNT =
+                "android.provider.action.SET_DEFAULT_ACCOUNT";
+
+        /**
+         * The method to invoke in order to set the default account for new contacts.
+         *
+         * @hide
+         */
+        public static final String SET_DEFAULT_ACCOUNT_METHOD = "setDefaultAccount";
+
+        /**
+         * The method to invoke in order to query the default account for new contacts.
+         *
+         * @hide
+         */
+        public static final String QUERY_DEFAULT_ACCOUNT_METHOD = "queryDefaultAccount";
+
+        /**
+         * Key in the incoming Bundle for the default account.
+         *
+         * @hide
+         */
+        public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
+
+        /**
+         * Get the account that is set as the default account for new contacts, which should be
+         * initially selected when creating a new contact on contact management apps.
+         * If the setting has not been set by any app, it will return null. Once the setting
+         * is set to non-null Account, it can still be set to null in the future.
+         *
+         * @param resolver the ContentResolver to query.
+         * @return the default account for new contacts, or null if it's not set or set to NULL
+         * account.
+         */
+        @Nullable
+        public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
+            Bundle response = resolver.call(ContactsContract.AUTHORITY_URI,
+                    QUERY_DEFAULT_ACCOUNT_METHOD, null, null);
+            return response.getParcelable(KEY_DEFAULT_ACCOUNT);
+        }
+
+        /**
+         * Sets the account as the default account that should be initially selected
+         * when creating a new contact on contact management apps. Apps can only set one of
+         * the following accounts as the default account:
+         * <ol>
+         *   <li>null or custom local account
+         *   <li>SIM account
+         *   <li>AccountManager accounts
+         * </ol>
+         *
+         * @param resolver the ContentResolver to query.
+         * @param account the account to be set to default.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS)
+        public static void setDefaultAccount(@NonNull ContentResolver resolver,
+                @Nullable Account account) {
+            Bundle extras = new Bundle();
+            if (account != null) {
+                extras.putString(ACCOUNT_NAME, account.name);
+                extras.putString(ACCOUNT_TYPE, account.type);
+            }
+
+            resolver.call(ContactsContract.AUTHORITY_URI, SET_DEFAULT_ACCOUNT_METHOD, null, extras);
+        }
     }
 
     /**

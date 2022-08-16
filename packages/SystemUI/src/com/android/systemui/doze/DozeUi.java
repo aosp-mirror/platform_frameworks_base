@@ -39,8 +39,6 @@ import java.util.Calendar;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 /**
  * The policy controlling doze.
  */
@@ -58,13 +56,12 @@ public class DozeUi implements DozeMachine.Part {
     private final boolean mCanAnimateTransition;
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
-    private final Lazy<StatusBarStateController> mStatusBarStateController;
+    private final StatusBarStateController mStatusBarStateController;
     private final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onTimeChanged() {
-                    if (BURN_IN_TESTING_ENABLED && mStatusBarStateController != null
-                            && mStatusBarStateController.get().isDozing()) {
+                    if (BURN_IN_TESTING_ENABLED && mStatusBarStateController.isDozing()) {
                         // update whenever the time changes for manual burn in testing
                         mHost.dozeTimeTick();
 
@@ -80,7 +77,8 @@ public class DozeUi implements DozeMachine.Part {
     public DozeUi(Context context, AlarmManager alarmManager,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DozeLog dozeLog, Lazy<StatusBarStateController> statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            DozeLog dozeLog) {
         mContext = context;
         mWakeLock = wakeLock;
         mHost = host;

@@ -17,6 +17,8 @@ package android.window;
 
 import static android.view.WindowManagerImpl.createWindowContextWindowManager;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -135,7 +137,8 @@ public class WindowContext extends ContextWrapper implements WindowProvider {
     }
 
     /** Dispatch {@link Configuration} to each {@link ComponentCallbacks}. */
-    void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
         mCallbacksController.dispatchConfigurationChanged(newConfig);
     }
 

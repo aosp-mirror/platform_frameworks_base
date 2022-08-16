@@ -43,6 +43,9 @@ public interface BubbleViewProvider {
     /** App badge drawable to draw above bubble icon. */
     @Nullable Bitmap getAppBadge();
 
+    /** Base app badge drawable without any markings. */
+    @Nullable Bitmap getRawAppBadge();
+
     /** Path of normalized bubble icon to draw dot on. */
     Path getDotPath();
 

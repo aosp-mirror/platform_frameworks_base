@@ -19,7 +19,7 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.traces.RegionSubject
+import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Test
 
@@ -66,8 +66,8 @@ abstract class MovePipShelfHeightTransition(
     @Presubmit
     @Test
     open fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -78,8 +78,8 @@ abstract class MovePipShelfHeightTransition(
     @Presubmit
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 

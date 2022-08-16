@@ -329,7 +329,7 @@
         <font weight="400" style="normal" postScriptName="NotoSansThai">NotoSansThai-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoSansThai-Bold.ttf</font>
-        <font weight="400" style="normal" fallbackFor="serif" postScriptName="NotoSerifThai">
+        <font weight="400" style="normal" fallbackFor="serif">
             NotoSerifThai-Regular.ttf
         </font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifThai-Bold.ttf</font>
@@ -923,16 +923,16 @@
         <font weight="700" style="normal">NotoSansKhmerUI-Bold.ttf</font>
     </family>
     <family lang="und-Laoo" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansLao">NotoSansLao-Regular.ttf
+        <font weight="400" style="normal">NotoSansLao-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoSansLao-Bold.ttf</font>
-        <font weight="400" style="normal" fallbackFor="serif" postScriptName="NotoSerifLao">
+        <font weight="400" style="normal" fallbackFor="serif">
             NotoSerifLao-Regular.ttf
         </font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifLao-Bold.ttf</font>
     </family>
     <family lang="und-Laoo" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansLaoUI">NotoSansLaoUI-Regular.ttf
+        <font weight="400" style="normal">NotoSansLaoUI-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoSansLaoUI-Bold.ttf</font>
     </family>
@@ -1013,7 +1013,7 @@
         </font>
     </family>
     <family lang="und-Cans">
-        <font weight="400" style="normal" postScriptName="NotoSansCanadianAboriginal">
+        <font weight="400" style="normal">
             NotoSansCanadianAboriginal-Regular.ttf
         </font>
     </family>
@@ -1327,6 +1327,9 @@
         <font weight="400" style="normal" index="1" fallbackFor="serif"
               postScriptName="NotoSerifCJKjp-Regular">NotoSerifCJK-Regular.ttc
         </font>
+    </family>
+    <family lang="und-Zsye" ignore="true">
+        <font weight="400" style="normal">NotoColorEmojiLegacy.ttf</font>
     </family>
     <family lang="und-Zsye">
         <font weight="400" style="normal">NotoColorEmoji.ttf</font>

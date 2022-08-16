@@ -436,6 +436,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".PenStylusActivity"
+                  android:label="Pen/Draw"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="GLTextureViewActivity"
              android:label="TextureView/OpenGL"
              android:exported="true">
@@ -773,6 +782,15 @@
 
         <activity android:name="RenderEffectShaderActivity"
                   android:label="RenderEffect/Shader"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="RenderEffectViewActivity"
+                  android:label="RenderEffect/View"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

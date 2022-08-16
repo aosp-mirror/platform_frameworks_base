@@ -137,9 +137,16 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 
     auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
     SkColorType decodeColorType = brd->computeOutputColorType(colorType);
-    if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
+
+    if (isHardware) {
+        if (decodeColorType == kRGBA_F16_SkColorType &&
             !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
-        decodeColorType = kN32_SkColorType;
+            decodeColorType = kN32_SkColorType;
+        }
+        if (decodeColorType == kRGBA_1010102_SkColorType &&
+            !uirenderer::HardwareBitmapUploader::has1010102Support()) {
+            decodeColorType = kN32_SkColorType;
+        }
     }
 
     // Set up the pixel allocator

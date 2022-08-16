@@ -19,9 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingMessage
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
-import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
@@ -35,9 +34,8 @@ import javax.inject.Inject
  */
 @CoordinatorScope
 class ViewConfigCoordinator @Inject internal constructor(
-    configurationController: ConfigurationController,
-    lockscreenUserManager: NotificationLockscreenUserManagerImpl,
-    featureFlags: FeatureFlags,
+    private val mConfigurationController: ConfigurationController,
+    private val mLockscreenUserManager: NotificationLockscreenUserManager,
     private val mGutsManager: NotificationGutsManager,
     private val mKeyguardUpdateMonitor: KeyguardUpdateMonitor
 ) : Coordinator, UserChangedListener, ConfigurationController.ConfigurationListener {
@@ -46,15 +44,12 @@ class ViewConfigCoordinator @Inject internal constructor(
     private var mDispatchUiModeChangeOnUserSwitched = false
     private var mPipeline: NotifPipeline? = null
 
-    init {
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
-            lockscreenUserManager.addUserChangedListener(this)
-            configurationController.addCallback(this)
-        }
-    }
-
     override fun attach(pipeline: NotifPipeline) {
         mPipeline = pipeline
+        if (pipeline.isNewPipelineEnabled) {
+            mLockscreenUserManager.addUserChangedListener(this)
+            mConfigurationController.addCallback(this)
+        }
     }
 
     override fun onDensityOrFontScaleChanged() {

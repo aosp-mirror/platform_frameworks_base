@@ -122,7 +122,7 @@ public class WalletActivity extends LifecycleActivity implements
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
 
-        mWalletClient = QuickAccessWalletClient.create(this);
+        mWalletClient = QuickAccessWalletClient.create(this, mExecutor);
         mWalletScreenController = new WalletScreenController(
                 this,
                 walletView,
@@ -152,8 +152,7 @@ public class WalletActivity extends LifecycleActivity implements
                         Log.w(TAG, "Unable to create wallet app intent.");
                         return;
                     }
-                    if (!mKeyguardStateController.isUnlocked()
-                            && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
 
@@ -278,7 +277,7 @@ public class WalletActivity extends LifecycleActivity implements
 
     private Drawable getHomeIndicatorDrawable() {
         Drawable drawable = getDrawable(R.drawable.ic_close);
-        drawable.setTint(getColor(com.android.internal.R.color.system_neutral1_300));
+        drawable.setTint(getColor(R.color.material_dynamic_neutral70));
         return drawable;
     }
 }

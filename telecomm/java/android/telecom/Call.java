@@ -2895,7 +2895,19 @@ public final class Call {
             if (key != null) {
                 final Object value = bundle.get(key);
                 final Object newValue = newBundle.get(key);
-                if (!Objects.equals(value, newValue)) {
+                if (!newBundle.containsKey(key)) {
+                    return false;
+                }
+                if (value instanceof Bundle && newValue instanceof Bundle) {
+                    if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                        return false;
+                    }
+                }
+                if (value instanceof byte[] && newValue instanceof byte[]) {
+                    if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
+                        return false;
+                    }
+                } else if (!Objects.equals(value, newValue)) {
                     return false;
                 }
             }

@@ -67,17 +67,38 @@ public final class PrebakedSegment extends VibrationEffectSegment {
         return -1;
     }
 
+    /** @hide */
+    @Override
+    public boolean isHapticFeedbackCandidate() {
+        switch (mEffectId) {
+            case VibrationEffect.EFFECT_CLICK:
+            case VibrationEffect.EFFECT_DOUBLE_CLICK:
+            case VibrationEffect.EFFECT_HEAVY_CLICK:
+            case VibrationEffect.EFFECT_POP:
+            case VibrationEffect.EFFECT_TEXTURE_TICK:
+            case VibrationEffect.EFFECT_THUD:
+            case VibrationEffect.EFFECT_TICK:
+                return true;
+            default:
+                // VibrationEffect.RINGTONES are not segments that could represent a haptic feedback
+                return false;
+        }
+    }
+
+    /** @hide */
     @Override
     public boolean hasNonZeroAmplitude() {
         return true;
     }
 
+    /** @hide */
     @NonNull
     @Override
     public PrebakedSegment resolve(int defaultAmplitude) {
         return this;
     }
 
+    /** @hide */
     @NonNull
     @Override
     public PrebakedSegment scale(float scaleFactor) {
@@ -85,6 +106,7 @@ public final class PrebakedSegment extends VibrationEffectSegment {
         return this;
     }
 
+    /** @hide */
     @NonNull
     @Override
     public PrebakedSegment applyEffectStrength(int effectStrength) {
@@ -105,16 +127,17 @@ public final class PrebakedSegment extends VibrationEffectSegment {
         }
     }
 
+    /** @hide */
     @Override
     public void validate() {
         switch (mEffectId) {
             case VibrationEffect.EFFECT_CLICK:
             case VibrationEffect.EFFECT_DOUBLE_CLICK:
-            case VibrationEffect.EFFECT_TICK:
+            case VibrationEffect.EFFECT_HEAVY_CLICK:
+            case VibrationEffect.EFFECT_POP:
             case VibrationEffect.EFFECT_TEXTURE_TICK:
             case VibrationEffect.EFFECT_THUD:
-            case VibrationEffect.EFFECT_POP:
-            case VibrationEffect.EFFECT_HEAVY_CLICK:
+            case VibrationEffect.EFFECT_TICK:
                 break;
             default:
                 int[] ringtones = VibrationEffect.RINGTONES;

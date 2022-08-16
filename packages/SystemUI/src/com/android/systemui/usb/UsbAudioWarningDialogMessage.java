@@ -19,14 +19,14 @@ package com.android.systemui.usb;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.util.Log;
 
 import com.android.systemui.R;
 
 import java.lang.annotation.Retention;
+
+import javax.inject.Inject;
 
 /**
  * USB Audio devices warning dialog messages help class.
@@ -40,32 +40,37 @@ public class UsbAudioWarningDialogMessage {
     public static final int TYPE_PERMISSION = 0;
     public static final int TYPE_CONFIRM = 1;
 
-    private final int mDialogType;
+    private int mDialogType;
     private UsbDialogHelper mDialogHelper;
 
-    public UsbAudioWarningDialogMessage(Context context, Intent intent, @DialogType int type) {
-        mDialogType = type;
-        try {
-            mDialogHelper = new UsbDialogHelper(context, intent);
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "Unable to initialize UsbDialogHelper!", e);
-        }
+    @Inject
+    public UsbAudioWarningDialogMessage() {
     }
 
-    private boolean hasRecordPermission() {
+    /**
+     * Initialize USB audio warning dialog message type and helper class.
+     * @param type Dialog type for Activity.
+     * @param usbDialogHelper Helper class for getting USB permission and confirm dialogs
+     */
+    public void init(@DialogType int type, UsbDialogHelper usbDialogHelper) {
+        mDialogType = type;
+        mDialogHelper = usbDialogHelper;
+    }
+
+    boolean hasRecordPermission() {
         return mDialogHelper.packageHasAudioRecordingPermission();
     }
 
-    private boolean isUsbAudioDevice() {
+    boolean isUsbAudioDevice() {
         return mDialogHelper.isUsbDevice() && (mDialogHelper.deviceHasAudioCapture()
                 || (mDialogHelper.deviceHasAudioPlayback()));
     }
 
-    private boolean hasAudioPlayback() {
+    boolean hasAudioPlayback() {
         return mDialogHelper.deviceHasAudioPlayback();
     }
 
-    private boolean hasAudioCapture() {
+    boolean hasAudioCapture() {
         return mDialogHelper.deviceHasAudioCapture();
     }
 

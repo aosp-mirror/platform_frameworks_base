@@ -56,31 +56,26 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
     @NonNull private final UserSwitchCallback mUserSwitchCallback;
     @Nullable private StopUserClient<?> mStopUserClient;
 
-    private class ClientFinishedCallback implements BaseClientMonitor.Callback {
-        private final BaseClientMonitor mOwner;
+    private class ClientFinishedCallback implements ClientMonitorCallback {
+        @NonNull private final BaseClientMonitor mOwner;
 
-        ClientFinishedCallback(BaseClientMonitor owner) {
+        ClientFinishedCallback(@NonNull BaseClientMonitor owner) {
             mOwner = owner;
         }
 
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
-                if (mOwner != clientMonitor) {
-                    Slog.e(getTag(), "[Wrong client finished], actual: "
-                            + clientMonitor + ", expected: " + mOwner);
-                    return;
-                }
-
                 Slog.d(getTag(), "[Client finished] " + clientMonitor + ", success: " + success);
                 if (mCurrentOperation != null && mCurrentOperation.isFor(mOwner)) {
                     mCurrentOperation = null;
-                    startNextOperationIfIdle();
                 } else {
-                    // can usually be ignored (hal died, etc.)
-                    Slog.d(getTag(), "operation is already null or different (reset?): "
+                    // can happen if the hal dies and is usually okay
+                    // do not unset the current operation that may be newer
+                    Slog.w(getTag(), "operation is already null or different (reset?): "
                             + mCurrentOperation);
                 }
+                startNextOperationIfIdle();
             });
         }
     }

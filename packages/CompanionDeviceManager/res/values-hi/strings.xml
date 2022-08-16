@@ -17,11 +17,32 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"सहयोगी डिवाइस मैनेजर"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"कोई <xliff:g id="PROFILE_NAME">%1$s</xliff:g> चुनें, ताकि उसे &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; की मदद से प्रबंधित किया जा सके"</string>
-    <string name="profile_name_generic" msgid="6851028682723034988">"डिवाइस"</string>
+    <string name="confirmation_title" msgid="3785000297483688997">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ऐक्सेस करने की अनुमति दें"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"स्मार्टवॉच"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को, अपनी &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; मैनेज करने की अनुमति दें"</string>
-    <string name="profile_summary" msgid="2059360676631420073">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> को मैनेज करने के लिए, यह ऐप्लिकेशन ज़रूरी है. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"कोई <xliff:g id="PROFILE_NAME">%1$s</xliff:g> चुनें, ताकि उसे &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; की मदद से मैनेज किया जा सके"</string>
+    <string name="summary_watch" msgid="3002344206574997652">"यह ऐप्लिकेशन, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> को मैनेज करने के लिए ज़रूरी है. <xliff:g id="APP_NAME">%2$s</xliff:g> आपकी सूचनाओं पर कार्रवाई कर पाएगा. साथ ही, इसे आपके फ़ोन, एसएमएस, संपर्कों, कैलेंडर, कॉल लॉग, और आस-पास मौजूद डिवाइसों को ऐक्सेस करने की अनुमति मिल पाएगी."</string>
+    <string name="permission_apps" msgid="6142133265286656158">"ऐप्लिकेशन"</string>
+    <string name="permission_apps_summary" msgid="798718816711515431">"अपने फ़ोन के ऐप्लिकेशन को स्ट्रीम करें"</string>
+    <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को अपने फ़ोन से यह जानकारी ऐक्सेस करने की अनुमति दें"</string>
+    <string name="helper_title_app_streaming" msgid="4151687003439969765">"क्रॉस-डिवाइस से जुड़ी सेवाएं"</string>
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> आपके <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> की ओर से, फ़ोन में मौजूद फ़ोटो, मीडिया, और सूचनाओं को ऐक्सेस करने की अनुमति मांग रही हैं"</string>
+    <string name="title_automotive_projection" msgid="3296005598978412847"></string>
+    <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को अपने फ़ोन से यह जानकारी ऐक्सेस करने की अनुमति दें"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
+    <string name="permission_notification" msgid="693762568127741203">"सूचनाएं"</string>
+    <string name="permission_notification_summary" msgid="884075314530071011">"इससे सभी सूचनाएं देखी जा सकती हैं. इसमें संपर्क, मैसेज, और फ़ोटो जैसी जानकारी शामिल होती है"</string>
+    <string name="permission_storage" msgid="6831099350839392343">"फ़ोटो और मीडिया"</string>
+    <string name="permission_storage_summary" msgid="3918240895519506417"></string>
+    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play सेवाएं"</string>
+    <string name="helper_summary_computer" msgid="1676407599909474428">"<xliff:g id="APP_NAME">%1$s</xliff:g> आपके <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> की ओर से, डिवाइसों के बीच ऐप्लिकेशन को स्ट्रीम करने की अनुमति मांग रहा है"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"डिवाइस"</string>
+    <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"अनुमति दें"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमति न दें"</string>
+    <string name="consent_back" msgid="2560683030046918882">"वापस जाएं"</string>
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ऐप्लिकेशन से जुड़ी अनुमतियों को अपनी वॉच में ट्रांसफ़र करें"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"वॉच को सेट अप करने की प्रोसेस को आसान बनाने के लिए, उस पर इंस्टॉल किए गए ऐप्लिकेशन को भी वही अनुमतियां मिलेंगी जो आपने उन ऐप्लिकेशन को फ़ोन पर दी होंगी.\n\n इन अनुमतियों में, आपकी वॉच के माइक्रोफ़ोन और जगह की जानकारी का ऐक्सेस शामिल हो सकता है."</string>
+    <string name="vendor_icon_description" msgid="4445875290032225965">"ऐप्लिकेशन आइकॉन"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"ज़्यादा जानकारी वाला बटन"</string>
 </resources>

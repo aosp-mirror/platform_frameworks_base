@@ -16,6 +16,12 @@
 
 package android.text;
 
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.TextAttribute;
+import android.view.inputmethod.TextAttribute.Builder;
+
+import java.util.List;
+
 /**
  * Bit definitions for an integer defining the basic content type of text
  * held in an {@link Editable} object. Supported classes may be combined
@@ -187,6 +193,21 @@ public interface InputType {
      * mean they do not need to try to auto-correct what the user is typing.
      */
     public static final int TYPE_TEXT_FLAG_NO_SUGGESTIONS = 0x00080000;
+
+    /**
+     * Flag for {@link #TYPE_CLASS_TEXT}: Let the IME know the text conversion suggestions are
+     * required by the application. Text conversion suggestion is for the transliteration languages
+     * which has pronunciation characters and target characters. When the user is typing the
+     * pronunciation charactes, the IME could provide the possible target characters to the user.
+     * When this flag is set, the IME should insert the text conversion suggestions through
+     * {@link Builder#setTextConversionSuggestions(List)} and
+     * the {@link TextAttribute} with initialized with the text conversion suggestions is provided
+     * by the IME to the application. To receive the additional information, the application needs
+     * to implement {@link InputConnection#setComposingText(CharSequence, int, TextAttribute)},
+     * {@link InputConnection#setComposingRegion(int, int, TextAttribute)}, and
+     * {@link InputConnection#commitText(CharSequence, int, TextAttribute)}.
+     */
+    public static final int TYPE_TEXT_FLAG_ENABLE_TEXT_CONVERSION_SUGGESTIONS = 0x00100000;
 
     // ----------------------------------------------------------------------
 

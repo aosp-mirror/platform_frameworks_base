@@ -98,7 +98,7 @@ public final class IdleController extends RestrictingController implements Idlen
                 mTrackedTasks.valueAt(i).setIdleConstraintSatisfied(nowElapsed, isIdle);
             }
         }
-        mStateChangedListener.onControllerStateChanged();
+        mStateChangedListener.onControllerStateChanged(mTrackedTasks);
     }
 
     /**

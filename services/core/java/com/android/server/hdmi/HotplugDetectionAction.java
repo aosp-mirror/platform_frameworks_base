@@ -28,17 +28,20 @@ import java.util.List;
  * Feature action that handles hot-plug detection mechanism.
  * Hot-plug event is initiated by timer after device discovery action.
  *
- * <p>Check all devices every 15 secs except for system audio.
+ * <p>TV checks all devices every 15 secs except for system audio.
  * If system audio is on, check hot-plug for audio system every 5 secs.
  * For other devices, keep 15 secs period.
+ *
+ * <p>Playback devices check all devices every 1 minute.
  */
 // Seq #3
 final class HotplugDetectionAction extends HdmiCecFeatureAction {
     private static final String TAG = "HotPlugDetectionAction";
 
-    public static final int POLLING_INTERVAL_MS = 5000;
+    public static final int POLLING_INTERVAL_MS_FOR_TV = 5000;
+    public static final int POLLING_INTERVAL_MS_FOR_PLAYBACK = 60000;
     public static final int TIMEOUT_COUNT = 3;
-    public static final int AVR_COUNT_MAX = 3;
+    private static final int AVR_COUNT_MAX = 3;
 
     // State in which waits for next polling
     private static final int STATE_WAIT_FOR_NEXT_POLLING = 1;
@@ -55,6 +58,8 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     // is detected {@code AVR_COUNT_MAX} times in a row.
     private int mAvrStatusCount = 0;
 
+    private final boolean mIsTvDevice = localDevice().mService.isTvDevice();
+
     /**
      * Constructor
      *
@@ -64,16 +69,21 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         super(source);
     }
 
+    private int getPollingInterval() {
+        return mIsTvDevice ? POLLING_INTERVAL_MS_FOR_TV : POLLING_INTERVAL_MS_FOR_PLAYBACK;
+    }
+
     @Override
     boolean start() {
-        Slog.v(TAG, "Hot-plug dection started.");
+        Slog.v(TAG, "Hot-plug detection started.");
 
         mState = STATE_WAIT_FOR_NEXT_POLLING;
         mTimeoutCount = 0;
 
         // Start timer without polling.
-        // The first check for all devices will be initiated 15 seconds later.
-        addTimer(mState, POLLING_INTERVAL_MS);
+        // The first check for all devices will be initiated 15 seconds later for TV panels and 60
+        // seconds later for playback devices.
+        addTimer(mState, getPollingInterval());
         return true;
     }
 
@@ -90,13 +100,24 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         }
 
         if (mState == STATE_WAIT_FOR_NEXT_POLLING) {
-            mTimeoutCount = (mTimeoutCount + 1) % TIMEOUT_COUNT;
-            pollDevices();
+            if (mIsTvDevice) {
+                mTimeoutCount = (mTimeoutCount + 1) % TIMEOUT_COUNT;
+                if (mTimeoutCount == 0) {
+                    pollAllDevices();
+                } else if (tv().isSystemAudioActivated()) {
+                    pollAudioSystem();
+                }
+                addTimer(mState, POLLING_INTERVAL_MS_FOR_TV);
+                return;
+            }
+            pollAllDevices();
+            addTimer(mState, POLLING_INTERVAL_MS_FOR_PLAYBACK);
         }
     }
 
     /**
-     * Start device polling immediately.
+     * Start device polling immediately. This method is called only by
+     * {@link HdmiCecLocalDeviceTv#onHotplug}.
      */
     void pollAllDevicesNow() {
         // Clear existing timer to avoid overlapped execution
@@ -106,21 +127,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         mState = STATE_WAIT_FOR_NEXT_POLLING;
         pollAllDevices();
 
-        addTimer(mState, POLLING_INTERVAL_MS);
-    }
-
-    // This method is called every 5 seconds.
-    private void pollDevices() {
-        // All device check called every 15 seconds.
-        if (mTimeoutCount == 0) {
-            pollAllDevices();
-        } else {
-            if (tv().isSystemAudioActivated()) {
-                pollAudioSystem();
-            }
-        }
-
-        addTimer(mState, POLLING_INTERVAL_MS);
+        addTimer(mState, getPollingInterval());
     }
 
     private void pollAllDevices() {
@@ -148,15 +155,16 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {
-        BitSet currentInfos = infoListToBitSet(
-                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false), audioOnly);
+        List<HdmiDeviceInfo> deviceInfoList =
+                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false);
+        BitSet currentInfos = infoListToBitSet(deviceInfoList, audioOnly, false);
         BitSet polledResult = addressListToBitSet(ackedAddress);
 
         // At first, check removed devices.
         BitSet removed = complement(currentInfos, polledResult);
         int index = -1;
         while ((index = removed.nextSetBit(index + 1)) != -1) {
-            if (index == Constants.ADDR_AUDIO_SYSTEM) {
+            if (mIsTvDevice && index == Constants.ADDR_AUDIO_SYSTEM) {
                 HdmiDeviceInfo avr = tv().getAvrDeviceInfo();
                 if (avr != null && tv().isConnected(avr.getPortId())) {
                     ++mAvrStatusCount;
@@ -176,7 +184,8 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         }
 
         // Next, check added devices.
-        BitSet added = complement(polledResult, currentInfos);
+        BitSet currentInfosWithPhysicalAddress = infoListToBitSet(deviceInfoList, audioOnly, true);
+        BitSet added = complement(polledResult, currentInfosWithPhysicalAddress);
         index = -1;
         while ((index = added.nextSetBit(index + 1)) != -1) {
             Slog.v(TAG, "Add device by hot-plug detection:" + index);
@@ -184,14 +193,15 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         }
     }
 
-    private static BitSet infoListToBitSet(List<HdmiDeviceInfo> infoList, boolean audioOnly) {
+    private static BitSet infoListToBitSet(
+            List<HdmiDeviceInfo> infoList, boolean audioOnly, boolean requirePhysicalAddress) {
         BitSet set = new BitSet(NUM_OF_ADDRESS);
         for (HdmiDeviceInfo info : infoList) {
-            if (audioOnly) {
-                if (info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-                    set.set(info.getLogicalAddress());
-                }
-            } else {
+            boolean audioOnlyConditionMet = !audioOnly
+                    || (info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+            boolean requirePhysicalAddressConditionMet = !requirePhysicalAddress
+                    || (info.getPhysicalAddress() != HdmiDeviceInfo.PATH_INVALID);
+            if (audioOnlyConditionMet && requirePhysicalAddressConditionMet) {
                 set.set(info.getLogicalAddress());
             }
         }
@@ -221,11 +231,12 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void removeDevice(int removedAddress) {
-        mayChangeRoutingPath(removedAddress);
+        if (mIsTvDevice) {
+            mayChangeRoutingPath(removedAddress);
+            mayCancelOneTouchRecord(removedAddress);
+            mayDisableSystemAudioAndARC(removedAddress);
+        }
         mayCancelDeviceSelect(removedAddress);
-        mayCancelOneTouchRecord(removedAddress);
-        mayDisableSystemAudioAndARC(removedAddress);
-
         localDevice().mService.getHdmiCecNetwork().removeCecDevice(localDevice(), removedAddress);
     }
 
@@ -237,15 +248,19 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void mayCancelDeviceSelect(int address) {
-        List<DeviceSelectAction> actions = getActions(DeviceSelectAction.class);
-        if (actions.isEmpty()) {
-            return;
+        List<DeviceSelectActionFromTv> actionsFromTv = getActions(DeviceSelectActionFromTv.class);
+        for (DeviceSelectActionFromTv action : actionsFromTv) {
+            if (action.getTargetAddress() == address) {
+                removeAction(DeviceSelectActionFromTv.class);
+            }
         }
 
-        // Should have only one Device Select Action
-        DeviceSelectAction action = actions.get(0);
-        if (action.getTargetAddress() == address) {
-            removeAction(DeviceSelectAction.class);
+        List<DeviceSelectActionFromPlayback> actionsFromPlayback = getActions(
+                DeviceSelectActionFromPlayback.class);
+        for (DeviceSelectActionFromPlayback action : actionsFromPlayback) {
+            if (action.getTargetAddress() == address) {
+                removeAction(DeviceSelectActionFromTv.class);
+            }
         }
     }
 

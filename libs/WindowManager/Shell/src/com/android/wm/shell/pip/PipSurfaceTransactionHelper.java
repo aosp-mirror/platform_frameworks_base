@@ -37,6 +37,7 @@ public class PipSurfaceTransactionHelper {
     private final Rect mTmpDestinationRect = new Rect();
 
     private int mCornerRadius;
+    private int mShadowRadius;
 
     /**
      * Called when display size or font size of settings changed
@@ -45,6 +46,7 @@ public class PipSurfaceTransactionHelper {
      */
     public void onDensityOrFontScaleChanged(Context context) {
         mCornerRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        mShadowRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius);
     }
 
     /**
@@ -100,21 +102,33 @@ public class PipSurfaceTransactionHelper {
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
     public PipSurfaceTransactionHelper scaleAndCrop(SurfaceControl.Transaction tx,
-            SurfaceControl leash,
-            Rect sourceBounds, Rect destinationBounds, Rect insets) {
-        mTmpSourceRectF.set(sourceBounds);
+            SurfaceControl leash, Rect sourceRectHint,
+            Rect sourceBounds, Rect destinationBounds, Rect insets,
+            boolean isInPipDirection) {
         mTmpDestinationRect.set(sourceBounds);
+        // Similar to {@link #scale}, we want to position the surface relative to the screen
+        // coordinates so offset the bounds to 0,0
+        mTmpDestinationRect.offsetTo(0, 0);
         mTmpDestinationRect.inset(insets);
         // Scale by the shortest edge and offset such that the top/left of the scaled inset source
         // rect aligns with the top/left of the destination bounds
-        final float scale = sourceBounds.width() <= sourceBounds.height()
-                ? (float) destinationBounds.width() / sourceBounds.width()
-                : (float) destinationBounds.height() / sourceBounds.height();
+        final float scale;
+        if (isInPipDirection
+                && sourceRectHint != null && sourceRectHint.width() < sourceBounds.width()) {
+            // scale by sourceRectHint if it's not edge-to-edge, for entering PiP transition only.
+            scale = sourceBounds.width() <= sourceBounds.height()
+                    ? (float) destinationBounds.width() / sourceRectHint.width()
+                    : (float) destinationBounds.height() / sourceRectHint.height();
+        } else {
+            scale = sourceBounds.width() <= sourceBounds.height()
+                    ? (float) destinationBounds.width() / sourceBounds.width()
+                    : (float) destinationBounds.height() / sourceBounds.height();
+        }
         final float left = destinationBounds.left - insets.left * scale;
         final float top = destinationBounds.top - insets.top * scale;
         mTmpTransform.setScale(scale, scale);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setWindowCrop(leash, mTmpDestinationRect)
+                .setCrop(leash, mTmpDestinationRect)
                 .setPosition(leash, left, top);
         return this;
     }
@@ -138,8 +152,8 @@ public class PipSurfaceTransactionHelper {
         // destination are different.
         final float scale = srcW <= srcH ? (float) destW / srcW : (float) destH / srcH;
         final Rect crop = mTmpDestinationRect;
-        crop.set(0, 0, Transitions.ENABLE_SHELL_TRANSITIONS ? destH
-                : destW, Transitions.ENABLE_SHELL_TRANSITIONS ? destW : destH);
+        crop.set(0, 0, Transitions.SHELL_TRANSITIONS_ROTATION ? destH
+                : destW, Transitions.SHELL_TRANSITIONS_ROTATION ? destW : destH);
         // Inverse scale for crop to fit in screen coordinates.
         crop.scale(1 / scale);
         crop.offset(insets.left, insets.top);
@@ -160,7 +174,7 @@ public class PipSurfaceTransactionHelper {
         mTmpTransform.setScale(scale, scale);
         mTmpTransform.postRotate(degrees);
         mTmpTransform.postTranslate(positionX, positionY);
-        tx.setMatrix(leash, mTmpTransform, mTmpFloat9).setWindowCrop(leash, crop);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9).setCrop(leash, crop);
         return this;
     }
 
@@ -200,14 +214,12 @@ public class PipSurfaceTransactionHelper {
     }
 
     /**
-     * Re-parents the snapshot to the parent's surface control and shows it.
+     * Operates the shadow radius on a given transaction and leash
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper reparentAndShowSurfaceSnapshot(
-            SurfaceControl.Transaction t, SurfaceControl parent, SurfaceControl snapshot) {
-        t.reparent(snapshot, parent);
-        t.setLayer(snapshot, Integer.MAX_VALUE);
-        t.show(snapshot);
-        t.apply();
+    public PipSurfaceTransactionHelper shadow(SurfaceControl.Transaction tx, SurfaceControl leash,
+            boolean applyShadowRadius) {
+        tx.setShadowRadius(leash, applyShadowRadius ? mShadowRadius : 0);
         return this;
     }
 

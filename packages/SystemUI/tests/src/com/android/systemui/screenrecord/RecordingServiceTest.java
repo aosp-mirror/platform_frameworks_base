@@ -104,7 +104,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStartRecording() {
-        Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0);
+        Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false);
         mRecordingService.onStartCommand(startIntent, 0, 0);
 
         verify(mUiEventLogger, times(1)).log(Events.ScreenRecordEvent.SCREEN_RECORD_START);
@@ -137,7 +137,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         // When the screen recording does not start properly
         doThrow(new RuntimeException("fail")).when(mScreenMediaRecorder).start();
 
-        Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0);
+        Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false);
         mRecordingService.onStartCommand(startIntent, 0, 0);
 
         // Then the state is set to not recording

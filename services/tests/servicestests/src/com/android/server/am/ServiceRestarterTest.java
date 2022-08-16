@@ -16,6 +16,10 @@
 
 package com.android.server.am;
 
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +35,9 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.provider.DeviceConfig;
+import android.provider.Settings;
+import android.server.wm.settings.SettingsSession;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
@@ -39,6 +46,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.compatibility.common.util.SystemUtil;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +72,12 @@ public final class ServiceRestarterTest {
             "com.android.servicestests.apps.simpleservicetestapp3";
     private static final String TEST_SERVICE_NAME =
             "com.android.servicestests.apps.simpleservicetestapp.SimpleService";
+    private static final String[] MEMORY_PRESSURE_MAP = {
+            "NORMAL", "MODERATE", "LOW", "CRITICAL"};
+    private static final String EXTRA_DELAY = "0,2000,4000,8000";
+    private static final int SERVICE_RESTART_DURATION_FACTOR = 2;
+    private static final long BOUND_SERVICE_CRASH_RESTART_DURATION = 1000;
+    private static final long SERVICE_MIN_RESTART_TIME_BETWEEN = 1000;
 
     private static final long WAIT_MS = 5 * 1000;
     private static final long WAIT_LONG_MS = 30 * 1000;
@@ -79,6 +93,10 @@ public final class ServiceRestarterTest {
     private static final String ACTION_SERVICE_WITH_DEP_PKG =
             "com.android.servicestests.apps.simpleservicetestapp.ACTION_SERVICE_WITH_DEP_PKG";
     private static final String EXTRA_TARGET_PACKAGE = "target_package";
+
+    private SettingsSession<String> mAMConstantsSettings;
+    private DeviceConfigSession<String> mExtraDelaysDeviceConfig;
+    private DeviceConfigSession<Boolean> mEnableExtraDelaysDeviceConfig;
 
     private Context mContext;
     private Instrumentation mInstrumentation;
@@ -96,6 +114,40 @@ public final class ServiceRestarterTest {
         mTestPackage2Uid = ai.uid;
         ai = mContext.getPackageManager().getApplicationInfo(TEST_PACKAGE3_NAME, 0);
         mTestPackage3Uid = ai.uid;
+        final String activityManagerConstants = Settings.Global.ACTIVITY_MANAGER_CONSTANTS;
+        mAMConstantsSettings = new SettingsSession<>(
+                Settings.Global.getUriFor(activityManagerConstants),
+                Settings.Global::getString, Settings.Global::putString);
+        mAMConstantsSettings.set(
+                ActivityManagerConstants.KEY_SERVICE_RESTART_DURATION_FACTOR + "="
+                + SERVICE_RESTART_DURATION_FACTOR + ","
+                + ActivityManagerConstants.KEY_BOUND_SERVICE_CRASH_RESTART_DURATION + "="
+                + BOUND_SERVICE_CRASH_RESTART_DURATION + ","
+                + ActivityManagerConstants.KEY_SERVICE_MIN_RESTART_TIME_BETWEEN + "="
+                + SERVICE_MIN_RESTART_TIME_BETWEEN);
+        mExtraDelaysDeviceConfig = new DeviceConfigSession<>(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ActivityManagerConstants.KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE,
+                DeviceConfig::getString, null);
+        mExtraDelaysDeviceConfig.set(EXTRA_DELAY);
+        mEnableExtraDelaysDeviceConfig = new DeviceConfigSession<>(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ActivityManagerConstants.KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE,
+                DeviceConfig::getBoolean, false);
+        mEnableExtraDelaysDeviceConfig.set(true);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (mAMConstantsSettings != null) {
+            mAMConstantsSettings.close();
+        }
+        if (mExtraDelaysDeviceConfig != null) {
+            mExtraDelaysDeviceConfig.close();
+        }
+        if (mEnableExtraDelaysDeviceConfig != null) {
+            mEnableExtraDelaysDeviceConfig.close();
+        }
     }
 
     @LargeTest
@@ -124,7 +176,7 @@ public final class ServiceRestarterTest {
             // Test restarts in normal case
             final long[] ts1 = startKillAndRestart(am, ACTION_START | ACTION_KILL | ACTION_WAIT,
                     uid1Listener1, uid1Listener2, uid2Listener1, uid2Listener2,
-                    uid3Listener1, uid3Listener2, Long.MAX_VALUE);
+                    uid3Listener1, uid3Listener2, Long.MAX_VALUE, false);
             assertTrue("app1 restart should be before app2", ts1[1] < ts1[2]);
             assertTrue("app2 restart should be before app3", ts1[2] < ts1[3]);
 
@@ -133,7 +185,7 @@ public final class ServiceRestarterTest {
             // Test restarts again.
             final long[] ts2 = startKillAndRestart(am, ACTION_KILL | ACTION_WAIT | ACTION_STOPPKG,
                     uid1Listener1, uid1Listener2, uid2Listener1,
-                    uid2Listener2, uid3Listener1, uid3Listener2, Long.MAX_VALUE);
+                    uid2Listener2, uid3Listener1, uid3Listener2, Long.MAX_VALUE, false);
             assertTrue("app2 restart should be before app1", ts2[2] < ts2[1]);
             assertTrue("app1 restart should be before app3", ts2[1] < ts2[3]);
             assertTrue("app2 should be restart in a very short moment", ts2[2] - ts2[0] < WAIT_MS);
@@ -142,7 +194,8 @@ public final class ServiceRestarterTest {
             executeShellCmd("am service-restart-backoff enable " + TEST_PACKAGE2_NAME);
             // Test restarts again.
             final long[] ts3 = startKillAndRestart(am, ACTION_ALL, uid1Listener1, uid1Listener2,
-                    uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2, Long.MAX_VALUE);
+                    uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2, Long.MAX_VALUE,
+                    false);
             assertTrue("app1 restart should be before app2", ts3[1] < ts3[2]);
             assertTrue("app2 restart should be before app3", ts3[2] < ts3[3]);
 
@@ -163,11 +216,101 @@ public final class ServiceRestarterTest {
         }
     }
 
+    @LargeTest
+    @Test
+    public void testExtraDelaysInServiceRestartOnLowMem() throws Exception {
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        final MyUidImportanceListener uid1Listener1 = new MyUidImportanceListener(mTestPackage1Uid);
+        final MyUidImportanceListener uid1Listener2 = new MyUidImportanceListener(mTestPackage1Uid);
+        final MyUidImportanceListener uid2Listener1 = new MyUidImportanceListener(mTestPackage2Uid);
+        final MyUidImportanceListener uid2Listener2 = new MyUidImportanceListener(mTestPackage2Uid);
+        final MyUidImportanceListener uid3Listener1 = new MyUidImportanceListener(mTestPackage3Uid);
+        final MyUidImportanceListener uid3Listener2 = new MyUidImportanceListener(mTestPackage3Uid);
+        try {
+            am.addOnUidImportanceListener(uid1Listener1, RunningAppProcessInfo.IMPORTANCE_SERVICE);
+            am.addOnUidImportanceListener(uid1Listener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            am.addOnUidImportanceListener(uid2Listener1, RunningAppProcessInfo.IMPORTANCE_SERVICE);
+            am.addOnUidImportanceListener(uid2Listener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            am.addOnUidImportanceListener(uid3Listener1, RunningAppProcessInfo.IMPORTANCE_SERVICE);
+            am.addOnUidImportanceListener(uid3Listener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            executeShellCmd("cmd deviceidle whitelist +" + TEST_PACKAGE1_NAME);
+            executeShellCmd("cmd deviceidle whitelist +" + TEST_PACKAGE2_NAME);
+            executeShellCmd("cmd deviceidle whitelist +" + TEST_PACKAGE3_NAME);
+
+            // Force the memory pressure to normal.
+            setMemoryPressure(ADJ_MEM_FACTOR_NORMAL);
+
+            // Test restarts in normal condition.
+            final long[] ts1 = startKillAndRestart(am, ACTION_ALL, uid1Listener1, uid1Listener2,
+                    uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2, WAIT_LONG_MS, true);
+
+            // Mimic a memory pressure event.
+            setMemoryPressure(ADJ_MEM_FACTOR_MODERATE);
+
+            final long[] ts2 = startKillAndRestart(am, ACTION_ALL, uid1Listener1, uid1Listener2,
+                    uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2, WAIT_LONG_MS, true);
+
+            assertTrue("Expect extra delays in service restarts",
+                    (ts2[1] - ts2[0]) > (ts1[1] - ts1[0]));
+            assertTrue("Expect extra delays in service restarts",
+                    (ts2[2] - ts2[0]) > (ts1[2] - ts1[0]));
+            assertTrue("Expect extra delays in service restarts",
+                    (ts2[3] - ts2[0]) > (ts1[3] - ts1[0]));
+
+            // Increase the memory pressure event.
+            setMemoryPressure(ADJ_MEM_FACTOR_LOW);
+
+            final long[] ts3 = startKillAndRestart(am, ACTION_ALL, uid1Listener1, uid1Listener2,
+                    uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2, WAIT_LONG_MS, true);
+
+            assertTrue("Expect extra delays in service restarts",
+                    (ts3[1] - ts3[0]) > (ts2[1] - ts2[0]));
+            assertTrue("Expect extra delays in service restarts",
+                    (ts3[2] - ts3[0]) > (ts2[2] - ts2[0]));
+            assertTrue("Expect extra delays in service restarts",
+                    (ts3[3] - ts3[0]) > (ts2[3] - ts2[0]));
+
+            // Start and kill them again, but don't wait for the restart.
+            final long now4 = startKillAndRestart(am, ACTION_START | ACTION_KILL, uid1Listener1,
+                    uid1Listener2, uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2,
+                    WAIT_LONG_MS, true)[0];
+
+            // Set the memory pressure to normal.
+            setMemoryPressure(ADJ_MEM_FACTOR_NORMAL);
+
+            // Now wait for the restarts.
+            final long[] ts4 = startKillAndRestart(am, ACTION_WAIT | ACTION_STOPPKG, uid1Listener1,
+                    uid1Listener2, uid2Listener1, uid2Listener2, uid3Listener1, uid3Listener2,
+                    WAIT_LONG_MS, true);
+
+            assertTrue("Expect less delays in service restarts",
+                    (ts4[1] - now4) < (ts2[1] - ts2[0]));
+            assertTrue("Expect less delays in service restarts",
+                    (ts4[2] - now4) < (ts2[2] - ts2[0]));
+            assertTrue("Expect less delays in service restarts",
+                    (ts4[3] - now4) < (ts2[3] - ts2[0]));
+        } finally {
+            executeShellCmd("cmd deviceidle whitelist -" + TEST_PACKAGE1_NAME);
+            executeShellCmd("cmd deviceidle whitelist -" + TEST_PACKAGE2_NAME);
+            executeShellCmd("cmd deviceidle whitelist -" + TEST_PACKAGE3_NAME);
+            resetMemoryPressure();
+            am.removeOnUidImportanceListener(uid1Listener1);
+            am.removeOnUidImportanceListener(uid1Listener2);
+            am.removeOnUidImportanceListener(uid2Listener1);
+            am.removeOnUidImportanceListener(uid2Listener2);
+            am.removeOnUidImportanceListener(uid3Listener1);
+            am.removeOnUidImportanceListener(uid3Listener2);
+            am.forceStopPackage(TEST_PACKAGE1_NAME);
+            am.forceStopPackage(TEST_PACKAGE2_NAME);
+            am.forceStopPackage(TEST_PACKAGE3_NAME);
+        }
+    }
+
     private long[] startKillAndRestart(ActivityManager am, int action,
             MyUidImportanceListener uid1Listener1, MyUidImportanceListener uid1Listener2,
             MyUidImportanceListener uid2Listener1, MyUidImportanceListener uid2Listener2,
             MyUidImportanceListener uid3Listener1, MyUidImportanceListener uid3Listener2,
-            long waitDuration) throws Exception {
+            long waitDuration, boolean checkStartSeq) throws Exception {
         final long[] res = new long[4];
         // Test restarts in normal condition.
         if ((action & ACTION_START) != 0) {
@@ -190,9 +333,15 @@ public final class ServiceRestarterTest {
                     RunningAppProcessInfo.IMPORTANCE_SERVICE, waitDuration));
             assertTrue("Timed out to restart " + TEST_PACKAGE3_NAME, uid3Listener1.waitFor(
                     RunningAppProcessInfo.IMPORTANCE_SERVICE, waitDuration));
-            res[1] = uid1Listener1.mCurrentTimestamp;
-            res[2] = uid2Listener1.mCurrentTimestamp;
-            res[3] = uid3Listener1.mCurrentTimestamp;
+            final long uid1RestartTime = res[1] = uid1Listener1.mCurrentTimestamp;
+            final long uid2RestartTime = res[2] = uid2Listener1.mCurrentTimestamp;
+            final long uid3RestartTime = res[3] = uid3Listener1.mCurrentTimestamp;
+            if (checkStartSeq) {
+                assertTrue(TEST_PACKAGE1_NAME + " should restart before " + TEST_PACKAGE2_NAME,
+                        uid1RestartTime <= uid2RestartTime);
+                assertTrue(TEST_PACKAGE2_NAME + " should restart before " + TEST_PACKAGE3_NAME,
+                        uid2RestartTime <= uid3RestartTime);
+            }
         }
 
         if ((action & ACTION_STOPPKG) != 0) {
@@ -310,6 +459,14 @@ public final class ServiceRestarterTest {
         final String result = SystemUtil.runShellCommand(mInstrumentation, cmd);
         Log.d(TAG, String.format("Output for '%s': %s", cmd, result));
         return result;
+    }
+
+    private void setMemoryPressure(int pressure) throws Exception {
+        executeShellCmd("am memory-factor set " + MEMORY_PRESSURE_MAP[pressure]);
+    }
+
+    private void resetMemoryPressure() throws Exception {
+        executeShellCmd("am memory-factor reset");
     }
 
     private static class MyUidImportanceListener implements OnUidImportanceListener {

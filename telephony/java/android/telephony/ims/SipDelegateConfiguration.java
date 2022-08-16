@@ -573,7 +573,7 @@ public final class SipDelegateConfiguration implements Parcelable {
         mPrivateUserIdentifier = source.readString();
         mHomeDomain = source.readString();
         mImei = source.readString();
-        mGruu = source.readParcelable(null);
+        mGruu = source.readParcelable(null, android.net.Uri.class);
         mSipAuthHeader = source.readString();
         mSipAuthNonce = source.readString();
         mServiceRouteHeader = source.readString();

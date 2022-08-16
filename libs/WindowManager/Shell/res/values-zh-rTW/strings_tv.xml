@@ -19,6 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"子母畫面"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(無標題的節目)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"關閉子母畫面"</string>
+    <string name="pip_close" msgid="2955969519031223530">"關閉"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"全螢幕"</string>
+    <string name="pip_move" msgid="158770205886688553">"移動"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"展開"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"收合"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" 按兩下"<annotation icon="home_icon">"主畫面按鈕"</annotation>"即可顯示控制選項"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"子母畫面選單。"</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"向左移動"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"向右移動"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"向上移動"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"向下移動"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"完成"</string>
 </resources>

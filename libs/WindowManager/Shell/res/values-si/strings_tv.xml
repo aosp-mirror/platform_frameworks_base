@@ -19,6 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"පින්තූරය-තුළ-පින්තූරය"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(මාතෘකාවක් නැති වැඩසටහන)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"PIP වසන්න"</string>
+    <string name="pip_close" msgid="2955969519031223530">"වසන්න"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"සම්පූර්ණ තිරය"</string>
+    <string name="pip_move" msgid="158770205886688553">"ගෙන යන්න"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"දිග හරින්න"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"හකුළන්න"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" පාලන සඳහා "<annotation icon="home_icon">" මුල් පිටුව "</annotation>" දෙවරක් ඔබන්න"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"පින්තූරය තුළ පින්තූරය මෙනුව"</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"වමට ගෙන යන්න"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"දකුණට ගෙන යන්න"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"ඉහළට ගෙන යන්න"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"පහළට ගෙන යන්න"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"නිමයි"</string>
 </resources>

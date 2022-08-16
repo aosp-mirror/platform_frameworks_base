@@ -16,9 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -38,6 +36,7 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_P
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -63,6 +62,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
+import android.view.WindowManager.LayoutParams;
 import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
@@ -117,8 +117,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_RECENTS,
                 mFinishedCallback);
 
-        // Remove the app window so that the animation target can not be created
-        activity.removeImmediately();
+        // The activity doesn't contain window so the animation target cannot be created.
         mController.startAnimation();
 
         // Verify that the finish callback to reparent the leash is called
@@ -162,6 +161,30 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
         assertTrue(mController.isAnimatingTask(activity.getTask()));
         assertFalse(mController.isAnimatingTask(hiddenActivity.getTask()));
+    }
+
+    @Test
+    public void testLaunchAndStartRecents_expectTargetAndVisible() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityRecord homeActivity = createHomeActivity();
+        final Task task = createTask(mDefaultDisplay);
+        // Emulate that activity1 has just launched activity2, but app transition has not yet been
+        // executed.
+        final ActivityRecord activity1 = createActivityRecord(task);
+        activity1.setVisible(true);
+        activity1.mVisibleRequested = false;
+        activity1.addWindow(createWindowState(new LayoutParams(TYPE_BASE_APPLICATION), activity1));
+
+        final ActivityRecord activity2 = createActivityRecord(task);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = true;
+
+        mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
+                mDefaultDisplay.getRotation());
+        initializeRecentsAnimationController(mController, homeActivity);
+        mController.startAnimation();
+        verify(mMockRunner, never()).onAnimationCanceled(null /* taskIds */,
+                null /* taskSnapshots */);
     }
 
     @Test
@@ -444,16 +467,26 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     public void testCheckRotationAfterCleanup() {
         mWm.setRecentsAnimationController(mController);
         spyOn(mDisplayContent.mFixedRotationTransitionListener);
-        doReturn(true).when(mDisplayContent.mFixedRotationTransitionListener)
-                .isTopFixedOrientationRecentsAnimating();
+        final ActivityRecord recents = mock(ActivityRecord.class);
+        recents.mOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        doReturn(ORIENTATION_PORTRAIT).when(recents)
+                .getRequestedConfigurationOrientation(anyBoolean());
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recents);
+
         // Rotation update is skipped while the recents animation is running.
-        assertFalse(mDisplayContent.getDisplayRotation().updateOrientation(DisplayContentTests
-                .getRotatedOrientation(mDefaultDisplay), false /* forceUpdate */));
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        final int topOrientation = DisplayContentTests.getRotatedOrientation(mDefaultDisplay);
+        assertFalse(displayRotation.updateOrientation(topOrientation, false /* forceUpdate */));
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSET, displayRotation.getLastOrientation());
         final int prevRotation = mDisplayContent.getRotation();
         mWm.cleanupRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
-        waitHandlerIdle(mWm.mH);
+
+        // In real case, it is called from RecentsAnimation#finishAnimation -> continueWindowLayout
+        // -> handleAppTransitionReady -> add FINISH_LAYOUT_REDO_CONFIG, and DisplayContent#
+        // applySurfaceChangesTransaction will call updateOrientation for FINISH_LAYOUT_REDO_CONFIG.
+        assertTrue(displayRotation.updateOrientation(topOrientation, false  /* forceUpdate */));
         // The display should be updated to the changed orientation after the animation is finished.
-        assertNotEquals(mDisplayContent.getRotation(), prevRotation);
+        assertNotEquals(displayRotation.getRotation(), prevRotation);
     }
 
     @Test
@@ -563,6 +596,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         assertFalse(mController.isNavigationBarAttachedToApp());
+        assertTrue(navToken.isAnimating(ANIMATION_TYPE_TOKEN_TRANSFORM));
     }
 
     @Test
@@ -590,6 +624,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         assertFalse(mController.isNavigationBarAttachedToApp());
+        assertFalse(navToken.isAnimating(ANIMATION_TYPE_TOKEN_TRANSFORM));
     }
 
     @Test
@@ -617,14 +652,15 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         assertFalse(mController.isNavigationBarAttachedToApp());
+        assertTrue(navToken.isAnimating(ANIMATION_TYPE_TOKEN_TRANSFORM));
     }
 
     @Test
     public void testNotAttachNavigationBar_controlledByFadeRotationAnimation() {
         setupForShouldAttachNavBarDuringTransition();
-        FadeRotationAnimationController mockController =
-                mock(FadeRotationAnimationController.class);
-        doReturn(mockController).when(mDefaultDisplay).getFadeRotationAnimationController();
+        AsyncRotationController mockController =
+                mock(AsyncRotationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getAsyncRotationController();
         final ActivityRecord homeActivity = createHomeActivity();
         initializeRecentsAnimationController(mController, homeActivity);
         assertFalse(mController.isNavigationBarAttachedToApp());
@@ -633,10 +669,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testAttachNavBarInSplitScreenMode() {
         setupForShouldAttachNavBarDuringTransition();
-        final ActivityRecord primary = createActivityRecordWithParentTask(mDefaultDisplay,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord secondary = createActivityRecordWithParentTask(mDefaultDisplay,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD);
+        TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm);
+        final ActivityRecord primary = createActivityRecordWithParentTask(
+                organizer.createTaskToPrimary(true));
+        final ActivityRecord secondary = createActivityRecordWithParentTask(
+                organizer.createTaskToSecondary(true));
         final ActivityRecord homeActivity = createHomeActivity();
         homeActivity.setVisibility(true);
         initializeRecentsAnimationController(mController, homeActivity);

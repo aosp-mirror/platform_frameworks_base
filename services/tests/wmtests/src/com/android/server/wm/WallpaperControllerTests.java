@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -54,7 +55,6 @@ import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.ITransitionPlayer;
 
 import androidx.test.filters.SmallTest;
 
@@ -117,6 +117,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         WindowManager.LayoutParams attrs = wallpaperWindow.getAttrs();
         Rect bounds = dc.getBounds();
+        int displayWidth = dc.getBounds().width();
         int displayHeight = dc.getBounds().height();
 
         // Use a wallpaper with a different ratio than the display
@@ -124,20 +125,18 @@ public class WallpaperControllerTests extends WindowTestsBase {
         int wallpaperHeight = (int) (bounds.height() * 1.10);
 
         // Simulate what would be done on the client's side
-        attrs.width = wallpaperWidth;
-        attrs.height = wallpaperHeight;
-        attrs.flags |= FLAG_LAYOUT_NO_LIMITS;
+        final float layoutScale = Math.max(
+                displayWidth / (float) wallpaperWidth, displayHeight / (float) wallpaperHeight);
+        attrs.width = (int) (wallpaperWidth * layoutScale + .5f);
+        attrs.height = (int) (wallpaperHeight * layoutScale + .5f);
+        attrs.flags |= FLAG_LAYOUT_NO_LIMITS | FLAG_SCALED;
         attrs.gravity = Gravity.TOP | Gravity.LEFT;
         wallpaperWindow.getWindowFrames().mParentFrame.set(dc.getBounds());
 
-        // Calling layoutWindowLw a first time, so adjustWindowParams gets the correct data
-        dc.getDisplayPolicy().layoutWindowLw(wallpaperWindow, null, dc.mDisplayFrames);
-
-        wallpaperWindowToken.adjustWindowParams(wallpaperWindow, attrs);
         dc.getDisplayPolicy().layoutWindowLw(wallpaperWindow, null, dc.mDisplayFrames);
 
         assertEquals(Configuration.ORIENTATION_PORTRAIT, dc.getConfiguration().orientation);
-        int expectedWidth = (int) (wallpaperWidth * (displayHeight / (double) wallpaperHeight));
+        int expectedWidth = (int) (wallpaperWidth * layoutScale + .5f);
 
         // Check that the wallpaper is correctly scaled
         assertEquals(expectedWidth, wallpaperWindow.getFrame().width());
@@ -313,11 +312,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         wallpaperWindow.setHasSurface(true);
 
         // Set-up mock shell transitions
-        final IBinder mockBinder = mock(IBinder.class);
-        final ITransitionPlayer mockPlayer = mock(ITransitionPlayer.class);
-        doReturn(mockBinder).when(mockPlayer).asBinder();
-        mWm.mAtmService.getTransitionController().registerTransitionPlayer(mockPlayer,
-                null /* appThread */);
+        registerTestTransitionPlayer();
 
         Transition transit =
                 mWm.mAtmService.getTransitionController().createTransition(TRANSIT_OPEN);
@@ -338,10 +333,21 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertFalse(token.isVisibleRequested());
         assertTrue(token.isVisible());
 
-        transit.onTransactionReady(transit.getSyncId(), mock(SurfaceControl.Transaction.class));
-        transit.finishTransition();
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        token.finishSync(t, false /* cancel */);
+        transit.onTransactionReady(transit.getSyncId(), t);
+        dc.mTransitionController.finishTransition(transit);
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
+
+        // Assume wallpaper was visible. When transaction is ready without wallpaper target,
+        // wallpaper should be requested to be invisible.
+        token.setVisibility(true);
+        transit = dc.mTransitionController.createTransition(TRANSIT_CLOSE);
+        dc.mTransitionController.collect(token);
+        transit.onTransactionReady(transit.getSyncId(), t);
+        assertFalse(token.isVisibleRequested());
+        assertTrue(token.isVisible());
     }
 
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {

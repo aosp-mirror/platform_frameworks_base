@@ -63,6 +63,32 @@
       ]
     }
   ],
+  "presubmit-large": [
+    {
+      "name": "CtsUsageStatsTestCases",
+      "file_patterns": [
+        "ActivityManagerService\\.java",
+        "BroadcastQueue\\.java"
+      ],
+      "options": [
+        {
+          "include-filter": "android.app.usage.cts.BroadcastResponseStatsTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.MediumTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
+    }
+  ],
   "postsubmit": [
     {
       "name": "FrameworksServicesTests",

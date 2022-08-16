@@ -43,6 +43,9 @@ per-file android_os_HwParcel* = file:platform/system/libhwbinder:/OWNERS
 per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
 per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
 
+# Sensor
+per-file android_hardware_SensorManager* = arthuri@google.com, bduddie@google.com, stange@google.com
+
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file core_jni_helpers.* = file:/ZYGOTE_OWNERS
 per-file fd_utils.* = file:/ZYGOTE_OWNERS

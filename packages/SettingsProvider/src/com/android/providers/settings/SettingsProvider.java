@@ -86,6 +86,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -136,7 +137,6 @@ import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
 
 /**
  * <p>
@@ -288,6 +288,12 @@ public class SettingsProvider extends ContentProvider {
     static final Set<String> sGlobalMovedToSecureSettings = new ArraySet<>();
     static {
         Settings.Global.getMovedToSecureSettings(sGlobalMovedToSecureSettings);
+    }
+
+    // Per all users global settings that moved to the per user system settings.
+    static final Set<String> sGlobalMovedToSystemSettings = new ArraySet<>();
+    static {
+        Settings.Global.getMovedToSystemSettings(sGlobalMovedToSystemSettings);
     }
 
     // Per user secure settings that are cloned for the managed profiles of the user.
@@ -472,16 +478,16 @@ public class SettingsProvider extends ContentProvider {
                 return result;
             }
 
-            case Settings.CALL_METHOD_SET_SYNC_DISABLED_CONFIG: {
+            case Settings.CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG: {
                 final int mode = getSyncDisabledMode(args);
-                setSyncDisabledConfig(mode);
+                setSyncDisabledModeConfig(mode);
                 break;
             }
 
-            case Settings.CALL_METHOD_IS_SYNC_DISABLED_CONFIG: {
+            case Settings.CALL_METHOD_GET_SYNC_DISABLED_MODE_CONFIG: {
                 Bundle result = new Bundle();
-                result.putBoolean(Settings.KEY_CONFIG_IS_SYNC_DISABLED_RETURN,
-                        isSyncDisabledConfig());
+                result.putInt(Settings.KEY_CONFIG_GET_SYNC_DISABLED_MODE_RETURN,
+                        getSyncDisabledModeConfig());
                 return result;
             }
 
@@ -812,6 +818,13 @@ public class SettingsProvider extends ContentProvider {
             getContext().enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS,
                     "Access files from the settings of another user");
         }
+        final String callingPackage = getCallingPackage();
+        if (mode.contains("w") && !Settings.checkAndNoteWriteSettingsOperation(getContext(),
+                Binder.getCallingUid(), callingPackage, getCallingAttributionTag(),
+                true /* throwException */)) {
+            Slog.e(LOG_TAG, "Package: " + callingPackage + " is not allowed to modify "
+                    + "system settings files.");
+        }
         uri = ContentProvider.getUriWithoutUserId(uri);
 
         final String cacheRingtoneSetting;
@@ -918,9 +931,10 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    @SuppressWarnings("GuardedBy")
     private void dumpSettingsLocked(SettingsState settingsState, PrintWriter pw) {
         List<String> names = settingsState.getSettingNamesLocked();
-
+        pw.println("version: " + settingsState.getVersionLocked());
         final int nameCount = names.size();
 
         for (int i = 0; i < nameCount; i++) {
@@ -1149,7 +1163,7 @@ public class SettingsProvider extends ContentProvider {
         final String callingPackage = resolveCallingPackage();
 
         synchronized (mLock) {
-            if (isSyncDisabledConfigLocked()) {
+            if (getSyncDisabledModeConfigLocked() != SYNC_DISABLED_MODE_NONE) {
                 return SET_ALL_RESULT_DISABLED;
             }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
@@ -1159,32 +1173,32 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void setSyncDisabledConfig(@SyncDisabledMode int syncDisabledMode) {
+    private void setSyncDisabledModeConfig(@SyncDisabledMode int syncDisabledMode) {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "setSyncDisabledConfig(" + syncDisabledMode + ")");
+            Slog.v(LOG_TAG, "setSyncDisabledModeConfig(" + syncDisabledMode + ")");
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            setSyncDisabledConfigLocked(syncDisabledMode);
+            setSyncDisabledModeConfigLocked(syncDisabledMode);
         }
     }
 
-    private boolean isSyncDisabledConfig() {
+    private int getSyncDisabledModeConfig() {
         if (DEBUG) {
-            Slog.v(LOG_TAG, "isSyncDisabledConfig");
+            Slog.v(LOG_TAG, "getSyncDisabledModeConfig");
         }
 
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            return isSyncDisabledConfigLocked();
+            return getSyncDisabledModeConfigLocked();
         }
     }
 
     @GuardedBy("mLock")
-    private void setSyncDisabledConfigLocked(@SyncDisabledMode int syncDisabledMode) {
+    private void setSyncDisabledModeConfigLocked(@SyncDisabledMode int syncDisabledMode) {
         boolean persistentValue;
         boolean inMemoryValue;
         if (syncDisabledMode == SYNC_DISABLED_MODE_NONE) {
@@ -1216,13 +1230,13 @@ public class SettingsProvider extends ContentProvider {
     }
 
     @GuardedBy("mLock")
-    private boolean isSyncDisabledConfigLocked() {
+    private int getSyncDisabledModeConfigLocked() {
         // Check the values used for both SYNC_DISABLED_MODE_PERSISTENT and
         // SYNC_DISABLED_MODE_UNTIL_REBOOT.
 
         // The SYNC_DISABLED_MODE_UNTIL_REBOOT value is cheap to check first.
         if (mSyncConfigDisabledUntilReboot) {
-            return true;
+            return SYNC_DISABLED_MODE_UNTIL_REBOOT;
         }
 
         // Now check the global setting used to implement SYNC_DISABLED_MODE_PERSISTENT.
@@ -1232,10 +1246,12 @@ public class SettingsProvider extends ContentProvider {
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
                     Global.DEVICE_CONFIG_SYNC_DISABLED);
             if (settingLocked == null) {
-                return false;
+                return SYNC_DISABLED_MODE_NONE;
             }
             String settingValue = settingLocked.getValue();
-            return settingValue != null && !"0".equals(settingValue);
+            boolean isSyncDisabledPersistent = settingValue != null && !"0".equals(settingValue);
+            return isSyncDisabledPersistent
+                    ? SYNC_DISABLED_MODE_PERSISTENT : SYNC_DISABLED_MODE_NONE;
         } finally {
             restoreCallingIdentity(callingIdentity);
         }
@@ -1874,6 +1890,8 @@ public class SettingsProvider extends ContentProvider {
             if (!Settings.checkAndNoteWriteSettingsOperation(getContext(),
                     Binder.getCallingUid(), callingPackage, getCallingAttributionTag(),
                     true)) {
+                Slog.e(LOG_TAG, "Calling package: " + callingPackage + " is not allowed to "
+                        + "write system settings: " + name);
                 return false;
             }
         }
@@ -1882,6 +1900,8 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
 
         if (isSettingRestrictedForUser(name, callingUserId, value, Binder.getCallingUid())) {
+            Slog.e(LOG_TAG, "UserId: " + callingUserId + " is disallowed to change system "
+                    + "setting: " + name);
             return false;
         }
 
@@ -1893,6 +1913,8 @@ public class SettingsProvider extends ContentProvider {
 
         // Only the owning user id can change the setting.
         if (owningUserId != callingUserId) {
+            Slog.e(LOG_TAG, "UserId: " + callingUserId + " is not the owning userId: "
+                    + owningUserId);
             return false;
         }
 
@@ -1933,7 +1955,7 @@ public class SettingsProvider extends ContentProvider {
                             false, null);
                 }
             }
-
+            Slog.e(LOG_TAG, "Unknown operation code: " + operation);
             return false;
         }
     }
@@ -2614,6 +2636,10 @@ public class SettingsProvider extends ContentProvider {
 
                 if (sGlobalMovedToSecureSettings.contains(name)) {
                     table = TABLE_SECURE;
+                }
+
+                if (sGlobalMovedToSystemSettings.contains(name)) {
+                    table = TABLE_SYSTEM;
                 }
             }
 
@@ -3605,7 +3631,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 205;
+            private static final int SETTINGS_VERSION = 210;
 
             private final int mUserId;
 
@@ -4622,18 +4648,7 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 174) {
                     // Version 174: Set the default value for Global Settings: APPLY_RAMPING_RINGER
-
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-
-                    Setting currentRampingRingerSetting = globalSettings.getSettingLocked(
-                            Settings.Global.APPLY_RAMPING_RINGER);
-                    if (currentRampingRingerSetting.isNull()) {
-                        globalSettings.insertSettingOverrideableByRestoreLocked(
-                                Settings.Global.APPLY_RAMPING_RINGER,
-                                getContext().getResources().getBoolean(
-                                        R.bool.def_apply_ramping_ringer) ? "1" : "0", null,
-                                true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
+                    // Removed. Moved APPLY_RAMPING_RINGER to System Settings, set in version 206.
 
                     currentVersion = 175;
                 }
@@ -4958,16 +4973,7 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 190) {
                     // Version 190: get HDMI auto device off from overlay
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final Setting currentSetting = globalSettings.getSettingLocked(
-                            Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED);
-                    if (currentSetting.isNull()) {
-                        globalSettings.insertSettingLocked(
-                                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                                getContext().getResources().getBoolean(
-                                        R.bool.def_hdmiControlAutoDeviceOff) ? "1" : "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
+                    // HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED settings option was removed
                     currentVersion = 191;
                 }
 
@@ -5210,6 +5216,188 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 203) {
+                    // Version 203: initialize entries migrated from wear settings provide.
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.HAS_PAY_TOKENS, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, 6);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.HOTWORD_DETECTION_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_hotwordDetectionEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SMART_REPLIES_ENABLED, false);
+                    Setting locationMode =
+                            getSecureSettingsLocked(userId).getSettingLocked(Secure.LOCATION_MODE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
+                            !locationMode.isNull()
+                                    && !Integer.toString(Secure.LOCATION_MODE_OFF)
+                                            .equals(locationMode.getValue()));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.RETAIL_MODE, Global.Wearable.RETAIL_MODE_CONSUMER);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
+                            Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.BUG_REPORT,
+                            "user".equals(Build.TYPE) // is user build?
+                                    ? Global.Wearable.BUG_REPORT_DISABLED
+                                    : Global.Wearable.BUG_REPORT_ENABLED);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SMART_ILLUMINATE_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_smartIlluminateEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CLOCKWORK_AUTO_TIME,
+                            Global.Wearable.SYNC_TIME_FROM_PHONE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
+                            Global.Wearable.SYNC_TIME_ZONE_FROM_PHONE);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CLOCKWORK_24HR_TIME, false);
+                    initGlobalSettingsDefaultValForWearLocked(Global.Wearable.AUTO_WIFI, true);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.WIFI_POWER_SAVE,
+                            getContext()
+                                    .getResources()
+                                    .getInteger(
+                                            R.integer
+                                                    .def_wearable_offChargerWifiUsageLimitMinutes));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS, 0L);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SETUP_SKIPPED, Global.Wearable.SETUP_SKIPPED_UNKNOWN);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.LAST_CALL_FORWARD_ACTION,
+                            Global.Wearable.CALL_FORWARD_NO_LAST_ACTION);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_muteWhenOffBodyEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.WEAR_OS_VERSION_STRING, "");
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.CORNER_ROUNDNESS,
+                            getContext()
+                                    .getResources()
+                                    .getInteger(
+                                            R.integer.def_wearable_squareScreenCornerRoundness));
+                    initGlobalSettingsDefaultValForWearLocked(Global.Wearable.BUTTON_SET, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SIDE_BUTTON,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_sideButtonPresent));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.ANDROID_WEAR_VERSION,
+                            Long.parseLong(
+                                    getContext()
+                                            .getResources()
+                                            .getString(R.string.def_wearable_androidWearVersion)));
+                    final int editionGlobal = 1;
+                    final int editionLocal = 2;
+                    boolean isLe = getContext().getPackageManager().hasSystemFeature("cn.google");
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SYSTEM_EDITION, isLe ? editionLocal : editionGlobal);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.SYSTEM_CAPABILITIES, getWearSystemCapabilities(isLe));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
+                            SystemProperties.getInt("ro.cw_build.platform_mr", 0));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_mobileSignalDetectorAllowed));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_ENABLED,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_ambientEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_TILT_TO_WAKE,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_tiltToWakeEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_touchToWakeEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(R.bool.def_wearable_tiltToBrightEnabled));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Global.Wearable.DECOMPOSABLE_WATCHFACE, false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
+                            SystemProperties.getBoolean("ro.ambient.force_when_docked", false));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
+                            SystemProperties.getBoolean("ro.ambient.low_bit_enabled", false));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                            SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                            Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
+                            Settings.Global.Wearable.HFP_CLIENT_UNSET);
+                    Setting disabledProfileSetting =
+                            getGlobalSettingsLocked()
+                                    .getSettingLocked(Settings.Global.BLUETOOTH_DISABLED_PROFILES);
+                    final long disabledProfileSettingValue =
+                            disabledProfileSetting.isNull()
+                                    ? 0
+                                    : Long.parseLong(disabledProfileSetting.getValue());
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.COMPANION_OS_VERSION,
+                            Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);
+                    final boolean defaultBurnInProtectionEnabled =
+                            getContext()
+                                    .getResources()
+                                    .getBoolean(
+                                            com.android
+                                                    .internal
+                                                    .R
+                                                    .bool
+                                                    .config_enableBurnInProtection);
+                    final boolean forceBurnInProtection =
+                            SystemProperties.getBoolean("persist.debug.force_burn_in", false);
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
+                            defaultBurnInProtectionEnabled || forceBurnInProtection);
+
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.CLOCKWORK_SYSUI_PACKAGE,
+                            getContext()
+                                    .getResources()
+                                    .getString(
+                                            com.android.internal.R.string.config_wearSysUiPackage));
+                    initGlobalSettingsDefaultValForWearLocked(
+                            Settings.Global.Wearable.CLOCKWORK_SYSUI_MAIN_ACTIVITY,
+                            getContext()
+                                    .getResources()
+                                    .getString(
+                                            com.android
+                                                    .internal
+                                                    .R
+                                                    .string
+                                                    .config_wearSysUiMainActivity));
+
+                    currentVersion = 204;
+                }
+
+                if (currentVersion == 204) {
                     // Version 204: Replace 'wifi' or 'cell' tiles with 'internet' if existed.
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
                     final Setting currentValue = secureSettings.getSettingLocked(Secure.QS_TILES);
@@ -5244,11 +5432,56 @@ public class SettingsProvider extends ContentProvider {
                                 true /* makeDefault */,
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
-                    currentVersion = 204;
+                    currentVersion = 205;
                 }
 
-                if (currentVersion == 204) {
-                    // Version 204: Reset the
+                if (currentVersion == 205) {
+                    // Version 205: Set the default value for QR Code Scanner Setting:
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting showQRCodeScannerOnLockScreen = secureSettings.getSettingLocked(
+                            Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER);
+                    if (showQRCodeScannerOnLockScreen.isNull()) {
+                        final boolean defLockScreenShowQrCodeScanner = getContext().getResources()
+                                .getBoolean(R.bool.def_lock_screen_show_qr_code_scanner);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
+                                defLockScreenShowQrCodeScanner ? "1" : "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 206;
+                }
+
+                if (currentVersion == 206) {
+                    // Version 206: APPLY_RAMPING_RINGER moved to System settings. Use the old value
+                    // for the newly inserted system setting and keep it to be restored to other
+                    // users. Set default value if global value is not set.
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    Setting globalValue = getGlobalSettingsLocked()
+                            .getSettingLocked(Global.APPLY_RAMPING_RINGER);
+                    Setting currentValue = systemSettings
+                            .getSettingLocked(Settings.System.APPLY_RAMPING_RINGER);
+                    if (currentValue.isNull()) {
+                        if (!globalValue.isNull()) {
+                            // Recover settings from Global.
+                            systemSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.System.APPLY_RAMPING_RINGER, globalValue.getValue(),
+                                    globalValue.getTag(), globalValue.isDefaultFromSystem(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        } else {
+                            // Set default value.
+                            systemSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.System.APPLY_RAMPING_RINGER,
+                                    getContext().getResources().getBoolean(
+                                            R.bool.def_apply_ramping_ringer) ? "1" : "0",
+                                    null /* tag */, true /* makeDefault */,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 207;
+                }
+
+                if (currentVersion == 207) {
+                    // Version 207: Reset the
                     // Secure#ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT as enabled
                     // status for showing the tooltips.
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
@@ -5268,7 +5501,16 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
 
-                    currentVersion = 205;
+                    currentVersion = 208;
+                }
+
+                if (currentVersion == 208) {
+                    // Unused
+                    currentVersion = 209;
+                }
+                if (currentVersion == 209) {
+                    // removed now that feature is enabled for everyone
+                    currentVersion = 210;
                 }
 
                 // vXXX: Add new settings above this point.
@@ -5286,6 +5528,58 @@ public class SettingsProvider extends ContentProvider {
 
                 // Return the current version.
                 return currentVersion;
+            }
+
+            private void initGlobalSettingsDefaultValForWearLocked(String key, boolean val) {
+                initGlobalSettingsDefaultValForWearLocked(key, val ? "1" : "0");
+            }
+
+            private void initGlobalSettingsDefaultValForWearLocked(String key, int val) {
+                initGlobalSettingsDefaultValForWearLocked(key, String.valueOf(val));
+            }
+
+            private void initGlobalSettingsDefaultValForWearLocked(String key, long val) {
+                initGlobalSettingsDefaultValForWearLocked(key, String.valueOf(val));
+            }
+
+            private void initGlobalSettingsDefaultValForWearLocked(String key, String val) {
+                final SettingsState globalSettings = getGlobalSettingsLocked();
+                Setting currentSetting = globalSettings.getSettingLocked(key);
+                if (currentSetting.isNull()) {
+                    globalSettings.insertSettingOverrideableByRestoreLocked(
+                            key,
+                            val,
+                            null /* tag */,
+                            true /* makeDefault */,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                }
+            }
+
+            private long getWearSystemCapabilities(boolean isLe) {
+                // Capability constants are imported from
+                // com.google.android.clockwork.common.system.WearableConstants.
+                final int capabilityCompanionLegacyCalling = 5;
+                final int capabilitySpeaker = 6;
+                final int capabilitySetupProtocommChannel = 7;
+                long capabilities =
+                        Long.parseLong(
+                                getContext().getResources()
+                                .getString(
+                                        isLe ? R.string.def_wearable_leSystemCapabilities
+                                                : R.string.def_wearable_systemCapabilities));
+                PackageManager pm = getContext().getPackageManager();
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                    capabilities |= getBitMask(capabilityCompanionLegacyCalling);
+                }
+                if (pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)) {
+                    capabilities |= getBitMask(capabilitySpeaker);
+                }
+                capabilities |= getBitMask(capabilitySetupProtocommChannel);
+                return capabilities;
+            }
+
+            private long getBitMask(int capability) {
+                return 1 << (capability - 1);
             }
         }
 

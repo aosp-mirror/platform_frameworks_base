@@ -15,6 +15,7 @@
  */
 package com.android.internal.policy;
 
+import android.content.Intent;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
@@ -113,7 +114,20 @@ oneway interface IKeyguardService {
 
     /**
      * Notifies the Keyguard that the power key was pressed while locked and launched Home rather
-     * than putting the device to sleep or waking up.
+     * than putting the device to sleep or waking up. Note that it's called only if the device is
+     * interactive.
      */
     void onShortPowerPressedGoHome();
+
+    /**
+     * Notifies the Keyguard that it needs to bring up a bouncer and then launch the intent as soon
+     * as user unlocks the watch.
+     */
+    void dismissKeyguardToLaunch(in Intent intentToLaunch);
+
+    /**
+     * Notifies the Keyguard that a key was pressed while locked so the Keyguard can handle it.
+     * Note that it's called only if the device is interactive.
+     */
+    void onSystemKeyPressed(int keycode);
 }

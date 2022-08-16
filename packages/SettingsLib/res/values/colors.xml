@@ -36,7 +36,6 @@
     <color name="bt_color_bg_6">#e9d2fd</color> <!-- Material Purple 100 -->
     <color name="bt_color_bg_7">#cbf0f8</color> <!-- Material Cyan 100 -->
 
-
     <color name="dark_mode_icon_color_single_tone">#99000000</color>
     <color name="light_mode_icon_color_single_tone">#ffffff</color>
 

@@ -26,22 +26,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start|center_vertical"
-        android:paddingStart="24dp"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="24dp"
         android:orientation="horizontal">
         <ImageView
             android:id="@+id/header_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:importantForAccessibility="no"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="24dp"
-            android:paddingEnd="24dp"
+            android:paddingStart="12dp"
             android:orientation="vertical">
+            <ImageView
+                android:id="@+id/app_source_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:gravity="center_vertical"
+                android:importantForAccessibility="no"/>
             <TextView
                 android:id="@+id/header_title"
                 android:layout_width="wrap_content"
@@ -51,7 +57,7 @@
                 android:maxLines="1"
                 android:textColor="?android:attr/textColorPrimary"
                 android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-                android:textSize="20sp"/>
+                android:textSize="16sp"/>
             <TextView
                 android:id="@+id/header_subtitle"
                 android:layout_width="wrap_content"
@@ -60,15 +66,17 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="?android:attr/textColorSecondary"
-                android:fontFamily="roboto-regular"
-                android:textSize="16sp"/>
+                android:fontFamily="@*android:string/config_bodyFontFamily"
+                android:textSize="14sp"/>
         </LinearLayout>
     </LinearLayout>
 
-    <View
+    <ViewStub
+        android:id="@+id/broadcast_qrcode"
+        android:layout="@layout/media_output_broadcast_area"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
+        android:layout_height="wrap_content" >
+    </ViewStub>
 
     <LinearLayout
         android:id="@+id/device_list"
@@ -86,9 +94,39 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/cast_app_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/dialog_side_padding"
+        android:layout_marginEnd="@dimen/dialog_side_padding"
+        android:layout_marginBottom="@dimen/dialog_bottom_padding"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/launch_app_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:ellipsize="end"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/media_output_dialog_launch_app_text"
+            android:maxLines="1"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:textSize="16sp"/>
+
+        <Button
+            android:id="@+id/launch_app_button"
+            style="@style/Widget.Dialog.Button.BorderButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="5dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:layout_marginStart="@dimen/dialog_side_padding"
         android:layout_marginEnd="@dimen/dialog_side_padding"
         android:layout_marginBottom="@dimen/dialog_bottom_padding"
@@ -99,7 +137,7 @@
             style="@style/Widget.Dialog.Button.BorderButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/keyboard_key_media_stop"
+            android:text="@string/media_output_dialog_button_stop_casting"
             android:visibility="gone"/>
 
         <Space

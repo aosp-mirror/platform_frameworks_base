@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -31,6 +33,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class Timestamp64Test {
 

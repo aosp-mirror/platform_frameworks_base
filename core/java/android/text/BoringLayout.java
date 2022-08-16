@@ -16,6 +16,9 @@
 
 package android.text;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -85,6 +88,41 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     }
 
     /**
+     * Utility function to construct a BoringLayout instance.
+     *
+     * The spacing multiplier and additional amount spacing are not used by BoringLayout.
+     * {@link Layout#getSpacingMultiplier()} will return 1.0 and {@link Layout#getSpacingAdd()} will
+     * return 0.0.
+     *
+     * @param source the text to render
+     * @param paint the default paint for the layout
+     * @param outerWidth the wrapping width for the text
+     * @param align whether to left, right, or center the text
+     * @param metrics {@code #Metrics} instance that contains information about FontMetrics and
+     *                line width
+     * @param includePad set whether to include extra space beyond font ascent and descent which is
+     *                   needed to avoid clipping in some scripts
+     * @param ellipsize whether to ellipsize the text if width of the text is longer than the
+     *                  requested width. null if ellipsis is not applied.
+     * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
+     *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
+     *                        not used, {@code outerWidth} is used instead
+     * @param useFallbackLineSpacing True for adjusting the line spacing based on fallback fonts.
+     *                              False for keeping the first font's line height. If some glyphs
+     *                              requires larger vertical spaces, by passing true to this
+     *                              argument, the layout increase the line height to fit all glyphs.
+     */
+    public static @NonNull BoringLayout make(
+            @NonNull CharSequence source, @NonNull TextPaint paint,
+            @IntRange(from = 0) int outerWidth,
+            @NonNull Alignment align, @NonNull BoringLayout.Metrics metrics,
+            boolean includePad, @Nullable TextUtils.TruncateAt ellipsize,
+            @IntRange(from = 0) int ellipsizedWidth, boolean useFallbackLineSpacing) {
+        return new BoringLayout(source, paint, outerWidth, align, 1f, 0f, metrics, includePad,
+                ellipsize, ellipsizedWidth, useFallbackLineSpacing);
+    }
+
+    /**
      * Returns a BoringLayout for the specified text, potentially reusing
      * this one if it is already suitable.  The caller must make sure that
      * no one is still using this Layout.
@@ -108,8 +146,65 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
         mEllipsizedCount = 0;
+        mUseFallbackLineSpacing = false;
 
-        init(source, paint, align, metrics, includePad, true);
+        init(source, paint, align, metrics, includePad, true, false /* useFallbackLineSpacing */);
+        return this;
+    }
+
+    /**
+     * Returns a BoringLayout for the specified text, potentially reusing
+     * this one if it is already suitable.  The caller must make sure that
+     * no one is still using this Layout.
+     *
+     * The spacing multiplier and additional amount spacing are not used by BoringLayout.
+     * {@link Layout#getSpacingMultiplier()} will return 1.0 and {@link Layout#getSpacingAdd()} will
+     * return 0.0.
+     *
+     * @param source the text to render
+     * @param paint the default paint for the layout
+     * @param outerWidth the wrapping width for the text
+     * @param align whether to left, right, or center the text
+     * @param metrics {@code #Metrics} instance that contains information about FontMetrics and
+     *                line width
+     * @param includePad set whether to include extra space beyond font ascent and descent which is
+     *                   needed to avoid clipping in some scripts
+     * @param ellipsize whether to ellipsize the text if width of the text is longer than the
+     *                  requested width. null if ellipsis not applied.
+     * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
+     *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
+     *                        not used, {@code outerWidth} is used instead
+     * @param useFallbackLineSpacing True for adjusting the line spacing based on fallback fonts.
+     *                              False for keeping the first font's line height. If some glyphs
+     *                              requires larger vertical spaces, by passing true to this
+     *                              argument, the layout increase the line height to fit all glyphs.
+     */
+    public @NonNull BoringLayout replaceOrMake(@NonNull CharSequence source,
+            @NonNull TextPaint paint, @IntRange(from = 0) int outerWidth,
+            @NonNull Alignment align, @NonNull BoringLayout.Metrics metrics, boolean includePad,
+            @Nullable TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
+            boolean useFallbackLineSpacing) {
+        boolean trust;
+
+        if (ellipsize == null || ellipsize == TextUtils.TruncateAt.MARQUEE) {
+            replaceWith(source, paint, outerWidth, align, 1f, 0f);
+
+            mEllipsizedWidth = outerWidth;
+            mEllipsizedStart = 0;
+            mEllipsizedCount = 0;
+            trust = true;
+        } else {
+            replaceWith(TextUtils.ellipsize(source, paint, ellipsizedWidth, ellipsize, true, this),
+                    paint, outerWidth, align, 1f, 0f);
+
+            mEllipsizedWidth = ellipsizedWidth;
+            trust = false;
+        }
+
+        mUseFallbackLineSpacing = useFallbackLineSpacing;
+
+        init(getText(), paint, align, metrics, includePad, trust,
+                useFallbackLineSpacing);
         return this;
     }
 
@@ -132,30 +227,13 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      *                  requested width
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
-     *                        not used, {@code outerwidth} is used instead
+     *                        not used, {@code outerWidth} is used instead
      */
     public BoringLayout replaceOrMake(CharSequence source, TextPaint paint, int outerWidth,
             Alignment align, float spacingMult, float spacingAdd, BoringLayout.Metrics metrics,
             boolean includePad, TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
-        boolean trust;
-
-        if (ellipsize == null || ellipsize == TextUtils.TruncateAt.MARQUEE) {
-            replaceWith(source, paint, outerWidth, align, spacingMult, spacingAdd);
-
-            mEllipsizedWidth = outerWidth;
-            mEllipsizedStart = 0;
-            mEllipsizedCount = 0;
-            trust = true;
-        } else {
-            replaceWith(TextUtils.ellipsize(source, paint, ellipsizedWidth, ellipsize, true, this),
-                    paint, outerWidth, align, spacingMult, spacingAdd);
-
-            mEllipsizedWidth = ellipsizedWidth;
-            trust = false;
-        }
-
-        init(getText(), paint, align, metrics, includePad, trust);
-        return this;
+        return replaceOrMake(source, paint, outerWidth, align, metrics,
+                includePad, ellipsize, ellipsizedWidth, false /* useFallbackLineSpacing */);
     }
 
     /**
@@ -177,8 +255,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
         mEllipsizedCount = 0;
+        mUseFallbackLineSpacing = false;
 
-        init(source, paint, align, metrics, includePad, true);
+        init(source, paint, align, metrics, includePad, true, false /* useFallbackLineSpacing */);
     }
 
     /**
@@ -194,14 +273,46 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param includePad set whether to include extra space beyond font ascent and descent which is
      *                   needed to avoid clipping in some scripts
      * @param ellipsize whether to ellipsize the text if width of the text is longer than the
-     *                  requested {@code outerwidth}
+     *                  requested {@code outerWidth}
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
-     *                        not used, {@code outerwidth} is used instead
+     *                        not used, {@code outerWidth} is used instead
      */
     public BoringLayout(CharSequence source, TextPaint paint, int outerWidth, Alignment align,
             float spacingMult, float spacingAdd, BoringLayout.Metrics metrics, boolean includePad,
             TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+        this(source, paint, outerWidth, align, spacingMult, spacingAdd, metrics, includePad,
+                ellipsize, ellipsizedWidth, false /* fallbackLineSpacing */);
+    }
+
+    /**
+     *
+     * @param source the text to render
+     * @param paint the default paint for the layout
+     * @param outerWidth the wrapping width for the text
+     * @param align whether to left, right, or center the text
+     * @param spacingMult this value is no longer used by BoringLayout
+     * @param spacingAdd this value is no longer used by BoringLayout
+     * @param metrics {@code #Metrics} instance that contains information about FontMetrics and
+     *                line width
+     * @param includePad set whether to include extra space beyond font ascent and descent which is
+     *                   needed to avoid clipping in some scripts
+     * @param ellipsize whether to ellipsize the text if width of the text is longer than the
+     *                  requested {@code outerWidth}. null if ellipsis is not applied.
+     * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
+     *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
+     *                        not used, {@code outerWidth} is used instead
+     * @param useFallbackLineSpacing True for adjusting the line spacing based on fallback fonts.
+     *                              False for keeping the first font's line height. If some glyphs
+     *                              requires larger vertical spaces, by passing true to this
+     *                              argument, the layout increase the line height to fit all glyphs.
+     */
+    public BoringLayout(
+            @NonNull CharSequence source, @NonNull TextPaint paint,
+            @IntRange(from = 0) int outerWidth, @NonNull Alignment align, float spacingMult,
+            float spacingAdd, @NonNull BoringLayout.Metrics metrics, boolean includePad,
+            @Nullable TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
+            boolean useFallbackLineSpacing) {
         /*
          * It is silly to have to call super() and then replaceWith(),
          * but we can't use "this" for the callback until the call to
@@ -224,11 +335,13 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             trust = false;
         }
 
-        init(getText(), paint, align, metrics, includePad, trust);
+        mUseFallbackLineSpacing = useFallbackLineSpacing;
+        init(getText(), paint, align, metrics, includePad, trust, useFallbackLineSpacing);
     }
 
     /* package */ void init(CharSequence source, TextPaint paint, Alignment align,
-            BoringLayout.Metrics metrics, boolean includePad, boolean trustWidth) {
+            BoringLayout.Metrics metrics, boolean includePad, boolean trustWidth,
+            boolean useFallbackLineSpacing) {
         int spacing;
 
         if (source instanceof String && align == Layout.Alignment.ALIGN_NORMAL) {
@@ -260,7 +373,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             TextLine line = TextLine.obtain();
             line.set(paint, source, 0, source.length(), Layout.DIR_LEFT_TO_RIGHT,
                     Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
-                    mEllipsizedStart, mEllipsizedStart + mEllipsizedCount);
+                    mEllipsizedStart, mEllipsizedStart + mEllipsizedCount, useFallbackLineSpacing);
             mMax = (int) Math.ceil(line.metrics(null));
             TextLine.recycle(line);
         }
@@ -336,6 +449,27 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     @UnsupportedAppUsage
     public static Metrics isBoring(CharSequence text, TextPaint paint,
             TextDirectionHeuristic textDir, Metrics metrics) {
+        return isBoring(text, paint, textDir, false /* useFallbackLineSpacing */, metrics);
+    }
+
+    /**
+     * Returns null if not boring; the width, ascent, and descent in the
+     * provided Metrics object (or a new one if the provided one was null)
+     * if boring.
+     *
+     * @param text a text to be calculated text layout.
+     * @param paint a paint object used for styling.
+     * @param textDir a text direction.
+     * @param useFallbackLineSpacing True for adjusting the line spacing based on fallback fonts.
+     *                              False for keeping the first font's line height. If some glyphs
+     *                              requires larger vertical spaces, by passing true to this
+     *                              argument, the layout increase the line height to fit all glyphs.
+     * @param metrics the out metrics.
+     * @return metrics on success. null if text cannot be rendered by BoringLayout.
+     */
+    public static @Nullable Metrics isBoring(@NonNull CharSequence text, @NonNull TextPaint paint,
+            @NonNull TextDirectionHeuristic textDir, boolean useFallbackLineSpacing,
+            @Nullable Metrics metrics) {
         final int textLength = text.length();
         if (hasAnyInterestingChars(text, textLength)) {
            return null;  // There are some interesting characters. Not boring.
@@ -362,7 +496,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
                 Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
                 0 /* ellipsisStart, 0 since text has not been ellipsized at this point */,
-                0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */);
+                0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */,
+                useFallbackLineSpacing);
         fm.width = (int) Math.ceil(line.metrics(fm));
         TextLine.recycle(line);
 
@@ -450,6 +585,11 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         return mEllipsizedWidth;
     }
 
+    @Override
+    public boolean isFallbackLineSpacingEnabled() {
+        return mUseFallbackLineSpacing;
+    }
+
     // Override draw so it will be faster.
     @Override
     public void draw(Canvas c, Path highlight, Paint highlightpaint,
@@ -471,6 +611,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
     private String mDirect;
     private Paint mPaint;
+    private boolean mUseFallbackLineSpacing;
 
     /* package */ int mBottom, mDesc;   // for Direct
     private int mTopPadding, mBottomPadding;

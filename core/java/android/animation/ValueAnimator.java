@@ -17,12 +17,16 @@
 package android.animation;
 
 import android.annotation.CallSuper;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
@@ -33,8 +37,10 @@ import android.view.animation.LinearInterpolator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class provides a simple timing engine for running animations
@@ -74,6 +80,8 @@ import java.util.HashMap;
 public class ValueAnimator extends Animator implements AnimationHandler.AnimationFrameCallback {
     private static final String TAG = "ValueAnimator";
     private static final boolean DEBUG = false;
+    private static final boolean TRACE_ANIMATION_FRACTION = SystemProperties.getBoolean(
+            "persist.debug.animator.trace_fraction", false);
 
     /**
      * Internal constants
@@ -86,6 +94,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static float sDurationScale = 1.0f;
+
+    private static final ArrayList<WeakReference<DurationScaleChangeListener>>
+            sDurationScaleChangeListeners = new ArrayList<>();
 
     /**
      * Internal variables
@@ -304,17 +315,89 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @UnsupportedAppUsage
     @TestApi
-    public static void setDurationScale(float durationScale) {
+    @MainThread
+    public static void setDurationScale(@FloatRange(from = 0) float durationScale) {
         sDurationScale = durationScale;
+        List<WeakReference<DurationScaleChangeListener>> listenerCopy;
+
+        synchronized (sDurationScaleChangeListeners) {
+            listenerCopy = new ArrayList<>(sDurationScaleChangeListeners);
+        }
+
+        for (WeakReference<DurationScaleChangeListener> listenerRef : listenerCopy) {
+            final DurationScaleChangeListener listener = listenerRef.get();
+            if (listener != null) {
+                listener.onChanged(durationScale);
+            }
+        }
     }
 
     /**
-     * @hide
+     * Returns the system-wide scaling factor for Animator-based animations.
+     *
+     * This affects both the start delay and duration of all such animations. Setting to 0 will
+     * cause animations to end immediately. The default value is 1.0f.
+     *
+     * @return the duration scale.
      */
-    @UnsupportedAppUsage
-    @TestApi
+    @FloatRange(from = 0)
     public static float getDurationScale() {
         return sDurationScale;
+    }
+
+    /**
+     * Registers a {@link DurationScaleChangeListener}
+     *
+     * This listens for changes to the system-wide scaling factor for Animator-based animations.
+     * Listeners will be called on the main thread.
+     *
+     * @param listener the listener to register.
+     * @return true if the listener was registered.
+     */
+    public static boolean registerDurationScaleChangeListener(
+            @NonNull DurationScaleChangeListener listener) {
+        int posToReplace = -1;
+        synchronized (sDurationScaleChangeListeners) {
+            for (int i = 0; i < sDurationScaleChangeListeners.size(); i++) {
+                final WeakReference<DurationScaleChangeListener> ref =
+                        sDurationScaleChangeListeners.get(i);
+                if (ref.get() == null) {
+                    if (posToReplace == -1) {
+                        posToReplace = i;
+                    }
+                } else if (ref.get() == listener) {
+                    return false;
+                }
+            }
+            if (posToReplace != -1) {
+                sDurationScaleChangeListeners.set(posToReplace, new WeakReference<>(listener));
+                return true;
+            } else {
+                return sDurationScaleChangeListeners.add(new WeakReference<>(listener));
+            }
+        }
+    }
+
+    /**
+     * Unregisters a DurationScaleChangeListener.
+     *
+     * @see #registerDurationScaleChangeListener(DurationScaleChangeListener)
+     * @param listener the listener to unregister.
+     * @return true if the listener was unregistered.
+     */
+    public static boolean unregisterDurationScaleChangeListener(
+            @NonNull DurationScaleChangeListener listener) {
+        synchronized (sDurationScaleChangeListeners) {
+            WeakReference<DurationScaleChangeListener> listenerRefToRemove = null;
+            for (WeakReference<DurationScaleChangeListener> listenerRef :
+                    sDurationScaleChangeListeners) {
+                if (listenerRef.get() == listener) {
+                    listenerRefToRemove = listenerRef;
+                    break;
+                }
+            }
+            return sDurationScaleChangeListeners.remove(listenerRefToRemove);
+        }
     }
 
     /**
@@ -1554,6 +1637,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     @CallSuper
     @UnsupportedAppUsage
     void animateValue(float fraction) {
+        if (TRACE_ANIMATION_FRACTION) {
+            Trace.traceCounter(Trace.TRACE_TAG_VIEW, getNameForTrace() + hashCode(),
+                    (int) (fraction * 1000));
+        }
         fraction = mInterpolator.getInterpolation(fraction);
         mCurrentFraction = fraction;
         int numValues = mValues.length;
@@ -1619,7 +1706,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
          *
          * @param animation The animation which was repeated.
          */
-        void onAnimationUpdate(ValueAnimator animation);
+        void onAnimationUpdate(@NonNull ValueAnimator animation);
 
     }
 
@@ -1700,5 +1787,19 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     public void setAnimationHandler(@Nullable AnimationHandler animationHandler) {
         mAnimationHandler = animationHandler;
+    }
+
+    /**
+     * Listener interface for the system-wide scaling factor for Animator-based animations.
+     *
+     * @see #registerDurationScaleChangeListener(DurationScaleChangeListener)
+     * @see #unregisterDurationScaleChangeListener(DurationScaleChangeListener)
+     */
+    public interface DurationScaleChangeListener {
+        /**
+         * Called when the duration scale changes.
+         * @param scale the duration scale
+         */
+        void onChanged(@FloatRange(from = 0) float scale);
     }
 }

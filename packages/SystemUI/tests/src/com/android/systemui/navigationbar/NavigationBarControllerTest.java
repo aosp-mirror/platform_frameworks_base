@@ -46,7 +46,9 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import org.junit.After;
@@ -73,7 +75,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @Mock
     private CommandQueue mCommandQueue;
     @Mock
-    private NavigationBar.Factory mNavigationBarFactory;
+    private NavigationBarComponent.Factory mNavigationBarFactory;
 
     @Before
     public void setUp() {
@@ -89,10 +91,12 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(NavBarHelper.class),
                         mock(TaskbarDelegate.class),
                         mNavigationBarFactory,
+                        mock(StatusBarKeyguardViewManager.class),
                         mock(DumpManager.class),
                         mock(AutoHideController.class),
                         mock(LightBarController.class),
-                        Optional.of(mock(Pip.class))));
+                        Optional.of(mock(Pip.class)),
+                        Optional.of(mock(BackAnimation.class))));
         initializeNavigationBars();
     }
 

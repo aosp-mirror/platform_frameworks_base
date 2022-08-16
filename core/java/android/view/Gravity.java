@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.graphics.Rect;
 
 import java.lang.annotation.Retention;
@@ -187,8 +188,8 @@ public class Gravity
      * @see View#LAYOUT_DIRECTION_LTR
      * @see View#LAYOUT_DIRECTION_RTL
      */
-    public static void apply(int gravity, int w, int h, Rect container,
-            Rect outRect, int layoutDirection) {
+    public static void apply(int gravity, int w, int h, @NonNull Rect container,
+            @NonNull Rect outRect, int layoutDirection) {
         int absGravity = getAbsoluteGravity(gravity, layoutDirection);
         apply(absGravity, w, h, container, 0, 0, outRect);
     }
@@ -214,8 +215,8 @@ public class Gravity
      * @param outRect Receives the computed frame of the object in its
      *                container.
      */
-    public static void apply(int gravity, int w, int h, Rect container,
-            int xAdj, int yAdj, Rect outRect) {
+    public static void apply(int gravity, int w, int h, @NonNull Rect container,
+            int xAdj, int yAdj, @NonNull Rect outRect) {
         switch (gravity&((AXIS_PULL_BEFORE|AXIS_PULL_AFTER)<<AXIS_X_SHIFT)) {
             case 0:
                 outRect.left = container.left
@@ -324,8 +325,8 @@ public class Gravity
      * @see View#LAYOUT_DIRECTION_LTR
      * @see View#LAYOUT_DIRECTION_RTL
      */
-    public static void apply(int gravity, int w, int h, Rect container,
-                             int xAdj, int yAdj, Rect outRect, int layoutDirection) {
+    public static void apply(int gravity, int w, int h, @NonNull Rect container,
+                             int xAdj, int yAdj, @NonNull Rect outRect, int layoutDirection) {
         int absGravity = getAbsoluteGravity(gravity, layoutDirection);
         apply(absGravity, w, h, container, xAdj, yAdj, outRect);
     }
@@ -346,7 +347,7 @@ public class Gravity
      * @param inoutObj Supplies the current object position; returns with it
      * modified if needed to fit in the display.
      */
-    public static void applyDisplay(int gravity, Rect display, Rect inoutObj) {
+    public static void applyDisplay(int gravity, @NonNull Rect display, @NonNull Rect inoutObj) {
         if ((gravity&DISPLAY_CLIP_VERTICAL) != 0) {
             if (inoutObj.top < display.top) inoutObj.top = display.top;
             if (inoutObj.bottom > display.bottom) inoutObj.bottom = display.bottom;
@@ -404,7 +405,8 @@ public class Gravity
      * @see View#LAYOUT_DIRECTION_LTR
      * @see View#LAYOUT_DIRECTION_RTL
      */
-    public static void applyDisplay(int gravity, Rect display, Rect inoutObj, int layoutDirection) {
+    public static void applyDisplay(int gravity, @NonNull Rect display, @NonNull Rect inoutObj,
+            int layoutDirection) {
         int absGravity = getAbsoluteGravity(gravity, layoutDirection);
         applyDisplay(absGravity, display, inoutObj);
     }

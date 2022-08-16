@@ -118,20 +118,18 @@ import java.util.function.Consumer;
  *
  * <pre>
  * public void onCreate() {
- *     if (DEVELOPER_MODE) {
- *         StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
- *                 .detectDiskReads()
- *                 .detectDiskWrites()
- *                 .detectNetwork()   // or .detectAll() for all detectable problems
- *                 .penaltyLog()
- *                 .build());
- *         StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
- *                 .detectLeakedSqlLiteObjects()
- *                 .detectLeakedClosableObjects()
- *                 .penaltyLog()
- *                 .penaltyDeath()
- *                 .build());
- *     }
+ *     StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
+ *             .detectDiskReads()
+ *             .detectDiskWrites()
+ *             .detectNetwork()   // or .detectAll() for all detectable problems
+ *             .penaltyLog()
+ *             .build());
+ *     StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
+ *             .detectLeakedSqlLiteObjects()
+ *             .detectLeakedClosableObjects()
+ *             .penaltyLog()
+ *             .penaltyDeath()
+ *             .build());
  *     super.onCreate();
  * }
  * </pre>
@@ -150,9 +148,7 @@ import java.util.function.Consumer;
  * <p class="note">StrictMode is not a security mechanism and is not guaranteed to find all disk or
  * network accesses. While it does propagate its state across process boundaries when doing {@link
  * android.os.Binder} calls, it's still ultimately a best effort mechanism. Notably, disk or network
- * access from JNI calls won't necessarily trigger it. Future versions of Android may catch more (or
- * fewer) operations, so you should never leave StrictMode enabled in applications distributed on
- * Google Play.
+ * access from JNI calls won't necessarily trigger it.
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";
@@ -946,7 +942,7 @@ public final class StrictMode {
              * <p>Instead, apps should use {@code content://} Uris so the platform can extend
              * temporary permission for the receiving app to access the resource.
              *
-             * @see android.support.v4.content.FileProvider
+             * @see androidx.core.content.FileProvider
              * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
              */
             public @NonNull Builder detectFileUriExposure() {
@@ -2997,7 +2993,7 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            mViolation = (Violation) in.readSerializable();
+            mViolation = (Violation) in.readSerializable(android.os.strictmode.Violation.class.getClassLoader(), android.os.strictmode.Violation.class);
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
                 StackTraceElement[] traceElements = new StackTraceElement[in.readInt()];

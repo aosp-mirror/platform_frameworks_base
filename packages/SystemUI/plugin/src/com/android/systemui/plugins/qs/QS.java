@@ -15,7 +15,6 @@
 package com.android.systemui.plugins.qs;
 
 import android.view.View;
-import android.view.View.OnClickListener;
 
 import com.android.systemui.plugins.FragmentBase;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -34,7 +33,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 12;
+    int VERSION = 15;
 
     String TAG = "QS";
 
@@ -51,6 +50,14 @@ public interface QS extends FragmentBase {
     void setOverscrolling(boolean overscrolling);
     void setExpanded(boolean qsExpanded);
     void setListening(boolean listening);
+
+    /**
+     * Set whether QQS/QS is visible or not.
+     *
+     * This is different from setExpanded, as it will be true when QQS is visible. In particular,
+     * it should be false when device is locked and only notifications (in lockscreen) are visible.
+     */
+    void setQsVisible(boolean qsVisible);
     boolean isShowingDetail();
     void closeDetail();
     void animateHeaderSlidingOut();
@@ -68,7 +75,17 @@ public interface QS extends FragmentBase {
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
     void setContainerController(QSContainerController controller);
-    void setExpandClickListener(OnClickListener onClickListener);
+
+    /**
+     * Provide an action to collapse if expanded or expand if collapsed.
+     * @param action
+     */
+    void setCollapseExpandAction(Runnable action);
+
+    /**
+     * Returns the height difference between the QSPanel container and the QuickQSPanel container
+     */
+    int getHeightDiff();
 
     View getHeader();
 
@@ -116,6 +133,11 @@ public interface QS extends FragmentBase {
      * Set a scroll listener for the QSPanel container
      */
     default void setScrollListener(ScrollListener scrollListener) {}
+
+    /**
+     * Sets the amount of vertical over scroll that should be performed on QS.
+     */
+    default void setOverScrollAmount(int overScrollAmount) {}
 
     /**
      * Callback for when QSPanel container is scrolled

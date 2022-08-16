@@ -35,7 +35,7 @@ import android.content.Intent;
  * or higher. Applications targeting earlier SDK versions are allowed to share
  * {@code file://} {@link android.net.Uri}, but it's strongly discouraged.
  *
- * @see android.support.v4.content.FileProvider
+ * @see androidx.core.content.FileProvider
  * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
  */
 public class FileUriExposedException extends RuntimeException {

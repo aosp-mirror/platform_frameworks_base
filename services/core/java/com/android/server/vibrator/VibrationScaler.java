@@ -74,6 +74,12 @@ final class VibrationScaler {
     public int getExternalVibrationScale(int usageHint) {
         int defaultIntensity = mSettingsController.getDefaultIntensity(usageHint);
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
+
+        if (currentIntensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+            // Bypassing user settings, or it has changed between checking and scaling. Use default.
+            return SCALE_NONE;
+        }
+
         int scaleLevel = currentIntensity - defaultIntensity;
 
         if (scaleLevel >= SCALE_VERY_LOW && scaleLevel <= SCALE_VERY_HIGH) {
@@ -97,6 +103,12 @@ final class VibrationScaler {
     public <T extends VibrationEffect> T scale(VibrationEffect effect, int usageHint) {
         int defaultIntensity = mSettingsController.getDefaultIntensity(usageHint);
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
+
+        if (currentIntensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+            // Bypassing user settings, or it has changed between checking and scaling. Use default.
+            currentIntensity = defaultIntensity;
+        }
+
         int newEffectStrength = intensityToEffectStrength(currentIntensity);
         effect = effect.applyEffectStrength(newEffectStrength).resolve(mDefaultVibrationAmplitude);
         ScaleLevel scale = mScaleLevels.get(currentIntensity - defaultIntensity);
@@ -121,6 +133,12 @@ final class VibrationScaler {
      */
     public PrebakedSegment scale(PrebakedSegment prebaked, int usageHint) {
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
+
+        if (currentIntensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+            // Bypassing user settings, or it has changed between checking and scaling. Use default.
+            currentIntensity = mSettingsController.getDefaultIntensity(usageHint);
+        }
+
         int newEffectStrength = intensityToEffectStrength(currentIntensity);
         return prebaked.applyEffectStrength(newEffectStrength);
     }

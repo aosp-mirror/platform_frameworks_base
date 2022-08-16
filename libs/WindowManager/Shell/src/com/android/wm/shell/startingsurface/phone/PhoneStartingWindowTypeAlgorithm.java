@@ -17,35 +17,31 @@
 package com.android.wm.shell.startingsurface.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 
-import static com.android.wm.shell.startingsurface.StartingWindowController.DEBUG_SPLASH_SCREEN;
-import static com.android.wm.shell.startingsurface.StartingWindowController.DEBUG_TASK_SNAPSHOT;
-
-import android.util.Slog;
 import android.window.StartingWindowInfo;
-import android.window.TaskSnapshot;
 
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 
 /**
  * Algorithm for determining the type of a new starting window on handheld devices.
- * At the moment also used on Android Auto.
+ * At the moment also used on Android Auto and Wear OS.
  */
 public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgorithm {
-    private static final String TAG = PhoneStartingWindowTypeAlgorithm.class.getSimpleName();
-
     @Override
     public int getSuggestedWindowType(StartingWindowInfo windowInfo) {
         final int parameter = windowInfo.startingWindowTypeParameter;
@@ -54,71 +50,55 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         final boolean processRunning = (parameter & TYPE_PARAMETER_PROCESS_RUNNING) != 0;
         final boolean allowTaskSnapshot = (parameter & TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT) != 0;
         final boolean activityCreated = (parameter & TYPE_PARAMETER_ACTIVITY_CREATED) != 0;
-        final boolean useEmptySplashScreen =
-                (parameter & TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN) != 0;
+        final boolean isSolidColorSplashScreen =
+                (parameter & TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN) != 0;
         final boolean legacySplashScreen =
                 ((parameter & TYPE_PARAMETER_LEGACY_SPLASH_SCREEN) != 0);
+        final boolean activityDrawn = (parameter & TYPE_PARAMETER_ACTIVITY_DRAWN) != 0;
         final boolean topIsHome = windowInfo.taskInfo.topActivityType == ACTIVITY_TYPE_HOME;
 
-        if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-            Slog.d(TAG, "preferredStartingWindowType newTask:" + newTask
-                    + " taskSwitch:" + taskSwitch
-                    + " processRunning:" + processRunning
-                    + " allowTaskSnapshot:" + allowTaskSnapshot
-                    + " activityCreated:" + activityCreated
-                    + " useEmptySplashScreen:" + useEmptySplashScreen
-                    + " legacySplashScreen:" + legacySplashScreen
-                    + " topIsHome:" + topIsHome);
-        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "preferredStartingWindowType "
+                        + "newTask=%b, "
+                        + "taskSwitch=%b, "
+                        + "processRunning=%b, "
+                        + "allowTaskSnapshot=%b, "
+                        + "activityCreated=%b, "
+                        + "isSolidColorSplashScreen=%b, "
+                        + "legacySplashScreen=%b, "
+                        + "activityDrawn=%b, "
+                        + "topIsHome=%b",
+                newTask, taskSwitch, processRunning, allowTaskSnapshot, activityCreated,
+                isSolidColorSplashScreen, legacySplashScreen, activityDrawn, topIsHome);
 
         if (!topIsHome) {
             if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
-                return useEmptySplashScreen
-                        ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
-                        : legacySplashScreen
-                                ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
-                                : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                return getSplashscreenType(isSolidColorSplashScreen, legacySplashScreen);
             }
         }
-        if (taskSwitch && allowTaskSnapshot) {
-            if (isSnapshotCompatible(windowInfo)) {
-                return STARTING_WINDOW_TYPE_SNAPSHOT;
+
+        if (taskSwitch) {
+            if (allowTaskSnapshot) {
+                if (windowInfo.taskSnapshot != null) {
+                    return STARTING_WINDOW_TYPE_SNAPSHOT;
+                }
+                if (!topIsHome) {
+                    return STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
+                }
             }
-            if (!topIsHome) {
-                return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+            if (!activityDrawn && !topIsHome) {
+                return getSplashscreenType(isSolidColorSplashScreen, legacySplashScreen);
             }
         }
         return STARTING_WINDOW_TYPE_NONE;
     }
 
-
-    /**
-     * Returns {@code true} if the task snapshot is compatible with this activity (at least the
-     * rotation must be the same).
-     */
-    private boolean isSnapshotCompatible(StartingWindowInfo windowInfo) {
-        final TaskSnapshot snapshot = windowInfo.taskSnapshot;
-        if (snapshot == null) {
-            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                Slog.d(TAG, "isSnapshotCompatible no snapshot " + windowInfo.taskInfo.taskId);
-            }
-            return false;
-        }
-        if (!snapshot.getTopActivityComponent().equals(windowInfo.taskInfo.topActivity)) {
-            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                Slog.d(TAG, "isSnapshotCompatible obsoleted snapshot "
-                        + windowInfo.taskInfo.topActivity);
-            }
-            return false;
-        }
-
-        final int taskRotation = windowInfo.taskInfo.configuration
-                .windowConfiguration.getRotation();
-        final int snapshotRotation = snapshot.getRotation();
-        if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-            Slog.d(TAG, "isSnapshotCompatible rotation " + taskRotation
-                    + " snapshot " + snapshotRotation);
-        }
-        return taskRotation == snapshotRotation;
+    private static int getSplashscreenType(boolean solidColorSplashScreen,
+            boolean legacySplashScreen) {
+        return solidColorSplashScreen
+                ? STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN
+                : legacySplashScreen
+                        ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+                        : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
     }
 }

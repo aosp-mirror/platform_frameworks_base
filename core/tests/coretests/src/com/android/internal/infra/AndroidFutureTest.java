@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 
 /**
  * Unit test for {@link AndroidFuture}.
@@ -153,5 +154,36 @@ public class AndroidFutureTest {
         ExecutionException executionException =
                 expectThrows(ExecutionException.class, future1::get);
         assertThat(executionException.getCause()).isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    public void testThenCombine() throws Exception {
+        String nearFutureString = "near future comes";
+        AndroidFuture<String> nearFuture = AndroidFuture.supply(() -> nearFutureString);
+        String farFutureString = " before far future.";
+        AndroidFuture<String> farFuture = AndroidFuture.supply(() -> farFutureString);
+        AndroidFuture<String> combinedFuture =
+                nearFuture.thenCombine(farFuture, ((s1, s2) -> s1 + s2));
+
+        assertThat(combinedFuture.get()).isEqualTo(nearFutureString + farFutureString);
+    }
+
+    @Test
+    public void testThenCombine_functionThrowingException() throws Exception {
+        String nearFutureString = "near future comes";
+        AndroidFuture<String> nearFuture = AndroidFuture.supply(() -> nearFutureString);
+        String farFutureString = " before far future.";
+        AndroidFuture<String> farFuture = AndroidFuture.supply(() -> farFutureString);
+        UnsupportedOperationException exception = new UnsupportedOperationException(
+                "Unsupported operation exception thrown!");
+        BiFunction<String, String, String> throwingFunction = (s1, s2) -> {
+            throw exception;
+        };
+        AndroidFuture<String> combinedFuture = nearFuture.thenCombine(farFuture, throwingFunction);
+
+        ExecutionException thrown = expectThrows(ExecutionException.class,
+                () -> combinedFuture.get());
+
+        assertThat(thrown.getCause()).isSameInstanceAs(exception);
     }
 }

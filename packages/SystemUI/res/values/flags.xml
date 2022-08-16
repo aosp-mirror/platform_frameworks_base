@@ -23,7 +23,17 @@
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
 
+    <!-- Whether the multi-user icon on the lockscreen opens the QS user detail. If false, clicking
+         the multi-user icon will display a list of users directly on the lockscreen. The multi-user
+         icon is only shown if config_keyguardUserSwitcher=false in the frameworks config. -->
+    <bool name="flag_lockscreen_qs_user_detail_shortcut">false</bool>
+
     <bool name="flag_charging_ripple">false</bool>
 
     <bool name="flag_smartspace">false</bool>
+
+    <!--  Whether the user switcher chip shows in the status bar. When true, the multi user
+      avatar will no longer show on the lockscreen -->
+    <bool name="flag_user_switcher_chip">false</bool>
+
 </resources>

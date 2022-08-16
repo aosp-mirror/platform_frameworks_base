@@ -22,6 +22,9 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.InsetsState.ITYPE_LOCAL_NAVIGATION_BAR_1;
+import static android.view.InsetsState.ITYPE_LOCAL_NAVIGATION_BAR_2;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
@@ -43,6 +46,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayArea.Type.ANY;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -66,6 +70,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
+import android.view.InsetsSource;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -76,6 +81,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -270,6 +276,22 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveImmediatelyClearsLeash() {
+        final AnimationAdapter animAdapter = mock(AnimationAdapter.class);
+        final WindowToken token = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        final SurfaceControl.Transaction t = token.getPendingTransaction();
+        token.startAnimation(t, animAdapter, false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        final ArgumentCaptor<SurfaceControl> leashCaptor =
+                ArgumentCaptor.forClass(SurfaceControl.class);
+        verify(animAdapter).startAnimation(leashCaptor.capture(), eq(t), anyInt(), any());
+        assertTrue(token.mSurfaceAnimator.hasLeash());
+        token.removeImmediately();
+        assertFalse(token.mSurfaceAnimator.hasLeash());
+        verify(t).remove(eq(leashCaptor.getValue()));
+    }
+
+    @Test
     public void testAddChildByIndex() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -442,7 +464,7 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(window.isAnimating());
         assertFalse(window.isAnimating(0, ANIMATION_TYPE_SCREEN_ROTATION));
         assertTrue(window.isAnimating(0, ANIMATION_TYPE_APP_TRANSITION));
-        assertFalse(window.isAnimatingExcluding(0, ANIMATION_TYPE_APP_TRANSITION));
+        assertFalse(window.isAnimating(0, ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_APP_TRANSITION));
 
         final TestWindowContainer child = window.addChildWindow();
         assertFalse(child.isAnimating());
@@ -459,7 +481,7 @@ public class WindowContainerTests extends WindowTestsBase {
                 windowState.mSurfaceAnimator).getAnimationType();
         assertTrue(parent.isAnimating(CHILDREN));
 
-        windowState.setControllableInsetProvider(mock(InsetsSourceProvider.class));
+        windowState.setControllableInsetProvider(mock(WindowContainerInsetsSourceProvider.class));
         assertFalse(parent.isAnimating(CHILDREN));
     }
 
@@ -851,6 +873,24 @@ public class WindowContainerTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
         doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
+
+        // An animating window with mRemoveOnExit can be removed by handleCompleteDeferredRemoval
+        // once it no longer animates.
+        final WindowState exitingWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
+                displayContent, "exiting window");
+        exitingWindow.startAnimation(exitingWindow.getPendingTransaction(),
+                mock(AnimationAdapter.class), false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        exitingWindow.mRemoveOnExit = true;
+        exitingWindow.handleCompleteDeferredRemoval();
+        // The animation has not finished so the window is not removed.
+        assertTrue(exitingWindow.isAnimating());
+        assertTrue(exitingWindow.isAttached());
+        exitingWindow.cancelAnimation();
+        // The window is removed because the animation is gone.
+        exitingWindow.handleCompleteDeferredRemoval();
+        assertFalse(exitingWindow.isAttached());
+
         final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
@@ -939,7 +979,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled() {
+                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
@@ -1228,6 +1268,175 @@ public class WindowContainerTests extends WindowTestsBase {
 
         verify(t).remove(prevLeash);
         verify(prevSnapshot).destroy(t);
+    }
+
+    @Test
+    public void testAddLocalInsetsSourceProvider() {
+         /*
+                ___ rootTask _______________________________________________
+               |        |                |                                  |
+          activity0    container     navigationBarInsetsProvider1    navigationBarInsetsProvider2
+                       /       \
+               activity1    activity2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        final Task container = createTaskInRootTask(rootTask, 0);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs1 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs1.setTitle("AppWindow1");
+        activity1.addWindow(createWindowState(attrs1, activity1));
+
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs2 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs2.setTitle("AppWindow2");
+        activity2.addWindow(createWindowState(attrs2, activity2));
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        container.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_2});
+
+        InsetsSource navigationBarInsetsProvider1Source = new InsetsSource(
+                ITYPE_LOCAL_NAVIGATION_BAR_1);
+        navigationBarInsetsProvider1Source.setFrame(navigationBarInsetsRect1);
+        navigationBarInsetsProvider1Source.setVisible(true);
+        InsetsSource navigationBarInsetsProvider2Source = new InsetsSource(
+                ITYPE_LOCAL_NAVIGATION_BAR_2);
+        navigationBarInsetsProvider2Source.setFrame(navigationBarInsetsRect2);
+        navigationBarInsetsProvider2Source.setVisible(true);
+
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2));
+        }, true);
+        activity1.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
+        activity2.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
+    }
+
+    @Test
+    public void testAddLocalInsetsSourceProvider_sameType_replacesInsets() {
+         /*
+                ___ rootTask ________________________________________
+               |                  |                                  |
+          activity0      navigationBarInsetsProvider1    navigationBarInsetsProvider2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+        }, true);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+        }, true);
+    }
+
+    @Test
+    public void testRemoveLocalInsetsSourceProvider() {
+         /*
+                ___ rootTask _______________________________________________
+               |        |                |                                  |
+          activity0    container    navigationBarInsetsProvider1     navigationBarInsetsProvider2
+                       /       \
+               activity1    activity2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        final Task container = createTaskInRootTask(rootTask, 0);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs1 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs1.setTitle("AppWindow1");
+        activity1.addWindow(createWindowState(attrs1, activity1));
+
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs2 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs2.setTitle("AppWindow2");
+        activity2.addWindow(createWindowState(attrs2, activity2));
+
+        activity2.addWindow(createWindowState(attrs2, activity2));
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        container.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_2});
+        mDisplayContent.getInsetsStateController().onPostLayout();
+        rootTask.removeLocalInsetsSourceProvider(new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        mDisplayContent.getInsetsStateController().onPostLayout();
+
+        activity0.forAllWindows(window -> {
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1));
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2));
+        }, true);
+        activity1.forAllWindows(window -> {
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1));
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
+        activity2.forAllWindows(window -> {
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1));
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

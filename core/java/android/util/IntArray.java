@@ -34,7 +34,7 @@ public class IntArray implements Cloneable {
     private int[] mValues;
     private int mSize;
 
-    private  IntArray(int[] array, int size) {
+    private IntArray(int[] array, int size) {
         mValues = array;
         mSize = Preconditions.checkArgumentInRange(size, 0, array.length, "size");
     }
@@ -178,10 +178,8 @@ public class IntArray implements Cloneable {
     }
 
     @Override
-    public IntArray clone() throws CloneNotSupportedException {
-        final IntArray clone = (IntArray) super.clone();
-        clone.mValues = mValues.clone();
-        return clone;
+    public IntArray clone() {
+        return new IntArray(mValues.clone(), mSize);
     }
 
     /**

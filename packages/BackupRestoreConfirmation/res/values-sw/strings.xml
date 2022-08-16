@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Tafadhali weka nenosiri lako la kusimba kifaa kwa njia fiche hapo chini. Pia litatumika kusimba kumbukumbu za nakala kwa njia fiche."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Tafadhali weka nenosiri la kutumia katika kusimba nakala kamili za data kwa njia fiche. Ikiwa sehemu hii itawachwa wazi, nenosiri lako la sasa litatumika:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ikiwa unataka kusimba nakala za data kwa njia fiche, weka nenosiri hapo chini:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Kwa kuwa kifaa chako kimesimbwa kwa njia fiche, unatakiwa usimbe hifadhi rudufu yako kwa njia fiche. Tafadhali weka nenosiri hapo chini:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ikiwa data imesimbwa kwa njia fiche, tafadhali weka nenosiri lake hapo chini:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Inaanza kuhifadhi..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Imemaliza kuhifadhi"</string>

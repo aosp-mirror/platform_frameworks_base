@@ -50,8 +50,7 @@ public class DataServiceCallback {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RESULT_SUCCESS, RESULT_ERROR_UNSUPPORTED, RESULT_ERROR_INVALID_ARG, RESULT_ERROR_BUSY,
-            RESULT_ERROR_ILLEGAL_STATE, RESULT_ERROR_TEMPORARILY_UNAVAILABLE,
-            RESULT_ERROR_INVALID_RESPONSE})
+            RESULT_ERROR_ILLEGAL_STATE, RESULT_ERROR_TEMPORARILY_UNAVAILABLE})
     public @interface ResultCode {}
 
     /** Request is completed successfully */
@@ -69,11 +68,6 @@ public class DataServiceCallback {
      * @hide
      */
     public static final int RESULT_ERROR_TEMPORARILY_UNAVAILABLE = 5;
-    /**
-     * Request failed to complete due to an invalid response.
-     * @hide
-     */
-    public static final int RESULT_ERROR_INVALID_RESPONSE = 6;
 
     private final IDataServiceCallback mCallback;
 
@@ -261,8 +255,6 @@ public class DataServiceCallback {
                 return "RESULT_ERROR_ILLEGAL_STATE";
             case RESULT_ERROR_TEMPORARILY_UNAVAILABLE:
                 return "RESULT_ERROR_TEMPORARILY_UNAVAILABLE";
-            case RESULT_ERROR_INVALID_RESPONSE:
-                return "RESULT_ERROR_INVALID_RESPONSE";
             default:
                 return "Unknown(" + resultCode + ")";
         }

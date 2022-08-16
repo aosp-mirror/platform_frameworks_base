@@ -96,7 +96,7 @@ public class EmergencyButton extends Button {
      **/
     public void reloadColors() {
         int color = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.textColorPrimaryInverse);
+                com.android.internal.R.attr.textColorOnAccent);
         setTextColor(color);
         setBackground(getContext()
                 .getDrawable(com.android.systemui.R.drawable.kg_emergency_button_background));
@@ -107,10 +107,10 @@ public class EmergencyButton extends Button {
         return super.performLongClick();
     }
 
-    void updateEmergencyCallButton(boolean isInCall, boolean isVoiceCapable, boolean simLocked) {
+    void updateEmergencyCallButton(boolean isInCall, boolean hasTelephonyRadio, boolean simLocked) {
         boolean visible = false;
-        if (isVoiceCapable) {
-            // Emergency calling requires voice capability.
+        if (hasTelephonyRadio) {
+            // Emergency calling requires a telephony radio.
             if (isInCall) {
                 visible = true; // always show "return to call" if phone is off-hook
             } else {

@@ -19,6 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Slika v sliki"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Program brez naslova)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"Zapri način PIP"</string>
+    <string name="pip_close" msgid="2955969519031223530">"Zapri"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Celozaslonsko"</string>
+    <string name="pip_move" msgid="158770205886688553">"Premakni"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"Razširi"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"Strni"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Za kontrolnike dvakrat pritisnite gumb za "<annotation icon="home_icon">" ZAČETNI ZASLON "</annotation></string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Meni za sliko v sliki"</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Premakni levo"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Premakni desno"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Premakni navzgor"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Premakni navzdol"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Končano"</string>
 </resources>

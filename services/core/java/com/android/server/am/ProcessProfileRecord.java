@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.processStateAmToProto;
 
+import android.annotation.IntDef;
 import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
 import android.os.Debug;
@@ -35,12 +36,95 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ProcessList.ProcStateMemTracker;
 
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Profiling info of the process, such as PSS, cpu, etc.
  */
 final class ProcessProfileRecord {
+    // Keep below types in sync with the HostingComponentType in the atoms.proto.
+    /**
+     * The type of the component this process is hosting;
+     * this means not hosting any components (cached).
+     */
+    static final int HOSTING_COMPONENT_TYPE_EMPTY = 0x0;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's a system process.
+     */
+    static final int HOSTING_COMPONENT_TYPE_SYSTEM = 0x00000001;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's a persistent process.
+     */
+    static final int HOSTING_COMPONENT_TYPE_PERSISTENT = 0x00000002;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting a backup/restore agent.
+     */
+    static final int HOSTING_COMPONENT_TYPE_BACKUP = 0x00000004;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting an instrumentation.
+     */
+    static final int HOSTING_COMPONENT_TYPE_INSTRUMENTATION = 0x00000008;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting an activity.
+     */
+    static final int HOSTING_COMPONENT_TYPE_ACTIVITY = 0x00000010;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting a broadcast receiver.
+     */
+    static final int HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER = 0x00000020;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting a content provider.
+     */
+    static final int HOSTING_COMPONENT_TYPE_PROVIDER = 0x00000040;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting a started service.
+     */
+    static final int HOSTING_COMPONENT_TYPE_STARTED_SERVICE = 0x00000080;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's hosting a foreground service.
+     */
+    static final int HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE = 0x00000100;
+
+    /**
+     * The type of the component this process is hosting;
+     * this means it's being bound via a service binding.
+     */
+    static final int HOSTING_COMPONENT_TYPE_BOUND_SERVICE = 0x00000200;
+
+    @IntDef(flag = true, prefix = { "HOSTING_COMPONENT_TYPE_" }, value = {
+            HOSTING_COMPONENT_TYPE_EMPTY,
+            HOSTING_COMPONENT_TYPE_SYSTEM,
+            HOSTING_COMPONENT_TYPE_PERSISTENT,
+            HOSTING_COMPONENT_TYPE_BACKUP,
+            HOSTING_COMPONENT_TYPE_INSTRUMENTATION,
+            HOSTING_COMPONENT_TYPE_ACTIVITY,
+            HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER,
+            HOSTING_COMPONENT_TYPE_PROVIDER,
+            HOSTING_COMPONENT_TYPE_STARTED_SERVICE,
+            HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE,
+            HOSTING_COMPONENT_TYPE_BOUND_SERVICE,
+    })
+    @interface HostingComponentType {}
+
     final ProcessRecord mApp;
 
     private final ActivityManagerService mService;
@@ -194,6 +278,12 @@ final class ProcessProfileRecord {
     @GuardedBy("mProfilerLock")
     private long mLastStateTime;
 
+    private AtomicInteger mCurrentHostingComponentTypes =
+            new AtomicInteger(HOSTING_COMPONENT_TYPE_EMPTY);
+
+    private AtomicInteger mHistoricalHostingComponentTypes =
+            new AtomicInteger(HOSTING_COMPONENT_TYPE_EMPTY);
+
     private final ActivityManagerGlobalLock mProcLock;
 
     ProcessProfileRecord(final ProcessRecord app) {
@@ -292,6 +382,8 @@ final class ProcessProfileRecord {
                 mThread = null;
             }
         }
+        mCurrentHostingComponentTypes.set(HOSTING_COMPONENT_TYPE_EMPTY);
+        mHistoricalHostingComponentTypes.set(HOSTING_COMPONENT_TYPE_EMPTY);
     }
 
     @GuardedBy("mProfilerLock")
@@ -518,12 +610,13 @@ final class ProcessProfileRecord {
         }
     }
 
-    void setProcessTrackerState(int procState, int memFactor, long now) {
+    void setProcessTrackerState(int procState, int memFactor) {
         synchronized (mService.mProcessStats.mLock) {
             final ProcessState tracker = mBaseProcessTracker;
             if (tracker != null) {
                 if (procState != PROCESS_STATE_NONEXISTENT) {
                     final PackageList pkgList = mApp.getPkgList();
+                    final long now = SystemClock.uptimeMillis();
                     synchronized (pkgList) {
                         tracker.setState(procState, memFactor, now,
                                 pkgList.getPackageListLocked());
@@ -604,6 +697,23 @@ final class ProcessProfileRecord {
         mLastStateTime = state.getLastStateTime();
     }
 
+    void addHostingComponentType(@HostingComponentType int type) {
+        mCurrentHostingComponentTypes.set(mCurrentHostingComponentTypes.get() | type);
+        mHistoricalHostingComponentTypes.set(mHistoricalHostingComponentTypes.get() | type);
+    }
+
+    void clearHostingComponentType(@HostingComponentType int type) {
+        mCurrentHostingComponentTypes.set(mCurrentHostingComponentTypes.get() & ~type);
+    }
+
+    @HostingComponentType int getCurrentHostingComponentTypes() {
+        return mCurrentHostingComponentTypes.get();
+    }
+
+    @HostingComponentType int getHistoricalHostingComponentTypes() {
+        return mHistoricalHostingComponentTypes.get();
+    }
+
     @GuardedBy("mService")
     void dumpPss(PrintWriter pw, String prefix, long nowUptime) {
         synchronized (mProfilerLock) {
@@ -642,6 +752,11 @@ final class ProcessProfileRecord {
             pw.print(" reportLowMemory=");
             pw.println(mReportLowMemory);
         }
+        pw.print(prefix);
+        pw.print("currentHostingComponentTypes=0x");
+        pw.print(Integer.toHexString(getCurrentHostingComponentTypes()));
+        pw.print(" historicalHostingComponentTypes=0x");
+        pw.println(Integer.toHexString(getHistoricalHostingComponentTypes()));
     }
 
     void dumpCputime(PrintWriter pw, String prefix) {

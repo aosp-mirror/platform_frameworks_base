@@ -17,11 +17,32 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ସହଯୋଗୀ ଡିଭାଇସ୍ ପରିଚାଳକ"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ଦ୍ୱାରା ପରିଚାଳିତ ହେବା ପାଇଁ ଏକ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>କୁ ବାଛନ୍ତୁ"</string>
-    <string name="profile_name_generic" msgid="6851028682723034988">"ଡିଭାଇସ୍"</string>
+    <string name="confirmation_title" msgid="3785000297483688997">"ଆପଣଙ୍କ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;କୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ୱାଚ୍"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"ଆପଣଙ୍କ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;କୁ ପରିଚାଳନା କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="profile_summary" msgid="2059360676631420073">"ଆପଣଙ୍କ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ ଏହି ଆପ୍ ଆବଶ୍ୟକ। <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ଦ୍ୱାରା ପରିଚାଳିତ ହେବା ପାଇଁ ଏକ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>କୁ ବାଛନ୍ତୁ"</string>
+    <string name="summary_watch" msgid="3002344206574997652">"ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ ଏହି ଆପ ଆବଶ୍ୟକ। ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ଏବଂ ଆପଣଙ୍କ ଫୋନ, SMS, ଯୋଗାଯୋଗ, କ୍ୟାଲେଣ୍ଡର, କଲ ଲଗ ଏବଂ ଆଖପାଖର ଡିଭାଇସ ଅନୁମତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%2$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ।"</string>
+    <string name="permission_apps" msgid="6142133265286656158">"ଆପ୍ସ"</string>
+    <string name="permission_apps_summary" msgid="798718816711515431">"ଆପଣଙ୍କ ଫୋନର ଆପ୍ସକୁ ଷ୍ଟ୍ରିମ କରନ୍ତୁ"</string>
+    <string name="title_app_streaming" msgid="2270331024626446950">"ଆପଣଙ୍କ ଫୋନରୁ ଏହି ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="helper_title_app_streaming" msgid="4151687003439969765">"କ୍ରସ-ଡିଭାଇସ ସେବାଗୁଡ଼ିକ"</string>
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"ଆପଣଙ୍କ ଫୋନର ଫଟୋ, ମିଡିଆ ଏବଂ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
+    <string name="title_automotive_projection" msgid="3296005598978412847"></string>
+    <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"ଆପଣଙ୍କ ଫୋନରୁ ଏହି ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
+    <string name="permission_notification" msgid="693762568127741203">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
+    <string name="permission_notification_summary" msgid="884075314530071011">"ଯୋଗାଯୋଗ, ମେସେଜ ଏବଂ ଫଟୋଗୁଡ଼ିକ ପରି ସୂଚନା ସମେତ ସମସ୍ତ ବିଜ୍ଞପ୍ତିକୁ ପଢ଼ିପାରିବ"</string>
+    <string name="permission_storage" msgid="6831099350839392343">"ଫଟୋ ଏବଂ ମିଡିଆ"</string>
+    <string name="permission_storage_summary" msgid="3918240895519506417"></string>
+    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ସେବାଗୁଡ଼ିକ"</string>
+    <string name="helper_summary_computer" msgid="1676407599909474428">"ଆପଣଙ୍କ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପ୍ସକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"ଡିଭାଇସ୍"</string>
+    <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="consent_no" msgid="2640796915611404382">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
+    <string name="consent_back" msgid="2560683030046918882">"ପଛକୁ ଫେରନ୍ତୁ"</string>
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ଆପଣଙ୍କ ୱାଚକୁ ଆପ ଅନୁମତିଗୁଡ଼ିକ ଟ୍ରାନ୍ସଫର କରନ୍ତୁ"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"ଆପଣଙ୍କ ୱାଚ ସେଟ ଅପ କରିବାକୁ ସହଜ କରିବା ପାଇଁ, ସେଟଅପ ସମୟରେ ଆପଣଙ୍କର ୱାଚରେ ଇନଷ୍ଟଲ କରାଯାଇଥିବା ଆପଗୁଡ଼ିକ ଆପଣଙ୍କ ଫୋନରେ ଥିବା ଆପଗୁଡ଼ିକ ପରି ସମାନ ଅନୁମତିଗୁଡ଼ିକ ବ୍ୟବହାର କରିବ।\n\n ଏହି ଅନୁମତିଗୁଡ଼ିକରେ ଆପଣଙ୍କ ୱାଚର ମାଇକ୍ରୋଫୋନ ଏବଂ ଲୋକେସନକୁ ଆକ୍ସେସ ଅନ୍ତର୍ଭୁକ୍ତ ହୋଇପାରେ।"</string>
+    <string name="vendor_icon_description" msgid="4445875290032225965">"ଆପ ଆଇକନ"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"ଅଧିକ ସୂଚନା ବଟନ"</string>
 </resources>

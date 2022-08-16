@@ -16,7 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import android.annotation.Nullable;
 import android.app.admin.DeviceAdminInfo;
 import android.content.ComponentName;
 
@@ -29,12 +28,6 @@ import java.util.function.Function;
  * to go through the upgrade process.
  */
 public interface PolicyUpgraderDataProvider {
-    /**
-     * Returns true if the provided {@code userId} is a device owner. May affect some policy
-     * defaults.
-     */
-    boolean isDeviceOwner(int userId, ComponentName who);
-
     /**
      * Returns true if the storage manager indicates file-based encryption is enabled.
      */
@@ -49,11 +42,6 @@ public interface PolicyUpgraderDataProvider {
      * Returns the journaled policy version file for a given user.
      */
     JournaledFile makePoliciesVersionJournaledFile(int userId);
-
-    /**
-     * Returns the {@code ComponentName} of the owner component for a user.
-     */
-    @Nullable ComponentName getOwnerComponent(int userId);
 
     /**
      * Returns a function which provides the component name and device admin info for a given

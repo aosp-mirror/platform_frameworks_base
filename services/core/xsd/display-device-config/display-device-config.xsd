@@ -26,11 +26,19 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
+                <xs:element type="densityMapping" name="densityMapping" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="nitsMap" name="screenBrightnessMap">
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessDefault">
+                    <xs:annotation name="nonnull"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="thermalThrottling" name="thermalThrottling">
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -49,10 +57,29 @@
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Maximum time in milliseconds that a brightness increase animation
+                     can take. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampIncreaseMaxMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum time in milliseconds that a brightness decrease animation
+                     can take. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampDecreaseMaxMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="sensorDetails" name="lightSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="proxSensor">
+                    <xs:annotation name="final"/>
+                </xs:element>
+
+                <!-- Length of the ambient light horizon used to calculate the long & short term
+                estimates of ambient light in milliseconds.-->
+                <xs:element type="xs:nonNegativeInteger" name="ambientLightHorizonLong">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="xs:nonNegativeInteger" name="ambientLightHorizonShort">
                     <xs:annotation name="final"/>
                 </xs:element>
 
@@ -106,6 +133,18 @@
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
+            <!-- The minimum HDR video size at which high-brightness-mode is allowed to operate.
+                Default is 0.5 if not specified-->
+            <xs:element name="minimumHdrPercentOfScreen" type="nonNegativeDecimal"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- This LUT specifies how to boost HDR brightness at given SDR brightness (nits). -->
+            <xs:element type="sdrHdrRatioMap" name="sdrHdrRatioMap" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:all>
         <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
     </xs:complexType>
@@ -141,6 +180,37 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:complexType name="thermalThrottling">
+        <xs:complexType>
+            <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:complexType>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessThrottlingMap">
+        <xs:sequence>
+            <xs:element name="brightnessThrottlingPoint" type="brightnessThrottlingPoint" maxOccurs="unbounded" minOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="brightness">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
     <xs:complexType name="nitsMap">
         <xs:sequence>
             <xs:element name="point" type="point" maxOccurs="unbounded" minOccurs="2">
@@ -148,6 +218,8 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+        <!-- valid value of interpolation if specified: linear -->
+        <xs:attribute name="interpolation" type="xs:string" use="optional"/>
     </xs:complexType>
 
     <xs:complexType name="point">
@@ -157,6 +229,28 @@
                 <xs:annotation name="final"/>
             </xs:element>
             <xs:element type="nonNegativeDecimal" name="nits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="sdrHdrRatioMap">
+        <xs:sequence>
+            <xs:element name="point" type="sdrHdrRatioPoint" maxOccurs="unbounded" minOccurs="2">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="sdrHdrRatioPoint">
+        <xs:sequence>
+            <xs:element type="nonNegativeDecimal" name="sdrNits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="hdrRatio">
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
@@ -196,6 +290,30 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:complexType name="densityMapping">
+        <xs:sequence>
+            <xs:element name="density" type="density" maxOccurs="unbounded" minOccurs="1">
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="density">
+        <xs:sequence>
+            <xs:element type="xs:nonNegativeInteger" name="width">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="xs:nonNegativeInteger" name="height">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="xs:nonNegativeInteger" name="density">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+      </xs:complexType>
 
     <!-- Thresholds for brightness changes. -->
     <xs:complexType name="thresholds">

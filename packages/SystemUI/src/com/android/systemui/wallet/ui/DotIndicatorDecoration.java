@@ -48,8 +48,8 @@ final class DotIndicatorDecoration extends RecyclerView.ItemDecoration {
                         R.dimen.card_carousel_dot_selected_radius);
         mDotMargin = context.getResources().getDimensionPixelSize(R.dimen.card_carousel_dot_margin);
 
-        mUnselectedColor = context.getColor(com.android.internal.R.color.system_neutral1_300);
-        mSelectedColor = context.getColor(com.android.internal.R.color.system_neutral1_0);
+        mUnselectedColor = context.getColor(R.color.material_dynamic_neutral70);
+        mSelectedColor = context.getColor(R.color.material_dynamic_neutral100);
     }
 
     @Override

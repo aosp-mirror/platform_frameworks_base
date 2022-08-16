@@ -17,17 +17,19 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.BiometricConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * A class to keep track of the remove state for a given client.
@@ -41,13 +43,15 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     private final Map<Integer, Long> mAuthenticatorIds;
     private final boolean mHasEnrollmentsBeforeStarting;
 
-    public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public RemovalClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils, int sensorId,
-            @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_REMOVE,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                logger, biometricContext);
+        //, BiometricsProtoEnums.ACTION_REMOVE,
+          //      BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
@@ -59,7 +63,7 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL
@@ -68,6 +72,24 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
 
     @Override
     public void onRemoved(@NonNull BiometricAuthenticator.Identifier identifier, int remaining) {
+        // This happens when we have failed to remove a biometric.
+        if (identifier == null) {
+            Slog.e(TAG, "identifier was null, skipping onRemove()");
+            try {
+                if (getListener() != null) {
+                    getListener().onError(getSensorId(), getCookie(),
+                            BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_REMOVE,
+                            0 /* vendorCode */);
+                } else {
+                    Slog.e(TAG, "Error, listener was null, not sending onError callback");
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to send error to client for onRemoved", e);
+            }
+            mCallback.onClientFinished(this, false /* success */);
+            return;
+        }
+
         Slog.d(TAG, "onRemoved: " + identifier.getBiometricId() + " remaining: " + remaining);
         mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
                 identifier.getBiometricId());

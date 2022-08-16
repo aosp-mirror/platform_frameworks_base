@@ -17,10 +17,12 @@
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.Error;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.ISessionCallback;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
@@ -181,6 +183,39 @@ public class TestHal extends IFingerprint.Stub {
             @Override
             public void onUiReady() {
                 Slog.w(TAG, "onUiReady");
+            }
+
+            @Override
+            public ICancellationSignal authenticateWithContext(
+                    long operationId, OperationContext context) {
+                return authenticate(operationId);
+            }
+
+            @Override
+            public ICancellationSignal enrollWithContext(
+                    HardwareAuthToken hat, OperationContext context) {
+                return enroll(hat);
+            }
+
+            @Override
+            public ICancellationSignal detectInteractionWithContext(OperationContext context) {
+                return detectInteraction();
+            }
+
+            @Override
+            public void onPointerDownWithContext(PointerContext context) {
+                onPointerDown(context.pointerId, (int) context.x, (int) context.y, context.minor,
+                        context.major);
+            }
+
+            @Override
+            public void onPointerUpWithContext(PointerContext context) {
+                onPointerUp(context.pointerId);
+            }
+
+            @Override
+            public void onContextChanged(OperationContext context) {
+                Slog.w(TAG, "onContextChanged");
             }
         };
     }

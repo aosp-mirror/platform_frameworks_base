@@ -74,9 +74,9 @@ class EnterPipToOtherOrientationTest(
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            setupAndTeardown(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            setupAndTeardown(this)
 
             setup {
                 eachRun {
@@ -98,7 +98,7 @@ class EnterPipToOtherOrientationTest(
                 // Enter PiP, and assert that the PiP is within bounds now that the device is back
                 // in portrait
                 broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
-                wmHelper.waitFor { it.wmState.hasPipWindow() }
+                wmHelper.waitPipShown()
                 wmHelper.waitForAppTransitionIdle()
                 // during rotation the status bar becomes invisible and reappears at the end
                 wmHelper.waitForNavBarStatusBarVisible()
@@ -117,7 +117,7 @@ class EnterPipToOtherOrientationTest(
      * Checks that the [FlickerComponentName.STATUS_BAR] has the correct position at
      * the start and end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -224,7 +224,7 @@ class EnterPipToOtherOrientationTest(
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 5)
+                    repetitions = 3)
         }
     }
 }

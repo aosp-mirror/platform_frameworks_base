@@ -34,6 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import android.app.PropertyInvalidatedCache;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.gatekeeper.GateKeeperResponse;
@@ -47,6 +48,7 @@ import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.FakeGateKeeperService.VerifyHandle;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,6 +59,11 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
+    @Before
+    public void disableProcessCaches() {
+        PropertyInvalidatedCache.disableForTestMode();
+    }
+
     @Test
     public void testCreatePasswordPrimaryUser() throws RemoteException {
         testCreateCredential(PRIMARY_USER_ID, newPassword("password"));

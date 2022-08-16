@@ -88,18 +88,26 @@ genrule {
     out: ["com/android/internal/art/ArtStatsLog.java"],
 }
 
+genrule {
+    name: "statslog-contexthub-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module contexthub" +
+        " --javaPackage com.android.server.location.contexthub --javaClass ContextHubStatsLog",
+    out: ["com/android/server/location/contexthub/ContextHubStatsLog.java"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
+        ":android.hardware.biometrics.face-V2-java-source",
         ":statslog-art-java-gen",
-        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex is ready
+        ":statslog-contexthub-java-gen",
         ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gsiservice_aidl",
-        ":inputconstants_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
@@ -116,17 +124,18 @@ java_library_static {
 
     libs: [
         "services.net",
+        "android.hardware.common-V2-java",
         "android.hardware.light-V2.0-java",
-        "android.hardware.gnss-V1-java",
-        "android.hardware.power-V1-java",
-        "android.hardware.power-V1.0-java",
+        "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V2-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
+        "service-sdksandbox.stubs.system_server",
     ],
 
     required: [
+        "default_television.xml",
         "gps_debug.conf",
         "protolog.conf.json.gz",
     ],
@@ -145,16 +154,16 @@ java_library_static {
         "android.hardware.light-V1-java",
         "android.hardware.tv.cec-V1.1-java",
         "android.hardware.weaver-V1.0-java",
-        "android.hardware.biometrics.face-V1-java",
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.3-java",
-        "android.hardware.biometrics.fingerprint-V1-java",
+        "android.hardware.biometrics.fingerprint-V2-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.1-java",
         "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.soundtrigger-V2.3-java",
         "android.hardware.power.stats-V1-java",
+        "android.hardware.power-V3-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
         "icu4j_calendar_astronomer",
@@ -205,11 +214,4 @@ genrule {
 prebuilt_etc {
     name: "protolog.conf.json.gz",
     src: ":services.core.json.gz",
-}
-
-filegroup {
-    name: "services.core-sources-deviceconfig-interface",
-    srcs: [
-        "java/com/android/server/utils/DeviceConfigInterface.java",
-    ],
 }

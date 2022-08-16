@@ -779,6 +779,8 @@ message UidRecordProto {
         CHANGE_CACHED = 3;
         CHANGE_UNCACHED = 4;
         CHANGE_CAPABILITY = 5;
+        CHANGE_PROCSTATE = 6;
+        CHANGE_PROCADJ = 7;
     }
     repeated Change last_reported_changes = 8;
     optional int32 num_procs = 9;

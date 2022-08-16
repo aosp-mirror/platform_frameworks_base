@@ -17,6 +17,7 @@
 package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 
 /**
@@ -103,6 +104,20 @@ public interface LegacyPermissionManagerInternal {
      * Schedule reading the default permission exceptions file.
      */
     void scheduleReadDefaultPermissionExceptions();
+
+    /**
+     * Check whether a particular package should have access to the microphone data from the
+     * SoundTrigger.
+     *
+     * @param uid the uid of the package you are checking against
+     * @param packageName the name of the package you are checking against
+     * @param attributionTag the attributionTag to attach to the app op transaction
+     * @param reason the reason to attach to the app op transaction
+     * @return {@code PERMISSION_GRANTED} if the permission is granted,
+     *         or {@code PERMISSION_SOFT/HARD DENIED otherwise
+     */
+    int checkSoundTriggerRecordAudioPermissionForDataDelivery(int uid,
+            @NonNull String packageName, @Nullable String attributionTag, @NonNull String reason);
 
     /**
      * Provider for package names.

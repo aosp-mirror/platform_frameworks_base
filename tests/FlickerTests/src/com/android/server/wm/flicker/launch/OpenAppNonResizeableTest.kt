@@ -17,20 +17,19 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.traces.common.FlickerComponentName
-import com.google.common.truth.Truth
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,6 +38,8 @@ import org.junit.runners.Parameterized
 
 /**
  * Test launching an app while the device is locked
+ *
+ * This test assumes the device doesn't have AOD enabled
  *
  * To run this test: `atest FlickerTests:OpenAppNonResizeableTest`
  *
@@ -59,83 +60,22 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
+    : OpenAppFromLockTransition(testSpec) {
     override val testApp = NonResizeableAppHelper(instrumentation)
     private val colorFadComponent = FlickerComponentName("", "ColorFade BLAST#")
 
     /**
-     * Defines the transition used to run the test
+     * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation
+     * and remains visible at the end
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { args ->
-            super.transition(this, args)
-            setup {
-                eachRun {
-                    device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
-                }
-            }
-            teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
-                }
-            }
-            transitions {
-                testApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(testApp.component)
-            }
-        }
-
-    /**
-     * Checks that the nav bar layer starts visible, becomes invisible during unlocking animation
-     * and becomes visible at the end
-     */
-    @Postsubmit
+    @FlakyTest(bugId = 227083463)
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
-            this.isVisible(FlickerComponentName.NAV_BAR)
-                .then()
-                .isInvisible(FlickerComponentName.NAV_BAR)
+            this.isInvisible(FlickerComponentName.NAV_BAR)
                 .then()
                 .isVisible(FlickerComponentName.NAV_BAR)
-        }
-    }
-
-    /**
-     * Checks that the app layer doesn't exist at the start of the transition, that it is
-     * created (invisible) and becomes visible during the transition
-     */
-    @FlakyTest
-    @Test
-    fun appLayerBecomesVisible() {
-        testSpec.assertLayers {
-            this.notContains(testApp.component)
-                    .then()
-                    .isInvisible(testApp.component)
-                    .then()
-                    .isVisible(testApp.component)
-        }
-    }
-
-    /**
-     * Checks that the app window doesn't exist at the start of the transition, that it is
-     * created (invisible - optional) and becomes visible during the transition
-     *
-     * The `isAppWindowInvisible` step is optional because we log once per frame, upon logging,
-     * the window may be visible or not depending on what was processed until that moment.
-     */
-    @Presubmit
-    @Test
-    fun appWindowBecomesVisible() {
-        testSpec.assertWm {
-            this.notContains(testApp.component)
-                    .then()
-                    .isAppWindowInvisible(testApp.component, isOptional = true)
-                    .then()
-                    .isAppWindowVisible(testApp.component)
         }
     }
 
@@ -151,31 +91,23 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     }
 
     /**
-     * Checks that the nav bar starts the transition visible, then becomes invisible during
-     * then unlocking animation and becomes visible at the end of the transition
+     * Checks that the nav bar starts the transition invisible, then becomes visible during
+     * the unlocking animation and remains visible at the end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {
-            this.isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
-                .then()
-                .isNonAppWindowInvisible(FlickerComponentName.NAV_BAR)
+            this.isNonAppWindowInvisible(FlickerComponentName.NAV_BAR)
                 .then()
                 .isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
         }
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
-
     /**
      * Checks that the status bar layer is visible at the end of the trace
      *
-     * It is not possible to check at the start because the animation is working differently
-     * in devices with and without blur (b/202936526)
+     * It is not possible to check at the start because the screen is off
      */
     @Presubmit
     @Test
@@ -186,31 +118,31 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 202936526)
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerPositionAtEnd() {
         testSpec.assertLayersEnd {
             val display = this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
+                ?: error("There is no display!")
             this.visibleRegion(FlickerComponentName.STATUS_BAR)
                 .coversExactly(WindowUtils.getStatusBarPosition(display))
         }
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Postsubmit
     @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -219,47 +151,14 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
-    /**
-     * Checks that the focus changes from the launcher to [testApp]
-     */
-    @FlakyTest
+    @FlakyTest(bugId = 218470989)
     @Test
-    override fun focusChanges() = super.focusChanges()
-
-    /**
-     * Checks that the screen is locked at the start of the transition ([colorFadComponent])
-     * layer is visible
-     */
-    @Postsubmit
-    @Test
-    fun screenLockedStart() {
-        testSpec.assertLayersStart {
-            isVisible(colorFadComponent)
-        }
-    }
-
-    /**
-     * This test checks if the launcher is visible at the start and the app at the end,
-     * it cannot use the regular assertion (check over time), because on lock screen neither
-     * the app not the launcher are visible, and there is no top visible window.
-     */
-    @Postsubmit
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() {
-        testSpec.assertWm {
-            this.invoke("noAppWindowsOnTop") {
-                    Truth.assertWithMessage("Should not have any app window on top " +
-                        "when the screen is locked")
-                        .that(it.wmState.topVisibleAppWindow)
-                        .isEmpty()
-                }.then()
-                .isAppWindowOnTop(testApp.component)
-        }
-    }
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
@@ -273,7 +172,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(
-                            repetitions = 5,
+                            repetitions = 3,
                             supportedNavigationModes =
                             listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
                             supportedRotations = listOf(Surface.ROTATION_0)

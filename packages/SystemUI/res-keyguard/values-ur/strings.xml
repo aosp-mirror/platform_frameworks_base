@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"غلط کارڈ۔"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"چارج ہوگئی"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • وائرلیس طریقے سے چارج ہو رہا ہے"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارجنگ ڈاک"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تیزی سے چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آہستہ چارج ہو رہا ہے"</string>
@@ -52,10 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"غلط پیٹرن"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"غلط پاس ورڈ"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"‏غلط PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> سیکنڈز میں دوبارہ کوشش کریں۔</item>
-      <item quantity="one">1 سیکنڈ میں دوبارہ کوشش کریں۔</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# سیکنڈ میں دوبارہ کوشش کریں۔}other{# سیکنڈ میں دوبارہ کوشش کریں۔}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"‏SIM PIN درج کریں۔"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏\"<xliff:g id="CARRIER">%1$s</xliff:g>\" کیلئے SIM PIN درج کریں۔"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"‏<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> موبائل سروس کے بغیر آلہ کا استعمال کرنے کیلئے eSIM غیر فعال کریں۔"</string>
@@ -91,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"اضافی سیکیورٹی کیلئے پاس ورڈ درکار ہے"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"آلہ منتظم کی جانب سے مقفل ہے"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"تسلیم شدہ نہیں ہے"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"فیس اَنلاک کا استعمال کرنے کے لیے، ترتیبات اور رازداری میں "<b>"کیمرے تک رسائی"</b>" کو آن کریں"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

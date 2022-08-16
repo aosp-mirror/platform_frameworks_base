@@ -17,13 +17,14 @@
 */
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <!-- Keyguard PIN pad styles -->
     <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="Theme.SystemUI">
-        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
         <item name="android:textSize">14dp</item>
         <item name="android:background">@drawable/kg_emergency_button_background</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
@@ -139,5 +140,26 @@
 
     <style name="TextAppearance.Keyguard.BottomArea.Button">
         <item name="android:shadowRadius">0</item>
+    </style>
+
+    <style name="Bouncer.UserSwitcher.Spinner" parent="@android:style/Widget.DeviceDefault.TextView">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingVertical">@dimen/bouncer_user_switcher_item_padding_vertical</item>
+        <item name="android:paddingHorizontal">@dimen/bouncer_user_switcher_item_padding_horizontal</item>
+        <item name="android:lineHeight">@dimen/bouncer_user_switcher_item_line_height</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+    <style name="Bouncer.UserSwitcher.Spinner.Header">
+        <item name="android:background">@drawable/bouncer_user_switcher_header_bg</item>
+        <item name="android:textSize">@dimen/bouncer_user_switcher_header_text_size</item>
+        <item name="android:paddingEnd">@dimen/bouncer_user_switcher_header_padding_end</item>
+    </style>
+
+    <style name="Bouncer.UserSwitcher.Spinner.Item">
+        <item name="android:textSize">@dimen/bouncer_user_switcher_item_text_size</item>
     </style>
 </resources>

@@ -33,7 +33,6 @@
 #include "Resource.h"
 #include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/Maybe.h"
 #include "xml/XmlUtil.h"
 
 namespace aapt {
@@ -121,7 +120,8 @@ class XmlPullParser : public IPackageDeclStack {
    * If xmlns:app="http://schemas.android.com/apk/res-auto", then
    * 'package' will be set to 'defaultPackage'.
    */
-  Maybe<ExtractedPackage> TransformPackageAlias(const android::StringPiece& alias) const override;
+  std::optional<ExtractedPackage> TransformPackageAlias(
+      const android::StringPiece& alias) const override;
 
   struct PackageDecl {
     std::string prefix;
@@ -193,16 +193,16 @@ class XmlPullParser : public IPackageDeclStack {
 /**
  * Finds the attribute in the current element within the global namespace.
  */
-Maybe<android::StringPiece> FindAttribute(const XmlPullParser* parser,
-                                          const android::StringPiece& name);
+std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                                  const android::StringPiece& name);
 
 /**
  * Finds the attribute in the current element within the global namespace. The
  * attribute's value
  * must not be the empty string.
  */
-Maybe<android::StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
-                                                  const android::StringPiece& name);
+std::optional<android::StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
+                                                          const android::StringPiece& name);
 
 //
 // Implementation

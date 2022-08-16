@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"ขอการเชื่อมต่อ"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ต้องการสร้างการเชื่อมต่อ VPN เพื่อให้แอปสามารถตรวจสอบการเข้าใช้งานเครือข่าย โปรดยอมรับหากคุณเชื่อถือแหล่งที่มานี้เท่านั้น &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; จะปรากฏที่ด้านบนหน้าจอเมื่อมีการใช้งาน VPN อยู่"</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> ต้องการตั้งค่าการเชื่อมต่อ VPN เพื่อให้ตรวจสอบการจราจรของข้อมูลในเครือข่ายได้ ยอมรับต่อเมื่อคุณไว้วางใจแหล่งที่มานี้เท่านั้น &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; จะปรากฏบนหน้าจอเมื่อใช้งาน VPN อยู่"</string>
     <string name="legacy_title" msgid="192936250066580964">"เชื่อมต่อ VPN แล้ว"</string>
     <string name="session" msgid="6470628549473641030">"เซสชัน"</string>
     <string name="duration" msgid="3584782459928719435">"ระยะเวลา:"</string>

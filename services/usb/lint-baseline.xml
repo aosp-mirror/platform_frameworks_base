@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="7.1.0-dev">
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        int isDisabled = Settings.Secure.getInt(mContext.getContentResolver(),"
+        errorLine2="                                         ~~~~~~">
+        <location
+            file="frameworks/base/services/usb/java/com/android/server/usb/UsbAlsaManager.java"
+            line="150"
+            column="42"/>
+    </issue>
+
+</issues>

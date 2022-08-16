@@ -26,9 +26,12 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
+import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -57,6 +60,12 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private lateinit var sysuiUnfoldComponent: SysUIUnfoldComponent
     @Mock
     private lateinit var progressProvider: ScopedUnfoldTransitionProgressProvider
+    @Mock
+    private lateinit var configurationController: ConfigurationController
+    @Mock
+    private lateinit var userSwitcherController: StatusBarUserSwitcherController
+    @Mock
+    private lateinit var viewUtil: ViewUtil
 
     private lateinit var view: PhoneStatusBarView
     private lateinit var controller: PhoneStatusBarViewController
@@ -76,7 +85,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
         }
 
-        controller = createController(view)
+        controller = createAndInitController(view)
     }
 
     @Test
@@ -96,8 +105,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         val view = createViewMock()
         val argumentCaptor = ArgumentCaptor.forClass(OnPreDrawListener::class.java)
         unfoldConfig.isEnabled = true
-        controller = createController(view)
-        controller.init()
+        controller = createAndInitController(view)
 
         verify(view.viewTreeObserver).addOnPreDrawListener(argumentCaptor.capture())
         argumentCaptor.value.onPreDraw()
@@ -113,11 +121,16 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         return view
     }
 
-    private fun createController(view: PhoneStatusBarView): PhoneStatusBarViewController {
+    private fun createAndInitController(view: PhoneStatusBarView): PhoneStatusBarViewController {
         return PhoneStatusBarViewController.Factory(
             Optional.of(sysuiUnfoldComponent),
-            Optional.of(progressProvider)
-        ).create(view, touchEventHandler)
+            Optional.of(progressProvider),
+            userSwitcherController,
+            viewUtil,
+            configurationController
+        ).create(view, touchEventHandler).also {
+            it.init()
+        }
     }
 
     private class UnfoldConfig : UnfoldTransitionConfig {

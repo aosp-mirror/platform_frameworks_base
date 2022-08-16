@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.graphics.Rect
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.SystemClock
@@ -26,6 +25,7 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
+import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
@@ -58,16 +58,26 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
     }
 
-    /** {@inheritDoc}  */
-    override fun launchViaIntent(
+    /**
+     * Launches the app through an intent instead of interacting with the launcher and waits
+     * until the app window is in PIP mode
+     */
+    @JvmOverloads
+    fun launchViaIntentAndWaitForPip(
         wmHelper: WindowManagerStateHelper,
-        expectedWindowName: String,
-        action: String?,
+        expectedWindowName: String = "",
+        action: String? = null,
         stringExtras: Map<String, String>
     ) {
-        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        wmHelper.waitFor("hasPipWindow") { it.wmState.hasPipWindow() }
+        launchViaIntentAndWaitShown(wmHelper, expectedWindowName, action, stringExtras,
+            waitConditions = arrayOf(WindowManagerStateHelper.pipShownCondition))
     }
+
+    /**
+     * Expand the PIP window back to full screen via intent and wait until the app is visible
+     */
+    fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
+        launchViaIntentAndWaitShown(wmHelper)
 
     private fun focusOnObject(selector: BySelector): Boolean {
         // We expect all the focusable UI elements to be arranged in a way so that it is possible
@@ -88,7 +98,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper?.waitFor("hasPipWindow") { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
+        wmHelper?.waitPipShown() ?: SystemClock.sleep(3_000)
         // when entering pip, the dismiss button is visible at the start. to ensure the pip
         // animation is complete, wait until the pip dismiss button is no longer visible. 
         // b/176822698: dismiss-only state will be removed in the future
@@ -148,7 +158,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
 
         // Wait for animation to complete.
-        wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+        wmHelper.waitPipGone()
         wmHelper.waitForHomeActivityVisible()
     }
 
@@ -165,7 +175,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
                 ?: error("PIP window expand button not found")
         val expandButtonBounds = expandPipObject.visibleBounds
         uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
-        wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+        wmHelper.waitPipGone()
         wmHelper.waitForAppTransitionIdle()
     }
 

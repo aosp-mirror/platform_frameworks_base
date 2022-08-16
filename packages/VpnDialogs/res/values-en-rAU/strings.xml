@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Connection request"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> wants to set up a VPN connection that allows it to monitor network traffic. Only accept if you trust the source. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; appears at the top of your screen when VPN is active."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> wants to set up a VPN connection that allows it to monitor network traffic. Only accept if you trust the source. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; appears on your screen when VPN is active."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN is connected"</string>
     <string name="session" msgid="6470628549473641030">"Session:"</string>
     <string name="duration" msgid="3584782459928719435">"Duration:"</string>

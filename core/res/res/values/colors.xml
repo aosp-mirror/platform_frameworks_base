@@ -174,14 +174,14 @@
     <color name="system_notification_accent_color">#00000000</color>
 
     <!-- Default user icon colors -->
-    <color name="user_icon_1">#ff00bcd4</color><!-- cyan 500 -->
-    <color name="user_icon_2">#ff3f51b5</color><!-- indigo 500 -->
-    <color name="user_icon_3">#ff4285f4</color><!-- blue 500 -->
-    <color name="user_icon_4">#ffe91e63</color><!-- pink 500 -->
-    <color name="user_icon_5">#ff0f9d58</color><!-- green 500 -->
-    <color name="user_icon_6">#ff8bc34a</color><!-- light green 500 -->
-    <color name="user_icon_7">#ffff9800</color><!-- orange 500 -->
-    <color name="user_icon_8">#ffff5722</color><!-- deep orange 500 -->
+    <color name="user_icon_1">#ffe46962</color><!-- red -->
+    <color name="user_icon_2">#ffaf5cf7</color><!-- purple -->
+    <color name="user_icon_3">#ff4c8df6</color><!-- blue -->
+    <color name="user_icon_4">#fff439a0</color><!-- pink -->
+    <color name="user_icon_5">#ff1ea446</color><!-- green -->
+    <color name="user_icon_6">#ff129eaf</color><!-- cyan -->
+    <color name="user_icon_7">#ffb26c00</color><!-- yellow -->
+    <color name="user_icon_8">#ffe8710a</color><!-- orange -->
     <color name="user_icon_default_gray">#ff9e9e9e</color><!-- gray 500 -->
     <color name="user_icon_default_white">#ffffffff</color><!-- white -->
 
@@ -235,8 +235,6 @@
 
     <!-- Resolver/Chooser -->
     <color name="resolver_text_color_secondary_dark">#ffC4C6C6</color>
-    <color name="resolver_empty_state_text">#FF202124</color>
-    <color name="resolver_empty_state_icon">#FF5F6368</color>
 
     <!-- Color for personal app suspension notification button text and icon tint. -->
     <color name="personal_apps_suspension_notification_color">#1A73E8</color>
@@ -448,4 +446,8 @@
     <color name="accessibility_magnification_background">#F50D60</color>
     <color name="accessibility_daltonizer_background">#00BCD4</color>
     <color name="accessibility_color_inversion_background">#546E7A</color>
+
+    <!-- Color of camera light when camera is in use -->
+    <color name="camera_privacy_light_day">#FFFFFF</color>
+    <color name="camera_privacy_light_night">#FFFFFF</color>
 </resources>

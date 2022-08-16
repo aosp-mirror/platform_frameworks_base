@@ -52,6 +52,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
@@ -107,7 +108,6 @@ public class SystemServicesTestRule implements TestRule {
     private static final String TAG = SystemServicesTestRule.class.getSimpleName();
 
     static int sNextDisplayId = DEFAULT_DISPLAY + 100;
-    static int sNextTaskId = 100;
 
     private static final int[] TEST_USER_PROFILE_IDS = {};
     /** Use a real static object so there won't be NPE in finalize() after clearInlineMocks(). */
@@ -128,8 +128,6 @@ public class SystemServicesTestRule implements TestRule {
     private ActivityManagerService mAmService;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
-    private TestWindowManagerPolicy mWMPolicy;
-    private TestDisplayWindowSettingsProvider mTestDisplayWindowSettingsProvider;
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
@@ -173,11 +171,13 @@ public class SystemServicesTestRule implements TestRule {
                 .defaultAnswer(CALLS_REAL_METHODS);
         final MockSettings mockStubOnly = withSettings().stubOnly();
         // Return mocked services: LocalServices.getService
+        // Avoid real operation: SurfaceControl.mirrorSurface
         // Avoid leakage: DeviceConfig.addOnPropertiesChangedListener, LockGuard.installLock
         //                Watchdog.getInstance/addMonitor
         mMockitoSession = mockitoSession()
                 .mockStatic(LocalServices.class, spyStubOnly)
                 .mockStatic(DeviceConfig.class, spyStubOnly)
+                .mockStatic(SurfaceControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
                 .strictness(Strictness.LENIENT)
@@ -229,6 +229,10 @@ public class SystemServicesTestRule implements TestRule {
         // AppOpsManager
         final AppOpsManager aom = mock(AppOpsManager.class);
         doReturn(aom).when(mContext).getSystemService(eq(Context.APP_OPS_SERVICE));
+
+        // DeviceStateManager
+        final DeviceStateManager dsm = mock(DeviceStateManager.class);
+        doReturn(dsm).when(mContext).getSystemService(eq(Context.DEVICE_STATE_SERVICE));
 
         // Prevent "WakeLock finalized while still held: SCREEN_FROZEN".
         final PowerManager pm = mock(PowerManager.class);
@@ -307,6 +311,7 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(amInternal).updateOomLevelsForDisplay(anyInt());
         doNothing().when(amInternal).broadcastGlobalConfigurationChanged(anyInt(), anyBoolean());
         doNothing().when(amInternal).cleanUpServices(anyInt(), any(), any());
+        doNothing().when(amInternal).reportCurKeyguardUsageEvent(anyBoolean());
         doReturn(UserHandle.USER_SYSTEM).when(amInternal).getCurrentUserId();
         doReturn(TEST_USER_PROFILE_IDS).when(amInternal).getCurrentProfileIds();
         doReturn(true).when(amInternal).isUserRunning(anyInt(), anyInt());
@@ -321,14 +326,14 @@ public class SystemServicesTestRule implements TestRule {
 
     private void setUpWindowManagerService() {
         mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
-        mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
-                mPowerManagerWrapper);
-        mTestDisplayWindowSettingsProvider = new TestDisplayWindowSettingsProvider();
+        TestWindowManagerPolicy wmPolicy = new TestWindowManagerPolicy();
+        TestDisplayWindowSettingsProvider testDisplayWindowSettingsProvider =
+                new TestDisplayWindowSettingsProvider();
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, mWMPolicy, mAtmService,
-                mTestDisplayWindowSettingsProvider, StubTransaction::new,
+                mContext, mImService, false, false, wmPolicy, mAtmService,
+                testDisplayWindowSettingsProvider, StubTransaction::new,
                 () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);

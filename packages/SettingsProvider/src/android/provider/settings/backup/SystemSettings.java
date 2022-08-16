@@ -47,6 +47,7 @@ public class SystemSettings {
         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
         Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
         Settings.System.ADAPTIVE_SLEEP,             // moved to secure
+        Settings.System.APPLY_RAMPING_RINGER,
         Settings.System.VIBRATE_INPUT_DEVICES,
         Settings.System.MODE_RINGER_STREAMS_AFFECTED,
         Settings.System.TEXT_AUTO_REPLACE,
@@ -77,9 +78,13 @@ public class SystemSettings {
         Settings.System.NOTIFICATION_SOUND,
         Settings.System.ACCELEROMETER_ROTATION,
         Settings.System.SHOW_BATTERY_PERCENT,
+        Settings.System.ALARM_VIBRATION_INTENSITY,
+        Settings.System.MEDIA_VIBRATION_INTENSITY,
         Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
         Settings.System.RING_VIBRATION_INTENSITY,
         Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+        Settings.System.HARDWARE_HAPTIC_FEEDBACK_INTENSITY,
+        Settings.System.HAPTIC_FEEDBACK_ENABLED,
         Settings.System.DISPLAY_COLOR_MODE_VENDOR_HINT, // must precede DISPLAY_COLOR_MODE
         Settings.System.DISPLAY_COLOR_MODE,
         Settings.System.ALARM_ALERT,

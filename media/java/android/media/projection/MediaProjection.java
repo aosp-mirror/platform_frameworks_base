@@ -25,11 +25,13 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.ContentRecordingSession;
 import android.view.Surface;
+import android.window.WindowContainerToken;
 
 import java.util.Map;
 
@@ -50,6 +52,7 @@ public final class MediaProjection {
     private final IMediaProjection mImpl;
     private final Context mContext;
     private final Map<Callback, CallbackRecord> mCallbacks;
+    @Nullable private IMediaProjectionManager mProjectionService = null;
 
     /** @hide */
     public MediaProjection(Context context, IMediaProjection impl) {
@@ -106,16 +109,12 @@ public final class MediaProjection {
         if (isSecure) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
         }
-        Context windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
-                TYPE_APPLICATION, null /* options */);
-        final VirtualDisplayConfig.Builder builder = buildMirroredVirtualDisplay(name, width,
-                height, dpi, windowContext.getWindowContextToken());
-        builder.setFlags(flags);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, dpi).setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
-        VirtualDisplay virtualDisplay = createVirtualDisplay(builder.build(), callback, handler,
-                windowContext);
+        VirtualDisplay virtualDisplay = createVirtualDisplay(builder, callback, handler);
         return virtualDisplay;
     }
 
@@ -145,35 +144,13 @@ public final class MediaProjection {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        Context windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
-                TYPE_APPLICATION, null /* options */);
-        final VirtualDisplayConfig.Builder builder = buildMirroredVirtualDisplay(name, width,
-                height, dpi, windowContext.getWindowContextToken());
-        builder.setFlags(flags);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, dpi).setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
-        VirtualDisplay virtualDisplay = createVirtualDisplay(builder.build(), callback, handler,
-                windowContext);
+        VirtualDisplay virtualDisplay = createVirtualDisplay(builder, callback, handler);
         return virtualDisplay;
-    }
-
-    /**
-     * Constructs a {@link VirtualDisplayConfig.Builder}, which will mirror the contents of a
-     * DisplayArea. The DisplayArea to mirror is from the DisplayArea the caller is launched on.
-     *
-     * @param name   The name of the virtual display, must be non-empty.
-     * @param width  The width of the virtual display in pixels. Must be greater than 0.
-     * @param height The height of the virtual display in pixels. Must be greater than 0.
-     * @param dpi    The density of the virtual display in dpi. Must be greater than 0.
-     * @return a config representing a VirtualDisplay
-     */
-    private VirtualDisplayConfig.Builder buildMirroredVirtualDisplay(@NonNull String name,
-            int width, int height, int dpi, IBinder windowContextToken) {
-        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
-                height, dpi);
-        builder.setWindowTokenClientToMirror(windowContextToken);
-        return builder;
     }
 
     /**
@@ -186,18 +163,55 @@ public final class MediaProjection {
      * @param handler The {@link android.os.Handler} on which the callback should be invoked, or
      *                null if the callback should be invoked on the calling thread's main
      *                {@link android.os.Looper}.
-     * @param windowContext the WindowContext associated with the caller.
      *
      * @see android.hardware.display.VirtualDisplay
      * @hide
      */
     @Nullable
-    public VirtualDisplay createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
-            Context windowContext) {
-        DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-        return dm.createVirtualDisplay(this, virtualDisplayConfig, callback, handler,
-                windowContext);
+    public VirtualDisplay createVirtualDisplay(
+            @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+        try {
+            final WindowContainerToken taskWindowContainerToken =
+                    mImpl.getTaskRecordingWindowContainerToken();
+            Context windowContext = null;
+            ContentRecordingSession session;
+            if (taskWindowContainerToken == null) {
+                windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
+                        TYPE_APPLICATION, null /* options */);
+                session = ContentRecordingSession.createDisplaySession(
+                        windowContext.getWindowContextToken());
+            } else {
+                session = ContentRecordingSession.createTaskSession(
+                        taskWindowContainerToken.asBinder());
+            }
+            virtualDisplayConfig.setWindowManagerMirroring(true);
+            final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+            final VirtualDisplay virtualDisplay = dm.createVirtualDisplay(this,
+                    virtualDisplayConfig.build(), callback, handler, windowContext);
+            if (virtualDisplay == null) {
+                // Since WM handling a new display and DM creating a new VirtualDisplay is async,
+                // WM may have tried to start task recording and encountered an error that required
+                // stopping recording entirely. The VirtualDisplay would then be null when the
+                // MediaProjection is no longer active.
+                return null;
+            }
+            session.setDisplayId(virtualDisplay.getDisplay().getDisplayId());
+            // Successfully set up, so save the current session details.
+            getProjectionService().setContentRecordingSession(session, mImpl);
+            return virtualDisplay;
+        } catch (RemoteException e) {
+            // Can not capture if WMS is not accessible, so bail out.
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private IMediaProjectionManager getProjectionService() {
+        if (mProjectionService == null) {
+            mProjectionService = IMediaProjectionManager.Stub.asInterface(
+                    ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE));
+        }
+        return mProjectionService;
     }
 
     /**

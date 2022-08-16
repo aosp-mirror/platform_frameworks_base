@@ -21,8 +21,85 @@
     <dimen name="keyguard_indication_margin_bottom">25dp</dimen>
     <dimen name="ambient_indication_margin_bottom">115dp</dimen>
     <dimen name="lock_icon_margin_bottom">60dp</dimen>
-
     <!-- margin from keyguard status bar to clock. For split shade it should be
          keyguard_split_shade_top_margin - status_bar_header_height_keyguard = 8dp -->
     <dimen name="keyguard_clock_top_margin">8dp</dimen>
+
+    <!-- QS-->
+    <dimen name="qs_panel_padding_top">16dp</dimen>
+    <dimen name="qs_content_horizontal_padding">24dp</dimen>
+    <dimen name="qs_horizontal_margin">24dp</dimen>
+    <!-- in split shade qs_tiles_page_horizontal_margin should be equal of qs_horizontal_margin/2,
+         otherwise full space between two pages is qs_horizontal_margin*2, and that makes tiles page
+         not appear immediately after user swipes to the side -->
+    <dimen name="qs_tiles_page_horizontal_margin">12dp</dimen>
+    <dimen name="qs_media_session_height_expanded">172dp</dimen>
+
+    <dimen name="split_shade_notifications_scrim_margin_bottom">16dp</dimen>
+
+    <dimen name="notification_panel_margin_bottom">48dp</dimen>
+
+    <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
+    <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">0.45</item>
+    <dimen name="controls_task_view_right_margin">8dp</dimen>
+
+    <dimen name="status_bar_header_height_keyguard">42dp</dimen>
+
+    <dimen name="lockscreen_shade_max_over_scroll_amount">32dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order to complete by tapping on a button
+         like "expand". -->
+    <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order to complete.  -->
+    <dimen name="lockscreen_shade_full_transition_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for media to fully transition to
+         the shade -->
+    <dimen name="lockscreen_shade_media_transition_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for scrim to fully transition to
+         the shade (in alpha) -->
+    <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
+
+    <!-- The notifications scrim transition should start when the other scrims' transition is at
+         95%. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_delay">76dp</dimen>
+
+    <!-- The notifications scrim transition duration is 66.6% of the duration of the other scrims'
+         transition. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_distance">53.28dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the keyguard content on
+         NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->
+    <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">80dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the notification shell to fully
+         expand. -->
+    <dimen name="lockscreen_shade_notif_shelf_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the Quick Settings to fully
+         fade and expand. -->
+    <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
+         change.
+         On split-shade, there should be no depth effect, so setting the value to 0. -->
+    <dimen name="lockscreen_shade_depth_controller_transition_distance">0dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the UDFPS Keyguard View to fully
+         fade. -->
+    <dimen name="lockscreen_shade_udfps_keyguard_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Used for StatusBar to know that a transition is in progress. At the moment it only checks
+         whether the progress is > 0, therefore this value is not very important. -->
+    <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
+
+    <!-- Roughly the same distance as media on LS to media on QS. We will translate by this value
+         when media is not showing. -->
+    <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">83dp</dimen>
+
+    <dimen name="notification_panel_margin_horizontal">24dp</dimen>
 </resources>

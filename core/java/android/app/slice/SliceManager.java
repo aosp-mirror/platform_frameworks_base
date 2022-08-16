@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -223,10 +224,15 @@ public class SliceManager {
     public @NonNull Collection<Uri> getSliceDescendants(@NonNull Uri uri) {
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireUnstableContentProviderClient(uri)) {
-            Bundle extras = new Bundle();
-            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
-            final Bundle res = provider.call(SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
-            return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS);
+            if (provider == null) {
+                Log.w(TAG, TextUtils.formatSimple("Unknown URI: %s", uri));
+            } else {
+                Bundle extras = new Bundle();
+                extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+                final Bundle res = provider.call(
+                        SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
+                return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to get slice descendants", e);
         }

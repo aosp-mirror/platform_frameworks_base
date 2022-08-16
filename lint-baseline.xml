@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="7.1.0-dev">
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        final String component = Settings.Secure.getString(getContentResolver(),"
+        errorLine2="                                         ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/dialog/AccessibilityButtonChooserActivity.java"
+            line="60"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(context.getContentResolver(),"
+        errorLine2="                               ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/util/AccessibilityStatsLogUtils.java"
+            line="188"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(context.getContentResolver(),"
+        errorLine2="                               ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/util/AccessibilityStatsLogUtils.java"
+            line="194"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(context.getContentResolver(),"
+        errorLine2="                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/app/AssistUtils.java"
+            line="216"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="     * volume, false otherwise."
+        errorLine2="                     ~~~~~~">
+        <location
+            file="frameworks/base/media/java/android/media/AudioManager.java"
+            line="1028"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="    public final boolean isEnabled() {"
+        errorLine2="                                     ^">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="70"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="    public final String getRawLocale() {"
+        errorLine2="                                       ^">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="81"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getFloat()` called from system process. Please call `android.provider.Settings.Secure#getFloatForUser()` instead. "
+        errorLine1="    public final float getFontScale() {"
+        errorLine2="                                      ^">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="111"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="    public int getRawUserStyle() {"
+        errorLine2="                                 ^">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="120"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            final int foregroundColor = Secure.getInt("
+        errorLine2="                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="478"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            final int backgroundColor = Secure.getInt("
+        errorLine2="                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="480"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            final int edgeType = Secure.getInt("
+        errorLine2="                ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="482"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            final int edgeColor = Secure.getInt("
+        errorLine2="                 ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="484"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            final int windowColor = Secure.getInt("
+        errorLine2="                   ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="486"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="            String rawTypeface = Secure.getString(cr, Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE);"
+        errorLine2="                ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/accessibility/CaptioningManager.java"
+            line="489"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        String nearbyComponent = Settings.Secure.getString("
+        errorLine2="                         ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/app/ChooserActivity.java"
+            line="1156"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        final ContentResolver cr = context.getContentResolver();"
+        errorLine2="                                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/hardware/display/ColorDisplayManager.java"
+            line="587"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Secure.getInt(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0) == 1"
+        errorLine2="                                                                   ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/hardware/display/ColorDisplayManager.java"
+            line="588"
+            column="68"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        int inversionEnabled = Settings.Secure.getInt(contentResolver,"
+        errorLine2="                                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/security/ConfirmationPrompt.java"
+            line="220"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getFloat()` called from system process. Please call `android.provider.Settings.System#getFloatForUser()` instead. "
+        errorLine1="        float fontScale = Settings.System.getFloat(contentResolver,"
+        errorLine2="                                  ~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/security/ConfirmationPrompt.java"
+            line="225"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            int a11yEnabled = Settings.Secure.getInt(contentResolver,"
+        errorLine2="                                      ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/security/ConfirmationPrompt.java"
+            line="237"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="                Secure.getInt(resolver, Secure.RELEASE_COMPRESS_BLOCKS_ON_INSTALL, 1) != 0;"
+        errorLine2="               ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/content/F2fsUtils.java"
+            line="96"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="        int speed = DEFAULT_POINTER_SPEED;"
+        errorLine2="                     ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/hardware/input/InputManager.java"
+            line="865"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        final ContentResolver contentResolver = fallbackContext.getContentResolver();"
+        errorLine2="                                                           ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/view/inputmethod/InputMethodManager.java"
+            line="2860"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            if (mShowImeWithHardKeyboard == ShowImeWithHardKeyboardType.UNKNOWN) {"
+        errorLine2="                                                                              ^">
+        <location
+            file="frameworks/base/core/java/android/inputmethodservice/InputMethodService.java"
+            line="1205"
+            column="79"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            if (showImeWithHardKeyboardUri.equals(uri)) {"
+        errorLine2="                                                     ^">
+        <location
+            file="frameworks/base/core/java/android/inputmethodservice/InputMethodService.java"
+            line="1225"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="                        RemoteViews.MARGIN_BOTTOM, 0);"
+        errorLine2="                            ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/app/Notification.java"
+            line="5619"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="            return Settings.Secure.getInt(context.getContentResolver(),"
+        errorLine2="                   ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/hardware/biometrics/ParentalControlsUtilsInternal.java"
+            line="40"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(mContext.getContentResolver(),"
+        errorLine2="                               ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/policy/PhoneFallbackEventHandler.java"
+            line="328"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        boolean isTvSetupComplete = Settings.Secure.getInt(getContext().getContentResolver(),"
+        errorLine2="                            ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/policy/PhoneWindow.java"
+            line="3129"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        isTvSetupComplete &amp;= Settings.Secure.getInt(getContext().getContentResolver(),"
+        errorLine2="                     ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/policy/PhoneWindow.java"
+            line="3131"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getString()` called from system process. Please call `android.provider.Settings.System#getStringForUser()` instead. "
+        errorLine1="            final String touchDataJson = Settings.System.getString("
+        errorLine2="                                                         ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/app/PlatLogoActivity.java"
+            line="184"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) == 1;"
+        errorLine2="       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/service/quickaccesswallet/QuickAccessWalletClientImpl.java"
+            line="463"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        String comp = Settings.Secure.getString(cr, Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT);"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/service/quickaccesswallet/QuickAccessWalletServiceInfo.java"
+            line="97"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="            final String setting = getDefaultRingtoneSetting(type);"
+        errorLine2="                                            ~~~~~~">
+        <location
+            file="frameworks/base/media/java/android/media/RingtoneManager.java"
+            line="1105"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        final String targetString = Settings.Secure.getString(context.getContentResolver(),"
+        errorLine2="                                            ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/util/ShortcutUtils.java"
+            line="55"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        final String targetsValue = Settings.Secure.getString(context.getContentResolver(),"
+        errorLine2="                                            ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/util/ShortcutUtils.java"
+            line="82"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        final String targetString = Settings.Secure.getString(context.getContentResolver(),"
+        errorLine2="                                            ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/util/ShortcutUtils.java"
+            line="112"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),"
+        errorLine2="  ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/speech/SpeechRecognizer.java"
+            line="665"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="        boolean cap = System.getInt(resolver, System.TEXT_AUTO_CAPS, 1) > 0;"
+        errorLine2="                             ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
+            line="296"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="        boolean text = System.getInt(resolver, System.TEXT_AUTO_REPLACE, 1) > 0;"
+        errorLine2="                              ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
+            line="297"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="        boolean period = System.getInt(resolver, System.TEXT_AUTO_PUNCTUATE, 1) > 0;"
+        errorLine2="                                ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
+            line="298"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.System#getInt()` called from system process. Please call `android.provider.Settings.System#getIntForUser()` instead. "
+        errorLine1="        boolean pw = System.getInt(resolver, System.TEXT_SHOW_PASSWORD, 1) > 0;"
+        errorLine2="                            ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/text/method/TextKeyListener.java"
+            line="299"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(getContentResolver(), name, defaultValue);"
+        errorLine2="                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/speech/tts/TextToSpeechService.java"
+            line="422"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        return Settings.Secure.getInt(getContext().getContentResolver(),"
+        errorLine2="                       ~~~~~~">
+        <location
+            file="frameworks/base/core/java/com/android/internal/accessibility/dialog/ToggleAllowListingFeatureTarget.java"
+            line="63"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        String engine = getString(mContext.getContentResolver(),"
+        errorLine2="                ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/speech/tts/TtsEngines.java"
+            line="116"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="                getString(mContext.getContentResolver(), Settings.Secure.TTS_DEFAULT_LOCALE));"
+        errorLine2="        ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/speech/tts/TtsEngines.java"
+            line="337"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="                    getString(mContext.getContentResolver(), Settings.Secure.TTS_DEFAULT_LOCALE),"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/speech/tts/TtsEngines.java"
+            line="373"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="        final String prefList = Settings.Secure.getString(mContext.getContentResolver(),"
+        errorLine2="                                        ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/speech/tts/TtsEngines.java"
+            line="527"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. "
+        errorLine1="        }"
+        errorLine2="         ^">
+        <location
+            file="frameworks/base/core/java/android/service/autofill/UserData.java"
+            line="535"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="    public static boolean isActiveService(Context context, ComponentName service) {"
+        errorLine2="                                                                         ~~~~~~~~~">
+        <location
+            file="frameworks/base/core/java/android/service/voice/VoiceInteractionService.java"
+            line="156"
+            column="74"/>
+    </issue>
+
+</issues>

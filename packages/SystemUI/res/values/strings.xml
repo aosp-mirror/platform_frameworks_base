@@ -21,7 +21,13 @@
     <string name="app_label">System UI</string>
 
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
-    <string name="battery_low_title">Battery may run out soon</string>
+    <string name="battery_low_title">Turn on Battery Saver?</string>
+
+    <!-- When the battery is low, this is displayed to the user in a dialog.  The description of the low battery alert.  [CHAR LIMIT=NONE]-->
+    <string name="battery_low_description">You have <xliff:g id="percentage" example="20%">%s</xliff:g> battery left. Battery Saver turns on Dark theme, restricts background activity, and delays notifications.</string>
+
+    <!-- When the battery is low at first time, this is displayed to the user in a dialog.  The description of the low battery alert.  [CHAR LIMIT=NONE]-->
+    <string name="battery_low_intro">Battery Saver turns on Dark theme, restricts background activity, and delays notifications.</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
         appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
@@ -60,7 +66,10 @@
     <string name="battery_saver_confirmation_ok">Turn on</string>
 
     <!-- Battery saver notification action [CHAR LIMIT=NONE]-->
-    <string name="battery_saver_start_action">Turn on Battery Saver</string>
+    <string name="battery_saver_start_action">Turn on</string>
+
+    <!-- Battery saver notification dismiss action: Do not turn on battery saver. [CHAR LIMIT=NONE]-->
+    <string name="battery_saver_dismiss_action">No thanks</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
 
@@ -135,6 +144,18 @@
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
     <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
 
+    <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=80] -->
+    <string name="hdmi_cec_set_menu_language_title">Do you want to change the system language to <xliff:g id="language" example="German">%1$s</xliff:g>?</string>
+
+    <!-- Description for the <Set Menu Language> confirmation dialog [CHAR LIMIT=NONE] -->
+    <string name="hdmi_cec_set_menu_language_description">System language change requested by another device</string>
+
+    <!-- Button label for accepting language change [CHAR LIMIT=25] -->
+    <string name="hdmi_cec_set_menu_language_accept">Change language</string>
+
+    <!-- Button label for declining language change [CHAR LIMIT=25] -->
+    <string name="hdmi_cec_set_menu_language_decline">Keep current language</string>
+
     <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
     <string name="wifi_debugging_title">Allow wireless debugging on this network?</string>
 
@@ -192,6 +213,8 @@
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
         your organization</string>
+    <!-- Notification text displayed when screenshots are blocked by an IT admin. [CHAR LIMIT=100] -->
+    <string name="screenshot_blocked_by_admin">Taking screenshots is blocked by your IT admin</string>
     <!-- Label for UI element which allows editing the screenshot [CHAR LIMIT=30] -->
     <string name="screenshot_edit_label">Edit</string>
     <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
@@ -278,6 +301,8 @@
     <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the wallet button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wallet_button">Wallet</string>
+    <!-- Content description of the QR Code scanner for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qr_code_scanner_button">QR Code Scanner</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
     <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -314,6 +339,8 @@
     <string name="biometric_dialog_face_icon_description_confirmed">Confirmed</string>
     <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
+    <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
+    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face. Press the unlock icon to continue.</string>
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
 
@@ -354,15 +381,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile">If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted.</string>
     <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
-
-    <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
-    <!-- Content of a dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
-    <!-- Content of a dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
-    <!-- Button label to dismiss the dialog telling the user the device, user, or work profile has been wiped. [CHAR LIMIT=40] -->
-    <string name="biometric_dialog_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
@@ -435,64 +453,24 @@
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_close">Close</string>
 
-    <!-- Announcement made when the wifi is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_wifi_changed_off">Wifi turned off.</string>
-    <!-- Announcement made when the wifi is turned on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_wifi_changed_on">Wifi turned on.</string>
-    <!-- Announcement made when the airplane mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_airplane_changed_off">Airplane mode turned off.</string>
-    <!-- Announcement made when the airplane mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_airplane_changed_on">Airplane mode turned on.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in none (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_none_on">total silence</string>
     <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_alarms_on">alarms only</string>
      <!-- Content description of the do not disturb tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd">Do Not Disturb.</string>
-    <!-- Announcement made when do not disturb changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_changed_off">Do Not Disturb turned off.</string>
-    <!-- Announcement made when do not disturb changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_changed_on">Do Not Disturb turned on.</string>
     <!-- Content description of the bluetooth tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth">Bluetooth.</string>
     <!-- Content description of the bluetooth tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth_on">Bluetooth on.</string>
-    <!-- Announcement made when the bluetooth is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_changed_off">Bluetooth turned off.</string>
-    <!-- Announcement made when the bluetooth is turned on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_changed_on">Bluetooth turned on.</string>
-    <!-- Announcement made when the location tile changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_location_changed_off">Location reporting turned off.</string>
-    <!-- Announcement made when the location tile changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_location_changed_on">Location reporting turned on.</string>
     <!-- Content description of the alarm tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_alarm">Alarm set for <xliff:g id="time" example="Wed 3:30 PM">%s</xliff:g>.</string>
     <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_more_time">More time.</string>
     <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_less_time">Less time.</string>
-    <!-- Announcement made when the flashlight state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_changed_off">Flashlight turned off.</string>
-    <!-- Announcement made when the flashlight state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_changed_on">Flashlight turned on.</string>
-    <!-- Announcement made when the color inversion state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_color_inversion_changed_off">Color inversion turned off.</string>
-    <!-- Announcement made when the color inversion state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_color_inversion_changed_on">Color inversion turned on.</string>
-    <!-- Announcement made when the hotspot state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_hotspot_changed_off">Mobile hotspot turned off.</string>
-    <!-- Announcement made when the hotspot state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
-    <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
-    <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <!-- Announcement made when the Data Saver changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_data_saver_changed_off">Data Saver turned off.</string>
-    <!-- Announcement made when the Data Saver changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_data_saver_changed_on">Data Saver turned on.</string>
-    <!-- Announcement made when the Sensor Privacy changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <!-- Announcement made when the Sensor Privacy changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
 
     <!-- Content description of the display brightness slider (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_brightness">Display brightness</string>
@@ -598,9 +576,11 @@
     <string name="quick_settings_camera_label">Camera access</string>
     <!-- QuickSettings: Microphone [CHAR LIMIT=NONE] -->
     <string name="quick_settings_mic_label">Mic access</string>
-    <!-- QuickSettings: Camera or microphone access is allowed [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Camera or microphone access is allowed. If you update this string, please
+    update the string "available" in packages/modules/Permission/PermissionController[CHAR LIMIT=NONE] -->
     <string name="quick_settings_camera_mic_available">Available</string>
-    <!-- QuickSettings: Camera or microphone access is blocked [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Camera or microphone access is blocked. If you update this string, please
+    update the string "blocked" in packages/modules/Permission/PermissionController [CHAR LIMIT=NONE] -->
     <string name="quick_settings_camera_mic_blocked">Blocked</string>
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
     <string name="quick_settings_media_device_label">Media device</string>
@@ -644,8 +624,7 @@
     <!-- QuickSettings: Label for the toggle that controls whether display inversion is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_inversion_label">Color inversion</string>
     <!-- QuickSettings: Label for the toggle that controls whether display color correction is enabled. [CHAR LIMIT=NONE] -->
-    <!-- QuickSettings: Control panel: Label for button that navigates to settings. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_more_settings">More settings</string>
+    <string name="quick_settings_color_correction_label">Color correction</string>
     <!-- QuickSettings: Control panel: Label for button that navigates to user settings. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_more_user_settings">User settings</string>
     <!-- QuickSettings: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
@@ -717,6 +696,10 @@
     <string name="quick_settings_dark_mode_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
     <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
     <string name="quick_settings_dark_mode_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
+    <!-- QuickSettings: Secondary text for when the Dark theme will be enabled at bedtime. [CHAR LIMIT=40] -->
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime">On at bedtime</string>
+    <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until bedtime ends. [CHAR LIMIT=40] -->
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends">Until bedtime ends</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -732,19 +715,58 @@
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="quick_settings_screen_record_stop">Stop</string>
 
+    <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_onehanded_label">One-handed mode</string>
+
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_camera_dialog_title">Unblock device camera?</string>
-    <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
+    <!--- Title of dialog triggered if both microphone and camera are disabled but an app tried to access them. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_camera_dialog_title">Unblock device camera and microphone?</string>
 
     <!--- Content of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_start_use_mic_dialog_content">This unblocks access for all apps and services allowed to use your microphone.</string>
     <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_start_use_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera.</string>
-    <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <!--- Title of dialog triggered if both microphone and camera are disabled but an app tried to access them. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera or microphone.</string>
+
+    <!--- Title of dialog triggered if the microphone is blocked by a hardware privacy switch but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title">Microphone is blocked</string>
+    <!--- Title of dialog triggered if the camera is blocked by a hardware privacy switch but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title">Camera is blocked</string>
+    <!--- Title of dialog triggered if both microphone and camera are blocked by a hardware privacy switch but an app tried to access them. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title">The mic &amp; camera are blocked</string>
+
+    <!--- Content of dialog triggered if the microphone is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content">
+        To unblock, move the privacy switch on your device to the microphone on position to allow
+        microphone access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+    <!--- Content of dialog triggered if the camera is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content">
+        To unblock, move the privacy switch on your device to the camera on position to allow camera
+        access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+    <!--- Content of dialog triggered if the camera is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content">
+        To unblock them, move the privacy switch on your device to the unblocked position to allow
+        access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+
+    <!--- Content of toast triggered if the microphone privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_unblocked_toast_content">
+        Microphone available
+    </string>
+    <!--- Content of toast triggered if the camera privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_unblocked_toast_content">
+        Camera available
+    </string>
+    <!--- Content of toast triggered if both mic and camera privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content">
+        Microphone and camera available
+    </string>
 
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_other_device">Other device</string>
@@ -776,8 +798,19 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
-    <!-- Message shown when lock screen is tapped or face authentication fails. Provides extra instructions for how the user can enter their device (unlock or proceed to home) [CHAR LIMIT=60] -->
-    <string name="keyguard_unlock_press">Press to open</string>
+    <!-- Message shown when lock screen is unlocked (ie: by trust agent) and the user taps the empty space on the lock screen and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_unlock_press">Press the unlock icon to open</string>
+
+    <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_press">Unlocked by face. Press the unlock icon to open.</string>
+
+    <!-- Messages shown when users press outside of udfps region during -->
+    <string-array name="udfps_accessibility_touch_hints">
+        <item>Move left</item>
+        <item>Move down</item>
+        <item>Move right</item>
+        <item>Move up</item>
+    </string-array>
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
@@ -836,6 +869,9 @@
     <!-- Indication on the keyguard that is shown when the device is charging slowly. Should match keyguard_plugged_in_charging_slowly [CHAR LIMIT=50]-->
     <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
+    <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
+    <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging Dock • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
+
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
@@ -847,20 +883,8 @@
 
     <!-- Accessibility label for the button that opens the quick contact of the user. -->
 
-    <!-- Label for the adding a new user in the user switcher [CHAR LIMIT=35] -->
-    <string name="user_add_user">Add user</string>
-
-    <!-- Name for a freshly added user [CHAR LIMIT=30] -->
-    <string name="user_new_user_name">New user</string>
-
-    <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_exit_guest_dialog_title">Remove guest?</string>
-
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
-
-    <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
-    <string name="guest_exit_guest_dialog_remove">Remove</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
@@ -873,12 +897,6 @@
 
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
     <string name="guest_wipe_session_dontwipe">Yes, continue</string>
-
-    <!-- Title for add user confirmation dialog [CHAR LIMIT=30] -->
-    <string name="user_add_user_title" msgid="2108112641783146007">Add new user?</string>
-
-    <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
-    <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
 
     <!-- Title for the dialog that lets users know that the maximum allowed number of users on the device has been reached. [CHAR LIMIT=35]-->
     <string name="user_limit_reached_title">User limit reached</string>
@@ -958,10 +976,10 @@
     <string name="quick_settings_financed_disclosure_named_management">This device is provided by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_named_vpn">This device belongs to your organization and is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <string name="quick_settings_disclosure_management_named_vpn">This device belongs to your organization and is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The first placeholder is the organization name, and the second placeholder is the VPN name. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_named_vpn">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to <xliff:g id="vpn_app" example="Foo VPN App">%2$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The first placeholder is the organization name, and the second placeholder is the VPN name. [CHAR LIMIT=150] -->
+    <string name="quick_settings_disclosure_named_management_named_vpn">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%2$s</xliff:g></string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization. [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_management">This device belongs to your organization</string>
@@ -970,10 +988,10 @@
     <string name="quick_settings_disclosure_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g></string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to multiple VPNs. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_vpns">This device belongs to your organization and is connected to VPNs</string>
+    <string name="quick_settings_disclosure_management_vpns">This device belongs to your organization and is connected to the internet through VPNs</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to multiple VPNs. The placeholder is the organization's name. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_vpns">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to VPNs</string>
+    <string name="quick_settings_disclosure_named_management_vpns">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to the internet through VPNs</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a managed profile which can be monitored by the profile owner [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_managed_profile_monitoring">Your organization may monitor network traffic in your work profile</string>
@@ -988,16 +1006,19 @@
     <string name="quick_settings_disclosure_monitoring">Network may be monitored</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to multiple VPNs. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_vpns">This device is connected to VPNs</string>
+    <string name="quick_settings_disclosure_vpns">This device is connected to the internet through VPNs</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the work profile. The placeholder is the VPN name. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_managed_profile_named_vpn">Your work profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn">Your work apps are connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the personal profile (instead of the work profile). The placeholder is the VPN name. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_personal_profile_named_vpn">Your personal profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn">Your personal apps are connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_vpn">This device is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <string name="quick_settings_disclosure_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+
 
     <!-- Monitoring dialog title for financed device [CHAR LIMIT=60] -->
     <string name="monitoring_title_financed_device">This device is provided by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
@@ -1046,16 +1067,16 @@
     <string name="monitoring_description_managed_profile_network_logging">Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile.</string>
 
     <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_named_vpn">You\'re connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+    <string name="monitoring_description_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
 
     <!-- Monitoring dialog: Description of two active VPNs. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_two_named_vpns">You\'re connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> and <xliff:g id="vpn_app" example="Bar VPN App">%2$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+    <string name="monitoring_description_two_named_vpns">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> and <xliff:g id="vpn_app" example="Bar VPN App">%2$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
 
     <!-- Monitoring dialog: Description of an active VPN in the work profile. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_managed_profile_named_vpn">Your work profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+    <string name="monitoring_description_managed_profile_named_vpn">Your work apps are connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity in work apps, including emails and browsing data, is visible to your IT admin and VPN provider.</string>
 
     <!-- Monitoring dialog: Description of an active VPN in the personal profile (as opposed to the work profile). [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_personal_profile_named_vpn">Your personal profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+    <string name="monitoring_description_personal_profile_named_vpn">Your personal apps are connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your VPN provider.</string>
 
     <!-- Monitoring dialog: Space that separates the VPN body text and the "Open VPN Settings" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_vpn_settings_separator">" "</string>
@@ -1198,7 +1219,7 @@
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
-    <string name="wallet_secondary_label_no_card">Add a card</string>
+    <string name="wallet_secondary_label_no_card">Tap to open</string>
     <!-- Secondary label of the quick access wallet tile if wallet is still updating. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_updating">Updating</string>
     <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
@@ -1207,6 +1228,9 @@
     <string name="wallet_error_generic">There was a problem getting your cards, please try again later</string>
     <!-- Overflow menu item label to open the lockscreen settings in wallet activity. [CHAR LIMIT=NONE] -->
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
+
+    <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
+    <string name="qr_code_scanner_title">Scan QR code</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
@@ -1231,9 +1255,6 @@
 
     <!-- Alarm template for far alarms [CHAR LIMIT=25] -->
     <string name="alarm_template_far">on <xliff:g id="when" example="Fri 7:00 AM">%1$s</xliff:g></string>
-
-    <!-- Accessibility label for Quick Settings detail screens [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_detail">Quick Settings, <xliff:g id="title" example="Wi-Fi">%s</xliff:g>.</string>
 
     <!-- Accessibility label for hotspot icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_hotspot">Hotspot</string>
@@ -1276,6 +1297,10 @@
 
     <!-- [CHAR LIMIT=NONE] Importance Tuner setting title -->
     <string name="tuner_full_importance_settings">Power notification controls</string>
+
+    <!-- [CHAR LIMIT=NONE] Notification camera based rotation enabled description -->
+    <string name="rotation_lock_camera_rotation_on">On - Face-based</string>
+
     <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
         \n\n<b>Level 5</b>
         \n- Show at the top of the notification list
@@ -1360,6 +1385,9 @@
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
+
+    <!-- Notification: Control panel: Label that displays when a notification cannot be blocked because it's attached to a phone/voip call. -->
+    <string name="notification_unblockable_call_desc">Call notifications can\'t be modified.</string>
 
     <!-- Notification: Control panel: label that displays when viewing settings for a group of notifications posted to multiple channels. -->
     <string name="notification_multichannel_desc">This group of notifications cannot be configured here</string>
@@ -1746,11 +1774,6 @@
     <string name="data_connection_no_internet">No internet</string>
 
     <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_open_details">Open details.</string>
-
-    <!-- accessibility label for quick settings items that are currently disabled. Must have a reason [CHAR LIMIT=NONE] -->
-
-    <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_open_settings">Open <xliff:g name="page" example="Bluetooth">%s</xliff:g> settings.</string>
 
     <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
@@ -1981,7 +2004,8 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
-    <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
+    <!-- Title for the privacy indicators dialog, only appears as part of a11y descriptions [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_a11y_title">In use</string>
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
@@ -2007,6 +2031,12 @@
     <!-- Text for privacy dialog, indicating that an app (or multiple) is using an op on behalf of another [CHAR LIMIT=NONE] -->
     <string name="ongoing_privacy_dialog_attribution_text">(through <xliff:g id="application name(s)" example="Maps, and Assistant">%s</xliff:g>)</string>
 
+    <!-- Text for privacy dialog, displaying just the subattribution label [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_attribution_label">(<xliff:g id="attribution_label" example="For Wallet">%s</xliff:g>)</string>
+
+    <!-- Text for privacy dialog, displaying both subattribution and proxy label [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_attribution_proxy_label">(<xliff:g id="attribution_label" example="For Wallet">%1$s</xliff:g>  \u2022 <xliff:g id="proxy_label" example="Maps, and Assistant">%2$s</xliff:g>)</string>
+
     <!-- Text for camera app op [CHAR LIMIT=20]-->
     <string name="privacy_type_camera">camera</string>
 
@@ -2015,6 +2045,9 @@
 
     <!-- Text for microphone app op [CHAR LIMIT=20]-->
     <string name="privacy_type_microphone">microphone</string>
+
+    <!-- Text for media projection privacy type [CHAR LIMIT=20]-->
+    <string name="privacy_type_media_projection">screen recording</string>
 
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
@@ -2128,6 +2161,19 @@
     <!-- Controls tile secondary label when device is locked and user does not want access to controls from lockscreen [CHAR LIMIT=20] -->
     <string name="controls_tile_locked">Device locked</string>
 
+    <!-- Title of the dialog to show and control devices from lock screen [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_show_controls_dialog_title">Show and control devices from lock screen?</string>
+    <!-- Message of the dialog to show and control devices from lock screen [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_show_controls_dialog_message">You can add controls for your external devices to the lock screen.\n\nYour device app may allow you to control some devices without unlocking your phone or tablet.\n\nYou can make changes any time in Settings.</string>
+    <!-- Title of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_trivial_controls_dialog_title">Control devices from lock screen?</string>
+    <!-- Message of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_trivial_controls_dialog_message">You can control some devices without unlocking your phone or tablet.\n\nYour device app determines which devices can be controlled in this way.</string>
+    <!-- Neutral button title of the controls dialog [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_dialog_neutral_button">No thanks</string>
+    <!-- Positive button title of the controls dialog  [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_dialog_positive_button">Yes</string>
+
     <!-- Controls PIN entry dialog, switch to alphanumeric keyboard [CHAR LIMIT=100] -->
     <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
     <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
@@ -2151,11 +2197,11 @@
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
-    <string name="controls_media_close_session">Hide this media session?</string>
+    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="YouTube Music">%1$s</xliff:g>?</string>
     <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
     <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
-    <string name="controls_media_dismiss_button">Dismiss</string>
+    <string name="controls_media_dismiss_button">Hide</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
@@ -2165,6 +2211,17 @@
     <!-- Content description for media cotnrols progress bar [CHAR_LIMIT=NONE] -->
     <string name="controls_media_seekbar_description"><xliff:g id="elapsed_time" example="1:30">%1$s</xliff:g> of <xliff:g id="total_time" example="3:00">%2$s</xliff:g></string>
 
+    <!-- Description for button in media controls. Pressing button starts playback [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_play">Play</string>
+    <!-- Description for button in media controls. Pressing button pauses playback [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_pause">Pause</string>
+    <!-- Description for button in media controls. Pressing button goes to previous track [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_prev">Previous track</string>
+    <!-- Description for button in media controls. Pressing button goes to next track [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_next">Next track</string>
+    <!-- Description for button in media controls. Used when media is connecting to a remote device (via something like chromecast). Pressing button does nothing [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_connecting">Connecting</string>
+
     <!-- Title for Smartspace recommendation card within media controls. The "Play" means the action to play a media [CHAR_LIMIT=10] -->
     <string name="controls_media_smartspace_rec_title">Play</string>
     <!-- Description for Smartspace recommendation card within media controls [CHAR_LIMIT=NONE] -->
@@ -2173,6 +2230,18 @@
     <string name="controls_media_smartspace_rec_item_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
     <!-- Description for Smartspace recommendation's media item which doesn't have artist info, including information for the media's title and the source app [CHAR LIMIT=NONE]-->
     <string name="controls_media_smartspace_rec_item_no_artist_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%2$s</xliff:g></string>
+
+    <!--- ****** Media tap-to-transfer ****** -->
+    <!-- Text for a button to undo the media transfer. [CHAR LIMIT=20] -->
+    <string name="media_transfer_undo">Undo</string>
+    <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to play media on the different device. [CHAR LIMIT=75] -->
+    <string name="media_move_closer_to_start_cast">Move closer to play on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to transfer media from the different device and back onto the current device. [CHAR LIMIT=75] -->
+    <string name="media_move_closer_to_end_cast">Move closer to <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g> to play here</string>
+    <!-- Text informing the user that their media is now playing on a different device (deviceName). [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIsMIT=50] -->
+    <string name="media_transfer_failed">Something went wrong. Try again.</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
@@ -2204,9 +2273,44 @@
     <!-- Summary for disconnected status [CHAR LIMIT=50] -->
     <string name="media_output_dialog_disconnected">(disconnected)</string>
     <!-- Summary for connecting error message [CHAR LIMIT=NONE] -->
-    <string name="media_output_dialog_connect_failed">Couldn\'t connect. Try again.</string>
+    <string name="media_output_dialog_connect_failed">Can\'t switch. Tap to try again.</string>
     <!-- Title for pairing item [CHAR LIMIT=60] -->
     <string name="media_output_dialog_pairing_new">Pair new device</string>
+    <!-- Title for launch app [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_launch_app_text">To cast this session, please open the app.</string>
+    <!-- App name when can't get app name [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_unknown_launch_app_name">Unknown app</string>
+    <!-- Button text for stopping casting [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_button_stop_casting">Stop casting</string>
+    <!-- Accessibility text describing purpose of media output dialog. [CHAR LIMIT=NONE] -->
+    <string name="media_output_dialog_accessibility_title">Available devices for audio output.</string>
+    <!-- Accessibility text describing purpose of seekbar in media output dialog. [CHAR LIMIT=NONE] -->
+    <string name="media_output_dialog_accessibility_seekbar">Volume</string>
+
+    <!-- Media Output Broadcast Dialog -->
+    <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_first_broadcast_title">How broadcasting works</string>
+    <!-- Title for Broadcast Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast">Broadcast</string>
+    <!-- Message for notifying the user about the Broadcast at first launch [CHAR LIMIT=NONE] -->
+    <string name="media_output_first_notify_broadcast_message">People near you with compatible Bluetooth devices can listen to the media you\'re broadcasting</string>
+    <!-- Message for Broadcasting information and QR code [CHAR LIMIT=NONE] -->
+    <string name="media_output_broadcasting_message">To listen to your broadcast, people nearby with compatible Bluetooth devices can scan your QR code or use your broadcast name and password</string>
+    <!-- Title for Broadcast Name [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_name">Broadcast Name</string>
+    <!-- Title for Broadcast Code(Password) [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code">Password</string>
+    <!-- Button for change broadcast name and broadcast code [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_dialog_save">Save</string>
+    <!-- The "starting" text when Broadcast is starting [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_starting">Starting&#8230;</string>
+    <!-- The button text when Broadcast start failed [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_start_failed">Can\u2019t broadcast</string>
+    <!-- The error message when Broadcast name/code update failed [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_update_error">Can\u2019t save. Try again.</string>
+    <!-- The error message when Broadcast name/code update failed and can't change again[CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
+
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
@@ -2351,6 +2455,88 @@
     <!-- Provider Model: Description of the airplane mode button. [CHAR LIMIT=60] -->
     <string name="turn_off_airplane_mode">Turn off airplane mode</string>
 
+    <!-- Text for TileService request dialog. This is shown to the user that an app is requesting
+         user approval to add the shown tile to Quick Settings [CHAR LIMIT=NONE] -->
+    <string name="qs_tile_request_dialog_text"><xliff:g id="appName" example="Fake App">%1$s</xliff:g> wants to add the following tile to Quick Settings</string>
+    <!-- Text for TileService request dialog. Text for button for user to approve adding the tile [CHAR LIMIT=20] -->
+    <string name="qs_tile_request_dialog_add">Add tile</string>
+    <!-- Text for TileService request dialog. Text for button for user to reject adding the tile [CHAR LIMIT=20] -->
+    <string name="qs_tile_request_dialog_not_add">Do not add tile</string>
+
     <!-- Title for User Switch dialog. [CHAR LIMIT=20] -->
     <string name="qs_user_switch_dialog_title">Select user</string>
+
+    <!-- Label for the entry point to open the dialog which shows currently running applications [CHAR LIMIT=NONE]-->
+    <plurals name="fgs_manager_footer_label">
+        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> app is active</item>
+        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> apps are active</item>
+    </plurals>
+    <!-- Content description for a dot indicator in the running application indicating that there
+    is new information [CHAR LIMIT=NONE] -->
+    <string name="fgs_dot_content_description">New information</string>
+    <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
+    <string name="fgs_manager_dialog_title">Active apps</string>
+    <!-- Detailed message for dialog listing applications currently running [CHAR LIMIT=NONE]-->
+    <string name="fgs_manager_dialog_message">These apps are active and running, even when you\u2019re not using them. This improves their functionality, but it may also affect battery life.</string>
+    <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
+    <string name="fgs_manager_app_item_stop_button_label">Stop</string>
+    <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
+    <string name="fgs_manager_app_item_stop_button_stopped_label">Stopped</string>
+
+    <!-- Label for button to finish and copy edited text back to the clipboard [CHAR LIMIT=20] -->
+    <string name="clipboard_edit_text_done">Done</string>
+    <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_overlay_text_copied">Copied</string>
+    <!-- Text informing user where text being edited was copied from [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_source">From <xliff:g id="appName" example="Gmail">%1$s</xliff:g></string>
+    <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
+    <string name="clipboard_dismiss_description">Dismiss copied text</string>
+    <!-- Label for button to edit text that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_text_description">Edit copied text</string>
+    <!-- Label for button to edit an image that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_image_description">Edit copied image</string>
+    <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
+    <string name="clipboard_send_nearby_description">Send to nearby device</string>
+    <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_hidden">Tap to view</string>
+    <!-- Asterisks replacing sensitive text content -->
+    <string name="clipboard_asterisks" translatable="false">••••••</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_copied">Text copied</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_image_copied">Image copied</string>
+    <!-- Accessibility announcement informing user that something has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_content_copied">Content copied</string>
+    <!-- Name of the screen that lets the user edit the context of the clipboard (copy/paste) [CHAR LIMIT=NONE] -->
+    <string name="clipboard_editor">Clipboard Editor</string>
+    <!-- Name for the window showing the clipboard (copy/paste) preview and controls [CHAR LIMIT=NONE] -->
+    <string name="clipboard_overlay_window_name">Clipboard</string>
+    <!-- Accessibility label for an image preview [CHAR LIMIT=NONE] -->
+    <string name="clipboard_image_preview">Image preview</string>
+    <!-- Accessibility string describing what will happen when the user selects the clipboard preview. Completing the sentence "Double tap to ..." [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit">edit</string>
+
+    <!-- Generic "add" string [CHAR LIMIT=NONE] -->
+    <string name="add">Add</string>
+    <!-- Add supervised user -->
+    <string name="add_user_supervised" translatable="false">@*android:string/supervised_user_creation_label</string>
+    <!-- Manage users - For system user management [CHAR LIMIT=40]  -->
+    <string name="manage_users">Manage users</string>
+
+    <!-- Toast shown when a notification does not support dragging to split [CHAR LIMIT=NONE] -->
+    <string name="drag_split_not_supported">This notification does not support dragging to Splitscreen.</string>
+
+    <!-- Content description for the Wi-Fi off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_wifi_off">Wi\u2011Fi unavailable</string>
+    <!-- Content description for the priority mode icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_priority_mode">Priority mode</string>
+    <!-- Content description for the alarm set icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_alarm_set">Alarm set</string>
+    <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
+    <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_notification_indicator">{count, plural,
+    =1 {# notification}
+    other {# notifications}
+    }</string>
 </resources>

@@ -15,7 +15,6 @@
   ~ limitations under the License
   -->
 <resources>
-
     <!-- The maximum number of tiles in the QuickQSPanel -->
     <integer name="quick_qs_panel_max_tiles">6</integer>
 
@@ -24,4 +23,8 @@
 
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
+
+    <integer name="power_menu_lite_max_columns">2</integer>
+    <integer name="power_menu_lite_max_rows">3</integer>
+
 </resources>

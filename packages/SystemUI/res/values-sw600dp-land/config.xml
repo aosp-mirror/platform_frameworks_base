@@ -15,9 +15,6 @@
   ~ limitations under the License
   -->
 <resources>
-    <!-- Max number of columns for quick controls area -->
-    <integer name="controls_max_columns">2</integer>
-
     <!-- The maximum number of rows in the QSPanel -->
     <integer name="quick_settings_max_rows">3</integer>
 
@@ -35,5 +32,8 @@
 
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">false</bool>
+
+    <integer name="power_menu_lite_max_columns">3</integer>
+    <integer name="power_menu_lite_max_rows">2</integer>
 
 </resources>

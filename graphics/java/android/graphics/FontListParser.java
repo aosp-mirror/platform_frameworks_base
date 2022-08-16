@@ -218,6 +218,7 @@ public class FontListParser {
         final String name = parser.getAttributeValue(null, "name");
         final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
+        final String ignore = parser.getAttributeValue(null, "ignore");
         final List<FontConfig.Font> fonts = new ArrayList<>();
         while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -240,7 +241,9 @@ public class FontListParser {
                 intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
-        if (fonts.isEmpty()) {
+
+        boolean skip = (ignore != null && (ignore.equals("true") || ignore.equals("1")));
+        if (skip || fonts.isEmpty()) {
             return null;
         }
         return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);

@@ -1318,11 +1318,6 @@ interface ITelephony {
             String callingFeatureId);
 
     /**
-     * Returns the subscription ID associated with the specified PhoneAccount.
-     */
-    int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
-
-    /**
      * Returns the subscription ID associated with the specified PhoneAccountHandle.
      */
     int getSubIdForPhoneAccountHandle(in PhoneAccountHandle phoneAccountHandle,
@@ -2515,6 +2510,9 @@ interface ITelephony {
     CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
             String callingFeatureId);
 
+    /** Check if telephony new data stack is enabled. */
+    boolean isUsingNewDataStack();
+
     /**
      *  @return true if the modem service is set successfully, false otherwise.
      */
@@ -2556,6 +2554,17 @@ interface ITelephony {
      */
     String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex);
 
-    /** Check if telephony new data stack is enabled. */
-    boolean isUsingNewDataStack();
+    /**
+     * set removable eSIM as default eUICC.
+     *
+     * @hide
+     */
+    void setRemovableEsimAsDefaultEuicc(boolean isDefault, String callingPackage);
+
+    /**
+     * Returns whether the removable eSIM is default eUICC or not.
+     *
+     * @hide
+     */
+    boolean isRemovableEsimDefaultEuicc(String callingPackage);
 }

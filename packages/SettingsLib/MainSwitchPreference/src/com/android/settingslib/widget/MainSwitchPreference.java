@@ -122,9 +122,10 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
      * Adds a listener for switch changes
      */
     public void addOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
-        if (mMainSwitchBar == null) {
+        if (!mSwitchChangeListeners.contains(listener)) {
             mSwitchChangeListeners.add(listener);
-        } else {
+        }
+        if (mMainSwitchBar != null) {
             mMainSwitchBar.addOnSwitchChangeListener(listener);
         }
     }
@@ -133,9 +134,8 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
      * Remove a listener for switch changes
      */
     public void removeOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
-        if (mMainSwitchBar == null) {
-            mSwitchChangeListeners.remove(listener);
-        } else {
+        mSwitchChangeListeners.remove(listener);
+        if (mMainSwitchBar != null) {
             mMainSwitchBar.removeOnSwitchChangeListener(listener);
         }
     }
@@ -144,6 +144,5 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
         for (OnMainSwitchChangeListener listener : mSwitchChangeListeners) {
             mMainSwitchBar.addOnSwitchChangeListener(listener);
         }
-        mSwitchChangeListeners.clear();
     }
 }

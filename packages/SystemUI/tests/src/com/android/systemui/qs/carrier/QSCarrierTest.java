@@ -53,13 +53,8 @@ public class QSCarrierTest extends SysuiTestCase {
         mTestableLooper.runWithLooper(() ->
                 mQSCarrier = (QSCarrier) inflater.inflate(R.layout.qs_carrier, null));
 
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-            // In this case, the id is an actual drawable id
-            mSignalIconId = TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[0];
-        } else {
-            // In this case, the id is a level
-            mSignalIconId = SignalDrawable.getEmptyState(5);
-        }
+        // In this case, the id is an actual drawable id
+        mSignalIconId = TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[0];
     }
 
     @Test

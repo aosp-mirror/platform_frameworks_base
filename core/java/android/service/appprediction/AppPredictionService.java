@@ -224,17 +224,16 @@ public abstract class AppPredictionService extends Service {
         }
 
         final CallbackWrapper wrapper = findCallbackWrapper(callbacks, callback);
-        if (wrapper != null) {
-            removeCallbackWrapper(callbacks, wrapper);
-        }
+        removeCallbackWrapper(callbacks, wrapper);
     }
 
-    private void removeCallbackWrapper(
-                ArrayList<CallbackWrapper> callbacks, CallbackWrapper wrapper) {
-        if (callbacks == null) {
+    private void removeCallbackWrapper(@Nullable ArrayList<CallbackWrapper> callbacks,
+            @Nullable CallbackWrapper wrapper) {
+        if (callbacks == null || wrapper == null) {
             return;
         }
         callbacks.remove(wrapper);
+        wrapper.destroy();
         if (callbacks.isEmpty()) {
             onStopPredictionUpdates();
         }
@@ -264,7 +263,8 @@ public abstract class AppPredictionService extends Service {
     public abstract void onRequestPredictionUpdate(@NonNull AppPredictionSessionId sessionId);
 
     private void doDestroyPredictionSession(@NonNull AppPredictionSessionId sessionId) {
-        mSessionCallbacks.remove(sessionId);
+        final ArrayList<CallbackWrapper> callbacks = mSessionCallbacks.remove(sessionId);
+        if (callbacks != null) callbacks.forEach(CallbackWrapper::destroy);
         onDestroyPredictionSession(sessionId);
     }
 
@@ -314,10 +314,12 @@ public abstract class AppPredictionService extends Service {
                 @Nullable Consumer<CallbackWrapper> onBinderDied) {
             mCallback = callback;
             mOnBinderDied = onBinderDied;
-            try {
-                mCallback.asBinder().linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to link to death: " + e);
+            if (mOnBinderDied != null) {
+                try {
+                    mCallback.asBinder().linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to link to death: " + e);
+                }
             }
         }
 
@@ -327,6 +329,12 @@ public abstract class AppPredictionService extends Service {
                 return false;
             }
             return mCallback.equals(callback);
+        }
+
+        public void destroy() {
+            if (mCallback != null && mOnBinderDied != null) {
+                mCallback.asBinder().unlinkToDeath(this, 0);
+            }
         }
 
         @Override
@@ -342,6 +350,7 @@ public abstract class AppPredictionService extends Service {
 
         @Override
         public void binderDied() {
+            destroy();
             mCallback = null;
             if (mOnBinderDied != null) {
                 mOnBinderDied.accept(this);

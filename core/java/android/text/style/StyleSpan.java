@@ -67,10 +67,10 @@ public class StyleSpan extends MetricAffectingSpan implements ParcelableSpan {
      *              include bold, italic, and normal. Values are constants defined
      *              in {@link Typeface}.
      * @param fontWeightAdjustment An integer describing the adjustment to be made to the font
-     *              weight.
+     *              weight. This is added to the value of the current weight returned by
+     *              {@link Typeface#getWeight()}.
      * @see Configuration#fontWeightAdjustment This is the adjustment in text font weight
      * that is used to reflect the current user's preference for increasing font weight.
-     * @hide
      */
     public StyleSpan(@Typeface.Style int style, int fontWeightAdjustment) {
         mStyle = style;
@@ -124,7 +124,9 @@ public class StyleSpan extends MetricAffectingSpan implements ParcelableSpan {
 
     /**
      * Returns the font weight adjustment specified by this span.
-     * @hide
+     * <p>
+     * This can be {@link Configuration#FONT_WEIGHT_ADJUSTMENT_UNDEFINED}. This is added to the
+     * value of the current weight returned by {@link Typeface#getWeight()}.
      */
     public int getFontWeightAdjustment() {
         return mFontWeightAdjustment;

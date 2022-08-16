@@ -110,6 +110,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
+import android.window.ProxyOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -340,6 +342,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     boolean mDecorFitsSystemWindows = true;
 
+    private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -353,6 +357,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mLayoutInflater = LayoutInflater.from(context);
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
+        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(
+                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
     }
 
     /**
@@ -373,6 +379,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // window, as we'll be skipping the addView in handleResumeActivity(), and
             // the token will not be updated as for a new window.
             getAttributes().token = preservedWindow.getAttributes().token;
+            mProxyOnBackInvokedDispatcher.setActualDispatcher(
+                    preservedWindow.getOnBackInvokedDispatcher());
         }
         // Even though the device doesn't support picture-in-picture mode,
         // an user can force using it through developer options.
@@ -1841,8 +1849,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setLocalFocus(boolean hasFocus, boolean inTouchMode) {
-        getViewRootImpl().windowFocusChanged(hasFocus, inTouchMode);
-
+        ViewRootImpl viewRoot = getViewRootImpl();
+        viewRoot.windowFocusChanged(hasFocus);
+        viewRoot.touchModeChanged(inTouchMode);
     }
 
     @Override
@@ -2145,6 +2154,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }
 
@@ -3991,5 +4001,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public AttachedSurfaceControl getRootSurfaceControl() {
         return getViewRootImplOrNull();
+    }
+
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        return mProxyOnBackInvokedDispatcher;
     }
 }

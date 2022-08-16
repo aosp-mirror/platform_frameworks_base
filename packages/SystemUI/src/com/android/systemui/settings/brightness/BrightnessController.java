@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import javax.inject.Inject;
 
 public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
-    private static final String TAG = "StatusBar.BrightnessController";
+    private static final String TAG = "CentralSurfaces.BrightnessController";
     private static final int SLIDER_ANIMATION_DURATION = 3000;
 
     private static final int MSG_UPDATE_SLIDER = 1;
@@ -398,6 +398,11 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
             min = mBrightnessMin;
             max = mBrightnessMax;
         }
+
+        // Ensure the slider is in a fixed position first, then check if we should animate.
+        if (mSliderAnimator != null && mSliderAnimator.isStarted()) {
+            mSliderAnimator.cancel();
+        }
         // convertGammaToLinearFloat returns 0-1
         if (BrightnessSynchronizer.floatEquals(brightnessValue,
                 convertGammaToLinearFloat(mControl.getValue(), min, max))) {
@@ -419,9 +424,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
             // animating it from two different sources causes janky motion
             mControl.setValue(target);
             mControlValueInitialized = true;
-        }
-        if (mSliderAnimator != null && mSliderAnimator.isStarted()) {
-            mSliderAnimator.cancel();
         }
         mSliderAnimator = ValueAnimator.ofInt(mControl.getValue(), target);
         mSliderAnimator.addUpdateListener((ValueAnimator animation) -> {

@@ -16,9 +16,6 @@
 package android.window;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
-import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLASHSCREEN_AVD;
 
@@ -29,11 +26,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -52,19 +47,17 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowInsetsController;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DecorView;
-import com.android.internal.util.ContrastColorUtil;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -86,12 +79,6 @@ public final class SplashScreenView extends FrameLayout {
     private static final String TAG = SplashScreenView.class.getSimpleName();
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
-    private static final int LIGHT_BARS_MASK =
-            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                    | WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
-    private static final int WINDOW_FLAG_MASK = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-                    | FLAG_TRANSLUCENT_NAVIGATION | FLAG_TRANSLUCENT_STATUS;
-
     private boolean mNotCopyable;
     private boolean mIsCopied;
     private int mInitBackgroundColor;
@@ -103,8 +90,8 @@ public final class SplashScreenView extends FrameLayout {
     private Duration mIconAnimationDuration;
     private Instant mIconAnimationStart;
 
-    // The host activity when transfer view to it.
-    private Activity mHostActivity;
+    private final Rect mTmpRect = new Rect();
+    private final int[] mTmpPos = new int[2];
 
     @Nullable
     private SurfaceControlViewHost.SurfacePackage mSurfacePackageCopy;
@@ -119,14 +106,7 @@ public final class SplashScreenView extends FrameLayout {
 
     // cache original window and status
     private Window mWindow;
-    private int mAppWindowFlags;
-    private int mStatusBarColor;
-    private int mNavigationBarColor;
-    private int mSystemBarsAppearance;
     private boolean mHasRemoved;
-    private boolean mNavigationContrastEnforced;
-    private boolean mStatusContrastEnforced;
-    private boolean mDecorFitsSystemWindows;
 
     /**
      * Internal builder to create a SplashScreenView object.
@@ -151,6 +131,7 @@ public final class SplashScreenView extends FrameLayout {
         private Instant mIconAnimationStart;
         private Duration mIconAnimationDuration;
         private Consumer<Runnable> mUiThreadInitTask;
+        private boolean mAllowHandleSolidColor = true;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -231,16 +212,7 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
-         * Set the animation duration if icon is animatable.
-         */
-        public Builder setAnimationDurationMillis(int duration) {
-            mIconAnimationDuration = Duration.ofMillis(duration);
-            return this;
-        }
-
-        /**
          * Set the Runnable that can receive the task which should be executed on UI thread.
-         * @param uiThreadInitTask
          */
         public Builder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
             mUiThreadInitTask = uiThreadInitTask;
@@ -254,6 +226,15 @@ public final class SplashScreenView extends FrameLayout {
             mBrandingDrawable = branding;
             mBrandingImageWidth = width;
             mBrandingImageHeight = height;
+            return this;
+        }
+
+        /**
+         * Sets whether this view can be copied and transferred to the client if the view is
+         * empty style splash screen.
+         */
+        public Builder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
+            mAllowHandleSolidColor = allowHandleSolidColor;
             return this;
         }
 
@@ -275,16 +256,17 @@ public final class SplashScreenView extends FrameLayout {
 
             view.mBrandingImageView = view.findViewById(R.id.splashscreen_branding_view);
 
+            boolean hasIcon = false;
             // center icon
             if (mIconDrawable instanceof SplashScreenView.IconAnimateListener
                     || mSurfacePackage != null) {
+                hasIcon = true;
                 if (mUiThreadInitTask != null) {
                     mUiThreadInitTask.accept(() -> view.mIconView = createSurfaceView(view));
                 } else {
                     view.mIconView = createSurfaceView(view);
                 }
-                view.initIconAnimation(mIconDrawable,
-                        mIconAnimationDuration != null ? mIconAnimationDuration.toMillis() : 0);
+                view.initIconAnimation(mIconDrawable);
                 view.mIconAnimationStart = mIconAnimationStart;
                 view.mIconAnimationDuration = mIconAnimationDuration;
             } else if (mIconSize != 0) {
@@ -301,9 +283,10 @@ public final class SplashScreenView extends FrameLayout {
                 if (mIconBackground != null) {
                     imageView.setBackground(mIconBackground);
                 }
+                hasIcon = true;
                 view.mIconView = imageView;
             }
-            if (mOverlayDrawable != null || mIconDrawable == null) {
+            if (mOverlayDrawable != null || (!hasIcon && !mAllowHandleSolidColor)) {
                 view.setNotCopyable();
             }
 
@@ -452,6 +435,11 @@ public final class SplashScreenView extends FrameLayout {
     /**
      * Returns the duration of the icon animation if icon is animatable.
      *
+     * Note the return value can be null or 0 if the
+     * {@link android.R.attr#windowSplashScreenAnimatedIcon} is not
+     * {@link android.graphics.drawable.AnimationDrawable} or
+     * {@link android.graphics.drawable.AnimatedVectorDrawable}.
+     *
      * @see android.R.attr#windowSplashScreenAnimatedIcon
      * @see android.R.attr#windowSplashScreenAnimationDuration
      */
@@ -483,15 +471,15 @@ public final class SplashScreenView extends FrameLayout {
             Log.d(TAG, "Transferring surface " + mSurfaceView.toString());
         }
 
-        mSurfaceView.setChildSurfacePackageOnDraw(mSurfacePackage);
+        mSurfaceView.setChildSurfacePackage(mSurfacePackage);
     }
 
-    void initIconAnimation(Drawable iconDrawable, long duration) {
+    void initIconAnimation(Drawable iconDrawable) {
         if (!(iconDrawable instanceof IconAnimateListener)) {
             return;
         }
         IconAnimateListener aniDrawable = (IconAnimateListener) iconDrawable;
-        aniDrawable.prepareAnimate(duration, this::animationStartCallback);
+        aniDrawable.prepareAnimate(this::animationStartCallback);
         aniDrawable.setAnimationJankMonitoring(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
@@ -511,8 +499,11 @@ public final class SplashScreenView extends FrameLayout {
         });
     }
 
-    private void animationStartCallback() {
+    private void animationStartCallback(long animDuration) {
         mIconAnimationStart = Instant.now();
+        if (animDuration >= 0) {
+            mIconAnimationDuration = Duration.ofMillis(animDuration);
+        }
     }
 
     /**
@@ -555,7 +546,6 @@ public final class SplashScreenView extends FrameLayout {
             if (decorView != null) {
                 decorView.removeView(this);
             }
-            restoreSystemUIColors();
             mWindow = null;
         }
         mHasRemoved = true;
@@ -566,6 +556,45 @@ public final class SplashScreenView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         releaseAnimationSurfaceHost();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        mBrandingImageView.getDrawingRect(mTmpRect);
+        final int brandingHeight = mTmpRect.height();
+        if (brandingHeight == 0 || mIconView == null) {
+            return;
+        }
+        final int visibility = mBrandingImageView.getVisibility();
+        if (visibility != VISIBLE) {
+            return;
+        }
+        final int currentHeight = b - t;
+
+        mIconView.getLocationInWindow(mTmpPos);
+        mIconView.getDrawingRect(mTmpRect);
+        final int iconHeight = mTmpRect.height();
+
+        final ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) mBrandingImageView.getLayoutParams();
+        if (params == null) {
+            Log.e(TAG, "Unable to adjust branding image layout, layout changed?");
+            return;
+        }
+        final int marginBottom = params.bottomMargin;
+        final int remainingHeight = currentHeight - mTmpPos[1] - iconHeight;
+        final int remainingMaxMargin = remainingHeight - brandingHeight;
+        if (remainingHeight < brandingHeight) {
+            // unable to show the branding image, hide it
+            mBrandingImageView.setVisibility(GONE);
+        } else if (remainingMaxMargin < marginBottom) {
+            // shorter than original margin
+            params.bottomMargin = (int) Math.round(remainingMaxMargin / 2.0);
+            mBrandingImageView.setLayoutParams(params);
+        }
+        // nothing need to adjust
     }
 
     private void releaseAnimationSurfaceHost() {
@@ -597,56 +626,12 @@ public final class SplashScreenView extends FrameLayout {
     }
 
     /**
-     * Called when this view is attached to an activity. This also makes SystemUI colors
-     * transparent so the content of splash screen view can draw fully.
+     * Called when this view is attached to a window of an activity.
      *
      * @hide
      */
-    public void attachHostActivityAndSetSystemUIColors(Activity activity, Window window) {
-        mHostActivity = activity;
+    public void attachHostWindow(Window window) {
         mWindow = window;
-        final WindowManager.LayoutParams attr = window.getAttributes();
-        mAppWindowFlags = attr.flags;
-        mStatusBarColor = window.getStatusBarColor();
-        mNavigationBarColor = window.getNavigationBarColor();
-        mSystemBarsAppearance = window.getInsetsController().getSystemBarsAppearance();
-        mNavigationContrastEnforced = window.isNavigationBarContrastEnforced();
-        mStatusContrastEnforced = window.isStatusBarContrastEnforced();
-        mDecorFitsSystemWindows = window.decorFitsSystemWindows();
-
-        applySystemBarsContrastColor(window.getInsetsController(), mInitBackgroundColor);
-        // Let app draw the background of bars.
-        window.addFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        // Use specified bar colors instead of window background.
-        window.clearFlags(FLAG_TRANSLUCENT_STATUS | FLAG_TRANSLUCENT_NAVIGATION);
-        window.setStatusBarColor(Color.TRANSPARENT);
-        window.setNavigationBarColor(Color.TRANSPARENT);
-        window.setDecorFitsSystemWindows(false);
-        window.setStatusBarContrastEnforced(false);
-        window.setNavigationBarContrastEnforced(false);
-    }
-
-    /** Called when this view is removed from the host activity. */
-    private void restoreSystemUIColors() {
-        mWindow.setFlags(mAppWindowFlags, WINDOW_FLAG_MASK);
-        mWindow.setStatusBarColor(mStatusBarColor);
-        mWindow.setNavigationBarColor(mNavigationBarColor);
-        mWindow.getInsetsController().setSystemBarsAppearance(mSystemBarsAppearance,
-                LIGHT_BARS_MASK);
-        mWindow.setDecorFitsSystemWindows(mDecorFitsSystemWindows);
-        mWindow.setStatusBarContrastEnforced(mStatusContrastEnforced);
-        mWindow.setNavigationBarContrastEnforced(mNavigationContrastEnforced);
-    }
-
-    /**
-     * Makes the icon color of system bars contrast.
-     * @hide
-     */
-    public static void applySystemBarsContrastColor(WindowInsetsController windowInsetsController,
-            int backgroundColor) {
-        final int lightBarAppearance = ContrastColorUtil.isColorLight(backgroundColor)
-                ? LIGHT_BARS_MASK : 0;
-        windowInsetsController.setSystemBarsAppearance(lightBarAppearance, LIGHT_BARS_MASK);
     }
 
     /**
@@ -681,11 +666,9 @@ public final class SplashScreenView extends FrameLayout {
     public interface IconAnimateListener {
         /**
          * Prepare the animation if this drawable also be animatable.
-         * @param duration The animation duration.
          * @param startListener The callback listener used to receive the start of the animation.
-         * @return true if this drawable object can also be animated and it can be played now.
          */
-        boolean prepareAnimate(long duration, Runnable startListener);
+        void prepareAnimate(LongConsumer startListener);
 
         /**
          * Stop animation.
@@ -720,13 +703,15 @@ public final class SplashScreenView extends FrameLayout {
         private RemoteCallback mClientCallback;
 
         public SplashScreenViewParcelable(SplashScreenView view) {
-            mIconSize = view.mIconView.getWidth();
+            final View iconView = view.getIconView();
+            mIconSize = iconView != null ? iconView.getWidth() : 0;
             mBackgroundColor = view.getInitBackgroundColor();
-            mIconBackground = copyDrawable(view.getIconView().getBackground());
+            mIconBackground = iconView != null ? copyDrawable(iconView.getBackground()) : null;
             mSurfacePackage = view.mSurfacePackageCopy;
             if (mSurfacePackage == null) {
                 // We only need to copy the drawable if we are not using a SurfaceView
-                mIconBitmap = copyDrawable(((ImageView) view.getIconView()).getDrawable());
+                mIconBitmap = iconView != null
+                        ? copyDrawable(((ImageView) view.getIconView()).getDrawable()) : null;
             }
             mBrandingBitmap = copyDrawable(view.getBrandingView().getBackground());
 
@@ -747,6 +732,9 @@ public final class SplashScreenView extends FrameLayout {
                 final Rect initialBounds = drawable.copyBounds();
                 final int width = initialBounds.width();
                 final int height = initialBounds.height();
+                if (width <= 0 || height <= 0) {
+                    return null;
+                }
 
                 final Bitmap snapshot = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 final Canvas bmpCanvas = new Canvas(snapshot);

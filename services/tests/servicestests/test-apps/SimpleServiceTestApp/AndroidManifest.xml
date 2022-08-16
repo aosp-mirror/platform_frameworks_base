@@ -28,6 +28,13 @@
         <service android:name=".SimpleIsolatedService"
                  android:isolatedProcess="true"
                  android:exported="true" />
+        <receiver android:name=".SimpleReceiver"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.servicestests.apps.simpleservicetestapp.TEST" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

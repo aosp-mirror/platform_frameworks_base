@@ -86,6 +86,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
     private static final String LOG_TAG = "TextClassificationManagerService";
 
+    // TODO: consider using device config to control it.
+    private static final boolean DEBUG = false;
+
     private static final ITextClassifierCallback NO_OP_CALLBACK = new ITextClassifierCallback() {
         @Override
         public void onSuccess(Bundle result) {}
@@ -175,8 +178,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private final String mDefaultTextClassifierPackage;
     @Nullable
     private final String mSystemTextClassifierPackage;
-    // TODO: consider using device config to control it.
-    private boolean DEBUG = false;
 
     private TextClassificationManagerService(Context context) {
         mContext = Objects.requireNonNull(context);

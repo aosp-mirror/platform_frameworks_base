@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापित करा"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल डिसमिस केला."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"हे अ‍ॅप रीस्टार्ट करण्यासाठी आणि फुल स्क्रीन करण्यासाठी टॅप करा."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"कॅमेराशी संबंधित काही समस्या आहेत का?\nपुन्हा फिट करण्यासाठी टॅप करा"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"निराकरण झाले नाही?\nरिव्हर्ट करण्यासाठी कृपया टॅप करा"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"कॅमेराशी संबंधित कोणत्याही समस्या नाहीत का? डिसमिस करण्‍यासाठी टॅप करा."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"काही ॲप्स पोर्ट्रेटमध्ये सर्वोत्तम काम करतात"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"तुमच्या स्पेसचा पुरेपूर वापर करण्यासाठी, यांपैकी एक पर्याय वापरून पहा"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"फुल स्क्रीन करण्यासाठी, तुमचे डिव्हाइस फिरवा"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ॲपची स्थिती पुन्हा बदलण्यासाठी, त्याच्या शेजारी दोनदा टॅप करा"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"समजले"</string>
 </resources>

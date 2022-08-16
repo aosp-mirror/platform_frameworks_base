@@ -16,11 +16,9 @@
 
 package com.android.server.location.contexthub;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import android.Manifest;
 import android.content.Context;
-import android.hardware.contexthub.V1_0.ContextHub;
+import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
 import android.hardware.contexthub.V1_0.Result;
@@ -29,28 +27,27 @@ import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
+import android.hardware.location.NanoAppRpcService;
 import android.hardware.location.NanoAppState;
-import android.os.Binder;
-import android.os.Build;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A class encapsulating helper functions used by the ContextHubService class
  */
 /* package */ class ContextHubServiceUtil {
     private static final String TAG = "ContextHubServiceUtil";
-    private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
     private static final String CONTEXT_HUB_PERMISSION = Manifest.permission.ACCESS_CONTEXT_HUB;
 
-    // A set of packages that have already been warned regarding the ACCESS_CONTEXT_HUB permission.
-    private static final Set<String> PERMISSION_WARNED_PACKAGES = new HashSet<String>();
+    /**
+     * A host endpoint that is reserved to identify a broadcasted message.
+     */
+    private static final char HOST_ENDPOINT_BROADCAST = 0xFFFF;
 
     /**
      * Creates a ConcurrentHashMap of the Context Hub ID to the ContextHubInfo object given an
@@ -60,10 +57,10 @@ import java.util.Set;
      * @return the HashMap object
      */
     /* package */
-    static HashMap<Integer, ContextHubInfo> createContextHubInfoMap(List<ContextHub> hubList) {
+    static HashMap<Integer, ContextHubInfo> createContextHubInfoMap(List<ContextHubInfo> hubList) {
         HashMap<Integer, ContextHubInfo> contextHubIdToInfoMap = new HashMap<>();
-        for (ContextHub contextHub : hubList) {
-            contextHubIdToInfoMap.put(contextHub.hubId, new ContextHubInfo(contextHub));
+        for (ContextHubInfo contextHubInfo : hubList) {
+            contextHubIdToInfoMap.put(contextHubInfo.getId(), contextHubInfo);
         }
 
         return contextHubIdToInfoMap;
@@ -118,11 +115,11 @@ import java.util.Set;
     }
 
     /**
-     * Generates the Context Hub HAL's NanoAppBinary object from the client-facing
+     * Generates the Context Hub HAL's HIDL NanoAppBinary object from the client-facing
      * android.hardware.location.NanoAppBinary object.
      *
      * @param nanoAppBinary the client-facing NanoAppBinary object
-     * @return the Context Hub HAL's NanoAppBinary object
+     * @return the Context Hub HAL's HIDL NanoAppBinary object
      */
     /* package */
     static android.hardware.contexthub.V1_0.NanoAppBinary createHidlNanoAppBinary(
@@ -150,6 +147,40 @@ import java.util.Set;
     }
 
     /**
+     * Generates the Context Hub HAL's AIDL NanoAppBinary object from the client-facing
+     * android.hardware.location.NanoAppBinary object.
+     *
+     * @param nanoAppBinary the client-facing NanoAppBinary object
+     * @return the Context Hub HAL's AIDL NanoAppBinary object
+     */
+    /* package */
+    static android.hardware.contexthub.NanoappBinary createAidlNanoAppBinary(
+            NanoAppBinary nanoAppBinary) {
+        android.hardware.contexthub.NanoappBinary aidlNanoAppBinary =
+                new android.hardware.contexthub.NanoappBinary();
+
+        aidlNanoAppBinary.nanoappId = nanoAppBinary.getNanoAppId();
+        aidlNanoAppBinary.nanoappVersion = nanoAppBinary.getNanoAppVersion();
+        aidlNanoAppBinary.flags = nanoAppBinary.getFlags();
+        aidlNanoAppBinary.targetChreApiMajorVersion = nanoAppBinary.getTargetChreApiMajorVersion();
+        aidlNanoAppBinary.targetChreApiMinorVersion = nanoAppBinary.getTargetChreApiMinorVersion();
+        // This explicit definition is required to avoid erroneous behavior at the binder.
+        aidlNanoAppBinary.customBinary = new byte[0];
+
+        // Log exceptions while processing the binary, but continue to pass down the binary
+        // since the error checking is deferred to the Context Hub.
+        try {
+            aidlNanoAppBinary.customBinary = nanoAppBinary.getBinaryNoHeader();
+        } catch (IndexOutOfBoundsException e) {
+            Log.w(TAG, e.getMessage());
+        } catch (NullPointerException e) {
+            Log.w(TAG, "NanoApp binary was null");
+        }
+
+        return aidlNanoAppBinary;
+    }
+
+    /**
      * Generates a client-facing NanoAppState array from a HAL HubAppInfo array.
      *
      * @param nanoAppInfoList the array of HubAppInfo objects
@@ -162,7 +193,31 @@ import java.util.Set;
         for (HubAppInfo appInfo : nanoAppInfoList) {
             nanoAppStateList.add(
                     new NanoAppState(appInfo.info_1_0.appId, appInfo.info_1_0.version,
-                                     appInfo.info_1_0.enabled, appInfo.permissions));
+                            appInfo.info_1_0.enabled, appInfo.permissions));
+        }
+
+        return nanoAppStateList;
+    }
+
+    /**
+     * Generates a client-facing NanoAppState array from a AIDL NanoappInfo array.
+     *
+     * @param nanoAppInfoList the array of NanoappInfo objects
+     * @return the corresponding array of NanoAppState objects
+     */
+    /* package */
+    static List<NanoAppState> createNanoAppStateList(
+            android.hardware.contexthub.NanoappInfo[] nanoAppInfoList) {
+        ArrayList<NanoAppState> nanoAppStateList = new ArrayList<>();
+        for (android.hardware.contexthub.NanoappInfo appInfo : nanoAppInfoList) {
+            ArrayList<NanoAppRpcService> rpcServiceList = new ArrayList<>();
+            for (android.hardware.contexthub.NanoappRpcService service : appInfo.rpcServices) {
+                rpcServiceList.add(new NanoAppRpcService(service.id, service.version));
+            }
+            nanoAppStateList.add(
+                    new NanoAppState(appInfo.nanoappId, appInfo.nanoappVersion,
+                            appInfo.enabled, new ArrayList<>(Arrays.asList(appInfo.permissions)),
+                            rpcServiceList));
         }
 
         return nanoAppStateList;
@@ -188,6 +243,29 @@ import java.util.Set;
     }
 
     /**
+     * Creates an AIDL ContextHubMessage object to send to a nanoapp.
+     *
+     * @param hostEndPoint the ID of the client sending the message
+     * @param message      the client-facing NanoAppMessage object describing the message
+     * @return the AIDL ContextHubMessage object
+     */
+    /* package */
+    static android.hardware.contexthub.ContextHubMessage createAidlContextHubMessage(
+            short hostEndPoint, NanoAppMessage message) {
+        android.hardware.contexthub.ContextHubMessage aidlMessage =
+                new android.hardware.contexthub.ContextHubMessage();
+
+        aidlMessage.nanoappId = message.getNanoAppId();
+        aidlMessage.hostEndPoint = (char) hostEndPoint;
+        aidlMessage.messageType = message.getMessageType();
+        aidlMessage.messageBody = message.getMessageBody();
+        // This explicit definition is required to avoid erroneous behavior at the binder.
+        aidlMessage.permissions = new String[0];
+
+        return aidlMessage;
+    }
+
+    /**
      * Creates a client-facing NanoAppMessage object to send to a client.
      *
      * @param message the HIDL ContextHubMsg object from a nanoapp
@@ -203,32 +281,28 @@ import java.util.Set;
     }
 
     /**
-     * Checks for location hardware permissions.
+     * Creates a client-facing NanoAppMessage object to send to a client.
+     *
+     * @param message the AIDL ContextHubMessage object from a nanoapp
+     * @return the NanoAppMessage object
+     */
+    /* package */
+    static NanoAppMessage createNanoAppMessage(
+            android.hardware.contexthub.ContextHubMessage message) {
+        return NanoAppMessage.createMessageFromNanoApp(
+                message.nanoappId, message.messageType, message.messageBody,
+                message.hostEndPoint == HOST_ENDPOINT_BROADCAST);
+    }
+
+    /**
+     * Checks for ACCESS_CONTEXT_HUB permissions.
      *
      * @param context the context of the service
      */
     /* package */
     static void checkPermissions(Context context) {
-        boolean hasLocationHardwarePermission = (context.checkCallingPermission(HARDWARE_PERMISSION)
-                == PERMISSION_GRANTED);
-        boolean hasAccessContextHubPermission = (context.checkCallingPermission(
-                CONTEXT_HUB_PERMISSION) == PERMISSION_GRANTED);
-
-        if (!hasLocationHardwarePermission && !hasAccessContextHubPermission) {
-            throw new SecurityException(
-                    "LOCATION_HARDWARE or ACCESS_CONTEXT_HUB permission required to use Context "
-                            + "Hub");
-        }
-
-        if (!hasAccessContextHubPermission && !Build.IS_USER) {
-            String pkgName = context.getPackageManager().getNameForUid(Binder.getCallingUid());
-            if (!PERMISSION_WARNED_PACKAGES.contains(pkgName)) {
-                Log.w(TAG, pkgName
-                        + ": please use the ACCESS_CONTEXT_HUB permission rather than "
-                        + "LOCATION_HARDWARE (will be removed for Context Hub APIs in T)");
-                PERMISSION_WARNED_PACKAGES.add(pkgName);
-            }
-        }
+        context.enforceCallingOrSelfPermission(CONTEXT_HUB_PERMISSION,
+                "ACCESS_CONTEXT_HUB permission required to use Context Hub");
     }
 
     /**
@@ -277,5 +351,39 @@ import java.util.Set;
             newAppInfo.add(newInfo);
         }
         return newAppInfo;
+    }
+
+    /**
+     * Converts a HIDL AsyncEventType to the corresponding ContextHubService.CONTEXT_HUB_EVENT_*.
+     *
+     * @param hidlEventType The AsyncEventType value.
+     * @return The converted event type.
+     */
+    /* package */
+    static int toContextHubEvent(int hidlEventType) {
+        switch (hidlEventType) {
+            case AsyncEventType.RESTARTED:
+                return ContextHubService.CONTEXT_HUB_EVENT_RESTARTED;
+            default:
+                Log.e(TAG, "toContextHubEvent: Unknown event type: " + hidlEventType);
+                return ContextHubService.CONTEXT_HUB_EVENT_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts an AIDL AsyncEventType to the corresponding ContextHubService.CONTEXT_HUB_EVENT_*.
+     *
+     * @param aidlEventType The AsyncEventType value.
+     * @return The converted event type.
+     */
+    /* package */
+    static int toContextHubEventFromAidl(int aidlEventType) {
+        switch (aidlEventType) {
+            case android.hardware.contexthub.AsyncEventType.RESTARTED:
+                return ContextHubService.CONTEXT_HUB_EVENT_RESTARTED;
+            default:
+                Log.e(TAG, "toContextHubEventFromAidl: Unknown event type: " + aidlEventType);
+                return ContextHubService.CONTEXT_HUB_EVENT_UNKNOWN;
+        }
     }
 }

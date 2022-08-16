@@ -149,6 +149,11 @@ public class ImmersiveModeConfirmation {
         }
     }
 
+    void release() {
+        mHandler.removeMessages(H.SHOW);
+        mHandler.removeMessages(H.HIDE);
+    }
+
     boolean onSettingChanged(int currentUserId) {
         final boolean changed = loadSetting(currentUserId, mContext);
         // Remove the window if the setting changes to be confirmed.
@@ -204,7 +209,12 @@ public class ImmersiveModeConfirmation {
         if (mClingWindow != null) {
             if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation");
             // We don't care which root display area the window manager is specifying for removal.
-            getWindowManager(FEATURE_UNDEFINED).removeView(mClingWindow);
+            try {
+                getWindowManager(FEATURE_UNDEFINED).removeView(mClingWindow);
+            } catch (WindowManager.InvalidDisplayException e) {
+                Slog.w(TAG, "Fail to hide the immersive confirmation window because of " + e);
+                return;
+            }
             mClingWindow = null;
         }
     }
@@ -432,7 +442,11 @@ public class ImmersiveModeConfirmation {
 
         // show the confirmation
         WindowManager.LayoutParams lp = getClingWindowLayoutParams();
-        getWindowManager(rootDisplayAreaId).addView(mClingWindow, lp);
+        try {
+            getWindowManager(rootDisplayAreaId).addView(mClingWindow, lp);
+        } catch (WindowManager.InvalidDisplayException e) {
+            Slog.w(TAG, "Fail to show the immersive confirmation window because of " + e);
+        }
     }
 
     private final Runnable mConfirm = new Runnable() {

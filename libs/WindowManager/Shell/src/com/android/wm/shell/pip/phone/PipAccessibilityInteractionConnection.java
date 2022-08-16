@@ -285,7 +285,7 @@ public class PipAccessibilityInteractionConnection {
                 Region bounds, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
-                Bundle arguments) throws RemoteException {
+                float[] matrixValues, Bundle arguments) throws RemoteException {
             mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this
                         .findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId, bounds,
@@ -298,7 +298,8 @@ public class PipAccessibilityInteractionConnection {
         public void findAccessibilityNodeInfosByViewId(long accessibilityNodeId, String viewId,
                 Region bounds, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrixValues)
                 throws RemoteException {
             mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.findAccessibilityNodeInfosByViewId(
@@ -311,7 +312,8 @@ public class PipAccessibilityInteractionConnection {
         public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
                 Region bounds, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrixValues)
                 throws RemoteException {
             mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.findAccessibilityNodeInfosByText(
@@ -323,7 +325,8 @@ public class PipAccessibilityInteractionConnection {
         @Override
         public void findFocus(long accessibilityNodeId, int focusType, Region bounds,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrixValues)
                 throws RemoteException {
             mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.findFocus(accessibilityNodeId, focusType,
@@ -335,7 +338,8 @@ public class PipAccessibilityInteractionConnection {
         @Override
         public void focusSearch(long accessibilityNodeId, int direction, Region bounds,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrixValues)
                 throws RemoteException {
             mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.focusSearch(accessibilityNodeId,

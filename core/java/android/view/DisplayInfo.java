@@ -311,6 +311,12 @@ public final class DisplayInfo implements Parcelable {
     @Nullable
     public RoundedCorners roundedCorners;
 
+    /**
+     * Install orientation of the display relative to its natural orientation.
+     */
+    @Surface.Rotation
+    public int installOrientation;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -381,7 +387,8 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
-                && Objects.equals(roundedCorners, other.roundedCorners);
+                && Objects.equals(roundedCorners, other.roundedCorners)
+                && installOrientation == other.installOrientation;
     }
 
     @Override
@@ -432,6 +439,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
+        installOrientation = other.installOrientation;
     }
 
     public void readFromParcel(Parcel source) {
@@ -440,8 +448,8 @@ public final class DisplayInfo implements Parcelable {
         type = source.readInt();
         displayId = source.readInt();
         displayGroupId = source.readInt();
-        address = source.readParcelable(null);
-        deviceProductInfo = source.readParcelable(null);
+        address = source.readParcelable(null, android.view.DisplayAddress.class);
+        deviceProductInfo = source.readParcelable(null, android.hardware.display.DeviceProductInfo.class);
         name = source.readString8();
         appWidth = source.readInt();
         appHeight = source.readInt();
@@ -466,7 +474,7 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < nColorModes; i++) {
             supportedColorModes[i] = source.readInt();
         }
-        hdrCapabilities = source.readParcelable(null);
+        hdrCapabilities = source.readParcelable(null, android.view.Display.HdrCapabilities.class);
         minimalPostProcessingSupported = source.readBoolean();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
@@ -488,6 +496,7 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < numUserDisabledFormats; i++) {
             userDisabledHdrTypes[i] = source.readInt();
         }
+        installOrientation = source.readInt();
     }
 
     @Override
@@ -542,6 +551,7 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < userDisabledHdrTypes.length; i++) {
             dest.writeInt(userDisabledHdrTypes[i]);
         }
+        dest.writeInt(installOrientation);
     }
 
     @Override
@@ -796,6 +806,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessMaximum);
         sb.append(", brightnessDefault ");
         sb.append(brightnessDefault);
+        sb.append(", installOrientation ");
+        sb.append(Surface.rotationToString(installOrientation));
         sb.append("}");
         return sb.toString();
     }
@@ -849,6 +861,12 @@ public final class DisplayInfo implements Parcelable {
         }
         if ((flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0) {
             result.append(", FLAG_OWN_DISPLAY_GROUP");
+        }
+        if ((flags & Display.FLAG_ALWAYS_UNLOCKED) != 0) {
+            result.append(", FLAG_ALWAYS_UNLOCKED");
+        }
+        if ((flags & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            result.append(", FLAG_TOUCH_FEEDBACK_DISABLED");
         }
         return result.toString();
     }

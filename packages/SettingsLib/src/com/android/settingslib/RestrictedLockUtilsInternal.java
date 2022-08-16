@@ -26,14 +26,17 @@ import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -42,6 +45,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -726,6 +730,26 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             textView.setCompoundDrawables(null, null, null, null);
         }
         textView.setText(sb);
+    }
+
+    /**
+     * Show restricted setting dialog.
+     */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    public static void sendShowRestrictedSettingDialogIntent(Context context,
+            String packageName, int uid) {
+        final Intent intent = getShowRestrictedSettingsIntent(packageName, uid);
+        context.startActivity(intent);
+    }
+
+    /**
+     * Get restricted settings dialog intent.
+     */
+    private static Intent getShowRestrictedSettingsIntent(String packageName, int uid) {
+        final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+        intent.putExtra(Intent.EXTRA_UID, uid);
+        return intent;
     }
 
     /**

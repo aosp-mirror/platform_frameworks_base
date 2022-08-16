@@ -55,6 +55,13 @@ class MediaHost constructor(
             return field
         }
 
+    /**
+     * Set the clipping that this host should use, based on its parent's bounds.
+     *
+     * Use [Rect.set].
+     */
+    val currentClipping = Rect()
+
     private val listener = object : MediaDataManager.Listener {
         override fun onMediaDataLoaded(
             key: String,

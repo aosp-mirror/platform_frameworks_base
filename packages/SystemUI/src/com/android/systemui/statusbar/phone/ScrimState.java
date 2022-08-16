@@ -62,7 +62,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mBlankScreen = false;
             if (previousState == ScrimState.AOD) {
-                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP_SCRIM;
                 if (mDisplayRequiresBlanking) {
                     // DisplayPowerManager will blank the screen, we'll just
                     // set our scrim to black in this frame to avoid flickering and
@@ -70,7 +70,7 @@ public enum ScrimState {
                     mBlankScreen = true;
                 }
             } else if (previousState == ScrimState.KEYGUARD) {
-                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP_SCRIM;
             } else {
                 mAnimationDuration = ScrimController.ANIMATION_DURATION;
             }
@@ -191,7 +191,7 @@ public enum ScrimState {
             // by animating the screen off via the LightRevelScrim. In either case we just need to
             // set our state.
             mAnimateChange = mDozeParameters.shouldControlScreenOff()
-                    && !mDozeParameters.shouldControlUnlockedScreenOff();
+                    && !mDozeParameters.shouldShowLightRevealScrim();
         }
 
         @Override
@@ -202,6 +202,11 @@ public enum ScrimState {
         @Override
         public boolean isLowPowerState() {
             return true;
+        }
+
+        @Override
+        public boolean shouldBlendWithMainColor() {
+            return false;
         }
     },
 
@@ -238,7 +243,7 @@ public enum ScrimState {
 
             mAnimationDuration = mKeyguardFadingAway
                     ? mKeyguardFadingAwayDuration
-                    : StatusBar.FADE_KEYGUARD_DURATION;
+                    : CentralSurfaces.FADE_KEYGUARD_DURATION;
 
             boolean fromAod = previousState == AOD || previousState == PULSING;
             mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;
@@ -257,6 +262,25 @@ public enum ScrimState {
                 mBehindTint = Color.BLACK;
                 mBlankScreen = true;
             }
+
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
+        }
+    },
+
+    DREAMING {
+        @Override
+        public void prepare(ScrimState previousState) {
+            mFrontTint = Color.TRANSPARENT;
+            mBehindTint = Color.BLACK;
+            mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
+
+            mFrontAlpha = 0;
+            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mNotifAlpha = 0;
+
+            mBlankScreen = false;
 
             if (mClipQsScrim) {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
@@ -306,6 +330,13 @@ public enum ScrimState {
     public void prepare(ScrimState previousState) {
     }
 
+    /**
+     * Whether a particular state should enable blending with extracted theme colors.
+     */
+    public boolean shouldBlendWithMainColor() {
+        return true;
+    }
+
     public float getFrontAlpha() {
         return mFrontAlpha;
     }
@@ -343,6 +374,10 @@ public enum ScrimState {
     }
 
     public void updateScrimColor(ScrimView scrim, float alpha, int tint) {
+        if (ScrimController.DEBUG_MODE) {
+            tint = scrim == mScrimInFront ? ScrimController.DEBUG_FRONT_TINT
+                    : ScrimController.DEBUG_BEHIND_TINT;
+        }
         Trace.traceCounter(Trace.TRACE_TAG_APP,
                 scrim == mScrimInFront ? "front_scrim_alpha" : "back_scrim_alpha",
                 (int) (alpha * 255));

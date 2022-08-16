@@ -69,17 +69,14 @@ import java.util.Map;
 
  <h4>Metadata Track</h4>
  <p>
-  Per-frame metadata is useful in carrying extra information that correlated with video or audio to
-  facilitate offline processing, e.g. gyro signals from the sensor could help video stabilization when
-  doing offline processing. Metadata track is only supported in MP4 container. When adding a new
-  metadata track, track's mime format must start with prefix "application/", e.g. "applicaton/gyro".
-  Metadata's format/layout will be defined by the application. Writing metadata is nearly the same as
-  writing video/audio data except that the data will not be from mediacodec. Application just needs
-  to pass the bytebuffer that contains the metadata and also the associated timestamp to the
-  {@link #writeSampleData} api. The timestamp must be in the same time base as video and audio. The
-  generated MP4 file uses TextMetaDataSampleEntry defined in section 12.3.3.2 of the ISOBMFF to signal
-  the metadata's mime format. When using{@link android.media.MediaExtractor} to extract the file with
-  metadata track, the mime format of the metadata will be extracted into {@link android.media.MediaFormat}.
+  Per-frame metadata carries information that correlates with video or audio to facilitate offline
+  processing. For example, gyro signals from the sensor can help video stabilization when doing
+  offline processing. Metadata tracks are only supported when multiplexing to the MP4 container
+  format. When adding a new metadata track, the MIME type format must start with prefix
+  "application/" (for example, "application/gyro"). The format of the metadata is
+  application-defined. Metadata timestamps must be in the same time base as video and audio
+  timestamps. The generated MP4 file uses TextMetaDataSampleEntry (defined in section 12.3.3.2 of
+  the ISOBMFF specification) to signal the metadata's MIME type.
 
  <pre class=prettyprint>
    MediaMuxer muxer = new MediaMuxer("temp.mp4", OutputFormat.MUXER_OUTPUT_MPEG_4);

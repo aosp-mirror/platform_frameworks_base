@@ -37,7 +37,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
     private val disableFlagsLogger = DisableFlagsLogger(disable1Flags, disable2Flags)
 
     @Test
-    fun getDisableFlagsString_oldAndNewSame_statesLoggedButDiffsNotLogged() {
+    fun getDisableFlagsString_oldAndNewSame_newAndUnchangedLoggedOldNotLogged() {
         val state = DisableFlagsLogger.DisableState(
                 0b111, // ABC
                 0b01 // mN
@@ -45,10 +45,9 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
 
         val result = disableFlagsLogger.getDisableFlagsString(state, state)
 
-        assertThat(result).contains("Old: ABC.mN")
-        assertThat(result).contains("New: ABC.mN")
-        assertThat(result).doesNotContain("(")
-        assertThat(result).doesNotContain(")")
+        assertThat(result).doesNotContain("Old")
+        assertThat(result).contains("ABC.mN")
+        assertThat(result).contains("(unchanged)")
     }
 
     @Test
@@ -66,7 +65,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
 
         assertThat(result).contains("Old: ABC.mN")
         assertThat(result).contains("New: abC.Mn")
-        assertThat(result).contains("(ab.Mn)")
+        assertThat(result).contains("(changed: ab.Mn)")
     }
 
     @Test
@@ -82,7 +81,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
                 )
         )
 
-        assertThat(result).contains("(.n)")
+        assertThat(result).contains("(changed: .n)")
     }
 
     @Test
@@ -96,8 +95,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
         )
 
         assertThat(result).doesNotContain("Old")
-        assertThat(result).contains("New: abC.mN")
-        // We have no state to diff on, so we shouldn't see any diff in parentheses
+        assertThat(result).contains("abC.mN")
         assertThat(result).doesNotContain("(")
         assertThat(result).doesNotContain(")")
     }
@@ -141,7 +139,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
                 )
         )
 
-        assertThat(result).contains("local modification: Abc.Mn (A.M)")
+        assertThat(result).contains("local modification: Abc.Mn (changed: A.M)")
     }
 
     @Test

@@ -151,9 +151,9 @@
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
-    <item msgid="204248102837117183">", సక్రియంగా ఉంది"</item>
-    <item msgid="253388653486517049">", (మీడియా) సక్రియంగా ఉంది"</item>
-    <item msgid="5001852592115448348">", (ఫోన్) సక్రియంగా ఉంది"</item>
+    <item msgid="204248102837117183">", యాక్టివ్‌గా ఉంది"</item>
+    <item msgid="253388653486517049">", (మీడియా) యాక్టివ్‌గా ఉంది"</item>
+    <item msgid="5001852592115448348">", (ఫోన్) యాక్టివ్‌గా ఉంది"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="1191094707770726722">"ఆఫ్"</item>
@@ -266,5 +266,7 @@
     <item msgid="3825132913289380004">"RNDIS (USB ఈథర్‌నెట్)"</item>
     <item msgid="8828567335701536560">"ఆడియో మూలం"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

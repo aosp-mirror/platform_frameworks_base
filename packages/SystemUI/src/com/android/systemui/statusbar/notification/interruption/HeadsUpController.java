@@ -124,7 +124,7 @@ public class HeadsUpController {
         if (wasHeadsUp) {
             if (shouldHeadsUp) {
                 mHeadsUpManager.updateNotification(entry.getKey(), hunAgain);
-            } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.getKey())) {
+            } else {
                 // We don't want this to be interrupting anymore, let's remove it
                 mHeadsUpManager.removeNotification(entry.getKey(), false /* removeImmediately */);
             }

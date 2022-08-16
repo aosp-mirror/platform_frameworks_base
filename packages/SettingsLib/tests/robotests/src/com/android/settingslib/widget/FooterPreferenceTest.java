@@ -19,8 +19,8 @@ package com.android.settingslib.widget;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
@@ -46,21 +46,24 @@ public class FooterPreferenceTest {
     }
 
     @Test
-    public void bindPreference_shouldLinkifyContent() {
-        final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(
-                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null));
-
-        mFooterPreference.onBindViewHolder(holder);
-
-        assertThat(((TextView) holder.findViewById(android.R.id.title)).getMovementMethod())
-                .isInstanceOf(LinkMovementMethod.class);
-    }
-
-    @Test
     public void setSummary_summarySet_shouldSetAsTitle() {
         mFooterPreference.setSummary("summary");
 
         assertThat(mFooterPreference.getTitle()).isEqualTo("summary");
+    }
+
+    @Test
+    public void setLearnMoreText_shouldSetAsTextInLearnMore() {
+        final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null));
+        mFooterPreference.setLearnMoreText("Custom learn more");
+        mFooterPreference.setLearnMoreAction(view -> { /* do nothing */ } /* listener */);
+
+        mFooterPreference.onBindViewHolder(holder);
+
+        assertThat(((TextView) holder.findViewById(
+                R.id.settingslib_learn_more)).getText().toString())
+                .isEqualTo("Custom learn more");
     }
 
     @Test
@@ -71,17 +74,17 @@ public class FooterPreferenceTest {
     }
 
     @Test
-    public void setLearnMoreContentDescription_contentSet_shouldGetSameContentDescription() {
-        mFooterPreference.setLearnMoreContentDescription("test");
-
-        assertThat(mFooterPreference.getLearnMoreContentDescription()).isEqualTo("test");
-    }
-
-    @Test
     public void setLearnMoreAction_actionSet_shouldGetAction() {
         mFooterPreference.setLearnMoreAction(v -> {
         });
 
         assertThat(mFooterPreference.mLearnMoreListener).isNotNull();
+    }
+
+    @Test
+    public void setIconVisibility_shouldReturnSameVisibilityType() {
+        mFooterPreference.setIconVisibility(View.GONE);
+
+        assertThat(mFooterPreference.mIconVisibility).isEqualTo(View.GONE);
     }
 }

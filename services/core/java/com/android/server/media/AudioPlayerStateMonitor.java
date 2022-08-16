@@ -40,7 +40,7 @@ import java.util.Set;
  * Monitors the state changes of audio players.
  */
 class AudioPlayerStateMonitor {
-    private static boolean DEBUG = MediaSessionService.DEBUG;
+    private static final boolean DEBUG = MediaSessionService.DEBUG;
     private static String TAG = "AudioPlayerStateMonitor";
 
     private static AudioPlayerStateMonitor sInstance;

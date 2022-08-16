@@ -360,67 +360,6 @@ public class SystemConfigTest {
             .containsExactly("android.permission.BAR");
     }
 
-    @Test
-    public void pruneVendorApexPrivappAllowlists_removeVendor()
-            throws Exception {
-        File apexDir = createTempSubfolder("apex");
-
-        // Read non-vendor apex permission allowlists
-        final String allowlistNonVendorContents =
-                "<privapp-permissions package=\"com.android.apk_in_non_vendor_apex\">"
-                        + "<permission name=\"android.permission.FOO\"/>"
-                        + "<deny-permission name=\"android.permission.BAR\"/>"
-                        + "</privapp-permissions>";
-        File nonVendorPermDir =
-                createTempSubfolder("apex/com.android.non_vendor/etc/permissions");
-        File nonVendorPermissionFile =
-                createTempFile(nonVendorPermDir, "permissions.xml", allowlistNonVendorContents);
-        XmlPullParser nonVendorParser = readXmlUntilStartTag(nonVendorPermissionFile);
-        mSysConfig.readApexPrivAppPermissions(nonVendorParser, nonVendorPermissionFile,
-                apexDir.toPath());
-
-        // Read vendor apex permission allowlists
-        final String allowlistVendorContents =
-                "<privapp-permissions package=\"com.android.apk_in_vendor_apex\">"
-                        + "<permission name=\"android.permission.BAZ\"/>"
-                        + "<deny-permission name=\"android.permission.BAT\"/>"
-                        + "</privapp-permissions>";
-        File vendorPermissionFile =
-                createTempFile(createTempSubfolder("apex/com.android.vendor/etc/permissions"),
-                        "permissions.xml", allowlistNonVendorContents);
-        XmlPullParser vendorParser = readXmlUntilStartTag(vendorPermissionFile);
-        mSysConfig.readApexPrivAppPermissions(vendorParser, vendorPermissionFile,
-                apexDir.toPath());
-
-        // Read allowed vendor apex list
-        final String allowedVendorContents =
-                "<config>\n"
-                        + "    <allowed-vendor-apex package=\"com.android.vendor\" "
-                        + "installerPackage=\"com.installer\" />\n"
-                        + "</config>";
-        final File allowedVendorFolder = createTempSubfolder("folder");
-        createTempFile(allowedVendorFolder, "vendor-apex-allowlist.xml", allowedVendorContents);
-        readPermissions(allowedVendorFolder, /* Grant all permission flags */ ~0);
-
-        // Finally, prune non-vendor allowlists.
-        // There is no guarantee in which order the above reads will be done, however pruning
-        // will always happen last.
-        mSysConfig.pruneVendorApexPrivappAllowlists();
-
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.non_vendor",
-                "com.android.apk_in_non_vendor_apex"))
-            .containsExactly("android.permission.FOO");
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.non_vendor",
-                "com.android.apk_in_non_vendor_apex"))
-            .containsExactly("android.permission.BAR");
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.vendor",
-                "com.android.apk_in_vendor_apex"))
-            .isNull();
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.vendor",
-                "com.android.apk_in_vendor_apex"))
-            .isNull();
-    }
-
     /**
      * Tests that readPermissions works correctly for a library with on-bootclasspath-before
      * and on-bootclasspath-since.
@@ -429,18 +368,40 @@ public class SystemConfigTest {
     public void readPermissions_allowLibs_parsesSimpleLibrary() throws IOException {
         String contents =
                 "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        on-bootclasspath-before=\"10\"\n"
-                + "        on-bootclasspath-since=\"20\"\n"
-                + "     />\n\n"
-                + " </permissions>";
+                        + "    <library \n"
+                        + "        name=\"foo\"\n"
+                        + "        file=\"" + mFooJar + "\"\n"
+                        + "        on-bootclasspath-before=\"10\"\n"
+                        + "        on-bootclasspath-since=\"20\"\n"
+                        + "     />\n\n"
+                        + " </permissions>";
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
         SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
-        assertThat(entry.onBootclasspathSince).isEqualTo(20);
+        assertThat(entry.onBootclasspathBefore).isEqualTo("10");
+        assertThat(entry.onBootclasspathSince).isEqualTo("20");
+    }
+
+    /**
+     * Tests that readPermissions works correctly for a library with on-bootclasspath-before
+     * and on-bootclasspath-since that uses codenames.
+     */
+    @Test
+    public void readPermissions_allowLibs_parsesSimpleLibraryWithCodenames() throws IOException {
+        String contents =
+                "<permissions>\n"
+                        + "    <library \n"
+                        + "        name=\"foo\"\n"
+                        + "        file=\"" + mFooJar + "\"\n"
+                        + "        on-bootclasspath-before=\"Q\"\n"
+                        + "        on-bootclasspath-since=\"W\"\n"
+                        + "     />\n\n"
+                        + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
+        assertThat(entry.onBootclasspathBefore).isEqualTo("Q");
+        assertThat(entry.onBootclasspathSince).isEqualTo("W");
     }
 
     /**
@@ -461,8 +422,8 @@ public class SystemConfigTest {
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
         SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
-        assertThat(entry.onBootclasspathSince).isEqualTo(20);
+        assertThat(entry.onBootclasspathBefore).isEqualTo("10");
+        assertThat(entry.onBootclasspathSince).isEqualTo("20");
     }
 
     /**
@@ -543,12 +504,20 @@ public class SystemConfigTest {
      */
     @Test
     public void readPermissions_allowLibs_allowsCurrentMaxSdk() throws IOException {
+        // depending on whether this test is running before or after finalization, we need to
+        // pass a different parameter
+        String parameter;
+        if ("REL".equals(Build.VERSION.CODENAME)) {
+            parameter = "" + Build.VERSION.SDK_INT;
+        } else {
+            parameter = "ZZZ";
+        }
         String contents =
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
                 + "        file=\"" + mFooJar + "\"\n"
-                + "        max-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
+                + "        max-device-sdk=\"" + parameter + "\"\n"
                 + "     />\n\n"
                 + " </permissions>";
         parseSharedLibraries(contents);

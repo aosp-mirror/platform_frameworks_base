@@ -20,9 +20,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.os.ShellCommand;
+import android.util.Slog;
 import android.view.Display;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
@@ -58,6 +60,28 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayModeDirectorLoggingEnabled(false);
             case "dwb-set-cct":
                 return setAmbientColorTemperatureOverride();
+            case "set-user-preferred-display-mode":
+                return setUserPreferredDisplayMode();
+            case "clear-user-preferred-display-mode":
+                return clearUserPreferredDisplayMode();
+            case "get-user-preferred-display-mode":
+                return getUserPreferredDisplayMode();
+            case "get-active-display-mode-at-start":
+                return getActiveDisplayModeAtStart();
+            case "set-match-content-frame-rate-pref":
+                return setMatchContentFrameRateUserPreference();
+            case "get-match-content-frame-rate-pref":
+                return getMatchContentFrameRateUserPreference();
+            case "set-user-disabled-hdr-types":
+                return setUserDisabledHdrTypes();
+            case "get-user-disabled-hdr-types":
+                return getUserDisabledHdrTypes();
+            case "get-displays":
+                return getDisplays();
+            case "dock":
+                return setDockedAndIdle();
+            case "undock":
+                return unsetDockedAndIdle();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -88,8 +112,50 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Disable display mode director logging.");
         pw.println("  dwb-set-cct CCT");
         pw.println("    Sets the ambient color temperature override to CCT (use -1 to disable).");
+        pw.println("  set-user-preferred-display-mode WIDTH HEIGHT REFRESH-RATE "
+                + "DISPLAY_ID (optional)");
+        pw.println("    Sets the user preferred display mode which has fields WIDTH, HEIGHT and "
+                + "REFRESH-RATE. If DISPLAY_ID is passed, the mode change is applied to display"
+                + "with id = DISPLAY_ID, else mode change is applied globally.");
+        pw.println("  clear-user-preferred-display-mode DISPLAY_ID (optional)");
+        pw.println("    Clears the user preferred display mode. If DISPLAY_ID is passed, the mode"
+                + " is cleared for  display with id = DISPLAY_ID, else mode is cleared globally.");
+        pw.println("  get-user-preferred-display-mode DISPLAY_ID (optional)");
+        pw.println("    Returns the user preferred display mode or null if no mode is set by user."
+                + "If DISPLAY_ID is passed, the mode for display with id = DISPLAY_ID is "
+                + "returned, else global display mode is returned.");
+        pw.println("  get-active-display-mode-at-start DISPLAY_ID");
+        pw.println("    Returns the display mode which was found at boot time of display with "
+                + "id = DISPLAY_ID");
+        pw.println("  set-match-content-frame-rate-pref PREFERENCE");
+        pw.println("    Sets the match content frame rate preference as PREFERENCE ");
+        pw.println("  get-match-content-frame-rate-pref");
+        pw.println("    Returns the match content frame rate preference");
+        pw.println("  set-user-disabled-hdr-types TYPES...");
+        pw.println("    Sets the user disabled HDR types as TYPES");
+        pw.println("  get-user-disabled-hdr-types");
+        pw.println("    Returns the user disabled HDR types");
+        pw.println("  get-displays [CATEGORY]");
+        pw.println("    Returns the current displays. Can specify string category among");
+        pw.println("    DisplayManager.DISPLAY_CATEGORY_*; must use the actual string value.");
+        pw.println("  dock");
+        pw.println("    Sets brightness to docked + idle screen brightness mode");
+        pw.println("  undock");
+        pw.println("    Sets brightness to active (normal) screen brightness mode");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
+    }
+
+    private int getDisplays() {
+        String category = getNextArg();
+        DisplayManager dm = mService.getContext().getSystemService(DisplayManager.class);
+        Display[] displays = dm.getDisplays(category);
+        PrintWriter out = getOutPrintWriter();
+        out.println("Displays:");
+        for (int i = 0; i < displays.length; i++) {
+            out.println("  " + displays[i]);
+        }
+        return 0;
     }
 
     private int setBrightness() {
@@ -148,6 +214,213 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.setAmbientColorTemperatureOverride(cct);
+        return 0;
+    }
+
+    private int setUserPreferredDisplayMode() {
+        final String widthText = getNextArg();
+        if (widthText == null) {
+            getErrPrintWriter().println("Error: no width specified");
+            return 1;
+        }
+
+        final String heightText = getNextArg();
+        if (heightText == null) {
+            getErrPrintWriter().println("Error: no height specified");
+            return 1;
+        }
+
+        final String refreshRateText = getNextArg();
+        if (refreshRateText == null) {
+            getErrPrintWriter().println("Error: no refresh-rate specified");
+            return 1;
+        }
+
+        final int width, height;
+        final float refreshRate;
+        try {
+            width = Integer.parseInt(widthText);
+            height = Integer.parseInt(heightText);
+            refreshRate = Float.parseFloat(refreshRateText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid format of width, height or refresh rate");
+            return 1;
+        }
+        if ((width < 0 || height < 0) && refreshRate <= 0.0f) {
+            getErrPrintWriter().println("Error: invalid value of resolution (width, height)"
+                    + " and refresh rate");
+            return 1;
+        }
+
+        final String displayIdText = getNextArg();
+        int displayId = Display.INVALID_DISPLAY;
+        if (displayIdText != null) {
+            try {
+                displayId = Integer.parseInt(displayIdText);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: invalid format of display ID");
+                return 1;
+            }
+        }
+        mService.setUserPreferredDisplayModeInternal(
+                displayId, new Display.Mode(width, height, refreshRate));
+        return 0;
+    }
+
+    private int clearUserPreferredDisplayMode() {
+        final String displayIdText = getNextArg();
+        int displayId = Display.INVALID_DISPLAY;
+        if (displayIdText != null) {
+            try {
+                displayId = Integer.parseInt(displayIdText);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: invalid format of display ID");
+                return 1;
+            }
+        }
+        mService.setUserPreferredDisplayModeInternal(displayId, null);
+        return 0;
+    }
+
+    private int getUserPreferredDisplayMode() {
+        final String displayIdText = getNextArg();
+        int displayId = Display.INVALID_DISPLAY;
+        if (displayIdText != null) {
+            try {
+                displayId = Integer.parseInt(displayIdText);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: invalid format of display ID");
+                return 1;
+            }
+        }
+        final Display.Mode mode =  mService.getUserPreferredDisplayModeInternal(displayId);
+        if (mode == null) {
+            getOutPrintWriter().println("User preferred display mode: null");
+            return 0;
+        }
+
+        getOutPrintWriter().println("User preferred display mode: " + mode.getPhysicalWidth() + " "
+                + mode.getPhysicalHeight() + " " + mode.getRefreshRate());
+        return 0;
+    }
+
+    private int getActiveDisplayModeAtStart() {
+        final String displayIdText = getNextArg();
+        if (displayIdText == null) {
+            getErrPrintWriter().println("Error: no displayId specified");
+            return 1;
+        }
+        final int displayId;
+        try {
+            displayId = Integer.parseInt(displayIdText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid displayId");
+            return 1;
+        }
+
+        Display.Mode mode = mService.getActiveDisplayModeAtStart(displayId);
+        if (mode == null) {
+            getOutPrintWriter().println("Boot display mode: null");
+            return 0;
+        }
+        getOutPrintWriter().println("Boot display mode: " + mode.getPhysicalWidth() + " "
+                + mode.getPhysicalHeight() + " " + mode.getRefreshRate());
+        return 0;
+    }
+
+    private int setMatchContentFrameRateUserPreference() {
+        final String matchContentFrameRatePrefText = getNextArg();
+        if (matchContentFrameRatePrefText == null) {
+            getErrPrintWriter().println("Error: no matchContentFrameRatePref specified");
+            return 1;
+        }
+
+        final int matchContentFrameRatePreference;
+        try {
+            matchContentFrameRatePreference = Integer.parseInt(matchContentFrameRatePrefText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid format of matchContentFrameRatePreference");
+            return 1;
+        }
+        if (matchContentFrameRatePreference < 0) {
+            getErrPrintWriter().println("Error: invalid value of matchContentFrameRatePreference");
+            return 1;
+        }
+
+        final Context context = mService.getContext();
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+
+        final int refreshRateSwitchingType =
+                toRefreshRateSwitchingType(matchContentFrameRatePreference);
+        dm.setRefreshRateSwitchingType(refreshRateSwitchingType);
+        return 0;
+    }
+
+    private int getMatchContentFrameRateUserPreference() {
+        final Context context = mService.getContext();
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        getOutPrintWriter().println("Match content frame rate type: "
+                + dm.getMatchContentFrameRateUserPreference());
+        return 0;
+    }
+
+    private int setUserDisabledHdrTypes() {
+        String[] userDisabledHdrTypesText = peekRemainingArgs();
+        if (userDisabledHdrTypesText == null) {
+            getErrPrintWriter().println("Error: no userDisabledHdrTypes specified");
+            return 1;
+        }
+
+        int[] userDisabledHdrTypes = new int[userDisabledHdrTypesText.length];
+        try {
+            int index = 0;
+            for (String userDisabledHdrType : userDisabledHdrTypesText) {
+                userDisabledHdrTypes[index++] = Integer.parseInt(userDisabledHdrType);
+            }
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid format of userDisabledHdrTypes");
+            return 1;
+        }
+        final Context context = mService.getContext();
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        dm.setUserDisabledHdrTypes(userDisabledHdrTypes);
+        return 0;
+    }
+
+    private int getUserDisabledHdrTypes() {
+        final Context context = mService.getContext();
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        final int[] userDisabledHdrTypes = dm.getUserDisabledHdrTypes();
+        getOutPrintWriter().println("User disabled HDR types: "
+                + Arrays.toString(userDisabledHdrTypes));
+        return 0;
+    }
+
+    @DisplayManager.SwitchingType
+    private int toRefreshRateSwitchingType(
+            @DisplayManager.MatchContentFrameRateType int matchContentFrameRateType) {
+        switch (matchContentFrameRateType) {
+            case DisplayManager.MATCH_CONTENT_FRAMERATE_NEVER:
+                return DisplayManager.SWITCHING_TYPE_NONE;
+            case DisplayManager.MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY:
+                return DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS;
+            case DisplayManager.MATCH_CONTENT_FRAMERATE_ALWAYS:
+                return DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS;
+            case DisplayManager.MATCH_CONTENT_FRAMERATE_UNKNOWN:
+            default:
+                Slog.e(TAG, matchContentFrameRateType + " is not a valid value of "
+                        + "matchContentFrameRate type.");
+                return -1;
+        }
+    }
+
+    private int setDockedAndIdle() {
+        mService.setDockedAndIdleEnabled(true, Display.DEFAULT_DISPLAY);
+        return 0;
+    }
+
+    private int unsetDockedAndIdle() {
+        mService.setDockedAndIdleEnabled(false, Display.DEFAULT_DISPLAY);
         return 0;
     }
 }

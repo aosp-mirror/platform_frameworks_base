@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bạn có muốn gỡ cài đặt ứng dụng này không?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Bạn có muốn gỡ cài đặt ứng dụng này cho "<b>"tất cả"</b>" người dùng không? Ứng dụng và dữ liệu của ứng dụng sẽ bị xóa khỏi "<b>"tất cả"</b>" người dùng trên thiết bị."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Bạn có muốn gỡ cài đặt ứng dụng này cho người dùng <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bạn có muốn gỡ cài đặt ứng dụng này khỏi hồ sơ công việc của mình không?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Thay thế ứng dụng này bằng phiên bản gốc? Tất cả dữ liệu sẽ bị xóa."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Thay thế ứng dụng này bằng phiên bản gốc? Tất cả dữ liệu sẽ bị xóa. Điều này ảnh hưởng đến tất cả người dùng thiết bị này, bao gồm cả những người có hồ sơ công việc."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Giữ lại <xliff:g id="SIZE">%1$s</xliff:g> dữ liệu ứng dụng."</string>

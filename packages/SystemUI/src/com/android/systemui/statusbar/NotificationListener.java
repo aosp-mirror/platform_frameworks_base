@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
-import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -25,45 +24,65 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * This class handles listening to notification updates and passing them along to
  * NotificationPresenter to be displayed to the user.
  */
+@SysUISingleton
 @SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
-    private static final boolean DEBUG = StatusBar.DEBUG;
+    private static final boolean DEBUG = CentralSurfaces.DEBUG;
+    private static final long MAX_RANKING_DELAY_MILLIS = 500L;
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
-    private final Handler mMainHandler;
+    private final SystemClock mSystemClock;
+    private final Executor mMainExecutor;
     private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
     private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
 
+    private final Deque<RankingMap> mRankingMapQueue = new ConcurrentLinkedDeque<>();
+    private final Runnable mDispatchRankingUpdateRunnable = this::dispatchRankingUpdate;
+    private long mSkippingRankingUpdatesSince = -1;
+
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
+    @Inject
     public NotificationListener(
             Context context,
             NotificationManager notificationManager,
-            @Main Handler mainHandler) {
+            SystemClock systemClock,
+            @Main Executor mainExecutor,
+            PluginManager pluginManager) {
+        super(pluginManager);
         mContext = context;
         mNotificationManager = notificationManager;
-        mMainHandler = mainHandler;
+        mSystemClock = systemClock;
+        mMainExecutor = mainExecutor;
     }
 
     /** Registers a listener that's notified when notifications are added/removed/etc. */
@@ -89,7 +108,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             return;
         }
         final RankingMap currentRanking = getCurrentRanking();
-        mMainHandler.post(() -> {
+        mMainExecutor.execute(() -> {
             // There's currently a race condition between the calls to getActiveNotifications() and
             // getCurrentRanking(). It's possible for the ranking that we store here to not contain
             // entries for every notification in getActiveNotifications(). To prevent downstream
@@ -119,7 +138,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             final RankingMap rankingMap) {
         if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
-            mMainHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
 
                 for (NotificationHandler handler : mNotificationHandlers) {
@@ -134,7 +153,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             int reason) {
         if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn + " reason: " + reason);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
-            mMainHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 for (NotificationHandler handler : mNotificationHandlers) {
                     handler.onNotificationRemoved(sbn, rankingMap, reason);
                 }
@@ -144,19 +163,56 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
-        onNotificationRemoved(sbn, rankingMap, UNDEFINED_DISMISS_REASON);
+        onNotificationRemoved(sbn, rankingMap, NotifCollection.REASON_UNKNOWN);
     }
 
     @Override
     public void onNotificationRankingUpdate(final RankingMap rankingMap) {
         if (DEBUG) Log.d(TAG, "onRankingUpdate");
         if (rankingMap != null) {
+            // Add the ranking to the queue, then run dispatchRankingUpdate() on the main thread
             RankingMap r = onPluginRankingUpdate(rankingMap);
-            mMainHandler.post(() -> {
-                for (NotificationHandler handler : mNotificationHandlers) {
-                    handler.onNotificationRankingUpdate(r);
+            mRankingMapQueue.addLast(r);
+            // Maintaining our own queue and always posting the runnable allows us to guarantee the
+            //  relative ordering of all events which are dispatched, which is important so that the
+            //  RankingMap always has exactly the same elements that are current, per add/remove
+            //  events.
+            mMainExecutor.execute(mDispatchRankingUpdateRunnable);
+        }
+    }
+
+    /**
+     * This method is (and must be) the sole consumer of the RankingMap queue.  After pulling an
+     * object off the queue, it checks if the queue is empty, and only dispatches the ranking update
+     * if the queue is still empty.
+     */
+    private void dispatchRankingUpdate() {
+        if (DEBUG) Log.d(TAG, "dispatchRankingUpdate");
+        RankingMap r = mRankingMapQueue.pollFirst();
+        if (r == null) {
+            Log.wtf(TAG, "mRankingMapQueue was empty!");
+        }
+        if (!mRankingMapQueue.isEmpty()) {
+            final long now = mSystemClock.elapsedRealtime();
+            if (mSkippingRankingUpdatesSince == -1) {
+                mSkippingRankingUpdatesSince = now;
+            }
+            final long timeSkippingRankingUpdates = now - mSkippingRankingUpdatesSince;
+            if (timeSkippingRankingUpdates < MAX_RANKING_DELAY_MILLIS) {
+                if (DEBUG) {
+                    Log.d(TAG, "Skipping dispatch of onNotificationRankingUpdate() -- "
+                            + mRankingMapQueue.size() + " more updates already in the queue.");
                 }
-            });
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Proceeding with dispatch of onNotificationRankingUpdate() -- "
+                        + mRankingMapQueue.size() + " more updates already in the queue.");
+            }
+        }
+        mSkippingRankingUpdatesSince = -1;
+        for (NotificationHandler handler : mNotificationHandlers) {
+            handler.onNotificationRankingUpdate(r);
         }
     }
 
@@ -165,7 +221,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             String pkgName, UserHandle user, NotificationChannel channel, int modificationType) {
         if (DEBUG) Log.d(TAG, "onNotificationChannelModified");
         if (!onPluginNotificationChannelModified(pkgName, user, channel, modificationType)) {
-            mMainHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 for (NotificationHandler handler : mNotificationHandlers) {
                     handler.onNotificationChannelModified(pkgName, user, channel, modificationType);
                 }

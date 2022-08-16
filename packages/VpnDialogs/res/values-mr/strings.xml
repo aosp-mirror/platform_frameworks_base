@@ -18,18 +18,19 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"कनेक्‍शन विनंती"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> नेटवर्क रहदारीचे परीक्षण करण्‍यासाठी त्यास अनुमती देणारे VPN कनेक्‍शन सेट करू इच्‍छितो. तुम्हाला स्रोत विश्वसनीय वाटत असेल तरच स्वीकार करा. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN सक्रिय असताना आपल्‍या स्क्रीनच्या शीर्षावर दिसते."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> ला नेटवर्क ट्रॅफिकवर लक्ष ठेवण्याची अनुमती देणारे VPN कनेक्‍शन सेट करायचे आहे. तुमचा स्रोतावर विश्वास असेल तरच स्वीकारा. VPN अ‍ॅक्टिव्ह असल्यास, तुमच्या स्क्रीनवर &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; दिसते."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN कनेक्‍ट केले"</string>
     <string name="session" msgid="6470628549473641030">"सत्र:"</string>
     <string name="duration" msgid="3584782459928719435">"कालावधी:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"प्रेषित:"</string>
     <string name="data_received" msgid="4062776929376067820">"प्राप्त झाले:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> बाइट / <xliff:g id="NUMBER_1">%2$s</xliff:g> पॅकेट"</string>
-    <string name="always_on_disconnected_title" msgid="1906740176262776166">"कायम चालू असलेल्या VPN शी कनेक्ट करू शकत नाही"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"कायम सुरू असलेल्या VPN शी कनेक्ट करू शकत नाही"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> हे पूर्ण वेळ कनेक्ट राहण्यासाठी सेट अप केलेले आहे, पण हे आता कनेक्ट होऊ शकत नाही. <xliff:g id="VPN_APP_1">%1$s</xliff:g> शी पुन्हा कनेक्ट होईपर्यंत तुमचा फोन सार्वजनिक नेटवर्क वापरेल."</string>
     <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> हे पूर्ण वेळ कनेक्ट राहण्यासाठी सेट अप केलेले आहे, पण हे आता कनेक्ट होऊ शकत नाही. VPN पुन्हा कनेक्ट होईपर्यंत तुमच्याकडे कनेक्शन नसेल."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN सेटिंग्ज बदला"</string>
-    <string name="configure" msgid="4905518375574791375">"कॉन्फिगर करा"</string>
+    <string name="configure" msgid="4905518375574791375">"कॉंफिगर करा"</string>
     <string name="disconnect" msgid="971412338304200056">"‍डिस्कनेक्ट करा"</string>
     <string name="open_app" msgid="3717639178595958667">"अ‍ॅप उघडा"</string>
     <string name="dismiss" msgid="6192859333764711227">"डिसमिस करा"</string>

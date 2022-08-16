@@ -101,7 +101,7 @@ public class AppOpsCoordinator implements Coordinator {
     };
 
     /**
-     * Puts foreground service notifications into its own section.
+     * Puts colorized foreground service and call notifications into its own section.
      */
     private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService",
             NotificationPriorityBucketKt.BUCKET_FOREGROUND_SERVICE) {
@@ -109,12 +109,22 @@ public class AppOpsCoordinator implements Coordinator {
         public boolean isInSection(ListEntry entry) {
             NotificationEntry notificationEntry = entry.getRepresentativeEntry();
             if (notificationEntry != null) {
-                Notification notification = notificationEntry.getSbn().getNotification();
-                return notification.isForegroundService()
-                        && notification.isColorized()
-                        && entry.getRepresentativeEntry().getImportance() > IMPORTANCE_MIN;
+                return isColorizedForegroundService(notificationEntry) || isCall(notificationEntry);
             }
             return false;
+        }
+
+        private boolean isColorizedForegroundService(NotificationEntry entry) {
+            Notification notification = entry.getSbn().getNotification();
+            return notification.isForegroundService()
+                    && notification.isColorized()
+                    && entry.getImportance() > IMPORTANCE_MIN;
+        }
+
+        private boolean isCall(NotificationEntry entry) {
+            Notification notification = entry.getSbn().getNotification();
+            return entry.getImportance() > IMPORTANCE_MIN
+                    && notification.isStyle(Notification.CallStyle.class);
         }
     };
 }

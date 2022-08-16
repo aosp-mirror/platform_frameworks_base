@@ -62,7 +62,10 @@ public final class ColorUtils {
         return Color.argb(a, r, g, b);
     }
 
-    private static int compositeAlpha(int foregroundAlpha, int backgroundAlpha) {
+    /**
+     * Returns the composite alpha of the given foreground and background alpha.
+     */
+    public static int compositeAlpha(int foregroundAlpha, int backgroundAlpha) {
         return 0xFF - (((0xFF - backgroundAlpha) * (0xFF - foregroundAlpha)) / 0xFF);
     }
 

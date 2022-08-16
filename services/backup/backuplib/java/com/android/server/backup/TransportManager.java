@@ -16,6 +16,9 @@
 
 package com.android.server.backup;
 
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
@@ -28,7 +31,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -39,10 +41,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
+import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.OnTransportRegisteredListener;
-import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.transport.TransportClientManager;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportConnectionListener;
+import com.android.server.backup.transport.TransportConnectionManager;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.transport.TransportStats;
@@ -57,6 +60,7 @@ import java.util.function.Predicate;
 /** Handles in-memory bookkeeping of all BackupTransport objects. */
 public class TransportManager {
     private static final String TAG = "BackupTransportManager";
+    private static final boolean MORE_DEBUG = false;
 
     @VisibleForTesting
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
@@ -65,7 +69,7 @@ public class TransportManager {
     private final @UserIdInt int mUserId;
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
-    private final TransportClientManager mTransportClientManager;
+    private final TransportConnectionManager mTransportConnectionManager;
     private final TransportStats mTransportStats;
     private OnTransportRegisteredListener mOnTransportRegisteredListener = (c, n) -> {};
 
@@ -73,8 +77,8 @@ public class TransportManager {
      * Lock for registered transports and currently selected transport.
      *
      * <p><b>Warning:</b> No calls to {@link IBackupTransport} or calls that result in transport
-     * code being executed such as {@link TransportClient#connect(String)}} and its variants should
-     * be made with this lock held, risk of deadlock.
+     * code being executed such as {@link TransportConnection#connect(String)}} and its variants
+     * should be made with this lock held, risk of deadlock.
      */
     private final Object mTransportLock = new Object();
 
@@ -94,7 +98,8 @@ public class TransportManager {
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
         mTransportStats = new TransportStats();
-        mTransportClientManager = new TransportClientManager(mUserId, context, mTransportStats);
+        mTransportConnectionManager = new TransportConnectionManager(mUserId, context,
+                mTransportStats);
     }
 
     @VisibleForTesting
@@ -103,13 +108,13 @@ public class TransportManager {
             Context context,
             Set<ComponentName> whitelist,
             String selectedTransport,
-            TransportClientManager transportClientManager) {
+            TransportConnectionManager transportConnectionManager) {
         mUserId = userId;
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
         mTransportStats = new TransportStats();
-        mTransportClientManager = transportClientManager;
+        mTransportConnectionManager = transportConnectionManager;
     }
 
     /* Sets a listener to be called whenever a transport is registered. */
@@ -128,13 +133,60 @@ public class TransportManager {
         }
     }
 
+    void onPackageEnabled(String packageName) {
+        onPackageAdded(packageName);
+    }
+
+    void onPackageDisabled(String packageName) {
+        onPackageRemoved(packageName);
+    }
+
     @WorkerThread
     void onPackageChanged(String packageName, String... components) {
+        // Determine if the overall package has changed and not just its
+        // components - see {@link EXTRA_CHANGED_COMPONENT_NAME_LIST}.  When we
+        // know a package was enabled/disabled we'll handle that directly and
+        // not continue with onPackageChanged.
+        if (components.length == 1 && components[0].equals(packageName)) {
+            int enabled;
+            try {
+                enabled = mPackageManager.getApplicationEnabledSetting(packageName);
+            } catch (IllegalArgumentException ex) {
+                // packageName doesn't exist: likely due to a race with it being uninstalled.
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "Package " + packageName + " was changed, but no longer exists.");
+                }
+                return;
+            }
+            switch (enabled) {
+                case COMPONENT_ENABLED_STATE_ENABLED: {
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Package " + packageName + " was enabled.");
+                    }
+                    onPackageEnabled(packageName);
+                    return;
+                }
+                case COMPONENT_ENABLED_STATE_DISABLED: {
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Package " + packageName + " was disabled.");
+                    }
+                    onPackageDisabled(packageName);
+                    return;
+                }
+                default: {
+                    Slog.w(TAG, "Package " + packageName + " enabled setting: " + enabled);
+                    return;
+                }
+            }
+        }
         // Unfortunately this can't be atomic because we risk a deadlock if
         // registerTransportsFromPackage() is put inside the synchronized block
         Set<ComponentName> transportComponents = new ArraySet<>(components.length);
         for (String componentName : components) {
             transportComponents.add(new ComponentName(packageName, componentName));
+        }
+        if (transportComponents.isEmpty()) {
+            return;
         }
         synchronized (mTransportLock) {
             mRegisteredTransportsDescriptionMap.keySet().removeIf(transportComponents::contains);
@@ -307,7 +359,7 @@ public class TransportManager {
      * transportConsumer}.
      *
      * <p><b>Warning:</b> Do NOT make any calls to {@link IBackupTransport} or call any variants of
-     * {@link TransportClient#connect(String)} here, otherwise you risk deadlock.
+     * {@link TransportConnection#connect(String)} here, otherwise you risk deadlock.
      */
     public void forEachRegisteredTransport(Consumer<String> transportConsumer) {
         synchronized (mTransportLock) {
@@ -407,17 +459,17 @@ public class TransportManager {
     }
 
     /**
-     * Returns a {@link TransportClient} for {@code transportName} or {@code null} if not
+     * Returns a {@link TransportConnection} for {@code transportName} or {@code null} if not
      * registered.
      *
      * @param transportName The name of the transport.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
-     * @return A {@link TransportClient} or null if not registered.
+     * @return A {@link TransportConnection} or null if not registered.
      */
     @Nullable
-    public TransportClient getTransportClient(String transportName, String caller) {
+    public TransportConnection getTransportClient(String transportName, String caller) {
         try {
             return getTransportClientOrThrow(transportName, caller);
         } catch (TransportNotRegisteredException e) {
@@ -427,38 +479,38 @@ public class TransportManager {
     }
 
     /**
-     * Returns a {@link TransportClient} for {@code transportName} or throws if not registered.
+     * Returns a {@link TransportConnection} for {@code transportName} or throws if not registered.
      *
      * @param transportName The name of the transport.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
-     * @return A {@link TransportClient}.
+     * @return A {@link TransportConnection}.
      * @throws TransportNotRegisteredException if the transport is not registered.
      */
-    public TransportClient getTransportClientOrThrow(String transportName, String caller)
+    public TransportConnection getTransportClientOrThrow(String transportName, String caller)
             throws TransportNotRegisteredException {
         synchronized (mTransportLock) {
             ComponentName component = getRegisteredTransportComponentLocked(transportName);
             if (component == null) {
                 throw new TransportNotRegisteredException(transportName);
             }
-            return mTransportClientManager.getTransportClient(component, caller);
+            return mTransportConnectionManager.getTransportClient(component, caller);
         }
     }
 
     /**
-     * Returns a {@link TransportClient} for the current transport or {@code null} if not
+     * Returns a {@link TransportConnection} for the current transport or {@code null} if not
      * registered.
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
-     * @return A {@link TransportClient} or null if not registered.
+     * @return A {@link TransportConnection} or null if not registered.
      * @throws IllegalStateException if no transport is selected.
      */
     @Nullable
-    public TransportClient getCurrentTransportClient(String caller) {
+    public TransportConnection getCurrentTransportClient(String caller) {
         if (mCurrentTransportName == null) {
             throw new IllegalStateException("No transport selected");
         }
@@ -468,16 +520,16 @@ public class TransportManager {
     }
 
     /**
-     * Returns a {@link TransportClient} for the current transport or throws if not registered.
+     * Returns a {@link TransportConnection} for the current transport or throws if not registered.
      *
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
-     * @return A {@link TransportClient}.
+     * @return A {@link TransportConnection}.
      * @throws TransportNotRegisteredException if the transport is not registered.
      * @throws IllegalStateException if no transport is selected.
      */
-    public TransportClient getCurrentTransportClientOrThrow(String caller)
+    public TransportConnection getCurrentTransportClientOrThrow(String caller)
             throws TransportNotRegisteredException {
         if (mCurrentTransportName == null) {
             throw new IllegalStateException("No transport selected");
@@ -488,15 +540,15 @@ public class TransportManager {
     }
 
     /**
-     * Disposes of the {@link TransportClient}.
+     * Disposes of the {@link TransportConnection}.
      *
-     * @param transportClient The {@link TransportClient} to be disposed of.
+     * @param transportConnection The {@link TransportConnection} to be disposed of.
      * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     {@link TransportConnection#connectAsync(TransportConnectionListener, String)} for more
      *     details.
      */
-    public void disposeOfTransportClient(TransportClient transportClient, String caller) {
-        mTransportClientManager.disposeOfTransportClient(transportClient, caller);
+    public void disposeOfTransportClient(TransportConnection transportConnection, String caller) {
+        mTransportConnectionManager.disposeOfTransportClient(transportConnection, caller);
     }
 
     /**
@@ -637,24 +689,21 @@ public class TransportManager {
         Bundle extras = new Bundle();
         extras.putBoolean(BackupTransport.EXTRA_TRANSPORT_REGISTRATION, true);
 
-        TransportClient transportClient =
-                mTransportClientManager.getTransportClient(
+        TransportConnection transportConnection =
+                mTransportConnectionManager.getTransportClient(
                         transportComponent, extras, callerLogString);
-        final IBackupTransport transport;
+        final BackupTransportClient transport;
         try {
-            transport = transportClient.connectOrThrow(callerLogString);
+            transport = transportConnection.connectOrThrow(callerLogString);
         } catch (TransportNotAvailableException e) {
             Slog.e(TAG, "Couldn't connect to transport " + transportString + " for registration");
-            mTransportClientManager.disposeOfTransportClient(transportClient, callerLogString);
+            mTransportConnectionManager.disposeOfTransportClient(transportConnection,
+                    callerLogString);
             return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
         }
 
         int result;
         try {
-            // This is a temporary fix to allow blocking calls.
-            // TODO: b/147702043. Redesign IBackupTransport so as to make the calls non-blocking.
-            Binder.allowBlocking(transport.asBinder());
-
             String transportName = transport.name();
             String transportDirName = transport.transportDirName();
             registerTransport(transportComponent, transport);
@@ -667,13 +716,13 @@ public class TransportManager {
             result = BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
         }
 
-        mTransportClientManager.disposeOfTransportClient(transportClient, callerLogString);
+        mTransportConnectionManager.disposeOfTransportClient(transportConnection, callerLogString);
         return result;
     }
 
     /** If {@link RemoteException} is thrown the transport is guaranteed to not be registered. */
-    private void registerTransport(ComponentName transportComponent, IBackupTransport transport)
-            throws RemoteException {
+    private void registerTransport(ComponentName transportComponent,
+            BackupTransportClient transport) throws RemoteException {
         checkCanUseTransport();
 
         TransportDescription description =
@@ -695,7 +744,7 @@ public class TransportManager {
     }
 
     public void dumpTransportClients(PrintWriter pw) {
-        mTransportClientManager.dump(pw);
+        mTransportConnectionManager.dump(pw);
     }
 
     public void dumpTransportStats(PrintWriter pw) {

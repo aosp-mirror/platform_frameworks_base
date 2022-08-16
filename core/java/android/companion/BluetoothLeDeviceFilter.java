@@ -252,7 +252,7 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
         public BluetoothLeDeviceFilter createFromParcel(Parcel in) {
             Builder builder = new Builder()
                     .setNamePattern(patternFromString(in.readString()))
-                    .setScanFilter(in.readParcelable(null));
+                    .setScanFilter(in.readParcelable(null, android.bluetooth.le.ScanFilter.class));
             byte[] rawDataFilter = in.createByteArray();
             byte[] rawDataFilterMask = in.createByteArray();
             if (rawDataFilter != null) {

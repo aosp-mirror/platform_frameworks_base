@@ -81,18 +81,18 @@ static constexpr const char* PRODUCT_USERSPACE_REBOOT_ANIMATION_FILE = "/product
 static constexpr const char* OEM_USERSPACE_REBOOT_ANIMATION_FILE = "/oem/media/userspace-reboot.zip";
 static constexpr const char* SYSTEM_USERSPACE_REBOOT_ANIMATION_FILE = "/system/media/userspace-reboot.zip";
 
-static const char SYSTEM_DATA_DIR_PATH[] = "/data/system";
-static const char SYSTEM_TIME_DIR_NAME[] = "time";
-static const char SYSTEM_TIME_DIR_PATH[] = "/data/system/time";
+static const char BOOTANIM_DATA_DIR_PATH[] = "/data/bootanim";
+static const char BOOTANIM_TIME_DIR_NAME[] = "time";
+static const char BOOTANIM_TIME_DIR_PATH[] = "/data/bootanim/time";
 static const char CLOCK_FONT_ASSET[] = "images/clock_font.png";
 static const char CLOCK_FONT_ZIP_NAME[] = "clock_font.png";
 static const char PROGRESS_FONT_ASSET[] = "images/progress_font.png";
 static const char PROGRESS_FONT_ZIP_NAME[] = "progress_font.png";
 static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
-static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/system/time/last_time_change";
+static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/bootanim/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
-static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/system/time/time_is_accurate";
-static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/system/time/time_format_12_hour";
+static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/bootanim/time/time_is_accurate";
+static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/bootanim/time/time_format_12_hour";
 // Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
 static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static constexpr char FONT_BEGIN_CHAR = ' ';
@@ -105,6 +105,7 @@ static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
 static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
+static const char CLOCK_ENABLED_PROP_NAME[] = "persist.sys.bootanim.clock.enabled";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
 static const int DYNAMIC_COLOR_COUNT = 4;
@@ -543,16 +544,15 @@ status_t BootAnimation::readyToRun() {
 
         // In the case of multi-display, boot animation shows on the specified displays
         // in addition to the primary display
-        auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
-        constexpr uint32_t LAYER_STACK = 0;
-        for (auto id : physicalDisplayIds) {
+        const auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
+        for (const auto id : physicalDisplayIds) {
             if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
-                sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(id);
-                if (token != nullptr)
-                    t.setDisplayLayerStack(token, LAYER_STACK);
+                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
+                    t.setDisplayLayerStack(token, ui::DEFAULT_LAYER_STACK);
+                }
             }
         }
-        t.setLayerStack(control, LAYER_STACK);
+        t.setLayerStack(control, ui::DEFAULT_LAYER_STACK);
     }
 
     t.setLayer(control, 0x40000000)
@@ -578,8 +578,8 @@ status_t BootAnimation::readyToRun() {
     mDisplay = display;
     mContext = context;
     mSurface = surface;
-    mWidth = w;
-    mHeight = h;
+    mInitWidth = mWidth = w;
+    mInitHeight = mHeight = h;
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
     mTargetInset = -1;
@@ -612,6 +612,7 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroySurface(mDisplay, mSurface);
 
+    mFlingerSurfaceControl->updateDefaultBufferSize(newWidth, newHeight);
     const auto limitedSize = limitSurfaceSize(newWidth, newHeight);
     mWidth = limitedSize.width;
     mHeight = limitedSize.height;
@@ -1323,6 +1324,8 @@ bool BootAnimation::movie() {
     }
     if (!anyPartHasClock) {
         mClockEnabled = false;
+    } else if (!android::base::GetBoolProperty(CLOCK_ENABLED_PROP_NAME, false)) {
+        mClockEnabled = false;
     }
 
     // Check if npot textures are supported
@@ -1365,7 +1368,7 @@ bool BootAnimation::movie() {
         mTimeCheckThread->run("BootAnimation::TimeCheckThread", PRIORITY_NORMAL);
     }
 
-    if (mAnimation != nullptr && mAnimation->dynamicColoringEnabled) {
+    if (mAnimation->dynamicColoringEnabled) {
         initDynamicColors();
     }
 
@@ -1424,12 +1427,17 @@ void BootAnimation::drawTexturedQuad(float xStart, float yStart, float width, fl
 
 void BootAnimation::initDynamicColors() {
     for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
-        parseColorDecimalString(
-            android::base::GetProperty("persist.bootanim.color" + std::to_string(i + 1), ""),
+        const auto syspropName = "persist.bootanim.color" + std::to_string(i + 1);
+        const auto syspropValue = android::base::GetProperty(syspropName, "");
+        if (syspropValue != "") {
+            SLOGI("Loaded dynamic color: %s -> %s", syspropName.c_str(), syspropValue.c_str());
+            mDynamicColorsApplied = true;
+        }
+        parseColorDecimalString(syspropValue,
             mAnimation->endColors[i], mAnimation->startColors[i]);
     }
     glUseProgram(mImageShader);
-    SLOGI("[BootAnimation] Dynamically coloring boot animation.");
+    SLOGI("Dynamically coloring boot animation. Sysprops loaded? %i", mDynamicColorsApplied);
     for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
         float *startColor = mAnimation->startColors[i];
         float *endColor = mAnimation->endColors[i];
@@ -1452,6 +1460,8 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
     int fadedFramesCount = 0;
     int lastDisplayedProgress = 0;
+    int colorTransitionStart = animation.colorTransitionStart;
+    int colorTransitionEnd = animation.colorTransitionEnd;
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
@@ -1467,6 +1477,23 @@ bool BootAnimation::playAnimation(const Animation& animation) {
         // process the part not only while the count allows but also if already fading
         for (int r=0 ; !part.count || r<part.count || fadedFramesCount > 0 ; r++) {
             if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
+
+            // It's possible that the sysprops were not loaded yet at this boot phase.
+            // If that's the case, then we should keep trying until they are available.
+            if (animation.dynamicColoringEnabled && !mDynamicColorsApplied
+                && (part.useDynamicColoring || part.postDynamicColoring)) {
+                SLOGD("Trying to load dynamic color sysprops.");
+                initDynamicColors();
+                if (mDynamicColorsApplied) {
+                    // Sysprops were loaded. Next step is to adjust the animation if we loaded
+                    // the colors after the animation should have started.
+                    const int transitionLength = colorTransitionEnd - colorTransitionStart;
+                    if (part.postDynamicColoring) {
+                        colorTransitionStart = 0;
+                        colorTransitionEnd = fmin(transitionLength, fcount - 1);
+                    }
+                }
+            }
 
             mCallbacks->playPart(i, part, r);
 
@@ -1497,15 +1524,16 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 // - 1 for parts that come after.
                 float colorProgress = part.useDynamicColoring
                     ? fmin(fmax(
-                        ((float)j - animation.colorTransitionStart) /
-                            fmax(animation.colorTransitionEnd -
-                                animation.colorTransitionStart, 1.0f), 0.0f), 1.0f)
+                        ((float)j - colorTransitionStart) /
+                            fmax(colorTransitionEnd - colorTransitionStart, 1.0f), 0.0f), 1.0f)
                     : (part.postDynamicColoring ? 1 : 0);
 
                 processDisplayEvents();
 
-                const int animationX = (mWidth - animation.width) / 2;
-                const int animationY = (mHeight - animation.height) / 2;
+                const double ratio_w = static_cast<double>(mWidth) / mInitWidth;
+                const double ratio_h = static_cast<double>(mHeight) / mInitHeight;
+                const int animationX = (mWidth - animation.width * ratio_w) / 2;
+                const int animationY = (mHeight - animation.height * ratio_h) / 2;
 
                 const Animation::Frame& frame(part.frames[j]);
                 nsecs_t lastFrame = systemTime();
@@ -1521,12 +1549,16 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     initTexture(frame.map, &w, &h, false /* don't premultiply alpha */);
                 }
 
-                const int xc = animationX + frame.trimX;
-                const int yc = animationY + frame.trimY;
+                const int trimWidth = frame.trimWidth * ratio_w;
+                const int trimHeight = frame.trimHeight * ratio_h;
+                const int trimX = frame.trimX * ratio_w;
+                const int trimY = frame.trimY * ratio_h;
+                const int xc = animationX + trimX;
+                const int yc = animationY + trimY;
                 glClear(GL_COLOR_BUFFER_BIT);
                 // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
                 // which is equivalent to mHeight - (yc + frame.trimHeight)
-                const int frameDrawY = mHeight - (yc + frame.trimHeight);
+                const int frameDrawY = mHeight - (yc + trimHeight);
 
                 float fade = 0;
                 // if the part hasn't been stopped yet then continue fading if necessary
@@ -1543,7 +1575,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     glUniform1f(mImageColorProgressLocation, colorProgress);
                 }
                 glEnable(GL_BLEND);
-                drawTexturedQuad(xc, frameDrawY, frame.trimWidth, frame.trimHeight);
+                drawTexturedQuad(xc, frameDrawY, trimWidth, trimHeight);
                 glDisable(GL_BLEND);
 
                 if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
@@ -1750,7 +1782,7 @@ bool BootAnimation::updateIsTimeAccurate() {
 }
 
 BootAnimation::TimeCheckThread::TimeCheckThread(BootAnimation* bootAnimation) : Thread(false),
-    mInotifyFd(-1), mSystemWd(-1), mTimeWd(-1), mBootAnimation(bootAnimation) {}
+    mInotifyFd(-1), mBootAnimWd(-1), mTimeWd(-1), mBootAnimation(bootAnimation) {}
 
 BootAnimation::TimeCheckThread::~TimeCheckThread() {
     // mInotifyFd may be -1 but that's ok since we're not at risk of attempting to close a valid FD.
@@ -1793,7 +1825,7 @@ bool BootAnimation::TimeCheckThread::doThreadLoop() {
     const struct inotify_event *event;
     for (char* ptr = buff; ptr < buff + length; ptr += sizeof(struct inotify_event) + event->len) {
         event = (const struct inotify_event *) ptr;
-        if (event->wd == mSystemWd && strcmp(SYSTEM_TIME_DIR_NAME, event->name) == 0) {
+        if (event->wd == mBootAnimWd && strcmp(BOOTANIM_TIME_DIR_NAME, event->name) == 0) {
             addTimeDirWatch();
         } else if (event->wd == mTimeWd && (strcmp(LAST_TIME_CHANGED_FILE_NAME, event->name) == 0
                 || strcmp(ACCURATE_TIME_FLAG_FILE_NAME, event->name) == 0)) {
@@ -1805,12 +1837,12 @@ bool BootAnimation::TimeCheckThread::doThreadLoop() {
 }
 
 void BootAnimation::TimeCheckThread::addTimeDirWatch() {
-        mTimeWd = inotify_add_watch(mInotifyFd, SYSTEM_TIME_DIR_PATH,
+        mTimeWd = inotify_add_watch(mInotifyFd, BOOTANIM_TIME_DIR_PATH,
                 IN_CLOSE_WRITE | IN_MOVED_TO | IN_ATTRIB);
         if (mTimeWd > 0) {
             // No need to watch for the time directory to be created if it already exists
-            inotify_rm_watch(mInotifyFd, mSystemWd);
-            mSystemWd = -1;
+            inotify_rm_watch(mInotifyFd, mBootAnimWd);
+            mBootAnimWd = -1;
         }
 }
 
@@ -1821,11 +1853,11 @@ status_t BootAnimation::TimeCheckThread::readyToRun() {
         return NO_INIT;
     }
 
-    mSystemWd = inotify_add_watch(mInotifyFd, SYSTEM_DATA_DIR_PATH, IN_CREATE | IN_ATTRIB);
-    if (mSystemWd < 0) {
+    mBootAnimWd = inotify_add_watch(mInotifyFd, BOOTANIM_DATA_DIR_PATH, IN_CREATE | IN_ATTRIB);
+    if (mBootAnimWd < 0) {
         close(mInotifyFd);
         mInotifyFd = -1;
-        SLOGE("Could not add watch for %s: %s", SYSTEM_DATA_DIR_PATH, strerror(errno));
+        SLOGE("Could not add watch for %s: %s", BOOTANIM_DATA_DIR_PATH, strerror(errno));
         return NO_INIT;
     }
 

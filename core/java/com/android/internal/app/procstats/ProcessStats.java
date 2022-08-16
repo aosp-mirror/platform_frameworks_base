@@ -179,17 +179,19 @@ public final class ProcessStats implements Parcelable {
     public static final int REPORT_PKG_ASC_STATS = 0x08;
     // Should report package stats.
     public static final int REPORT_PKG_STATS = 0x0E;
+    // Should report uid stats.
+    public static final int REPORT_UID_STATS = 0x10;
     // Should report all stats.
-    public static final int REPORT_ALL = 0x0F;
+    public static final int REPORT_ALL = 0x1F;
 
     public static final int[] OPTIONS =
             {REPORT_PROC_STATS, REPORT_PKG_PROC_STATS, REPORT_PKG_SVC_STATS, REPORT_PKG_ASC_STATS,
-                    REPORT_PKG_STATS, REPORT_ALL};
+                    REPORT_PKG_STATS, REPORT_UID_STATS, REPORT_ALL};
     public static final String[] OPTIONS_STR =
-            {"proc", "pkg-proc", "pkg-svc", "pkg-asc", "pkg-all", "all"};
+            {"proc", "pkg-proc", "pkg-svc", "pkg-asc", "pkg-all", "uid", "all"};
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 40;
+    private static final int PARCEL_VERSION = 41;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -199,6 +201,8 @@ public final class ProcessStats implements Parcelable {
 
     public final ProcessMap<LongSparseArray<PackageState>> mPackages = new ProcessMap<>();
     public final ProcessMap<ProcessState> mProcesses = new ProcessMap<>();
+
+    public final SparseArray<UidState> mUidStates = new SparseArray<>();
 
     public final ArrayList<AssociationState.SourceState> mTrackingAssociations = new ArrayList<>();
 
@@ -337,6 +341,18 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
+        SparseArray<UidState> uidStates = other.mUidStates;
+        for (int ip = 0, size = uidStates.size(); ip < size; ip++) {
+            final int uid = uidStates.keyAt(ip);
+            UidState uidState = mUidStates.get(uid);
+            if (uidState == null) {
+                uidState = uidStates.valueAt(ip).clone();
+                mUidStates.put(uid, uidState);
+            } else {
+                uidState.add(uidStates.valueAt(ip));
+            }
+        }
+
         ArrayMap<String, SparseArray<ProcessState>> procMap = other.mProcesses.getMap();
         for (int ip=0; ip<procMap.size(); ip++) {
             SparseArray<ProcessState> uids = procMap.valueAt(ip);
@@ -358,7 +374,17 @@ public final class ProcessStats implements Parcelable {
                     }
                 }
                 thisProc.add(otherProc);
+                UidState uidState = mUidStates.get(uid);
+                if (uidState == null) {
+                    uidState = new UidState(this, uid);
+                    mUidStates.put(uid, uidState);
+                }
+                uidState.addProcess(thisProc);
             }
+        }
+
+        for (int ip = 0, size = mUidStates.size(); ip < size; ip++) {
+            mUidStates.valueAt(ip).updateCombinedState(-1);
         }
 
         for (int i=0; i<ADJ_COUNT; i++) {
@@ -488,6 +514,7 @@ public final class ProcessStats implements Parcelable {
         resetCommon();
         mPackages.getMap().clear();
         mProcesses.getMap().clear();
+        mUidStates.clear();
         mMemFactor = STATE_NOTHING;
         mStartTime = 0;
         if (DEBUG) Slog.d(TAG, "State reset; now " + mTimePeriodStartClockStr);
@@ -585,6 +612,15 @@ public final class ProcessStats implements Parcelable {
             }
             if (uids.size() <= 0) {
                 procMap.removeAt(ip);
+            }
+        }
+
+        for (int ip = mUidStates.size() - 1; ip >= 0; ip--) {
+            final UidState uidState = mUidStates.valueAt(ip);
+            if (uidState.isInUse()) {
+                mUidStates.valueAt(ip).resetSafely(now);
+            } else {
+                mUidStates.removeAt(ip);
             }
         }
 
@@ -900,6 +936,13 @@ public final class ProcessStats implements Parcelable {
 
         mSysMemUsage.writeToParcel(out);
 
+        final int numOfUids = mUidStates.size();
+        out.writeInt(numOfUids);
+        for (int ip = 0; ip < numOfUids; ip++) {
+            out.writeInt(mUidStates.keyAt(ip));
+            mUidStates.valueAt(ip).writeToParcel(out, now);
+        }
+
         out.writeInt(NPROC);
         for (int ip=0; ip<NPROC; ip++) {
             writeCommonString(out, procMap.keyAt(ip));
@@ -1026,7 +1069,8 @@ public final class ProcessStats implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         final boolean hadData = mPackages.getMap().size() > 0
-                || mProcesses.getMap().size() > 0;
+                || mProcesses.getMap().size() > 0
+                || mUidStates.size() > 0;
         if (hadData) {
             resetSafely();
         }
@@ -1083,6 +1127,16 @@ public final class ProcessStats implements Parcelable {
             return;
         }
 
+        final int numOfUids = in.readInt();
+        for (int ip = 0; ip < numOfUids; ip++) {
+            final int uid = in.readInt();
+            final UidState uidState = new UidState(this, uid);
+            if (!uidState.readFromParcel(in)) {
+                return;
+            }
+            mUidStates.put(uid, uidState);
+        }
+
         int NPROC = in.readInt();
         if (NPROC < 0) {
             mReadError = "bad process count: " + NPROC;
@@ -1127,7 +1181,22 @@ public final class ProcessStats implements Parcelable {
                 if (DEBUG_PARCEL) Slog.d(TAG, "Adding process: " + procName + " " + uid
                         + " " + proc);
                 mProcesses.put(procName, uid, proc);
+
+                UidState uidState = mUidStates.get(uid);
+                if (uidState == null) {
+                    // This is not expected, log a warning and construct a new UID state.
+                    if (DEBUG_PARCEL) {
+                        Slog.w(TAG, "Couldn't find the common UID " + uid + " for " + proc);
+                    }
+                    uidState = new UidState(this, uid);
+                    mUidStates.put(uid, uidState);
+                }
+                uidState.addProcess(proc);
             }
+        }
+
+        for (int ip = 0; ip < numOfUids; ip++) {
+            mUidStates.valueAt(ip).updateCombinedState(-1);
         }
 
         if (DEBUG_PARCEL) Slog.d(TAG, "Read " + mProcesses.getMap().size() + " processes");
@@ -1327,6 +1396,12 @@ public final class ProcessStats implements Parcelable {
             commonProc = new ProcessState(this, pkgState.mPackageName, pkgState.mUid,
                     pkgState.mVersionCode, processName);
             mProcesses.put(processName, pkgState.mUid, commonProc);
+            UidState uidState = mUidStates.get(pkgState.mUid);
+            if (uidState == null) {
+                uidState = new UidState(this, pkgState.mUid);
+                mUidStates.put(pkgState.mUid, uidState);
+            }
+            uidState.addProcess(commonProc);
             if (DEBUG) Slog.d(TAG, "GETPROC created new common " + commonProc);
         }
         if (!commonProc.isMultiPackage()) {
@@ -1785,6 +1860,42 @@ public final class ProcessStats implements Parcelable {
             }
             pw.print("  Total procs: "); pw.print(numShownProcs);
             pw.print(" shown of "); pw.print(numTotalProcs); pw.println(" total");
+        }
+
+        if ((section & REPORT_UID_STATS) != 0) {
+            SparseArray<UidState> uidStates = mUidStates;
+            int numShownUids = 0, numTotalUids = 0;
+            printedHeader = false;
+            for (int iu = 0, size = uidStates.size(); iu < size; iu++) {
+                final int uid = uidStates.keyAt(iu);
+                final UidState uidState = uidStates.valueAt(iu);
+                numTotalUids++;
+                if (reqPackage != null && !uidState.hasPackage(reqPackage)) {
+                    continue;
+                }
+                numShownUids++;
+                pw.println();
+                if (!printedHeader) {
+                    pw.println("Per-UID Stats:");
+                    printedHeader = true;
+                }
+                if (activeOnly && !uidState.isInUse()) {
+                    pw.print("      (Not active: ");
+                    pw.print(UserHandle.formatUid(uid));
+                    pw.println(")");
+                    continue;
+                }
+                pw.print("  * ");
+                UserHandle.formatUid(pw, uid);
+                pw.print(" (");
+                pw.print(uidState.getDurationsBucketCount());
+                pw.print(" entries)");
+                pw.println(":");
+                uidState.dumpState(pw, "        ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                        ALL_PROC_STATES, now);
+            }
+            pw.print("  Total UIDs: "); pw.print(numShownUids);
+            pw.print(" shown of "); pw.print(numTotalUids); pw.println(" total");
         }
 
         if (dumpAll) {

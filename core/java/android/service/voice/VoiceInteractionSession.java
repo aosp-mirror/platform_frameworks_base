@@ -38,7 +38,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.inputmethodservice.SoftInputWindow;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -68,7 +67,6 @@ import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
@@ -158,7 +156,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     TypedArray mThemeAttrs;
     View mRootView;
     FrameLayout mContentFrame;
-    SoftInputWindow mWindow;
+    VoiceInteractionWindow mWindow;
 
     boolean mUiEnabled = true;
     boolean mInitialized;
@@ -860,7 +858,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     static final int MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK = 110;
     static final int MSG_UNREGISTER_VISIBLE_ACTIVITY_CALLBACK = 111;
 
-    class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
+    class MyCallbacks implements HandlerCaller.Callback, VoiceInteractionWindow.Callback {
         @Override
         public void executeMessage(Message msg) {
             SomeArgs args = null;
@@ -1097,7 +1095,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             if (!mWindowVisible) {
                 mWindowVisible = true;
                 if (mUiEnabled) {
-                    mWindow.show();
+                    showWindow();
                 }
             }
             if (showCallback != null) {
@@ -1251,7 +1249,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mInitialized = true;
         mInflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
+        mWindow = new VoiceInteractionWindow(mContext, "VoiceInteractionSession", mTheme,
                 mCallbacks, this, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(0 /* types */);
@@ -1286,9 +1284,25 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
+    void showWindow() {
+        if (mWindow != null) {
+            mWindow.show();
+            try {
+                mSystemService.setSessionWindowVisible(mToken, true);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to notify session window shown", e);
+            }
+        }
+    }
+
     void ensureWindowHidden() {
         if (mWindow != null) {
             mWindow.hide();
+            try {
+                mSystemService.setSessionWindowVisible(mToken, false);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to notify session window hidden", e);
+            }
         }
     }
 
@@ -1379,7 +1393,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             if (mWindowVisible) {
                 if (enabled) {
                     ensureWindowAdded();
-                    mWindow.show();
+                    showWindow();
                 } else {
                     ensureWindowHidden();
                 }
@@ -1471,18 +1485,18 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * Requests a list of supported actions from an app.
      *
      * @param activityId Ths activity id of the app to get the actions from.
-     * @param resultExecutor The handler to receive the callback
      * @param cancellationSignal A signal to cancel the operation in progress,
      *     or {@code null} if none.
-     * @param callback The callback to receive the response
+     * @param resultExecutor The handler to receive the callback.
+     * @param callback The callback to receive the response.
      */
     public final void requestDirectActions(@NonNull ActivityId activityId,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor resultExecutor,
             @NonNull Consumer<List<DirectAction>> callback) {
-        Preconditions.checkNotNull(activityId);
-        Preconditions.checkNotNull(resultExecutor);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(activityId);
+        Objects.requireNonNull(resultExecutor);
+        Objects.requireNonNull(callback);
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
         }
@@ -1561,8 +1575,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
         }
-        Preconditions.checkNotNull(resultExecutor);
-        Preconditions.checkNotNull(resultListener);
+        Objects.requireNonNull(resultExecutor);
+        Objects.requireNonNull(resultListener);
 
         if (cancellationSignal != null) {
             cancellationSignal.throwIfCanceled();

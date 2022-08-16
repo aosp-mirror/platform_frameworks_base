@@ -55,9 +55,11 @@ public class KeyguardPasswordViewController
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
     private final InputMethodManager mInputMethodManager;
     private final DelayableExecutor mMainExecutor;
+    private final KeyguardViewController mKeyguardViewController;
     private final boolean mShowImeAtScreenOn;
     private EditText mPasswordEntry;
     private ImageView mSwitchImeButton;
+    private boolean mPaused;
 
     private final OnEditorActionListener mOnEditorActionListener = (v, actionId, event) -> {
         // Check if this was the result of hitting the enter key
@@ -116,13 +118,15 @@ public class KeyguardPasswordViewController
             EmergencyButtonController emergencyButtonController,
             @Main DelayableExecutor mainExecutor,
             @Main Resources resources,
-            FalsingCollector falsingCollector) {
+            FalsingCollector falsingCollector,
+            KeyguardViewController keyguardViewController) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mMainExecutor = mainExecutor;
+        mKeyguardViewController = keyguardViewController;
         mShowImeAtScreenOn = resources.getBoolean(R.bool.kg_show_ime_at_screen_on);
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
         mSwitchImeButton = mView.findViewById(R.id.switch_ime_button);
@@ -199,12 +203,17 @@ public class KeyguardPasswordViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
+        mPaused = false;
         if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
             showInput();
         }
     }
 
     private void showInput() {
+        if (!mKeyguardViewController.isBouncerShowing()) {
+            return;
+        }
+
         mView.post(() -> {
             if (mView.isShown()) {
                 mPasswordEntry.requestFocus();
@@ -215,6 +224,11 @@ public class KeyguardPasswordViewController
 
     @Override
     public void onPause() {
+        if (mPaused) {
+            return;
+        }
+        mPaused = true;
+
         if (!mPasswordEntry.isVisibleToUser()) {
             // Reset all states directly and then hide IME when the screen turned off.
             super.onPause();

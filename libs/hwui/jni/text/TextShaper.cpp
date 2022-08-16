@@ -160,7 +160,6 @@ static jlong TextShaper_Result_nReleaseFunc(CRITICAL_JNI_PARAMS) {
 }
 
 static const JNINativeMethod gMethods[] = {
-    // Fast Natives
     {"nativeShapeTextRun", "("
         "[C"  // text
         "I"  // start

@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -64,9 +65,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             transitions {
                 device.pressHome()
                 wmHelper.waitForHomeActivityVisible()
@@ -77,6 +78,33 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 227430489)
+    @Test
+    override fun statusBarLayerRotatesScales() {
+        super.statusBarLayerRotatesScales()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun launcherLayerReplacesApp() {
+        super.launcherLayerReplacesApp()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229762973)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
@@ -89,7 +117,7 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

@@ -16,8 +16,11 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -97,6 +100,12 @@ public final class EncoderProfiles
                 return MediaFormat.MIMETYPE_VIDEO_VP8;
             } else if (codec == MediaRecorder.VideoEncoder.HEVC) {
                 return MediaFormat.MIMETYPE_VIDEO_HEVC;
+            } else if (codec == MediaRecorder.VideoEncoder.VP9) {
+                return MediaFormat.MIMETYPE_VIDEO_VP9;
+            } else if (codec == MediaRecorder.VideoEncoder.DOLBY_VISION) {
+                return MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
+            } else if (codec == MediaRecorder.VideoEncoder.AV1) {
+                return MediaFormat.MIMETYPE_VIDEO_AV1;
             }
             // we should never be here
             throw new RuntimeException("Unknown codec");
@@ -190,19 +199,73 @@ public final class EncoderProfiles
             return profile;
         }
 
+        /**
+         * The bit depth of the encoded video.
+         * <p>
+         * This value is effectively 8 or 10, but some devices may
+         * support additional values.
+         */
+        public int getBitDepth() {
+            return bitDepth;
+        }
+
+        /**
+         * The chroma subsampling of the encoded video.
+         * <p>
+         * For most devices this is always YUV_420 but some devices may
+         * support additional values.
+         *
+         * @see #YUV_420
+         * @see #YUV_422
+         * @see #YUV_444
+         */
+        public @ChromaSubsampling int getChromaSubsampling() {
+            return chromaSubsampling;
+        }
+
+        /**
+         * The HDR format of the encoded video.
+         * <p>
+         * This is one of the HDR_ values.
+         * @see #HDR_NONE
+         * @see #HDR_HLG
+         * @see #HDR_HDR10
+         * @see #HDR_HDR10PLUS
+         * @see #HDR_DOLBY_VISION
+         */
+        public @HdrFormat int getHdrFormat() {
+            return hdrFormat;
+        }
+
         // Constructor called by JNI and CamcorderProfile
         /* package private */ VideoProfile(int codec,
                              int width,
                              int height,
                              int frameRate,
                              int bitrate,
-                             int profile) {
+                             int profile,
+                             int chromaSubsampling,
+                             int bitDepth,
+                             int hdrFormat) {
             this.codec = codec;
             this.width = width;
             this.height = height;
             this.frameRate = frameRate;
             this.bitrate = bitrate;
             this.profile = profile;
+            this.chromaSubsampling = chromaSubsampling;
+            this.bitDepth = bitDepth;
+            this.hdrFormat = hdrFormat;
+        }
+
+        /* package private */ VideoProfile(int codec,
+                             int width,
+                             int height,
+                             int frameRate,
+                             int bitrate,
+                             int profile) {
+            this(codec, width, height, frameRate, bitrate, profile,
+                 YUV_420, 8 /* bitDepth */, HDR_NONE);
         }
 
         private int codec;
@@ -211,6 +274,81 @@ public final class EncoderProfiles
         private int frameRate;
         private int bitrate;
         private int profile;
+        private int chromaSubsampling;
+        private int bitDepth;
+        private int hdrFormat;
+
+        /** @hide */
+        @IntDef({
+            HDR_NONE,
+            HDR_HLG,
+            HDR_HDR10,
+            HDR_HDR10PLUS,
+            HDR_DOLBY_VISION,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface HdrFormat {}
+
+        /** Not HDR (SDR).
+         *  <p>
+         *  An HDR format specifying SDR (Standard Dynamic
+         *  Range) recording. */
+        public static final int HDR_NONE = 0;
+
+        /** HLG (Hybrid-Log Gamma).
+         *  <p>
+         *  An HDR format specifying HLG. */
+        public static final int HDR_HLG = 1;
+
+        /** HDR10.
+         *  <p>
+         *  An HDR format specifying HDR10. */
+        public static final int HDR_HDR10 = 2;
+
+        /** HDR10+.
+         *  <p>
+         *  An HDR format specifying HDR10+. */
+        public static final int HDR_HDR10PLUS = 3;
+
+        /**
+         *  Dolby Vision
+         *  <p>
+         *  An HDR format specifying Dolby Vision. For this format
+         *  the codec is always a Dolby Vision encoder. The encoder
+         *  profile specifies which Dolby Vision version is being
+         *  used.
+         *
+         *  @see #getProfile
+         */
+        public static final int HDR_DOLBY_VISION = 4;
+
+        /** @hide */
+        @IntDef({
+            YUV_420,
+            YUV_422,
+            YUV_444,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ChromaSubsampling {}
+
+
+        /** YUV 4:2:0.
+         *  <p>
+         *  A chroma subsampling where the U and V planes are subsampled
+         *  by 2 both horizontally and vertically. */
+        public static final int YUV_420 = 0;
+
+        /** YUV 4:2:2.
+         *  <p>
+         *  A chroma subsampling where the U and V planes are subsampled
+         *  by 2 horizontally alone. */
+        public static final int YUV_422 = 1;
+
+        /** YUV 4:4:4.
+         *  <p>
+         *  A chroma subsampling where the U and V planes are not
+         *  subsampled. */
+        public static final int YUV_444 = 2;
     }
 
     /**

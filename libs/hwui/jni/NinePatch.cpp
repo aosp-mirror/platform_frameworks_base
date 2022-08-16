@@ -64,7 +64,7 @@ public:
     }
 
     static jlong validateNinePatchChunk(JNIEnv* env, jobject, jbyteArray obj) {
-        size_t chunkSize = env->GetArrayLength(obj);
+        size_t chunkSize = obj != NULL ? env->GetArrayLength(obj) : 0;
         if (chunkSize < (int) (sizeof(Res_png_9patch))) {
             jniThrowRuntimeException(env, "Array too small for chunk.");
             return 0;

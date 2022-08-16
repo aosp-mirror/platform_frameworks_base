@@ -20,7 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendAnalogAftFlag;
+import android.hardware.tv.tuner.FrontendAnalogSifStandard;
+import android.hardware.tv.tuner.FrontendAnalogType;
 import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
@@ -34,8 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class AnalogFrontendSettings extends FrontendSettings {
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SIGNAL_TYPE_",
+    @IntDef(prefix = "SIGNAL_TYPE_",
             value = {SIGNAL_TYPE_UNDEFINED, SIGNAL_TYPE_AUTO, SIGNAL_TYPE_PAL, SIGNAL_TYPE_PAL_M,
               SIGNAL_TYPE_PAL_N, SIGNAL_TYPE_PAL_60, SIGNAL_TYPE_NTSC, SIGNAL_TYPE_NTSC_443,
               SIGNAL_TYPE_SECAM})
@@ -45,43 +46,42 @@ public class AnalogFrontendSettings extends FrontendSettings {
     /**
      * Undefined analog signal type.
      */
-    public static final int SIGNAL_TYPE_UNDEFINED = Constants.FrontendAnalogType.UNDEFINED;
+    public static final int SIGNAL_TYPE_UNDEFINED = FrontendAnalogType.UNDEFINED;
     /**
      * AUTO analog signal type.
      */
-    public static final int SIGNAL_TYPE_AUTO = Constants.FrontendAnalogType.AUTO;
+    public static final int SIGNAL_TYPE_AUTO = FrontendAnalogType.AUTO;
     /**
      * PAL analog signal type.
      */
-    public static final int SIGNAL_TYPE_PAL = Constants.FrontendAnalogType.PAL;
+    public static final int SIGNAL_TYPE_PAL = FrontendAnalogType.PAL;
     /**
      * PAL M analog signal type.
      */
-    public static final int SIGNAL_TYPE_PAL_M = Constants.FrontendAnalogType.PAL_M;
+    public static final int SIGNAL_TYPE_PAL_M = FrontendAnalogType.PAL_M;
     /**
      * PAL N analog signal type.
      */
-    public static final int SIGNAL_TYPE_PAL_N = Constants.FrontendAnalogType.PAL_N;
+    public static final int SIGNAL_TYPE_PAL_N = FrontendAnalogType.PAL_N;
     /**
      * PAL 60 analog signal type.
      */
-    public static final int SIGNAL_TYPE_PAL_60 = Constants.FrontendAnalogType.PAL_60;
+    public static final int SIGNAL_TYPE_PAL_60 = FrontendAnalogType.PAL_60;
     /**
      * NTSC analog signal type.
      */
-    public static final int SIGNAL_TYPE_NTSC = Constants.FrontendAnalogType.NTSC;
+    public static final int SIGNAL_TYPE_NTSC = FrontendAnalogType.NTSC;
     /**
      * NTSC 443 analog signal type.
      */
-    public static final int SIGNAL_TYPE_NTSC_443 = Constants.FrontendAnalogType.NTSC_443;
+    public static final int SIGNAL_TYPE_NTSC_443 = FrontendAnalogType.NTSC_443;
     /**
      * SECM analog signal type.
      */
-    public static final int SIGNAL_TYPE_SECAM = Constants.FrontendAnalogType.SECAM;
+    public static final int SIGNAL_TYPE_SECAM = FrontendAnalogType.SECAM;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SIF_",
+    @IntDef(prefix = "SIF_",
             value = {SIF_UNDEFINED, SIF_AUTO, SIF_BG, SIF_BG_A2, SIF_BG_NICAM, SIF_I, SIF_DK,
             SIF_DK1_A2, SIF_DK2_A2, SIF_DK3_A2, SIF_DK_NICAM, SIF_L, SIF_M, SIF_M_BTSC, SIF_M_A2,
             SIF_M_EIAJ, SIF_I_NICAM, SIF_L_NICAM, SIF_L_PRIME})
@@ -91,79 +91,79 @@ public class AnalogFrontendSettings extends FrontendSettings {
     /**
      * Undefined Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_UNDEFINED = Constants.FrontendAnalogSifStandard.UNDEFINED;
+    public static final int SIF_UNDEFINED = FrontendAnalogSifStandard.UNDEFINED;
     /**
      * Audo Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_AUTO = Constants.FrontendAnalogSifStandard.AUTO;
+    public static final int SIF_AUTO = FrontendAnalogSifStandard.AUTO;
      /**
      * BG Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_BG = Constants.FrontendAnalogSifStandard.BG;
+    public static final int SIF_BG = FrontendAnalogSifStandard.BG;
     /**
      * BG-A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_BG_A2 = Constants.FrontendAnalogSifStandard.BG_A2;
+    public static final int SIF_BG_A2 = FrontendAnalogSifStandard.BG_A2;
     /**
      * BG-NICAM Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_BG_NICAM = Constants.FrontendAnalogSifStandard.BG_NICAM;
+    public static final int SIF_BG_NICAM = FrontendAnalogSifStandard.BG_NICAM;
     /**
      * I Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_I = Constants.FrontendAnalogSifStandard.I;
+    public static final int SIF_I = FrontendAnalogSifStandard.I;
     /**
      * DK Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK = Constants.FrontendAnalogSifStandard.DK;
+    public static final int SIF_DK = FrontendAnalogSifStandard.DK;
     /**
      * DK1 A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK1_A2 = Constants.FrontendAnalogSifStandard.DK1_A2;
+    public static final int SIF_DK1_A2 = FrontendAnalogSifStandard.DK1_A2;
     /**
      * DK2 A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK2_A2 = Constants.FrontendAnalogSifStandard.DK2_A2;
+    public static final int SIF_DK2_A2 = FrontendAnalogSifStandard.DK2_A2;
     /**
      * DK3 A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK3_A2 = Constants.FrontendAnalogSifStandard.DK3_A2;
+    public static final int SIF_DK3_A2 = FrontendAnalogSifStandard.DK3_A2;
     /**
      * DK-NICAM Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK_NICAM = Constants.FrontendAnalogSifStandard.DK_NICAM;
+    public static final int SIF_DK_NICAM = FrontendAnalogSifStandard.DK_NICAM;
     /**
      * L Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_L = Constants.FrontendAnalogSifStandard.L;
+    public static final int SIF_L = FrontendAnalogSifStandard.L;
     /**
      * M Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_M = Constants.FrontendAnalogSifStandard.M;
+    public static final int SIF_M = FrontendAnalogSifStandard.M;
     /**
      * M-BTSC Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_M_BTSC = Constants.FrontendAnalogSifStandard.M_BTSC;
+    public static final int SIF_M_BTSC = FrontendAnalogSifStandard.M_BTSC;
     /**
      * M-A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_M_A2 = Constants.FrontendAnalogSifStandard.M_A2;
+    public static final int SIF_M_A2 = FrontendAnalogSifStandard.M_A2;
     /**
      * M-EIAJ Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_M_EIAJ = Constants.FrontendAnalogSifStandard.M_EIAJ;
+    public static final int SIF_M_EIAJ = FrontendAnalogSifStandard.M_EIAJ;
     /**
      * I-NICAM Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_I_NICAM = Constants.FrontendAnalogSifStandard.I_NICAM;
+    public static final int SIF_I_NICAM = FrontendAnalogSifStandard.I_NICAM;
     /**
      * L-NICAM Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_L_NICAM = Constants.FrontendAnalogSifStandard.L_NICAM;
+    public static final int SIF_L_NICAM = FrontendAnalogSifStandard.L_NICAM;
     /**
      * L-PRIME Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_L_PRIME = Constants.FrontendAnalogSifStandard.L_PRIME;
+    public static final int SIF_L_PRIME = FrontendAnalogSifStandard.L_PRIME;
 
     /** @hide */
     @IntDef(prefix = "AFT_FLAG_",
@@ -174,18 +174,15 @@ public class AnalogFrontendSettings extends FrontendSettings {
     /**
      * Aft flag is not defined.
      */
-    public static final int AFT_FLAG_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendAnalogAftFlag.UNDEFINED;
+    public static final int AFT_FLAG_UNDEFINED = FrontendAnalogAftFlag.UNDEFINED;
     /**
      * Aft flag is set true.
      */
-    public static final int AFT_FLAG_TRUE =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendAnalogAftFlag.AFT_TRUE;
+    public static final int AFT_FLAG_TRUE = FrontendAnalogAftFlag.AFT_TRUE;
     /**
      * Aft flag is not set.
      */
-    public static final int AFT_FLAG_FALSE =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendAnalogAftFlag.AFT_FALSE;
+    public static final int AFT_FLAG_FALSE = FrontendAnalogAftFlag.AFT_FALSE;
 
 
     private final int mSignalType;
@@ -230,7 +227,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
         return new Builder();
     }
 
-    private AnalogFrontendSettings(int frequency, int signalType, int sifStandard, int aftFlag) {
+    private AnalogFrontendSettings(long frequency, int signalType, int sifStandard, int aftFlag) {
         super(frequency);
         mSignalType = signalType;
         mSifStandard = sifStandard;
@@ -241,7 +238,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
      * Builder for {@link AnalogFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mSignalType = SIGNAL_TYPE_UNDEFINED;
         private int mSifStandard = SIF_UNDEFINED;
         private int mAftFlag = AFT_FLAG_UNDEFINED;
@@ -252,10 +249,23 @@ public class AnalogFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

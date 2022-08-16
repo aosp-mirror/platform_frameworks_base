@@ -20,8 +20,6 @@
         xmlns:tools="http://schemas.android.com/tools"
         package="com.android.bluetoothmidiservice"
         >
-    <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="30" />
-
     <uses-feature android:name="android.hardware.bluetooth_le"
          android:required="true"/>
     <uses-feature android:name="android.software.midi"

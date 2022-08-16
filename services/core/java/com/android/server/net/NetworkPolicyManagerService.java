@@ -265,6 +265,8 @@ import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -395,8 +397,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_NETWORK_TYPES = "networkTypes";
     private static final String ATTR_XML_UTILS_NAME = "name";
 
-    private static final String ACTION_ALLOW_BACKGROUND =
-            "com.android.server.net.action.ALLOW_BACKGROUND";
     private static final String ACTION_SNOOZE_WARNING =
             "com.android.server.net.action.SNOOZE_WARNING";
     private static final String ACTION_SNOOZE_RAPID =
@@ -1052,10 +1052,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_WIFI).build(),
                     0 /* thresholdBytes */, executor, mStatsCallback);
 
-            // listen for restrict background changes from notifications
-            final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
-            mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler);
-
             // Listen for snooze from notifications
             mContext.registerReceiver(mSnoozeReceiver,
                     new IntentFilter(ACTION_SNOOZE_WARNING), MANAGE_NETWORK_POLICY, mHandler);
@@ -1150,6 +1146,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -1287,20 +1286,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // being set to true.
             // TODO : fix threading for this member.
             return mIsAnyCallbackReceived;
-        }
-    };
-
-    /**
-     * Receiver that watches for {@link Notification} control of
-     * {@link #mRestrictBackground}.
-     */
-    final private BroadcastReceiver mAllowReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified MANAGE_NETWORK_POLICY
-            // permission above.
-
-            setRestrictBackground(false);
         }
     };
 
@@ -3838,6 +3823,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return 0;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
@@ -5880,10 +5866,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private static Intent buildAllowBackgroundDataIntent() {
-        return new Intent(ACTION_ALLOW_BACKGROUND);
-    }
-
     private static Intent buildSnoozeWarningIntent(NetworkTemplate template, String targetPackage) {
         final Intent intent = new Intent(ACTION_SNOOZE_WARNING);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -6390,6 +6372,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             return effectiveBlockedReasons;
+        }
+
+        static int getAllowedReasonsForProcState(int procState) {
+            if (procState > NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE) {
+                return ALLOWED_REASON_NONE;
+            } else if (procState <= NetworkPolicyManager.TOP_THRESHOLD_STATE) {
+                return ALLOWED_REASON_TOP | ALLOWED_REASON_FOREGROUND
+                        | ALLOWED_METERED_REASON_FOREGROUND;
+            } else {
+                return ALLOWED_REASON_FOREGROUND | ALLOWED_METERED_REASON_FOREGROUND;
+            }
         }
 
         @Override

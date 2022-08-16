@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"您要解除安裝此應用程式嗎？"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"您要為"<b>"所有"</b>"使用者解除安裝這個應用程式嗎？應用程式及其資料會從裝置上的"<b>"所有"</b>"使用者設定檔中移除。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"您要為使用者<xliff:g id="USERNAME">%1$s</xliff:g>解除安裝此應用程式嗎？"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"要從工作設定檔解除安裝此應用程式嗎？"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"要將此應用程式回復至原廠版本嗎？系統會移除所有資料。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要將此應用程式回復至原廠版本嗎？系統會移除所有資料。此裝置的所有使用者 (包括使用工作設定檔的使用者) 亦會受影響。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留應用程式資料 (<xliff:g id="SIZE">%1$s</xliff:g>)。"</string>

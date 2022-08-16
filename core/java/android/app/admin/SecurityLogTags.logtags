@@ -40,3 +40,8 @@ option java_package android.app.admin
 210033 security_cert_validation_failure         (reason|3)
 210034 security_camera_policy_set               (package|3),(admin_user|1),(target_user|1),(disabled|1)
 210035 security_password_complexity_required    (package|3),(admin_user|1),(target_user|1),(complexity|1)
+210036 security_password_changed                (password_complexity|1),(target_user|1)
+210037 security_wifi_connection                 (bssid|3),(event_type|3),(reason|3)
+210038 security_wifi_disconnection              (bssid|3),(reason|3)
+210039 security_bluetooth_connection            (addr|3),(success|1),(reason|3)
+210040 security_bluetooth_disconnection         (addr|3),(reason|3)

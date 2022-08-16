@@ -136,6 +136,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         return 0;
     }
 
+    @Nullable
     @Override
     public Intent getLongClickIntent() {
         return null;

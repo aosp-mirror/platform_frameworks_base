@@ -64,7 +64,11 @@ class BiometricDisplayListener(
     /** Listen for changes. */
     fun enable() {
         lastRotation = context.display?.rotation ?: Surface.ROTATION_0
-        displayManager.registerDisplayListener(this, handler)
+        displayManager.registerDisplayListener(
+            this,
+            handler,
+            DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+        )
     }
 
     /** Stop listening for changes. */
@@ -80,9 +84,7 @@ class BiometricDisplayListener(
      */
     sealed class SensorType {
         object Generic : SensorType()
-        data class UnderDisplayFingerprint(
-            val properties: FingerprintSensorPropertiesInternal
-        ) : SensorType()
+        object UnderDisplayFingerprint : SensorType()
         data class SideFingerprint(
             val properties: FingerprintSensorPropertiesInternal
         ) : SensorType()

@@ -18,26 +18,33 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -51,6 +58,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -75,24 +83,27 @@ import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalServices;
+import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.IntSupplier;
 
 /**
  * Server side implementation for the interface for organizing windows
  * @see android.window.WindowOrganizer
  */
 class WindowOrganizerController extends IWindowOrganizerController.Stub
-    implements BLASTSyncEngine.TransactionReadyListener {
+        implements BLASTSyncEngine.TransactionReadyListener {
 
     private static final String TAG = "WindowOrganizerController";
 
@@ -105,8 +116,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * will be filtered to only include these.
      */
     static final int CONTROLLABLE_CONFIGS = ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE;
-    static final int CONTROLLABLE_WINDOW_CONFIGS = WindowConfiguration.WINDOW_CONFIG_BOUNDS
+            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE
+            | ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+    static final int CONTROLLABLE_WINDOW_CONFIGS = WINDOW_CONFIG_BOUNDS
             | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 
     private final ActivityTaskManagerService mService;
@@ -182,6 +194,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                if (callback == null) {
+                    applyTransaction(t, -1 /* syncId*/, null /*transition*/, caller);
+                    return -1;
+                }
+
                 /**
                  * If callback is non-null we are looking to synchronize this transaction by
                  * collecting all the results in to a SurfaceFlinger transaction and then delivering
@@ -194,13 +211,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                  * all the WindowContainers will eventually finish applying their changes and notify
                  * the BLASTSyncEngine which will deliver the Transaction to the callback.
                  */
-                int syncId = -1;
-                if (callback != null) {
-                    syncId = startSyncWithOrganizer(callback);
-                }
-                applyTransaction(t, syncId, null /*transition*/, caller);
-                if (syncId >= 0) {
+                final BLASTSyncEngine.SyncGroup syncGroup = prepareSyncWithOrganizer(callback);
+                final int syncId = syncGroup.mSyncId;
+                if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+                    mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup);
+                    applyTransaction(t, syncId, null /*transition*/, caller);
                     setSyncReady(syncId);
+                } else {
+                    // Because the BLAST engine only supports one sync at a time, queue the
+                    // transaction.
+                    mService.mWindowManager.mSyncEngine.queueSyncSet(
+                            () -> mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup),
+                            () -> {
+                                applyTransaction(t, syncId, null /*transition*/, caller);
+                                setSyncReady(syncId);
+                            });
                 }
                 return syncId;
             }
@@ -218,31 +243,54 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         try {
             synchronized (mGlobalLock) {
                 Transition transition = Transition.fromBinder(transitionToken);
+                if (mTransitionController.getTransitionPlayer() == null && transition == null) {
+                    Slog.w(TAG, "Using shell transitions API for legacy transitions.");
+                    if (t == null) {
+                        throw new IllegalArgumentException("Can't use legacy transitions in"
+                                + " compatibility mode with no WCT.");
+                    }
+                    applyTransaction(t, -1 /* syncId */, null, caller);
+                    return null;
+                }
                 // In cases where transition is already provided, the "readiness lifecycle" of the
                 // transition is determined outside of this transaction. However, if this is a
                 // direct call from shell, the entire transition lifecycle is contained in the
                 // provided transaction and thus we can setReady immediately after apply.
-                boolean needsSetReady = transition == null && t != null;
+                final boolean needsSetReady = transition == null && t != null;
+                final WindowContainerTransaction wct =
+                        t != null ? t : new WindowContainerTransaction();
                 if (transition == null) {
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
                     }
-                    if (mTransitionController.getTransitionPlayer() == null) {
-                        Slog.w(TAG, "Using shell transitions API for legacy transitions.");
-                        if (t == null) {
-                            throw new IllegalArgumentException("Can't use legacy transitions in"
-                                    + " compatibility mode with no WCT.");
-                        }
-                        applyTransaction(t, -1 /* syncId */, null, caller);
-                        return null;
+                    // If there is already a collecting transition, queue up a new transition and
+                    // return that. The actual start and apply will then be deferred until that
+                    // transition starts collecting. This should almost never happen except during
+                    // tests.
+                    if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+                        Slog.w(TAG, "startTransition() while one is already collecting.");
+                        final Transition nextTransition = new Transition(type, 0 /* flags */,
+                                mTransitionController, mService.mWindowManager.mSyncEngine);
+                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                                "Creating Pending Transition: %s", nextTransition);
+                        mService.mWindowManager.mSyncEngine.queueSyncSet(
+                                // Make sure to collect immediately to prevent another transition
+                                // from sneaking in before it. Note: moveToCollecting internally
+                                // calls startSyncSet.
+                                () -> mTransitionController.moveToCollecting(nextTransition),
+                                () -> {
+                                    nextTransition.start();
+                                    applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                                    if (needsSetReady) {
+                                        nextTransition.setAllReady();
+                                    }
+                                });
+                        return nextTransition;
                     }
                     transition = mTransitionController.createTransition(type);
                 }
                 transition.start();
-                if (t == null) {
-                    t = new WindowContainerTransaction();
-                }
-                applyTransaction(t, -1 /*syncId*/, transition, caller);
+                applyTransaction(wct, -1 /*syncId*/, transition, caller);
                 if (needsSetReady) {
                     transition.setAllReady();
                 }
@@ -302,10 +350,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (t != null && callback != null) {
                     syncId = startSyncWithOrganizer(callback);
                 }
+                final Transition transition = Transition.fromBinder(transitionToken);
                 // apply the incoming transaction before finish in case it alters the visibility
                 // of the participants.
                 if (t != null) {
-                    applyTransaction(t, syncId, null /*transition*/, caller);
+                    applyTransaction(t, syncId, null /*transition*/, caller, transition);
                 }
                 getTransitionController().finishTransition(transitionToken);
                 if (syncId >= 0) {
@@ -318,13 +367,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
+    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+            @Nullable Transition transition, @NonNull CallerInfo caller) {
+        applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
+    }
+
     /**
      * @param syncId If non-null, this will be a sync-transaction.
      * @param transition A transition to collect changes into.
      * @param caller Info about the calling process.
+     * @param finishTransition The transition that is currently being finished.
      */
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
-            @Nullable Transition transition, @NonNull CallerInfo caller) {
+            @Nullable Transition transition, @NonNull CallerInfo caller,
+            @Nullable Transition finishTransition) {
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
@@ -337,10 +393,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // Go through all tasks and collect them before the rotation
                     // TODO(shell-transitions): move collect() to onConfigurationChange once
                     //       wallpaper handling is synchronized.
-                    dc.forAllTasks(task -> {
-                        if (task.isVisible()) transition.collect(task);
-                    });
-                    dc.getInsetsStateController().addProvidersToTransition();
+                    dc.mTransitionController.collectForDisplayChange(dc, transition);
                     dc.sendNewConfiguration();
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
@@ -363,7 +416,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (transition != null) transition.collect(wc);
 
-                int containerEffect = applyWindowContainerChange(wc, entry.getValue());
+                if (finishTransition != null) {
+                    // Deal with edge-cases in recents where it pretends to finish itself.
+                    if ((entry.getValue().getChangeMask()
+                            & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {
+                        finishTransition.setCanPipOnFinish(false /* canPipOnFinish */);
+                    }
+                }
+
+                int containerEffect = applyWindowContainerChange(wc, entry.getValue(),
+                        t.getErrorCallbackToken());
                 effects |= containerEffect;
 
                 // Lifecycle changes will trigger ensureConfig for everything.
@@ -380,7 +442,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 for (int i = 0; i < hopSize; ++i) {
                     effects |= applyHierarchyOp(hops.get(i), effects, syncId, transition,
                             isInLockTaskMode, caller, t.getErrorCallbackToken(),
-                            t.getTaskFragmentOrganizer());
+                            t.getTaskFragmentOrganizer(), finishTransition);
                 }
             }
             // Queue-up bounds-change transactions for tasks which are now organized. Do
@@ -445,7 +507,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    private int applyChanges(WindowContainer container, WindowContainerTransaction.Change change) {
+    private int applyChanges(WindowContainer<?> container,
+            WindowContainerTransaction.Change change, @Nullable IBinder errorCallbackToken) {
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize
         // masks here.
         final int configMask = change.getConfigSetMask() & CONTROLLABLE_CONFIGS;
@@ -453,6 +516,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = 0;
         final int windowingMode = change.getWindowingMode();
         if (configMask != 0) {
+
+            adjustBoundsForMinDimensionsIfNeeded(container, change, errorCallbackToken);
+
             if (windowingMode > -1 && windowingMode != container.getWindowingMode()) {
                 // Special handling for when we are setting a windowingMode in the same transaction.
                 // Setting the windowingMode is going to call onConfigurationChanged so we don't
@@ -496,6 +562,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         return effects;
+    }
+
+    private void adjustBoundsForMinDimensionsIfNeeded(WindowContainer<?> container,
+            WindowContainerTransaction.Change change, @Nullable IBinder errorCallbackToken) {
+        final TaskFragment taskFragment = container.asTaskFragment();
+        if (taskFragment == null || !taskFragment.isEmbedded()) {
+            return;
+        }
+        if ((change.getWindowSetMask() & WINDOW_CONFIG_BOUNDS) == 0) {
+            return;
+        }
+        final WindowConfiguration winConfig = change.getConfiguration().windowConfiguration;
+        final Rect bounds = winConfig.getBounds();
+        final Point minDimensions = taskFragment.calculateMinDimension();
+        if (bounds.width() < minDimensions.x || bounds.height() < minDimensions.y) {
+            sendMinimumDimensionViolation(taskFragment, minDimensions, errorCallbackToken,
+                    "setBounds:" + bounds);
+            // Sets the bounds to match parent bounds.
+            winConfig.setBounds(new Rect());
+        }
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
@@ -551,7 +637,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private int applyHierarchyOp(WindowContainerTransaction.HierarchyOp hop, int effects,
             int syncId, @Nullable Transition transition, boolean isInLockTaskMode,
             @NonNull CallerInfo caller, @Nullable IBinder errorCallbackToken,
-            @Nullable ITaskFragmentOrganizer organizer) {
+            @Nullable ITaskFragmentOrganizer organizer, @Nullable Transition finishTransition) {
         final int type = hop.getType();
         switch (type) {
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
@@ -616,40 +702,75 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         break;
                     }
                 }
-                effects |= deleteTaskFragment(taskFragment, errorCallbackToken);
+                effects |= deleteTaskFragment(taskFragment, organizer, errorCallbackToken);
                 break;
             }
             case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT: {
                 final IBinder fragmentToken = hop.getContainer();
-                if (!mLaunchTaskFragments.containsKey(fragmentToken)) {
+                final TaskFragment tf = mLaunchTaskFragments.get(fragmentToken);
+                if (tf == null) {
                     final Throwable exception = new IllegalArgumentException(
                             "Not allowed to operate with invalid fragment token");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
+                if (tf.isEmbeddedTaskFragmentInPip()) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "Not allowed to start activity in PIP TaskFragment");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
                 final Intent activityIntent = hop.getActivityIntent();
                 final Bundle activityOptions = hop.getLaunchOptions();
-                final TaskFragment tf = mLaunchTaskFragments.get(fragmentToken);
                 final int result = mService.getActivityStartController()
                         .startActivityInTaskFragment(tf, activityIntent, activityOptions,
-                                hop.getCallingActivity(), caller.mUid, caller.mPid);
+                                hop.getCallingActivity(), caller.mUid, caller.mPid,
+                                errorCallbackToken);
                 if (!isStartResultSuccessful(result)) {
-                    sendTaskFragmentOperationFailure(tf.getTaskFragmentOrganizer(),
-                            errorCallbackToken,
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken,
                             convertStartFailureToThrowable(result, activityIntent));
+                } else {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }
             case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT: {
                 final IBinder fragmentToken = hop.getNewParent();
-                final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
-                if (!mLaunchTaskFragments.containsKey(fragmentToken) || activity == null) {
+                final IBinder activityToken = hop.getContainer();
+                ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
+                if (activity == null) {
+                    // The token may be a temporary token if the activity doesn't belong to
+                    // the organizer process.
+                    activity = mTaskFragmentOrganizerController
+                            .getReparentActivityFromTemporaryToken(organizer, activityToken);
+                }
+                final TaskFragment parent = mLaunchTaskFragments.get(fragmentToken);
+                if (parent == null || activity == null) {
                     final Throwable exception = new IllegalArgumentException(
                             "Not allowed to operate with invalid fragment token or activity.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
-                activity.reparent(mLaunchTaskFragments.get(fragmentToken), POSITION_TOP);
+                if (parent.isEmbeddedTaskFragmentInPip()) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "Not allowed to reparent activity to PIP TaskFragment");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+                if (parent.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED) {
+                    final Throwable exception = new SecurityException(
+                            "The task fragment is not allowed to embed the given activity.");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+                if (parent.getTask() != activity.getTask()) {
+                    final Throwable exception = new SecurityException("The reparented activity is"
+                            + " not in the same Task as the target TaskFragment.");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+
+                activity.reparent(parent, POSITION_TOP);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
@@ -663,6 +784,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (tf1 == null || (adjacentFragmentToken != null && tf2 == null)) {
                     final Throwable exception = new IllegalArgumentException(
                             "Not allowed to set adjacent on invalid fragment tokens");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+                if (tf1.isEmbeddedTaskFragmentInPip()
+                        || (tf2 != null && tf2.isEmbeddedTaskFragmentInPip())) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "Not allowed to set adjacent on TaskFragment in PIP Task");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
@@ -683,6 +811,29 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     tf2.setDelayLastActivityRemoval(
                             adjacentParams.shouldDelaySecondaryLastActivityRemoval());
                 }
+                break;
+            }
+            case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT: {
+                final TaskFragment tf = mLaunchTaskFragments.get(hop.getContainer());
+                if (tf == null || !tf.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on detached container: " + tf);
+                    break;
+                }
+                final ActivityRecord curFocus = tf.getDisplayContent().mFocusedApp;
+                if (curFocus != null && curFocus.getTaskFragment() == tf) {
+                    Slog.d(TAG, "The requested TaskFragment already has the focus.");
+                    break;
+                }
+                if (curFocus != null && curFocus.getTask() != tf.getTask()) {
+                    Slog.d(TAG, "The Task of the requested TaskFragment doesn't have focus.");
+                    break;
+                }
+                final ActivityRecord targetFocus = tf.getTopResumedActivity();
+                if (targetFocus == null) {
+                    Slog.d(TAG, "There is no resumed activity in the requested TaskFragment.");
+                    break;
+                }
+                tf.getDisplayContent().setFocusedApp(targetFocus);
                 break;
             }
             default: {
@@ -744,26 +895,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
-                final Integer[] starterResult = {null};
-                // startActivityFromRecents should not be called in lock.
-                mService.mH.post(() -> {
-                    try {
-                        starterResult[0] = mService.mTaskSupervisor.startActivityFromRecents(
-                                caller.mPid, caller.mUid, taskId, safeOptions);
-                    } catch (Throwable t) {
-                        starterResult[0] = ActivityManager.START_CANCELED;
-                        Slog.w(TAG, t);
-                    }
-                    synchronized (mGlobalLock) {
-                        mGlobalLock.notifyAll();
-                    }
-                });
-                while (starterResult[0] == null) {
-                    try {
-                        mGlobalLock.wait();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
+                waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
+                        caller.mPid, caller.mUid, taskId, safeOptions));
                 break;
             }
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
@@ -772,22 +905,38 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         mService.mContext.getContentResolver())
                         : null;
 
-                Bundle options = null;
+                ActivityOptions activityOptions = null;
                 if (hop.getPendingIntent().isActivity()) {
                     // Set the context display id as preferred for this activity launches, so that
                     // it can land on caller's display. Or just brought the task to front at the
                     // display where it was on since it has higher preference.
-                    ActivityOptions activityOptions = hop.getLaunchOptions() != null
+                    activityOptions = hop.getLaunchOptions() != null
                             ? new ActivityOptions(hop.getLaunchOptions())
                             : ActivityOptions.makeBasic();
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
-                    options = activityOptions.toBundle();
                 }
-
-                mService.mAmInternal.sendIntentSender(hop.getPendingIntent().getTarget(),
+                final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
+                waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
+                        hop.getPendingIntent().getTarget(),
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
-                        null /* requiredPermission */, options);
+                        null /* requiredPermission */, options));
+                break;
+            }
+            case HIERARCHY_OP_TYPE_START_SHORTCUT: {
+                final Bundle launchOpts = hop.getLaunchOptions();
+                final String callingPackage = launchOpts.getString(
+                        WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_SHORTCUT_CALLING_PACKAGE);
+                launchOpts.remove(
+                        WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_SHORTCUT_CALLING_PACKAGE);
+
+                final LauncherAppsServiceInternal launcherApps = LocalServices.getService(
+                        LauncherAppsServiceInternal.class);
+
+                launcherApps.startShortcut(caller.mUid, caller.mPid, callingPackage,
+                        hop.getShortcutInfo().getPackage(), null /* default featureId */,
+                        hop.getShortcutInfo().getId(), null /* sourceBounds */, launchOpts,
+                        hop.getShortcutInfo().getUserId());
                 break;
             }
             case HIERARCHY_OP_TYPE_REPARENT_CHILDREN: {
@@ -795,17 +944,81 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final WindowContainer newParent = hop.getNewParent() != null
                         ? WindowContainer.fromBinder(hop.getNewParent())
                         : null;
-                if (oldParent == null || !oldParent.isAttached()) {
+                if (oldParent == null || oldParent.asTaskFragment() == null
+                        || !oldParent.isAttached()) {
                     Slog.e(TAG, "Attempt to operate on unknown or detached container: "
                             + oldParent);
                     break;
                 }
-                reparentTaskFragment(oldParent, newParent, errorCallbackToken);
+                reparentTaskFragment(oldParent.asTaskFragment(), newParent, organizer,
+                        errorCallbackToken);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
+            case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: {
+                if (finishTransition == null) break;
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                if (container == null) break;
+                final Task thisTask = container.asActivityRecord() != null
+                        ? container.asActivityRecord().getTask() : container.asTask();
+                if (thisTask == null) break;
+                final Task restoreAt = finishTransition.getTransientLaunchRestoreTarget(container);
+                if (restoreAt == null) break;
+                final TaskDisplayArea taskDisplayArea = thisTask.getTaskDisplayArea();
+                taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
+                break;
+            }
+            case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER:
+                final Rect insetsProviderWindowContainer = hop.getInsetsProviderFrame();
+                final WindowContainer receiverWindowContainer =
+                        WindowContainer.fromBinder(hop.getContainer());
+                receiverWindowContainer.addLocalRectInsetsSourceProvider(
+                        insetsProviderWindowContainer, hop.getInsetsTypes());
+                break;
+            case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
+                WindowContainer.fromBinder(hop.getContainer())
+                        .removeLocalInsetsSourceProvider(hop.getInsetsTypes());
+                break;
         }
         return effects;
+    }
+
+    /** A helper method to send minimum dimension violation error to the client. */
+    private void sendMinimumDimensionViolation(TaskFragment taskFragment, Point minDimensions,
+            IBinder errorCallbackToken, String reason) {
+        if (taskFragment == null || taskFragment.getTaskFragmentOrganizer() == null) {
+            return;
+        }
+        final Throwable exception = new SecurityException("The task fragment's bounds:"
+                + taskFragment.getBounds() + " does not satisfy minimum dimensions:"
+                + minDimensions + " " + reason);
+        sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
+                errorCallbackToken, exception);
+    }
+
+    /**
+     * Post and wait for the result of the activity start to prevent potential deadlock against
+     * {@link WindowManagerGlobalLock}.
+     */
+    private void waitAsyncStart(IntSupplier startActivity) {
+        final Integer[] starterResult = {null};
+        mService.mH.post(() -> {
+            try {
+                starterResult[0] = startActivity.getAsInt();
+            } catch (Throwable t) {
+                starterResult[0] = ActivityManager.START_CANCELED;
+                Slog.w(TAG, t);
+            }
+            synchronized (mGlobalLock) {
+                mGlobalLock.notifyAll();
+            }
+        });
+        while (starterResult[0] == null) {
+            try {
+                mGlobalLock.wait();
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     private int sanitizeAndApplyHierarchyOp(WindowContainer container,
@@ -879,7 +1092,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int reparentChildrenTasksHierarchyOp(WindowContainerTransaction.HierarchyOp hop,
             @Nullable Transition transition, int syncId) {
-        WindowContainer currentParent = hop.getContainer() != null
+        WindowContainer<?> currentParent = hop.getContainer() != null
                 ? WindowContainer.fromBinder(hop.getContainer()) : null;
         WindowContainer newParent = hop.getNewParent() != null
                 ? WindowContainer.fromBinder(hop.getNewParent()) : null;
@@ -922,7 +1135,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // We want to collect the tasks first before re-parenting to avoid array shifting on us.
         final ArrayList<Task> tasksToReparent = new ArrayList<>();
 
-        currentParent.forAllTasks((Function<Task, Boolean>) task -> {
+        currentParent.forAllTasks(task -> {
             Slog.i(TAG, " Processing task=" + task);
             final boolean reparent;
             if (task.mCreatedByOrganizer || task.getParent() != finalCurrentParent) {
@@ -979,6 +1192,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new IllegalArgumentException("setAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root1=" + root1 + " root2=" + root2);
         }
+        if (root1.isEmbeddedTaskFragmentInPip() || root2.isEmbeddedTaskFragmentInPip()) {
+            Slog.e(TAG, "Attempt to set adjacent TaskFragment in PIP Task");
+            return 0;
+        }
         root1.setAdjacentTaskFragment(root2, hop.getMoveAdjacentTogether());
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
@@ -990,10 +1207,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyWindowContainerChange(WindowContainer wc,
-            WindowContainerTransaction.Change c) {
+            WindowContainerTransaction.Change c, @Nullable IBinder errorCallbackToken) {
         sanitizeWindowContainer(wc);
+        if (wc.asTaskFragment() != null && wc.asTaskFragment().isEmbeddedTaskFragmentInPip()) {
+            // No override from organizer for embedded TaskFragment in a PIP Task.
+            return 0;
+        }
 
-        int effects = applyChanges(wc, c);
+        int effects = applyChanges(wc, c, errorCallbackToken);
 
         if (wc instanceof DisplayArea) {
             effects |= applyDisplayAreaChanges(wc.asDisplayArea(), c);
@@ -1021,11 +1242,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return mTaskFragmentOrganizerController;
     }
 
+    /**
+     * This will prepare a {@link BLASTSyncEngine.SyncGroup} for the organizer to track, but the
+     * {@link BLASTSyncEngine.SyncGroup} may not be active until the {@link BLASTSyncEngine} is
+     * free.
+     */
+    private BLASTSyncEngine.SyncGroup prepareSyncWithOrganizer(
+            IWindowContainerTransactionCallback callback) {
+        final BLASTSyncEngine.SyncGroup s = mService.mWindowManager.mSyncEngine
+                .prepareSyncSet(this, "");
+        mTransactionCallbacksByPendingSyncId.put(s.mSyncId, callback);
+        return s;
+    }
+
     @VisibleForTesting
     int startSyncWithOrganizer(IWindowContainerTransactionCallback callback) {
-        int id = mService.mWindowManager.mSyncEngine.startSyncSet(this);
-        mTransactionCallbacksByPendingSyncId.put(id, callback);
-        return id;
+        final BLASTSyncEngine.SyncGroup s = prepareSyncWithOrganizer(callback);
+        mService.mWindowManager.mSyncEngine.startSyncSet(s);
+        return s.mSyncId;
     }
 
     @VisibleForTesting
@@ -1102,7 +1336,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mService.enforceTaskPermission(func);
     }
 
-    private void enforceTaskPermission(String func, WindowContainerTransaction t) {
+    private void enforceTaskPermission(String func, @Nullable WindowContainerTransaction t) {
         if (t == null || t.getTaskFragmentOrganizer() == null) {
             enforceTaskPermission(func);
             return;
@@ -1127,8 +1361,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         while (entries.hasNext()) {
             final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
             // Only allow to apply changes to TaskFragment that is created by this organizer.
-            enforceTaskFragmentOrganized(func, WindowContainer.fromBinder(entry.getKey()),
-                    organizer);
+            final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
+            enforceTaskFragmentOrganized(func, wc, organizer);
+            enforceTaskFragmentConfigChangeAllowed(func, wc, entry.getValue(), organizer);
         }
 
         // Hierarchy changes
@@ -1157,6 +1392,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
+                case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT:
                     // We are allowing organizer to start/reparent activity to a TaskFragment it
                     // created, or set two TaskFragments adjacent to each other. Nothing to check
                     // here because the TaskFragment may not be created yet, but will be created in
@@ -1200,6 +1436,81 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
+    /**
+     * Makes sure that SurfaceControl transactions and the ability to set bounds outside of the
+     * parent bounds are not allowed for embedding without full trust between the host and the
+     * target.
+     */
+    private void enforceTaskFragmentConfigChangeAllowed(String func, @Nullable WindowContainer wc,
+            WindowContainerTransaction.Change change, ITaskFragmentOrganizer organizer) {
+        if (wc == null) {
+            Slog.e(TAG, "Attempt to operate on task fragment that no longer exists");
+            return;
+        }
+        if (change == null) {
+            return;
+        }
+        final int changeMask = change.getChangeMask();
+        if (changeMask != 0) {
+            // None of the change should be requested from a TaskFragment organizer.
+            String msg = "Permission Denial: " + func + " from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " trying to apply changes of " + changeMask + " to TaskFragment"
+                    + " TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        // Check if TaskFragment is embedded in fully trusted mode.
+        if (wc.asTaskFragment().isAllowedToBeEmbeddedInTrustedMode()) {
+            // Fully trusted, no need to check further
+            return;
+        }
+        final WindowContainer wcParent = wc.getParent();
+        if (wcParent == null) {
+            Slog.e(TAG, "Attempt to apply config change on task fragment that has no parent");
+            return;
+        }
+        final Configuration requestedConfig = change.getConfiguration();
+        final Configuration parentConfig = wcParent.getConfiguration();
+        if (parentConfig.screenWidthDp < requestedConfig.screenWidthDp
+                || parentConfig.screenHeightDp < requestedConfig.screenHeightDp
+                || parentConfig.smallestScreenWidthDp < requestedConfig.smallestScreenWidthDp) {
+            String msg = "Permission Denial: " + func + " from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " trying to apply screen width/height greater than parent's for non-trusted"
+                    + " host, TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (change.getWindowSetMask() == 0) {
+            // No bounds change.
+            return;
+        }
+        final WindowConfiguration requestedWindowConfig = requestedConfig.windowConfiguration;
+        final WindowConfiguration parentWindowConfig = parentConfig.windowConfiguration;
+        if (!requestedWindowConfig.getBounds().isEmpty()
+                && !parentWindowConfig.getBounds().contains(requestedWindowConfig.getBounds())) {
+            String msg = "Permission Denial: " + func + " from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " trying to apply bounds outside of parent for non-trusted host,"
+                    + " TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (requestedWindowConfig.getAppBounds() != null
+                && !requestedWindowConfig.getAppBounds().isEmpty()
+                && parentWindowConfig.getAppBounds() != null
+                && !parentWindowConfig.getAppBounds().contains(
+                        requestedWindowConfig.getAppBounds())) {
+            String msg = "Permission Denial: " + func + " from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " trying to apply app bounds outside of parent for non-trusted host,"
+                    + " TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+    }
+
     void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams,
             @Nullable IBinder errorCallbackToken, @NonNull CallerInfo caller) {
         final ActivityRecord ownerActivity =
@@ -1220,11 +1531,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             return;
         }
         // The ownerActivity has to belong to the same app as the target Task.
-        if (ownerActivity.getTask().effectiveUid != ownerActivity.getUid()
-                || ownerActivity.getTask().effectiveUid != caller.mUid) {
+        final Task ownerTask = ownerActivity.getTask();
+        if (ownerTask.effectiveUid != ownerActivity.getUid()
+                || ownerTask.effectiveUid != caller.mUid) {
             final Throwable exception =
-                    new IllegalArgumentException("Not allowed to operate with the ownerToken while "
+                    new SecurityException("Not allowed to operate with the ownerToken while "
                             + "the root activity of the target task belong to the different app");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        if (ownerTask.inPinnedWindowingMode()) {
+            final Throwable exception = new IllegalArgumentException(
+                    "Not allowed to create TaskFragment in PIP Task");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }
@@ -1234,39 +1552,74 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // actions.
         taskFragment.setTaskFragmentOrganizer(creationParams.getOrganizer(),
                 ownerActivity.getUid(), ownerActivity.info.processName);
-        ownerActivity.getTask().addChild(taskFragment, POSITION_TOP);
+        ownerTask.addChild(taskFragment, POSITION_TOP);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
     }
 
-    void reparentTaskFragment(@NonNull WindowContainer oldParent,
-            @Nullable WindowContainer newParent,  @Nullable IBinder errorCallbackToken) {
-        WindowContainer parent = newParent;
-        if (parent == null && oldParent.asTaskFragment() != null) {
-            parent = oldParent.asTaskFragment().getTask();
+    void reparentTaskFragment(@NonNull TaskFragment oldParent,
+            @Nullable WindowContainer<?> newParent, @Nullable ITaskFragmentOrganizer organizer,
+            @Nullable IBinder errorCallbackToken) {
+        final TaskFragment newParentTF;
+        if (newParent == null) {
+            // Use the old parent's parent if the caller doesn't specify the new parent.
+            newParentTF = oldParent.getTask();
+        } else {
+            newParentTF = newParent.asTaskFragment();
         }
-        if (parent == null) {
+        if (newParentTF == null) {
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with invalid container");
-            sendTaskFragmentOperationFailure(oldParent.asTaskFragment().getTaskFragmentOrganizer(),
-                    errorCallbackToken, exception);
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        if (newParentTF.getTaskFragmentOrganizer() != null) {
+            // We are reparenting activities to a new embedded TaskFragment, this operation is only
+            // allowed if the new parent is trusted by all reparent activities.
+            final boolean isEmbeddingDisallowed = oldParent.forAllActivities(activity ->
+                    newParentTF.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED);
+            if (isEmbeddingDisallowed) {
+                final Throwable exception = new SecurityException(
+                        "The new parent is not allowed to embed the activities.");
+                sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                return;
+            }
+        }
+        if (newParentTF.isEmbeddedTaskFragmentInPip() || oldParent.isEmbeddedTaskFragmentInPip()) {
+            final Throwable exception = new SecurityException(
+                    "Not allow to reparent in TaskFragment in PIP Task.");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        if (newParentTF.getTask() != oldParent.getTask()) {
+            final Throwable exception = new SecurityException(
+                    "The new parent is not in the same Task as the old parent.");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }
         while (oldParent.hasChild()) {
-            oldParent.getChildAt(0).reparent(parent, POSITION_TOP);
+            oldParent.getChildAt(0).reparent(newParentTF, POSITION_TOP);
         }
     }
 
     private int deleteTaskFragment(@NonNull TaskFragment taskFragment,
-            @Nullable IBinder errorCallbackToken) {
+            @Nullable ITaskFragmentOrganizer organizer, @Nullable IBinder errorCallbackToken) {
         final int index = mLaunchTaskFragments.indexOfValue(taskFragment);
         if (index < 0) {
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with invalid "
                             + "taskFragment");
-            sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
-                    errorCallbackToken, exception);
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return 0;
+        }
+        if (taskFragment.isEmbeddedTaskFragmentInPip()
+                // When the Task enters PiP before the organizer removes the empty TaskFragment, we
+                // should allow it to do the cleanup.
+                && taskFragment.getTopNonFinishingActivity() != null) {
+            final Throwable exception = new IllegalArgumentException(
+                    "Not allowed to delete TaskFragment in PIP Task");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return 0;
         }
         mLaunchTaskFragments.removeAt(index);
@@ -1277,6 +1630,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @Nullable
     TaskFragment getTaskFragment(IBinder tfToken) {
         return mLaunchTaskFragments.get(tfToken);
+    }
+
+    void cleanUpEmbeddedTaskFragment(TaskFragment taskFragment) {
+        mLaunchTaskFragments.remove(taskFragment.getFragmentToken());
     }
 
     static class CallerInfo {

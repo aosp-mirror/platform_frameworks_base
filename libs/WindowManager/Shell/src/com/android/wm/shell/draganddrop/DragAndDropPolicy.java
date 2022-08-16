@@ -45,10 +45,12 @@ import android.app.WindowConfiguration;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.ResolveInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -62,8 +64,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
@@ -105,9 +110,23 @@ public class DragAndDropPolicy {
      */
     void start(DisplayLayout displayLayout, ClipData data, InstanceId loggerSessionId) {
         mLoggerSessionId = loggerSessionId;
-        mSession = new DragSession(mContext, mActivityTaskManager, displayLayout, data);
+        mSession = new DragSession(mActivityTaskManager, displayLayout, data);
         // TODO(b/169894807): Also update the session data with task stack changes
         mSession.update();
+    }
+
+    /**
+     * Returns the last running task.
+     */
+    ActivityManager.RunningTaskInfo getLatestRunningTask() {
+        return mSession.runningTaskInfo;
+    }
+
+    /**
+     * Returns the number of targets.
+     */
+    int getNumTargets() {
+        return mTargets.size();
     }
 
     /**
@@ -132,6 +151,8 @@ public class DragAndDropPolicy {
         final Rect fullscreenHitRegion = new Rect(displayRegion);
         final boolean inLandscape = mSession.displayLayout.isLandscape();
         final boolean inSplitScreen = mSplitScreen != null && mSplitScreen.isSplitScreenVisible();
+        final float dividerWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.split_divider_bar_width);
         // We allow splitting if we are already in split-screen or the running task is a standard
         // task in fullscreen mode.
         final boolean allowSplit = inSplitScreen
@@ -147,37 +168,45 @@ public class DragAndDropPolicy {
 
             if (inLandscape) {
                 final Rect leftHitRegion = new Rect();
-                final Rect leftDrawRegion = topOrLeftBounds;
                 final Rect rightHitRegion = new Rect();
-                final Rect rightDrawRegion = bottomOrRightBounds;
 
                 // If we have existing split regions use those bounds, otherwise split it 50/50
                 if (inSplitScreen) {
-                    leftHitRegion.set(topOrLeftBounds);
-                    rightHitRegion.set(bottomOrRightBounds);
+                    // The bounds of the existing split will have a divider bar, the hit region
+                    // should include that space. Find the center of the divider bar:
+                    float centerX = topOrLeftBounds.right + (dividerWidth / 2);
+                    // Now set the hit regions using that center.
+                    leftHitRegion.set(displayRegion);
+                    leftHitRegion.right = (int) centerX;
+                    rightHitRegion.set(displayRegion);
+                    rightHitRegion.left = (int) centerX;
                 } else {
                     displayRegion.splitVertically(leftHitRegion, rightHitRegion);
                 }
 
-                mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, leftDrawRegion));
-                mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, rightDrawRegion));
+                mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, topOrLeftBounds));
+                mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, bottomOrRightBounds));
 
             } else {
                 final Rect topHitRegion = new Rect();
-                final Rect topDrawRegion = topOrLeftBounds;
                 final Rect bottomHitRegion = new Rect();
-                final Rect bottomDrawRegion = bottomOrRightBounds;
 
                 // If we have existing split regions use those bounds, otherwise split it 50/50
                 if (inSplitScreen) {
-                    topHitRegion.set(topOrLeftBounds);
-                    bottomHitRegion.set(bottomOrRightBounds);
+                    // The bounds of the existing split will have a divider bar, the hit region
+                    // should include that space. Find the center of the divider bar:
+                    float centerX = topOrLeftBounds.bottom + (dividerWidth / 2);
+                    // Now set the hit regions using that center.
+                    topHitRegion.set(displayRegion);
+                    topHitRegion.bottom = (int) centerX;
+                    bottomHitRegion.set(displayRegion);
+                    bottomHitRegion.top = (int) centerX;
                 } else {
                     displayRegion.splitHorizontally(topHitRegion, bottomHitRegion);
                 }
 
-                mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topDrawRegion));
-                mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomDrawRegion));
+                mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topOrLeftBounds));
+                mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomOrRightBounds));
             }
         } else {
             // Split-screen not allowed, so only show the fullscreen target
@@ -237,32 +266,68 @@ public class DragAndDropPolicy {
             final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
             mStarter.startShortcut(packageName, id, position, opts, user);
         } else {
-            mStarter.startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT),
-                    null, position, opts);
+            final PendingIntent launchIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
+            mStarter.startIntent(launchIntent, getStartIntentFillInIntent(launchIntent, position),
+                    position, opts);
         }
+    }
+
+    /**
+     * Returns the fill-in intent to use when starting an app from a drop.
+     */
+    @VisibleForTesting
+    Intent getStartIntentFillInIntent(PendingIntent launchIntent, @SplitPosition int position) {
+        // Get the drag app
+        final List<ResolveInfo> infos = launchIntent.queryIntentComponents(0 /* flags */);
+        final ComponentName dragIntentActivity = !infos.isEmpty()
+                ? infos.get(0).activityInfo.getComponentName()
+                : null;
+
+        // Get the current app (either fullscreen or the remaining app post-drop if in splitscreen)
+        final boolean inSplitScreen = mSplitScreen != null
+                && mSplitScreen.isSplitScreenVisible();
+        final ComponentName currentActivity;
+        if (!inSplitScreen) {
+            currentActivity = mSession.runningTaskInfo != null
+                    ? mSession.runningTaskInfo.baseActivity
+                    : null;
+        } else {
+            final int nonReplacedSplitPosition = position == SPLIT_POSITION_TOP_OR_LEFT
+                    ? SPLIT_POSITION_BOTTOM_OR_RIGHT
+                    : SPLIT_POSITION_TOP_OR_LEFT;
+            ActivityManager.RunningTaskInfo nonReplacedTaskInfo =
+                    mSplitScreen.getTaskInfo(nonReplacedSplitPosition);
+            currentActivity = nonReplacedTaskInfo.baseActivity;
+        }
+
+        if (currentActivity.equals(dragIntentActivity)) {
+            // Only apply MULTIPLE_TASK if we are dragging the same activity
+            final Intent fillInIntent = new Intent();
+            fillInIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Adding MULTIPLE_TASK");
+            return fillInIntent;
+        }
+        return null;
     }
 
     /**
      * Per-drag session data.
      */
     private static class DragSession {
-        private final Context mContext;
         private final ActivityTaskManager mActivityTaskManager;
         private final ClipData mInitialDragData;
 
         final DisplayLayout displayLayout;
         Intent dragData;
-        int runningTaskId;
+        ActivityManager.RunningTaskInfo runningTaskInfo;
         @WindowConfiguration.WindowingMode
         int runningTaskWinMode = WINDOWING_MODE_UNDEFINED;
         @WindowConfiguration.ActivityType
         int runningTaskActType = ACTIVITY_TYPE_STANDARD;
-        boolean runningTaskIsResizeable;
         boolean dragItemSupportsSplitscreen;
 
-        DragSession(Context context, ActivityTaskManager activityTaskManager,
+        DragSession(ActivityTaskManager activityTaskManager,
                 DisplayLayout dispLayout, ClipData data) {
-            mContext = context;
             mActivityTaskManager = activityTaskManager;
             mInitialDragData = data;
             displayLayout = dispLayout;
@@ -276,10 +341,9 @@ public class DragAndDropPolicy {
                     mActivityTaskManager.getTasks(1, false /* filterOnlyVisibleRecents */);
             if (!tasks.isEmpty()) {
                 final ActivityManager.RunningTaskInfo task = tasks.get(0);
+                runningTaskInfo = task;
                 runningTaskWinMode = task.getWindowingMode();
                 runningTaskActType = task.getActivityType();
-                runningTaskId = task.taskId;
-                runningTaskIsResizeable = task.isResizeable;
             }
 
             final ActivityInfo info = mInitialDragData.getItemAt(0).getActivityInfo();

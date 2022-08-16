@@ -22,14 +22,12 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
@@ -41,10 +39,10 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
 
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
 
-    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
+    protected open val transition: FlickerBuilder.() -> Unit = {
         setup {
             eachRun {
-                this.setRotation(testSpec.config.startRotation)
+                this.setRotation(testSpec.startRotation)
             }
         }
         teardown {
@@ -53,7 +51,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
             }
         }
         transitions {
-            this.setRotation(testSpec.config.endRotation)
+            this.setRotation(testSpec.endRotation)
         }
     }
 
@@ -64,7 +62,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            transition(testSpec.config)
+            transition()
         }
     }
 
@@ -129,17 +127,6 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Presubmit
     @Test
     open fun entireScreenCovered() = testSpec.entireScreenCovered()
-
-    /**
-     * Checks that the focus doesn't change during animation
-     */
-    @Presubmit
-    @Test
-    open fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
-        }
-    }
 
     /**
      * Checks that [testApp] layer covers the entire screen at the start of the transition

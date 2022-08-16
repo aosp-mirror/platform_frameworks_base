@@ -18,10 +18,10 @@
 #define LOG_TAG "AndroidMediaUtils"
 
 #include <aidl/android/hardware/graphics/common/PlaneLayoutComponentType.h>
-#include <hardware/camera3.h>
 #include <ui/GraphicBufferMapper.h>
 #include <ui/GraphicTypes.h>
 #include <utils/Log.h>
+
 #include "android_media_Utils.h"
 
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
@@ -122,11 +122,16 @@ uint32_t Image_getBlobSize(LockedImage* buffer, bool usingRGBAOverride) {
     }
 
     // First check for BLOB transport header at the end of the buffer
-    uint8_t* header = blobBuffer + (width - sizeof(struct camera3_jpeg_blob));
-    struct camera3_jpeg_blob *blob = (struct camera3_jpeg_blob*)(header);
-    if (blob->jpeg_blob_id == CAMERA3_JPEG_BLOB_ID ||
-            blob->jpeg_blob_id == CAMERA3_HEIC_BLOB_ID) {
-        size = blob->jpeg_size;
+    uint8_t* header = blobBuffer + (width - sizeof(struct camera3_jpeg_blob_v2));
+
+    // read camera3_jpeg_blob_v2 from the end of the passed buffer.
+    // requires memcpy because 'header' might not be properly aligned.
+    struct camera3_jpeg_blob_v2 blob;
+    memcpy(&blob, header, sizeof(struct camera3_jpeg_blob_v2));
+
+    if (blob.jpeg_blob_id == CAMERA3_JPEG_BLOB_ID ||
+            blob.jpeg_blob_id == CAMERA3_HEIC_BLOB_ID) {
+        size = blob.jpeg_size;
         ALOGV("%s: Jpeg/Heic size = %d", __FUNCTION__, size);
     }
 

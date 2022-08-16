@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.content.componentalias.tests" >
+    <application>
+        <!--
+            Note the alias components are essentially just placeholders, so the APKs don't have to
+            have the implementation classes.
+        -->
+        <service android:name=".s.Alias00" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests/android.content.componentalias.tests.s.Target00" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_ALIAS_00" /></intent-filter>
+        </service>
+        <service android:name=".s.Alias01" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub1/android.content.componentalias.tests.s.Target01" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_ALIAS_01" /></intent-filter>
+        </service>
+        <service android:name=".s.Alias02" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub2/android.content.componentalias.tests.s.Target02" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_ALIAS_02" /></intent-filter>
+        </service>
+        <service android:name=".s.Alias03" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub1/android.content.componentalias.tests.s.Target03" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_ALIAS_03" /></intent-filter>
+        </service>
+        <service android:name=".s.Alias04" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub2/android.content.componentalias.tests.s.Target04" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_ALIAS_04" /></intent-filter>
+        </service>
+
+        <receiver android:name=".b.Alias00" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests/android.content.componentalias.tests.b.Target00" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_00" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Alias01" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub1/android.content.componentalias.tests.b.Target01" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_01" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Alias02" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub2/android.content.componentalias.tests.b.Target02" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_02" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Alias03" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub1/android.content.componentalias.tests.b.Target03" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_03" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Alias04" android:exported="true" android:enabled="true" >
+            <meta-data android:name="alias_target" android:value="android.content.componentalias.tests.sub2/android.content.componentalias.tests.b.Target04" />
+            <intent-filter><action android:name="com.android.intent.action.EXPERIMENTAL_IS_ALIAS" /></intent-filter>
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_04" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+    </application>
+</manifest>

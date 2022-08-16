@@ -60,13 +60,13 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.TaskView;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -112,6 +112,7 @@ public class BubbleExpandedView extends LinearLayout {
     private ShapeDrawable mRightPointer;
     private float mCornerRadius = 0f;
     private int mBackgroundColorFloating;
+    private boolean mUsingMaxHeight;
 
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
@@ -335,7 +336,7 @@ public class BubbleExpandedView extends LinearLayout {
             mManageButton.setVisibility(GONE);
         } else {
             mTaskView = new TaskView(mContext, mController.getTaskOrganizer(),
-                    mController.getSyncTransactionQueue());
+                    mController.getTaskViewTransitions(), mController.getSyncTransactionQueue());
             mTaskView.setListener(mController.getMainExecutor(), mTaskViewListener);
             mExpandedViewContainer.addView(mTaskView);
             bringChildToFront(mTaskView);
@@ -386,13 +387,14 @@ public class BubbleExpandedView extends LinearLayout {
         final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
                 android.R.attr.dialogCornerRadius,
                 android.R.attr.colorBackgroundFloating});
-        mCornerRadius = ta.getDimensionPixelSize(0, 0);
+        boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
+                mContext.getResources());
+        mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;
         mBackgroundColorFloating = ta.getColor(1, Color.WHITE);
         mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
         ta.recycle();
 
-        if (mTaskView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
-                mContext.getResources())) {
+        if (mTaskView != null) {
             mTaskView.setCornerRadius(mCornerRadius);
         }
         updatePointerView();
@@ -417,8 +419,9 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerView.setBackground(mCurrentPointer);
     }
 
-    private String getBubbleKey() {
-        return mBubble != null ? mBubble.getKey() : "null";
+    @VisibleForTesting
+    public String getBubbleKey() {
+        return mBubble != null ? mBubble.getKey() : mIsOverflow ? BubbleOverflow.KEY : null;
     }
 
     /**
@@ -451,8 +454,11 @@ public class BubbleExpandedView extends LinearLayout {
                     p.beginRecording(mOverflowView.getWidth(), mOverflowView.getHeight()));
             p.endRecording();
             Bitmap snapshot = Bitmap.createBitmap(p);
-            return new SurfaceControl.ScreenshotHardwareBuffer(snapshot.getHardwareBuffer(),
-                    snapshot.getColorSpace(), false /* containsSecureLayers */);
+            return new SurfaceControl.ScreenshotHardwareBuffer(
+                    snapshot.getHardwareBuffer(),
+                    snapshot.getColorSpace(),
+                    false /* containsSecureLayers */,
+                    false /* containsHdrLayers */);
         }
         if (mTaskView == null || mTaskView.getSurfaceControl() == null) {
             return null;
@@ -619,6 +625,13 @@ public class BubbleExpandedView extends LinearLayout {
         return prevWasIntentBased != newIsIntentBased;
     }
 
+    /**
+     * Whether the bubble is using all available height to display or not.
+     */
+    public boolean isUsingMaxHeight() {
+        return mUsingMaxHeight;
+    }
+
     void updateHeight() {
         if (mExpandedViewContainerLocation == null) {
             return;
@@ -630,6 +643,7 @@ public class BubbleExpandedView extends LinearLayout {
             float height = desiredHeight == MAX_HEIGHT
                     ? maxHeight
                     : Math.min(desiredHeight, maxHeight);
+            mUsingMaxHeight = height == maxHeight;
             FrameLayout.LayoutParams lp = mIsOverflow
                     ? (FrameLayout.LayoutParams) mOverflowView.getLayoutParams()
                     : (FrameLayout.LayoutParams) mTaskView.getLayoutParams();
@@ -689,8 +703,11 @@ public class BubbleExpandedView extends LinearLayout {
      * @param bubblePosition the x position of the bubble if showing on top, the y position of
      *                       the bubble if showing vertically.
      * @param onLeft whether the stack was on the left side of the screen when expanded.
+     * @param animate whether the pointer should animate to this position.
      */
     public void setPointerPosition(float bubblePosition, boolean onLeft, boolean animate) {
+        final boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
+                == LAYOUT_DIRECTION_RTL;
         // Pointer gets drawn in the padding
         final boolean showVertically = mPositioner.showBubblesVertically();
         final float paddingLeft = (showVertically && onLeft)
@@ -717,12 +734,22 @@ public class BubbleExpandedView extends LinearLayout {
             float pointerX;
             if (showVertically) {
                 pointerY = bubbleCenter - (mPointerWidth / 2f);
-                pointerX = onLeft
-                        ? -mPointerHeight + mPointerOverlap
-                        : getWidth() - mPaddingRight - mPointerOverlap;
+                if (!isRtl) {
+                    pointerX = onLeft
+                            ? -mPointerHeight + mPointerOverlap
+                            : getWidth() - mPaddingRight - mPointerOverlap;
+                } else {
+                    pointerX = onLeft
+                            ? -(getWidth() - mPaddingLeft - mPointerOverlap)
+                            : mPointerHeight - mPointerOverlap;
+                }
             } else {
                 pointerY = mPointerOverlap;
-                pointerX = bubbleCenter - (mPointerWidth / 2f);
+                if (!isRtl) {
+                    pointerX = bubbleCenter - (mPointerWidth / 2f);
+                } else {
+                    pointerX = -(getWidth() - mPaddingLeft - bubbleCenter) + (mPointerWidth / 2f);
+                }
             }
             if (animate) {
                 mPointerView.animate().translationX(pointerX).translationY(pointerY).start();
@@ -772,8 +799,7 @@ public class BubbleExpandedView extends LinearLayout {
     /**
      * Description of current expanded view state.
      */
-    public void dump(
-            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("BubbleExpandedView");
         pw.print("  taskId:               "); pw.println(mTaskId);
         pw.print("  stackView:            "); pw.println(mStackView);

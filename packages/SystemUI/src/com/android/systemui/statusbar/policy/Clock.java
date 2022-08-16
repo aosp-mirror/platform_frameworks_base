@@ -31,6 +31,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
@@ -56,6 +57,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -87,10 +89,11 @@ public class Clock extends TextView implements
     private boolean mAttached;
     private boolean mScreenReceiverRegistered;
     private Calendar mCalendar;
-    private String mClockFormatString;
+    private String mContentDescriptionFormatString;
     private SimpleDateFormat mClockFormat;
     private SimpleDateFormat mContentDescriptionFormat;
     private Locale mLocale;
+    private DateTimePatternGenerator mDateTimePatternGenerator;
 
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
@@ -99,6 +102,10 @@ public class Clock extends TextView implements
     private final int mAmPmStyle;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
+
+    // Fields to cache the width so the clock remains at an approximately constant width
+    private int mCharsAtCurrentWidth = -1;
+    private int mCachedWidth = -1;
 
     /**
      * Color to be set on this {@link TextView}, when wallpaperTextColor is <b>not</b> utilized.
@@ -195,7 +202,8 @@ public class Clock extends TextView implements
 
         // The time zone may have changed while the receiver wasn't registered, so update the Time
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
-        mClockFormatString = "";
+        mContentDescriptionFormatString = "";
+        mDateTimePatternGenerator = null;
 
         // Make sure we update to the current time
         updateClock();
@@ -246,7 +254,9 @@ public class Clock extends TextView implements
                 handler.post(() -> {
                     if (!newLocale.equals(mLocale)) {
                         mLocale = newLocale;
-                        mClockFormatString = ""; // force refresh
+                         // Force refresh of dependent variables.
+                        mContentDescriptionFormatString = "";
+                        mDateTimePatternGenerator = null;
                     }
                 });
             }
@@ -286,8 +296,40 @@ public class Clock extends TextView implements
     final void updateClock() {
         if (mDemoMode) return;
         mCalendar.setTimeInMillis(System.currentTimeMillis());
-        setText(getSmallTime());
+        CharSequence smallTime = getSmallTime();
+        // Setting text actually triggers a layout pass (because the text view is set to
+        // wrap_content width and TextView always relayouts for this). Avoid needless
+        // relayout if the text didn't actually change.
+        if (!TextUtils.equals(smallTime, getText())) {
+            setText(smallTime);
+        }
         setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
+    }
+
+    /**
+     * In order to avoid the clock growing and shrinking due to proportional fonts, we want to
+     * cache the drawn width at a given number of characters (removing the cache when it changes),
+     * and only use the biggest value. This means that the clock width with grow to the maximum
+     * size over time, but reset whenever the number of characters changes (or the configuration
+     * changes)
+     */
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int chars = getText().length();
+        if (chars != mCharsAtCurrentWidth) {
+            mCharsAtCurrentWidth = chars;
+            mCachedWidth = getMeasuredWidth();
+            return;
+        }
+
+        int measuredWidth = getMeasuredWidth();
+        if (mCachedWidth > measuredWidth) {
+            setMeasuredDimension(mCachedWidth, getMeasuredHeight());
+        } else {
+            mCachedWidth = measuredWidth;
+        }
     }
 
     @Override
@@ -314,8 +356,8 @@ public class Clock extends TextView implements
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        mNonAdaptedColor = DarkIconDispatcher.getTint(area, this, tint);
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        mNonAdaptedColor = DarkIconDispatcher.getTint(areas, this, tint);
         setTextColor(mNonAdaptedColor);
     }
 
@@ -366,17 +408,22 @@ public class Clock extends TextView implements
     private final CharSequence getSmallTime() {
         Context context = getContext();
         boolean is24 = DateFormat.is24HourFormat(context, mCurrentUserId);
-        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
+        if (mDateTimePatternGenerator == null) {
+            // Despite its name, getInstance creates a cloned instance, so reuse the generator to
+            // avoid unnecessary churn.
+            mDateTimePatternGenerator = DateTimePatternGenerator.getInstance(
                 context.getResources().getConfiguration().locale);
+        }
 
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';
 
-        SimpleDateFormat sdf;
-        String format = mShowSeconds
-                ? is24 ? dtpg.getBestPattern("Hms") : dtpg.getBestPattern("hms")
-                : is24 ? dtpg.getBestPattern("Hm") : dtpg.getBestPattern("hm");
-        if (!format.equals(mClockFormatString)) {
+        final String formatSkeleton = mShowSeconds
+                ? is24 ? "Hms" : "hms"
+                : is24 ? "Hm" : "hm";
+        String format = mDateTimePatternGenerator.getBestPattern(formatSkeleton);
+        if (!format.equals(mContentDescriptionFormatString)) {
+            mContentDescriptionFormatString = format;
             mContentDescriptionFormat = new SimpleDateFormat(format);
             /*
              * Search for an unquoted "a" in the format string, so we can
@@ -408,12 +455,9 @@ public class Clock extends TextView implements
                         + "a" + MAGIC2 + format.substring(b + 1);
                 }
             }
-            mClockFormat = sdf = new SimpleDateFormat(format);
-            mClockFormatString = format;
-        } else {
-            sdf = mClockFormat;
+            mClockFormat = new SimpleDateFormat(format);
         }
-        String result = sdf.format(mCalendar.getTime());
+        String result = mClockFormat.format(mCalendar.getTime());
 
         if (mAmPmStyle != AM_PM_STYLE_NORMAL) {
             int magic1 = result.indexOf(MAGIC1);

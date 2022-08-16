@@ -24,6 +24,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
+import static android.Manifest.permission.MANAGE_GAME_ACTIVITY;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
@@ -43,6 +44,7 @@ import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_CANT_SAVE_STATE;
+import static android.content.pm.PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -60,10 +62,9 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIV
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
@@ -136,6 +137,7 @@ import android.app.Dialog;
 import android.app.IActivityClientController;
 import android.app.IActivityController;
 import android.app.IActivityTaskManager;
+import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.INotificationManager;
@@ -146,7 +148,6 @@ import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
-import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
@@ -205,6 +206,7 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
+import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
@@ -222,6 +224,7 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
+import android.window.BackNavigationInfo;
 import android.window.IWindowOrganizerController;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
@@ -240,6 +243,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -254,9 +258,9 @@ import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
 import com.android.server.firewall.IntentFirewall;
-import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -279,7 +283,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -377,7 +380,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     final MirrorActiveUids mActiveUids = new MirrorActiveUids();
-    private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid and uid */
@@ -396,7 +398,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     volatile WindowProcessController mPreviousProcess;
     /** The time at which the previous process was last visible. */
-    long mPreviousProcessVisibleTime;
+    private long mPreviousProcessVisibleTime;
 
     /** List of intents that were used to start the most recent tasks. */
     private RecentTasks mRecentTasks;
@@ -418,30 +420,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // How long to wait in getAutofillAssistStructure() for the activity to respond with the result.
     private static final int PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT = 2000;
 
-    // Permission tokens are used to temporarily granted a trusted app the ability to call
-    // #startActivityAsCaller.  A client is expected to dump its token after this time has elapsed,
-    // showing any appropriate error messages to the user.
-    private static final long START_AS_CALLER_TOKEN_TIMEOUT =
-            10 * MINUTE_IN_MILLIS;
-
-    // How long before the service actually expires a token.  This is slightly longer than
-    // START_AS_CALLER_TOKEN_TIMEOUT, to provide a buffer so clients will rarely encounter the
-    // expiration exception.
-    private static final long START_AS_CALLER_TOKEN_TIMEOUT_IMPL =
-            START_AS_CALLER_TOKEN_TIMEOUT + 2 * 1000;
-
-    // How long the service will remember expired tokens, for the purpose of providing error
-    // messaging when a client uses an expired token.
-    private static final long START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT =
-            START_AS_CALLER_TOKEN_TIMEOUT_IMPL + 20 * MINUTE_IN_MILLIS;
-
-    // Activity tokens of system activities that are delegating their call to
-    // #startActivityByCaller, keyed by the permissionToken granted to the delegate.
-    final HashMap<IBinder, IBinder> mStartActivitySources = new HashMap<>();
-
-    // Permission tokens that have expired, but we remember for error reporting.
-    final ArrayList<IBinder> mExpiredStartAsCallerTokens = new ArrayList<>();
-
     private final ArrayList<PendingAssistExtras> mPendingAssistExtras = new ArrayList<>();
 
     // Keeps track of the active voice interaction service component, notified from
@@ -454,6 +432,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     VrController mVrController;
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
+
+    @Nullable
+    private final BackNavigationController mBackNavigationController;
+
     private TaskChangeNotificationController mTaskChangeNotificationController;
     /** The controller for all operations related to locktask. */
     private LockTaskController mLockTaskController;
@@ -494,9 +476,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * anyone...
      */
     private Configuration mTempConfig = new Configuration();
-
-    /** Temporary to avoid allocations. */
-    final StringBuilder mStringBuilder = new StringBuilder(256);
 
     /**
      * Whether normal application switches are allowed; a call to {@link #stopAppSwitches()
@@ -586,6 +565,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     boolean mSupportsSplitScreenMultiWindow;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
+    boolean mSupportsExpandedPictureInPicture;
     boolean mSupportsMultiDisplay;
     boolean mForceResizableActivities;
 
@@ -667,7 +647,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * start/stop the dream. It is set to true shortly  before the {@link DreamService} is started.
      * It is set to false after the {@link DreamService} is stopped.
      */
-    private boolean mDreaming = false;
+    private volatile boolean mDreaming;
 
     /**
      * The process state used for processes that are running the top activities.
@@ -684,14 +664,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             POWER_MODE_REASON_START_ACTIVITY,
-            POWER_MODE_REASON_FREEZE_DISPLAY,
+            POWER_MODE_REASON_CHANGE_DISPLAY,
             POWER_MODE_REASON_UNKNOWN_VISIBILITY,
             POWER_MODE_REASON_ALL,
     })
     @interface PowerModeReason {}
 
     static final int POWER_MODE_REASON_START_ACTIVITY = 1 << 0;
-    static final int POWER_MODE_REASON_FREEZE_DISPLAY = 1 << 1;
+    static final int POWER_MODE_REASON_CHANGE_DISPLAY = 1 << 1;
     /** @see UnknownAppVisibilityController */
     static final int POWER_MODE_REASON_UNKNOWN_VISIBILITY = 1 << 2;
     /** This can only be used by {@link #endLaunchPowerMode(int)}.*/
@@ -840,6 +820,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
+        mBackNavigationController = BackNavigationController.isEnabled()
+                ? new BackNavigationController() : null;
     }
 
     public void onSystemReady() {
@@ -877,6 +859,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean supportsMultiWindow = ActivityTaskManager.supportsMultiWindow(mContext);
         final boolean supportsPictureInPicture = supportsMultiWindow &&
                 mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
+        final boolean supportsExpandedPictureInPicture =
+                supportsPictureInPicture && mContext.getPackageManager().hasSystemFeature(
+                        FEATURE_EXPANDED_PICTURE_IN_PICTURE);
         final boolean supportsSplitScreenMultiWindow =
                 ActivityTaskManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
@@ -924,12 +909,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mSupportsFreeformWindowManagement = freeformWindowManagement;
                 mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
                 mSupportsPictureInPicture = supportsPictureInPicture;
+                mSupportsExpandedPictureInPicture = supportsExpandedPictureInPicture;
                 mSupportsMultiDisplay = supportsMultiDisplay;
             } else {
                 mSupportsMultiWindow = false;
                 mSupportsFreeformWindowManagement = false;
                 mSupportsSplitScreenMultiWindow = false;
                 mSupportsPictureInPicture = false;
+                mSupportsExpandedPictureInPicture = false;
                 mSupportsMultiDisplay = false;
             }
             mWindowManager.mRoot.onSettingsRetrieved();
@@ -971,7 +958,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mActivityClientController = new ActivityClientController(this);
 
         mTaskChangeNotificationController =
-                new TaskChangeNotificationController(mGlobalLock, mTaskSupervisor, mH);
+                new TaskChangeNotificationController(mTaskSupervisor, mH);
         mLockTaskController = new LockTaskController(mContext, mTaskSupervisor, mH,
                 mTaskChangeNotificationController);
         mActivityStartController = new ActivityStartController(this);
@@ -1017,6 +1004,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mLockTaskController.setWindowManager(wm);
             mTaskSupervisor.setWindowManager(wm);
             mRootWindowContainer.setWindowManager(wm);
+            if (mBackNavigationController != null) {
+                mBackNavigationController.setTaskSnapshotController(wm.mTaskSnapshotController);
+            }
         }
     }
 
@@ -1221,6 +1211,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                    SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal == null) {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when starting"
+                        + " an activity from an SDK sandbox uid.");
+            }
+            sdkSandboxManagerLocal.enforceAllowedToStartActivity(intent);
+        }
 
         userId = getActivityStartController().checkTargetUser(userId, validateIncomingUser,
                 Binder.getCallingPid(), Binder.getCallingUid(), "startActivityAsUser");
@@ -1369,7 +1368,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setCaller(r.app.getThread())
                     .setResolvedType(r.resolvedType)
                     .setActivityInfo(aInfo)
-                    .setResultTo(resultTo != null ? resultTo.appToken : null)
+                    .setResultTo(resultTo != null ? resultTo.token : null)
                     .setResultWho(resultWho)
                     .setRequestCode(requestCode)
                     .setCallingPid(-1)
@@ -1390,10 +1389,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    boolean isDreaming() {
+        return mDreaming;
+    }
+
+    boolean canLaunchDreamActivity(String packageName) {
+        if (!mDreaming || packageName == null) {
+            return false;
+        }
+        final DreamManagerInternal dreamManager =
+                LocalServices.getService(DreamManagerInternal.class);
+        // Verify that the package is the current active dream or doze component. The
+        // getActiveDreamComponent() call path does not acquire the DreamManager lock and thus
+        // is safe to use.
+        final ComponentName activeDream = dreamManager.getActiveDreamComponent(false /* doze */);
+        if (activeDream != null && packageName.equals(activeDream.getPackageName())) {
+            return true;
+        }
+        final ComponentName activeDoze = dreamManager.getActiveDreamComponent(true /* doze */);
+        if (activeDoze != null && packageName.equals(activeDoze.getPackageName())) {
+            return true;
+        }
+        return false;
+    }
+
     private void enforceCallerIsDream(String callerPackageName) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            if (!ActivityRecord.canLaunchDreamActivity(callerPackageName)) {
+            if (!canLaunchDreamActivity(callerPackageName)) {
                 throw new SecurityException("The dream activity can be started only when the device"
                         + " is dreaming and only by the active dream package.");
             }
@@ -1427,7 +1450,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             a.packageName = process.mInfo.packageName;
             a.applicationInfo = process.mInfo;
-            a.processName = process.mInfo.processName;
+            a.processName = process.mName;
             a.uiOptions = process.mInfo.uiOptions;
             a.taskAffinity = "android:" + a.packageName + "/dream";
 
@@ -1508,41 +1531,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public IBinder requestStartActivityPermissionToken(IBinder delegatorToken) {
-        int callingUid = Binder.getCallingUid();
-        if (UserHandle.getAppId(callingUid) != SYSTEM_UID) {
-            throw new SecurityException("Only the system process can request a permission token, "
-                    + "received request from uid: " + callingUid);
-        }
-        IBinder permissionToken = new Binder();
-        synchronized (mGlobalLock) {
-            mStartActivitySources.put(permissionToken, delegatorToken);
-        }
-
-        Message expireMsg = PooledLambda.obtainMessage(
-                ActivityTaskManagerService::expireStartAsCallerTokenMsg, this, permissionToken);
-        mUiHandler.sendMessageDelayed(expireMsg, START_AS_CALLER_TOKEN_TIMEOUT_IMPL);
-
-        Message forgetMsg = PooledLambda.obtainMessage(
-                ActivityTaskManagerService::forgetStartAsCallerTokenMsg, this, permissionToken);
-        mUiHandler.sendMessageDelayed(forgetMsg, START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT);
-
-        return permissionToken;
-    }
-
-    @Override
     public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, IBinder permissionToken,
+            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions,
             boolean ignoreTargetSecurity, int userId) {
         // This is very dangerous -- it allows you to perform a start activity (including
         // permission grants) as any app that may launch one of your own activities.  So we only
         // allow this in two cases:
-        // 1)  The caller is an activity that is part of the core framework, and then only when it
-        //     is running as the system.
-        // 2)  The caller provides a valid permissionToken.  Permission tokens are one-time use and
-        //     can only be requested by a system activity, which may then delegate this call to
-        //     another app.
+        // 1)  The calling process holds the signature permission START_ACTIVITY_AS_CALLER
+        //
+        // 2) The calling process is an activity belonging to the package "android" which is
+        //    running as UID_SYSTEM or as the target UID (the activity which started the activity
+        //    calling this method).
+
         final ActivityRecord sourceRecord;
         final int targetUid;
         final String targetPackage;
@@ -1552,54 +1553,32 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (resultTo == null) {
                 throw new SecurityException("Must be called from an activity");
             }
-            final IBinder sourceToken;
-            if (permissionToken != null) {
-                // To even attempt to use a permissionToken, an app must also have this signature
-                // permission.
-                mAmInternal.enforceCallingPermission(
-                        android.Manifest.permission.START_ACTIVITY_AS_CALLER,
-                        "startActivityAsCaller");
-                // If called with a permissionToken, we want the sourceRecord from the delegator
-                // activity that requested this token.
-                sourceToken = mStartActivitySources.remove(permissionToken);
-                if (sourceToken == null) {
-                    // Invalid permissionToken, check if it recently expired.
-                    if (mExpiredStartAsCallerTokens.contains(permissionToken)) {
-                        throw new SecurityException("Called with expired permission token: "
-                                + permissionToken);
-                    } else {
-                        throw new SecurityException("Called with invalid permission token: "
-                                + permissionToken);
-                    }
-                }
-            } else {
-                // This method was called directly by the source.
-                sourceToken = resultTo;
-            }
 
-            sourceRecord = ActivityRecord.isInAnyTask(sourceToken);
+            sourceRecord = ActivityRecord.isInAnyTask(resultTo);
             if (sourceRecord == null) {
-                throw new SecurityException("Called with bad activity token: " + sourceToken);
+                throw new SecurityException("Called with bad activity token: " + resultTo);
             }
             if (sourceRecord.app == null) {
                 throw new SecurityException("Called without a process attached to activity");
             }
 
-            // Whether called directly or from a delegate, the source activity must be from the
-            // android package.
-            if (!sourceRecord.info.packageName.equals("android")) {
-                throw new SecurityException("Must be called from an activity that is "
-                        + "declared in the android package");
-            }
-
-            if (UserHandle.getAppId(sourceRecord.app.mUid) != SYSTEM_UID) {
-                // This is still okay, as long as this activity is running under the
-                // uid of the original calling activity.
-                if (sourceRecord.app.mUid != sourceRecord.launchedFromUid) {
-                    throw new SecurityException(
-                            "Calling activity in uid " + sourceRecord.app.mUid
-                                    + " must be system uid or original calling uid "
-                                    + sourceRecord.launchedFromUid);
+            if (checkCallingPermission(Manifest.permission.START_ACTIVITY_AS_CALLER)
+                    != PERMISSION_GRANTED) {
+                // Whether called directly or from a delegate, the source activity must be from the
+                // android package.
+                if (!sourceRecord.info.packageName.equals("android")) {
+                    throw new SecurityException("Must be called from an activity that is "
+                            + "declared in the android package");
+                }
+                if (UserHandle.getAppId(sourceRecord.app.mUid) != SYSTEM_UID) {
+                    // This is still okay, as long as this activity is running under the
+                    // uid of the original calling activity.
+                    if (sourceRecord.app.mUid != sourceRecord.launchedFromUid) {
+                        throw new SecurityException(
+                                "Calling activity in uid " + sourceRecord.app.mUid
+                                        + " must be system uid or original calling uid "
+                                        + sourceRecord.launchedFromUid);
+                    }
                 }
             }
             if (ignoreTargetSecurity) {
@@ -1690,6 +1669,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+        return LocalServices.getService(VoiceInteractionManagerInternal.class)
+                .getVoiceInteractorPackageName(callingVoiceInteractor);
+    }
+
+    @Override
     public int startAssistantActivity(String callingPackage, @NonNull String callingFeatureId,
             int callingPid, int callingUid, Intent intent, String resolvedType, Bundle bOptions,
             int userId) {
@@ -1764,6 +1749,53 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public int startActivityFromGameSession(IApplicationThread caller, String callingPackage,
+            String callingFeatureId, int callingPid, int callingUid, Intent intent, int taskId,
+            int userId) {
+        if (checkCallingPermission(MANAGE_GAME_ACTIVITY) != PERMISSION_GRANTED) {
+            final String msg = "Permission Denial: startActivityFromGameSession() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + MANAGE_GAME_ACTIVITY;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        assertPackageMatchesCallingUid(callingPackage);
+
+        final ActivityOptions activityOptions = ActivityOptions.makeBasic();
+        activityOptions.setLaunchTaskId(taskId);
+
+        userId = handleIncomingUser(callingPid, callingUid, userId, "startActivityFromGameSession");
+
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return getActivityStartController()
+                    .obtainStarter(intent, "startActivityFromGameSession")
+                    .setCaller(caller)
+                    .setCallingUid(callingUid)
+                    .setCallingPid(callingPid)
+                    .setCallingPackage(intent.getPackage())
+                    .setCallingFeatureId(callingFeatureId)
+                    .setUserId(userId)
+                    .setActivityOptions(activityOptions.toBundle())
+                    .setRealCallingUid(Binder.getCallingUid())
+                    .execute();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public BackNavigationInfo startBackNavigation(boolean requestAnimation) {
+        mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
+                "startBackNavigation()");
+        if (mBackNavigationController == null) {
+            return null;
+        }
+        return mBackNavigationController.startBackNavigation(mWindowManager, requestAnimation);
     }
 
     /**
@@ -2103,7 +2135,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityStarter starter = getActivityStartController().obtainStarter(
                 null /* intent */, "moveTaskToFront");
         if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
-                -1, callerApp, null, false, null)) {
+                -1, callerApp, null, false, null, null)) {
             if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }
@@ -2142,18 +2174,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Return true if callingUid is system, or packageName belongs to that callingUid.
      */
     private boolean isSameApp(int callingUid, @Nullable String packageName) {
-        try {
-            if (callingUid != 0 && callingUid != SYSTEM_UID) {
-                if (packageName == null) {
-                    return false;
-                }
-                final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.getUserId(callingUid));
-                return UserHandle.isSameApp(callingUid, uid);
-            }
-        } catch (RemoteException e) {
-            // Should not happen
+        if (callingUid != 0 && callingUid != SYSTEM_UID) {
+            return mPmInternal.isSameApp(packageName, callingUid, UserHandle.getUserId(callingUid));
         }
         return true;
     }
@@ -2546,12 +2568,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public List<IBinder> getAppTasks(String callingPackage) {
-        int callingUid = Binder.getCallingUid();
         assertPackageMatchesCallingUid(callingPackage);
+        return getAppTasks(callingPackage, Binder.getCallingUid());
+    }
+
+    private List<IBinder> getAppTasks(String pkgName, int uid) {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                return mRecentTasks.getAppTasksList(callingUid, callingPackage);
+                return mRecentTasks.getAppTasksList(uid, pkgName);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2806,7 +2831,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mH.sendMessage(msg);
             }
             try {
-                mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing);
+                mRootWindowContainer.forAllDisplays(displayContent -> {
+                    mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
+                            keyguardShowing, aodShowing);
+                });
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2913,7 +2941,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         LocalService.ActivityTokens tokens = null;
         try {
-            tokens = mInternal.getTopActivityForTask(taskId);
+            tokens = mInternal.getAttachedNonFinishingActivityForTask(taskId, null);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -2985,7 +3013,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * SecurityException} or returns false with a logcat message depending on whether the app
      * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
      */
-    private boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
+    boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
         final WindowProcessController process;
         synchronized (mGlobalLock) {
             process = mProcessMap.getProcess(pid);
@@ -3100,11 +3128,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         throw new SecurityException(msg);
     }
 
-    @VisibleForTesting
-    int checkGetTasksPermission(String permission, int pid, int uid) {
-        return checkPermission(permission, pid, uid);
-    }
-
     static int checkPermission(String permission, int pid, int uid) {
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -3118,16 +3141,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 permission, pid, uid, owningUid, exported);
     }
 
+    boolean isCallerRecents(int callingUid) {
+        return mRecentTasks.isCallerRecents(callingUid);
+    }
+
     boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
-        if (getRecentTasks().isCallerRecents(callingUid)) {
+        if (isCallerRecents(callingUid)) {
             // Always allow the recents component to get tasks
             return true;
         }
 
-        boolean allowed = checkGetTasksPermission(android.Manifest.permission.REAL_GET_TASKS,
+        boolean allowed = checkPermission(android.Manifest.permission.REAL_GET_TASKS,
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
         if (!allowed) {
-            if (checkGetTasksPermission(android.Manifest.permission.GET_TASKS,
+            if (checkPermission(android.Manifest.permission.GET_TASKS,
                     callingPid, callingUid) == PackageManager.PERMISSION_GRANTED) {
                 // Temporary compatibility: some existing apps on the system image may
                 // still be requesting the old permission and not switched to the new
@@ -3213,7 +3240,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mViSessionId++;
             }
             try {
-                activity.app.getThread().requestAssistContextExtras(activity.appToken, pae,
+                activity.app.getThread().requestAssistContextExtras(activity.token, pae,
                         requestType, mViSessionId, flags);
                 mPendingAssistExtras.add(pae);
                 mUiHandler.postDelayed(pae, timeout);
@@ -3304,7 +3331,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             userId = activity.mUserId;
         }
-        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId, false);
+        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId);
     }
 
     private void onLocalVoiceInteractionStartedLocked(IBinder activity,
@@ -3371,7 +3398,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mKeyguardController.keyguardGoingAway(flags);
+                // Keyguard asked us to clear the home task snapshot before going away, so do that.
+                if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
+                    mActivityClientController.invalidateHomeTaskSnapshot(null /* token */);
+                }
+
+                mRootWindowContainer.forAllDisplays(displayContent -> {
+                    mKeyguardController.keyguardGoingAway(displayContent.getDisplayId(), flags);
+                });
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -3436,16 +3470,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
                     return;
                 }
-                // Only update the saved args from the args that are set
                 r.setPictureInPictureParams(params);
-                final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
-                final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                mRootWindowContainer.moveActivityToPinnedRootTask(
-                        r, "enterPictureInPictureMode");
+                mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
                 final Task task = r.getTask();
-                task.setPictureInPictureAspectRatio(aspectRatio);
-                task.setPictureInPictureActions(actions);
-
                 // Continue the pausing process after entering pip.
                 if (task.getPausingActivity() == r) {
                     task.schedulePauseActivity(r, false /* userLeaving */,
@@ -3454,11 +3482,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         };
 
-        if (isKeyguardLocked()) {
+        if (r.isKeyguardLocked()) {
             // If the keyguard is showing or occluded, then try and dismiss it before
             // entering picture-in-picture (this will prompt the user to authenticate if the
             // device is currently locked).
-            mActivityClientController.dismissKeyguard(r.appToken, new KeyguardDismissCallback() {
+            mActivityClientController.dismissKeyguard(r.token, new KeyguardDismissCallback() {
                 @Override
                 public void onDismissSucceeded() {
                     mH.post(enterPipRunnable);
@@ -3564,25 +3592,41 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
-            return getTaskSnapshot(taskId, isLowResolution, true /* restoreFromDisk */);
+            final Task task;
+            synchronized (mGlobalLock) {
+                task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null) {
+                    Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                    return null;
+                }
+            }
+            // Don't call this while holding the lock as this operation might hit the disk.
+            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId, task.mUserId,
+                    true /* restoreFromDisk */, isLowResolution);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
-            boolean restoreFromDisk) {
-        final Task task;
-        synchronized (mGlobalLock) {
-            task = mRootWindowContainer.anyTaskForId(taskId,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (task == null) {
-                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
-                return null;
+    @Override
+    public TaskSnapshot takeTaskSnapshot(int taskId) {
+        mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeTaskSnapshot()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null || !task.isVisible()) {
+                    Slog.w(TAG, "takeTaskSnapshot: taskId=" + taskId + " not found or not visible");
+                    return null;
+                }
+                return mWindowManager.mTaskSnapshotController.captureTaskSnapshot(
+                        task, false /* snapshotHome */);
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        // Don't call this while holding the lock as this operation might hit the disk.
-        return task.getSnapshot(isLowResolution, restoreFromDisk);
     }
 
     /** Return the user id of the last resumed activity. */
@@ -3802,8 +3846,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    boolean isKeyguardLocked() {
-        return mKeyguardController.isKeyguardLocked();
+    boolean isKeyguardLocked(int displayId) {
+        return mKeyguardController.isKeyguardLocked(displayId);
     }
 
     /**
@@ -3824,11 +3868,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void onPictureInPictureStateChanged(PictureInPictureUiState pipState) {
         enforceTaskPermission("onPictureInPictureStateChanged");
-        final Task rootPinnedStask = mRootWindowContainer.getDefaultTaskDisplayArea()
+        final Task rootPinnedTask = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .getRootPinnedTask();
-        if (rootPinnedStask != null && rootPinnedStask.getTopMostActivity() != null) {
+        if (rootPinnedTask != null && rootPinnedTask.getTopMostActivity() != null) {
             mWindowManager.mAtmService.mActivityClientController.onPictureInPictureStateChanged(
-                    rootPinnedStask.getTopMostActivity(), pipState);
+                    rootPinnedTask.getTopMostActivity(), pipState);
         }
     }
 
@@ -3942,6 +3986,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         getActivityStartController().dump(pw, "", dumpPackage);
     }
 
+    /** Dumps installed packages having app-specific config. */
+    void dumpInstalledPackagesConfig(PrintWriter pw) {
+        mPackageConfigPersister.dump(pw, getCurrentUserId());
+    }
+
     /**
      * There are three things that cmd can be:
      * - a flattened component name that matches an existing activity
@@ -3959,12 +4008,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly) {
+            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (mGlobalLock) {
             activities = mRootWindowContainer.getDumpActivities(name, dumpVisibleRootTasksOnly,
-                    dumpFocusedRootTaskOnly);
+                    dumpFocusedRootTaskOnly, userId);
         }
 
         if (activities.size() <= 0) {
@@ -4032,7 +4081,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // to write to the file descriptor directly
             pw.flush();
             try (TransferPipe tp = new TransferPipe()) {
-                appThread.dumpActivity(tp.getWriteFd(), r.appToken, innerPrefix, args);
+                appThread.dumpActivity(tp.getWriteFd(), r.token, innerPrefix, args);
                 tp.go(fd);
             } catch (IOException e) {
                 pw.println(innerPrefix + "Failure while dumping the activity: " + e);
@@ -4360,15 +4409,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         Settings.System.putConfigurationForUser(resolver, config, userId);
     }
 
-    private void expireStartAsCallerTokenMsg(IBinder permissionToken) {
-        mStartActivitySources.remove(permissionToken);
-        mExpiredStartAsCallerTokens.add(permissionToken);
-    }
-
-    private void forgetStartAsCallerTokenMsg(IBinder permissionToken) {
-        mExpiredStartAsCallerTokens.remove(permissionToken);
-    }
-
     boolean isActivityStartsLoggingEnabled() {
         return mAmInternal.isActivityStartsLoggingEnabled();
     }
@@ -4412,6 +4452,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
+        if (userId != getCurrentUserId()) {
+            return;
+        }
+
         final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 FONT_SCALE, 1.0f, userId);
 
@@ -4428,6 +4472,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void updateFontWeightAdjustmentIfNeeded(@UserIdInt int userId) {
+        if (userId != getCurrentUserId()) {
+            return;
+        }
+
         final int fontWeightAdjustment =
                 Settings.Secure.getIntForUser(
                         mContext.getContentResolver(),
@@ -4633,6 +4681,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mTopApp = top != null ? top.app : null;
     }
 
+    /**
+     * The process state of previous activity is more important than the regular background to keep
+     * around in case the user wants to return to it.
+     */
+    void updatePreviousProcess(ActivityRecord stoppedActivity) {
+        if (stoppedActivity.app != null && mTopApp != null
+                // Don't replace the previous process if the stopped one is the top, e.g. sleeping.
+                && stoppedActivity.app != mTopApp
+                // The stopped activity must have been visible later than the previous.
+                && stoppedActivity.lastVisibleTime > mPreviousProcessVisibleTime
+                // Home has its own retained state, so don't let it occupy the previous.
+                && stoppedActivity.app != mHomeProcess) {
+            mPreviousProcess = stoppedActivity.app;
+            mPreviousProcessVisibleTime = stoppedActivity.lastVisibleTime;
+        }
+    }
+
     void updateActivityUsageStats(ActivityRecord activity, int event) {
         ComponentName taskRoot = null;
         final Task task = activity.getTask();
@@ -4645,7 +4710,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         final Message m = PooledLambda.obtainMessage(
                 ActivityManagerInternal::updateActivityUsageStats, mAmInternal,
-                activity.mActivityComponent, activity.mUserId, event, activity.appToken, taskRoot);
+                activity.mActivityComponent, activity.mUserId, event, activity.token, taskRoot);
         mH.sendMessage(m);
     }
 
@@ -5020,11 +5085,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * @return allowlist tag for a uid from mPendingTempAllowlist, null if not currently on
-     * the allowlist
+     * Saves the current activity manager state and includes the saved state in the next dump of
+     * activity manager.
      */
-    String getPendingTempAllowlistTagForUidLocked(int uid) {
-        return mPendingTempAllowlist.get(uid);
+    void saveANRState(String reason) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new FastPrintWriter(sw, false, 1024);
+        pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
+        if (reason != null) {
+            pw.println("  Reason: " + reason);
+        }
+        pw.println();
+        getActivityStartController().dump(pw, "  ", null);
+        pw.println();
+        pw.println("-------------------------------------------------------------------"
+                + "------------");
+        dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
+                true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
+                "" /* header */);
+        pw.println();
+        pw.close();
+
+        mLastANRState = sw.toString();
     }
 
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
@@ -5124,11 +5206,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * @param imeContainer The DisplayArea that contains the IME window.
      */
     void onImeWindowSetOnDisplayArea(final int pid, @NonNull final DisplayArea imeContainer) {
-        // Don't update process-level configuration for Multi-Client IME process since other
-        // IMEs on other displays will also receive this configuration change due to IME
-        // services use the same application config/context.
-        if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
-
         if (pid == MY_PID || pid < 0) {
             ProtoLog.w(WM_DEBUG_CONFIGURATION,
                     "Trying to update display configuration for system/invalid process.");
@@ -5169,6 +5246,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             wpc.setRunningRemoteAnimation(true /* running */);
             callingProc.addRemoteAnimationDelegate(wpc);
         }
+    }
+
+    /**
+     * Returns {@code true} if the process represented by the pid passed as argument is
+     * instrumented and the instrumentation source was granted with the permission also
+     * passed as argument.
+     */
+    boolean instrumentationSourceHasPermission(int pid, String permission) {
+        final WindowProcessController process;
+        synchronized (mGlobalLock) {
+            process = mProcessMap.getProcess(pid);
+        }
+        if (process == null || !process.isInstrumenting()) {
+            return false;
+        }
+        final int sourceUid = process.getInstrumentationSourceUid();
+        return checkPermission(permission, -1, sourceUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     final class H extends Handler {
@@ -5366,42 +5460,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     false /*validateIncomingUser*/);
         }
 
-        @Override
-        public void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
-            synchronized (mGlobalLock) {
-
-                // We might change the visibilities here, so prepare an empty app transition which
-                // might be overridden later if we actually change visibilities.
-                final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
-                if (dc == null) {
-                    return;
-                }
-                final boolean wasTransitionSet = dc.mAppTransition.isTransitionSet();
-                if (!wasTransitionSet) {
-                    dc.prepareAppTransition(TRANSIT_NONE);
-                }
-                mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-
-                // If there was a transition set already we don't want to interfere with it as we
-                // might be starting it too early.
-                if (!wasTransitionSet) {
-                    dc.executeAppTransition();
-                }
-            }
-            if (callback != null) {
-                callback.run();
-            }
-        }
-
-        @Override
-        public void notifyKeyguardTrustedChanged() {
-            synchronized (mGlobalLock) {
-                if (mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
-                    mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-                }
-            }
-        }
-
         /**
          * Called after virtual display Id is updated by
          * {@link com.android.server.vr.Vr2dDisplay} with a specific
@@ -5436,7 +5494,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isCallerRecents(int callingUid) {
-            return getRecentTasks().isCallerRecents(callingUid);
+            return ActivityTaskManagerService.this.isCallerRecents(callingUid);
         }
 
         @Override
@@ -5501,10 +5559,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.isGetTasksAllowed(
-                        caller, callingPid, callingUid);
-            }
+            return ActivityTaskManagerService.this.isGetTasksAllowed(
+                    caller, callingPid, callingUid);
         }
 
         @HotPath(caller = HotPath.PROCESS_CHANGE)
@@ -5563,13 +5619,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(
                         mHeavyWeightProcess);
-            }
-        }
-
-        @Override
-        public boolean isDreaming() {
-            synchronized (mGlobalLock) {
-                return mDreaming;
             }
         }
 
@@ -5671,19 +5720,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onPackageDataCleared(String name) {
+        public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
                 mAppWarnings.onPackageDataCleared(name);
+                mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
 
         @Override
-        public void onPackageUninstalled(String name) {
+        public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
                 mAppWarnings.onPackageUninstalled(name);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
-                mPackageConfigPersister.onPackageUninstall(name);
+                mPackageConfigPersister.onPackageUninstall(name, userId);
             }
         }
 
@@ -5747,7 +5797,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public ActivityTokens getTopActivityForTask(int taskId) {
+        public ActivityTokens getAttachedNonFinishingActivityForTask(int taskId,
+                IBinder token) {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
                         MATCH_ATTACHED_TASK_ONLY);
@@ -5756,19 +5807,32 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " Requested task not found");
                     return null;
                 }
-                final ActivityRecord activity = task.getTopNonFinishingActivity();
-                if (activity == null) {
-                    Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
-                            + " Requested activity not found");
+                final List<ActivityRecord> list = new ArrayList<>();
+                task.forAllActivities(r -> {
+                    if (!r.finishing) {
+                        list.add(r);
+                    }
+                });
+                if (list.size() <= 0) {
                     return null;
                 }
-                if (!activity.attachedToProcess()) {
-                    Slog.w(TAG, "getApplicationThreadForTopActivity failed: No process for "
-                            + activity);
-                    return null;
+                // pass null, get top Activity
+                if (token == null && list.get(0).attachedToProcess()) {
+                    ActivityRecord topRecord = list.get(0);
+                    return new ActivityTokens(topRecord.token, topRecord.assistToken,
+                            topRecord.app.getThread(), topRecord.shareableActivityToken,
+                            topRecord.getUid());
                 }
-                return new ActivityTokens(activity.appToken, activity.assistToken,
-                        activity.app.getThread(), activity.shareableActivityToken);
+                // find the expected Activity
+                for (int i = 0; i < list.size(); i++) {
+                    ActivityRecord record = list.get(i);
+                    if (record.shareableActivityToken == token && record.attachedToProcess()) {
+                        return new ActivityTokens(record.token, record.assistToken,
+                                record.app.getThread(), record.shareableActivityToken,
+                                record.getUid());
+                    }
+                }
+                return null;
             }
         }
 
@@ -5975,7 +6039,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean onForceStopPackage(String packageName, boolean doit, boolean evenPersistent,
                 int userId) {
             synchronized (mGlobalLock) {
-
+                // In case if setWindowManager hasn't been called yet when booting.
+                if (mRootWindowContainer == null) return false;
                 return mRootWindowContainer.finishDisabledPackageActivities(packageName,
                         null /* filterByClasses */, doit, evenPersistent, userId,
                         // Only remove the activities without process because the activities with
@@ -6032,7 +6097,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mAmInternal.shouldConfirmCredentials(userId)) {
-                        if (mKeyguardController.isKeyguardLocked()) {
+                        if (mKeyguardController.isKeyguardLocked(DEFAULT_DISPLAY)) {
                             // Showing launcher to avoid user entering credential twice.
                             startHomeActivity(currentUserId, "notifyLockedProfile");
                         }
@@ -6068,37 +6133,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // The output proto of "activity --proto activities"
                 mRootWindowContainer.dumpDebug(
                         proto, ROOT_WINDOW_CONTAINER, WindowTraceLogLevel.ALL);
-            }
-        }
-
-        @Override
-        public void saveANRState(String reason) {
-            synchronized (mGlobalLock) {
-                final StringWriter sw = new StringWriter();
-                final PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-                pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
-                if (reason != null) {
-                    pw.println("  Reason: " + reason);
-                }
-                pw.println();
-                getActivityStartController().dump(pw, "  ", null);
-                pw.println();
-                pw.println("-------------------------------------------------------------------"
-                        + "------------");
-                dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
-                        true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
-                        "" /* header */);
-                pw.println();
-                pw.close();
-
-                mLastANRState = sw.toString();
-            }
-        }
-
-        @Override
-        public void clearSavedANRState() {
-            synchronized (mGlobalLock) {
-                mLastANRState = null;
             }
         }
 
@@ -6316,9 +6350,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
                 String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-                boolean dumpFocusedRootTaskOnly) {
+                boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
             return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
-                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly);
+                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly, userId);
         }
 
         @Override
@@ -6397,20 +6431,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onUidProcStateChanged(int uid, int procState) {
             mActiveUids.onUidProcStateChanged(uid, procState);
-        }
-
-        @Override
-        public void onUidAddedToPendingTempAllowlist(int uid, String tag) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempAllowlist.put(uid, tag);
-            }
-        }
-
-        @Override
-        public void onUidRemovedFromPendingTempAllowlist(int uid) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempAllowlist.remove(uid);
-            }
         }
 
         @Override
@@ -6548,8 +6568,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
-                    true /* restoreFromDisk */);
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
         }
 
         @Override
@@ -6608,9 +6627,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void notifyWakingUp() {
-            // Start a transition for waking. This is needed for showWhenLocked activities.
-            getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
-                    null /* trigger */, mRootWindowContainer.getDefaultDisplay());
+            synchronized (mGlobalLock) {
+                // Start a transition for waking. This is needed for showWhenLocked activities.
+                getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
+                        null /* trigger */, mRootWindowContainer.getDefaultDisplay());
+            }
         }
 
         @Override
@@ -6627,6 +6648,79 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     + FIRST_ORDERED_ID + "," + LAST_ORDERED_ID + "]");
                 }
                 mActivityInterceptorCallbacks.put(id, callback);
+            }
+        }
+
+        @Override
+        public ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground() {
+            List<ActivityManager.RunningTaskInfo> runningTaskInfoList = getTasks(1);
+            ActivityManager.RunningTaskInfo runningTaskInfo;
+            if (runningTaskInfoList.size() > 0) {
+                runningTaskInfo = runningTaskInfoList.get(0);
+            } else {
+                Slog.i(TAG, "No running task found!");
+                return null;
+            }
+            // Get 2 most recent tasks.
+            List<ActivityManager.RecentTaskInfo> recentTaskInfoList =
+                    getRecentTasks(
+                                    2,
+                                    ActivityManager.RECENT_IGNORE_UNAVAILABLE,
+                                    mContext.getUserId())
+                            .getList();
+            ActivityManager.RecentTaskInfo targetTask = null;
+            for (ActivityManager.RecentTaskInfo info : recentTaskInfoList) {
+                // Find a recent task that is not the current running task on screen.
+                if (info.id != runningTaskInfo.id) {
+                    targetTask = info;
+                    break;
+                }
+            }
+            return targetTask;
+        }
+
+        @Override
+        public List<ActivityManager.AppTask> getAppTasks(String pkgName, int uid) {
+            ArrayList<ActivityManager.AppTask> tasks = new ArrayList<>();
+            List<IBinder> appTasks = ActivityTaskManagerService.this.getAppTasks(pkgName, uid);
+            int numAppTasks = appTasks.size();
+            for (int i = 0; i < numAppTasks; i++) {
+                tasks.add(new ActivityManager.AppTask(IAppTask.Stub.asInterface(appTasks.get(i))));
+            }
+            return tasks;
+        }
+
+        @Override
+        public int getTaskToShowPermissionDialogOn(String pkgName, int uid) {
+            synchronized (ActivityTaskManagerService.this.mGlobalLock) {
+                return ActivityTaskManagerService.this.mRootWindowContainer
+                        .getTaskToShowPermissionDialogOn(pkgName, uid);
+            }
+        }
+
+        @Override
+        public void restartTaskActivityProcessIfVisible(int taskId, String packageName) {
+            synchronized (ActivityTaskManagerService.this.mGlobalLock) {
+                final Task task =
+                        ActivityTaskManagerService.this.mRootWindowContainer
+                                .anyTaskForId(taskId, MATCH_ATTACHED_TASK_ONLY);
+                if (task == null) {
+                    Slog.w(TAG, "Failed to restart Activity. No task found for id: " + taskId);
+                    return;
+                }
+
+                final ActivityRecord activity = task.getActivity(activityRecord -> {
+                    return packageName.equals(activityRecord.packageName)
+                            && !activityRecord.finishing;
+                });
+
+                if (activity == null) {
+                    Slog.w(TAG, "Failed to restart Activity. No Activity found for package name: "
+                            + packageName + " in task: " + taskId);
+                    return;
+                }
+
+                activity.restartProcessIfVisible();
             }
         }
     }

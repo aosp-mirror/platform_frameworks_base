@@ -153,15 +153,6 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_flashlight_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_flashlight_changed_off);
-        }
-    }
-
-    @Override
     public void onFlashlightChanged(boolean enabled) {
         refreshState(enabled);
     }

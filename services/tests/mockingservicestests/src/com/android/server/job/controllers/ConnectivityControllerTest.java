@@ -23,6 +23,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -48,21 +49,21 @@ import static org.mockito.Mockito.verify;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
-import android.os.BatteryManager;
-import android.os.BatteryManagerInternal;
 import android.os.Build;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.telephony.CellSignalStrength;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyManager;
 import android.util.DataUnit;
 
 import com.android.server.LocalServices;
@@ -74,21 +75,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
+import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConnectivityControllerTest {
 
     @Mock
     private Context mContext;
-    @Mock
-    private BatteryManagerInternal mBatteryManagerInternal;
     @Mock
     private ConnectivityManager mConnManager;
     @Mock
@@ -114,9 +113,6 @@ public class ConnectivityControllerTest {
 
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(NetworkPolicyManagerInternal.class, mNetPolicyManagerInternal);
-
-        LocalServices.removeServiceForTest(BatteryManagerInternal.class);
-        LocalServices.addService(BatteryManagerInternal.class, mBatteryManagerInternal);
 
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
 
@@ -152,34 +148,64 @@ public class ConnectivityControllerTest {
                 .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
                         DataUnit.MEBIBYTES.toBytes(1))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        final JobInfo.Builder jobWithMinChunk = createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
+                .setMinimumNetworkChunkBytes(DataUnit.KIBIBYTES.toBytes(100))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 
-        final ArgumentCaptor<BroadcastReceiver> chargingCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
-                .thenReturn(false);
+        when(mService.isBatteryCharging()).thenReturn(false);
         final ConnectivityController controller = new ConnectivityController(mService);
-        verify(mContext).registerReceiver(chargingCaptor.capture(),
-                ArgumentMatchers.argThat(filter ->
-                        filter.hasAction(BatteryManager.ACTION_CHARGING)
-                                && filter.hasAction(BatteryManager.ACTION_DISCHARGING)));
         when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
-        final BroadcastReceiver chargingReceiver = chargingCaptor.getValue();
-        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
+        controller.onBatteryStateChangedLocked();
 
         // Slow network is too slow
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1)
+                        .setLinkDownstreamBandwidthKbps(1).build(), mConstants));
+        assertFalse(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1)
                         .setLinkDownstreamBandwidthKbps(1).build(), mConstants));
         // Slow downstream
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1024)
                         .setLinkDownstreamBandwidthKbps(1).build(), mConstants));
+        assertFalse(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1024)
+                        .setLinkDownstreamBandwidthKbps(1).build(), mConstants));
         // Slow upstream
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1)
                         .setLinkDownstreamBandwidthKbps(1024).build(), mConstants));
+        assertFalse(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1)
+                        .setLinkDownstreamBandwidthKbps(1024).build(), mConstants));
+        // Medium network is fine for min chunk
+        assertFalse(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(5)
+                        .setLinkDownstreamBandwidthKbps(5).build(), mConstants));
+        assertTrue(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(5)
+                        .setLinkDownstreamBandwidthKbps(5).build(), mConstants));
+        // Medium downstream
+        assertFalse(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1024)
+                        .setLinkDownstreamBandwidthKbps(5).build(), mConstants));
+        assertTrue(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1024)
+                        .setLinkDownstreamBandwidthKbps(5).build(), mConstants));
+        // Medium upstream
+        assertFalse(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(5)
+                        .setLinkDownstreamBandwidthKbps(1024).build(), mConstants));
+        assertTrue(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(5)
+                        .setLinkDownstreamBandwidthKbps(1024).build(), mConstants));
         // Fast network looks great
         assertTrue(controller.isSatisfied(createJobStatus(job), net,
+                createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1024)
+                        .setLinkDownstreamBandwidthKbps(1024).build(), mConstants));
+        assertTrue(controller.isSatisfied(createJobStatus(jobWithMinChunk), net,
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(1024)
                         .setLinkDownstreamBandwidthKbps(1024).build(), mConstants));
         // Slow network still good given time
@@ -187,17 +213,15 @@ public class ConnectivityControllerTest {
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(130)
                         .setLinkDownstreamBandwidthKbps(130).build(), mConstants));
         // Slow network is too slow, but device is charging and network is unmetered.
-        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
-                .thenReturn(true);
-        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_CHARGING));
+        when(mService.isBatteryCharging()).thenReturn(true);
+        controller.onBatteryStateChangedLocked();
         assertTrue(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().addCapability(NET_CAPABILITY_NOT_METERED)
                         .setLinkUpstreamBandwidthKbps(1).setLinkDownstreamBandwidthKbps(1).build(),
                 mConstants));
 
-        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
-                .thenReturn(false);
-        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
+        when(mService.isBatteryCharging()).thenReturn(false);
+        controller.onBatteryStateChangedLocked();
         when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(60_000L);
 
         // Slow network is too slow
@@ -221,9 +245,8 @@ public class ConnectivityControllerTest {
                 createCapabilitiesBuilder().setLinkUpstreamBandwidthKbps(130)
                         .setLinkDownstreamBandwidthKbps(130).build(), mConstants));
         // Slow network is too slow, but device is charging and network is unmetered.
-        when(mBatteryManagerInternal.isPowered(eq(BatteryManager.BATTERY_PLUGGED_ANY)))
-                .thenReturn(true);
-        chargingReceiver.onReceive(mContext, new Intent(BatteryManager.ACTION_CHARGING));
+        when(mService.isBatteryCharging()).thenReturn(true);
+        controller.onBatteryStateChangedLocked();
         assertTrue(controller.isSatisfied(createJobStatus(job), net,
                 createCapabilitiesBuilder().addCapability(NET_CAPABILITY_NOT_METERED)
                         .setLinkUpstreamBandwidthKbps(1).setLinkDownstreamBandwidthKbps(1).build(),
@@ -240,7 +263,6 @@ public class ConnectivityControllerTest {
 
         final ConnectivityController controller = new ConnectivityController(mService);
         when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
-
 
         // Suspended networks aren't usable.
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
@@ -286,6 +308,427 @@ public class ConnectivityControllerTest {
     }
 
     @Test
+    public void testStrongEnough_Cellular() {
+        mConstants.CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = 0;
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        final TelephonyManager telephonyManager = mock(TelephonyManager.class);
+        when(mContext.getSystemService(TelephonyManager.class))
+                .thenReturn(telephonyManager);
+        when(telephonyManager.createForSubscriptionId(anyInt()))
+                .thenReturn(telephonyManager);
+        final ArgumentCaptor<TelephonyCallback> signalStrengthsCaptor =
+                ArgumentCaptor.forClass(TelephonyCallback.class);
+        doNothing().when(telephonyManager)
+                .registerTelephonyCallback(any(), signalStrengthsCaptor.capture());
+        final ArgumentCaptor<NetworkCallback> callbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        doNothing().when(mConnManager).registerNetworkCallback(any(), callbackCaptor.capture());
+        final Network net = mock(Network.class);
+        final NetworkCapabilities caps = createCapabilitiesBuilder()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                .setSubscriptionIds(Set.of(7357))
+                .build();
+        final JobInfo.Builder baseJobBuilder = createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        final JobStatus jobExp = createJobStatus(baseJobBuilder.setExpedited(true));
+        final JobStatus jobHigh = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_HIGH));
+        final JobStatus jobDefEarly = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_DEFAULT),
+                now - 1000, now + 100_000);
+        final JobStatus jobDefLate = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_DEFAULT),
+                now - 100_000, now + 1000);
+        final JobStatus jobLow = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_LOW));
+        final JobStatus jobMin = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_MIN));
+        final JobStatus jobMinRunner = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_MIN));
+
+        final ConnectivityController controller = new ConnectivityController(mService);
+
+        final NetworkCallback generalCallback = callbackCaptor.getValue();
+
+        when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        answerNetwork(generalCallback, null, null, net, caps);
+
+        final TelephonyCallback.SignalStrengthsListener signalStrengthsListener =
+                (TelephonyCallback.SignalStrengthsListener) signalStrengthsCaptor.getValue();
+
+        controller.maybeStartTrackingJobLocked(jobMinRunner, null);
+        controller.prepareForExecutionLocked(jobMinRunner);
+
+        final SignalStrength signalStrength = mock(SignalStrength.class);
+
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_POOR);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(true);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(true);
+        when(mService.isBatteryNotLow()).thenReturn(true);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_MODERATE);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(true);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertFalse(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(true);
+        when(mService.isBatteryNotLow()).thenReturn(true);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_GOOD);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_GREAT);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+    }
+
+    @Test
+    public void testStrongEnough_Cellular_CheckDisabled() {
+        mConstants.CONN_USE_CELL_SIGNAL_STRENGTH = false;
+        mConstants.CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = 0;
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        final TelephonyManager telephonyManager = mock(TelephonyManager.class);
+        when(mContext.getSystemService(TelephonyManager.class))
+                .thenReturn(telephonyManager);
+        when(telephonyManager.createForSubscriptionId(anyInt()))
+                .thenReturn(telephonyManager);
+        final ArgumentCaptor<TelephonyCallback> signalStrengthsCaptor =
+                ArgumentCaptor.forClass(TelephonyCallback.class);
+        doNothing().when(telephonyManager)
+                .registerTelephonyCallback(any(), signalStrengthsCaptor.capture());
+        final ArgumentCaptor<NetworkCallback> callbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        doNothing().when(mConnManager).registerNetworkCallback(any(), callbackCaptor.capture());
+        final Network net = mock(Network.class);
+        final NetworkCapabilities caps = createCapabilitiesBuilder()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                .setSubscriptionIds(Set.of(7357))
+                .build();
+        final JobInfo.Builder baseJobBuilder = createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        final JobStatus jobExp = createJobStatus(baseJobBuilder.setExpedited(true));
+        final JobStatus jobHigh = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_HIGH));
+        final JobStatus jobDefEarly = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_DEFAULT),
+                now - 1000, now + 100_000);
+        final JobStatus jobDefLate = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_DEFAULT),
+                now - 100_000, now + 1000);
+        final JobStatus jobLow = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_LOW));
+        final JobStatus jobMin = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_MIN));
+        final JobStatus jobMinRunner = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_MIN));
+
+        final ConnectivityController controller = new ConnectivityController(mService);
+
+        final NetworkCallback generalCallback = callbackCaptor.getValue();
+
+        when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        answerNetwork(generalCallback, null, null, net, caps);
+
+        final TelephonyCallback.SignalStrengthsListener signalStrengthsListener =
+                (TelephonyCallback.SignalStrengthsListener) signalStrengthsCaptor.getValue();
+
+        controller.maybeStartTrackingJobLocked(jobMinRunner, null);
+        controller.prepareForExecutionLocked(jobMinRunner);
+
+        final SignalStrength signalStrength = mock(SignalStrength.class);
+
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_POOR);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(true);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(true);
+        when(mService.isBatteryNotLow()).thenReturn(true);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_MODERATE);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(true);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(true);
+        when(mService.isBatteryNotLow()).thenReturn(true);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_GOOD);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_GREAT);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+    }
+
+    @Test
+    public void testStrongEnough_Cellular_VPN() {
+        mConstants.CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = 0;
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        final TelephonyManager telephonyManager = mock(TelephonyManager.class);
+        when(mContext.getSystemService(TelephonyManager.class))
+                .thenReturn(telephonyManager);
+        when(telephonyManager.createForSubscriptionId(anyInt()))
+                .thenReturn(telephonyManager);
+        final ArgumentCaptor<TelephonyCallback> signalStrengthsCaptor =
+                ArgumentCaptor.forClass(TelephonyCallback.class);
+        doNothing().when(telephonyManager)
+                .registerTelephonyCallback(any(), signalStrengthsCaptor.capture());
+        final ArgumentCaptor<NetworkCallback> callbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        doNothing().when(mConnManager).registerNetworkCallback(any(), callbackCaptor.capture());
+        final Network net = mock(Network.class);
+        final NetworkCapabilities caps = createCapabilitiesBuilder()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addTransportType(TRANSPORT_VPN)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                .setSubscriptionIds(Set.of(7357))
+                .build();
+        final JobInfo.Builder baseJobBuilder = createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        final JobStatus jobExp = createJobStatus(baseJobBuilder.setExpedited(true));
+        final JobStatus jobHigh = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_HIGH));
+        final JobStatus jobDefEarly = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_DEFAULT),
+                now - 1000, now + 100_000);
+        final JobStatus jobDefLate = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_DEFAULT),
+                now - 100_000, now + 1000);
+        final JobStatus jobLow = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_LOW));
+        final JobStatus jobMin = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_MIN));
+        final JobStatus jobMinRunner = createJobStatus(
+                baseJobBuilder.setExpedited(false).setPriority(JobInfo.PRIORITY_MIN));
+
+        final ConnectivityController controller = new ConnectivityController(mService);
+
+        final NetworkCallback generalCallback = callbackCaptor.getValue();
+
+        when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
+
+        when(mService.isBatteryCharging()).thenReturn(false);
+        when(mService.isBatteryNotLow()).thenReturn(false);
+        answerNetwork(generalCallback, null, null, net, caps);
+
+        final TelephonyCallback.SignalStrengthsListener signalStrengthsListener =
+                (TelephonyCallback.SignalStrengthsListener) signalStrengthsCaptor.getValue();
+
+        controller.maybeStartTrackingJobLocked(jobMinRunner, null);
+        controller.prepareForExecutionLocked(jobMinRunner);
+
+        final SignalStrength signalStrength = mock(SignalStrength.class);
+
+        when(signalStrength.getLevel()).thenReturn(
+                CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        signalStrengthsListener.onSignalStrengthsChanged(signalStrength);
+
+        // We don't restrict data via VPN over cellular.
+        assertTrue(controller.isSatisfied(jobExp, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobHigh, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefEarly, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobDefLate, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobLow, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMin, net, caps, mConstants));
+        assertTrue(controller.isSatisfied(jobMinRunner, net, caps, mConstants));
+    }
+
+    @Test
     public void testRelaxed() throws Exception {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         final JobInfo.Builder job = createJob()
@@ -299,7 +742,16 @@ public class ConnectivityControllerTest {
         final JobStatus earlyPrefetch = createJobStatus(job, now - 1000, now + 2000);
         final JobStatus latePrefetch = createJobStatus(job, now - 2000, now + 1000);
 
+        job.setEstimatedNetworkBytes(JobInfo.NETWORK_BYTES_UNKNOWN, DataUnit.MEBIBYTES.toBytes(1));
+        final JobStatus latePrefetchUnknownDown = createJobStatus(job, now - 2000, now + 1000);
+        job.setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), JobInfo.NETWORK_BYTES_UNKNOWN);
+        final JobStatus latePrefetchUnknownUp = createJobStatus(job, now - 2000, now + 1000);
+
         final ConnectivityController controller = new ConnectivityController(mService);
+
+        when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
+                any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
+                .thenReturn(0L);
 
         // Unmetered network is whenever
         {
@@ -312,9 +764,11 @@ public class ConnectivityControllerTest {
             assertTrue(controller.isSatisfied(late, net, caps, mConstants));
             assertTrue(controller.isSatisfied(earlyPrefetch, net, caps, mConstants));
             assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
         }
 
-        // Metered network is only when prefetching and late
+        // Metered network is only when prefetching, late, and in opportunistic quota
         {
             final Network net = mock(Network.class);
             final NetworkCapabilities caps = createCapabilitiesBuilder()
@@ -323,7 +777,17 @@ public class ConnectivityControllerTest {
             assertFalse(controller.isSatisfied(early, net, caps, mConstants));
             assertFalse(controller.isSatisfied(late, net, caps, mConstants));
             assertFalse(controller.isSatisfied(earlyPrefetch, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
+
+            when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
+                    any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
+                    .thenReturn(9876543210L);
             assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            // Only relax restrictions when we at least know the estimated download bytes.
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertTrue(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
         }
     }
 

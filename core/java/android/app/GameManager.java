@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
@@ -108,11 +109,37 @@ public final class GameManager {
      *
      * @hide
      */
+    @TestApi
     @UserHandleAware
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int getGameMode(@NonNull String packageName) {
         try {
             return mService.getGameMode(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the {@link GameModeInfo} associated with the game associated with
+     * the given {@code packageName}. If the given package is not a game, {@code null} is
+     * always returned.
+     * <p>
+     * An application can use <code>android:isGame="true"</code> or
+     * <code>android:appCategory="game"</code> to indicate that the application is a game.
+     * If the manifest doesn't define a category, the category can also be
+     * provided by the installer via
+     * {@link android.content.pm.PackageManager#setApplicationCategoryHint(String, int)}.
+     * <p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public @Nullable GameModeInfo getGameModeInfo(@NonNull String packageName) {
+        try {
+            return mService.getGameModeInfo(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -125,7 +152,7 @@ public final class GameManager {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     @UserHandleAware
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public void setGameMode(@NonNull String packageName, @GameMode int gameMode) {
@@ -153,17 +180,63 @@ public final class GameManager {
     }
 
     /**
-     * Returns if ANGLE is enabled for a given package.
+     * Returns if ANGLE is enabled for a given package and user ID.
      * <p>
+     * ANGLE (Almost Native Graphics Layer Engine) can translate OpenGL ES commands to Vulkan
+     * commands. Enabling ANGLE may improve the performance and/or reduce the power consumption of
+     * applications.
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
      *
      * @hide
      */
-    @UserHandleAware
+    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode boolean isAngleEnabled(@NonNull String packageName) {
+    public boolean isAngleEnabled(@NonNull String packageName) {
         try {
-            return mService.getAngleEnabled(packageName, mContext.getUserId());
+            return mService.isAngleEnabled(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set up the automatic power boost if appropriate.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void notifyGraphicsEnvironmentSetup() {
+        try {
+            mService.notifyGraphicsEnvironmentSetup(
+                    mContext.getPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by games to communicate the current state to the platform.
+     * @param gameState An object set to the current state.
+     */
+    public void setGameState(@NonNull GameState gameState) {
+        try {
+            mService.setGameState(mContext.getPackageName(), gameState, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Sets the game service provider to the given package name for test only.
+     *
+     * <p>Passing in {@code null} will clear a previously set value.
+     * @hide
+     */
+    @TestApi
+    public void setGameServiceProvider(@Nullable String packageName) {
+        try {
+            mService.setGameServiceProvider(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

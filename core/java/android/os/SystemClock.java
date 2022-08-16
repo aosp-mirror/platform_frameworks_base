@@ -104,6 +104,8 @@ import java.time.ZoneOffset;
 public final class SystemClock {
     private static final String TAG = "SystemClock";
 
+    private static volatile IAlarmManager sIAlarmManager;
+
     /**
      * This class is uninstantiable.
      */
@@ -151,8 +153,7 @@ public final class SystemClock {
      * @return if the clock was successfully set to the specified time.
      */
     public static boolean setCurrentTimeMillis(long millis) {
-        final IAlarmManager mgr = IAlarmManager.Stub
-                .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
+        final IAlarmManager mgr = getIAlarmManager();
         if (mgr == null) {
             Slog.e(TAG, "Unable to set RTC: mgr == null");
             return false;
@@ -280,8 +281,7 @@ public final class SystemClock {
      * @hide
      */
     public static long currentNetworkTimeMillis() {
-        final IAlarmManager mgr = IAlarmManager.Stub
-                .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
+        final IAlarmManager mgr = getIAlarmManager();
         if (mgr != null) {
             try {
                 return mgr.currentNetworkTimeMillis();
@@ -294,6 +294,14 @@ public final class SystemClock {
         } else {
             throw new RuntimeException(new DeadSystemException());
         }
+    }
+
+    private static IAlarmManager getIAlarmManager() {
+        if (sIAlarmManager == null) {
+            sIAlarmManager = IAlarmManager.Stub
+                    .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
+        }
+        return sIAlarmManager;
     }
 
     /**

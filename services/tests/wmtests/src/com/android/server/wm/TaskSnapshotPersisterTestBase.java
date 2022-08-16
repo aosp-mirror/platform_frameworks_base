@@ -92,7 +92,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     @Before
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
-        mTestUserId = um.getUserHandle();
+        mTestUserId = um.getProcessUserId();
 
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
@@ -131,8 +131,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot() {
-        return new TaskSnapshotBuilder()
-                .build();
+        return new TaskSnapshotBuilder().setTopActivityComponent(getUniqueComponentName()).build();
     }
 
     protected static void assertTrueForFiles(File[] files, Predicate<File> predicate,
@@ -155,6 +154,8 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         private int mSystemUiVisibility = 0;
         private int mRotation = Surface.ROTATION_0;
+        private int mWidth = SNAPSHOT_WIDTH;
+        private int mHeight = SNAPSHOT_HEIGHT;
         private ComponentName mTopActivityComponent = new ComponentName("", "");
 
         TaskSnapshotBuilder() {
@@ -195,12 +196,18 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return this;
         }
 
+        TaskSnapshotBuilder setTaskSize(int width, int height) {
+            mWidth = width;
+            mHeight = height;
+            return this;
+        }
+
         TaskSnapshot build() {
             // To satisfy existing tests, ensure the graphics buffer is always 100x100, and
             // compute the ize of the task according to mScaleFraction.
-            Point taskSize = new Point((int) (SNAPSHOT_WIDTH / mScaleFraction),
-                    (int) (SNAPSHOT_HEIGHT / mScaleFraction));
-            final GraphicBuffer buffer = GraphicBuffer.create(SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT,
+            Point taskSize = new Point((int) (mWidth / mScaleFraction),
+                    (int) (mHeight / mScaleFraction));
+            final GraphicBuffer buffer = GraphicBuffer.create(mWidth, mHeight,
                     PixelFormat.RGBA_8888,
                     USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
             Canvas c = buffer.lockCanvas();

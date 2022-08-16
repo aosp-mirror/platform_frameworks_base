@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"කළමනා කරන්න"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"බුබුල ඉවත දමා ඇත."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"මෙම යෙදුම යළි ඇරඹීමට සහ පූර්ණ තිරයට යාමට තට්ටු කරන්න."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"කැමරා ගැටලුද?\nයළි සවි කිරීමට තට්ටු කරන්න"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"එය විසඳුවේ නැතිද?\nප්‍රතිවර්තනය කිරීමට තට්ටු කරන්න"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"කැමරා ගැටලු නොමැතිද? ඉවත දැමීමට තට්ටු කරන්න"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"සමහර යෙදුම් ප්‍රතිමූර්තිය තුළ හොඳින්ම ක්‍රියා කරයි"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ඔබගේ ඉඩෙන් උපරිම ප්‍රයෝජන ගැනීමට මෙම විකල්පවලින් එකක් උත්සාහ කරන්න"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"සම්පූර්ණ තිරයට යාමට ඔබගේ උපාංගය කරකවන්න"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"එය නැවත ස්ථානගත කිරීමට යෙදුමකට යාබදව දෙවරක් තට්ටු කරන්න"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"තේරුණා"</string>
 </resources>

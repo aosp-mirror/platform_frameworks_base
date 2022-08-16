@@ -96,8 +96,11 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.hardware.gnss-V2-java-source",
+        ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.security.keymint-V2-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
+        ":android.hardware.tv.tuner-V1-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
         ":android.security.legacykeystore-java-source",
@@ -117,10 +120,10 @@ filegroup {
         ":installd_aidl",
         ":libaudioclient_aidl",
         ":libbinder_aidl",
-        ":libbluetooth-binder-aidl",
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
+        ":logd_aidl",
         ":resourcemanager_aidl",
         ":storaged_aidl",
         ":vold_aidl",
@@ -198,6 +201,7 @@ java_library {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.contexthub-V1.1-java",
         "android.hardware.contexthub-V1.2-java",
+        "android.hardware.contexthub-V1-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
@@ -219,8 +223,6 @@ java_library {
         "android.hardware.thermal-V1.1-java",
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb-V1.2-java-constants",
@@ -258,7 +260,6 @@ java_defaults {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
-        ":framework-bluetooth-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
         "core/java/**/*.logtags",
         ":apex-info-list",
     ],
@@ -270,8 +271,10 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     dxflags: [
@@ -286,8 +289,12 @@ java_defaults {
         "error_prone_android_framework",
     ],
     required: [
+        // TODO(b/120066492): remove default_television.xml when the build system
+        // propagates "required" properly.
+        "default_television.xml",
         "framework-platform-compat-config",
-        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
+        // TODO(b/120066492): remove gps_debug and protolog.conf.json when the build
+        // system propagates "required" properly.
         "gps_debug.conf",
         "icu4j-platform-compat-config",
         "protolog.conf.json.gz",
@@ -306,6 +313,9 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        "android.hardware.common.fmq-V1-java",
+        // TODO(b/184162091)
+        "android.hardware.soundtrigger3-V1-java",
         "bouncycastle-repackaged-unbundled",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
@@ -314,10 +324,12 @@ java_defaults {
         "av-types-aidl-java",
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
+        "modules-utils-build",
         "modules-utils-preconditions",
         "modules-utils-statemachine",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
+        "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
         "audiopolicy-types-aidl-java",
@@ -334,12 +346,14 @@ java_library {
     visibility: [
         "//frameworks/base",
         // TODO(b/147128803) remove the below lines
-        "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/packages/Tethering/tests/unit",
         "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
+    lint: {
+        extra_check_modules: ["AndroidFrameworkLintChecker"],
+    },
     errorprone: {
         javacflags: [
             "-Xep:AndroidFrameworkBinderIdentity:ERROR",
@@ -371,7 +385,6 @@ java_library {
     static_libs: [
         "app-compat-annotations",
         "framework-minus-apex",
-        "framework-appsearch.impl", // TODO(b/146218515): should be removed
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
@@ -518,7 +531,10 @@ stubs_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
@@ -533,8 +549,6 @@ stubs_defaults {
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.0-java-constants",
-        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb.gadget-V1.0-java",
@@ -557,6 +571,7 @@ stubs_defaults {
     name: "module-classpath-stubs-defaults",
     aidl: {
         include_dirs: [
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
         ],

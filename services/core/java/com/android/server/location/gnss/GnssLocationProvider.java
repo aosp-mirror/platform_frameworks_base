@@ -17,11 +17,14 @@
 package com.android.server.location.gnss;
 
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.location.provider.ProviderProperties.ACCURACY_FINE;
 import static android.location.provider.ProviderProperties.POWER_USAGE_HIGH;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.gnss.hal.GnssNative.AGPS_REF_LOCATION_TYPE_GSM_CELLID;
+import static com.android.server.location.gnss.hal.GnssNative.AGPS_REF_LOCATION_TYPE_LTE_CELLID;
+import static com.android.server.location.gnss.hal.GnssNative.AGPS_REF_LOCATION_TYPE_NR_CELLID;
 import static com.android.server.location.gnss.hal.GnssNative.AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
 import static com.android.server.location.gnss.hal.GnssNative.AGPS_SETID_TYPE_IMSI;
 import static com.android.server.location.gnss.hal.GnssNative.AGPS_SETID_TYPE_MSISDN;
@@ -55,6 +58,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.location.GnssCapabilities;
 import android.location.GnssStatus;
@@ -67,12 +71,9 @@ import android.location.LocationResult;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
-import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -84,9 +85,18 @@ import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
+import android.telephony.CellIdentity;
+import android.telephony.CellIdentityGsm;
+import android.telephony.CellIdentityLte;
+import android.telephony.CellIdentityNr;
+import android.telephony.CellIdentityWcdma;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoNr;
+import android.telephony.CellInfoWcdma;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -110,10 +120,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
@@ -143,13 +155,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
-
-    // handler messages
-    private static final int INJECT_NTP_TIME = 5;
-    private static final int DOWNLOAD_PSDS_DATA = 6;
-    private static final int REQUEST_LOCATION = 16;
-    private static final int REPORT_LOCATION = 17; // HAL reports location
-    private static final int REPORT_SV_STATUS = 18; // HAL reports SV status
 
     // TCP/IP constants.
     // Valid TCP/UDP port range is (0, 65535].
@@ -252,6 +257,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @GuardedBy("mLock")
     private boolean mBatchingEnabled;
 
+    @GuardedBy("mLock")
+    private boolean mAutomotiveSuspend;
+
     private boolean mShutdown;
     private boolean mStarted;
     private boolean mBatchingStarted;
@@ -275,6 +283,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // true if PSDS is supported
     private boolean mSupportsPsds;
+    private final Object mPsdsPeriodicDownloadToken = new Object();
     @GuardedBy("mLock")
     private final PowerManager.WakeLock mDownloadPsdsWakeLock;
     @GuardedBy("mLock")
@@ -413,7 +422,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 BatteryStats.SERVICE_NAME));
 
         // Construct internal handler
-        mHandler = new ProviderHandler(FgThread.getHandler().getLooper());
+        mHandler = FgThread.getHandler();
 
         // Load GPS configuration and register listeners in the background:
         // some operations, such as opening files and registering broadcast receivers, can take a
@@ -541,7 +550,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (mSupportsPsds) {
             synchronized (mLock) {
                 for (int psdsType : mPendingDownloadPsdsTypes) {
-                    sendMessage(DOWNLOAD_PSDS_DATA, psdsType, null);
+                    postWithWakeLockHeld(() -> handleDownloadPsdsData(psdsType));
                 }
                 mPendingDownloadPsdsTypes.clear();
             }
@@ -645,18 +654,30 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
         }
         Log.i(TAG, "WakeLock acquired by handleDownloadPsdsData()");
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> {
             GnssPsdsDownloader psdsDownloader = new GnssPsdsDownloader(
                     mGnssConfiguration.getProperties());
             byte[] data = psdsDownloader.downloadPsdsData(psdsType);
             if (data != null) {
                 mHandler.post(() -> {
+                    FrameworkStatsLog.write(FrameworkStatsLog.GNSS_PSDS_DOWNLOAD_REPORTED,
+                            psdsType);
                     if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
                     mGnssNative.injectPsdsData(data, data.length, psdsType);
                     synchronized (mLock) {
                         mPsdsBackOff.reset();
                     }
                 });
+                PackageManager pm = mContext.getPackageManager();
+                if (pm != null && pm.hasSystemFeature(FEATURE_WATCH)
+                        && psdsType == GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX
+                        && mGnssConfiguration.isPsdsPeriodicDownloadEnabled()) {
+                    if (DEBUG) Log.d(TAG, "scheduling next long term Psds download");
+                    mHandler.removeCallbacksAndMessages(mPsdsPeriodicDownloadToken);
+                    mHandler.postDelayed(() -> handleDownloadPsdsData(psdsType),
+                            mPsdsPeriodicDownloadToken,
+                            GnssPsdsDownloader.PSDS_INTERVAL);
+                }
             } else {
                 // Try download PSDS data again later according to backoff time.
                 // Since this is delayed and not urgent, we do not hold a wake lock here.
@@ -665,9 +686,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 synchronized (mLock) {
                     backoffMillis = mPsdsBackOff.nextBackoffMillis();
                 }
-                mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(DOWNLOAD_PSDS_DATA, psdsType, 0, null),
-                        backoffMillis);
+                mHandler.postDelayed(() -> handleDownloadPsdsData(psdsType), backoffMillis);
             }
 
             // Release wake lock held by task, synchronize on mLock in case multiple
@@ -732,6 +751,27 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
+    /**
+     * Set whether the GnssLocationProvider is suspended. This method was added to help support
+     * power management use cases on automotive devices.
+     */
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        synchronized (mLock) {
+            mAutomotiveSuspend = suspended;
+        }
+        mHandler.post(this::updateEnabled);
+    }
+
+    /**
+     * Return whether the GnssLocationProvider is suspended or not. This method was added to help
+     * support power management use cases on automotive devices.
+     */
+    public boolean isAutomotiveGnssSuspended() {
+        synchronized (mLock) {
+            return mAutomotiveSuspend && !mGpsEnabled;
+        }
+    }
+
     private void handleEnable() {
         if (DEBUG) Log.d(TAG, "handleEnable");
 
@@ -786,6 +826,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         enabled |= (mProviderRequest != null
                 && mProviderRequest.isActive()
                 && mProviderRequest.isBypass());
+
+        // .. disable if automotive device needs to go into suspend
+        synchronized (mLock) {
+            enabled &= !mAutomotiveSuspend;
+        }
 
         // ... and, finally, disable anyway, if device is being shut down
         enabled &= !mShutdown;
@@ -984,8 +1029,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             requestUtcTime();
         } else if ("force_psds_injection".equals(command)) {
             if (mSupportsPsds) {
-                sendMessage(DOWNLOAD_PSDS_DATA, GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX,
-                        null);
+                postWithWakeLockHeld(() -> handleDownloadPsdsData(
+                        GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX));
             }
         } else if ("request_power_stats".equals(command)) {
             mGnssNative.requestPowerStats();
@@ -1104,7 +1149,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) {
             Log.d(TAG, "startBatching " + mFixInterval + " " + batchLengthMs);
         }
-        if (mGnssNative.startBatch(MILLISECONDS.toNanos(mFixInterval), true)) {
+        if (mGnssNative.startBatch(MILLISECONDS.toNanos(mFixInterval), 0, true)) {
             mBatchingStarted = true;
 
             if (batchSize < getBatchSize()) {
@@ -1141,6 +1186,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mAlarmManager.cancel(mBatchingAlarm);
                 mBatchingAlarm = null;
             }
+            mGnssNative.flushBatch();
             mGnssNative.stopBatch();
             mBatchingStarted = false;
         }
@@ -1351,32 +1397,130 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private void requestUtcTime() {
         if (DEBUG) Log.d(TAG, "utcTimeRequest");
-        sendMessage(INJECT_NTP_TIME, 0, null);
+        postWithWakeLockHeld(mNtpTimeHelper::retrieveAndInjectNtpTime);
+    }
+
+
+    private static int getCellType(CellInfo ci) {
+        if (ci instanceof CellInfoGsm) {
+            return CellInfo.TYPE_GSM;
+        } else if (ci instanceof CellInfoWcdma) {
+            return CellInfo.TYPE_WCDMA;
+        } else if (ci instanceof CellInfoLte) {
+            return CellInfo.TYPE_LTE;
+        } else if (ci instanceof CellInfoNr) {
+            return CellInfo.TYPE_NR;
+        }
+        return CellInfo.TYPE_UNKNOWN;
+    }
+
+    /**
+     * Extract the CID/CI for GSM/WCDMA/LTE/NR
+     *
+     * @return the cell ID or -1 if invalid
+     */
+    private static long getCidFromCellIdentity(CellIdentity id) {
+        if (id == null) return -1;
+        long cid = -1;
+        switch(id.getType()) {
+            case CellInfo.TYPE_GSM: cid = ((CellIdentityGsm) id).getCid(); break;
+            case CellInfo.TYPE_WCDMA: cid = ((CellIdentityWcdma) id).getCid(); break;
+            case CellInfo.TYPE_LTE: cid = ((CellIdentityLte) id).getCi(); break;
+            case CellInfo.TYPE_NR: cid = ((CellIdentityNr) id).getNci(); break;
+            default: break;
+        }
+        // If the CID is unreported
+        if (cid == (id.getType() == CellInfo.TYPE_NR
+                ? CellInfo.UNAVAILABLE_LONG : CellInfo.UNAVAILABLE)) {
+            cid = -1;
+        }
+
+        return cid;
+    }
+
+    private void setRefLocation(int type, CellIdentity ci) {
+        String mcc_str = ci.getMccString();
+        String mnc_str = ci.getMncString();
+        int mcc = mcc_str != null ? Integer.parseInt(mcc_str) : CellInfo.UNAVAILABLE;
+        int mnc = mnc_str != null ? Integer.parseInt(mnc_str) : CellInfo.UNAVAILABLE;
+        int lac = CellInfo.UNAVAILABLE;
+        int tac = CellInfo.UNAVAILABLE;
+        int pcid = CellInfo.UNAVAILABLE;
+        int arfcn = CellInfo.UNAVAILABLE;
+        long cid = CellInfo.UNAVAILABLE_LONG;
+
+        switch (type) {
+            case AGPS_REF_LOCATION_TYPE_GSM_CELLID:
+                CellIdentityGsm cig = (CellIdentityGsm) ci;
+                cid = cig.getCid();
+                lac = cig.getLac();
+                break;
+            case AGPS_REF_LOCATION_TYPE_UMTS_CELLID:
+                CellIdentityWcdma ciw = (CellIdentityWcdma) ci;
+                cid = ciw.getCid();
+                lac = ciw.getLac();
+                break;
+            case AGPS_REF_LOCATION_TYPE_LTE_CELLID:
+                CellIdentityLte cil = (CellIdentityLte) ci;
+                cid = cil.getCi();
+                tac = cil.getTac();
+                pcid = cil.getPci();
+                break;
+            case AGPS_REF_LOCATION_TYPE_NR_CELLID:
+                CellIdentityNr cin = (CellIdentityNr) ci;
+                cid = cin.getNci();
+                tac = cin.getTac();
+                pcid = cin.getPci();
+                arfcn = cin.getNrarfcn();
+                break;
+            default:
+        }
+
+        mGnssNative.setAgpsReferenceLocationCellId(
+                type, mcc, mnc, lac, cid, tac, pcid, arfcn);
     }
 
     private void requestRefLocation() {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
+
         final int phoneType = phone.getPhoneType();
         if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
-            GsmCellLocation gsm_cell = (GsmCellLocation) phone.getCellLocation();
-            if ((gsm_cell != null) && (phone.getNetworkOperator() != null)
-                    && (phone.getNetworkOperator().length() > 3)) {
-                int type;
-                int mcc = Integer.parseInt(phone.getNetworkOperator().substring(0, 3));
-                int mnc = Integer.parseInt(phone.getNetworkOperator().substring(3));
-                int networkType = phone.getNetworkType();
-                if (networkType == TelephonyManager.NETWORK_TYPE_UMTS
-                        || networkType == TelephonyManager.NETWORK_TYPE_HSDPA
-                        || networkType == TelephonyManager.NETWORK_TYPE_HSUPA
-                        || networkType == TelephonyManager.NETWORK_TYPE_HSPA
-                        || networkType == TelephonyManager.NETWORK_TYPE_HSPAP) {
-                    type = AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
-                } else {
-                    type = AGPS_REF_LOCATION_TYPE_GSM_CELLID;
+
+            List<CellInfo> cil = phone.getAllCellInfo();
+            if (cil != null) {
+                HashMap<Integer, CellIdentity> cellIdentityMap = new HashMap<>();
+                cil.sort(Comparator.comparingInt(
+                        (CellInfo ci) -> ci.getCellSignalStrength().getAsuLevel()).reversed());
+
+                for (CellInfo ci : cil) {
+                    int status = ci.getCellConnectionStatus();
+                    if (status == CellInfo.CONNECTION_PRIMARY_SERVING
+                            || status == CellInfo.CONNECTION_SECONDARY_SERVING) {
+                        CellIdentity c = ci.getCellIdentity();
+                        int t = getCellType(ci);
+                        if (getCidFromCellIdentity(c) != -1
+                                && !cellIdentityMap.containsKey(t)) {
+                            cellIdentityMap.put(t, c);
+                        }
+                    }
                 }
-                mGnssNative.setAgpsReferenceLocationCellId(type, mcc, mnc, gsm_cell.getLac(),
-                        gsm_cell.getCid());
+
+                if (cellIdentityMap.containsKey(CellInfo.TYPE_GSM)) {
+                    setRefLocation(AGPS_REF_LOCATION_TYPE_GSM_CELLID,
+                            cellIdentityMap.get(CellInfo.TYPE_GSM));
+                } else if (cellIdentityMap.containsKey(CellInfo.TYPE_WCDMA)) {
+                    setRefLocation(AGPS_REF_LOCATION_TYPE_UMTS_CELLID,
+                            cellIdentityMap.get(CellInfo.TYPE_WCDMA));
+                } else if (cellIdentityMap.containsKey(CellInfo.TYPE_LTE)) {
+                    setRefLocation(AGPS_REF_LOCATION_TYPE_LTE_CELLID,
+                            cellIdentityMap.get(CellInfo.TYPE_LTE));
+                } else if (cellIdentityMap.containsKey(CellInfo.TYPE_NR)) {
+                    setRefLocation(AGPS_REF_LOCATION_TYPE_NR_CELLID,
+                            cellIdentityMap.get(CellInfo.TYPE_NR));
+                } else {
+                    Log.e(TAG, "No available serving cell information.");
+                }
             } else {
                 Log.e(TAG, "Error getting cell location info.");
             }
@@ -1385,75 +1529,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    boolean isInEmergencySession() {
-        return mNIHandler.getInEmergency();
-    }
-
-    private void sendMessage(int message, int arg, Object obj) {
+    private void postWithWakeLockHeld(Runnable runnable) {
         // hold a wake lock until this message is delivered
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
-        if (DEBUG) {
-            Log.d(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
-                    + ", " + obj + ")");
-        }
-        mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
-    }
-
-    private final class ProviderHandler extends Handler {
-        ProviderHandler(Looper looper) {
-            super(looper, null, true /*async*/);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            int message = msg.what;
-            switch (message) {
-                case INJECT_NTP_TIME:
-                    mNtpTimeHelper.retrieveAndInjectNtpTime();
-                    break;
-                case REQUEST_LOCATION:
-                    handleRequestLocation(msg.arg1 == 1, (boolean) msg.obj);
-                    break;
-                case DOWNLOAD_PSDS_DATA:
-                    handleDownloadPsdsData(msg.arg1);
-                    break;
-                case REPORT_LOCATION:
-                    handleReportLocation(msg.arg1 == 1, (Location) msg.obj);
-                    break;
-                case REPORT_SV_STATUS:
-                    handleReportSvStatus((GnssStatus) msg.obj);
-                    break;
-            }
-            if (msg.arg2 == 1) {
-                // wakelock was taken for this message, release it
+        boolean success = mHandler.post(() -> {
+            try {
+                runnable.run();
+            } finally {
                 mWakeLock.release();
-                if (DEBUG) {
-                    Log.d(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
-                            + ", " + msg.arg1 + ", " + msg.obj + ")");
-                }
             }
-        }
-    }
-
-    /**
-     * @return A string representing the given message ID.
-     */
-    private String messageIdAsString(int message) {
-        switch (message) {
-            case INJECT_NTP_TIME:
-                return "INJECT_NTP_TIME";
-            case REQUEST_LOCATION:
-                return "REQUEST_LOCATION";
-            case DOWNLOAD_PSDS_DATA:
-                return "DOWNLOAD_PSDS_DATA";
-            case REPORT_LOCATION:
-                return "REPORT_LOCATION";
-            case REPORT_SV_STATUS:
-                return "REPORT_SV_STATUS";
-            default:
-                return "<Unknown>";
+        });
+        if (!success) {
+            mWakeLock.release();
         }
     }
 
@@ -1484,6 +1573,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         pw.println("mFixInterval=" + mFixInterval);
         pw.print(mGnssMetrics.dumpGnssMetricsAsText());
         if (dumpAll) {
+            pw.println("mSupportsPsds=" + mSupportsPsds);
+            pw.println(
+                    "PsdsServerConfigured=" + mGnssConfiguration.isLongTermPsdsServerConfigured());
             pw.println("native internal state: ");
             pw.println("  " + mGnssNative.getInternalState());
         }
@@ -1495,6 +1587,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (isGpsEnabled()) {
             setGpsEnabled(false);
             updateEnabled();
+            restartLocationRequest();
         }
     }
 
@@ -1513,7 +1606,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onReportLocation(boolean hasLatLong, Location location) {
-        sendMessage(REPORT_LOCATION, hasLatLong ? 1 : 0, location);
+        postWithWakeLockHeld(() -> handleReportLocation(hasLatLong, location));
     }
 
     @Override
@@ -1573,7 +1666,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onReportSvStatus(GnssStatus gnssStatus) {
-        sendMessage(REPORT_SV_STATUS, 0, gnssStatus);
+        postWithWakeLockHeld(() -> handleReportSvStatus(gnssStatus));
     }
 
     @Override
@@ -1583,7 +1676,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onRequestPsdsDownload(int psdsType) {
-        sendMessage(DOWNLOAD_PSDS_DATA, psdsType, null);
+        postWithWakeLockHeld(() -> handleDownloadPsdsData(psdsType));
     }
 
     @Override
@@ -1629,7 +1722,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     + ", isUserEmergency: "
                     + isUserEmergency);
         }
-        sendMessage(REQUEST_LOCATION, independentFromGnss ? 1 : 0, isUserEmergency);
+        postWithWakeLockHeld(() -> handleRequestLocation(independentFromGnss, isUserEmergency));
     }
 
     @Override

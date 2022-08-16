@@ -24,16 +24,17 @@ public class PasswordValidationError {
     public static final int WEAK_CREDENTIAL_TYPE = 1;
     public static final int CONTAINS_INVALID_CHARACTERS = 2;
     public static final int TOO_SHORT = 3;
-    public static final int TOO_LONG = 4;
-    public static final int CONTAINS_SEQUENCE = 5;
-    public static final int NOT_ENOUGH_LETTERS = 6;
-    public static final int NOT_ENOUGH_UPPER_CASE = 7;
-    public static final int NOT_ENOUGH_LOWER_CASE = 8;
-    public static final int NOT_ENOUGH_DIGITS = 9;
-    public static final int NOT_ENOUGH_SYMBOLS = 10;
-    public static final int NOT_ENOUGH_NON_LETTER = 11;
-    public static final int NOT_ENOUGH_NON_DIGITS = 12;
-    public static final int RECENTLY_USED = 13;
+    public static final int TOO_SHORT_WHEN_ALL_NUMERIC = 4;
+    public static final int TOO_LONG = 5;
+    public static final int CONTAINS_SEQUENCE = 6;
+    public static final int NOT_ENOUGH_LETTERS = 7;
+    public static final int NOT_ENOUGH_UPPER_CASE = 8;
+    public static final int NOT_ENOUGH_LOWER_CASE = 9;
+    public static final int NOT_ENOUGH_DIGITS = 10;
+    public static final int NOT_ENOUGH_SYMBOLS = 11;
+    public static final int NOT_ENOUGH_NON_LETTER = 12;
+    public static final int NOT_ENOUGH_NON_DIGITS = 13;
+    public static final int RECENTLY_USED = 14;
     // WARNING: if you add a new error, make sure it is presented to the user correctly in Settings.
 
     public final int errorCode;
@@ -61,6 +62,7 @@ public class PasswordValidationError {
             case WEAK_CREDENTIAL_TYPE: return "Weak credential type";
             case CONTAINS_INVALID_CHARACTERS: return "Contains an invalid character";
             case TOO_SHORT: return "Password too short";
+            case TOO_SHORT_WHEN_ALL_NUMERIC: return "Password too short";
             case TOO_LONG: return "Password too long";
             case CONTAINS_SEQUENCE: return "Sequence too long";
             case NOT_ENOUGH_LETTERS: return "Too few letters";

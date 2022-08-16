@@ -26,8 +26,6 @@ import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
-import com.android.systemui.Dependency;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,7 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -53,12 +50,14 @@ public class DumpTruck {
     private static final int BUFSIZ = 1024 * 1024; // 1MB
 
     private final Context context;
+    private final GarbageMonitor mGarbageMonitor;
     private Uri hprofUri;
     private long rss;
     final StringBuilder body = new StringBuilder();
 
-    public DumpTruck(Context context) {
+    public DumpTruck(Context context, GarbageMonitor garbageMonitor) {
         this.context = context;
+        mGarbageMonitor = garbageMonitor;
     }
 
     /**
@@ -68,8 +67,6 @@ public class DumpTruck {
      * @return this, for chaining
      */
     public DumpTruck captureHeaps(List<Long> pids) {
-        final GarbageMonitor gm = Dependency.get(GarbageMonitor.class);
-
         final File dumpDir = new File(context.getCacheDir(), FILEPROVIDER_PATH);
         dumpDir.mkdirs();
         hprofUri = null;
@@ -83,16 +80,14 @@ public class DumpTruck {
         for (Long pidL : pids) {
             final int pid = pidL.intValue();
             body.append("  pid ").append(pid);
-            if (gm != null) {
-                GarbageMonitor.ProcessMemInfo info = gm.getMemInfo(pid);
-                if (info != null) {
-                    body.append(":")
-                            .append(" up=")
-                            .append(info.getUptime())
-                            .append(" rss=")
-                            .append(info.currentRss);
-                    rss = info.currentRss;
-                }
+            GarbageMonitor.ProcessMemInfo info = mGarbageMonitor.getMemInfo(pid);
+            if (info != null) {
+                body.append(":")
+                        .append(" up=")
+                        .append(info.getUptime())
+                        .append(" rss=")
+                        .append(info.currentRss);
+                rss = info.currentRss;
             }
             if (pid == myPid) {
                 final String path =

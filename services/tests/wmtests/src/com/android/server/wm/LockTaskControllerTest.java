@@ -82,6 +82,7 @@ import android.util.Pair;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.telephony.CellBroadcastUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -294,6 +295,22 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.isLockTaskModeViolation(keypad));
         assertTrue(mLockTaskController.isLockTaskModeViolation(callAction));
         assertTrue(mLockTaskController.isLockTaskModeViolation(dialer));
+    }
+
+    @Test
+    public void testLockTaskViolation_wirelessEmergencyAlerts() {
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(LOCK_TASK_AUTH_ALLOWLISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // GIVEN cellbroadcast task necessary for emergency warning alerts
+        Task cellbroadcastreceiver = getTask(
+                new Intent().setComponent(
+                        CellBroadcastUtils.getDefaultCellBroadcastAlertDialogComponent(mContext)),
+                LOCK_TASK_AUTH_PINNABLE);
+
+        // THEN the cellbroadcast task should all be allowed
+        assertFalse(mLockTaskController.isLockTaskModeViolation(cellbroadcastreceiver));
     }
 
     @Test
@@ -557,7 +574,7 @@ public class LockTaskControllerTest {
         mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // THEN the task running that package should be stopped
-        verify(tr2).performClearTaskLocked();
+        verify(tr2).performClearTaskForReuse(false /* excludingTaskOverlay*/);
         assertFalse(mLockTaskController.isTaskLocked(tr2));
         // THEN the other task should remain locked
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
@@ -569,7 +586,7 @@ public class LockTaskControllerTest {
         mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // THEN the last task should be cleared, and the system should quit LockTask mode
-        verify(tr1).performClearTaskLocked();
+        verify(tr1).performClearTaskForReuse(false /* excludingTaskOverlay*/);
         assertFalse(mLockTaskController.isTaskLocked(tr1));
         assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
         verifyLockTaskStopped(times(1));

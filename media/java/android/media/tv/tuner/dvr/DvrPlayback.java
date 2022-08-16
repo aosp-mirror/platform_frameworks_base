@@ -20,7 +20,6 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
@@ -56,25 +55,27 @@ public class DvrPlayback implements AutoCloseable {
     /**
      * The space of the playback is empty.
      */
-    public static final int PLAYBACK_STATUS_EMPTY = Constants.PlaybackStatus.SPACE_EMPTY;
+    public static final int PLAYBACK_STATUS_EMPTY =
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_EMPTY;
     /**
      * The space of the playback is almost empty.
      *
      * <p> the threshold is set in {@link DvrSettings}.
      */
     public static final int PLAYBACK_STATUS_ALMOST_EMPTY =
-            Constants.PlaybackStatus.SPACE_ALMOST_EMPTY;
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_ALMOST_EMPTY;
     /**
      * The space of the playback is almost full.
      *
      * <p> the threshold is set in {@link DvrSettings}.
      */
     public static final int PLAYBACK_STATUS_ALMOST_FULL =
-            Constants.PlaybackStatus.SPACE_ALMOST_FULL;
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_ALMOST_FULL;
     /**
      * The space of the playback is full.
      */
-    public static final int PLAYBACK_STATUS_FULL = Constants.PlaybackStatus.SPACE_FULL;
+    public static final int PLAYBACK_STATUS_FULL =
+            android.hardware.tv.tuner.PlaybackStatus.SPACE_FULL;
 
     private static final String TAG = "TvTunerPlayback";
 
@@ -97,6 +98,7 @@ public class DvrPlayback implements AutoCloseable {
     private native void nativeSetFileDescriptor(int fd);
     private native long nativeRead(long size);
     private native long nativeRead(byte[] bytes, long offset, long size);
+    private native long nativeSeek(long pos);
 
     private DvrPlayback() {
         mUserId = Process.myUid();
@@ -119,7 +121,13 @@ public class DvrPlayback implements AutoCloseable {
         }
         synchronized (mListenerLock) {
             if (mExecutor != null && mListener != null) {
-                mExecutor.execute(() -> mListener.onPlaybackStatusChanged(status));
+                mExecutor.execute(() -> {
+                    synchronized (mListenerLock) {
+                        if (mListener != null) {
+                            mListener.onPlaybackStatusChanged(status);
+                        }
+                    }
+                });
             }
         }
     }
@@ -236,7 +244,7 @@ public class DvrPlayback implements AutoCloseable {
      *
      * @param fd the file descriptor to read data.
      * @see #read(long)
-     * @see #read(byte[], long, long)
+     * @see #seek(long)
      */
     public void setFileDescriptor(@NonNull ParcelFileDescriptor fd) {
         nativeSetFileDescriptor(fd.getFd());
@@ -254,19 +262,30 @@ public class DvrPlayback implements AutoCloseable {
     }
 
     /**
-     * Reads data from the buffer for DVR playback and copies to the given byte array.
+     * Reads data from the buffer for DVR playback.
      *
-     * @param bytes the byte array to store the data.
-     * @param offset the index of the first byte in {@code bytes} to copy to.
+     * @param buffer the byte array where DVR reads data from.
+     * @param offset the index of the first byte in {@code buffer} to read.
      * @param size the maximum number of bytes to read.
      * @return the number of bytes read.
      */
     @BytesLong
-    public long read(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
-        if (size + offset > bytes.length) {
+    public long read(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
+        if (size + offset > buffer.length) {
             throw new ArrayIndexOutOfBoundsException(
-                    "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
+                    "Array length=" + buffer.length + ", offset=" + offset + ", size=" + size);
         }
-        return nativeRead(bytes, offset, size);
+        return nativeRead(buffer, offset, size);
+    }
+
+    /**
+     * Sets the file pointer offset of the file descriptor.
+     *
+     * @param position the offset position, measured in bytes from the beginning of the file.
+     * @return the new offset position. On error, {@code -1} is returned.
+     */
+    @BytesLong
+    public long seek(@BytesLong long position) {
+        return nativeSeek(position);
     }
 }

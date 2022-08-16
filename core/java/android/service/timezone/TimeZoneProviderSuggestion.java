@@ -18,6 +18,7 @@ package android.service.timezone;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -99,7 +100,7 @@ public final class TimeZoneProviderSuggestion implements Parcelable {
                 public TimeZoneProviderSuggestion createFromParcel(Parcel in) {
                     @SuppressWarnings("unchecked")
                     ArrayList<String> timeZoneIds =
-                            (ArrayList<String>) in.readArrayList(null /* classLoader */);
+                            (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
                     long elapsedRealtimeMillis = in.readLong();
                     return new TimeZoneProviderSuggestion(timeZoneIds, elapsedRealtimeMillis);
                 }
@@ -119,6 +120,24 @@ public final class TimeZoneProviderSuggestion implements Parcelable {
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeList(mTimeZoneIds);
         parcel.writeLong(mElapsedRealtimeMillis);
+    }
+
+    /**
+     * Similar to {@link #equals} except this methods checks for equivalence, not equality.
+     * i.e. two suggestions are equivalent if they suggest the same time zones.
+     *
+     * @hide
+     */
+    @SuppressWarnings("ReferenceEquality")
+    public boolean isEquivalentTo(@Nullable TimeZoneProviderSuggestion other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        // Only check the time zone IDs. The times can be different, but we don't mind.
+        return mTimeZoneIds.equals(other.mTimeZoneIds);
     }
 
     @Override

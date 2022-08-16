@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Voulez-vous désinstaller cette application?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Voulez-vous désinstaller cette application pour "<b>"tous"</b>" les utilisateurs? L\'application et ses données seront supprimées pour "<b>"tous"</b>" les utilisateurs de l\'appareil."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Voulez-vous désinstaller cette application pour l\'utilisateur <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Voulez-vous désinstaller cette application de votre profil professionnel?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Remplacer cette application par la version d\'usine? Toutes les données seront supprimées."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Remplacer cette application par la version d\'usine? Toutes les données seront supprimées. Cela touchera tous les utilisateurs de cet appareil, y compris ceux qui utilisent un profil professionnel."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Garder <xliff:g id="SIZE">%1$s</xliff:g> de données d\'application."</string>

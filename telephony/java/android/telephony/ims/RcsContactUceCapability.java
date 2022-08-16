@@ -254,7 +254,7 @@ public final class RcsContactUceCapability implements Parcelable {
     }
 
     private RcsContactUceCapability(Parcel in) {
-        mContactUri = in.readParcelable(Uri.class.getClassLoader());
+        mContactUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
         mCapabilityMechanism = in.readInt();
         mSourceType = in.readInt();
         mRequestResult = in.readInt();
@@ -262,7 +262,7 @@ public final class RcsContactUceCapability implements Parcelable {
         List<String> featureTagList = new ArrayList<>();
         in.readStringList(featureTagList);
         mFeatureTags.addAll(featureTagList);
-        in.readParcelableList(mPresenceTuples, RcsContactPresenceTuple.class.getClassLoader());
+        in.readParcelableList(mPresenceTuples, RcsContactPresenceTuple.class.getClassLoader(), android.telephony.ims.RcsContactPresenceTuple.class);
     }
 
     @Override

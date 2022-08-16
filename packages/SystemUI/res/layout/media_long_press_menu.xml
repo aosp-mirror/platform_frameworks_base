@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        android:id="@+id/remove_text"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:text="@string/controls_media_close_session"
+        android:gravity="center_horizontal|top"
+        app:layout_constraintTop_toBottomOf="@id/settings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/cancel" />
+
+    <ImageButton
+        android:id="@+id/settings"
+        android:src="@drawable/ic_settings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/qs_media_light_source"
+        android:contentDescription="@string/controls_media_settings_button"
+        android:layout_gravity="top"
+        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
+        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+    </ImageButton>
+
+    <FrameLayout
+        android:id="@+id/dismiss"
+        android:background="@drawable/qs_media_light_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/remove_text">
+        <TextView
+            android:id="@+id/dismiss_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
+            android:layout_gravity="center|top"
+            style="@style/MediaPlayer.SolidButton"
+            android:background="@drawable/qs_media_solid_button"
+            android:text="@string/controls_media_dismiss_button" />
+    </FrameLayout>
+    <FrameLayout
+        android:id="@+id/cancel"
+        android:background="@drawable/qs_media_light_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
+        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
+        app:layout_constraintStart_toEndOf="@id/dismiss"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/remove_text">
+        <TextView
+            android:id="@+id/cancel_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|top"
+            style="@style/MediaPlayer.OutlineButton"
+            android:text="@string/cancel" />
+    </FrameLayout>
+
+</merge>

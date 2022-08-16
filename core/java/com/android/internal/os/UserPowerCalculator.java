@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -26,12 +27,15 @@ import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.List;
-
 /**
  * Computes power consumed by Users
  */
 public class UserPowerCalculator extends PowerCalculator {
+
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return true;
+    }
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
@@ -45,7 +49,11 @@ public class UserPowerCalculator extends PowerCalculator {
                 builder.getUidBatteryConsumerBuilders();
 
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
-            UidBatteryConsumer.Builder uidBuilder = uidBatteryConsumerBuilders.valueAt(i);
+            final UidBatteryConsumer.Builder uidBuilder = uidBatteryConsumerBuilders.valueAt(i);
+            if (uidBuilder.isVirtualUid()) {
+                continue;
+            }
+
             final int uid = uidBuilder.getUid();
             if (UserHandle.getAppId(uid) < Process.FIRST_APPLICATION_UID) {
                 continue;
@@ -56,42 +64,6 @@ public class UserPowerCalculator extends PowerCalculator {
                 uidBuilder.excludeFromBatteryUsageStats();
                 builder.getOrCreateUserBatteryConsumerBuilder(userId)
                         .addUidBatteryConsumer(uidBuilder);
-            }
-        }
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final boolean forAllUsers = (asUsers.get(UserHandle.USER_ALL) != null);
-        if (forAllUsers) {
-            return;
-        }
-
-        SparseArray<BatterySipper> userSippers = new SparseArray<>();
-
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            BatterySipper sipper = sippers.get(i);
-            final int uid = sipper.getUid();
-            final int userId = UserHandle.getUserId(uid);
-            if (asUsers.get(userId) == null
-                    && UserHandle.getAppId(uid) >= Process.FIRST_APPLICATION_UID) {
-                // We are told to just report this user's apps as one accumulated entry.
-                BatterySipper userSipper = userSippers.get(userId);
-                if (userSipper == null) {
-                    userSipper = new BatterySipper(BatterySipper.DrainType.USER, null, 0);
-                    userSipper.userId = userId;
-                    userSippers.put(userId, userSipper);
-                }
-                userSipper.add(sipper);
-                sipper.isAggregated = true;
-            }
-        }
-
-        for (int i = 0; i < userSippers.size(); i++) {
-            BatterySipper sipper = userSippers.valueAt(i);
-            if (sipper.sumPower() > 0) {
-                sippers.add(sipper);
             }
         }
     }

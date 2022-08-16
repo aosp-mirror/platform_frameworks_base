@@ -92,7 +92,7 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
                 || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
                 && displayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 && service.getRecentsAnimationController() == null
-                && displayContent.getFadeRotationAnimationController() == null;
+                && displayContent.getAsyncRotationController() == null;
     }
 
     /**
@@ -108,7 +108,7 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
         final WindowManagerPolicy policy = service.mPolicy;
         service.mRoot.forAllWindows(nonAppWindow -> {
             // Animation on the IME window is controlled via Insets.
-            if (nonAppWindow.mActivityRecord == null && policy.canBeHiddenByKeyguardLw(nonAppWindow)
+            if (nonAppWindow.mActivityRecord == null && nonAppWindow.canBeHiddenByKeyguard()
                     && nonAppWindow.wouldBeVisibleIfPolicyIgnored() && !nonAppWindow.isVisible()
                     && nonAppWindow != service.mRoot.getCurrentInputMethodWindow()) {
                 final NonAppWindowAnimationAdapter nonAppAdapter = new NonAppWindowAnimationAdapter(

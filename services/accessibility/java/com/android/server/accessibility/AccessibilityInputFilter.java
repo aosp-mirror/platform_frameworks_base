@@ -608,7 +608,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             final Context uiContext = displayContext.createWindowContext(
                     TYPE_MAGNIFICATION_OVERLAY, null /* options */);
             magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
-                    mAms.getFullScreenMagnificationController(), mAms.getTraceManager(),
+                    mAms.getMagnificationController().getFullScreenMagnificationController(),
+                    mAms.getTraceManager(),
                     mAms.getMagnificationController(), detectControlGestures, triggerable,
                     new WindowMagnificationPromptController(displayContext, mUserId), displayId);
         }
@@ -889,6 +890,42 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
         if (region != null && mTouchExplorer.contains(displayId)) {
             mTouchExplorer.get(displayId).setTouchExplorationPassthroughRegion(region);
+        }
+    }
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).setServiceDetectsGestures(mode);
+        }
+    }
+
+    public void requestTouchExploration(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).requestTouchExploration();
+        }
+    }
+
+    public void requestDragging(int displayId, int pointerId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).requestDragging(pointerId);
+        }
+    }
+
+    public void requestDelegating(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).requestDelegating();
+        }
+    }
+
+    public void onDoubleTap(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).onDoubleTap();
+        }
+    }
+
+    public void onDoubleTapAndHold(int displayId) {
+        if (mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).onDoubleTapAndHold();
         }
     }
 

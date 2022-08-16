@@ -48,6 +48,9 @@ import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.assist.AssistStructure;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -76,6 +79,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.text.LineBreakConfig;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -200,13 +204,14 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.EditableInputConnection;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.EditableInputConnection;
 
 import libcore.util.EmptyArray;
 
@@ -344,6 +349,8 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_fontVariationSettings
  * @attr ref android.R.styleable#TextView_breakStrategy
  * @attr ref android.R.styleable#TextView_hyphenationFrequency
+ * @attr ref android.R.styleable#TextView_lineBreakStyle
+ * @attr ref android.R.styleable#TextView_lineBreakWordStyle
  * @attr ref android.R.styleable#TextView_autoSizeTextType
  * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
  * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
@@ -436,6 +443,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Accessibility action start id for "process text" actions.
     static final int ACCESSIBILITY_ACTION_PROCESS_TEXT_START_ID = 0x10000100;
 
+    /** Accessibility action start id for "smart" actions. @hide */
+    static final int ACCESSIBILITY_ACTION_SMART_START_ID = 0x10001000;
+
     /**
      * @hide
      */
@@ -451,6 +461,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD = 2;
 
     private static final int FLOATING_TOOLBAR_SELECT_ALL_REFRESH_DELAY = 500;
+
+    // The default value of the line break style.
+    private static final int DEFAULT_LINE_BREAK_STYLE = LineBreakConfig.LINE_BREAK_STYLE_NONE;
+
+    // The default value of the line break word style.
+    private static final int DEFAULT_LINE_BREAK_WORD_STYLE =
+            LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+
+    /**
+     * This change ID enables the fallback text line spacing (line height) for BoringLayout.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long BORINGLAYOUT_FALLBACK_LINESPACING = 210923482L; // buganizer id
+
+    /**
+     * This change ID enables the fallback text line spacing (line height) for StaticLayout.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.P)
+    public static final long STATICLAYOUT_FALLBACK_LINESPACING = 37756858; // buganizer id
 
     // System wide time for last cut, copy or text changed action.
     static long sLastCutCopyOrTextChangedTime;
@@ -755,6 +788,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Layout mLayout;
     private boolean mLocalesChanged = false;
     private int mTextSizeUnit = -1;
+    private int mLineBreakStyle = DEFAULT_LINE_BREAK_STYLE;
+    private int mLineBreakWordStyle = DEFAULT_LINE_BREAK_WORD_STYLE;
 
     // This is used to reflect the current user preference for changing font weight and making text
     // more bold.
@@ -765,8 +800,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mListenerChanged = false;
     // True if internationalized input should be used for numbers and date and time.
     private final boolean mUseInternationalizedInput;
-    // True if fallback fonts that end up getting used should be allowed to affect line spacing.
-    /* package */ boolean mUseFallbackLineSpacing;
+
+    // Fallback fonts that end up getting used should be allowed to affect line spacing.
+    private static final int FALLBACK_LINE_SPACING_NONE = 0;
+    private static final int FALLBACK_LINE_SPACING_STATIC_LAYOUT_ONLY = 1;
+    private static final int FALLBACK_LINE_SPACING_ALL = 2;
+
+    private int mUseFallbackLineSpacing;
     // True if the view text can be padded for compat reasons, when the view is translated.
     private final boolean mUseTextPaddingForUiTranslation;
 
@@ -1417,6 +1457,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mHyphenationFrequency = a.getInt(attr, Layout.HYPHENATION_FREQUENCY_NONE);
                     break;
 
+                case com.android.internal.R.styleable.TextView_lineBreakStyle:
+                    mLineBreakStyle = a.getInt(attr, LineBreakConfig.LINE_BREAK_STYLE_NONE);
+                    break;
+
+                case com.android.internal.R.styleable.TextView_lineBreakWordStyle:
+                    mLineBreakWordStyle = a.getInt(attr,
+                            LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE);
+                    break;
+
                 case com.android.internal.R.styleable.TextView_autoSizeTextType:
                     mAutoSizeTextType = a.getInt(attr, AUTO_SIZE_TEXT_TYPE_NONE);
                     break;
@@ -1478,7 +1527,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         mUseInternationalizedInput = targetSdkVersion >= VERSION_CODES.O;
-        mUseFallbackLineSpacing = targetSdkVersion >= VERSION_CODES.P;
+        if (CompatChanges.isChangeEnabled(BORINGLAYOUT_FALLBACK_LINESPACING)) {
+            mUseFallbackLineSpacing = FALLBACK_LINE_SPACING_ALL;
+        } else if (CompatChanges.isChangeEnabled(STATICLAYOUT_FALLBACK_LINESPACING)) {
+            mUseFallbackLineSpacing = FALLBACK_LINE_SPACING_STATIC_LAYOUT_ONLY;
+        } else {
+            mUseFallbackLineSpacing = FALLBACK_LINE_SPACING_NONE;
+        }
         // TODO(b/179693024): Use a ChangeId instead.
         mUseTextPaddingForUiTranslation = targetSdkVersion <= Build.VERSION_CODES.R;
 
@@ -3943,6 +3998,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float mLetterSpacing = 0;
         String mFontFeatureSettings = null;
         String mFontVariationSettings = null;
+        boolean mHasLineBreakStyle = false;
+        boolean mHasLineBreakWordStyle = false;
+        int mLineBreakStyle = DEFAULT_LINE_BREAK_STYLE;
+        int mLineBreakWordStyle = DEFAULT_LINE_BREAK_WORD_STYLE;
 
         @Override
         public String toString() {
@@ -3973,6 +4032,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mLetterSpacing:" + mLetterSpacing + "\n"
                     + "    mFontFeatureSettings:" + mFontFeatureSettings + "\n"
                     + "    mFontVariationSettings:" + mFontVariationSettings + "\n"
+                    + "    mHasLineBreakStyle:" + mHasLineBreakStyle + "\n"
+                    + "    mHasLineBreakWordStyle:" + mHasLineBreakWordStyle + "\n"
+                    + "    mLineBreakStyle:" + mLineBreakStyle + "\n"
+                    + "    mLineBreakWordStyle:" + mLineBreakWordStyle + "\n"
                     + "}";
         }
     }
@@ -4020,6 +4083,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_fontFeatureSettings);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontVariationSettings,
                 com.android.internal.R.styleable.TextAppearance_fontVariationSettings);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_lineBreakStyle,
+                com.android.internal.R.styleable.TextAppearance_lineBreakStyle);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_lineBreakWordStyle,
+                com.android.internal.R.styleable.TextAppearance_lineBreakWordStyle);
     }
 
     /**
@@ -4135,6 +4202,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_fontVariationSettings:
                     attributes.mFontVariationSettings = appearance.getString(attr);
                     break;
+                case com.android.internal.R.styleable.TextAppearance_lineBreakStyle:
+                    attributes.mHasLineBreakStyle = true;
+                    attributes.mLineBreakStyle =
+                            appearance.getInt(attr, attributes.mLineBreakStyle);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_lineBreakWordStyle:
+                    attributes.mHasLineBreakWordStyle = true;
+                    attributes.mLineBreakWordStyle =
+                            appearance.getInt(attr, attributes.mLineBreakWordStyle);
+                    break;
                 default:
             }
         }
@@ -4200,8 +4277,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (attributes.mFontVariationSettings != null) {
             setFontVariationSettings(attributes.mFontVariationSettings);
         }
+
+        if (attributes.mHasLineBreakStyle || attributes.mHasLineBreakWordStyle) {
+            updateLineBreakConfigFromTextAppearance(attributes.mHasLineBreakStyle,
+                    attributes.mHasLineBreakWordStyle, attributes.mLineBreakStyle,
+                    attributes.mLineBreakWordStyle);
+        }
     }
 
+    /**
+     * Updates the LineBreakConfig from the TextAppearance.
+     *
+     * This method updates the given line configuration from the TextAppearance. This method will
+     * request new layout if line break config has been changed.
+     *
+     * @param isLineBreakStyleSpecified true if the line break style is specified.
+     * @param isLineBreakWordStyleSpecified true if the line break word style is specified.
+     * @param lineBreakStyle the value of the line break style in the TextAppearance.
+     * @param lineBreakWordStyle the value of the line break word style in the TextAppearance.
+     */
+    private void updateLineBreakConfigFromTextAppearance(boolean isLineBreakStyleSpecified,
+            boolean isLineBreakWordStyleSpecified,
+            @LineBreakConfig.LineBreakStyle int lineBreakStyle,
+            @LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
+        boolean updated = false;
+        if (isLineBreakStyleSpecified && mLineBreakStyle != lineBreakStyle) {
+            mLineBreakStyle = lineBreakStyle;
+            updated = true;
+        }
+        if (isLineBreakWordStyleSpecified && mLineBreakWordStyle != lineBreakWordStyle) {
+            mLineBreakWordStyle = lineBreakWordStyle;
+            updated = true;
+        }
+        if (updated && mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
     /**
      * Get the default primary {@link Locale} of the text in this TextView. This will always be
      * the first member of {@link #getTextLocales()}.
@@ -4540,8 +4653,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_fallbackLineSpacing
      */
     public void setFallbackLineSpacing(boolean enabled) {
-        if (mUseFallbackLineSpacing != enabled) {
-            mUseFallbackLineSpacing = enabled;
+        int fallbackStrategy;
+        if (enabled) {
+            if (CompatChanges.isChangeEnabled(BORINGLAYOUT_FALLBACK_LINESPACING)) {
+                fallbackStrategy = FALLBACK_LINE_SPACING_ALL;
+            } else {
+                fallbackStrategy = FALLBACK_LINE_SPACING_STATIC_LAYOUT_ONLY;
+            }
+        } else {
+            fallbackStrategy = FALLBACK_LINE_SPACING_NONE;
+        }
+        if (mUseFallbackLineSpacing != fallbackStrategy) {
+            mUseFallbackLineSpacing = fallbackStrategy;
             if (mLayout != null) {
                 nullLayouts();
                 requestLayout();
@@ -4559,7 +4682,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @InspectableProperty
     public boolean isFallbackLineSpacing() {
-        return mUseFallbackLineSpacing;
+        return mUseFallbackLineSpacing != FALLBACK_LINE_SPACING_NONE;
+    }
+
+    private boolean isFallbackLineSpacingForBoringLayout() {
+        return mUseFallbackLineSpacing == FALLBACK_LINE_SPACING_ALL;
+    }
+
+    // Package privte for accessing from Editor.java
+    /* package */ boolean isFallbackLineSpacingForStaticLayout() {
+        return mUseFallbackLineSpacing == FALLBACK_LINE_SPACING_ALL
+                || mUseFallbackLineSpacing == FALLBACK_LINE_SPACING_STATIC_LAYOUT_ONLY;
     }
 
     /**
@@ -4648,12 +4781,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * TextView is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}, and the default value for
      * EditText is {@link Layout#BREAK_STRATEGY_SIMPLE}, the latter to avoid the
      * text "dancing" when being edited.
-     * <p/>
+     * <p>
      * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
      * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
      * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
      * improves the structure of text layout however has performance impact and requires more time
-     * to do the text layout.
+     * to do the text layout.</p>
+     * <p>
+     * Compared with {@link #setLineBreakStyle(int)}, line break style with different strictness is
+     * evaluated in the ICU to identify the potential breakpoints. In
+     * {@link #setBreakStrategy(int)}, line break strategy handles the post processing of ICU's line
+     * break result. It aims to evaluate ICU's breakpoints and break the lines based on the
+     * constraint.
+     * </p>
      *
      * @attr ref android.R.styleable#TextView_breakStrategy
      * @see #getBreakStrategy()
@@ -4737,13 +4877,84 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Set the line break style for text wrapping.
+     *
+     * The line break style to indicates the line break strategies can be used when
+     * calculating the text wrapping. The line break style affects rule-based breaking. It
+     * specifies the strictness of line-breaking rules.
+     * There are several types for the line break style:
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE},
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL} and
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}. The default values of the line break style
+     * is {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}, indicating no breaking rule is specified.
+     * See <a href="https://www.w3.org/TR/css-text-3/#line-break-property">
+     *         the line-break property</a>
+     *
+     * @param lineBreakStyle the line break style for the text.
+     */
+    public void setLineBreakStyle(@LineBreakConfig.LineBreakStyle int lineBreakStyle) {
+        if (mLineBreakStyle != lineBreakStyle) {
+            mLineBreakStyle = lineBreakStyle;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * Set the line break word style for text wrapping.
+     *
+     * The line break word style affects dictionary-based breaking and provide phrase-based
+     * breaking opportunities. The type for the line break word style is
+     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE}. The default values of the line break
+     * word style is {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE}, indicating no breaking rule
+     * is specified.
+     * See <a href="https://www.w3.org/TR/css-text-3/#word-break-property">
+     *         the word-break property</a>
+     *
+     * @param lineBreakWordStyle the line break word style for the tet
+     */
+    public void setLineBreakWordStyle(@LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
+        if (mLineBreakWordStyle != lineBreakWordStyle) {
+            mLineBreakWordStyle = lineBreakWordStyle;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * Get the current line break style for text wrapping.
+     *
+     * @return the current line break style to be used for text wrapping.
+     */
+    public @LineBreakConfig.LineBreakStyle int getLineBreakStyle() {
+        return mLineBreakStyle;
+    }
+
+    /**
+     * Get the current line word break style for text wrapping.
+     *
+     * @return the current line break word style to be used for text wrapping.
+     */
+    public @LineBreakConfig.LineBreakWordStyle int getLineBreakWordStyle() {
+        return mLineBreakWordStyle;
+    }
+
+    /**
      * Gets the parameters for text layout precomputation, for use with {@link PrecomputedText}.
      *
      * @return a current {@link PrecomputedText.Params}
      * @see PrecomputedText
      */
     public @NonNull PrecomputedText.Params getTextMetricsParams() {
-        return new PrecomputedText.Params(new TextPaint(mTextPaint), getTextDirectionHeuristic(),
+        return new PrecomputedText.Params(new TextPaint(mTextPaint),
+                LineBreakConfig.getLineBreakConfig(mLineBreakStyle, mLineBreakWordStyle),
+                getTextDirectionHeuristic(),
                 mBreakStrategy, mHyphenationFrequency);
     }
 
@@ -4759,6 +4970,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTextDir = params.getTextDirection();
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
+        LineBreakConfig lineBreakConfig = params.getLineBreakConfig();
+        mLineBreakStyle = lineBreakConfig.getLineBreakStyle();
+        mLineBreakWordStyle = lineBreakConfig.getLineBreakWordStyle();
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -4892,7 +5106,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param color A color value in the form 0xAARRGGBB.
      * Do not pass a resource ID. To get a color value from a resource ID, call
-     * {@link android.support.v4.content.ContextCompat#getColor(Context, int) getColor}.
+     * {@link androidx.core.content.ContextCompat#getColor(Context, int) getColor}.
      *
      * @see #setTextColor(ColorStateList)
      * @see #getTextColors()
@@ -6297,7 +6511,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
                     precomputed.getParams().checkResultUsable(getPaint(), mTextDir, mBreakStrategy,
-                            mHyphenationFrequency);
+                            mHyphenationFrequency, LineBreakConfig.getLineBreakConfig(
+                                    mLineBreakStyle, mLineBreakWordStyle));
             switch (checkResult) {
                 case PrecomputedText.Params.UNUSABLE:
                     throw new IllegalArgumentException(
@@ -6316,6 +6531,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             text = mSpannableFactory.newSpannable(text);
         } else if (!(text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
+        }
+
+        @AccessibilityUtils.A11yTextChangeType int a11yTextChangeType = AccessibilityUtils.NONE;
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            a11yTextChangeType = AccessibilityUtils.textOrSpanChanged(text, mText);
         }
 
         if (mAutoLinkMask != 0) {
@@ -6337,6 +6557,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                  * setText() again to try to upgrade the buffer type.
                  */
                 setTextInternal(text);
+                if (a11yTextChangeType == AccessibilityUtils.NONE) {
+                    a11yTextChangeType = AccessibilityUtils.PARCELABLE_SPAN;
+                }
 
                 // Do not change the movement method for text that support text selection as it
                 // would prevent an arbitrary cursor displacement.
@@ -6401,7 +6624,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
-        notifyViewAccessibilityStateChangedIfNeeded(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+        if (a11yTextChangeType == AccessibilityUtils.TEXT) {
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+        } else if (a11yTextChangeType == AccessibilityUtils.PARCELABLE_SPAN) {
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        }
 
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
@@ -6750,6 +6979,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (type == InputType.TYPE_NULL && mEditor == null) return; //TYPE_NULL is the default value
         createEditorIfNeeded();
         mEditor.mInputType = type;
+    }
+
+    @Override
+    public String[] getAutofillHints() {
+        String[] hints = super.getAutofillHints();
+        if (isAnyPasswordInputType()) {
+            if (!ArrayUtils.contains(hints, AUTOFILL_HINT_PASSWORD_AUTO)) {
+                hints = ArrayUtils.appendElement(String.class, hints,
+                        AUTOFILL_HINT_PASSWORD_AUTO);
+            }
+        }
+        return hints;
     }
 
     /**
@@ -8736,6 +8977,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mEditor != null && mEditor.mInputType != EditorInfo.TYPE_NULL;
     }
 
+    private boolean hasEditorInFocusSearchDirection(@FocusRealDirection int direction) {
+        final View nextView = focusSearch(direction);
+        return nextView != null && nextView.onCheckIsTextEditor();
+    }
+
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (onCheckIsTextEditor() && isEnabled()) {
@@ -8752,10 +8998,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.imeOptions = EditorInfo.IME_NULL;
                 outAttrs.hintLocales = null;
             }
-            if (focusSearch(FOCUS_DOWN) != null) {
+            if (hasEditorInFocusSearchDirection(FOCUS_DOWN)) {
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
             }
-            if (focusSearch(FOCUS_UP) != null) {
+            if (hasEditorInFocusSearchDirection(FOCUS_UP)) {
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS;
             }
             if ((outAttrs.imeOptions & EditorInfo.IME_MASK_ACTION)
@@ -9128,7 +9374,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (hintBoring == UNKNOWN_BORING) {
                 hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
-                                                   mHintBoring);
+                        isFallbackLineSpacingForBoringLayout(), mHintBoring);
                 if (hintBoring != null) {
                     mHintBoring = hintBoring;
                 }
@@ -9170,11 +9416,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setTextDirection(mTextDir)
                         .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
-                        .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
+                        .setUseLineSpacingFromFallbacks(isFallbackLineSpacingForStaticLayout())
                         .setBreakStrategy(mBreakStrategy)
                         .setHyphenationFrequency(mHyphenationFrequency)
                         .setJustificationMode(mJustificationMode)
-                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
+                        .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
+                                mLineBreakStyle, mLineBreakWordStyle));
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
                             .setEllipsizedWidth(ellipsisWidth);
@@ -9230,7 +9478,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setTextDirection(mTextDir)
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
-                    .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
+                    .setUseLineSpacingFromFallbacks(isFallbackLineSpacingForStaticLayout())
                     .setBreakStrategy(mBreakStrategy)
                     .setHyphenationFrequency(mHyphenationFrequency)
                     .setJustificationMode(mJustificationMode)
@@ -9239,7 +9487,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             result = builder.build();
         } else {
             if (boring == UNKNOWN_BORING) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir,
+                        isFallbackLineSpacingForBoringLayout(), mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -9283,11 +9532,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setTextDirection(mTextDir)
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
-                    .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
+                    .setUseLineSpacingFromFallbacks(isFallbackLineSpacingForStaticLayout())
                     .setBreakStrategy(mBreakStrategy)
                     .setHyphenationFrequency(mHyphenationFrequency)
                     .setJustificationMode(mJustificationMode)
-                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
+                    .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
+                            mLineBreakStyle, mLineBreakWordStyle));
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth);
@@ -9410,7 +9661,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (des < 0) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir,
+                        isFallbackLineSpacingForBoringLayout(), mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -9443,7 +9695,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (hintDes < 0) {
-                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir, mHintBoring);
+                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
+                            isFallbackLineSpacingForBoringLayout(), mHintBoring);
                     if (hintBoring != null) {
                         mHintBoring = hintBoring;
                     }
@@ -9647,12 +9900,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         layoutBuilder.setAlignment(getLayoutAlignment())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
                 .setIncludePad(getIncludeFontPadding())
-                .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
+                .setUseLineSpacingFromFallbacks(isFallbackLineSpacingForStaticLayout())
                 .setBreakStrategy(getBreakStrategy())
                 .setHyphenationFrequency(getHyphenationFrequency())
                 .setJustificationMode(getJustificationMode())
                 .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
-                .setTextDirection(getTextDirectionHeuristic());
+                .setTextDirection(getTextDirectionHeuristic())
+                .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
+                        mLineBreakStyle, mLineBreakWordStyle));
 
         final StaticLayout layout = layoutBuilder.build();
 
@@ -10607,8 +10862,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         && mSavedMarqueeModeLayout.getLineWidth(0) > width));
     }
 
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private void startMarquee() {
+    protected void startMarquee() {
         // Do not ellipsize EditText
         if (getKeyListener() != null) return;
 
@@ -10616,8 +10874,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        if ((mMarquee == null || mMarquee.isStopped()) && (isFocused() || isSelected())
-                && getLineCount() == 1 && canMarquee()) {
+        if ((mMarquee == null || mMarquee.isStopped()) && isAggregatedVisible()
+                && (isFocused() || isSelected()) && getLineCount() == 1 && canMarquee()) {
 
             if (mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
                 mMarqueeFadeMode = MARQUEE_FADE_SWITCH_SHOW_FADE;
@@ -10634,7 +10892,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void stopMarquee() {
+    /**
+     * @hide
+     */
+    protected void stopMarquee() {
         if (mMarquee != null && !mMarquee.isStopped()) {
             mMarquee.stop();
         }
@@ -11076,6 +11337,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        startStopMarquee(isVisible);
+    }
+
     /**
      * Use {@link BaseInputConnection#removeComposingSpans
      * BaseInputConnection.removeComposingSpans()} to remove any IME composing
@@ -11210,7 +11477,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = getInputMethodManager();
                 viewClicked(imm);
-                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null) {
+                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null
+                        && !showAutofillDialog()) {
                     imm.showSoftInput(this, 0);
                 }
 
@@ -11226,6 +11494,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * The fill dialog UI is a more conspicuous and efficient interface than dropdown UI.
+     * If autofill suggestions are available when the user clicks on a field that supports filling
+     * the dialog UI, Autofill will pop up a fill dialog. The dialog will take up a larger area
+     * to display the datasets, so it is easy for users to pay attention to the datasets and
+     * selecting a dataset. The autofill dialog is shown as the bottom sheet, the better
+     * experience is not to show the IME if there is a fill dialog.
+     */
+    private boolean showAutofillDialog() {
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
+        if (afm != null) {
+            return afm.showAutofillDialog(this);
+        }
+        return false;
     }
 
     @Override
@@ -12069,6 +12353,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     EXTRA_DATA_RENDERING_INFO_KEY,
                     EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
             ));
+            info.setTextSelectable(isTextSelectable() || isTextEditable());
         } else {
             info.setAvailableExtraData(Arrays.asList(
                     EXTRA_DATA_RENDERING_INFO_KEY
@@ -12085,6 +12370,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canCut()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_CUT);
             }
+            if (canReplace()) {
+                info.addAction(
+                        AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_TEXT_SUGGESTIONS);
+            }
             if (canShare()) {
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
                         ACCESSIBILITY_ACTION_SHARE,
@@ -12092,6 +12381,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (canProcessText()) {  // also implies mEditor is not null.
                 mEditor.mProcessTextIntentActionsHandler.onInitializeAccessibilityNodeInfo(info);
+                mEditor.onInitializeSmartActionsAccessibilityNodeInfo(info);
             }
         }
 
@@ -12109,9 +12399,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // A view should not be exposed as clickable/long-clickable to a service because of a
-        // LinkMovementMethod.
+        // LinkMovementMethod or because it has selectable and non-editable text.
         if ((info.isClickable() || info.isLongClickable())
-                && mMovement instanceof LinkMovementMethod) {
+                && (mMovement instanceof LinkMovementMethod
+                || (isTextSelectable() && !isTextEditable()))) {
             if (!hasOnClickListeners()) {
                 info.setClickable(false);
                 info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
@@ -12295,9 +12586,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        if (mEditor != null
-                && mEditor.mProcessTextIntentActionsHandler.performAccessibilityAction(action)) {
-            return true;
+        if (mEditor != null) {
+            if (mEditor.mProcessTextIntentActionsHandler.performAccessibilityAction(action)
+                    || mEditor.performSmartActionsAccessibilityAction(action)) {
+                return true;
+            }
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
@@ -12341,6 +12634,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return true;
                     }
                     if (start >= 0 && start <= end && end <= text.length()) {
+                        requestFocusOnNonEditableSelectableText();
                         Selection.setSelection((Spannable) text, start, end);
                         // Make sure selection mode is engaged.
                         if (mEditor != null) {
@@ -12399,6 +12693,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             return false;
             default: {
+                // New ids have static blocks to assign values, so they can't be used in a case
+                // block.
+                if (action == R.id.accessibilityActionShowTextSuggestions) {
+                    return isFocused() && canReplace() && onTextContextMenuItem(ID_REPLACE);
+                }
                 return super.performAccessibilityActionInternal(action, arguments);
             }
         }
@@ -12434,6 +12733,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return handled;
     }
 
+    private void requestFocusOnNonEditableSelectableText() {
+        if (!isTextEditable() && isTextSelectable()) {
+            if (!isEnabled()) {
+                return;
+            }
+
+            if (isFocusable() && !isFocused()) {
+                requestFocus();
+            }
+        }
+    }
+
     private boolean hasSpannableText() {
         return mText != null && mText instanceof Spannable;
     }
@@ -12462,9 +12773,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the text that should be exposed to accessibility services.
      * <p>
-     * This approximates what is displayed visually. If the user has specified
-     * that accessibility services should speak passwords, this method will
-     * bypass any password transformation method and return unobscured text.
+     * This approximates what is displayed visually.
      *
      * @return the text that should be exposed to accessibility services, may
      *         be {@code null} if no text is set
@@ -12481,6 +12790,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return TextUtils.trimToParcelableSize(mTransformed);
     }
 
+    boolean isVisibleToAccessibility() {
+        return AccessibilityManager.getInstance(mContext).isEnabled()
+                && (isFocused() || (isSelected() && isShown()));
+    }
+
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
             int fromIndex, int removedCount, int addedCount) {
         AccessibilityEvent event =
@@ -12488,6 +12802,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         event.setFromIndex(fromIndex);
         event.setRemovedCount(removedCount);
         event.setAddedCount(addedCount);
+        event.setBeforeText(beforeText);
+        sendAccessibilityEventUnchecked(event);
+    }
+
+    void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
+            int fromIndex, int toIndex) {
+        AccessibilityEvent event =
+                AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+        event.setFromIndex(fromIndex);
+        event.setToIndex(toIndex);
         event.setBeforeText(beforeText);
         sendAccessibilityEventUnchecked(event);
     }
@@ -12974,6 +13298,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    boolean canReplace() {
+        if (hasPasswordTransformationMethod()) {
+            return false;
+        }
+
+        return (mText.length() > 0) && (mText instanceof Editable) && (mEditor != null)
+                && isSuggestionsEnabled() && mEditor.shouldOfferToShowSuggestions();
+    }
+
     boolean canShare() {
         if (!getContext().canStartActivityForResult() || !isDeviceProvisioned()) {
             return false;
@@ -13421,6 +13754,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @hide
      */
+    public void prepareForExtendedAccessibilitySelection() {
+        requestFocusOnNonEditableSelectableText();
+    }
+
+    /**
+     * @hide
+     */
     @Override
     public int getAccessibilitySelectionEnd() {
         return getSelectionEnd();
@@ -13701,7 +14041,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mChoreographer.removeFrameCallback(mTickCallback);
 
             final TextView textView = mView.get();
-            if (textView != null && (textView.isFocused() || textView.isSelected())) {
+            if (textView != null && textView.isAggregatedVisible()
+                    && (textView.isFocused() || textView.isSelected())) {
                 long currentMs = mChoreographer.getFrameTime();
                 long deltaMs = currentMs - mLastAnimationMs;
                 mLastAnimationMs = currentMs;
@@ -13810,8 +14151,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             TextView.this.handleTextChanged(buffer, start, before, after);
 
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && (isFocused() || isSelected() && isShown())) {
+            if (isVisibleToAccessibility()) {
                 sendAccessibilityEventTypeViewTextChanged(mBeforeText, start, before, after);
                 mBeforeText = null;
             }
@@ -13907,13 +14247,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Collects a {@link ViewTranslationRequest} which represents the content to be translated in
      * the view.
      *
-     * <p>NOTE: When overriding the method, it should not translate the password. If the subclass
-     * uses {@link TransformationMethod} to display the translated result, it's also not recommend
-     * to translate text is selectable or editable.
+     * <p>NOTE: When overriding the method, it should not collect a request to translate this
+     * TextView if it is displaying a password.
      *
      * @param supportedFormats the supported translation format. The value could be {@link
      *                         android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
-     * @return the {@link ViewTranslationRequest} which contains the information to be translated.
+     * @param requestsCollector {@link Consumer} to receiver the {@link ViewTranslationRequest}
+     *                                         which contains the information to be translated.
      */
     @Override
     public void onCreateViewTranslationRequest(@NonNull int[] supportedFormats,
@@ -13935,18 +14275,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
             boolean isPassword = isAnyPasswordInputType() || hasPasswordTransformationMethod();
-            // TODO(b/177214256): support selectable text translation.
-            //  We use the TransformationMethod to implement showing the translated text. The
-            //  TextView does not support the text length change for TransformationMethod. If the
-            //  text is selectable or editable, it will crash while selecting the text. To support
-            //  it, it needs broader changes to text APIs, we only allow to translate non selectable
-            //  and editable text in S.
-            if (isTextEditable() || isPassword || isTextSelectable()) {
-                if (UiTranslationController.DEBUG) {
-                    Log.w(LOG_TAG, "Cannot create translation request. editable = "
-                            + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "
-                            + isTextSelectable());
-                }
+            if (isTextEditable() || isPassword) {
+                Log.w(LOG_TAG, "Cannot create translation request. editable = "
+                        + isTextEditable() + ", isPassword = " + isPassword);
                 return;
             }
             // TODO(b/176488462): apply the view's important for translation

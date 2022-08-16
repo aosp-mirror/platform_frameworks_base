@@ -252,6 +252,11 @@ class ProximitySensorImpl implements ProximitySensor {
     }
 
     @Override
+    public void destroy() {
+        pause();
+    }
+
+    @Override
     public String getName() {
         return mPrimaryThresholdSensor.getName();
     }

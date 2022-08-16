@@ -54,6 +54,7 @@ public class NfcTile extends QSTileImpl<BooleanState> {
     private static final String NFC = "nfc";
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_nfc);
 
+    @Nullable
     private NfcAdapter mAdapter;
     private BroadcastDispatcher mBroadcastDispatcher;
 
@@ -145,15 +146,6 @@ public class NfcTile extends QSTileImpl<BooleanState> {
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_NFC;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.quick_settings_nfc_on);
-        } else {
-            return mContext.getString(R.string.quick_settings_nfc_off);
-        }
     }
 
     private NfcAdapter getAdapter() {

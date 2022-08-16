@@ -15,9 +15,6 @@
   -->
 
 <resources>
-    <!-- Minimum margin between clock and top of screen or ambient indication -->
-    <dimen name="keyguard_clock_top_margin">38dp</dimen>
-
     <!-- Large clock maximum font size (dp is intentional, to prevent any further scaling) -->
     <dimen name="large_clock_text_size">200dp</dimen>
 

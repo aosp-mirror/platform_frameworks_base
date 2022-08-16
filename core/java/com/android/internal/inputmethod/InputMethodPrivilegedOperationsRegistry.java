@@ -74,12 +74,7 @@ public final class InputMethodPrivilegedOperationsRegistry {
             if (sRegistry == null) {
                 sRegistry = new WeakHashMap<>();
             }
-            final WeakReference<InputMethodPrivilegedOperations> previousOps =
-                    sRegistry.put(token, new WeakReference<>(ops));
-            if (previousOps != null) {
-                throw new IllegalStateException(previousOps.get() + " is already registered for "
-                        + " this token=" + token + " newOps=" + ops);
-            }
+            sRegistry.put(token, new WeakReference<>(ops));
         }
     }
 
@@ -130,23 +125,6 @@ public final class InputMethodPrivilegedOperationsRegistry {
             if (sRegistry.isEmpty()) {
                 sRegistry = null;
             }
-        }
-    }
-
-    /**
-     * Check the given IME token registration status.
-     *
-     * @param token IME token
-     * @return {@code true} when the IME token has already registered
-     *         {@link InputMethodPrivilegedOperations}, {@code false} otherwise.
-     */
-    @AnyThread
-    public static boolean isRegistered(IBinder token) {
-        synchronized (sLock) {
-            if (sRegistry == null) {
-                return false;
-            }
-            return sRegistry.containsKey(token);
         }
     }
 }

@@ -80,25 +80,6 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
          * @param mode The magnification mode
          */
         void onTouchInteractionEnd(int displayId, int mode);
-
-        /**
-         * Called when the magnification shortcut is triggered by a user. The magnification
-         * shortcut can be accessibility button or volume shortcut.
-         *
-         * @param displayId The logical display id
-         * @param mode The magnification mode
-         */
-        void onShortcutTriggered(int displayId, int mode);
-
-        /**
-         * Called when the triple-tap gesture is handled. The magnification
-         * shortcut can be a triple-tap gesture or accessibility button.
-         * Called when the triple-tap gesture is handled
-         *
-         * @param displayId The logical display id
-         * @param mode The magnification mode
-         */
-        void onTripleTapped(int displayId, int mode);
     }
 
     private final AccessibilityTraceManager mTrace;
@@ -192,7 +173,6 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
         }
         if (mDetectShortcutTrigger) {
             handleShortcutTriggered();
-            mCallback.onShortcutTriggered(mDisplayId, getMode());
         }
     }
 

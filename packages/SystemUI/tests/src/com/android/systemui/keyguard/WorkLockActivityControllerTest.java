@@ -60,6 +60,13 @@ import org.mockito.MockitoAnnotations;
 public class WorkLockActivityControllerTest extends SysuiTestCase {
     private static final int USER_ID = 333;
     private static final int TASK_ID = 444;
+    private static final ActivityManager.RunningTaskInfo TASK_INFO =
+            new ActivityManager.RunningTaskInfo();
+
+    static {
+        TASK_INFO.userId = USER_ID;
+        TASK_INFO.taskId = TASK_ID;
+    }
 
     private @Mock Context mContext;
     private @Mock TaskStackChangeListeners mTaskStackChangeListeners;
@@ -91,7 +98,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         setActivityStartCode(TASK_ID, true /*taskOverlay*/, ActivityManager.START_SUCCESS);
 
         // And the controller receives a message saying the profile is locked,
-        mTaskStackListener.onTaskProfileLocked(TASK_ID, USER_ID);
+        mTaskStackListener.onTaskProfileLocked(TASK_INFO);
 
         // The overlay should start and the task the activity started in should not be removed.
         verifyStartActivity(TASK_ID, true /*taskOverlay*/);
@@ -104,7 +111,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         setActivityStartCode(TASK_ID, true /*taskOverlay*/, ActivityManager.START_CLASS_NOT_FOUND);
 
         // And the controller receives a message saying the profile is locked,
-        mTaskStackListener.onTaskProfileLocked(TASK_ID, USER_ID);
+        mTaskStackListener.onTaskProfileLocked(TASK_INFO);
 
         // The task the activity started in should be removed to prevent the locked task from
         // being shown.

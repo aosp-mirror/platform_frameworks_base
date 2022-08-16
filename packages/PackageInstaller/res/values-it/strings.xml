@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera dello spazio e riprova."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"App non trovata"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Impossibile trovare l\'applicazione nell\'elenco di applicazioni installate."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Autorizzazione non concessa"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Non autorizzate"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"L\'utente corrente non è autorizzato a eseguire questa disinstallazione."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Errore"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Impossibile disinstallare l\'app."</string>
@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Vuoi disinstallare questa app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Vuoi disinstallare questa applicazione per "<b>"tutti"</b>" gli utenti? L\'applicazione e i relativi dati verranno rimossi da "<b>"tutti"</b>" gli utenti configurati sul dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Disinstallare l\'app per l\'utente <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Vuoi disinstallare questa app dal tuo profilo di lavoro?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Sostituire questa app con la versione di fabbrica? Tutti i dati verranno rimossi."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Sostituire questa app con la versione di fabbrica? Tutti i dati verranno rimossi. Saranno interessati tutti gli utenti del dispositivo, inclusi quelli che hanno profili di lavoro."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Mantieni <xliff:g id="SIZE">%1$s</xliff:g> di dati delle app."</string>

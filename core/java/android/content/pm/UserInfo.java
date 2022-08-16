@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -170,7 +171,7 @@ public class UserInfo implements Parcelable {
     @UnsupportedAppUsage
     public int serialNumber;
     @UnsupportedAppUsage
-    public String name;
+    public @Nullable String name;
     @UnsupportedAppUsage
     public String iconPath;
     @UnsupportedAppUsage
@@ -343,7 +344,7 @@ public class UserInfo implements Parcelable {
     }
 
     public boolean isDemo() {
-        return UserManager.isUserTypeDemo(userType);
+        return UserManager.isUserTypeDemo(userType) || (flags & FLAG_DEMO) != 0;
     }
 
     public boolean isFull() {

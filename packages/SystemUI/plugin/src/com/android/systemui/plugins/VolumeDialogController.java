@@ -60,7 +60,6 @@ public interface VolumeDialogController {
 
     boolean areCaptionsEnabled();
     void setCaptionsEnabled(boolean isEnabled);
-    boolean isCaptionStreamOptedOut();
 
     void getCaptionsComponentState(boolean fromTooltip);
 
@@ -182,7 +181,7 @@ public interface VolumeDialogController {
     public interface Callbacks {
         int VERSION = 1;
 
-        void onShowRequested(int reason);
+        void onShowRequested(int reason, boolean keyguardLocked, int lockTaskModeState);
         void onDismissRequested(int reason);
         void onStateChanged(State state);
         void onLayoutDirectionChanged(int layoutDirection);

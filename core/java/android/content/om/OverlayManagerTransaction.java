@@ -67,7 +67,7 @@ public class OverlayManagerTransaction
         mRequests = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             final int request = source.readInt();
-            final OverlayIdentifier overlay = source.readParcelable(null);
+            final OverlayIdentifier overlay = source.readParcelable(null, android.content.om.OverlayIdentifier.class);
             final int userId = source.readInt();
             final Bundle extras = source.readBundle(null);
             mRequests.add(new Request(request, overlay, userId, extras));

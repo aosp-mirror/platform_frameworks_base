@@ -21,10 +21,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.media.tv.tuner.TunerFrontendInfo;
+import android.media.tv.TvInputService;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -180,6 +182,96 @@ public class TunerResourceManager {
     }
 
     /**
+     * Checks if there is an unused frontend resource available.
+     *
+     * @param frontendType The frontend type for the query to be done for.
+     */
+    public boolean hasUnusedFrontend(int frontendType) {
+        boolean result = false;
+        try {
+            result = mService.hasUnusedFrontend(frontendType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Checks if the client has the lowest priority among the clients that are holding
+     * the frontend resource of the specified type.
+     *
+     * <p> When this function returns false, it means that there is at least one client with the
+     * strictly lower priority (than clientId) that is reclaimable by the system.
+     *
+     * @param clientId The client ID to be checked the priority for.
+     * @param frontendType The specific frontend type to be checked for.
+     *
+     * @return false if there is another client holding the frontend resource of the specified type
+     * that can be reclaimed. Otherwise true.
+     */
+    public boolean isLowestPriority(int clientId, int frontendType) {
+        boolean result = false;
+        try {
+            result = mService.isLowestPriority(clientId, frontendType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Stores the frontend resource map if it was stored before.
+     *
+     * <p>This API is only for testing purpose and should be used in pair with
+     * restoreResourceMap(), which allows testing of {@link Tuner} APIs
+     * that behave differently based on different sets of resource map.
+     *
+     * @param resourceType The resource type to store the map for.
+     */
+    public void storeResourceMap(int resourceType) {
+        try {
+            mService.storeResourceMap(resourceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the frontend resource map.
+     *
+     * <p>This API is only for testing purpose and should be called right after
+     * storeResourceMap(), so TRMService#removeFrontendResource() does not
+     * get called in TRMService#setFrontendInfoListInternal() for custom frontend
+     * resource map creation.
+     *
+     * @param resourceType The resource type to clear the map for.
+     */
+    public void clearResourceMap(int resourceType) {
+        try {
+            mService.clearResourceMap(resourceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Restores Frontend resource map for the later restore.
+     *
+     * <p>This API is only for testing purpose and should be used in pair with
+     * storeResourceMap(), which allows testing of {@link Tuner} APIs
+     * that behave differently based on different sets of resource map.
+     *
+     * @param resourceType The resource type to restore the map for.
+     */
+    public void restoreResourceMap(int resourceType) {
+        try {
+            mService.restoreResourceMap(resourceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Updates the current TRM of the TunerHAL Frontend information.
      *
      * <p><strong>Note:</strong> This update must happen before the first
@@ -231,6 +323,48 @@ public class TunerResourceManager {
     }
 
     /**
+     * Grants the lock to the caller for public {@link Tuner} APIs
+     *
+     * <p>{@link Tuner} functions that call both [@link TunerResourceManager} APIs and
+     * grabs lock that are also used in {@link IResourcesReclaimListener#onReclaimResources()}
+     * must call this API before acquiring lock used in onReclaimResources().
+     *
+     * <p>This API will block until it releases the lock or fails
+     *
+     * @param clientId The ID of the caller.
+     *
+     * @return true if the lock is granted. If false is returned, calling this API again is not
+     * guaranteed to work and may be unrecoverrable. (This should not happen.)
+     */
+    public boolean acquireLock(int clientId) {
+        try {
+            return mService.acquireLock(clientId, Thread.currentThread().getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Releases the lock to the caller for public {@link Tuner} APIs
+     *
+     * <p>This API must be called in pair with {@link #acquireLock(int, int)}
+     *
+     * <p>This API will block until it releases the lock or fails
+     *
+     * @param clientId The ID of the caller.
+     *
+     * @return true if the lock is granted. If false is returned, calling this API again is not
+     * guaranteed to work and may be unrecoverrable. (This should not happen.)
+     */
+    public boolean releaseLock(int clientId) {
+        try {
+            return mService.releaseLock(clientId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Requests a frontend resource.
      *
      * <p>There are three possible scenarios:
@@ -267,6 +401,43 @@ public class TunerResourceManager {
     }
 
     /**
+     * Sets the maximum usable frontends number of a given frontend type. It is used to enable or
+     * disable frontends when cable connection status is changed by user.
+     *
+     * @param frontendType the frontendType which the maximum usable number will be set for.
+     * @param maxNum the new maximum usable number.
+     *
+     * @return true if  successful and false otherwise.
+     */
+    public boolean setMaxNumberOfFrontends(int frontendType, int maxNum) {
+        boolean result = false;
+        try {
+            result = mService.setMaxNumberOfFrontends(frontendType, maxNum);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Get the maximum usable frontends number of a given frontend type.
+     *
+     * @param frontendType the frontendType which the maximum usable number will be queried for.
+     *
+     * @return the maximum usable number of the queried frontend type. Returns -1 when the
+     *         frontendType is invalid
+     */
+    public int getMaxNumberOfFrontends(int frontendType) {
+        int result = -1;
+        try {
+            result = mService.getMaxNumberOfFrontends(frontendType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
      * Requests from the client to share frontend with an existing client.
      *
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called
@@ -278,6 +449,25 @@ public class TunerResourceManager {
     public void shareFrontend(int selfClientId, int targetClientId) {
         try {
             mService.shareFrontend(selfClientId, targetClientId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Transfers the ownership of shared resource.
+     *
+     * <p><strong>Note:</strong> Only the existing frontend sharee can be the new owner.
+     *
+     * @param resourceType the type of the resource to transfer the ownership for.
+     * @param currentOwnerId the id of the current owner client.
+     * @param newOwnerId the id of the new owner client.
+     *
+     * @return true if successful and false otherwise.
+     */
+    public boolean transferOwner(int resourceType, int currentOwnerId, int newOwnerId) {
+        try {
+            return mService.transferOwner(resourceType, currentOwnerId, newOwnerId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -565,6 +755,49 @@ public class TunerResourceManager {
             ResourceClientProfile holderProfile) {
         try {
             return mService.isHigherPriority(challengerProfile, holderProfile);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a priority for the given use case type and the client's foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param pid the pid of the client. When the pid is invalid, background status will be used as
+     *        a client's status. Otherwise, client's app corresponding to the given session id will
+     *        be used as a client. {@see TvInputService#onCreateSession(String, String)}.
+     *
+     * @return the client priority..
+     */
+    public int getClientPriority(@TvInputService.PriorityHintUseCaseType int useCase, int pid) {
+        try {
+            return mService.getClientPriority(useCase, pid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a config priority for the given use case type and the foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param isForeground {@code true} if foreground, {@code false} otherwise.
+     *
+     * @return the config priority.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("ShowingMemberInHiddenClass")
+    public int getConfigPriority(@TvInputService.PriorityHintUseCaseType int useCase,
+            boolean isForeground) {
+        try {
+            return mService.getConfigPriority(useCase, isForeground);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -309,24 +309,25 @@ public final class ManualBenchmarkState {
             status.putLong(key + "_iteration", stats.getSize());
         }
         if (shouldReport(StatsReport.FLAG_MEDIAN)) {
-            status.putLong(key + "_median", stats.getMedian());
+            status.putLong(key + "_median (ns)", stats.getMedian());
         }
         if (shouldReport(StatsReport.FLAG_MEAN)) {
-            status.putLong(key + "_mean", Math.round(stats.getMean()));
+            status.putLong(key + "_mean (ns)", Math.round(stats.getMean()));
         }
         if (shouldReport(StatsReport.FLAG_MIN)) {
-            status.putLong(key + "_min", stats.getMin());
+            status.putLong(key + "_min (ns)", stats.getMin());
         }
         if (shouldReport(StatsReport.FLAG_MAX)) {
-            status.putLong(key + "_max", stats.getMax());
+            status.putLong(key + "_max (ns)", stats.getMax());
         }
         if (mStatsReportPercentiles != null) {
             for (int percentile : mStatsReportPercentiles) {
-                status.putLong(key + "_percentile" + percentile, stats.getPercentile(percentile));
+                status.putLong(key + "_percentile" + percentile + " (ns)",
+                        stats.getPercentile(percentile));
             }
         }
         if (shouldReport(StatsReport.FLAG_STDDEV)) {
-            status.putLong(key + "_stddev", Math.round(stats.getStandardDeviation()));
+            status.putLong(key + "_stddev (ns)", Math.round(stats.getStandardDeviation()));
         }
         if (shouldReport(StatsReport.FLAG_COEFFICIENT_VAR)) {
             status.putLong(key + "_cv",

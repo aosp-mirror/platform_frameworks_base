@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -29,6 +27,7 @@ import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -46,9 +45,9 @@ import org.junit.runners.Parameterized
 class AppPairsTestPairPrimaryAndSecondaryApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             transitions {
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
@@ -57,23 +56,23 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
             }
         }
 
-    @Presubmit
+    @Ignore
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
-    @FlakyTest
+    @Ignore
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest
+    @Ignore
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
 
-    @Presubmit
+    @Ignore
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
@@ -82,7 +81,7 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
         }
     }
 
-    @FlakyTest
+    @Ignore
     @Test
     fun appsEndingBounds() {
         testSpec.assertLayersEnd {

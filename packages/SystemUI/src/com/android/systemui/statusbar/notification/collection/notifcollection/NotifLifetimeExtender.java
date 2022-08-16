@@ -45,7 +45,7 @@ public interface NotifLifetimeExtender {
      * called on all lifetime extenders even if earlier ones return true (in other words, multiple
      * lifetime extenders can be extending a notification at the same time).
      */
-    boolean shouldExtendLifetime(@NonNull NotificationEntry entry, @CancellationReason int reason);
+    boolean maybeExtendLifetime(@NonNull NotificationEntry entry, @CancellationReason int reason);
 
     /**
      * Called by the NotifCollection to inform a lifetime extender that its extension of a notif

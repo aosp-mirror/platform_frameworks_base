@@ -38,6 +38,10 @@ import java.util.concurrent.TimeUnit;
  */
 class GnssPsdsDownloader {
 
+    // how often to request PSDS download, in milliseconds
+    // current setting 24 hours
+    static final long PSDS_INTERVAL = 24 * 60 * 60 * 1000;
+
     private static final String TAG = "GnssPsdsDownloader";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long MAXIMUM_CONTENT_LENGTH_BYTES = 1000000;  // 1MB.
@@ -57,9 +61,12 @@ class GnssPsdsDownloader {
     GnssPsdsDownloader(Properties properties) {
         // read PSDS servers from the Properties object
         int count = 0;
-        String longTermPsdsServer1 = properties.getProperty("LONGTERM_PSDS_SERVER_1");
-        String longTermPsdsServer2 = properties.getProperty("LONGTERM_PSDS_SERVER_2");
-        String longTermPsdsServer3 = properties.getProperty("LONGTERM_PSDS_SERVER_3");
+        String longTermPsdsServer1 = properties.getProperty(
+                GnssConfiguration.CONFIG_LONGTERM_PSDS_SERVER_1);
+        String longTermPsdsServer2 = properties.getProperty(
+                GnssConfiguration.CONFIG_LONGTERM_PSDS_SERVER_2);
+        String longTermPsdsServer3 = properties.getProperty(
+                GnssConfiguration.CONFIG_LONGTERM_PSDS_SERVER_3);
         if (longTermPsdsServer1 != null) count++;
         if (longTermPsdsServer2 != null) count++;
         if (longTermPsdsServer3 != null) count++;
@@ -79,8 +86,10 @@ class GnssPsdsDownloader {
             mNextServerIndex = random.nextInt(count);
         }
 
-        String normalPsdsServer = properties.getProperty("NORMAL_PSDS_SERVER");
-        String realtimePsdsServer = properties.getProperty("REALTIME_PSDS_SERVER");
+        String normalPsdsServer = properties.getProperty(
+                GnssConfiguration.CONFIG_NORMAL_PSDS_SERVER);
+        String realtimePsdsServer = properties.getProperty(
+                GnssConfiguration.CONFIG_REALTIME_PSDS_SERVER);
         mPsdsServers = new String[MAX_PSDS_TYPE_INDEX + 1];
         mPsdsServers[NORMAL_PSDS_SERVER_INDEX] = normalPsdsServer;
         mPsdsServers[REALTIME_PSDS_SERVER_INDEX] = realtimePsdsServer;

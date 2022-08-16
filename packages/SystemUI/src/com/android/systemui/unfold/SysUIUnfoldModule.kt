@@ -17,10 +17,12 @@
 package com.android.systemui.unfold
 
 import com.android.keyguard.KeyguardUnfoldTransition
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.phone.NotificationPanelUnfoldAnimationController
+import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
+import com.android.systemui.util.kotlin.getOrNull
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
@@ -36,15 +38,17 @@ annotation class SysUIUnfoldScope
 
 /**
  * Creates an injectable [SysUIUnfoldComponent] that provides objects that have been scoped with
- * [@SysUIUnfoldScope]. Since [SysUIUnfoldComponent] depends upon:
+ * [@SysUIUnfoldScope].
+ *
+ * Since [SysUIUnfoldComponent] depends upon:
  * * [Optional<UnfoldTransitionProgressProvider>]
  * * [Optional<ScopedUnfoldTransitionProgressProvider>]
  * * [Optional<NaturalRotationProgressProvider>]
+ *
  * no objects will get constructed if these parameters are empty.
  */
 @Module(subcomponents = [SysUIUnfoldComponent::class])
 class SysUIUnfoldModule {
-    constructor() {}
 
     @Provides
     @SysUISingleton
@@ -53,12 +57,16 @@ class SysUIUnfoldModule {
         rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
         @Named(UNFOLD_STATUS_BAR) scopedProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         factory: SysUIUnfoldComponent.Factory
-    ) =
-        provider.flatMap { p1 ->
-            rotationProvider.flatMap { p2 ->
-                scopedProvider.map { p3 -> factory.create(p1, p2, p3) }
-            }
+    ): Optional<SysUIUnfoldComponent> {
+        val p1 = provider.getOrNull()
+        val p2 = rotationProvider.getOrNull()
+        val p3 = scopedProvider.getOrNull()
+        return if (p1 == null || p2 == null || p3 == null) {
+            Optional.empty()
+        } else {
+            Optional.of(factory.create(p1, p2, p3))
         }
+    }
 }
 
 @SysUIUnfoldScope
@@ -77,6 +85,10 @@ interface SysUIUnfoldComponent {
     fun getKeyguardUnfoldTransition(): KeyguardUnfoldTransition
 
     fun getStatusBarMoveFromCenterAnimationController(): StatusBarMoveFromCenterAnimationController
+
+    fun getNotificationPanelUnfoldAnimationController(): NotificationPanelUnfoldAnimationController
+
+    fun getFoldAodAnimationController(): FoldAodAnimationController
 
     fun getUnfoldTransitionWallpaperController(): UnfoldTransitionWallpaperController
 
