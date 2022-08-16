@@ -234,6 +234,10 @@ public class Flags {
     public static final SysPropBooleanFlag WM_CAPTION_ON_SHELL =
             new SysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", false);
 
+    @Keep
+    public static final SysPropBooleanFlag FLOATING_TASKS_ENABLED =
+            new SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false);
+
     // 1200 - predictive back
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(
