@@ -12810,6 +12810,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Set if view is a heading for a section of content for accessibility purposes.
+     * <p>
+     * Users of some accessibility services can choose to navigate between headings
+     * instead of between paragraphs, words, etc. Apps that provide headings on
+     * sections of text can help the text navigation experience.
      *
      * @param isHeading {@code true} if the view is a heading, {@code false} otherwise.
      *

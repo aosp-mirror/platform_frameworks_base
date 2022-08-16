@@ -168,7 +168,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * signature checks} or
      * <a href="https://developer.android.com/training/articles/security-tips#Permissions">permissions</a>.
      *
-     * <p><b>Warning:</b> Note that does flag not behave the same as
+     * <p><b>Warning:</b> Note that this flag does not behave the same as
      * {@link android.R.attr#protectionLevel android:protectionLevel} {@code system} or
      * {@code signatureOrSystem}.
      */

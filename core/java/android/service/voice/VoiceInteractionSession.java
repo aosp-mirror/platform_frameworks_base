@@ -84,12 +84,12 @@ import java.util.function.Consumer;
 
 /**
  * An active voice interaction session, providing a facility for the implementation
- * to interact with the user in the voice interaction layer.  The user interface is
- * initially shown by default, and can be created be overriding {@link #onCreateContentView()}
+ * to interact with the user in the voice interaction layer. The user interface is
+ * initially shown by default, and can be created by overriding {@link #onCreateContentView()}
  * in which the UI can be built.
  *
  * <p>A voice interaction session can be self-contained, ultimately calling {@link #finish}
- * when done.  It can also initiate voice interactions with applications by calling
+ * when done. It can also initiate voice interactions with applications by calling
  * {@link #startVoiceActivity}</p>.
  */
 public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCallbacks2 {

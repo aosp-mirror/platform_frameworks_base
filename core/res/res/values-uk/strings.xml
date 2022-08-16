@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"Пб"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без назви&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Немає номера тел.)"</string>
@@ -639,8 +634,8 @@
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Тримайте телефон ближче до обличчя."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Тримайте телефон вище."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Тримайте телефон нижче."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Тримайте телефон лівіше."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Тримайте телефон правіше."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Посуньте телефон лівіше."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Посуньте телефон правіше."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Дивіться просто на пристрій."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Тримайте телефон просто перед обличчям."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
@@ -2177,7 +2172,7 @@
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
-    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про програму"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим енергозбереження"</string>

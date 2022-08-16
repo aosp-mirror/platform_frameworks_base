@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"ባ"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"ኪባ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"ሜባ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ጊባ"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ቴባ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ፔባ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;ርዕስ አልባ&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ምንም ስልክ ቁጥር የለም)"</string>
@@ -420,7 +415,7 @@
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"መተግበሪያው በእርስዎ ስልክ ላይ ስለተከማቹ እውቂያዎችዎ ያለ ውሂብን እንዲቀይር ያስችለዋል። ይህ ፈቃድ መተግበሪያዎች የእውቂያ ውሂብን እንዲሰርዙ ያስችላቸዋል።"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"የጥሪ ምዝግብ ማስታወሻን ያንብቡ"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"ይህ መተግበሪያ የእርስዎን የጥሪ ታሪክ ማንበብ ይችላል።"</string>
-    <string name="permlab_writeCallLog" msgid="670292975137658895">"የጥሪ ምዝግብ ማስታወሻን ፃፍ"</string>
+    <string name="permlab_writeCallLog" msgid="670292975137658895">"የጥሪ ምዝግብ ማስታወሻን ጻፍ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያለ ውሂብም ጨምሮ የእርስዎ Android TV መሣሪያ ምዝግብ ማስታወሻ እንዲቀይር ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ይህን ተጠቅመው የስልክዎን ምዝግብ ማስታወሻ ሊደመስሱ ወይም ሊቀይሩ ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>

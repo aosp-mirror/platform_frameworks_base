@@ -37,6 +37,7 @@ android_test {
         "vts",
     ],
     data: [
+        ":EmojiRenderingTestApp",
         ":NotoColorEmojiTtf",
         ":UpdatableSystemFontTestCertDer",
         ":UpdatableSystemFontTestNotoColorEmojiTtfFsvSig",

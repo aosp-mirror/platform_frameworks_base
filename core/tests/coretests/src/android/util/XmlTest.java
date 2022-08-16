@@ -224,7 +224,7 @@ public class XmlTest {
         doVerifyRead(in);
     }
 
-    private static final String TEST_STRING = "com.example";
+    private static final String TEST_STRING = "com☃example😀typical☃package😀name";
     private static final String TEST_STRING_EMPTY = "";
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4, 3, 2, 1, 0 };
     private static final byte[] TEST_BYTES_EMPTY = new byte[0];

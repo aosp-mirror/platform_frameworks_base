@@ -337,7 +337,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             boolean hasPublicClients = false;
             while (clientIterator.hasNext()) {
                 RecMonitorClient rmc = clientIterator.next();
-                if (rcdb.equals(rmc.mDispatcherCb)) {
+                if (rcdb.asBinder().equals(rmc.mDispatcherCb.asBinder())) {
                     rmc.release();
                     clientIterator.remove();
                 } else {

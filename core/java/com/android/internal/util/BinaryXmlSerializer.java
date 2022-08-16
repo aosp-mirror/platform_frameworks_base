@@ -91,12 +91,6 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
     static final int TYPE_BOOLEAN_TRUE = 12 << 4;
     static final int TYPE_BOOLEAN_FALSE = 13 << 4;
 
-    /**
-     * Default buffer size, which matches {@code FastXmlSerializer}. This should
-     * be kept in sync with {@link BinaryXmlPullParser}.
-     */
-    private static final int BUFFER_SIZE = 32_768;
-
     private FastDataOutput mOut;
 
     /**
@@ -124,7 +118,7 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
             throw new UnsupportedOperationException();
         }
 
-        mOut = new FastDataOutput(os, BUFFER_SIZE);
+        mOut = FastDataOutput.obtainUsing4ByteSequences(os);
         mOut.write(PROTOCOL_MAGIC_VERSION_0);
 
         mTagCount = 0;
@@ -138,7 +132,9 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
 
     @Override
     public void flush() throws IOException {
-        mOut.flush();
+        if (mOut != null) {
+            mOut.flush();
+        }
     }
 
     @Override
@@ -157,6 +153,9 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
     public void endDocument() throws IOException {
         mOut.writeByte(END_DOCUMENT | TYPE_NULL);
         flush();
+
+        mOut.release();
+        mOut = null;
     }
 
     @Override

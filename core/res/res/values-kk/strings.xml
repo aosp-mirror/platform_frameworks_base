@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Атаусыз&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Телефон нөмірі жоқ)"</string>
@@ -274,7 +269,7 @@
     <string name="global_action_lockdown" msgid="2475471405907902963">"Құлыптау"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Жаңа хабарландыру"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Виртуалды пернетақта"</string>
+    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Виртуалдық пернетақта"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Физикалық пернетақта"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Қауіпсіздік"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Көлік режимі"</string>
@@ -1168,7 +1163,7 @@
     <string name="replace" msgid="7842675434546657444">"… сөзін алмастыру"</string>
     <string name="delete" msgid="1514113991712129054">"Жою"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL мекенжайын көшіру"</string>
-    <string name="selectTextMode" msgid="3225108910999318778">"Мәтінді бөлектеу"</string>
+    <string name="selectTextMode" msgid="3225108910999318778">"Мәтінді ерекшелеу"</string>
     <string name="undo" msgid="3175318090002654673">"Қайтару"</string>
     <string name="redo" msgid="7231448494008532233">"Қайтару"</string>
     <string name="autofill" msgid="511224882647795296">"Aвтотолтыру"</string>
@@ -1404,7 +1399,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Енгізу әдісін таңдау"</string>
     <string name="show_ime" msgid="6406112007347443383">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
-    <string name="hardware" msgid="1800597768237606953">"Виртуалды пернетақтаны көрсету"</string>
+    <string name="hardware" msgid="1800597768237606953">"Виртуалдық пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Физикалық пернетақтаны конфигурациялау"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1503,7 +1498,7 @@
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Артқы фоны"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Артқы фонын өзгерту"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Хабар бақылағыш"</string>
-    <string name="vr_listener_binding_label" msgid="8013112996671206429">"Виртуалды шынайылық тыңдаушысы"</string>
+    <string name="vr_listener_binding_label" msgid="8013112996671206429">"Виртуалдық шынайылық тыңдаушысы"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Шарт провайдері"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Хабарландыруларды жіктеу қызметі"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN белсенді"</string>

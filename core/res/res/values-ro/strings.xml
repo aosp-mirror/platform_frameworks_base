@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TO"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PO"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Fără titlu&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Niciun număr de telefon)"</string>
@@ -1402,8 +1397,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Se încarcă dispozitivul conectat. Atingeți pentru mai multe opțiuni."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"S-a detectat un accesoriu audio analogic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Dispozitivul atașat nu este compatibil cu acest telefon. Atingeți pentru a afla mai multe."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Remedierea erorilor prin USB este conectată"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Atingeți pentru a dezactiva remedierea erorilor prin USB."</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Remedierea erorilor prin USB conectată"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Atingeți pentru a dezactiva."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selectați pentru a dezactiva remedierea erorilor prin USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Remedierea erorilor wireless este activă"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Atingeți pentru a dezactiva remedierea erorilor wireless"</string>

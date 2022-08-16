@@ -56,7 +56,7 @@ public class UpdatableListPreferenceDialogFragmentTest {
 
         mUpdatableListPrefDlgFragment = spy(UpdatableListPreferenceDialogFragment
                 .newInstance(KEY, MetricsProto.MetricsEvent.DIALOG_SWITCH_A2DP_DEVICES));
-        mEntries = spy(new ArrayList<>());
+        mEntries = new ArrayList<>();
         mUpdatableListPrefDlgFragment.setEntries(mEntries);
         mUpdatableListPrefDlgFragment
                 .setMetricsCategory(mUpdatableListPrefDlgFragment.getArguments());

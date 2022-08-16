@@ -26,6 +26,12 @@ import dalvik.annotation.optimization.FastNative;
  * <p>
  * These methods purposefully accept only non-movable byte array addresses to
  * avoid extra JNI overhead.
+ * <p>
+ * Callers are cautioned that there is a long-standing ART bug that emits
+ * non-standard 4-byte sequences, as described by {@code kUtfUse4ByteSequence}
+ * in {@code art/runtime/jni/jni_internal.cc}. If precise modified UTF-8
+ * encoding is required, use {@link com.android.internal.util.ModifiedUtf8}
+ * instead.
  *
  * @hide
  */
@@ -33,6 +39,12 @@ public class CharsetUtils {
     /**
      * Attempt to encode the given string as modified UTF-8 into the destination
      * byte array without making any new allocations.
+     * <p>
+     * Callers are cautioned that there is a long-standing ART bug that emits
+     * non-standard 4-byte sequences, as described by
+     * {@code kUtfUse4ByteSequence} in {@code art/runtime/jni/jni_internal.cc}.
+     * If precise modified UTF-8 encoding is required, use
+     * {@link com.android.internal.util.ModifiedUtf8} instead.
      *
      * @param src string value to be encoded
      * @param dest destination byte array to encode into
@@ -50,6 +62,12 @@ public class CharsetUtils {
     /**
      * Attempt to encode the given string as modified UTF-8 into the destination
      * byte array without making any new allocations.
+     * <p>
+     * Callers are cautioned that there is a long-standing ART bug that emits
+     * non-standard 4-byte sequences, as described by
+     * {@code kUtfUse4ByteSequence} in {@code art/runtime/jni/jni_internal.cc}.
+     * If precise modified UTF-8 encoding is required, use
+     * {@link com.android.internal.util.ModifiedUtf8} instead.
      *
      * @param src string value to be encoded
      * @param srcLen exact length of string to be encoded
@@ -66,6 +84,12 @@ public class CharsetUtils {
 
     /**
      * Attempt to decode a modified UTF-8 string from the source byte array.
+     * <p>
+     * Callers are cautioned that there is a long-standing ART bug that emits
+     * non-standard 4-byte sequences, as described by
+     * {@code kUtfUse4ByteSequence} in {@code art/runtime/jni/jni_internal.cc}.
+     * If precise modified UTF-8 encoding is required, use
+     * {@link com.android.internal.util.ModifiedUtf8} instead.
      *
      * @param src source byte array to decode from
      * @param srcOff offset into source where decoding should begin

@@ -2528,7 +2528,9 @@ public class ActivityRecordTests extends WindowTestsBase {
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                     "splash_screen_exception_list", DEFAULT_COMPONENT_PACKAGE_NAME, false);
             testLegacySplashScreen(Build.VERSION_CODES.R, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            testLegacySplashScreen(Build.VERSION_CODES.S, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.S_V2, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.S_V2 + 1, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);
@@ -3065,11 +3067,11 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Simulate app re-start input or turning screen off/on then unlocked by un-secure
         // keyguard to back to the app, expect IME insets is not frozen
-        mDisplayContent.updateImeInputAndControlTarget(app);
-        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         imeSource.setFrame(new Rect(100, 400, 500, 500));
         app.getInsetsState().addSource(imeSource);
         app.getInsetsState().setSourceVisible(ITYPE_IME, true);
+        mDisplayContent.updateImeInputAndControlTarget(app);
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);

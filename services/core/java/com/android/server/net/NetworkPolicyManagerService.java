@@ -1382,8 +1382,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean roamingChanged = updateCapabilityChange(
                         mNetworkRoaming, newRoaming, network);
 
-                if (meteredChanged || roamingChanged) {
+                final boolean shouldUpdateNetworkRules = meteredChanged || roamingChanged;
+
+                if (meteredChanged) {
                     mLogger.meterednessChanged(network.getNetId(), newMetered);
+                }
+
+                if (roamingChanged) {
+                    mLogger.roamingChanged(network.getNetId(), newRoaming);
+                }
+
+                if (shouldUpdateNetworkRules) {
                     updateNetworkRulesNL();
                 }
             }
@@ -1396,6 +1405,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean ifacesChanged = updateNetworkToIfacesNL(network.getNetId(),
                         newIfaces);
                 if (ifacesChanged) {
+                    mLogger.interfacesChanged(network.getNetId(), newIfaces);
                     updateNetworkRulesNL();
                 }
             }
@@ -4046,6 +4056,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < size; ++i) {
                     fout.print("u" + mMeteredRestrictedUids.keyAt(i) + ": ");
                     fout.println(mMeteredRestrictedUids.valueAt(i));
+                }
+                fout.decreaseIndent();
+
+                fout.println("Network to interfaces:");
+                fout.increaseIndent();
+                for (int i = 0; i < mNetworkToIfaces.size(); ++i) {
+                    final int key = mNetworkToIfaces.keyAt(i);
+                    fout.println(key + ": " + mNetworkToIfaces.get(key));
                 }
                 fout.decreaseIndent();
 

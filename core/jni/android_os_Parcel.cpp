@@ -549,10 +549,15 @@ static jbyteArray android_os_Parcel_marshall(JNIEnv* env, jclass clazz, jlong na
        return NULL;
     }
 
-    // do not marshall if there are binder objects in the parcel
+    if (parcel->isForRpc()) {
+        jniThrowException(env, "java/lang/RuntimeException", "Tried to marshall an RPC Parcel.");
+        return NULL;
+    }
+
     if (parcel->objectsCount())
     {
-        jniThrowException(env, "java/lang/RuntimeException", "Tried to marshall a Parcel that contained Binder objects.");
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "Tried to marshall a Parcel that contains objects (binders or FDs).");
         return NULL;
     }
 
