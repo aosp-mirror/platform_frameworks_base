@@ -525,7 +525,7 @@ public final class FlexibilityController extends StateController {
         public void dump(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
             for (int i = 0; i < mTrackedJobs.size(); i++) {
                 ArraySet<JobStatus> jobs = mTrackedJobs.get(i);
-                for (int j = 0; j < mTrackedJobs.size(); j++) {
+                for (int j = 0; j < jobs.size(); j++) {
                     final JobStatus js = jobs.valueAt(j);
                     if (!predicate.test(js)) {
                         continue;
