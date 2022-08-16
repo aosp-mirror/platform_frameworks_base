@@ -1374,21 +1374,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
-            if (mFocusingTaskInfo != null && !isValidToEnterSplitScreen(mFocusingTaskInfo)) {
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                mSideStage.removeAllTasks(wct, true);
-                wct.reorder(mRootTaskInfo.token, false /* onTop */);
-                mTaskOrganizer.applyTransaction(wct);
-                Slog.i(TAG, "cancel entering split screen, reason = "
-                        + exitReasonToString(EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW));
-            } else {
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                mSplitLayout.init();
-                prepareEnterSplitScreen(wct);
-                mSyncQueue.queue(wct);
-                mSyncQueue.runInSync(t ->
-                        updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
-            }
+            // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mSplitLayout.init();
+            prepareEnterSplitScreen(wct);
+            mSyncQueue.queue(wct);
+            mSyncQueue.runInSync(t ->
+                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
             mShouldUpdateRecents = true;
