@@ -18,7 +18,6 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -2085,15 +2084,6 @@ public final class InputMethodManager {
             if (view.getViewRootImpl() != mCurRootView) {
                 Log.w(TAG, "Ignoring startStylusHandwriting: View's window does not have focus.");
                 return;
-            }
-            if (mServedInputConnection != null && getDelegate().hasActiveConnection(view)) {
-                // TODO (b/210039666): optimize CURSOR_UPDATE_IMMEDIATE.
-                // TODO (b/210039666): Pipe IME displayId from InputBindResult and use it here.
-                //  instead of mDisplayId.
-                mServedInputConnection.requestCursorUpdatesFromImm(
-                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR,
-                                CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
-                        mDisplayId);
             }
 
             mServiceInvoker.startStylusHandwriting(mClient);
