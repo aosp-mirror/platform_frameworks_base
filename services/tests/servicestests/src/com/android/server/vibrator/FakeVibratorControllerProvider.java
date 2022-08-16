@@ -127,9 +127,17 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public long compose(PrimitiveSegment[] effects, long vibrationId) {
+        public long compose(PrimitiveSegment[] primitives, long vibrationId) {
+            if (mSupportedPrimitives == null) {
+                return 0;
+            }
+            for (PrimitiveSegment primitive : primitives) {
+                if (Arrays.binarySearch(mSupportedPrimitives, primitive.getPrimitiveId()) < 0) {
+                    return 0;
+                }
+            }
             long duration = 0;
-            for (PrimitiveSegment primitive : effects) {
+            for (PrimitiveSegment primitive : primitives) {
                 duration += EFFECT_DURATION + primitive.getDelay();
                 recordEffectSegment(vibrationId, primitive);
             }
