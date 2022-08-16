@@ -14127,8 +14127,11 @@ public class TelephonyManager {
      * network; {@code false} if it is not; or throw an SecurityException if the caller does not
      * have the required permission/privileges
      * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @deprecated Please use {@link TelephonyManager#isEmergencyNumber(String)} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
