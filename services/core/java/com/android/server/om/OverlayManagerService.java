@@ -39,6 +39,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -1416,16 +1417,18 @@ public final class OverlayManagerService extends SystemService {
 
     private static void broadcastActionOverlayChanged(@NonNull final Set<String> targetPackages,
             final int userId) {
+        final PackageManagerInternal pmInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        final ActivityManagerInternal amInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
         CollectionUtils.forEach(targetPackages, target -> {
             final Intent intent = new Intent(ACTION_OVERLAY_CHANGED,
                     Uri.fromParts("package", target, null));
             intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            try {
-                ActivityManager.getService().broadcastIntent(null, intent, null, null, 0, null,
-                        null, null, android.app.AppOpsManager.OP_NONE, null, false, false, userId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "broadcastActionOverlayChanged remote exception", e);
-            }
+            final int[] allowList = pmInternal.getVisibilityAllowList(target, userId);
+            amInternal.broadcastIntent(intent, null /* resultTo */, null /* requiredPermissions */,
+                    false /* serialized */, userId, allowList, null /* filterExtrasForReceiver */,
+                    null /* bOptions */);
         });
     }
 
