@@ -189,7 +189,8 @@ public class InstallStaging extends AlertActivity {
                         out.write(buffer, 0, bytesRead);
                     }
                 }
-            } catch (IOException | SecurityException | IllegalStateException e) {
+            } catch (IOException | SecurityException | IllegalStateException
+                    | IllegalArgumentException e) {
                 Log.w(LOG_TAG, "Error staging apk from content URI", e);
                 return false;
             }
