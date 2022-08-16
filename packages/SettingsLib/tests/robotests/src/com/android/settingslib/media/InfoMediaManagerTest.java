@@ -112,7 +112,7 @@ public class InfoMediaManagerTest {
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
 
-        mInfoMediaManager.mMediaRouterCallback.onRoutesAdded(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
@@ -135,7 +135,7 @@ public class InfoMediaManagerTest {
         assertThat(mediaDevice).isNull();
 
         mInfoMediaManager.mPackageName = "";
-        mInfoMediaManager.mMediaRouterCallback.onRoutesAdded(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
@@ -199,7 +199,7 @@ public class InfoMediaManagerTest {
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
 
-        mInfoMediaManager.mMediaRouterCallback.onRoutesChanged(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
@@ -222,7 +222,7 @@ public class InfoMediaManagerTest {
         assertThat(mediaDevice).isNull();
 
         mInfoMediaManager.mPackageName = "";
-        mInfoMediaManager.mMediaRouterCallback.onRoutesChanged(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
@@ -263,7 +263,7 @@ public class InfoMediaManagerTest {
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
 
-        mInfoMediaManager.mMediaRouterCallback.onRoutesRemoved(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
@@ -286,7 +286,7 @@ public class InfoMediaManagerTest {
         assertThat(mediaDevice).isNull();
 
         mInfoMediaManager.mPackageName = "";
-        mInfoMediaManager.mMediaRouterCallback.onRoutesRemoved(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);

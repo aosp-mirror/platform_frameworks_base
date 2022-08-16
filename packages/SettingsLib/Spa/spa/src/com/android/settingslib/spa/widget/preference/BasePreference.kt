@@ -19,8 +19,6 @@ package com.android.settingslib.spa.widget.preference
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BatteryChargingFull
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
@@ -29,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.ui.SettingsBody
 
 @Composable
 internal fun BasePreference(
@@ -44,15 +43,7 @@ internal fun BasePreference(
 ) {
     BaseLayout(
         title = title,
-        subTitle = {
-            if (summary.value.isNotEmpty()) {
-                Text(
-                    text = summary.value,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        },
+        subTitle = { SettingsBody(summary) },
         modifier = modifier,
         icon = icon,
         enabled = enabled,

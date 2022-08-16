@@ -131,7 +131,7 @@ public class InternalResourceService extends SystemService {
 
     @NonNull
     @GuardedBy("mLock")
-    private final List<PackageInfo> mPkgCache = new ArrayList<>();
+    private final List<InstalledPackageInfo> mPkgCache = new ArrayList<>();
 
     /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
     @GuardedBy("mLock")
@@ -303,7 +303,7 @@ public class InternalResourceService extends SystemService {
     }
 
     @NonNull
-    List<PackageInfo> getInstalledPackages() {
+    List<InstalledPackageInfo> getInstalledPackages() {
         synchronized (mLock) {
             return mPkgCache;
         }
@@ -311,13 +311,12 @@ public class InternalResourceService extends SystemService {
 
     /** Returns the installed packages for the specified user. */
     @NonNull
-    List<PackageInfo> getInstalledPackages(final int userId) {
-        final List<PackageInfo> userPkgs = new ArrayList<>();
+    List<InstalledPackageInfo> getInstalledPackages(final int userId) {
+        final List<InstalledPackageInfo> userPkgs = new ArrayList<>();
         synchronized (mLock) {
             for (int i = 0; i < mPkgCache.size(); ++i) {
-                final PackageInfo packageInfo = mPkgCache.get(i);
-                if (packageInfo.applicationInfo != null
-                        && UserHandle.getUserId(packageInfo.applicationInfo.uid) == userId) {
+                final InstalledPackageInfo packageInfo = mPkgCache.get(i);
+                if (UserHandle.getUserId(packageInfo.uid) == userId) {
                     userPkgs.add(packageInfo);
                 }
             }
@@ -451,7 +450,7 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            mPkgCache.add(packageInfo);
+            mPkgCache.add(new InstalledPackageInfo(packageInfo));
             mUidToPackageCache.add(uid, pkgName);
             // TODO: only do this when the user first launches the app (app leaves stopped state)
             mAgent.grantBirthrightLocked(userId, pkgName);
@@ -472,8 +471,8 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mUidToPackageCache.remove(uid, pkgName);
             for (int i = 0; i < mPkgCache.size(); ++i) {
-                PackageInfo pkgInfo = mPkgCache.get(i);
-                if (UserHandle.getUserId(pkgInfo.applicationInfo.uid) == userId
+                final InstalledPackageInfo pkgInfo = mPkgCache.get(i);
+                if (UserHandle.getUserId(pkgInfo.uid) == userId
                         && pkgName.equals(pkgInfo.packageName)) {
                     mPkgCache.remove(i);
                     break;
@@ -496,8 +495,11 @@ public class InternalResourceService extends SystemService {
 
     void onUserAdded(final int userId) {
         synchronized (mLock) {
-            mPkgCache.addAll(
-                    mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId));
+            final List<PackageInfo> pkgs =
+                    mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
+            for (int i = pkgs.size() - 1; i >= 0; --i) {
+                mPkgCache.add(new InstalledPackageInfo(pkgs.get(i)));
+            }
             mAgent.grantBirthrightsLocked(userId);
         }
     }
@@ -506,10 +508,10 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             ArrayList<String> removedPkgs = new ArrayList<>();
             for (int i = mPkgCache.size() - 1; i >= 0; --i) {
-                PackageInfo pkgInfo = mPkgCache.get(i);
-                if (UserHandle.getUserId(pkgInfo.applicationInfo.uid) == userId) {
+                final InstalledPackageInfo pkgInfo = mPkgCache.get(i);
+                if (UserHandle.getUserId(pkgInfo.uid) == userId) {
                     removedPkgs.add(pkgInfo.packageName);
-                    mUidToPackageCache.remove(pkgInfo.applicationInfo.uid);
+                    mUidToPackageCache.remove(pkgInfo.uid);
                     mPkgCache.remove(i);
                     break;
                 }
@@ -659,8 +661,11 @@ public class InternalResourceService extends SystemService {
                 LocalServices.getService(UserManagerInternal.class);
         final int[] userIds = userManagerInternal.getUserIds();
         for (int userId : userIds) {
-            mPkgCache.addAll(
-                    mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId));
+            final List<PackageInfo> pkgs =
+                    mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
+            for (int i = pkgs.size() - 1; i >= 0; --i) {
+                mPkgCache.add(new InstalledPackageInfo(pkgs.get(i)));
+            }
         }
     }
 

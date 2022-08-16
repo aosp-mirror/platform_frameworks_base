@@ -30,6 +30,7 @@ import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.SPLIT_DECOR_MANAGER
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.testapp.Components
 
@@ -218,6 +219,23 @@ class SplitScreenHelper(
             } finally {
                 allApps.unfreeze()
             }
+        }
+
+        fun dragDividerToResizeAndWait(
+            device: UiDevice,
+            wmHelper: WindowManagerStateHelper
+        ) {
+            val displayBounds = wmHelper.currentState.layerState
+                .displays.firstOrNull { !it.isVirtual }
+                ?.layerStackSpace
+                ?: error("Display not found")
+            val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
+            dividerBar.drag(Point(displayBounds.width * 2 / 3, displayBounds.height * 2 / 3))
+
+            wmHelper.StateSyncBuilder()
+                .withAppTransitionIdle()
+                .withWindowSurfaceDisappeared(SPLIT_DECOR_MANAGER)
+                .waitForAndVerify()
         }
 
         fun dragDividerToDismissSplit(

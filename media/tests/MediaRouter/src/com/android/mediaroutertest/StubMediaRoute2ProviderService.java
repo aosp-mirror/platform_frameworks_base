@@ -30,7 +30,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -146,19 +148,44 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
      * they have the same route id.
      */
     public void addRoute(@NonNull MediaRoute2Info route) {
-        Objects.requireNonNull(route, "route must not be null");
-        mRoutes.put(route.getOriginalId(), route);
-        publishRoutes();
+        addRoutes(Collections.singletonList(route));
     }
 
     /**
-     * Removes a route and publishes it.
+     * Adds a list of routes and publishes it. It will replace existing routes with matching ids.
+     *
+     * @param routes list of routes to be added.
      */
+    public void addRoutes(@NonNull List<MediaRoute2Info> routes) {
+        Objects.requireNonNull(routes, "Routes must not be null.");
+        for (MediaRoute2Info route : routes) {
+            Objects.requireNonNull(route, "Route must not be null");
+            mRoutes.put(route.getOriginalId(), route);
+        }
+        publishRoutes();
+    }
+
+    /** Removes a route and publishes it. */
     public void removeRoute(@NonNull String routeId) {
-        Objects.requireNonNull(routeId, "routeId must not be null");
-        MediaRoute2Info route = mRoutes.get(routeId);
-        if (route != null) {
-            mRoutes.remove(routeId);
+        removeRoutes(Collections.singletonList(routeId));
+    }
+
+    /**
+     * Removes a list of routes and publishes the changes.
+     *
+     * @param routes list of route ids to be removed.
+     */
+    public void removeRoutes(@NonNull List<String> routes) {
+        Objects.requireNonNull(routes, "Routes must not be null");
+        boolean hasRemovedRoutes = false;
+        for (String routeId : routes) {
+            MediaRoute2Info route = mRoutes.get(routeId);
+            if (route != null) {
+                mRoutes.remove(routeId);
+                hasRemovedRoutes = true;
+            }
+        }
+        if (hasRemovedRoutes) {
             publishRoutes();
         }
     }

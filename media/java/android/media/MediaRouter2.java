@@ -132,7 +132,7 @@ public final class MediaRouter2 {
     /**
      * Stores an auxiliary copy of {@link #mFilteredRoutes} at the time of the last route callback
      * dispatch. This is only used to determine what callback a route should be assigned to (added,
-     * removed, changed) in {@link #dispatchFilteredRoutesChangedLocked(List)}.
+     * removed, changed) in {@link #dispatchFilteredRoutesUpdatedOnHandler(List)}.
      */
     private volatile ArrayMap<String, MediaRoute2Info> mPreviousRoutes = new ArrayMap<>();
 
@@ -820,7 +820,7 @@ public final class MediaRouter2 {
         }
     }
 
-    void dispatchFilteredRoutesChangedLocked(List<MediaRoute2Info> newRoutes) {
+    void dispatchFilteredRoutesUpdatedOnHandler(List<MediaRoute2Info> newRoutes) {
         List<MediaRoute2Info> addedRoutes = new ArrayList<>();
         List<MediaRoute2Info> removedRoutes = new ArrayList<>();
         List<MediaRoute2Info> changedRoutes = new ArrayList<>();
@@ -863,29 +863,16 @@ public final class MediaRouter2 {
         if (!changedRoutes.isEmpty()) {
             notifyRoutesChanged(changedRoutes);
         }
-    }
 
-    void addRoutesOnHandler(List<MediaRoute2Info> routes) {
-        synchronized (mLock) {
-            for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getId(), route);
-            }
-            updateFilteredRoutesLocked();
+        // Note: We don't notify clients of changes in route ordering.
+        if (!addedRoutes.isEmpty() || !removedRoutes.isEmpty() || !changedRoutes.isEmpty()) {
+            notifyRoutesUpdated(newRoutes);
         }
     }
 
-    void removeRoutesOnHandler(List<MediaRoute2Info> routes) {
+    void updateRoutesOnHandler(List<MediaRoute2Info> routes) {
         synchronized (mLock) {
-            for (MediaRoute2Info route : routes) {
-                mRoutes.remove(route.getId());
-            }
-            updateFilteredRoutesLocked();
-        }
-    }
-
-    void changeRoutesOnHandler(List<MediaRoute2Info> routes) {
-        List<MediaRoute2Info> changedRoutes = new ArrayList<>();
-        synchronized (mLock) {
+            mRoutes.clear();
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
             }
@@ -900,8 +887,10 @@ public final class MediaRouter2 {
                 Collections.unmodifiableList(
                         filterRoutesWithCompositePreferenceLocked(List.copyOf(mRoutes.values())));
         mHandler.sendMessage(
-                obtainMessage(MediaRouter2::dispatchFilteredRoutesChangedLocked,
-                        this, mFilteredRoutes));
+                obtainMessage(
+                        MediaRouter2::dispatchFilteredRoutesUpdatedOnHandler,
+                        this,
+                        mFilteredRoutes));
     }
 
     /**
@@ -1211,6 +1200,14 @@ public final class MediaRouter2 {
         }
     }
 
+    private void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
+        for (RouteCallbackRecord record : mRouteCallbackRecords) {
+            List<MediaRoute2Info> filteredRoutes =
+                    filterRoutesWithIndividualPreference(routes, record.mPreference);
+            record.mExecutor.execute(() -> record.mRouteCallback.onRoutesUpdated(filteredRoutes));
+        }
+    }
+
     private void notifyPreferredFeaturesChanged(List<String> features) {
         for (RouteCallbackRecord record : mRouteCallbackRecords) {
             record.mExecutor.execute(
@@ -1246,27 +1243,42 @@ public final class MediaRouter2 {
     /** Callback for receiving events about media route discovery. */
     public abstract static class RouteCallback {
         /**
-         * Called when routes are added. Whenever you registers a callback, this will be invoked
-         * with known routes.
+         * Called when routes are added. Whenever you register a callback, this will be invoked with
+         * known routes.
          *
          * @param routes the list of routes that have been added. It's never empty.
+         * @deprecated Use {@link #onRoutesUpdated(List)} instead.
          */
+        @Deprecated
         public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when routes are removed.
          *
          * @param routes the list of routes that have been removed. It's never empty.
+         * @deprecated Use {@link #onRoutesUpdated(List)} instead.
          */
+        @Deprecated
         public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
-         * Called when routes are changed. For example, it is called when the route's name or volume
-         * have been changed.
+         * Called when the properties of one or more existing routes are changed. For example, it is
+         * called when a route's name or volume have changed.
          *
          * @param routes the list of routes that have been changed. It's never empty.
+         * @deprecated Use {@link #onRoutesUpdated(List)} instead.
          */
+        @Deprecated
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+
+        /**
+         * Called when the route list is updated, which can happen when routes are added, removed,
+         * or modified. It will also be called when a route callback is registered.
+         *
+         * @param routes the updated list of routes filtered by the callback's individual discovery
+         *     preferences.
+         */
+        public void onRoutesUpdated(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when the client app's preferred features are changed. When this is called, it is
@@ -1985,21 +1997,9 @@ public final class MediaRouter2 {
         }
 
         @Override
-        public void notifyRoutesAdded(List<MediaRoute2Info> routes) {
+        public void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
             mHandler.sendMessage(
-                    obtainMessage(MediaRouter2::addRoutesOnHandler, MediaRouter2.this, routes));
-        }
-
-        @Override
-        public void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(
-                    obtainMessage(MediaRouter2::removeRoutesOnHandler, MediaRouter2.this, routes));
-        }
-
-        @Override
-        public void notifyRoutesChanged(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(
-                    obtainMessage(MediaRouter2::changeRoutesOnHandler, MediaRouter2.this, routes));
+                    obtainMessage(MediaRouter2::updateRoutesOnHandler, MediaRouter2.this, routes));
         }
 
         @Override
@@ -2047,17 +2047,7 @@ public final class MediaRouter2 {
     class ManagerCallback implements MediaRouter2Manager.Callback {
 
         @Override
-        public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {
-            updateAllRoutesFromManager();
-        }
-
-        @Override
-        public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {
-            updateAllRoutesFromManager();
-        }
-
-        @Override
-        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {
+        public void onRoutesUpdated() {
             updateAllRoutesFromManager();
         }
 

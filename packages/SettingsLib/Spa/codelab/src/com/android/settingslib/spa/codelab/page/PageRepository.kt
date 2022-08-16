@@ -21,10 +21,19 @@ import com.android.settingslib.spa.framework.api.SettingsPageRepository
 object Destinations {
     const val Home = "Home"
     const val Preference = "Preference"
+    const val SwitchPreference = "SwitchPreference"
     const val Argument = "Argument"
+    const val Slider = "Slider"
 }
 
 val codelabPageRepository = SettingsPageRepository(
-    allPages = listOf(HomePageProvider, PreferencePageProvider, ArgumentPageProvider),
+    allPages = listOf(
+        HomePageProvider,
+        PreferencePageProvider,
+        SwitchPreferencePageProvider,
+        ArgumentPageProvider,
+        SliderPageProvider,
+        FooterPageProvider,
+    ),
     startDestination = Destinations.Home,
 )

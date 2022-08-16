@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
 import static com.android.keyguard.LockIconView.ICON_FINGERPRINT;
@@ -29,6 +30,7 @@ import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Process;
 import android.os.VibrationAttributes;
@@ -701,13 +703,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
-        public void onAllAuthenticatorsRegistered() {
-            updateUdfpsConfig();
+        public void onAllAuthenticatorsRegistered(@BiometricAuthenticator.Modality int modality) {
+            if (modality == TYPE_FINGERPRINT) {
+                updateUdfpsConfig();
+            }
         }
 
         @Override
-        public void onEnrollmentsChanged() {
-            updateUdfpsConfig();
+        public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
+            if (modality == TYPE_FINGERPRINT) {
+                updateUdfpsConfig();
+            }
         }
 
         @Override

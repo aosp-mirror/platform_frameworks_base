@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 
 object SettingsDimension {
+    val itemIconSize = 24.dp
     val itemIconContainerSize = 72.dp
     val itemPaddingStart = 24.dp
     val itemPaddingEnd = 16.dp

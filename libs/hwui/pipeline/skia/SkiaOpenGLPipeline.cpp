@@ -112,7 +112,7 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
                     ProfileType::None != Properties::getProfileType())) {
         SkCanvas* profileCanvas = surface->getCanvas();
-        SkiaProfileRenderer profileRenderer(profileCanvas);
+        SkiaProfileRenderer profileRenderer(profileCanvas, frame.width(), frame.height());
         profiler->draw(profileRenderer);
     }
 

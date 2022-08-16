@@ -16,9 +16,17 @@
 
 package com.android.settingslib.spa.framework.compose
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+
+@Composable
+fun <T> rememberContext(constructor: (Context) -> T): T {
+    val context = LocalContext.current
+    return remember(context) { constructor(context) }
+}
 
 /**
  * Remember the [State] initialized with the [this].

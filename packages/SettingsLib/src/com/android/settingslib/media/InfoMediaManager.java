@@ -528,7 +528,7 @@ public class InfoMediaManager extends MediaManager {
     class RouterManagerCallback implements MediaRouter2Manager.Callback {
 
         @Override
-        public void onRoutesAdded(List<MediaRoute2Info> routes) {
+        public void onRoutesUpdated() {
             refreshDevices();
         }
 
@@ -537,16 +537,6 @@ public class InfoMediaManager extends MediaManager {
             if (TextUtils.equals(mPackageName, packageName)) {
                 refreshDevices();
             }
-        }
-
-        @Override
-        public void onRoutesChanged(List<MediaRoute2Info> routes) {
-            refreshDevices();
-        }
-
-        @Override
-        public void onRoutesRemoved(List<MediaRoute2Info> routes) {
-            refreshDevices();
         }
 
         @Override
