@@ -784,7 +784,6 @@ public class AccessibilityServiceInfo implements Parcelable {
         mNonInteractiveUiTimeout = other.mNonInteractiveUiTimeout;
         mInteractiveUiTimeout = other.mInteractiveUiTimeout;
         flags = other.flags;
-        mIsAccessibilityTool = other.mIsAccessibilityTool;
     }
 
     private boolean isRequestAccessibilityButtonChangeEnabled(IPlatformCompat platformCompat) {
@@ -1110,26 +1109,6 @@ public class AccessibilityServiceInfo implements Parcelable {
     public boolean isDirectBootAware() {
         return ((flags & FLAG_FORCE_DIRECT_BOOT_AWARE) != 0)
                 || mResolveInfo.serviceInfo.directBootAware;
-    }
-
-    /**
-     * Sets whether the service is used to assist users with disabilities.
-     *
-     * <p>
-     * This property is normally provided in the service's {@link #mResolveInfo ResolveInfo}.
-     * </p>
-     *
-     * <p>
-     * This method is helpful for unit testing. However, this property is not dynamically
-     * configurable by a standard {@link AccessibilityService} so it's not possible to update the
-     * copy held by the system with this method.
-     * </p>
-     *
-     * @hide
-     */
-    @TestApi
-    public void setAccessibilityTool(boolean isAccessibilityTool) {
-        mIsAccessibilityTool = isAccessibilityTool;
     }
 
     /**

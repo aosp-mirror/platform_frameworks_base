@@ -276,8 +276,6 @@ public final class AccessibilityManager {
     private final ArrayMap<AudioDescriptionRequestedChangeListener, Executor>
             mAudioDescriptionRequestedChangeListeners = new ArrayMap<>();
 
-    private boolean mRequestFromAccessibilityTool;
-
     /**
      * Map from a view's accessibility id to the list of request preparers set for that view
      */
@@ -982,39 +980,6 @@ public final class AccessibilityManager {
         synchronized (mLock) {
             return mServicesStateChangeListeners.remove(listener) != null;
         }
-    }
-
-    /**
-     * Whether the current accessibility request comes from an
-     * {@link AccessibilityService} with the {@link AccessibilityServiceInfo#isAccessibilityTool}
-     * property set to true.
-     *
-     * <p>
-     * You can use this method inside {@link AccessibilityNodeProvider} to decide how to populate
-     * your nodes.
-     * </p>
-     *
-     * <p>
-     * <strong>Note:</strong> The return value is valid only when an {@link AccessibilityNodeInfo}
-     * request is in progress, can change from one request to another, and has no meaning when a
-     * request is not in progress.
-     * </p>
-     *
-     * @return True if the current request is from a tool that sets isAccessibilityTool.
-     */
-    public boolean isRequestFromAccessibilityTool() {
-        return mRequestFromAccessibilityTool;
-    }
-
-    /**
-     * Specifies whether the current accessibility request comes from an
-     * {@link AccessibilityService} with the {@link AccessibilityServiceInfo#isAccessibilityTool}
-     * property set to true.
-     *
-     * @hide
-     */
-    public void setRequestFromAccessibilityTool(boolean requestFromAccessibilityTool) {
-        mRequestFromAccessibilityTool = requestFromAccessibilityTool;
     }
 
     /**
