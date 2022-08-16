@@ -20,13 +20,14 @@
               android:layout_height="wrap_content"
               android:minWidth="350dp"
               android:layout_gravity="center"
-              android:theme="?attr/alertDialogTheme">
+              android:background="@color/side_fps_toast_background">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/fp_power_button_enrollment_title"
         android:singleLine="true"
         android:ellipsize="end"
+        android:textColor="@color/side_fps_text_color"
         android:paddingLeft="20dp"/>
     <Space
         android:layout_width="wrap_content"
@@ -39,5 +40,6 @@
         android:text="@string/fp_power_button_enrollment_button_text"
         android:paddingRight="20dp"
         style="?android:attr/buttonBarNegativeButtonStyle"
+        android:textColor="@color/side_fps_button_color"
         android:maxLines="1"/>
 </LinearLayout>

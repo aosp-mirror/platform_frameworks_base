@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:exitFadeDuration="@integer/pip_menu_fade_animation_duration">
+    android:exitFadeDuration="@integer/tv_window_menu_fade_animation_duration">
     <item android:state_activated="true">
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/pip_menu_border_corner_radius" />

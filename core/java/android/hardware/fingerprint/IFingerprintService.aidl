@@ -202,8 +202,10 @@ interface IFingerprintService {
     void setSidefpsController(in ISidefpsController controller);
 
     // Registers BiometricStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void registerBiometricStateListener(IBiometricStateListener listener);
 
     // Sends a power button pressed event to all listeners.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     oneway void onPowerPressed();
 }

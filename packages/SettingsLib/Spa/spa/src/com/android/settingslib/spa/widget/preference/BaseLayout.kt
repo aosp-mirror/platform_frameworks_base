@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -39,6 +37,7 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsOpacity
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.ui.SettingsTitle
 
 @Composable
 internal fun BaseLayout(
@@ -94,11 +93,7 @@ private fun BaseIcon(
 @Composable
 private fun Titles(title: String, subTitle: @Composable () -> Unit, modifier: Modifier) {
     Column(modifier) {
-        Text(
-            text = title,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleMedium,
-        )
+        SettingsTitle(title)
         subTitle()
     }
 }

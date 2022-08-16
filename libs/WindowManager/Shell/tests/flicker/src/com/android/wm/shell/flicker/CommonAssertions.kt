@@ -20,6 +20,7 @@ package com.android.wm.shell.flicker
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
 
@@ -88,18 +89,13 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
     splitLeftTop: Boolean
 ) {
     assertLayers {
-        val dividerRegion = this.last().layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
         this.isInvisible(component)
             .then()
-            .invoke("splitAppLayerBoundsBecomesVisible") {
-                it.visibleRegion(component).coversAtMost(
-                    if (splitLeftTop) {
-                        getSplitLeftTopRegion(dividerRegion, endRotation)
-                    } else {
-                        getSplitRightBottomRegion(dividerRegion, endRotation)
-                    }
-                )
-            }
+            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+            .isVisible(component)
+            .then()
+            .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+            .splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
     }
 }
 
@@ -108,16 +104,7 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesInvisible(
     splitLeftTop: Boolean
 ) {
     assertLayers {
-        val dividerRegion = this.first().layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
-        this.invoke("splitAppLayerBoundsBecomesVisible") {
-                it.visibleRegion(component).coversAtMost(
-                    if (splitLeftTop) {
-                        getSplitLeftTopRegion(dividerRegion, endRotation)
-                    } else {
-                        getSplitRightBottomRegion(dividerRegion, endRotation)
-                    }
-                )
-            }
+        this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
             .then()
             .isVisible(component, true)
             .then()
@@ -136,6 +123,40 @@ fun FlickerTestParameter.splitAppLayerBoundsIsVisibleAtEnd(
                 getSplitLeftTopRegion(dividerRegion, endRotation)
             } else {
                 getSplitRightBottomRegion(dividerRegion, endRotation)
+            }
+        )
+    }
+}
+
+fun FlickerTestParameter.splitAppLayerBoundsChanges(
+    component: IComponentMatcher,
+    splitLeftTop: Boolean
+) {
+    assertLayers {
+        if (splitLeftTop) {
+            this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+                .then()
+                .isInvisible(component)
+                .then()
+                .splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+        } else {
+            this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+        }
+    }
+}
+
+fun LayersTraceSubject.splitAppLayerBoundsSnapToDivider(
+    component: IComponentMatcher,
+    splitLeftTop: Boolean,
+    rotation: Int
+): LayersTraceSubject {
+    return invoke("splitAppLayerBoundsSnapToDivider") {
+        val dividerRegion = it.layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
+        it.visibleRegion(component).coversAtMost(
+            if (splitLeftTop) {
+                getSplitLeftTopRegion(dividerRegion, rotation)
+            } else {
+                getSplitRightBottomRegion(dividerRegion, rotation)
             }
         )
     }

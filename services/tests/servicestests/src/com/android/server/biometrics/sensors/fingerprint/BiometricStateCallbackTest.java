@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,35 +26,70 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricStateListener;
+import android.hardware.biometrics.SensorPropertiesInternal;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricServiceProvider;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+
+import java.util.List;
 
 @Presubmit
 @SmallTest
 public class BiometricStateCallbackTest {
 
-    private BiometricStateCallback mCallback;
+    private static final int USER_ID = 10;
+    private static final int SENSOR_ID = 2;
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
+    private BiometricStateCallback<FakeProvider, SensorPropertiesInternal> mCallback;
 
     @Mock
-    BiometricStateListener mBiometricStateListener;
+    private UserManager mUserManager;
+    @Mock
+    private BiometricStateListener mBiometricStateListener;
+    @Mock
+    private FakeProvider mFakeProvider;
+
+    private SensorPropertiesInternal mFakeProviderProps;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        mFakeProviderProps = new SensorPropertiesInternal(SENSOR_ID, STRENGTH_STRONG,
+                5 /* maxEnrollmentsPerUser */, List.of(),
+                false /* resetLockoutRequiresHardwareAuthToken */,
+                false /* resetLockoutRequiresChallenge */);
+        when(mFakeProvider.getSensorProperties()).thenReturn(List.of(mFakeProviderProps));
+        when(mFakeProvider.getSensorProperties(eq(SENSOR_ID))).thenReturn(mFakeProviderProps);
+        when(mFakeProvider.hasEnrollments(eq(SENSOR_ID), eq(USER_ID))).thenReturn(true);
+        when(mUserManager.getAliveUsers()).thenReturn(
+                List.of(new UserInfo(USER_ID, "name", 0)));
 
-        mCallback = new BiometricStateCallback();
+        mCallback = new BiometricStateCallback<>(mUserManager);
         mCallback.registerBiometricStateListener(mBiometricStateListener);
+    }
+
+    @Test
+    public void startNotifiesEnrollments() {
+        mCallback.start(List.of(mFakeProvider));
+
+        verify(mBiometricStateListener).onEnrollmentsChanged(eq(USER_ID), eq(SENSOR_ID), eq(true));
     }
 
     @Test
@@ -102,4 +139,6 @@ public class BiometricStateCallbackTest {
         verify(mBiometricStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),
                 anyBoolean());
     }
+
+    private interface FakeProvider extends BiometricServiceProvider<SensorPropertiesInternal> {}
 }

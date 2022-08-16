@@ -51,6 +51,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -1668,7 +1669,8 @@ public final class JobStatus {
         return readinessStatusWithConstraint(constraint, true);
     }
 
-    private boolean readinessStatusWithConstraint(int constraint, boolean value) {
+    @VisibleForTesting
+    boolean readinessStatusWithConstraint(int constraint, boolean value) {
         boolean oldValue = false;
         int satisfied = mSatisfiedConstraintsOfInterest;
         switch (constraint) {
@@ -1702,6 +1704,15 @@ public final class JobStatus {
                         && mDynamicConstraints == (satisfied & mDynamicConstraints);
 
                 break;
+        }
+
+        // The flexibility constraint relies on other constraints to be satisfied.
+        // This function lacks the information to determine if flexibility will be satisfied.
+        // But for the purposes of this function it is still useful to know the jobs' readiness
+        // not including the flexibility constraint. If flexibility is the constraint in question
+        // we can proceed as normal.
+        if (constraint != CONSTRAINT_FLEXIBLE) {
+            satisfied |= CONSTRAINT_FLEXIBLE;
         }
 
         boolean toReturn = isReady(satisfied);

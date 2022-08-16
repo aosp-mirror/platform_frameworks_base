@@ -308,7 +308,7 @@ class AuthRippleController @Inject constructor(
 
     private val authControllerCallback =
         object : AuthController.Callback {
-            override fun onAllAuthenticatorsRegistered() {
+            override fun onAllAuthenticatorsRegistered(modality: Int) {
                 updateUdfpsDependentParams()
                 updateSensorLocation()
             }

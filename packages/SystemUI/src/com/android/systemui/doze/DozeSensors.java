@@ -16,6 +16,8 @@
 
 package com.android.systemui.doze;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+
 import static com.android.systemui.doze.DozeLog.REASON_SENSOR_QUICK_PICKUP;
 import static com.android.systemui.doze.DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS;
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_DISPLAY;
@@ -29,6 +31,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.net.Uri;
 import android.os.Handler;
@@ -835,13 +838,17 @@ public class DozeSensors {
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
-        public void onAllAuthenticatorsRegistered() {
-            updateUdfpsEnrolled();
+        public void onAllAuthenticatorsRegistered(@BiometricAuthenticator.Modality int modality) {
+            if (modality == TYPE_FINGERPRINT) {
+                updateUdfpsEnrolled();
+            }
         }
 
         @Override
-        public void onEnrollmentsChanged() {
-            updateUdfpsEnrolled();
+        public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
+            if (modality == TYPE_FINGERPRINT) {
+                updateUdfpsEnrolled();
+            }
         }
 
         private void updateUdfpsEnrolled() {

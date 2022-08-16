@@ -565,6 +565,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
+    public boolean hasEnrollments(int sensorId, int userId) {
+        return !getEnrolledFingerprints(sensorId, userId).isEmpty();
+    }
+
+    @Override
     public void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
             @NonNull IInvalidationCallback callback) {
         mHandler.post(() -> {

@@ -56,6 +56,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.TvWindowMenuActionButton;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
@@ -79,7 +80,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
     private final LinearLayout mActionButtonsContainer;
     private final View mMenuFrameView;
-    private final List<TvPipMenuActionButton> mAdditionalButtons = new ArrayList<>();
+    private final List<TvWindowMenuActionButton> mAdditionalButtons = new ArrayList<>();
     private final View mPipFrameView;
     private final View mPipView;
     private final TextView mEduTextView;
@@ -94,7 +95,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final ImageView mArrowRight;
     private final ImageView mArrowDown;
     private final ImageView mArrowLeft;
-    private final TvPipMenuActionButton mA11yDoneButton;
+    private final TvWindowMenuActionButton mA11yDoneButton;
 
     private final ScrollView mScrollView;
     private final HorizontalScrollView mHorizontalScrollView;
@@ -104,8 +105,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private boolean mMoveMenuIsVisible;
     private boolean mButtonMenuIsVisible;
 
-    private final TvPipMenuActionButton mExpandButton;
-    private final TvPipMenuActionButton mCloseButton;
+    private final TvWindowMenuActionButton mExpandButton;
+    private final TvWindowMenuActionButton mCloseButton;
 
     private boolean mSwitchingOrientation;
 
@@ -166,7 +167,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mResizeAnimationDuration = context.getResources().getInteger(
                 R.integer.config_pipResizeAnimationDuration);
         mPipMenuFadeAnimationDuration = context.getResources()
-                .getInteger(R.integer.pip_menu_fade_animation_duration);
+                .getInteger(R.integer.tv_window_menu_fade_animation_duration);
 
         mPipMenuOuterSpace = context.getResources()
                 .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
@@ -568,7 +569,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         if (actionsNumber > buttonsNumber) {
             // Add buttons until we have enough to display all the actions.
             while (actionsNumber > buttonsNumber) {
-                TvPipMenuActionButton button = new TvPipMenuActionButton(mContext);
+                TvWindowMenuActionButton button = new TvWindowMenuActionButton(mContext);
                 button.setOnClickListener(this);
 
                 mActionButtonsContainer.addView(button,
@@ -591,7 +592,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         // "Assign" actions to the buttons.
         for (int index = 0; index < actionsNumber; index++) {
             final RemoteAction action = actions.get(index);
-            final TvPipMenuActionButton button = mAdditionalButtons.get(index);
+            final TvWindowMenuActionButton button = mAdditionalButtons.get(index);
 
             // Remove action if it matches the custom close action.
             if (PipUtils.remoteActionsMatch(action, closeAction)) {
@@ -607,7 +608,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         }
     }
 
-    private void setActionForButton(RemoteAction action, TvPipMenuActionButton button,
+    private void setActionForButton(RemoteAction action, TvWindowMenuActionButton button,
             Handler mainHandler) {
         button.setVisibility(View.VISIBLE); // Ensure the button is visible.
         if (action.getContentDescription().length() > 0) {
