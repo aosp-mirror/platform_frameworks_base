@@ -3526,6 +3526,16 @@
          automatically dismissing. This is currently used in SideFpsEventHandler -->
     <integer name="config_sideFpsToastTimeout">3000</integer>
 
+    <!-- This acquired message will cause the sidefpsKgPowerPress window to be skipped.
+         If this is set to BIOMETRIC_ACQUIRED_VENDOR, then the framework will skip on
+         config_sidefpsSkipWaitForPowerVendorAcquireMessage -->
+    <integer name="config_sidefpsSkipWaitForPowerAcquireMessage">6</integer>
+
+    <!-- This vendor acquired message that will cause the sidefpsKgPowerPress window to be skipped.
+         config_sidefpsSkipWaitForPowerOnFingerUp must be true and
+         config_sidefpsSkipWaitForPowerAcquireMessage must be BIOMETRIC_ACQUIRED_VENDOR == 6. -->
+    <integer name="config_sidefpsSkipWaitForPowerVendorAcquireMessage">2</integer>
+
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
          It declares the package name of VoiceInteractionService that should be started. -->
     <string translatable="false" name="config_forceVoiceInteractionServicePackage"></string>

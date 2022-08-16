@@ -2631,6 +2631,8 @@
   <java-symbol type="integer" name="config_sidefpsKeyguardPowerPressWindow"/>
   <java-symbol type="integer" name="config_sidefpsPostAuthDowntime"/>
   <java-symbol type="integer" name="config_sideFpsToastTimeout"/>
+  <java-symbol type="integer" name="config_sidefpsSkipWaitForPowerAcquireMessage"/>
+  <java-symbol type="integer" name="config_sidefpsSkipWaitForPowerVendorAcquireMessage"/>
 
   <!-- Clickable toast used during sidefps enrollment -->
   <java-symbol type="layout" name="side_fps_toast" />
