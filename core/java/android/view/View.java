@@ -4571,7 +4571,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
      * set to true.
      */
-    private int mAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
+    private int mExplicitAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
+    /** Used to calculate and cache {@link #isAccessibilityDataPrivate()}. */
+    private int mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
 
     /**
      * Specifies the id of a view for which this view serves as a label for
@@ -13256,6 +13258,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setFilterTouchesWhenObscured(boolean enabled) {
         setFlags(enabled ? FILTER_TOUCHES_WHEN_OBSCURED : 0,
                 FILTER_TOUCHES_WHEN_OBSCURED);
+        calculateAccessibilityDataPrivate();
     }
 
     /**
@@ -14458,8 +14461,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     public boolean includeForAccessibility() {
         if (mAttachInfo != null) {
-            if (isAccessibilityDataPrivate() && !AccessibilityManager.getInstance(
-                    mContext).isRequestFromAccessibilityTool()) {
+            if (!AccessibilityManager.getInstance(mContext).isRequestFromAccessibilityTool()
+                    && isAccessibilityDataPrivate()) {
                 return false;
             }
 
@@ -14486,33 +14489,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "accessibility")
     public boolean isAccessibilityDataPrivate() {
-        if (mAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_YES) {
-            return true;
+        if (mInferredAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_AUTO) {
+            calculateAccessibilityDataPrivate();
         }
-        if (mAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_NO) {
-            return false;
-        }
+        return mInferredAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_YES;
+    }
 
-        // Views inside FLAG_SECURE windows default to accessibilityDataPrivate.
-        if (mAttachInfo != null && mAttachInfo.mWindowSecure) {
-            return true;
+    /**
+     * Calculate and cache the inferred value for {@link #isAccessibilityDataPrivate()}.
+     *
+     * <p>
+     * <strong>Note:</strong> This method needs to be called any time one of the below conditions
+     * changes, to recalculate the new value.
+     * </p>
+     */
+    void calculateAccessibilityDataPrivate() {
+        // Use the explicit value if set.
+        if (mExplicitAccessibilityDataPrivate != ACCESSIBILITY_DATA_PRIVATE_AUTO) {
+            mInferredAccessibilityDataPrivate = mExplicitAccessibilityDataPrivate;
+        } else if (mAttachInfo != null && mAttachInfo.mWindowSecure) {
+            // Views inside FLAG_SECURE windows default to accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+        } else if (getFilterTouchesWhenObscured()) {
+            // Views that set filterTouchesWhenObscured default to accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+        } else if (mParent instanceof View && ((View) mParent).isAccessibilityDataPrivate()) {
+            // Descendants of an accessibilityDataPrivate View are also accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+        } else {
+            // Otherwise, default to not accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_NO;
         }
-        // Views that set filterTouchesWhenObscured default to accessibilityDataPrivate.
-        if (getFilterTouchesWhenObscured()) {
-            return true;
-        }
-
-        // Descendants of an accessibilityDataPrivate View are also accessibilityDataPrivate.
-        ViewParent parent = mParent;
-        while (parent instanceof View) {
-            if (((View) parent).isAccessibilityDataPrivate()) {
-                return true;
-            }
-            parent = parent.getParent();
-        }
-
-        // Otherwise, default to not accessibilityDataPrivate.
-        return false;
     }
 
     /**
@@ -14523,7 +14530,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setAccessibilityDataPrivate(
             @AccessibilityDataPrivate int accessibilityDataPrivate) {
-        mAccessibilityDataPrivate = accessibilityDataPrivate;
+        mExplicitAccessibilityDataPrivate = accessibilityDataPrivate;
+        calculateAccessibilityDataPrivate();
     }
 
     /**
