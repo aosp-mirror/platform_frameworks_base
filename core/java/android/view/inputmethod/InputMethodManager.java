@@ -2331,9 +2331,6 @@ public final class InputMethodManager {
         editorInfo.packageName = view.getContext().getOpPackageName();
         editorInfo.autofillId = view.getAutofillId();
         editorInfo.fieldId = view.getId();
-        synchronized (mH) {
-            editorInfo.setInitialToolType(mCurRootView.getLastClickToolType());
-        }
         InputConnection ic = view.onCreateInputConnection(editorInfo);
         if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
 
@@ -2372,6 +2369,8 @@ public final class InputMethodManager {
             if (mCurrentEditorInfo == null) {
                 startInputFlags |= StartInputFlags.INITIAL_CONNECTION;
             }
+
+            editorInfo.setInitialToolType(mCurRootView.getLastClickToolType());
 
             // Hook 'em up and let 'er rip.
             mCurrentEditorInfo = editorInfo.createCopyInternal();
