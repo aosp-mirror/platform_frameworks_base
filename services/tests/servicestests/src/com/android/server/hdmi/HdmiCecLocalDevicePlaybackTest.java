@@ -47,7 +47,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
@@ -79,6 +78,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     private TestLooper mTestLooper = new TestLooper();
     private FakePowerManagerWrapper mPowerManager;
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
+    private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
     private int mPlaybackPhysicalAddress;
     private int mPlaybackLogicalAddress;
     private boolean mWokenUp;
@@ -91,9 +91,11 @@ public class HdmiCecLocalDevicePlaybackTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
+                        mLocalDeviceTypes, new FakeAudioDeviceVolumeManagerWrapper()) {
+
                     @Override
                     void wakeUp() {
                         mWokenUp = true;
@@ -118,16 +120,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                     @Override
                     protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
-                    }
-
-                    @Override
-                    boolean isPowerStandby() {
-                        return false;
-                    }
-
-                    @Override
-                    boolean isPowerStandbyOrTransient() {
-                        return false;
                     }
 
                     @Override
@@ -165,6 +157,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mNativeWrapper.clearResultMessages();
         mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
                 HdmiProperties.playback_device_action_on_routing_control_values.NONE;
+        mHdmiControlService.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
     }
 
     @Test
@@ -1199,6 +1192,9 @@ public class HdmiCecLocalDevicePlaybackTest {
         HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
                 mPlaybackPhysicalAddress);
         mHdmiCecLocalDevicePlayback.dispatchMessage(setStreamPath);
+        // The ActiveSourceAction created from the message above is deferred until the device wakes
+        // up.
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
         mTestLooper.dispatchAll();
         HdmiCecMessage activeSource =
                 HdmiCecMessageBuilder.buildActiveSource(
@@ -2087,5 +2083,112 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
                 .isEmpty();
+    }
+
+    @Test
+    public void handleRoutingChange_addressNotAllocated_removeActiveSourceAction() {
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties
+                        .playback_device_action_on_routing_control_values
+                        .WAKE_UP_AND_SEND_ACTIVE_SOURCE;
+        mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
+                "HdmiCecLocalDevicePlaybackTest");
+        HdmiCecMessage routingChangeToPlayback =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000,
+                        mPlaybackPhysicalAddress);
+        HdmiCecMessage routingChangeToTv =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, mPlaybackPhysicalAddress,
+                        0x0000);
+        HdmiCecMessage unexpectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+        // 1. DUT goes to sleep.
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        // Delay allocate logical address in order to trigger message buffering.
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mNativeWrapper.onCecMessage(routingChangeToPlayback);
+        mTestLooper.dispatchAll();
+        // 2. DUT wakes up and defer ActiveSourceAction.
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isNotEmpty();
+        // 3. DUT buffers <Routing Change> message to TV.
+        mNativeWrapper.onCecMessage(routingChangeToTv);
+        mTestLooper.dispatchAll();
+        // 4. Allocation is finished and the ActiveSourceAction is removed from the queue.
+        // No <Active Source> message is sent by the DUT.
+        mTestLooper.moveTimeForward(allocationDelay);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isEmpty();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpectedMessage);
+    }
+
+    @Test
+    public void handleSetStreamPath_addressNotAllocated_removeActiveSourceAction() {
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
+                "HdmiCecLocalDevicePlaybackTest");
+        HdmiCecMessage setStreamPathToPlayback =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, mPlaybackPhysicalAddress);
+        HdmiCecMessage setStreamPathToTv =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x0000);
+        HdmiCecMessage unexpectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+        // 1. DUT goes to sleep.
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        // Delay allocate logical address in order to trigger message buffering.
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mNativeWrapper.onCecMessage(setStreamPathToPlayback);
+        mTestLooper.dispatchAll();
+        // 2. DUT wakes up and defer ActiveSourceAction.
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isNotEmpty();
+        // 3. DUT buffers <Set Stream Path> message to TV.
+        mNativeWrapper.onCecMessage(setStreamPathToTv);
+        mTestLooper.dispatchAll();
+        // 4. Allocation is finished and the ActiveSourceAction is removed from the queue.
+        // No <Active Source> message is sent by the DUT.
+        mTestLooper.moveTimeForward(allocationDelay);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isEmpty();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpectedMessage);
+    }
+
+    @Test
+    public void handleActiveSource_addressNotAllocated_removeActiveSourceAction() {
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+
+        mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
+                "HdmiCecLocalDevicePlaybackTest");
+
+        HdmiCecMessage setStreamPathToPlayback =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, mPlaybackPhysicalAddress);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage unexpectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+        // 1. DUT goes to sleep.
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        // Delay allocate logical address in order to trigger message buffering.
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mNativeWrapper.onCecMessage(setStreamPathToPlayback);
+        mTestLooper.dispatchAll();
+        // 2. DUT wakes up and defer ActiveSourceAction.
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isNotEmpty();
+        // 3. DUT buffers <Active Source> message from TV.
+        mNativeWrapper.onCecMessage(activeSourceFromTv);
+        mTestLooper.dispatchAll();
+        // 4. Allocation is finished and the ActiveSourceAction is removed from the queue.
+        // No <Active Source> message is sent by the DUT.
+        mTestLooper.moveTimeForward(allocationDelay);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isEmpty();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpectedMessage);
     }
 }

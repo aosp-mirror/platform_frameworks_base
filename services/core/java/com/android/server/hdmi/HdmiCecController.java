@@ -147,6 +147,9 @@ final class HdmiCecController {
 
     private final HdmiCecAtomWriter mHdmiCecAtomWriter;
 
+    // This variable is used for testing, in order to delay the logical address allocation.
+    private long mLogicalAddressAllocationDelay = 0;
+
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController(
             HdmiControlService service, NativeWrapper nativeWrapper, HdmiCecAtomWriter atomWriter) {
@@ -215,12 +218,12 @@ final class HdmiCecController {
             final AllocateAddressCallback callback) {
         assertRunOnServiceThread();
 
-        runOnIoThread(new Runnable() {
+        mIoHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 handleAllocateLogicalAddress(deviceType, preferredAddress, callback);
             }
-        });
+        }, mLogicalAddressAllocationDelay);
     }
 
     /**
@@ -383,6 +386,14 @@ final class HdmiCecController {
             return;
         }
         mNativeWrapperImpl.nativeSetLanguage(language);
+    }
+
+    /**
+     * This method is used for testing, in order to delay the logical address allocation.
+     */
+    @VisibleForTesting
+    void setLogicalAddressAllocationDelay(long delay) {
+        mLogicalAddressAllocationDelay = delay;
     }
 
     /**
