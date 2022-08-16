@@ -25,6 +25,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
+import android.hardware.input.InputDeviceCountryCode;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.lights.LightsManager;
@@ -72,6 +73,8 @@ public final class InputDevice implements Parcelable {
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
+    @InputDeviceCountryCode
+    private final int mCountryCode;
     private final boolean mHasVibrator;
     private final boolean mHasMicrophone;
     private final boolean mHasButtonUnderPad;
@@ -462,8 +465,9 @@ public final class InputDevice implements Parcelable {
     @VisibleForTesting
     public InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
-            boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery) {
+            KeyCharacterMap keyCharacterMap, @InputDeviceCountryCode int countryCode,
+            boolean hasVibrator, boolean hasMicrophone, boolean hasButtonUnderPad,
+            boolean hasSensor, boolean hasBattery) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
@@ -475,6 +479,7 @@ public final class InputDevice implements Parcelable {
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
+        mCountryCode = countryCode;
         mHasVibrator = hasVibrator;
         mHasMicrophone = hasMicrophone;
         mHasButtonUnderPad = hasButtonUnderPad;
@@ -495,6 +500,7 @@ public final class InputDevice implements Parcelable {
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
         mKeyboardType = in.readInt();
+        mCountryCode = in.readInt();
         mHasVibrator = in.readInt() != 0;
         mHasMicrophone = in.readInt() != 0;
         mHasButtonUnderPad = in.readInt() != 0;
@@ -726,6 +732,16 @@ public final class InputDevice implements Parcelable {
      */
     public KeyCharacterMap getKeyCharacterMap() {
         return mKeyCharacterMap;
+    }
+
+    /**
+     * Gets Country code associated with the device
+     *
+     * @hide
+     */
+    @InputDeviceCountryCode
+    public int getCountryCode() {
+        return mCountryCode;
     }
 
     /**
@@ -1147,6 +1163,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
+        out.writeInt(mCountryCode);
         out.writeInt(mHasVibrator ? 1 : 0);
         out.writeInt(mHasMicrophone ? 1 : 0);
         out.writeInt(mHasButtonUnderPad ? 1 : 0);
@@ -1178,7 +1195,8 @@ public final class InputDevice implements Parcelable {
         description.append("Input Device ").append(mId).append(": ").append(mName).append("\n");
         description.append("  Descriptor: ").append(mDescriptor).append("\n");
         description.append("  Generation: ").append(mGeneration).append("\n");
-        description.append("  Location: ").append(mIsExternal ? "external" : "built-in").append("\n");
+        description.append("  Location: ").append(mIsExternal ? "external" : "built-in").append(
+                "\n");
 
         description.append("  Keyboard Type: ");
         switch (mKeyboardType) {
@@ -1193,6 +1211,8 @@ public final class InputDevice implements Parcelable {
                 break;
         }
         description.append("\n");
+
+        description.append("  Country Code: ").append(mCountryCode).append("\n");
 
         description.append("  Has Vibrator: ").append(mHasVibrator).append("\n");
 

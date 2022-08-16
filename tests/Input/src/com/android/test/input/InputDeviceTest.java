@@ -17,8 +17,8 @@
 package android.view;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
+import android.hardware.input.InputDeviceCountryCode;
 import android.os.Parcel;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -55,11 +55,12 @@ public class InputDeviceTest {
         assertEquals(device.isExternal(), outDevice.isExternal());
         assertEquals(device.getSources(), outDevice.getSources());
         assertEquals(device.getKeyboardType(), outDevice.getKeyboardType());
+        assertEquals(device.getCountryCode(), outDevice.getCountryCode());
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
 
         KeyCharacterMap keyCharacterMap = device.getKeyCharacterMap();
         KeyCharacterMap outKeyCharacterMap = outDevice.getKeyCharacterMap();
-        assertTrue("keyCharacterMap not equal", keyCharacterMap.equals(outKeyCharacterMap));
+        assertEquals("keyCharacterMap not equal", keyCharacterMap, outKeyCharacterMap);
 
         for (int j = 0; j < device.getMotionRanges().size(); j++) {
             assertMotionRangeEquals(device.getMotionRanges().get(j),
@@ -70,10 +71,11 @@ public class InputDeviceTest {
     private void assertInputDeviceParcelUnparcel(KeyCharacterMap keyCharacterMap) {
         final InputDevice device =
                 new InputDevice(DEVICE_ID, 0 /* generation */, 0 /* controllerNumber */, "name",
-                0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
-                0 /* sources */, 0 /* keyboardType */, keyCharacterMap,
-                false /* hasVibrator */, false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                true /* hasSensor */, false /* hasBattery */);
+                        0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
+                        0 /* sources */, 0 /* keyboardType */, keyCharacterMap,
+                        InputDeviceCountryCode.INTERNATIONAL, false /* hasVibrator */,
+                        false /* hasMicrophone */, false /* hasButtonUnderpad */,
+                        true /* hasSensor */, false /* hasBattery */);
 
         Parcel parcel = Parcel.obtain();
         device.writeToParcel(parcel, 0);
