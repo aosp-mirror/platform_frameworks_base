@@ -101,23 +101,24 @@ public class ZenModeFiltering {
      */
     public static boolean matchesCallFilter(Context context, int zen, NotificationManager.Policy
             consolidatedPolicy, UserHandle userHandle, Bundle extras,
-            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
+            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity,
+            int callingUid) {
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-            ZenLog.traceMatchesCallFilter(false, "no interruptions");
+            ZenLog.traceMatchesCallFilter(false, "no interruptions", callingUid);
             return false; // nothing gets through
         }
         if (zen == Global.ZEN_MODE_ALARMS) {
-            ZenLog.traceMatchesCallFilter(false, "alarms only");
+            ZenLog.traceMatchesCallFilter(false, "alarms only", callingUid);
             return false; // not an alarm
         }
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             if (consolidatedPolicy.allowRepeatCallers()
                     && REPEAT_CALLERS.isRepeat(context, extras, null)) {
-                ZenLog.traceMatchesCallFilter(true, "repeat caller");
+                ZenLog.traceMatchesCallFilter(true, "repeat caller", callingUid);
                 return true;
             }
             if (!consolidatedPolicy.allowCalls()) {
-                ZenLog.traceMatchesCallFilter(false, "calls not allowed");
+                ZenLog.traceMatchesCallFilter(false, "calls not allowed", callingUid);
                 return false; // no other calls get through
             }
             if (validator != null) {
@@ -125,11 +126,12 @@ public class ZenModeFiltering {
                         contactsTimeoutMs, timeoutAffinity);
                 boolean match =
                         audienceMatches(consolidatedPolicy.allowCallsFrom(), contactAffinity);
-                ZenLog.traceMatchesCallFilter(match, "contact affinity " + contactAffinity);
+                ZenLog.traceMatchesCallFilter(match, "contact affinity " + contactAffinity,
+                        callingUid);
                 return match;
             }
         }
-        ZenLog.traceMatchesCallFilter(true, "no restrictions");
+        ZenLog.traceMatchesCallFilter(true, "no restrictions", callingUid);
         return true;
     }
 
@@ -419,6 +421,7 @@ public class ZenModeFiltering {
 
         private synchronized void recordCallers(String[] people, ArraySet<String> phoneNumbers,
                 long now) {
+            boolean recorded = false, hasTel = false, hasOther = false;
             for (int i = 0; i < people.length; i++) {
                 String person = people[i];
                 if (person == null) continue;
@@ -427,10 +430,16 @@ public class ZenModeFiltering {
                     // while ideally we should not need to decode this, sometimes we have seen tel
                     // numbers given in an encoded format
                     String tel = Uri.decode(uri.getSchemeSpecificPart());
-                    if (tel != null) mTelCalls.put(tel, now);
+                    if (tel != null) {
+                        mTelCalls.put(tel, now);
+                        recorded = true;
+                        hasTel = true;
+                    }
                 } else {
                     // for non-tel calls, store the entire string, uri-component and all
                     mOtherCalls.put(person, now);
+                    recorded = true;
+                    hasOther = true;
                 }
             }
 
@@ -438,8 +447,15 @@ public class ZenModeFiltering {
             // provided; these are in the format of just a phone number string
             if (phoneNumbers != null) {
                 for (String num : phoneNumbers) {
-                    if (num != null) mTelCalls.put(num, now);
+                    if (num != null) {
+                        mTelCalls.put(num, now);
+                        recorded = true;
+                        hasTel = true;
+                    }
                 }
+            }
+            if (recorded) {
+                ZenLog.traceRecordCaller(hasTel, hasOther);
             }
         }
 
@@ -468,6 +484,8 @@ public class ZenModeFiltering {
         // previously recorded phone call.
         private synchronized boolean checkCallers(Context context, String[] people,
                 ArraySet<String> phoneNumbers) {
+            boolean found = false, checkedTel = false, checkedOther = false;
+
             // get the default country code for checking telephone numbers
             final String defaultCountryCode =
                     context.getSystemService(TelephonyManager.class).getNetworkCountryIso();
@@ -477,12 +495,14 @@ public class ZenModeFiltering {
                 final Uri uri = Uri.parse(person);
                 if ("tel".equals(uri.getScheme())) {
                     String number = uri.getSchemeSpecificPart();
+                    checkedTel = true;
                     if (checkForNumber(number, defaultCountryCode)) {
-                        return true;
+                        found = true;
                     }
                 } else {
+                    checkedOther = true;
                     if (mOtherCalls.containsKey(person)) {
-                        return true;
+                        found = true;
                     }
                 }
             }
@@ -490,14 +510,16 @@ public class ZenModeFiltering {
             // also check any passed-in phone numbers
             if (phoneNumbers != null) {
                 for (String num : phoneNumbers) {
+                    checkedTel = true;
                     if (checkForNumber(num, defaultCountryCode)) {
-                        return true;
+                        found = true;
                     }
                 }
             }
 
             // no matches
-            return false;
+            ZenLog.traceCheckRepeatCaller(found, checkedTel, checkedOther);
+            return found;
         }
     }
 
