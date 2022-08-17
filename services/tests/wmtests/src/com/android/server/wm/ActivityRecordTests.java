@@ -2314,6 +2314,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertEquals(launchCookie, activity2.mLaunchCookie);
         assertNull(activity1.mLaunchCookie);
+        activity2.makeFinishingLocked();
+        assertTrue(activity1.getTask().getTaskInfo().launchCookies.contains(launchCookie));
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,

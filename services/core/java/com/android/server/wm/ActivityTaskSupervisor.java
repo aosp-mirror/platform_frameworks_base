@@ -2654,11 +2654,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         @Override
         public void accept(ActivityRecord r) {
-            if (r.finishing) {
-                return;
-            }
             if (r.mLaunchCookie != null) {
                 mInfo.addLaunchCookie(r.mLaunchCookie);
+            }
+            if (r.finishing) {
+                return;
             }
             mInfo.numActivities++;
             mInfo.baseActivity = r.mActivityComponent;
