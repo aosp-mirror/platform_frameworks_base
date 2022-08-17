@@ -314,7 +314,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int applyKeyguardOcclusionChange(boolean keyguardOccludingStarted) {
+    public int applyKeyguardOcclusionChange(boolean notify) {
         return 0;
     }
 

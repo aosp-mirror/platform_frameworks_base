@@ -416,7 +416,7 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final boolean keyguardGoingAway = mNextAppTransitionRequests.contains(
+        final boolean keyguardGoingAwayCancelled = mNextAppTransitionRequests.contains(
                 TRANSIT_KEYGUARD_GOING_AWAY);
 
         // The RemoteAnimationControl didn't register AppTransitionListener and
@@ -429,7 +429,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionRequests.clear();
         clear();
         setReady();
-        notifyAppTransitionCancelledLocked(keyguardGoingAway);
+        notifyAppTransitionCancelledLocked(keyguardGoingAwayCancelled);
     }
 
     private void setAppTransitionState(int state) {
@@ -479,9 +479,9 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled) {
         for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAway);
+            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAwayCancelled);
         }
     }
 
