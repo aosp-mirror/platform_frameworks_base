@@ -46,7 +46,6 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
-import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
@@ -157,6 +156,25 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
     };
 
+    private final IFingerprintAuthenticatorsRegisteredCallback
+            mFingerprintAuthenticatorsRegisteredCallback =
+            new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                @Override
+                public void onAllAuthenticatorsRegistered(
+                        List<FingerprintSensorPropertiesInternal> sensors) {
+                    mHandler.post(() -> handleAllFingerprintAuthenticatorsRegistered(sensors));
+                }
+            };
+
+    private final BiometricStateListener mBiometricStateListener =
+            new BiometricStateListener() {
+                @Override
+                public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+                    mHandler.post(
+                            () -> handleEnrollmentsChanged(userId, sensorId, hasEnrollments));
+                }
+            };
+
     @VisibleForTesting
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -231,8 +249,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             List<FingerprintSensorPropertiesInternal> sensors) {
         mExecution.assertIsMainThread();
         if (DEBUG) {
-            Log.d(TAG, "handleAllFingerprintAuthenticatorsRegistered | sensors: "
-                    + Arrays.toString(sensors.toArray()));
+            Log.d(TAG, "handleAllAuthenticatorsRegistered | sensors: " + Arrays.toString(
+                    sensors.toArray()));
         }
         mAllFingerprintAuthenticatorsRegistered = true;
         mFpProps = sensors;
@@ -274,42 +292,15 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             mSidefpsController = mSidefpsControllerFactory.get();
         }
 
-        mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
-            @Override
-            public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
-                mHandler.post(() -> handleEnrollmentsChanged(
-                        TYPE_FINGERPRINT, userId, sensorId, hasEnrollments));
-            }
-        });
+        mFingerprintManager.registerBiometricStateListener(mBiometricStateListener);
         updateFingerprintLocation();
 
         for (Callback cb : mCallbacks) {
-            cb.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT);
+            cb.onAllAuthenticatorsRegistered();
         }
     }
 
-    private void handleAllFaceAuthenticatorsRegistered(List<FaceSensorPropertiesInternal> sensors) {
-        mExecution.assertIsMainThread();
-        if (DEBUG) {
-            Log.d(TAG, "handleAllFaceAuthenticatorsRegistered | sensors: " + Arrays.toString(
-                    sensors.toArray()));
-        }
-
-        mFaceManager.registerBiometricStateListener(new BiometricStateListener() {
-            @Override
-            public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
-                mHandler.post(() -> handleEnrollmentsChanged(
-                        TYPE_FACE, userId, sensorId, hasEnrollments));
-            }
-        });
-
-        for (Callback cb : mCallbacks) {
-            cb.onAllAuthenticatorsRegistered(TYPE_FACE);
-        }
-    }
-
-    private void handleEnrollmentsChanged(@Modality int modality, int userId, int sensorId,
-            boolean hasEnrollments) {
+    private void handleEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
         mExecution.assertIsMainThread();
         Log.d(TAG, "handleEnrollmentsChanged, userId: " + userId + ", sensorId: " + sensorId
                 + ", hasEnrollments: " + hasEnrollments);
@@ -323,7 +314,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             }
         }
         for (Callback cb : mCallbacks) {
-            cb.onEnrollmentsChanged(modality);
+            cb.onEnrollmentsChanged();
         }
     }
 
@@ -709,26 +700,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
         if (mFingerprintManager != null) {
             mFingerprintManager.addAuthenticatorsRegisteredCallback(
-                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
-                        @Override
-                        public void onAllAuthenticatorsRegistered(
-                                List<FingerprintSensorPropertiesInternal> sensors) {
-                            mHandler.post(() ->
-                                    handleAllFingerprintAuthenticatorsRegistered(sensors));
-                        }
-                    });
-        }
-        if (mFaceManager != null) {
-            mFaceManager.addAuthenticatorsRegisteredCallback(
-                    new IFaceAuthenticatorsRegisteredCallback.Stub() {
-                        @Override
-                        public void onAllAuthenticatorsRegistered(
-                                List<FaceSensorPropertiesInternal> sensors) {
-                            mHandler.post(() ->
-                                    handleAllFaceAuthenticatorsRegistered(sensors));
-                        }
-                    }
-            );
+                    mFingerprintAuthenticatorsRegisteredCallback);
         }
 
         mStableDisplaySize = mDisplayManager.getStableDisplaySize();
@@ -1144,13 +1116,13 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
          * Called when authenticators are registered. If authenticators are already
          * registered before this call, this callback will never be triggered.
          */
-        default void onAllAuthenticatorsRegistered(@Modality int modality) {}
+        default void onAllAuthenticatorsRegistered() {}
 
         /**
-         * Called when enrollments have changed. This is called after boot and on changes to
+         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
          * enrollment.
          */
-        default void onEnrollmentsChanged(@Modality int modality) {}
+        default void onEnrollmentsChanged() {}
 
         /**
          * Called when the biometric prompt starts showing.

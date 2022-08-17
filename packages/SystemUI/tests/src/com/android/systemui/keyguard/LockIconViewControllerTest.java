@@ -16,8 +16,6 @@
 
 package com.android.systemui.keyguard;
 
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
@@ -221,7 +219,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         Pair<Float, PointF> udfps = setupUdfps();
 
         // WHEN all authenticators are registered
-        mAuthControllerCallback.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT);
+        mAuthControllerCallback.onAllAuthenticatorsRegistered();
         mDelayableExecutor.runAllReady();
 
         // THEN lock icon view location is updated with the same coordinates as auth controller vals

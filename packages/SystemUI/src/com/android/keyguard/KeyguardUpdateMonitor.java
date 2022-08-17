@@ -54,7 +54,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -2019,13 +2018,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // in case authenticators aren't registered yet at this point:
         mAuthController.addCallback(new AuthController.Callback() {
             @Override
-            public void onAllAuthenticatorsRegistered(
-                    @BiometricAuthenticator.Modality int modality) {
+            public void onAllAuthenticatorsRegistered() {
                 mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE));
             }
 
             @Override
-            public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
+            public void onEnrollmentsChanged() {
                 mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE));
             }
         });
