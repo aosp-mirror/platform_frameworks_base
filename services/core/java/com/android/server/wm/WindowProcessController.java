@@ -27,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.server.am.ProcessList.INVALID_ADJ;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -125,6 +126,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile int mCurProcState = PROCESS_STATE_NONEXISTENT;
     // Last reported process state;
     private volatile int mRepProcState = PROCESS_STATE_NONEXISTENT;
+    // Currently computed oom adj score
+    private volatile int mCurAdj = INVALID_ADJ;
     // are we in the process of crashing?
     private volatile boolean mCrashing;
     // does the app have a not responding dialog?
@@ -317,6 +320,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     int getCurrentProcState() {
         return mCurProcState;
+    }
+
+    public void setCurrentAdj(int curAdj) {
+        mCurAdj = curAdj;
+    }
+
+    int getCurrentAdj() {
+        return mCurAdj;
     }
 
     /**
