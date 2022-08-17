@@ -25,7 +25,6 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.window.WindowContainerTransaction;
@@ -43,9 +42,6 @@ import com.android.wm.shell.sysui.ShellInit;
  * Handles windowing changes when desktop mode system setting changes
  */
 public class DesktopModeController {
-
-    public static final boolean IS_FEATURE_ENABLED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode", false);
 
     private final Context mContext;
     private final ShellTaskOrganizer mShellTaskOrganizer;

@@ -49,6 +49,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.desktopmode.DesktopModeConstants;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -587,7 +588,7 @@ public abstract class WMShellModule {
             RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
             @ShellMainThread Handler mainHandler
     ) {
-        if (DesktopModeController.IS_FEATURE_ENABLED) {
+        if (DesktopModeConstants.IS_FEATURE_ENABLED) {
             return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
                     rootDisplayAreaOrganizer,
                     mainHandler));
