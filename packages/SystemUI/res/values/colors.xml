@@ -166,8 +166,12 @@
 
     <!-- Window magnification colors -->
     <color name="magnification_border_color">#FF9900</color>
+    <color name="magnification_border_color_change">#0000FF</color>
     <color name="magnification_switch_button_color">#7F000000</color>
     <color name="magnification_drag_handle_color">#B3000000</color>
+    <color name="accessibility_magnifier_bg">#FCFCFC</color>
+    <color name="accessibility_magnifier_bg_stroke">#E0E0E0</color>
+    <color name="accessibility_magnifier_icon_color">#252525</color>
 
     <!-- Volume dialog colors -->
     <color name="volume_dialog_background_color">@android:color/transparent</color>

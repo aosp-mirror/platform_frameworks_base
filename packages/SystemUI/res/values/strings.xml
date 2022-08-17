@@ -2109,6 +2109,41 @@
     <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_click_label">Switch</string>
 
+    <!-- Title of the magnification option button allow diagonal scrolling [CHAR LIMIT=NONE]-->
+    <string name="accessibility_allow_diagonal_scrolling">Allow diagonal scrolling</string>
+    <!-- Title of the magnification option button Resize [CHAR LIMIT=NONE]-->
+    <string name="accessibility_resize">Resize</string>
+    <!-- Title of the magnification option button Change type [CHAR LIMIT=NONE]-->
+    <string name="accessibility_change_magnification_type">Change magnification type</string>
+    <!-- Title of the magnification option button End resizing [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_end_resizing">End resizing</string>
+
+    <!-- Description of the window magnification Top handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_top_handle">Top handle</string>
+    <!-- Description of the window magnification Left handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_left_handle">Left handle</string>
+    <!-- Description of the window magnification Right handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_right_handle">Right handle</string>
+    <!-- Description of the window magnification Bottom handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_bottom_handle">Bottom handle</string>
+
+    <!-- Title of the window magnification panel option Magnifier size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnifier_size">Magnifier size</string>
+    <!-- Title of the window magnification panel option Zoom [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_zoom">Zoom</string>
+    <!-- Click action label for magnification panel medium size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_medium">Medium</string>
+    <!-- Click action label for magnification panel small size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_small">Small</string>
+    <!-- Click action label for magnification panel large size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_large">Large</string>
+    <!-- Click action label for magnification panel Close [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_close">Close</string>
+    <!-- Click action label for edit magnification size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnifier_edit">Edit</string>
+    <!-- Click action label for magnification panel settings [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_magnifier_window_settings">Magnifier window settings</string>
+
     <!-- Accessibility floating menu strings -->
     <!-- Message for the accessibility floating button migration tooltip. It shows when the user use gestural navigation then upgrade their system. It will tell the user they could customize or replace the floating button in Settings. [CHAR LIMIT=100] -->
     <string name="accessibility_floating_button_migration_tooltip">Tap to open accessibility features. Customize or replace this button in Settings.\n\n<annotation id="link">View settings</annotation></string>

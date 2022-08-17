@@ -28,6 +28,7 @@ import android.util.Log;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +51,14 @@ public class TypefaceSerializationPerfTest {
     @Rule
     public PerfManualStatusReporter mPerfManualStatusReporter = new PerfManualStatusReporter();
 
+    @Before
+    public void setUp() {
+        // Parse and load the preinstalled fonts in the test process so that:
+        // (1) Updated fonts do not affect test results.
+        // (2) Lazy-loading of fonts does not affect test results (esp. testSerializeFontMap).
+        Typeface.loadPreinstalledSystemFontMap();
+    }
+
     @ManualBenchmarkState.ManualBenchmarkTest(
             warmupDurationNs = WARMUP_DURATION_NS,
             targetTestDurationNs = TARGET_TEST_DURATION_NS)
@@ -61,8 +70,12 @@ public class TypefaceSerializationPerfTest {
         long elapsedTime = 0;
         while (state.keepRunning(elapsedTime)) {
             long startTime = System.nanoTime();
-            Typeface.serializeFontMap(systemFontMap);
+            SharedMemory sharedMemory = Typeface.serializeFontMap(systemFontMap);
             elapsedTime = System.nanoTime() - startTime;
+            sharedMemory.close();
+            android.util.Log.i(TAG,
+                    "testSerializeFontMap isWarmingUp=" + state.isWarmingUp()
+                            + " elapsedTime=" + elapsedTime);
         }
     }
 

@@ -140,6 +140,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -233,6 +234,54 @@ public class TelephonyManager {
     public static final int NETWORK_SELECTION_MODE_UNKNOWN = 0;
     public static final int NETWORK_SELECTION_MODE_AUTO = 1;
     public static final int NETWORK_SELECTION_MODE_MANUAL = 2;
+
+    /**
+     * Reasons for Radio being powered off.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RADIO_POWER_REASON_"},
+            value = {
+                    RADIO_POWER_REASON_USER,
+                    RADIO_POWER_REASON_THERMAL,
+                    RADIO_POWER_REASON_CARRIER,
+                    RADIO_POWER_REASON_NEARBY_DEVICE})
+    public @interface RadioPowerReason {}
+
+    /**
+     * This reason is used when users want to turn off radio, e.g., users turn on airplane mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_REASON_USER = 0;
+    /**
+     * This reason is used when radio needs to be turned off due to thermal.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_REASON_THERMAL = 1;
+    /**
+     * This reason is used when carriers want to turn off radio. A privileged app can request to
+     * turn off radio via the system service
+     * {@link com.android.carrierdefaultapp.CaptivePortalLoginActivity}, which subsequently calls
+     * the system APIs {@link requestRadioPowerOffForReason} and
+     * {@link clearRadioPowerOffForReason}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_REASON_CARRIER = 2;
+    /**
+     * Used to reduce power on a battery-constrained device when Telephony services are available
+     * via a paired device which is nearby.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_REASON_NEARBY_DEVICE = 3;
 
     /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
     /** @hide */
@@ -10506,34 +10555,155 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated - use the APIs {@link requestRadioPowerOffForReason} and
+     * {@link clearRadioPowerOffForReason}.
+     *
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public boolean setRadio(boolean turnOn) {
+        boolean result = true;
         try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.setRadio(turnOn);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setRadio", e);
+            if (turnOn) {
+                clearRadioPowerOffForReason(RADIO_POWER_REASON_USER);
+            } else {
+                requestRadioPowerOffForReason(RADIO_POWER_REASON_USER);
+            }
+        } catch (Exception e) {
+            String calledFunction =
+                    turnOn ? "clearRadioPowerOffForReason" : "requestRadioPowerOffForReason";
+            Log.e(TAG, "Error calling " + calledFunction, e);
+            result = false;
         }
-        return false;
+        return result;
     }
 
-    /** @hide */
+    /**
+     * @deprecated - use the APIs {@link requestRadioPowerOffForReason} and
+     * {@link clearRadioPowerOffForReason}.
+     *
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public boolean setRadioPower(boolean turnOn) {
+        boolean result = true;
+        try {
+            if (turnOn) {
+                clearRadioPowerOffForReason(RADIO_POWER_REASON_USER);
+            } else {
+                requestRadioPowerOffForReason(RADIO_POWER_REASON_USER);
+            }
+        } catch (Exception e) {
+            String calledFunction =
+                    turnOn ? "clearRadioPowerOffForReason" : "requestRadioPowerOffForReason";
+            Log.e(TAG, "Error calling " + calledFunction, e);
+            result = false;
+        }
+        return result;
+    }
+
+    /**
+     * Vote on powering off the radio for a reason. The radio will be turned on only when there is
+     * no reason to power it off. When any of the voters want to power it off, it will be turned
+     * off. In case of emergency, the radio will be turned on even if there are some reasons for
+     * powering it off, and these radio off votes will be cleared.
+     * Multiple apps can vote for the same reason and the last vote will take effect. Each app is
+     * responsible for its vote. A powering-off vote of a reason will be maintained until it is
+     * cleared by calling {@link clearRadioPowerOffForReason} for that reason, or an emergency call
+     * is made, or the device is rebooted. When an app comes backup from a crash, it needs to make
+     * sure if its vote is as expected. An app can use the API {@link getRadioPowerOffReasons} to
+     * check its vote.
+     *
+     * @param reason The reason for powering off radio.
+     * @throws SecurityException if the caller does not have MODIFY_PHONE_STATE permission.
+     * @throws IllegalStateException if the Telephony service is not currently available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    public void requestRadioPowerOffForReason(@RadioPowerReason int reason) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.setRadioPower(turnOn);
+            if (telephony != null) {
+                if (!telephony.requestRadioPowerOffForReason(getSubId(), reason)) {
+                    throw new IllegalStateException("Telephony service is not available.");
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setRadioPower", e);
+            Log.e(TAG, "Error calling ITelephony#requestRadioPowerOffForReason", e);
+            e.rethrowAsRuntimeException();
         }
-        return false;
+    }
+
+    /**
+     * Remove the vote on powering off the radio for a reason, as requested by
+     * {@link requestRadioPowerOffForReason}.
+     *
+     * @param reason The reason for powering off radio.
+     * @throws SecurityException if the caller does not have MODIFY_PHONE_STATE permission.
+     * @throws IllegalStateException if the Telephony service is not currently available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    public void clearRadioPowerOffForReason(@RadioPowerReason int reason) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (!telephony.clearRadioPowerOffForReason(getSubId(), reason)) {
+                    throw new IllegalStateException("Telephony service is not available.");
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#clearRadioPowerOffForReason", e);
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get reasons for powering off radio, as requested by {@link requestRadioPowerOffForReason}.
+     * If the reason set is empty, the radio is on in all cases.
+     *
+     * @return Set of reasons for powering off radio.
+     * @throws SecurityException if the caller does not have READ_PRIVILEGED_PHONE_STATE permission.
+     * @throws IllegalStateException if the Telephony service is not currently available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    @NonNull
+    public Set<Integer> getRadioPowerOffReasons() {
+        Set<Integer> result = new HashSet<>();
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                result.addAll(telephony.getRadioPowerOffReasons(getSubId(),
+                        mContext.getOpPackageName(), mContext.getAttributionTag()));
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getRadioPowerOffReasons", e);
+            e.rethrowAsRuntimeException();
+        }
+        return result;
     }
 
     /**
@@ -13037,20 +13207,21 @@ public class TelephonyManager {
      *
      * @param enabled control enable or disable radio.
      * @see #resetAllCarrierActions()
+     *
+     * @deprecated - use the APIs {@link requestRadioPowerOffForReason} and
+     * {@link clearRadioPowerOffForReason}.
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public void setRadioEnabled(boolean enabled) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                service.carrierActionSetRadioEnabled(
-                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#carrierActionSetRadioEnabled", e);
+        if (enabled) {
+            clearRadioPowerOffForReason(RADIO_POWER_REASON_CARRIER);
+        } else {
+            requestRadioPowerOffForReason(RADIO_POWER_REASON_CARRIER);
         }
     }
 

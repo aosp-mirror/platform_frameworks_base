@@ -123,16 +123,27 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
 
         boolean found = false;
+        boolean remountSystem = false;
+        boolean remountVendor = false;
         for (String file : files) {
             CommandResult result = getDevice().executeShellV2Command("ls " + file);
             if (result.getStatus() == CommandStatus.SUCCESS) {
                 found = true;
-                break;
+                if (file.startsWith("/system")) {
+                    remountSystem = true;
+                } else if (file.startsWith("/vendor")) {
+                    remountVendor = true;
+                }
             }
         }
 
         if (found) {
-            getDevice().remountSystemWritable();
+            if (remountSystem) {
+                getDevice().remountSystemWritable();
+            }
+            if (remountVendor) {
+                getDevice().remountVendorWritable();
+            }
             for (String file : files) {
                 getDevice().executeShellCommand("rm -rf " + file);
             }
@@ -150,7 +161,11 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
         }
-        getDevice().remountSystemWritable();
+        if ("system".equals(partition)) {
+            getDevice().remountSystemWritable();
+        } else if ("vendor".equals(partition)) {
+            getDevice().remountVendorWritable();
+        }
         assertTrue(getDevice().pushFile(apex, "/" + partition + "/apex/" + fileName));
     }
 
@@ -158,7 +173,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
         }
-        getDevice().remountSystemWritable();
+        getDevice().remountVendorWritable();
         File file = File.createTempFile("test-vendor-apex-allow-list", ".xml");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             final String fmt =

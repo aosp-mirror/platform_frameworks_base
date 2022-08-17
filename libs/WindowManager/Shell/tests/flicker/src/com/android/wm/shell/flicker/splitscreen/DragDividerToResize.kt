@@ -27,7 +27,9 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsChanges
 import org.junit.Assume
 import org.junit.Before
@@ -77,19 +79,11 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
 
     @Presubmit
     @Test
-    fun splitScreenDividerKeepVisible() {
-        testSpec.assertLayers {
-            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-        }
-    }
+    fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
     @Presubmit
     @Test
-    fun primaryAppLayerKeepVisible() {
-        testSpec.assertLayers {
-            this.isVisible(primaryApp)
-        }
-    }
+    fun primaryAppLayerKeepVisible() = testSpec.layerKeepVisible(primaryApp)
 
     @Presubmit
     @Test
@@ -105,19 +99,11 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
 
     @Presubmit
     @Test
-    fun primaryAppWindowKeepVisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(primaryApp)
-        }
-    }
+    fun primaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(primaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppWindowKeepVisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(secondaryApp)
-        }
-    }
+    fun secondaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(secondaryApp)
 
     @Presubmit
     @Test

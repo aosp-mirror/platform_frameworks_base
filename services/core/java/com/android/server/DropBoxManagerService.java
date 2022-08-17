@@ -479,6 +479,10 @@ public final class DropBoxManagerService extends SystemService {
             if (length > max) {
                 // Log and fall through to create empty tombstone below
                 Slog.w(TAG, "Dropping: " + tag + " (" + length + " > " + max + " bytes)");
+                logDropboxDropped(
+                        FrameworkStatsLog.DROPBOX_ENTRY_DROPPED__DROP_REASON__ENTRY_TOO_LARGE,
+                        tag,
+                        0);
             } else {
                 temp = new File(mDropBoxDir, "drop" + Thread.currentThread().getId() + ".tmp");
                 try (FileOutputStream out = new FileOutputStream(temp)) {

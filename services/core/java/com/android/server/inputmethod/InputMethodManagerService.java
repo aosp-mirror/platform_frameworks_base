@@ -910,11 +910,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final String mImeControlTargetName;
             @Nullable
             final String mImeTargetNameFromWm;
+            @Nullable
+            final String mImeSurfaceParentName;
 
             Entry(ClientState client, EditorInfo editorInfo, String focusedWindowName,
                     @SoftInputModeFlags int softInputMode, @SoftInputShowHideReason int reason,
                     boolean inFullscreenMode, String requestWindowName,
-                    @Nullable String imeControlTargetName, @Nullable String imeTargetName) {
+                    @Nullable String imeControlTargetName, @Nullable String imeTargetName,
+                    @Nullable String imeSurfaceParentName) {
                 mClientState = client;
                 mEditorInfo = editorInfo;
                 mFocusedWindowName = focusedWindowName;
@@ -926,6 +929,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mRequestWindowName = requestWindowName;
                 mImeControlTargetName = imeControlTargetName;
                 mImeTargetNameFromWm = imeTargetName;
+                mImeSurfaceParentName = imeSurfaceParentName;
             }
         }
 
@@ -970,6 +974,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                 pw.print(prefix);
                 pw.println(" imeTargetNameFromWm=" + entry.mImeTargetNameFromWm);
+
+                pw.print(prefix);
+                pw.println(" imeSurfaceParentName=" + entry.mImeSurfaceParentName);
 
                 pw.print(prefix);
                 pw.print(" editorInfo: ");
@@ -4676,7 +4683,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
                 mCurFocusedWindowClient, mCurEditorInfo, info.focusedWindowName,
                 mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
-                info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName));
+                info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName,
+                info.imeSurfaceParentName));
     }
 
     @BinderThread

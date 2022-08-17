@@ -64,7 +64,7 @@ std::shared_ptr<minikin::FontFamily> buildFamily(const char* fileName) {
                                               std::vector<minikin::FontVariation>());
     std::vector<std::shared_ptr<minikin::Font>> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
-    return std::make_shared<minikin::FontFamily>(std::move(fonts));
+    return minikin::FontFamily::create(std::move(fonts));
 }
 
 std::vector<std::shared_ptr<minikin::FontFamily>> makeSingleFamlyVector(const char* fileName) {

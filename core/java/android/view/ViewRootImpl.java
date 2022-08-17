@@ -75,6 +75,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -707,6 +708,8 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingBackDropFrame = new Rect();
 
     boolean mPendingAlwaysConsumeSystemBars;
+    private int mRelayoutSeq;
+    private final Rect mWinFrameInScreen = new Rect();
     private final InsetsState mTempInsets = new InsetsState();
     private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[SIZE];
     private final WindowConfiguration mTempWinConfig = new WindowConfiguration();
@@ -3364,26 +3367,26 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         } else {
-            // If a relayout isn't going to happen, we still need to check if this window can draw
-            // when mCheckIfCanDraw is set. This is because it means we had a sync in the past, but
-            // have not been told by WMS that the sync is complete and that we can continue to draw
-            if (mCheckIfCanDraw) {
-                try {
-                    cancelDraw = mWindowSession.cancelDraw(mWindow);
-                    cancelReason = "wm_sync";
-                    if (DEBUG_BLAST) {
-                        Log.d(mTag, "cancelDraw returned " + cancelDraw);
-                    }
-                } catch (RemoteException e) {
-                }
-            }
-
             // Not the first pass and no window/insets/visibility change but the window
             // may have moved and we need check that and if so to update the left and right
             // in the attach info. We translate only the window frame since on window move
             // the window manager tells us only for the new frame but the insets are the
             // same and we do not want to translate them more than once.
             maybeHandleWindowMove(frame);
+        }
+
+        if (!mRelayoutRequested && mCheckIfCanDraw) {
+            // We had a sync previously, but we didn't call IWindowSession#relayout in this
+            // traversal. So we don't know if the sync is complete that we can continue to draw.
+            // Here invokes cancelDraw to obtain the information.
+            try {
+                cancelDraw = mWindowSession.cancelDraw(mWindow);
+                cancelReason = "wm_sync";
+                if (DEBUG_BLAST) {
+                    Log.d(mTag, "cancelDraw returned " + cancelDraw);
+                }
+            } catch (RemoteException e) {
+            }
         }
 
         if (surfaceSizeChanged || surfaceReplaced || surfaceCreated || windowAttributesChanged) {
@@ -6403,6 +6406,12 @@ public final class ViewRootImpl implements ViewParent,
             // Make sure the fallback event policy sees all keys that will be
             // delivered to the view hierarchy.
             mFallbackEventHandler.preDispatchKeyEvent(event);
+
+            // Reset last tracked MotionEvent click toolType.
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                mLastClickToolType = MotionEvent.TOOL_TYPE_UNKNOWN;
+            }
+
             return FORWARD;
         }
 
@@ -8151,7 +8160,43 @@ public final class ViewRootImpl implements ViewParent,
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
-        mRelayoutRequested = true;
+        final WindowConfiguration winConfigFromAm = getConfiguration().windowConfiguration;
+        final WindowConfiguration winConfigFromWm =
+                mLastReportedMergedConfiguration.getGlobalConfiguration().windowConfiguration;
+        final WindowConfiguration winConfig = getCompatWindowConfiguration();
+        final int measuredWidth = mView.getMeasuredWidth();
+        final int measuredHeight = mView.getMeasuredHeight();
+        final boolean relayoutAsync;
+        if (LOCAL_LAYOUT && !mFirst && viewVisibility == mViewVisibility
+                && mWindowAttributes.type != TYPE_APPLICATION_STARTING
+                && mSyncSeqId <= mLastSyncSeqId
+                && winConfigFromAm.diff(winConfigFromWm, false /* compareUndefined */) == 0) {
+            final InsetsState state = mInsetsController.getState();
+            final Rect displayCutoutSafe = mTempRect;
+            state.getDisplayCutoutSafe(displayCutoutSafe);
+            mWindowLayout.computeFrames(mWindowAttributes.forRotation(winConfig.getRotation()),
+                    state, displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
+                    measuredWidth, measuredHeight, mInsetsController.getRequestedVisibilities(),
+                    1f /* compatScale */, mTmpFrames);
+            mWinFrameInScreen.set(mTmpFrames.frame);
+            if (mTranslator != null) {
+                mTranslator.translateRectInAppWindowToScreen(mWinFrameInScreen);
+            }
+
+            // If the position and the size of the frame are both changed, it will trigger a BLAST
+            // sync, and we still need to call relayout to obtain the syncSeqId. Otherwise, we just
+            // need to send attributes via relayoutAsync.
+            final Rect oldFrame = mWinFrame;
+            final Rect newFrame = mTmpFrames.frame;
+            final boolean positionChanged =
+                    newFrame.top != oldFrame.top || newFrame.left != oldFrame.left;
+            final boolean sizeChanged =
+                    newFrame.width() != oldFrame.width() || newFrame.height() != oldFrame.height();
+            relayoutAsync = !positionChanged || !sizeChanged;
+        } else {
+            relayoutAsync = false;
+        }
+
         float appScale = mAttachInfo.mApplicationScale;
         boolean restore = false;
         if (params != null && mTranslator != null) {
@@ -8173,26 +8218,47 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        final int requestedWidth = (int) (mView.getMeasuredWidth() * appScale + 0.5f);
-        final int requestedHeight = (int) (mView.getMeasuredHeight() * appScale + 0.5f);
+        final int requestedWidth = (int) (measuredWidth * appScale + 0.5f);
+        final int requestedHeight = (int) (measuredHeight * appScale + 0.5f);
+        int relayoutResult = 0;
+        mRelayoutSeq++;
+        if (relayoutAsync) {
+            mWindowSession.relayoutAsync(mWindow, params,
+                    requestedWidth, requestedHeight, viewVisibility,
+                    insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mRelayoutSeq,
+                    mLastSyncSeqId);
+        } else {
+            relayoutResult = mWindowSession.relayout(mWindow, params,
+                    requestedWidth, requestedHeight, viewVisibility,
+                    insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mRelayoutSeq,
+                    mLastSyncSeqId, mTmpFrames, mPendingMergedConfiguration, mSurfaceControl,
+                    mTempInsets, mTempControls, mRelayoutBundle);
+            mRelayoutRequested = true;
+            final int maybeSyncSeqId = mRelayoutBundle.getInt("seqid");
+            if (maybeSyncSeqId > 0) {
+                mSyncSeqId = maybeSyncSeqId;
+            }
+            mWinFrameInScreen.set(mTmpFrames.frame);
+            if (mTranslator != null) {
+                mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
+                mTranslator.translateRectInScreenToAppWindow(mTmpFrames.displayFrame);
+                mTranslator.translateRectInScreenToAppWindow(mTmpFrames.attachedFrame);
+                mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
+                mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
+            }
+            mInvSizeCompatScale = 1f / mTmpFrames.sizeCompatScale;
+            mInsetsController.onStateChanged(mTempInsets);
+            mInsetsController.onControlsChanged(mTempControls);
 
-        int relayoutResult = mWindowSession.relayout(mWindow, params,
-                requestedWidth, requestedHeight, viewVisibility,
-                insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
-                mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
-                mTempControls, mRelayoutBundle);
-        final int maybeSyncSeqId = mRelayoutBundle.getInt("seqid");
-        if (maybeSyncSeqId > 0) {
-            mSyncSeqId = maybeSyncSeqId;
+            mPendingAlwaysConsumeSystemBars =
+                    (relayoutResult & RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS) != 0;
         }
-        mInvSizeCompatScale = 1f / mTmpFrames.sizeCompatScale;
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
 
-        final WindowConfiguration winConfig = getCompatWindowConfiguration();
         WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
-                requestedHeight, mTmpFrames.frame, mPendingDragResizing, mSurfaceSize);
+                requestedHeight, mWinFrameInScreen, mPendingDragResizing, mSurfaceSize);
 
         final boolean transformHintChanged = transformHint != mLastTransformHint;
         final boolean sizeChanged = !mLastSurfaceSize.equals(mSurfaceSize);
@@ -8239,23 +8305,11 @@ public final class ViewRootImpl implements ViewParent,
             destroySurface();
         }
 
-        mPendingAlwaysConsumeSystemBars =
-                (relayoutResult & RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS) != 0;
-
         if (restore) {
             params.restore();
         }
 
-        if (mTranslator != null) {
-            mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
-            mTranslator.translateRectInScreenToAppWindow(mTmpFrames.displayFrame);
-            mTranslator.translateRectInScreenToAppWindow(mTmpFrames.attachedFrame);
-            mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
-            mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
-        }
         setFrame(mTmpFrames.frame);
-        mInsetsController.onStateChanged(mTempInsets);
-        mInsetsController.onControlsChanged(mTempControls);
         return relayoutResult;
     }
 

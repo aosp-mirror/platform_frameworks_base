@@ -7822,6 +7822,16 @@ public final class Settings {
                 "accessibility_display_magnification_auto_update";
 
         /**
+         * Accessibility Window Magnification Allow diagonal scrolling value. The value is boolean.
+         * 1 : on, 0 : off
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING =
+                "accessibility_allow_diagonal_scrolling";
+
+
+        /**
          * Setting that specifies what mode the soft keyboard is in (default or hidden). Can be
          * modified from an AccessibilityService using the SoftKeyboardController.
          *

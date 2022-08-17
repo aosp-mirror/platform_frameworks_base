@@ -46,6 +46,7 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.utils.AlarmQueue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -68,27 +69,15 @@ public final class FlexibilityController extends StateController {
     private static final int FLEXIBLE_CONSTRAINTS =
             JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS | SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 
-    @VisibleForTesting
-    static final int NUM_JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS =
+    private static final int NUM_JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS =
             Integer.bitCount(JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS);
 
     static final int NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS =
             Integer.bitCount(SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS);
 
-    @VisibleForTesting
     static final int NUM_FLEXIBLE_CONSTRAINTS = Integer.bitCount(FLEXIBLE_CONSTRAINTS);
 
     private static final long NO_LIFECYCLE_END = Long.MAX_VALUE;
-
-    /** Hard cutoff to remove flexible constraints. */
-    private static final long DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
-
-    /**
-     * The default deadline that all flexible constraints should be dropped by if a job lacks
-     * a deadline.
-     */
-    @VisibleForTesting
-    static final long DEFAULT_FLEXIBILITY_DEADLINE = 72 * HOUR_IN_MILLIS;
 
     /**
      * Keeps track of what flexible constraints are satisfied at the moment.
@@ -97,27 +86,43 @@ public final class FlexibilityController extends StateController {
     @VisibleForTesting
     @GuardedBy("mLock")
     int mSatisfiedFlexibleConstraints;
+
+    /** Hard cutoff to remove flexible constraints. */
+    private long mDeadlineProximityLimitMs =
+            FcConfig.DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS;
+
+    /**
+     * The default deadline that all flexible constraints should be dropped by if a job lacks
+     * a deadline.
+     */
+    private long mFallbackFlexibilityDeadlineMs =
+            FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
+
     @GuardedBy("mLock")
-    private boolean mFlexibilityEnabled = FcConstants.DEFAULT_FLEXIBILITY_ENABLED;
+    @VisibleForTesting
+    boolean mFlexibilityEnabled = FcConfig.DEFAULT_FLEXIBILITY_ENABLED;
+
+    private long mMinTimeBetweenFlexibilityAlarmsMs =
+            FcConfig.DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS;
+
+    /**
+     * The percent of a job's lifecycle to drop number of required constraints.
+     * mPercentToDropConstraints[i] denotes that at x% of a Jobs lifecycle,
+     * the controller should have i+1 constraints dropped.
+     */
+    private int[] mPercentToDropConstraints;
 
     @VisibleForTesting
     @GuardedBy("mLock")
     final FlexibilityTracker mFlexibilityTracker;
-    private final FcConstants mFcConstants;
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    final FlexibilityAlarmQueue mFlexibilityAlarmQueue;
+    @VisibleForTesting
+    final FcConfig mFcConfig;
 
     @VisibleForTesting
     final PrefetchController mPrefetchController;
-
-    @GuardedBy("mLock")
-    private final FlexibilityAlarmQueue mFlexibilityAlarmQueue;
-    private static final long MIN_TIME_BETWEEN_ALARMS_MS = MINUTE_IN_MILLIS;
-
-    /**
-     * The percent of a Jobs lifecycle to drop number of required constraints.
-     * PERCENT_TO_DROP_CONSTRAINTS[i] denotes that at x% of a Jobs lifecycle,
-     * the controller should have i+1 constraints dropped.
-     */
-    private static final int[] PERCENT_TO_DROP_CONSTRAINTS = {50, 60, 70, 80};
 
     /**
      * Stores the beginning of prefetch jobs lifecycle per app as a maximum of
@@ -164,9 +169,11 @@ public final class FlexibilityController extends StateController {
             JobSchedulerService service, PrefetchController prefetchController) {
         super(service);
         mFlexibilityTracker = new FlexibilityTracker(NUM_FLEXIBLE_CONSTRAINTS);
-        mFcConstants = new FcConstants();
+        mFcConfig = new FcConfig();
         mFlexibilityAlarmQueue = new FlexibilityAlarmQueue(
                 mContext, JobSchedulerBackgroundThread.get().getLooper());
+        mPercentToDropConstraints =
+                mFcConfig.DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
         mPrefetchController = prefetchController;
         if (mFlexibilityEnabled) {
             mPrefetchController.registerPrefetchChangedListener(mPrefetchChangedListener);
@@ -317,8 +324,7 @@ public final class FlexibilityController extends StateController {
             return NO_LIFECYCLE_END;
         }
         return js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME
-                ? earliest + DEFAULT_FLEXIBILITY_DEADLINE
-                : js.getLatestRunTimeElapsed();
+                ? earliest + mFallbackFlexibilityDeadlineMs : js.getLatestRunTimeElapsed();
     }
 
     @VisibleForTesting
@@ -327,7 +333,7 @@ public final class FlexibilityController extends StateController {
         final long earliest = getLifeCycleBeginningElapsedLocked(js);
         final long latest = getLifeCycleEndElapsedLocked(js, earliest);
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        if (latest == NO_LIFECYCLE_END || earliest > nowElapsed) {
+        if (latest == NO_LIFECYCLE_END || earliest >= nowElapsed) {
             return 0;
         }
         if (nowElapsed > latest || latest == earliest) {
@@ -344,11 +350,19 @@ public final class FlexibilityController extends StateController {
     long getNextConstraintDropTimeElapsedLocked(JobStatus js) {
         final long earliest = getLifeCycleBeginningElapsedLocked(js);
         final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+        return getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
+    }
+
+    /** The elapsed time that marks when the next constraint should be dropped. */
+    @VisibleForTesting
+    @ElapsedRealtimeLong
+    @GuardedBy("mLock")
+    long getNextConstraintDropTimeElapsedLocked(JobStatus js, long earliest, long latest) {
         if (latest == NO_LIFECYCLE_END
-                || js.getNumDroppedFlexibleConstraints() == PERCENT_TO_DROP_CONSTRAINTS.length) {
+                || js.getNumDroppedFlexibleConstraints() == mPercentToDropConstraints.length) {
             return NO_LIFECYCLE_END;
         }
-        final int percent = PERCENT_TO_DROP_CONSTRAINTS[js.getNumDroppedFlexibleConstraints()];
+        final int percent = mPercentToDropConstraints[js.getNumDroppedFlexibleConstraints()];
         final long percentInTime = ((latest - earliest) * percent) / 100;
         return earliest + percentInTime;
     }
@@ -390,8 +404,7 @@ public final class FlexibilityController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void onConstantsUpdatedLocked() {
-        if (mFcConstants.mShouldReevaluateConstraints) {
-            // Update job bookkeeping out of band.
+        if (mFcConfig.mShouldReevaluateConstraints) {
             JobSchedulerBackgroundThread.getHandler().post(() -> {
                 final ArraySet<JobStatus> changedJobs = new ArraySet<>();
                 synchronized (mLock) {
@@ -401,6 +414,8 @@ public final class FlexibilityController extends StateController {
                                 .getJobsByNumRequiredConstraints(j);
                         for (int i = 0; i < jobs.size(); i++) {
                             JobStatus js = jobs.valueAt(i);
+                            mFlexibilityTracker.resetJobNumDroppedConstraints(js);
+                            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js);
                             if (js.setFlexibilityConstraintSatisfied(
                                     nowElapsed, isFlexibilitySatisfiedLocked(js))) {
                                 changedJobs.add(js);
@@ -418,7 +433,13 @@ public final class FlexibilityController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void prepareForUpdatedConstantsLocked() {
-        mFcConstants.mShouldReevaluateConstraints = false;
+        mFcConfig.mShouldReevaluateConstraints = false;
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    public void processConstantLocked(DeviceConfig.Properties properties, String key) {
+        mFcConfig.processConstantLocked(properties, key);
     }
 
     @VisibleForTesting
@@ -461,8 +482,10 @@ public final class FlexibilityController extends StateController {
         public void resetJobNumDroppedConstraints(JobStatus js) {
             final int curPercent = getCurPercentOfLifecycleLocked(js);
             int toDrop = 0;
-            for (int i = 0; i < PERCENT_TO_DROP_CONSTRAINTS.length; i++) {
-                if (curPercent >= PERCENT_TO_DROP_CONSTRAINTS[i]) {
+            final int jsMaxFlexibleConstraints = NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS
+                    + (js.getPreferUnmetered() ? 1 : 0);
+            for (int i = 0; i < jsMaxFlexibleConstraints; i++) {
+                if (curPercent >= mPercentToDropConstraints[i]) {
                     toDrop++;
                 }
             }
@@ -480,6 +503,9 @@ public final class FlexibilityController extends StateController {
          * Jobs with 0 required flexible constraints are removed from the tracker.
          */
         public boolean adjustJobsRequiredConstraints(JobStatus js, int n) {
+            if (n == 0) {
+                return false;
+            }
             remove(js);
             js.adjustNumRequiredFlexibleConstraints(n);
             final long nowElapsed = sElapsedRealtimeClock.millis();
@@ -499,7 +525,7 @@ public final class FlexibilityController extends StateController {
         public void dump(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
             for (int i = 0; i < mTrackedJobs.size(); i++) {
                 ArraySet<JobStatus> jobs = mTrackedJobs.get(i);
-                for (int j = 0; j < mTrackedJobs.size(); j++) {
+                for (int j = 0; j < jobs.size(); j++) {
                     final JobStatus js = jobs.valueAt(j);
                     if (!predicate.test(js)) {
                         continue;
@@ -514,11 +540,12 @@ public final class FlexibilityController extends StateController {
         }
     }
 
-    private class FlexibilityAlarmQueue extends AlarmQueue<JobStatus> {
+    @VisibleForTesting
+    class FlexibilityAlarmQueue extends AlarmQueue<JobStatus> {
         private FlexibilityAlarmQueue(Context context, Looper looper) {
             super(context, looper, "*job.flexibility_check*",
                     "Flexible Constraint Check", false,
-                    MIN_TIME_BETWEEN_ALARMS_MS);
+                    mMinTimeBetweenFlexibilityAlarmsMs);
         }
 
         @Override
@@ -526,16 +553,24 @@ public final class FlexibilityController extends StateController {
             return js.getSourceUserId() == userId;
         }
 
-        protected void scheduleDropNumConstraintsAlarm(JobStatus js) {
+        public void scheduleDropNumConstraintsAlarm(JobStatus js) {
             long nextTimeElapsed;
             synchronized (mLock) {
-                nextTimeElapsed = getNextConstraintDropTimeElapsedLocked(js);
+                final long earliest = getLifeCycleBeginningElapsedLocked(js);
+                final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+                nextTimeElapsed = getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
                 if (nextTimeElapsed == NO_LIFECYCLE_END) {
                     // There is no known or estimated next time to drop a constraint.
                     removeAlarmForKey(js);
                     return;
                 }
-                mFlexibilityAlarmQueue.addAlarm(js, nextTimeElapsed);
+
+                if (latest - nextTimeElapsed < mDeadlineProximityLimitMs) {
+                    mFlexibilityTracker.adjustJobsRequiredConstraints(
+                            js, -js.getNumRequiredFlexibleConstraints());
+                    return;
+                }
+                addAlarm(js, nextTimeElapsed);
             }
         }
 
@@ -546,13 +581,21 @@ public final class FlexibilityController extends StateController {
                 for (int i = 0; i < expired.size(); i++) {
                     JobStatus js = expired.valueAt(i);
                     boolean wasFlexibilitySatisfied = js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE);
-                    long time = getNextConstraintDropTimeElapsedLocked(js);
-                    int toDecrease =
-                            js.getLatestRunTimeElapsed() - time < DEADLINE_PROXIMITY_LIMIT_MS
-                                    ? -js.getNumRequiredFlexibleConstraints() : -1;
-                    if (mFlexibilityTracker.adjustJobsRequiredConstraints(js, toDecrease)
-                            && time != NO_LIFECYCLE_END) {
-                        mFlexibilityAlarmQueue.addAlarm(js, time);
+
+                    final long earliest = getLifeCycleBeginningElapsedLocked(js);
+                    final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+                    final long nowElapsed = sElapsedRealtimeClock.millis();
+
+                    if (latest - nowElapsed < mDeadlineProximityLimitMs) {
+                        mFlexibilityTracker.adjustJobsRequiredConstraints(js,
+                                -js.getNumRequiredFlexibleConstraints());
+                    } else {
+                        long nextTimeElapsed =
+                                getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
+                        if (mFlexibilityTracker.adjustJobsRequiredConstraints(js, -1)
+                                && nextTimeElapsed != NO_LIFECYCLE_END) {
+                            mFlexibilityAlarmQueue.addAlarm(js, nextTimeElapsed);
+                        }
                     }
                     if (wasFlexibilitySatisfied != js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE)) {
                         changedJobs.add(js);
@@ -564,19 +607,46 @@ public final class FlexibilityController extends StateController {
     }
 
     @VisibleForTesting
-    class FcConstants {
+    class FcConfig {
         private boolean mShouldReevaluateConstraints = false;
 
-        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
-
-        public boolean FLEXIBILITY_ENABLED = DEFAULT_FLEXIBILITY_ENABLED;
-
         /** Prefix to use with all constant keys in order to "sub-namespace" the keys. */
-        private static final String FC_CONSTANT_PREFIX = "fc_";
+        private static final String FC_CONFIG_PREFIX = "fc_";
 
-        static final String KEY_FLEXIBILITY_ENABLED = FC_CONSTANT_PREFIX + "enable_flexibility";
+        static final String KEY_FLEXIBILITY_ENABLED = FC_CONFIG_PREFIX + "enable_flexibility";
+        static final String KEY_DEADLINE_PROXIMITY_LIMIT =
+                FC_CONFIG_PREFIX + "flexibility_deadline_proximity_limit_ms";
+        static final String KEY_FALLBACK_FLEXIBILITY_DEADLINE =
+                FC_CONFIG_PREFIX + "fallback_flexibility_deadline_ms";
+        static final String KEY_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS =
+                FC_CONFIG_PREFIX + "min_alarm_time_flexibility_ms";
+        static final String KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
+                FC_CONFIG_PREFIX + "percents_to_drop_num_flexible_constraints";
 
-        // TODO(b/239925946): properly handle DeviceConfig and changing variables
+        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
+        @VisibleForTesting
+        static final long DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
+        @VisibleForTesting
+        static final long DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS = 72 * HOUR_IN_MILLIS;
+        private static final long DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS = MINUTE_IN_MILLIS;
+        @VisibleForTesting
+        final int[] DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS = {50, 60, 70, 80};
+
+        /**
+         * If false the controller will not track new jobs
+         * and the flexibility constraint will always be satisfied.
+         */
+        public boolean FLEXIBILITY_ENABLED = DEFAULT_FLEXIBILITY_ENABLED;
+        /** How close to a jobs' deadline all flexible constraints will be dropped. */
+        public long DEADLINE_PROXIMITY_LIMIT_MS = DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS;
+        /** For jobs that lack a deadline, the time that will be used to drop all constraints by. */
+        public long FALLBACK_FLEXIBILITY_DEADLINE_MS = DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
+        public long MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS =
+                DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS;
+        /** The percentages of a jobs' lifecycle to drop the number of required constraints. */
+        public int[] PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
+                DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+
         @GuardedBy("mLock")
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
@@ -595,7 +665,68 @@ public final class FlexibilityController extends StateController {
                         }
                     }
                     break;
+                case KEY_DEADLINE_PROXIMITY_LIMIT:
+                    DEADLINE_PROXIMITY_LIMIT_MS =
+                            properties.getLong(key, DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS);
+                    if (mDeadlineProximityLimitMs != DEADLINE_PROXIMITY_LIMIT_MS) {
+                        mDeadlineProximityLimitMs = DEADLINE_PROXIMITY_LIMIT_MS;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_FALLBACK_FLEXIBILITY_DEADLINE:
+                    FALLBACK_FLEXIBILITY_DEADLINE_MS =
+                            properties.getLong(key, DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS);
+                    if (mFallbackFlexibilityDeadlineMs != FALLBACK_FLEXIBILITY_DEADLINE_MS) {
+                        mFallbackFlexibilityDeadlineMs = FALLBACK_FLEXIBILITY_DEADLINE_MS;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS:
+                    MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS =
+                            properties.getLong(key, DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS);
+                    if (mMinTimeBetweenFlexibilityAlarmsMs
+                            != MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS) {
+                        mMinTimeBetweenFlexibilityAlarmsMs = MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS:
+                    String dropPercentString = properties.getString(key, "");
+                    PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
+                            parsePercentToDropString(dropPercentString);
+                    if (PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS != null
+                            && !Arrays.equals(mPercentToDropConstraints,
+                            PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS)) {
+                        mPercentToDropConstraints = PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
             }
+        }
+
+        private int[] parsePercentToDropString(String s) {
+            String[] dropPercentString = s.split(",");
+            int[] dropPercentInt = new int[NUM_FLEXIBLE_CONSTRAINTS];
+            if (dropPercentInt.length != dropPercentString.length) {
+                return DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+            }
+            int prevPercent = 0;
+            for (int i = 0; i < dropPercentString.length; i++) {
+                try {
+                    dropPercentInt[i] =
+                            Integer.parseInt(dropPercentString[i]);
+                } catch (NumberFormatException ex) {
+                    Slog.e(TAG, "Provided string was improperly formatted.", ex);
+                    return DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+                }
+                if (dropPercentInt[i] < prevPercent) {
+                    Slog.wtf(TAG, "Percents to drop constraints were not in increasing order.");
+                    return DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+                }
+                prevPercent = dropPercentInt[i];
+            }
+
+            return dropPercentInt;
         }
 
         private void dump(IndentingPrintWriter pw) {
@@ -612,8 +743,8 @@ public final class FlexibilityController extends StateController {
 
     @VisibleForTesting
     @NonNull
-    FcConstants getFcConstants() {
-        return mFcConstants;
+    FcConfig getFcConfig() {
+        return mFcConfig;
     }
 
     @Override
@@ -623,6 +754,6 @@ public final class FlexibilityController extends StateController {
         pw.println();
 
         mFlexibilityTracker.dump(pw, predicate);
-        mFcConstants.dump(pw);
+        mFcConfig.dump(pw);
     }
 }

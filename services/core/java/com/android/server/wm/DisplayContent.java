@@ -53,7 +53,6 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
@@ -950,7 +949,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
-                if (mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
+                if (w.isFocused() && mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
                         && preferredModeId != 0) {
                     mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
                 }
@@ -2710,25 +2709,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentPrivacyIndicatorBounds =
                 mCurrentPrivacyIndicatorBounds.updateStaticBounds(staticBounds);
         if (!Objects.equals(oldBounds, mCurrentPrivacyIndicatorBounds)) {
-            updateDisplayFrames(false /* insetsSourceMayChange */, true /* notifyInsetsChange */);
+            updateDisplayFrames(true /* notifyInsetsChange */);
         }
     }
 
     void onDisplayInfoChanged() {
-        updateDisplayFrames(LOCAL_LAYOUT, LOCAL_LAYOUT);
+        updateDisplayFrames(false /* notifyInsetsChange */);
         mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
         mInputMonitor.layoutInputConsumers(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
         mDisplayPolicy.onDisplayInfoChanged(mDisplayInfo);
     }
 
-    private void updateDisplayFrames(boolean insetsSourceMayChange, boolean notifyInsetsChange) {
+    private void updateDisplayFrames(boolean notifyInsetsChange) {
         if (mDisplayFrames.update(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation),
                 calculateRoundedCornersForRotation(mDisplayInfo.rotation),
                 calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation))) {
-            if (insetsSourceMayChange) {
-                mDisplayPolicy.updateInsetsSourceFramesExceptIme(mDisplayFrames);
-            }
             mInsetsStateController.onDisplayFramesUpdated(notifyInsetsChange);
         }
     }

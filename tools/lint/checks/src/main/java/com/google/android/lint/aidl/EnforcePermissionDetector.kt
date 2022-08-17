@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.android.lint
+package com.google.android.lint.aidl
 
 import com.android.tools.lint.client.api.UElementHandler
 import com.android.tools.lint.detector.api.AnnotationInfo
 import com.android.tools.lint.detector.api.AnnotationOrigin
 import com.android.tools.lint.detector.api.AnnotationUsageInfo
 import com.android.tools.lint.detector.api.AnnotationUsageType
-import com.android.tools.lint.detector.api.ConstantEvaluator
 import com.android.tools.lint.detector.api.Category
+import com.android.tools.lint.detector.api.ConstantEvaluator
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
@@ -34,8 +34,8 @@ import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UAnnotation
-import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UClass
+import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UMethod
 
 /**
@@ -54,12 +54,11 @@ import org.jetbrains.uast.UMethod
  */
 class EnforcePermissionDetector : Detector(), SourceCodeScanner {
 
-    val ENFORCE_PERMISSION = "android.annotation.EnforcePermission"
     val BINDER_CLASS = "android.os.Binder"
     val JAVA_OBJECT = "java.lang.Object"
 
     override fun applicableAnnotations(): List<String> {
-        return listOf(ENFORCE_PERMISSION)
+        return listOf(ANNOTATION_ENFORCE_PERMISSION)
     }
 
     override fun getApplicableUastTypes(): List<Class<out UElement>> {
@@ -99,8 +98,8 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         overriddenMethod: PsiMethod,
         checkEquivalence: Boolean = true
     ) {
-        val overridingAnnotation = overridingMethod.getAnnotation(ENFORCE_PERMISSION)
-        val overriddenAnnotation = overriddenMethod.getAnnotation(ENFORCE_PERMISSION)
+        val overridingAnnotation = overridingMethod.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
+        val overriddenAnnotation = overriddenMethod.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
         val location = context.getLocation(element)
         val overridingClass = overridingMethod.parent as PsiClass
         val overriddenClass = overriddenMethod.parent as PsiClass
@@ -133,8 +132,8 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         extendedClass: PsiClass,
         checkEquivalence: Boolean = true
     ) {
-        val newAnnotation = newClass.getAnnotation(ENFORCE_PERMISSION)
-        val extendedAnnotation = extendedClass.getAnnotation(ENFORCE_PERMISSION)
+        val newAnnotation = newClass.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
+        val extendedAnnotation = extendedClass.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
 
         val location = context.getLocation(element)
         val newClassName = newClass.qualifiedName
@@ -180,7 +179,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
     override fun createUastHandler(context: JavaContext): UElementHandler {
         return object : UElementHandler() {
             override fun visitAnnotation(node: UAnnotation) {
-                if (node.qualifiedName != ENFORCE_PERMISSION) {
+                if (node.qualifiedName != ANNOTATION_ENFORCE_PERMISSION) {
                     return
                 }
                 val method = node.uastParent as? UMethod

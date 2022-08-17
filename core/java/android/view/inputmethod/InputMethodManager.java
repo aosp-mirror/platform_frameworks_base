@@ -18,7 +18,6 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -2086,15 +2085,6 @@ public final class InputMethodManager {
                 Log.w(TAG, "Ignoring startStylusHandwriting: View's window does not have focus.");
                 return;
             }
-            if (mServedInputConnection != null && getDelegate().hasActiveConnection(view)) {
-                // TODO (b/210039666): optimize CURSOR_UPDATE_IMMEDIATE.
-                // TODO (b/210039666): Pipe IME displayId from InputBindResult and use it here.
-                //  instead of mDisplayId.
-                mServedInputConnection.requestCursorUpdatesFromImm(
-                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR,
-                                CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
-                        mDisplayId);
-            }
 
             mServiceInvoker.startStylusHandwriting(mClient);
             // TODO(b/210039666): do we need any extra work for supporting non-native
@@ -2341,9 +2331,6 @@ public final class InputMethodManager {
         editorInfo.packageName = view.getContext().getOpPackageName();
         editorInfo.autofillId = view.getAutofillId();
         editorInfo.fieldId = view.getId();
-        synchronized (mH) {
-            editorInfo.setInitialToolType(mCurRootView.getLastClickToolType());
-        }
         InputConnection ic = view.onCreateInputConnection(editorInfo);
         if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
 
@@ -2382,6 +2369,8 @@ public final class InputMethodManager {
             if (mCurrentEditorInfo == null) {
                 startInputFlags |= StartInputFlags.INITIAL_CONNECTION;
             }
+
+            editorInfo.setInitialToolType(mCurRootView.getLastClickToolType());
 
             // Hook 'em up and let 'er rip.
             mCurrentEditorInfo = editorInfo.createCopyInternal();
