@@ -41,14 +41,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
-import com.android.systemui.util.LargeScreenUtils;
+
+import com.airbnb.lottie.LottieAnimationView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -133,7 +133,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private TextView mSubtitleView;
     private TextView mDescriptionView;
     private View mIconHolderView;
-    protected ImageView mIconView;
+    protected LottieAnimationView mIconView;
     protected TextView mIndicatorView;
 
     @VisibleForTesting @NonNull AuthIconController mIconController;
@@ -824,25 +824,12 @@ public abstract class AuthBiometricView extends LinearLayout {
         return new AuthDialog.LayoutParams(width, totalHeight);
     }
 
-    private boolean isLargeDisplay() {
-        return LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        final boolean isLargeDisplay = isLargeDisplay();
-
-        final int newWidth;
-        if (isLargeDisplay) {
-            // TODO(b/201811580): Unless we can come up with a one-size-fits-all equation, we may
-            //  want to consider moving this to an overlay.
-            newWidth = 2 * Math.min(width, height) / 3;
-        } else {
-            newWidth = Math.min(width, height);
-        }
+        final int newWidth = Math.min(width, height);
 
         // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
         // width.

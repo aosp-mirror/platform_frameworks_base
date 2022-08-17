@@ -291,7 +291,8 @@ public final class DataManagerTest {
                 mShortcutChangeCallbackCaptor.capture());
         mShortcutChangeCallback = mShortcutChangeCallbackCaptor.getValue();
 
-        verify(mContext, times(2)).registerReceiver(any(), any());
+        verify(mContext, times(1)).registerReceiver(any(), any());
+        verify(mContext, times(1)).registerReceiver(any(), any(), anyInt());
     }
 
     @After
@@ -1147,6 +1148,76 @@ public final class DataManagerTest {
             sendGenericNotification();
             listenerService.onNotificationRemoved(mGenericSbn, null,
                     NotificationListenerService.REASON_CANCEL);
+        }
+
+        // Only the shortcut #0 is uncached, all the others are not.
+        verify(mShortcutServiceInternal).uncacheShortcuts(
+                anyInt(), any(), eq(TEST_PKG_NAME),
+                eq(Collections.singletonList(TEST_SHORTCUT_ID + 0)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        for (int i = 1; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            verify(mShortcutServiceInternal, never()).uncacheShortcuts(
+                    anyInt(), anyString(), anyString(),
+                    eq(Collections.singletonList(TEST_SHORTCUT_ID + i)), anyInt(),
+                    eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        }
+    }
+
+    @Test
+    public void testUncacheOldestCachedShortcut_missingNotificationEvents() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        for (int i = 0; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            String shortcutId = TEST_SHORTCUT_ID + i;
+            ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
+                    buildPerson());
+            shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            mShortcutChangeCallback.onShortcutsAddedOrUpdated(
+                    TEST_PKG_NAME,
+                    Collections.singletonList(shortcut),
+                    UserHandle.of(USER_ID_PRIMARY));
+            mLooper.dispatchAll();
+        }
+
+        // Only the shortcut #0 is uncached, all the others are not.
+        verify(mShortcutServiceInternal).uncacheShortcuts(
+                anyInt(), any(), eq(TEST_PKG_NAME),
+                eq(Collections.singletonList(TEST_SHORTCUT_ID + 0)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        for (int i = 1; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            verify(mShortcutServiceInternal, never()).uncacheShortcuts(
+                    anyInt(), anyString(), anyString(),
+                    eq(Collections.singletonList(TEST_SHORTCUT_ID + i)), anyInt(),
+                    eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        }
+    }
+
+    @Test
+    public void testUncacheOldestCachedShortcut_legacyConversation() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        // Add an extra conversation with a legacy type (no creationTime)
+        ConversationStore conversationStore = mDataManager
+                .getUserDataForTesting(USER_ID_PRIMARY)
+                .getOrCreatePackageData(TEST_PKG_NAME)
+                .getConversationStore();
+        ConversationInfo.Builder builder = new ConversationInfo.Builder();
+        builder.setShortcutId(TEST_SHORTCUT_ID + 0);
+        builder.setShortcutFlags(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+        mDataManager.updateConversationStoreThenNotifyListeners(
+                conversationStore,
+                builder.build(),
+                TEST_PKG_NAME, USER_ID_PRIMARY);
+        for (int i = 1; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            String shortcutId = TEST_SHORTCUT_ID + i;
+            ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
+                    buildPerson());
+            shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            mShortcutChangeCallback.onShortcutsAddedOrUpdated(
+                    TEST_PKG_NAME,
+                    Collections.singletonList(shortcut),
+                    UserHandle.of(USER_ID_PRIMARY));
+            mLooper.dispatchAll();
         }
 
         // Only the shortcut #0 is uncached, all the others are not.
