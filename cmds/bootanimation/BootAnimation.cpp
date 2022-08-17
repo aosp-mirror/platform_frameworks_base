@@ -615,10 +615,6 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     mWidth = limitedSize.width;
     mHeight = limitedSize.height;
 
-    SurfaceComposerClient::Transaction t;
-    t.setSize(mFlingerSurfaceControl, mWidth, mHeight);
-    t.apply();
-
     EGLConfig config = getEglConfig(mDisplay);
     EGLSurface surface = eglCreateWindowSurface(mDisplay, config, mFlingerSurface.get(), nullptr);
     if (eglMakeCurrent(mDisplay, surface, surface, mContext) == EGL_FALSE) {

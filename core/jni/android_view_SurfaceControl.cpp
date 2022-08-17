@@ -820,14 +820,6 @@ static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionO
     transaction->setStretchEffect(ctrl, stretch);
 }
 
-static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject, jint w, jint h) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setSize(ctrl, w, h);
-}
-
 static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint flags, jint mask) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2163,8 +2155,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetPosition },
     {"nativeSetScale", "(JJFF)V",
             (void*)nativeSetScale },
-    {"nativeSetSize", "(JJII)V",
-            (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
     {"nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
