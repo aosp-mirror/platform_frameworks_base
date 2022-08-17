@@ -975,11 +975,6 @@ public abstract class PackageManagerInternal {
      */
     public abstract void setEnableRollbackCode(int token, int enableRollbackCode);
 
-    /**
-     * Ask the package manager to compile layouts in the given package.
-     */
-    public abstract boolean compileLayouts(String packageName);
-
     /*
      * Inform the package manager that the pending package install identified by
      * {@code token} can be completed.
