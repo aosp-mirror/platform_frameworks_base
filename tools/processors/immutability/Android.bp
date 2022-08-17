@@ -1,0 +1,58 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library_host {
+    name: "ImmutabilityAnnotationProcessorHostLibrary",
+    srcs: [
+        "src/**/*.kt",
+        "src/**/*.java",
+    ],
+    use_tools_jar: true,
+    // The --add-modules/exports flags below don't work for kotlinc yet, so pin this module to Java
+    // language level 8 (see b/139342589):
+    java_version: "1.8",
+    openjdk9: {
+        javacflags: [
+            "--add-modules=jdk.compiler",
+            "--add-exports jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+            "--add-exports jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+            "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+            "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        ],
+    },
+}
+
+java_plugin {
+    name: "ImmutabilityAnnotationProcessor",
+    processor_class: "android.processor.immutability.ImmutabilityProcessor",
+    static_libs: ["ImmutabilityAnnotationProcessorHostLibrary"],
+}
+
+java_library {
+    name: "ImmutabilityAnnotation",
+    srcs: ["src/**/Immutable.java"],
+    sdk_version: "core_current",
+    host_supported: true,
+}
+
+java_test_host {
+    name: "ImmutabilityAnnotationProcessorUnitTests",
+
+    srcs: ["test/**/*.kt"],
+
+    static_libs: [
+        "compile-testing-prebuilt",
+        "truth-prebuilt",
+        "junit",
+        "kotlin-reflect",
+        "ImmutabilityAnnotationProcessorHostLibrary",
+    ],
+
+    test_suites: ["general-tests"],
+}
