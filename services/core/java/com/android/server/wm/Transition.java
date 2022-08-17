@@ -622,9 +622,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
         }
 
+        boolean hasParticipatedDisplay = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
-            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            final WindowContainer<?> participant = mParticipants.valueAt(i);
+            final ActivityRecord ar = participant.asActivityRecord();
             if (ar != null) {
                 boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(ar);
                 // We need both the expected visibility AND current requested-visibility to be
@@ -656,8 +658,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Legacy dispatch relies on this (for now).
                     ar.mEnteringAnimation = visibleAtTransitionEnd;
                 }
+                continue;
             }
-            final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
+            if (participant.asDisplayContent() != null) {
+                hasParticipatedDisplay = true;
+                continue;
+            }
+            final WallpaperWindowToken wt = participant.asWallpaperToken();
             if (wt != null) {
                 final boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(wt);
                 if (!visibleAtTransitionEnd && !wt.isVisibleRequested()) {
@@ -737,6 +744,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         mState = STATE_FINISHED;
         mController.mTransitionTracer.logState(this);
+        // Rotation change may be deferred while there is a display change transition, so check
+        // again in case there is a new pending change.
+        if (hasParticipatedDisplay && !mController.useShellTransitionsRotation()) {
+            mController.mAtm.mWindowManager.updateRotation(false /* alwaysSendConfiguration */,
+                    false /* forceRelayout */);
+        }
     }
 
     void abort() {

@@ -4302,7 +4302,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Even if alwaysSend, we are waiting for a transition or remote to provide
                     // updated configuration, so we can't update configuration yet.
                     if (!pendingRemoteDisplayChange) {
-                        if (!rotationChanged || forceRelayout) {
+                        // The layout-needed flag will be set if there is a rotation change, so
+                        // only set it if the caller requests to force relayout.
+                        if (forceRelayout) {
                             displayContent.setLayoutNeeded();
                             layoutNeeded = true;
                         }
