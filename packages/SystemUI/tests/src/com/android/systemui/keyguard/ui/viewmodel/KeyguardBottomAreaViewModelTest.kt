@@ -41,6 +41,7 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -196,11 +197,27 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
     @Test
     fun animateButtonReveal() = runBlockingTest {
+        repository.setKeyguardShowing(true)
+        val testConfig =
+            TestConfig(
+                isVisible = true,
+                icon = mock(),
+                canShowWhileLocked = false,
+                intent = Intent("action"),
+            )
+
+        setUpQuickAffordanceModel(
+            position = KeyguardQuickAffordancePosition.BOTTOM_START,
+            testConfig = testConfig,
+        )
+
         val values = mutableListOf<Boolean>()
-        val job = underTest.animateButtonReveal.onEach(values::add).launchIn(this)
+        val job = underTest.startButton.onEach { values.add(it.animateReveal) }.launchIn(this)
 
         repository.setAnimateDozingTransitions(true)
+        yield()
         repository.setAnimateDozingTransitions(false)
+        yield()
 
         assertThat(values).isEqualTo(listOf(false, true, false))
         job.cancel()
