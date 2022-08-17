@@ -581,6 +581,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testTriesToAuthenticate_whenBouncer() {
         fingerprintIsNotEnrolled();
+        faceAuthEnabled();
         setKeyguardBouncerVisibility(true);
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
@@ -1218,6 +1219,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenFaceIsAlreadyAuthenticated_returnsFalse()
             throws RemoteException {
         // Face auth should run when the following is true.
+        faceAuthEnabled();
         bouncerFullyVisibleAndNotGoingToSleep();
         fingerprintIsNotEnrolled();
         keyguardNotGoingAway();
@@ -1284,6 +1286,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenBiometricsDisabledForUser_returnsFalse()
             throws RemoteException {
         // Preconditions for face auth to run
+        faceAuthEnabled();
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
         fingerprintIsNotEnrolled();
@@ -1307,6 +1310,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenUserCurrentlySwitching_returnsFalse()
             throws RemoteException {
         // Preconditions for face auth to run
+        faceAuthEnabled();
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
         fingerprintIsNotEnrolled();
@@ -1329,6 +1333,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenSecureCameraLaunched_returnsFalse()
             throws RemoteException {
         // Preconditions for face auth to run
+        faceAuthEnabled();
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
         fingerprintIsNotEnrolled();
@@ -1374,6 +1379,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenBouncerShowingAndDeviceIsAwake_returnsTrue()
             throws RemoteException {
         // Preconditions for face auth to run
+        faceAuthEnabled();
         keyguardNotGoingAway();
         currentUserIsPrimary();
         currentUserDoesNotHaveTrust();
@@ -1539,8 +1545,19 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(anyBoolean())).isEqualTo(true);
     }
 
+    private void faceAuthEnabled() {
+        // this ensures KeyguardUpdateMonitor updates the cached mIsFaceEnrolled flag using the
+        // face manager mock wire-up in setup()
+        mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(mCurrentUserId);
+    }
+
     private void fingerprintIsNotEnrolled() {
         when(mFingerprintManager.hasEnrolledTemplates(mCurrentUserId)).thenReturn(false);
+        // This updates the cached fingerprint state.
+        // There is no straightforward API to update the fingerprint state.
+        // It currently works updates after enrollment changes because something else invokes
+        // startListeningForFingerprint(), which internally calls this method.
+        mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(mCurrentUserId);
     }
 
     private void statusBarShadeIsNotLocked() {

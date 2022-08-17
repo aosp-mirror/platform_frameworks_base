@@ -993,8 +993,9 @@ class AutomaticBrightnessController {
                     final String packageName = info.topActivity.getPackageName();
                     // If the app didn't change, there's nothing to do. Otherwise, we have to
                     // update the category and re-apply the brightness correction.
-                    if (mForegroundAppPackageName != null
-                            && mForegroundAppPackageName.equals(packageName)) {
+                    String currentForegroundAppPackageName = mForegroundAppPackageName;
+                    if (currentForegroundAppPackageName != null
+                            && currentForegroundAppPackageName.equals(packageName)) {
                         return;
                     }
                     mPendingForegroundAppPackageName = packageName;

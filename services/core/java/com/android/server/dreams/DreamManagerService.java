@@ -218,10 +218,18 @@ public final class DreamManagerService extends SystemService {
         }, pw, "", 200);
     }
 
+    /** Whether a real dream is occurring. */
     private boolean isDreamingInternal() {
         synchronized (mLock) {
             return mCurrentDreamToken != null && !mCurrentDreamIsPreview
                     && !mCurrentDreamIsWaking;
+        }
+    }
+
+    /** Whether a real dream, or a dream preview is occurring. */
+    private boolean isDreamingOrInPreviewInternal() {
+        synchronized (mLock) {
+            return mCurrentDreamToken != null && !mCurrentDreamIsWaking;
         }
     }
 
@@ -693,6 +701,19 @@ public final class DreamManagerService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override // Binder call
+        public boolean isDreamingOrInPreview() {
+            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isDreamingOrInPreviewInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
 
         @Override // Binder call
         public void dream() {
