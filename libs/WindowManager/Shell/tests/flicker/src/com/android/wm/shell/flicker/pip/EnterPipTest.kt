@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -155,9 +155,9 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Test
     fun launcherLayerBecomesVisible() {
         testSpec.assertLayers {
-            isInvisible(ComponentMatcher.LAUNCHER)
+            isInvisible(ComponentNameMatcher.LAUNCHER)
                 .then()
-                .isVisible(ComponentMatcher.LAUNCHER)
+                .isVisible(ComponentNameMatcher.LAUNCHER)
         }
     }
 

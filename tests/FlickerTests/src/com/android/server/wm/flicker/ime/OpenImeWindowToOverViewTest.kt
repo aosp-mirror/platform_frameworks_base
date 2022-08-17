@@ -31,7 +31,7 @@ import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.statusBarLayerIsVisibleAtStartAndEnd
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
@@ -138,10 +138,10 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         Assume.assumeTrue(testSpec.isGesturalNavigation)
         Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayersStart {
-            this.isVisible(ComponentMatcher.NAV_BAR)
+            this.isVisible(ComponentNameMatcher.NAV_BAR)
         }
         testSpec.assertLayersEnd {
-            this.isInvisible(ComponentMatcher.NAV_BAR)
+            this.isInvisible(ComponentNameMatcher.NAV_BAR)
         }
     }
 
@@ -156,10 +156,10 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         Assume.assumeTrue(testSpec.isGesturalNavigation)
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.assertLayersStart {
-            this.isVisible(ComponentMatcher.STATUS_BAR)
+            this.isVisible(ComponentNameMatcher.STATUS_BAR)
         }
         testSpec.assertLayersEnd {
-            this.isInvisible(ComponentMatcher.STATUS_BAR)
+            this.isInvisible(ComponentNameMatcher.STATUS_BAR)
         }
     }
 
@@ -215,10 +215,10 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         Assume.assumeFalse(testSpec.isTablet)
         Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayersStart {
-            this.isVisible(ComponentMatcher.STATUS_BAR)
+            this.isVisible(ComponentNameMatcher.STATUS_BAR)
         }
         testSpec.assertLayersEnd {
-            this.isInvisible(ComponentMatcher.STATUS_BAR)
+            this.isInvisible(ComponentNameMatcher.STATUS_BAR)
         }
     }
 
@@ -235,7 +235,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
         testSpec.assertLayersStart {
-            isVisible(ComponentMatcher.IME).visibleRegion(ComponentMatcher.IME)
+            isVisible(ComponentNameMatcher.IME).visibleRegion(ComponentNameMatcher.IME)
                 .coversAtMost(
                     isVisible(imeTestApp)
                         .visibleRegion(imeTestApp).region
@@ -243,10 +243,10 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         }
         testSpec.assertLayers {
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
-                val imeVisibleRegion = it.visibleRegion(ComponentMatcher.IME)
+                val imeVisibleRegion = it.visibleRegion(ComponentNameMatcher.IME)
                 val appVisibleRegion = it.visibleRegion(imeTestApp)
                 if (imeVisibleRegion.region.isNotEmpty) {
-                    it.isVisible(ComponentMatcher.IME)
+                    it.isVisible(ComponentNameMatcher.IME)
                     imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                 }
             }

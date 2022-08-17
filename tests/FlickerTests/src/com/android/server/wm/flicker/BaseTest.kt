@@ -21,7 +21,6 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.Test

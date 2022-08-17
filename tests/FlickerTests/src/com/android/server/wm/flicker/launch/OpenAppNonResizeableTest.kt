@@ -29,7 +29,7 @@ import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -76,9 +76,9 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     fun navBarLayerVisibilityChanges() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.assertLayers {
-            this.isInvisible(ComponentMatcher.NAV_BAR)
+            this.isInvisible(ComponentNameMatcher.NAV_BAR)
                 .then()
-                .isVisible(ComponentMatcher.NAV_BAR)
+                .isVisible(ComponentNameMatcher.NAV_BAR)
         }
     }
 
@@ -102,9 +102,9 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     fun navBarWindowsVisibilityChanges() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.assertWm {
-            this.isNonAppWindowInvisible(ComponentMatcher.NAV_BAR)
+            this.isNonAppWindowInvisible(ComponentNameMatcher.NAV_BAR)
                 .then()
-                .isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
+                .isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
         }
     }
 
@@ -117,7 +117,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     fun taskBarLayerIsVisibleAtEnd() {
         Assume.assumeTrue(testSpec.isTablet)
         testSpec.assertLayersEnd {
-            this.isVisible(ComponentMatcher.TASK_BAR)
+            this.isVisible(ComponentNameMatcher.TASK_BAR)
         }
     }
 
@@ -130,7 +130,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() {
         testSpec.assertLayersEnd {
-            this.isVisible(ComponentMatcher.STATUS_BAR)
+            this.isVisible(ComponentNameMatcher.STATUS_BAR)
         }
     }
 
@@ -180,7 +180,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     fun navBarLayerIsVisibleAtEnd() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.assertLayersEnd {
-            this.isVisible(ComponentMatcher.NAV_BAR)
+            this.isVisible(ComponentNameMatcher.NAV_BAR)
         }
     }
 

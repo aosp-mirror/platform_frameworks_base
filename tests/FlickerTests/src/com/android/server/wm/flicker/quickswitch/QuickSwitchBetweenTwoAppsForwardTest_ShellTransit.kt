@@ -24,7 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
-import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
