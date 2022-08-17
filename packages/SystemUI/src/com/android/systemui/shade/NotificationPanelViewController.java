@@ -371,7 +371,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
-    private int mTrackingPointer;
+    private int mQsTrackingPointer;
     private VelocityTracker mQsVelocityTracker;
     private boolean mQsTracking;
 
@@ -1864,10 +1864,10 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     private boolean onQsIntercept(MotionEvent event) {
         if (DEBUG_LOGCAT) Log.d(TAG, "onQsIntercept");
-        int pointerIndex = event.findPointerIndex(mTrackingPointer);
+        int pointerIndex = event.findPointerIndex(mQsTrackingPointer);
         if (pointerIndex < 0) {
             pointerIndex = 0;
-            mTrackingPointer = event.getPointerId(pointerIndex);
+            mQsTrackingPointer = event.getPointerId(pointerIndex);
         }
         final float x = event.getX(pointerIndex);
         final float y = event.getY(pointerIndex);
@@ -1896,10 +1896,10 @@ public final class NotificationPanelViewController extends PanelViewController {
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 final int upPointer = event.getPointerId(event.getActionIndex());
-                if (mTrackingPointer == upPointer) {
+                if (mQsTrackingPointer == upPointer) {
                     // gesture is ongoing, find a new pointer to track
                     final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
-                    mTrackingPointer = event.getPointerId(newIndex);
+                    mQsTrackingPointer = event.getPointerId(newIndex);
                     mInitialTouchX = event.getX(newIndex);
                     mInitialTouchY = event.getY(newIndex);
                 }
@@ -2273,10 +2273,10 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void onQsTouch(MotionEvent event) {
-        int pointerIndex = event.findPointerIndex(mTrackingPointer);
+        int pointerIndex = event.findPointerIndex(mQsTrackingPointer);
         if (pointerIndex < 0) {
             pointerIndex = 0;
-            mTrackingPointer = event.getPointerId(pointerIndex);
+            mQsTrackingPointer = event.getPointerId(pointerIndex);
         }
         final float y = event.getY(pointerIndex);
         final float x = event.getX(pointerIndex);
@@ -2297,12 +2297,12 @@ public final class NotificationPanelViewController extends PanelViewController {
 
             case MotionEvent.ACTION_POINTER_UP:
                 final int upPointer = event.getPointerId(event.getActionIndex());
-                if (mTrackingPointer == upPointer) {
+                if (mQsTrackingPointer == upPointer) {
                     // gesture is ongoing, find a new pointer to track
                     final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
                     final float newY = event.getY(newIndex);
                     final float newX = event.getX(newIndex);
-                    mTrackingPointer = event.getPointerId(newIndex);
+                    mQsTrackingPointer = event.getPointerId(newIndex);
                     mInitialHeightOnTouch = mQsExpansionHeight;
                     mInitialTouchY = newY;
                     mInitialTouchX = newX;
@@ -2324,7 +2324,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 mShadeLog.logMotionEvent(event,
                         "onQsTouch: up/cancel action, QS tracking disabled");
                 mQsTracking = false;
-                mTrackingPointer = -1;
+                mQsTrackingPointer = -1;
                 trackMovement(event);
                 float fraction = computeQsExpansionFraction();
                 if (fraction != 0f || y >= mInitialTouchY) {
@@ -2342,7 +2342,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private int getFalsingThreshold() {
+    protected int getFalsingThreshold() {
         float factor = mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
         return (int) (mQsFalsingThreshold * factor);
     }
@@ -4145,8 +4145,8 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    public OnLayoutChangeListener createLayoutChangeListener() {
-        return new OnLayoutChangeListener();
+    protected OnLayoutChangeListener createLayoutChangeListener() {
+        return new OnLayoutChangeListenerImpl();
     }
 
     @Override
@@ -4785,7 +4785,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private class OnLayoutChangeListener extends PanelViewController.OnLayoutChangeListener {
+    private class OnLayoutChangeListenerImpl extends OnLayoutChangeListener {
 
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,

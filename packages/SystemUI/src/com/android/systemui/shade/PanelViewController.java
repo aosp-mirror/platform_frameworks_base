@@ -143,7 +143,6 @@ public abstract class PanelViewController {
     private float mSlopMultiplier;
     protected boolean mHintAnimationRunning;
     private boolean mTouchAboveFalsingThreshold;
-    private int mUnlockFalsingThreshold;
     private boolean mTouchStartedInEmptyArea;
     private boolean mMotionAborted;
     private boolean mUpwardsWhenThresholdReached;
@@ -168,8 +167,8 @@ public abstract class PanelViewController {
     private boolean mIsFlinging;
 
     private String mViewName;
-    private float mInitialTouchY;
-    private float mInitialTouchX;
+    private float mInitialExpandY;
+    private float mInitialExpandX;
     private boolean mTouchDisabled;
     private boolean mInitialTouchFromKeyguard;
 
@@ -314,8 +313,6 @@ public abstract class PanelViewController {
         mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mHintDistance = mResources.getDimension(R.dimen.hint_move_distance);
         mPanelFlingOvershootAmount = mResources.getDimension(R.dimen.panel_overshoot_amount);
-        mUnlockFalsingThreshold =
-                mResources.getDimensionPixelSize(R.dimen.unlock_falsing_threshold);
         mInSplitShade = mResources.getBoolean(R.bool.config_use_split_notification_shade);
     }
 
@@ -384,8 +381,8 @@ public abstract class PanelViewController {
      * horizontal direction
      */
     private boolean isDirectionUpwards(float x, float y) {
-        float xDiff = x - mInitialTouchX;
-        float yDiff = y - mInitialTouchY;
+        float xDiff = x - mInitialExpandX;
+        float yDiff = y - mInitialExpandY;
         if (yDiff >= 0) {
             return false;
         }
@@ -398,8 +395,8 @@ public abstract class PanelViewController {
             beginJankMonitoring();
         }
         mInitialOffsetOnTouch = expandedHeight;
-        mInitialTouchY = newY;
-        mInitialTouchX = newX;
+        mInitialExpandY = newY;
+        mInitialExpandX = newX;
         mInitialTouchFromKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         if (startTracking) {
             mTouchSlopExceeded = true;
@@ -411,8 +408,8 @@ public abstract class PanelViewController {
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
         mTrackingPointer = -1;
         mAmbientState.setSwipingUp(false);
-        if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialTouchX) > mTouchSlop
-                || Math.abs(y - mInitialTouchY) > mTouchSlop
+        if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
+                || Math.abs(y - mInitialExpandY) > mTouchSlop
                 || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
             mVelocityTracker.computeCurrentVelocity(1000);
             float vel = mVelocityTracker.getYVelocity();
@@ -448,13 +445,13 @@ public abstract class PanelViewController {
             // Log collapse gesture if on lock screen.
             if (!expand && onKeyguard) {
                 float displayDensity = mCentralSurfaces.getDisplayDensity();
-                int heightDp = (int) Math.abs((y - mInitialTouchY) / displayDensity);
+                int heightDp = (int) Math.abs((y - mInitialExpandY) / displayDensity);
                 int velocityDp = (int) Math.abs(vel / displayDensity);
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_UNLOCK, heightDp, velocityDp);
                 mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_UNLOCK);
             }
             @Classifier.InteractionType int interactionType = vel == 0 ? GENERIC
-                    : y - mInitialTouchY > 0 ? QUICK_SETTINGS
+                    : y - mInitialExpandY > 0 ? QUICK_SETTINGS
                             : (mKeyguardStateController.canDismissLockScreen()
                                     ? UNLOCK : BOUNCER_UNLOCK);
 
@@ -478,10 +475,7 @@ public abstract class PanelViewController {
         return mVelocityTracker.getYVelocity();
     }
 
-    private int getFalsingThreshold() {
-        float factor = mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
-        return (int) (mUnlockFalsingThreshold * factor);
-    }
+    protected abstract int getFalsingThreshold();
 
     protected abstract boolean shouldGestureWaitForTouchSlop();
 
@@ -521,9 +515,7 @@ public abstract class PanelViewController {
         }
     }
 
-    protected boolean canCollapsePanelOnTouch() {
-        return true;
-    }
+    protected abstract boolean canCollapsePanelOnTouch();
 
     protected float getContentHeight() {
         return mExpandedHeight;
@@ -539,7 +531,7 @@ public abstract class PanelViewController {
             return true;
         }
 
-        @Classifier.InteractionType int interactionType = y - mInitialTouchY > 0
+        @Classifier.InteractionType int interactionType = y - mInitialExpandY > 0
                 ? QUICK_SETTINGS : (
                         mKeyguardStateController.canDismissLockScreen() ? UNLOCK : BOUNCER_UNLOCK);
 
@@ -1176,9 +1168,7 @@ public abstract class PanelViewController {
         return mView;
     }
 
-    public OnLayoutChangeListener createLayoutChangeListener() {
-        return new OnLayoutChangeListener();
-    }
+    protected abstract OnLayoutChangeListener createLayoutChangeListener();
 
     protected abstract TouchHandler createTouchHandler();
 
@@ -1223,8 +1213,8 @@ public abstract class PanelViewController {
                         mTouchSlopExceeded = true;
                         return true;
                     }
-                    mInitialTouchY = y;
-                    mInitialTouchX = x;
+                    mInitialExpandY = y;
+                    mInitialExpandX = x;
                     mTouchStartedInEmptyArea = !isInContentBounds(x, y);
                     mTouchSlopExceeded = mTouchSlopExceededBeforeDown;
                     mMotionAborted = false;
@@ -1241,8 +1231,8 @@ public abstract class PanelViewController {
                         // gesture is ongoing, find a new pointer to track
                         final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
                         mTrackingPointer = event.getPointerId(newIndex);
-                        mInitialTouchX = event.getX(newIndex);
-                        mInitialTouchY = event.getY(newIndex);
+                        mInitialExpandX = event.getX(newIndex);
+                        mInitialExpandY = event.getY(newIndex);
                     }
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -1252,7 +1242,7 @@ public abstract class PanelViewController {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    final float h = y - mInitialTouchY;
+                    final float h = y - mInitialExpandY;
                     addMovement(event);
                     final boolean openShadeWithoutHun =
                             mPanelClosedOnDown && !mCollapsedAndHeadsUpOnDown;
@@ -1262,7 +1252,7 @@ public abstract class PanelViewController {
                         float touchSlop = getTouchSlop(event);
                         if ((h < -touchSlop
                                 || ((openShadeWithoutHun || mAnimatingOnDown) && hAbs > touchSlop))
-                                && hAbs > Math.abs(x - mInitialTouchX)) {
+                                && hAbs > Math.abs(x - mInitialExpandX)) {
                             cancelHeightAnimator();
                             startExpandMotion(x, y, true /* startTracking */, mExpandedHeight);
                             return true;
@@ -1379,12 +1369,12 @@ public abstract class PanelViewController {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     addMovement(event);
-                    float h = y - mInitialTouchY;
+                    float h = y - mInitialExpandY;
 
                     // If the panel was collapsed when touching, we only need to check for the
                     // y-component of the gesture, as we have no conflicting horizontal gesture.
                     if (Math.abs(h) > getTouchSlop(event)
-                            && (Math.abs(h) > Math.abs(x - mInitialTouchX)
+                            && (Math.abs(h) > Math.abs(x - mInitialExpandX)
                             || mIgnoreXTouchSlop)) {
                         mTouchSlopExceeded = true;
                         if (mGestureWaitForTouchSlop && !mTracking && !mCollapsedAndHeadsUpOnDown) {
@@ -1429,7 +1419,7 @@ public abstract class PanelViewController {
         }
     }
 
-    public class OnLayoutChangeListener implements View.OnLayoutChangeListener {
+    protected abstract class OnLayoutChangeListener implements View.OnLayoutChangeListener {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
                 int oldTop, int oldRight, int oldBottom) {
