@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.api.SettingsPageRepository
 import com.android.settingslib.spa.framework.compose.localNavController
@@ -33,6 +34,7 @@ open class SpaActivity(
     private val settingsPageRepository: SettingsPageRepository,
 ) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
         setContent {
             MainContent()
