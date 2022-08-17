@@ -16444,7 +16444,12 @@ public class TelephonyManager {
      * the appropriate callback method on the callback object and passes the current (updated)
      * values.
      * <p>
-     *
+     * Note: Be aware of the permission requirements stated on the {@link TelephonyCallback}
+     * listeners you implement.  Your application must be granted these permissions in order to
+     * register a {@link TelephonyCallback} which requires them; a {@link SecurityException} will be
+     * thrown if you do not hold the required permissions for all {@link TelephonyCallback}
+     * listeners you implement.
+     * <p>
      * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
      * applies to the given subId. Otherwise, applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
