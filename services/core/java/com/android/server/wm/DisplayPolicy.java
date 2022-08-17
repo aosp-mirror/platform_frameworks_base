@@ -794,11 +794,11 @@ public class DisplayPolicy {
     }
 
     public void setAwake(boolean awake) {
-        if (awake == mAwake) {
-            return;
-        }
-        mAwake = awake;
-        synchronized (mService.mGlobalLock) {
+        synchronized (mLock) {
+            if (awake == mAwake) {
+                return;
+            }
+            mAwake = awake;
             if (!mDisplayContent.isDefaultDisplay) {
                 return;
             }
