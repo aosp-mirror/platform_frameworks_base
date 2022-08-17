@@ -2566,8 +2566,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private boolean isOnlyFaceEnrolled() {
-        return isFaceAuthEnabledForUser(getCurrentUser())
-                && !isUnlockWithFingerprintPossible(getCurrentUser());
+        return isFaceEnrolled()
+                && !getCachedIsUnlockWithFingerprintPossible(sCurrentUser);
     }
 
     private void maybeLogListenerModelData(KeyguardListenModel model) {
@@ -2682,7 +2682,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return isUnlockWithFacePossible(userId) || isUnlockWithFingerprintPossible(userId);
     }
 
-    private boolean isUnlockWithFingerprintPossible(int userId) {
+    @VisibleForTesting
+    boolean isUnlockWithFingerprintPossible(int userId) {
+        // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
         mIsUnlockWithFingerprintPossible.put(userId, mFpm != null && mFpm.isHardwareDetected()
                 && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId));
         return mIsUnlockWithFingerprintPossible.get(userId);
@@ -2704,6 +2706,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If face hardware is available, user has enrolled and enabled auth via setting.
      */
     public boolean isFaceAuthEnabledForUser(int userId) {
+        // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
         updateFaceEnrolled(userId);
         return mIsFaceEnrolled;
     }
