@@ -63,7 +63,7 @@ public class AgentTrendCalculatorTest {
         }
 
         @Override
-        long getMaxSatiatedBalance() {
+        long getMaxSatiatedBalance(int userId, String pkgName) {
             return 0;
         }
 

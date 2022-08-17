@@ -19,6 +19,8 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
+import static com.android.server.tare.EconomicPolicy.REGULATION_BG_RESTRICTED;
+import static com.android.server.tare.EconomicPolicy.REGULATION_BG_UNRESTRICTED;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
 import static com.android.server.tare.EconomicPolicy.REGULATION_DEMOTION;
 import static com.android.server.tare.EconomicPolicy.REGULATION_PROMOTION;
@@ -510,12 +512,12 @@ class Agent {
         }
         final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
         final long originalBalance = ledger.getCurrentBalance();
+        final long maxBalance = economicPolicy.getMaxSatiatedBalance(userId, pkgName);
         if (transaction.delta > 0
-                && originalBalance + transaction.delta > economicPolicy.getMaxSatiatedBalance()) {
+                && originalBalance + transaction.delta > maxBalance) {
             // Set lower bound at 0 so we don't accidentally take away credits when we were trying
             // to _give_ the app credits.
-            final long newDelta =
-                    Math.max(0, economicPolicy.getMaxSatiatedBalance() - originalBalance);
+            final long newDelta = Math.max(0, maxBalance - originalBalance);
             Slog.i(TAG, "Would result in becoming too rich. Decreasing transaction "
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
@@ -660,6 +662,47 @@ class Agent {
         }
     }
 
+    /**
+     * Reclaim all ARCs from an app that was just restricted.
+     */
+    @GuardedBy("mLock")
+    void onAppRestrictedLocked(final int userId, @NonNull final String pkgName) {
+        final long curBalance = getBalanceLocked(userId, pkgName);
+        final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
+        if (curBalance <= minBalance) {
+            return;
+        }
+        if (DEBUG) {
+            Slog.i(TAG, "App restricted! Taking " + curBalance
+                    + " from " + appToString(userId, pkgName));
+        }
+
+        final long now = getCurrentTimeMillis();
+        final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+        recordTransactionLocked(userId, pkgName, ledger,
+                new Ledger.Transaction(now, now, REGULATION_BG_RESTRICTED, null, -curBalance, 0),
+                true);
+    }
+
+    /**
+     * Give an app that was just unrestricted some ARCs.
+     */
+    @GuardedBy("mLock")
+    void onAppUnrestrictedLocked(final int userId, @NonNull final String pkgName) {
+        final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+        if (ledger.getCurrentBalance() > 0) {
+            Slog.wtf(TAG, "App " + pkgName + " had credits while it was restricted");
+            // App already got credits somehow. Move along.
+            return;
+        }
+
+        final long now = getCurrentTimeMillis();
+
+        recordTransactionLocked(userId, pkgName, ledger,
+                new Ledger.Transaction(now, now, REGULATION_BG_UNRESTRICTED, null,
+                        mIrs.getMinBalanceLocked(userId, pkgName), 0), true);
+    }
+
     /** Returns true if an app should be given credits in the general distributions. */
     private boolean shouldGiveCredits(@NonNull InstalledPackageInfo packageInfo) {
         // Skip apps that wouldn't be doing any work. Giving them ARCs would be wasteful.
@@ -668,7 +711,8 @@ class Agent {
         }
         final int userId = UserHandle.getUserId(packageInfo.uid);
         // No point allocating ARCs to the system. It can do whatever it wants.
-        return !mIrs.isSystem(userId, packageInfo.packageName);
+        return !mIrs.isSystem(userId, packageInfo.packageName)
+                && !mIrs.isPackageRestricted(userId, packageInfo.packageName);
     }
 
     void onCreditSupplyChanged() {
