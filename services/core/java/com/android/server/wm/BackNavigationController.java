@@ -43,6 +43,7 @@ import android.window.IBackAnimationFinishedCallback;
 import android.window.OnBackInvokedCallbackInfo;
 import android.window.ScreenCapture;
 import android.window.TaskSnapshot;
+import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -61,6 +62,9 @@ class BackNavigationController {
     private boolean mShowWallpaper;
     private Runnable mPendingAnimation;
 
+    // TODO (b/241808055) Find a appropriate time to remove during refactor
+    // Execute back animation with legacy transition system. Temporary flag for easier debugging.
+    static final boolean ENABLE_SHELL_TRANSITIONS = WindowManagerService.sEnableShellTransitions;
     /**
      * Returns true if the back predictability feature is enabled
      */
@@ -263,12 +267,14 @@ class BackNavigationController {
             // Only prepare animation if no leash has been created (no animation is running).
             // TODO(b/241808055): Cancel animation when preparing back animation.
             if (prepareAnimation
-                    && removedWindowContainer.hasCommittedReparentToAnimationLeash()) {
+                    && (removedWindowContainer.hasCommittedReparentToAnimationLeash()
+                            || removedWindowContainer.mTransitionController.inTransition())) {
                 Slog.w(TAG, "Can't prepare back animation due to another animation is running.");
                 prepareAnimation = false;
             }
 
             if (prepareAnimation) {
+                infoBuilder.setDepartingWCT(toWindowContainerToken(currentTask));
                 prepareAnimationIfNeeded(currentTask, prevTask, prevActivity,
                         removedWindowContainer, backType, adapter);
             }
@@ -285,6 +291,13 @@ class BackNavigationController {
         }
 
         return infoBuilder.build();
+    }
+
+    private static WindowContainerToken toWindowContainerToken(WindowContainer<?> windowContainer) {
+        if (windowContainer == null || windowContainer.mRemoteToken == null) {
+            return null;
+        }
+        return windowContainer.mRemoteToken.toWindowContainerToken();
     }
 
     private void prepareAnimationIfNeeded(Task currentTask,
@@ -352,8 +365,10 @@ class BackNavigationController {
                 leashes.add(screenshotSurface);
             }
         } else if (prevTask != null) {
-            // Special handling for preventing next transition.
-            currentTask.mBackGestureStarted = true;
+            if (!ENABLE_SHELL_TRANSITIONS) {
+                // Special handling for preventing next transition.
+                currentTask.mBackGestureStarted = true;
+            }
             prevActivity = prevTask.getTopNonFinishingActivity();
             if (prevActivity != null) {
                 // Make previous task show from behind by marking its top activity as visible
@@ -396,16 +411,27 @@ class BackNavigationController {
                         }
 
                         synchronized (mWindowManagerService.mGlobalLock) {
-                            if (triggerBack) {
-                                final SurfaceControl surfaceControl =
-                                        removedWindowContainer.getSurfaceControl();
-                                if (surfaceControl != null && surfaceControl.isValid()) {
-                                    // When going back to home, hide the task surface before it is
-                                    // re-parented to avoid flicker.
-                                    finishedTransaction.hide(surfaceControl);
+                            if (ENABLE_SHELL_TRANSITIONS) {
+                                if (!triggerBack) {
+                                    if (!needsScreenshot(backType)) {
+                                        restoreLaunchBehind(finalPrevActivity);
+                                    }
                                 }
-                            } else if (!needsScreenshot(backType)) {
-                                restoreLaunchBehind(finalPrevActivity);
+                            } else {
+                                if (triggerBack) {
+                                    final SurfaceControl surfaceControl =
+                                            removedWindowContainer.getSurfaceControl();
+                                    if (surfaceControl != null && surfaceControl.isValid()) {
+                                        // When going back to home, hide the task surface before it
+                                        // re-parented to avoid flicker.
+                                        finishedTransaction.hide(surfaceControl);
+                                    }
+                                } else {
+                                    currentTask.mBackGestureStarted = false;
+                                    if (!needsScreenshot(backType)) {
+                                        restoreLaunchBehind(finalPrevActivity);
+                                    }
+                                }
                             }
                         }
                         finishedTransaction.apply();

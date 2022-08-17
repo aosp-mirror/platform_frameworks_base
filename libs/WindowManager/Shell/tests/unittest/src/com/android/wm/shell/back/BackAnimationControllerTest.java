@@ -61,6 +61,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -98,6 +99,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Mock
     private IRemoteAnimationRunner mBackAnimationRunner;
 
+    @Mock
+    private Transitions mTransitions;
+
     private BackAnimationController mController;
 
     private int mEventTime = 0;
@@ -117,7 +121,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController = new BackAnimationController(mShellInit,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
-                mContentResolver);
+                mContentResolver, mTransitions);
         mShellInit.init();
         mEventTime = 0;
         mShellExecutor.flushAll();
@@ -209,7 +213,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController = new BackAnimationController(shellInit,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
-                mContentResolver);
+                mContentResolver, mTransitions);
         shellInit.init();
         mController.setBackToLauncherCallback(mIOnBackInvokedCallback, mBackAnimationRunner);
 
@@ -250,6 +254,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         verifyNoMoreInteractions(mIOnBackInvokedCallback);
         mController.onBackAnimationFinished();
+        // Pretend the transition handler called finishAnimation.
+        mController.finishBackNavigation();
 
         // Verify that more events from a rejected swipe cannot start animation.
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
@@ -278,6 +284,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // Simulate transition timeout.
         mShellExecutor.flushAll();
         mController.onBackAnimationFinished();
+        // Pretend the transition handler called finishAnimation.
+        mController.finishBackNavigation();
 
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
