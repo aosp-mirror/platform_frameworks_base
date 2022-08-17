@@ -21,6 +21,8 @@ import android.util.Xml;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import com.google.common.base.Strings;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,7 +47,6 @@ public class SettingsStateTest extends AndroidTestCase {
             "\ud800\udc00\udbff\udfff" + // surrogate pairs
             "\uD800ab\uDC00 " + // broken surrogate pairs
             "日本語";
-
 
     public void testIsBinary() {
         assertFalse(SettingsState.isBinary(" abc 日本語"));
@@ -181,5 +182,45 @@ public class SettingsStateTest extends AndroidTestCase {
             assertEquals("v2", s.getValue());
             assertEquals("p2", s.getPackageName());
         }
+    }
+
+    public void testInsertSetting_memoryUsage() {
+        final Object lock = new Object();
+	final File file = new File(getContext().getCacheDir(), "setting.xml");
+	final String settingName = "test_setting";
+
+        SettingsState settingsState = new SettingsState(getContext(), lock, file, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        // No exception should be thrown when there is no cap
+        settingsState.insertSettingLocked(settingName, Strings.repeat("A", 20001),
+                null, false, "p1");
+        settingsState.deleteSettingLocked(settingName);
+
+        settingsState = new SettingsState(getContext(), lock, file, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        // System package doesn't have memory usage limit
+        settingsState.insertSettingLocked(settingName, Strings.repeat("A", 20001),
+                null, false, "android");
+        settingsState.deleteSettingLocked(settingName);
+
+        // Should not throw if usage is under the cap
+        settingsState.insertSettingLocked(settingName, Strings.repeat("A", 19999),
+                null, false, "p1");
+        settingsState.deleteSettingLocked(settingName);
+        try {
+            settingsState.insertSettingLocked(settingName, Strings.repeat("A", 20001),
+                    null, false, "p1");
+            fail("Should throw because it exceeded per package memory usage");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("p1"));
+        }
+        try {
+            settingsState.insertSettingLocked(settingName, Strings.repeat("A", 20001),
+                    null, false, "p1");
+            fail("Should throw because it exceeded per package memory usage");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("p1"));
+        }
+        assertTrue(settingsState.getSettingLocked(settingName).isNull());
     }
 }
