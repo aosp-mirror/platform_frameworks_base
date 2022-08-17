@@ -16,6 +16,7 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -1511,7 +1512,7 @@ public class AudioDeviceInventory {
         mDevRoleCapturePresetDispatchers.finishBroadcast();
     }
 
-    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+    @Nullable UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
         final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
                 device.getAddress());
         synchronized (mDevicesLock) {
