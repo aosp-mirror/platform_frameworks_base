@@ -298,6 +298,10 @@ message SystemMessage {
     // Notify the user to setup their dock
     NOTE_SETUP_DOCK = 72;
 
+    // Inform the user of wifi apm state changes.
+    // Package: android
+    NOTE_WIFI_APM_NOTIFICATION = 73;
+
     // Inform the user of bluetooth apm state changes.
     // Package: android
     NOTE_BT_APM_NOTIFICATION = 74;
