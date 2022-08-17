@@ -4209,9 +4209,9 @@ public class UserManagerService extends IUserManager.Stub {
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 // Keep logic in sync with getRemainingCreatableUserCount()
-                if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
+                if (!isGuest && !isProfile && !isDemo && isUserLimitReached()) {
                     // If the user limit has been reached, we cannot add a user (except guest/demo).
-                    // Note that managed profiles can bypass it in certain circumstances (taken
+                    // Note that profiles can bypass it in certain circumstances (taken
                     // into account in the profile check below).
                     throwCheckedUserOperationException(
                             "Cannot add user. Maximum user limit is reached.",
