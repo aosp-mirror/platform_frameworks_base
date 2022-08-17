@@ -90,8 +90,9 @@ open class AuthBiometricFingerprintView(
 
     fun updateOverrideIconLayoutParamsSize() {
         udfpsAdapter?.let {
-            (mIconController as? AuthBiometricFingerprintIconController)?.iconLayoutParamsSize =
-                    it.getSensorDiameter(scaleFactorProvider?.provide() ?: 1.0f)
+            val sensorDiameter = it.getSensorDiameter(scaleFactorProvider?.provide() ?: 1.0f)
+            (mIconController as? AuthBiometricFingerprintIconController)?.iconLayoutParamSize =
+                    Pair(sensorDiameter, sensorDiameter)
         }
     }
 
