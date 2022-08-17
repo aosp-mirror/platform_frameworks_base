@@ -264,12 +264,12 @@
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
-    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE_AUDIO profile. -->
-    <string name="bluetooth_profile_le_audio">LE_AUDIO</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
+    <string name="bluetooth_profile_le_audio">LE audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference when LE_AUDIO is connected. -->
-    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE_AUDIO</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
+    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE audio</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
