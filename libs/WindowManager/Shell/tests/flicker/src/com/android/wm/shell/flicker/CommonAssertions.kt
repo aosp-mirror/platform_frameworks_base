@@ -84,6 +84,14 @@ fun FlickerTestParameter.layerIsVisibleAtEnd(
     }
 }
 
+fun FlickerTestParameter.layerKeepVisible(
+    component: IComponentMatcher
+) {
+    assertLayers {
+        this.isVisible(component)
+    }
+}
+
 fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
     component: IComponentMatcher,
     splitLeftTop: Boolean
@@ -125,6 +133,15 @@ fun FlickerTestParameter.splitAppLayerBoundsIsVisibleAtEnd(
                 getSplitRightBottomRegion(dividerRegion, endRotation)
             }
         )
+    }
+}
+
+fun FlickerTestParameter.splitAppLayerBoundsKeepVisible(
+    component: IComponentMatcher,
+    splitLeftTop: Boolean
+) {
+    assertLayers {
+        this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
     }
 }
 
@@ -186,6 +203,14 @@ fun FlickerTestParameter.appWindowIsVisibleAtEnd(
     component: IComponentMatcher
 ) {
     assertWmEnd {
+        this.isAppWindowVisible(component)
+    }
+}
+
+fun FlickerTestParameter.appWindowKeepVisible(
+        component: IComponentMatcher
+) {
+    assertWm {
         this.isAppWindowVisible(component)
     }
 }

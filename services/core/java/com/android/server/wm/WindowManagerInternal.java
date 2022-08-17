@@ -810,12 +810,17 @@ public abstract class WindowManagerInternal {
          */
         public final String imeLayerTargetName;
 
+        /** The surface parent of the IME container. */
+        public final String imeSurfaceParentName;
+
         public ImeTargetInfo(String focusedWindowName, String requestWindowName,
-                String imeControlTargetName, String imeLayerTargetName) {
+                String imeControlTargetName, String imeLayerTargetName,
+                String imeSurfaceParentName) {
             this.focusedWindowName = focusedWindowName;
             this.requestWindowName = requestWindowName;
             this.imeControlTargetName = imeControlTargetName;
             this.imeLayerTargetName = imeLayerTargetName;
+            this.imeSurfaceParentName = imeSurfaceParentName;
         }
     }
 

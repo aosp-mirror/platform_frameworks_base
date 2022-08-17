@@ -47,6 +47,7 @@ class SplitScreenHelper(
         const val NOTIFICATION_SCROLLER = "notification_stack_scroller"
         const val DIVIDER_BAR = "docked_divider_handle"
         const val GESTURE_STEP_MS = 16L
+        const val LONG_PRESS_TIME_MS = 100L
 
         private val notificationScrollerSelector: BySelector
             get() = By.res(SYSTEM_UI_PACKAGE_NAME, NOTIFICATION_SCROLLER)
@@ -81,6 +82,13 @@ class SplitScreenHelper(
                 instrumentation,
                 Components.SendNotificationActivity.LABEL,
                 Components.SendNotificationActivity.COMPONENT.toFlickerComponent()
+            )
+
+        fun getIme(instrumentation: Instrumentation): SplitScreenHelper =
+            SplitScreenHelper(
+                instrumentation,
+                Components.ImeActivity.LABEL,
+                Components.ImeActivity.COMPONENT.toFlickerComponent()
             )
 
         fun waitForSplitComplete(
@@ -207,6 +215,16 @@ class SplitScreenHelper(
             }
         }
 
+        fun longPress(
+            instrumentation: Instrumentation,
+            point: Point
+        ) {
+            val downTime = SystemClock.uptimeMillis()
+            touch(instrumentation, MotionEvent.ACTION_DOWN, downTime, downTime, TIMEOUT_MS, point)
+            SystemClock.sleep(LONG_PRESS_TIME_MS)
+            touch(instrumentation, MotionEvent.ACTION_UP, downTime, downTime, TIMEOUT_MS, point)
+        }
+
         fun createShortcutOnHotseatIfNotExist(
             tapl: LauncherInstrumentation,
             appName: String
@@ -257,6 +275,34 @@ class SplitScreenHelper(
             dividerBar.click()
             SystemClock.sleep(interval.toLong())
             dividerBar.click()
+        }
+
+        fun copyContentFromLeftToRight(
+            instrumentation: Instrumentation,
+            device: UiDevice,
+            sourceApp: IComponentMatcher,
+            destinationApp: IComponentMatcher,
+        ) {
+            // Copy text from sourceApp
+            val textView = device.wait(Until.findObject(
+                By.res(sourceApp.packageNames.firstOrNull(), "SplitScreenTest")), TIMEOUT_MS)
+            longPress(instrumentation, textView.getVisibleCenter())
+
+            val copyBtn = device.wait(Until.findObject(By.text("Copy")), TIMEOUT_MS)
+            copyBtn.click()
+
+            // Paste text to destinationApp
+            val editText = device.wait(Until.findObject(
+                By.res(destinationApp.packageNames.firstOrNull(), "plain_text_input")), TIMEOUT_MS)
+            longPress(instrumentation, editText.getVisibleCenter())
+
+            val pasteBtn = device.wait(Until.findObject(By.text("Paste")), TIMEOUT_MS)
+            pasteBtn.click()
+
+            // Verify text
+            if (!textView.getText().contentEquals(editText.getText())) {
+                error("Fail to copy content in split")
+            }
         }
     }
 }

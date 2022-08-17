@@ -968,27 +968,6 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
         });
     }
 
-    /**
-     * Dispatches {@link InputConnection#requestCursorUpdates(int)}.
-     *
-     * <p>This method is intended to be called only from {@link InputMethodManager}.</p>
-     * @param cursorUpdateMode the mode for {@link InputConnection#requestCursorUpdates(int, int)}
-     * @param cursorUpdateFilter the filter for
-     *      {@link InputConnection#requestCursorUpdates(int, int)}
-     * @param imeDisplayId displayId on which IME is displayed.
-     */
-    @Dispatching(cancellable = true)
-    public void requestCursorUpdatesFromImm(int cursorUpdateMode, int cursorUpdateFilter,
-            int imeDisplayId) {
-        final int currentSessionId = mCurrentSessionId.get();
-        dispatchWithTracing("requestCursorUpdatesFromImm", () -> {
-            if (currentSessionId != mCurrentSessionId.get()) {
-                return;  // cancelled
-            }
-            requestCursorUpdatesInternal(cursorUpdateMode, cursorUpdateFilter, imeDisplayId);
-        });
-    }
-
     @Dispatching(cancellable = true)
     @Override
     public void requestCursorUpdates(InputConnectionCommandHeader header, int cursorUpdateMode,
