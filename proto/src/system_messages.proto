@@ -290,6 +290,10 @@ message SystemMessage {
     // Package: android
     NOTE_REVIEW_NOTIFICATION_PERMISSIONS = 71;
 
+    // Inform the user of wifi apm state changes.
+    // Package: android
+    NOTE_WIFI_APM_NOTIFICATION = 73;
+
     // Inform the user of bluetooth apm state changes.
     // Package: android
     NOTE_BT_APM_NOTIFICATION = 74;
