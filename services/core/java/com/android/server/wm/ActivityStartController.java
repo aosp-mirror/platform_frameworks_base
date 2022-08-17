@@ -94,6 +94,7 @@ public class ActivityStartController {
 
     boolean mCheckedForSetup = false;
 
+    /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
     private boolean mInExecution = false;
 
     /**
@@ -129,7 +130,7 @@ public class ActivityStartController {
         return mFactory.obtain().setIntent(intent).setReason(reason);
     }
 
-    void onExecutionStarted(ActivityStarter starter) {
+    void onExecutionStarted() {
         mInExecution = true;
     }
 

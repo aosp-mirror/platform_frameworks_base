@@ -5649,7 +5649,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppResumed: wasStopped=%b %s",
                 wasStopped, this);
         mAppStopped = false;
-        // Allow the window to turn the screen on once the app is resumed again.
+        // Allow the window to turn the screen on once the app is started and resumed.
         if (mAtmService.getActivityStartController().isInExecution()) {
             setCurrentLaunchCanTurnScreenOn(true);
         }
