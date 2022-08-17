@@ -20,11 +20,11 @@ plugins {
 }
 
 android {
-    namespace 'com.android.settingslib.spa.codelab'
+    namespace 'com.android.settingslib.spa.gallery'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.android.settingslib.spa.codelab"
+        applicationId "com.android.settingslib.spa.gallery"
         minSdk spa_min_sdk
         targetSdk 33
         versionCode 1

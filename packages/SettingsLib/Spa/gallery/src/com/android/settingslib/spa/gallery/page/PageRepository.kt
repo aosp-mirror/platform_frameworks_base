@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab.page
+package com.android.settingslib.spa.gallery.page
 
 import com.android.settingslib.spa.framework.api.SettingsPageRepository
 
@@ -26,7 +26,7 @@ object Destinations {
     const val Slider = "Slider"
 }
 
-val codelabPageRepository = SettingsPageRepository(
+val galleryPageRepository = SettingsPageRepository(
     allPages = listOf(
         HomePageProvider,
         PreferencePageProvider,

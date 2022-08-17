@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab
+package com.android.settingslib.spa.gallery
 
-import com.android.settingslib.spa.codelab.page.codelabPageRepository
 import com.android.settingslib.spa.framework.SpaActivity
+import com.android.settingslib.spa.gallery.page.galleryPageRepository
 
-class MainActivity : SpaActivity(codelabPageRepository)
+class MainActivity : SpaActivity(galleryPageRepository)

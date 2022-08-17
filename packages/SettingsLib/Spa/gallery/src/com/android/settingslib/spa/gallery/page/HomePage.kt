@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab.page
+package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
 import androidx.compose.foundation.layout.Column
@@ -25,10 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.codelab.R
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.gallery.R
 
 object HomePageProvider : SettingsPageProvider {
     override val name = Destinations.Home
