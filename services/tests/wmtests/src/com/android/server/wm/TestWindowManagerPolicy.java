@@ -310,7 +310,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime) {
     }
 
     @Override
