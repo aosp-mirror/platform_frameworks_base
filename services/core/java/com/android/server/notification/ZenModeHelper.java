@@ -177,10 +177,12 @@ public class ZenModeHelper {
     }
 
     public boolean matchesCallFilter(UserHandle userHandle, Bundle extras,
-            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
+            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity,
+            int callingUid) {
         synchronized (mConfig) {
             return ZenModeFiltering.matchesCallFilter(mContext, mZenMode, mConsolidatedPolicy,
-                    userHandle, extras, validator, contactsTimeoutMs, timeoutAffinity);
+                    userHandle, extras, validator, contactsTimeoutMs, timeoutAffinity,
+                    callingUid);
         }
     }
 
