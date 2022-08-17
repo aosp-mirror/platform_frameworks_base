@@ -384,9 +384,11 @@ final class SettingsState {
             Setting newSetting = new Setting(name, oldSetting.getValue(), null,
                     oldSetting.getPackageName(), oldSetting.getTag(), false,
                     oldSetting.getId());
-            mSettings.put(name, newSetting);
-            updateMemoryUsagePerPackageLocked(newSetting.getPackageName(), oldValue,
+            int newSize = getNewMemoryUsagePerPackageLocked(newSetting.getPackageName(), oldValue,
                     newSetting.getValue(), oldDefaultValue, newSetting.getDefaultValue());
+            checkNewMemoryUsagePerPackageLocked(newSetting.getPackageName(), newSize);
+            mSettings.put(name, newSetting);
+            updateMemoryUsagePerPackageLocked(newSetting.getPackageName(), newSize);
             scheduleWriteIfNeededLocked();
         }
     }
@@ -419,6 +421,12 @@ final class SettingsState {
         Setting oldState = mSettings.get(name);
         String oldValue = (oldState != null) ? oldState.value : null;
         String oldDefaultValue = (oldState != null) ? oldState.defaultValue : null;
+        String newDefaultValue = makeDefault ? value : oldDefaultValue;
+
+        int newSize = getNewMemoryUsagePerPackageLocked(packageName, oldValue, value,
+                oldDefaultValue, newDefaultValue);
+        checkNewMemoryUsagePerPackageLocked(packageName, newSize);
+
         Setting newState;
 
         if (oldState != null) {
@@ -439,8 +447,7 @@ final class SettingsState {
 
         addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, newState);
 
-        updateMemoryUsagePerPackageLocked(packageName, oldValue, value,
-                oldDefaultValue, newState.getDefaultValue());
+        updateMemoryUsagePerPackageLocked(packageName, newSize);
 
         scheduleWriteIfNeededLocked();
 
@@ -558,13 +565,14 @@ final class SettingsState {
         }
 
         Setting oldState = mSettings.remove(name);
+        int newSize = getNewMemoryUsagePerPackageLocked(oldState.packageName, oldState.value,
+                null, oldState.defaultValue, null);
 
         FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, name, /* value= */ "",
                 /* newValue= */ "", oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
                 FrameworkStatsLog.SETTING_CHANGED__REASON__DELETED);
 
-        updateMemoryUsagePerPackageLocked(oldState.packageName, oldState.value,
-                null, oldState.defaultValue, null);
+        updateMemoryUsagePerPackageLocked(oldState.packageName, newSize);
 
         addHistoricalOperationLocked(HISTORICAL_OPERATION_DELETE, oldState);
 
@@ -585,16 +593,18 @@ final class SettingsState {
         Setting oldSetting = new Setting(setting);
         String oldValue = setting.getValue();
         String oldDefaultValue = setting.getDefaultValue();
+        String newValue = oldDefaultValue;
+        String newDefaultValue = oldDefaultValue;
+
+        int newSize = getNewMemoryUsagePerPackageLocked(setting.packageName, oldValue,
+                newValue, oldDefaultValue, newDefaultValue);
+        checkNewMemoryUsagePerPackageLocked(setting.packageName, newSize);
 
         if (!setting.reset()) {
             return false;
         }
 
-        String newValue = setting.getValue();
-        String newDefaultValue = setting.getDefaultValue();
-
-        updateMemoryUsagePerPackageLocked(setting.packageName, oldValue,
-                newValue, oldDefaultValue, newDefaultValue);
+        updateMemoryUsagePerPackageLocked(setting.packageName, newSize);
 
         addHistoricalOperationLocked(HISTORICAL_OPERATION_RESET, oldSetting);
 
@@ -702,38 +712,49 @@ final class SettingsState {
     }
 
     @GuardedBy("mLock")
-    private void updateMemoryUsagePerPackageLocked(String packageName, String oldValue,
+    private boolean isExemptFromMemoryUsageCap(String packageName) {
+        return mMaxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_UNLIMITED
+                || SYSTEM_PACKAGE_NAME.equals(packageName);
+    }
+
+    @GuardedBy("mLock")
+    private void checkNewMemoryUsagePerPackageLocked(String packageName, int newSize)
+            throws IllegalStateException {
+        if (isExemptFromMemoryUsageCap(packageName)) {
+            return;
+        }
+        if (newSize > mMaxBytesPerAppPackage) {
+            throw new IllegalStateException("You are adding too many system settings. "
+                    + "You should stop using system settings for app specific data"
+                    + " package: " + packageName);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private int getNewMemoryUsagePerPackageLocked(String packageName, String oldValue,
             String newValue, String oldDefaultValue, String newDefaultValue) {
-        if (mMaxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_UNLIMITED) {
-            return;
+        if (isExemptFromMemoryUsageCap(packageName)) {
+            return 0;
         }
-
-        if (SYSTEM_PACKAGE_NAME.equals(packageName)) {
-            return;
-        }
-
+        final Integer currentSize = mPackageToMemoryUsage.get(packageName);
         final int oldValueSize = (oldValue != null) ? oldValue.length() : 0;
         final int newValueSize = (newValue != null) ? newValue.length() : 0;
         final int oldDefaultValueSize = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
         final int newDefaultValueSize = (newDefaultValue != null) ? newDefaultValue.length() : 0;
         final int deltaSize = newValueSize + newDefaultValueSize
                 - oldValueSize - oldDefaultValueSize;
+        return Math.max((currentSize != null) ? currentSize + deltaSize : deltaSize, 0);
+    }
 
-        Integer currentSize = mPackageToMemoryUsage.get(packageName);
-        final int newSize = Math.max((currentSize != null)
-                ? currentSize + deltaSize : deltaSize, 0);
-
-        if (newSize > mMaxBytesPerAppPackage) {
-            throw new IllegalStateException("You are adding too many system settings. "
-                    + "You should stop using system settings for app specific data"
-                    + " package: " + packageName);
+    @GuardedBy("mLock")
+    private void updateMemoryUsagePerPackageLocked(String packageName, int newSize) {
+        if (isExemptFromMemoryUsageCap(packageName)) {
+            return;
         }
-
         if (DEBUG) {
             Slog.i(LOG_TAG, "Settings for package: " + packageName
                     + " size: " + newSize + " bytes.");
         }
-
         mPackageToMemoryUsage.put(packageName, newSize);
     }
 
