@@ -63,6 +63,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
@@ -412,10 +413,10 @@ public class AudioService extends IAudioService.Stub
     protected static int[] MAX_STREAM_VOLUME = new int[] {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
-        7,  // STREAM_RING
+        7,  // STREAM_RING            // configured by config_audio_ring_vol_steps
         15, // STREAM_MUSIC
         7,  // STREAM_ALARM
-        7,  // STREAM_NOTIFICATION
+        7,  // STREAM_NOTIFICATION    // configured by config_audio_notif_vol_steps
         15, // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
         15, // STREAM_DTMF
@@ -1114,6 +1115,48 @@ public class AudioService extends IAudioService.Stub
             // Default is to use maximum.
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM] =
                         MAX_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM];
+        }
+
+        // Read following properties to configure max volume (number of steps) and default volume
+        //   for STREAM_NOTIFICATION and STREAM_RING:
+        //      config_audio_notif_vol_default
+        //      config_audio_notif_vol_steps
+        //      config_audio_ring_vol_default
+        //      config_audio_ring_vol_steps
+        int[] streams = { AudioSystem.STREAM_NOTIFICATION, AudioSystem.STREAM_RING };
+        int[] stepsResId = { com.android.internal.R.integer.config_audio_notif_vol_steps,
+                com.android.internal.R.integer.config_audio_ring_vol_steps };
+        int[] defaultResId = { com.android.internal.R.integer.config_audio_notif_vol_default,
+                com.android.internal.R.integer.config_audio_ring_vol_default };
+        for (int s = 0; s < streams.length; s++) {
+            try {
+                final int maxVol = mContext.getResources().getInteger(stepsResId[s]);
+                if (maxVol <= 0) {
+                    throw new IllegalArgumentException("Invalid negative max volume for stream "
+                            + streams[s]);
+                }
+                Log.i(TAG, "Stream " + streams[s] + ": using max vol of " + maxVol);
+                MAX_STREAM_VOLUME[streams[s]] = maxVol;
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Error querying max vol for stream type " + streams[s], e);
+            }
+            try {
+                final int defaultVol = mContext.getResources().getInteger(defaultResId[s]);
+                if (defaultVol > MAX_STREAM_VOLUME[streams[s]]) {
+                    throw new IllegalArgumentException("Invalid default volume (" + defaultVol
+                            + ") for stream " + streams[s] + ", greater than max volume of "
+                            + MAX_STREAM_VOLUME[streams[s]]);
+                }
+                if (defaultVol < MIN_STREAM_VOLUME[streams[s]]) {
+                    throw new IllegalArgumentException("Invalid default volume (" + defaultVol
+                            + ") for stream " + streams[s] + ", lower than min volume of "
+                            + MIN_STREAM_VOLUME[streams[s]]);
+                }
+                Log.i(TAG, "Stream " + streams[s] + ": using default vol of " + defaultVol);
+                AudioSystem.DEFAULT_STREAM_VOLUME[streams[s]] = defaultVol;
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Error querying default vol for stream type " + streams[s], e);
+            }
         }
 
         if (looper == null) {
