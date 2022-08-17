@@ -19,7 +19,7 @@ package {
 }
 
 android_app {
-    name: "SpaLibCodelab",
+    name: "SpaLibGallery",
 
     srcs: ["src/**/*.kt"],
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab.page
+package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
 import androidx.compose.foundation.layout.Column

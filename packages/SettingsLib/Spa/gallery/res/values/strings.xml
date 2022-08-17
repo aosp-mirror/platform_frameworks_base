@@ -14,6 +14,6 @@
   limitations under the License.
   -->
 <resources>
-    <!-- Codelab App name. [DO NOT TRANSLATE] -->
-    <string name="app_name" translatable="false">SpaLib Codelab</string>
+    <!-- Gallery App name. [DO NOT TRANSLATE] -->
+    <string name="app_name" translatable="false">SpaLib Gallery</string>
 </resources>
