@@ -273,9 +273,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            runThenWaitForBroadcasts(testUser, () -> {
-                mAm.switchUser(testUser);
-            }, Intent.ACTION_USER_UNLOCKED);
+            switchUser(testUser);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
