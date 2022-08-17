@@ -75,7 +75,7 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 import java.io.PrintWriter;
 import java.util.List;
 
-public abstract class PanelViewController {
+abstract class PanelViewController {
     public static final String TAG = PanelView.class.getSimpleName();
     public static final float FLING_MAX_LENGTH_SECONDS = 0.6f;
     public static final float FLING_SPEED_UP_FACTOR = 0.6f;
