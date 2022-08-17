@@ -187,7 +187,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
         final int w = 100;
         final int h = 200;
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0,
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
                 new ClientWindowFrames(), new MergedConfiguration(), new SurfaceControl(),
                 new InsetsState(), new InsetsSourceControl[0], new Bundle());
         // Because the window is already invisible, it doesn't need to apply exiting animation
