@@ -17,8 +17,10 @@
 package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.app.GameManagerService.WRITE_SETTINGS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -35,11 +37,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.GameManager;
 import android.app.GameModeInfo;
 import android.app.GameState;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -97,6 +103,7 @@ public class GameManagerServiceTests {
     private PowerManagerInternal mMockPowerManager;
     @Mock
     private UserManager mMockUserManager;
+    private BroadcastReceiver mShutDownActionReceiver;
 
     // Stolen from ConnectivityServiceTest.MockContext
     class MockContext extends ContextWrapper {
@@ -165,6 +172,12 @@ public class GameManagerServiceTests {
             }
             throw new UnsupportedOperationException("Couldn't find system service: " + name);
         }
+
+        @Override
+        public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter) {
+            mShutDownActionReceiver =  receiver;
+            return null;
+        }
     }
 
     @Before
@@ -200,15 +213,16 @@ public class GameManagerServiceTests {
     @After
     public void tearDown() throws Exception {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+        deleteFolder(InstrumentationRegistry.getTargetContext().getFilesDir());
     }
 
     private void startUser(GameManagerService gameManagerService, int userId) {
         UserInfo userInfo = new UserInfo(userId, "name", 0);
-        gameManagerService.onUserStarting(new SystemService.TargetUser(userInfo));
+        gameManagerService.onUserStarting(new SystemService.TargetUser(userInfo),
+                InstrumentationRegistry.getContext().getFilesDir());
         mTestLooper.dispatchAll();
     }
 
@@ -1507,5 +1521,43 @@ public class GameManagerServiceTests {
             gameManagerService.getResolutionScalingFactor(mPackageName,
                     GameManager.GAME_MODE_BATTERY, USER_ID_1);
         });
+    }
+
+    @Test
+    public void testWritingSettingFile_onShutdown() throws InterruptedException {
+        mockModifyGameModeGranted();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onBootCompleted();
+        startUser(gameManagerService, USER_ID_1);
+        Thread.sleep(500);
+        gameManagerService.setGameModeConfigOverride("com.android.app1", USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+        gameManagerService.setGameMode("com.android.app1", USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE);
+        GameManagerSettings settings = new GameManagerSettings(
+                InstrumentationRegistry.getContext().getFilesDir());
+        Thread.sleep(500);
+        // no data written as delayed messages are queued
+        assertFalse(settings.readPersistentDataLocked());
+        assertTrue(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
+        Intent shutdown = new Intent();
+        shutdown.setAction(Intent.ACTION_SHUTDOWN);
+        mShutDownActionReceiver.onReceive(mMockContext, shutdown);
+        Thread.sleep(500);
+        // data is written on processing new message with no delay on shutdown,
+        // and all queued messages should be removed
+        assertTrue(settings.readPersistentDataLocked());
+        assertFalse(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
+    }
+
+    private static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                deleteFolder(file);
+            }
+        }
+        folder.delete();
     }
 }

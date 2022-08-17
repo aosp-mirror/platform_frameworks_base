@@ -99,6 +99,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service to manage game related features.
@@ -119,7 +120,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     static final int SET_GAME_STATE = 4;
     static final int CANCEL_GAME_LOADING_MODE = 5;
     static final int WRITE_GAME_MODE_INTERVENTION_LIST_FILE = 6;
-    static final int WRITE_SETTINGS_DELAY = 10 * 1000;  // 10 seconds
+    static final int WRITE_DELAY_MILLIS = 10 * 1000;  // 10 seconds
     static final int LOADING_BOOST_MAX_DURATION = 5 * 1000;  // 5 seconds
 
     private static final String PACKAGE_NAME_MSG_KEY = "packageName";
@@ -130,7 +131,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Context mContext;
     private final Object mLock = new Object();
     private final Object mDeviceConfigLock = new Object();
-    private final Handler mHandler;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    final Handler mHandler;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
     private final PowerManagerInternal mPowerManagerInternal;
@@ -255,13 +257,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     if (userId < 0) {
                         Slog.wtf(TAG, "Attempt to write settings for invalid user: " + userId);
                         synchronized (mLock) {
-                            removeMessages(WRITE_SETTINGS, msg.obj);
+                            removeEqualMessages(WRITE_SETTINGS, msg.obj);
                         }
                         break;
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mLock) {
-                        removeMessages(WRITE_SETTINGS, msg.obj);
+                        removeEqualMessages(WRITE_SETTINGS, msg.obj);
                         if (mSettings.containsKey(userId)) {
                             GameManagerSettings userSettings = mSettings.get(userId);
                             userSettings.writePersistentDataLocked();
@@ -275,8 +277,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     if (userId < 0) {
                         Slog.wtf(TAG, "Attempt to write settings for invalid user: " + userId);
                         synchronized (mLock) {
-                            removeMessages(WRITE_SETTINGS, msg.obj);
-                            removeMessages(REMOVE_SETTINGS, msg.obj);
+                            removeEqualMessages(WRITE_SETTINGS, msg.obj);
+                            removeEqualMessages(REMOVE_SETTINGS, msg.obj);
                         }
                         break;
                     }
@@ -284,8 +286,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     synchronized (mLock) {
                         // Since the user was removed, ignore previous write message
                         // and do write here.
-                        removeMessages(WRITE_SETTINGS, msg.obj);
-                        removeMessages(REMOVE_SETTINGS, msg.obj);
+                        removeEqualMessages(WRITE_SETTINGS, msg.obj);
+                        removeEqualMessages(REMOVE_SETTINGS, msg.obj);
                         if (mSettings.containsKey(userId)) {
                             final GameManagerSettings userSettings = mSettings.get(userId);
                             mSettings.remove(userId);
@@ -295,7 +297,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     break;
                 }
                 case POPULATE_GAME_MODE_SETTINGS: {
-                    removeMessages(POPULATE_GAME_MODE_SETTINGS, msg.obj);
+                    removeEqualMessages(POPULATE_GAME_MODE_SETTINGS, msg.obj);
                     final int userId = (int) msg.obj;
                     final String[] packageNames = getInstalledGamePackageNames(userId);
                     updateConfigsForUser(userId, false /*checkGamePackage*/, packageNames);
@@ -341,13 +343,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     if (userId < 0) {
                         Slog.wtf(TAG, "Attempt to write setting for invalid user: " + userId);
                         synchronized (mLock) {
-                            removeMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, null);
+                            removeEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, msg.obj);
                         }
                         break;
                     }
 
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-                    removeMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, null);
+                    removeEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, msg.obj);
                     writeGameModeInterventionsToFile(userId);
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
@@ -843,7 +845,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
-            mService.onUserStarting(user);
+            mService.onUserStarting(user,
+                    Environment.getDataSystemDeDirectory(user.getUserIdentifier()));
         }
 
         @Override
@@ -1010,18 +1013,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             GameManagerSettings userSettings = mSettings.get(userId);
             userSettings.setGameModeLocked(packageName, gameMode);
-            final Message msg = mHandler.obtainMessage(WRITE_SETTINGS);
-            msg.obj = userId;
-            if (!mHandler.hasEqualMessages(WRITE_SETTINGS, userId)) {
-                mHandler.sendMessageDelayed(msg, WRITE_SETTINGS_DELAY);
-            }
         }
         updateInterventions(packageName, gameMode, userId);
-        final Message msg = mHandler.obtainMessage(WRITE_GAME_MODE_INTERVENTION_LIST_FILE);
-        msg.obj = userId;
-        if (!mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, userId)) {
-            mHandler.sendMessage(msg);
-        }
+        sendUserMessage(userId, WRITE_SETTINGS, "SET_GAME_MODE", WRITE_DELAY_MILLIS);
+        sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                "SET_GAME_MODE", 0 /*delayMillis*/);
     }
 
     /**
@@ -1208,22 +1204,46 @@ public final class GameManagerService extends IGameManagerService.Stub {
         if (mGameServiceController != null) {
             mGameServiceController.onBootComplete();
         }
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
+                    synchronized (mLock) {
+                        // Note that the max wait time of broadcast is 10s (see
+                        // {@ShutdownThread#MAX_BROADCAST_TIMEMAX_BROADCAST_TIME}) currently so
+                        // this can be optional only if we have message delay plus processing
+                        // time significant smaller to prevent data loss.
+                        for (Map.Entry<Integer, GameManagerSettings> entry : mSettings.entrySet()) {
+                            final int userId = entry.getKey();
+                            sendUserMessage(userId, WRITE_SETTINGS,
+                                    Intent.ACTION_SHUTDOWN, 0 /*delayMillis*/);
+                            sendUserMessage(userId,
+                                    WRITE_GAME_MODE_INTERVENTION_LIST_FILE, Intent.ACTION_SHUTDOWN,
+                                    0 /*delayMillis*/);
+                        }
+                    }
+                }
+            }
+        }, new IntentFilter(Intent.ACTION_SHUTDOWN));
     }
 
-    void onUserStarting(@NonNull TargetUser user) {
-        final int userId = user.getUserIdentifier();
+    private void sendUserMessage(int userId, int what, String eventForLog, int delayMillis) {
+        Message msg = mHandler.obtainMessage(what, userId);
+        if (!mHandler.sendMessageDelayed(msg, delayMillis)) {
+            Slog.e(TAG, "Failed to send user message " + what + " on " + eventForLog);
+        }
+    }
 
+    void onUserStarting(@NonNull TargetUser user, File settingDataDir) {
+        final int userId = user.getUserIdentifier();
         synchronized (mLock) {
             if (!mSettings.containsKey(userId)) {
-                GameManagerSettings userSettings =
-                        new GameManagerSettings(Environment.getDataSystemDeDirectory(userId));
+                GameManagerSettings userSettings = new GameManagerSettings(settingDataDir);
                 mSettings.put(userId, userSettings);
                 userSettings.readPersistentDataLocked();
             }
         }
-        final Message msg = mHandler.obtainMessage(POPULATE_GAME_MODE_SETTINGS);
-        msg.obj = userId;
-        mHandler.sendMessage(msg);
+        sendUserMessage(userId, POPULATE_GAME_MODE_SETTINGS, "ON_USER_STARTING", 0 /*delayMillis*/);
 
         if (mGameServiceController != null) {
             mGameServiceController.notifyUserStarted(user);
@@ -1243,9 +1263,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             if (!mSettings.containsKey(userId)) {
                 return;
             }
-            final Message msg = mHandler.obtainMessage(REMOVE_SETTINGS);
-            msg.obj = userId;
-            mHandler.sendMessage(msg);
+            sendUserMessage(userId, REMOVE_SETTINGS, "ON_USER_STOPPING", 0 /*delayMillis*/);
         }
 
         if (mGameServiceController != null) {
@@ -1259,15 +1277,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
             synchronized (mLock) {
                 final int fromUserId = from.getUserIdentifier();
                 if (mSettings.containsKey(fromUserId)) {
-                    final Message msg = mHandler.obtainMessage(REMOVE_SETTINGS);
-                    msg.obj = fromUserId;
-                    mHandler.sendMessage(msg);
+                    sendUserMessage(fromUserId, REMOVE_SETTINGS, "ON_USER_SWITCHING",
+                            0 /*delayMillis*/);
                 }
             }
         }
-        final Message msg = mHandler.obtainMessage(POPULATE_GAME_MODE_SETTINGS);
-        msg.obj = toUserId;
-        mHandler.sendMessage(msg);
+
+        sendUserMessage(toUserId, POPULATE_GAME_MODE_SETTINGS, "ON_USER_SWITCHING",
+                0 /*delayMillis*/);
 
         if (mGameServiceController != null) {
             mGameServiceController.notifyNewForegroundUser(to);
@@ -1539,14 +1556,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     updateInterventions(packageName, gameMode, userId);
                 }
             }
+            sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                    "UPDATE_CONFIGS_FOR_USERS", 0 /*delayMillis*/);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to update configs for user " + userId + ": " + e);
-        }
-
-        final Message msg = mHandler.obtainMessage(WRITE_GAME_MODE_INTERVENTION_LIST_FILE);
-        msg.obj = userId;
-        if (!mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE, userId)) {
-            mHandler.sendMessage(msg);
         }
     }
 
@@ -1700,18 +1713,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
                                     if (mSettings.containsKey(userId)) {
                                         mSettings.get(userId).removeGame(packageName);
                                     }
-                                    Message msg = mHandler.obtainMessage(WRITE_SETTINGS);
-                                    msg.obj = userId;
-                                    if (!mHandler.hasEqualMessages(WRITE_SETTINGS, userId)) {
-                                        mHandler.sendMessageDelayed(msg, WRITE_SETTINGS_DELAY);
-                                    }
-                                    msg = mHandler.obtainMessage(
-                                            WRITE_GAME_MODE_INTERVENTION_LIST_FILE);
-                                    msg.obj = userId;
-                                    if (!mHandler.hasEqualMessages(
-                                            WRITE_GAME_MODE_INTERVENTION_LIST_FILE, userId)) {
-                                        mHandler.sendMessage(msg);
-                                    }
+                                    sendUserMessage(userId, WRITE_SETTINGS,
+                                            Intent.ACTION_PACKAGE_REMOVED, WRITE_DELAY_MILLIS);
+                                    sendUserMessage(userId,
+                                            WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                                            Intent.ACTION_PACKAGE_REMOVED, WRITE_DELAY_MILLIS);
                                 }
                             }
                             break;
