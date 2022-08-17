@@ -219,6 +219,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when a pending app transition gets cancelled.
+         *
          * @param keyguardGoingAwayCancelled {@code true} if keyguard going away transition was
          *        cancelled.
          * @param keyguardOccludedCancelled {@code true} if keyguard (un)occluded transition was
@@ -235,9 +236,6 @@ public abstract class WindowManagerInternal {
         /**
          * Called when an app transition gets started
          *
-         * @param keyguardGoingAway true if keyguard going away transition is started.
-         * @param keyguardOccluding true if keyguard (un)occlude transition is started.
-         * @param duration the total duration of the transition
          * @param statusBarAnimationStartTime the desired start time for all visual animations in
          *        the status bar caused by this app transition in uptime millis
          * @param statusBarAnimationDuration the duration for all visual animations in the status
@@ -248,8 +246,7 @@ public abstract class WindowManagerInternal {
          * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
          * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
-        public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
-                boolean keyguardOccluding, long duration, long statusBarAnimationStartTime,
+        public int onAppTransitionStartingLocked(long statusBarAnimationStartTime,
                 long statusBarAnimationDuration) {
             return 0;
         }

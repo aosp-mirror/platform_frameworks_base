@@ -424,32 +424,6 @@ public class WindowManagerService extends IWindowManager.Stub
             SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, false);
 
     /**
-     * Run Keyguard animation as remote animation in System UI instead of local animation in
-     * the server process.
-     *
-     * 0: Runs all keyguard animation as local animation
-     * 1: Only runs keyguard going away animation as remote animation
-     * 2: Runs all keyguard animation as remote animation
-     */
-    private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
-            "persist.wm.enable_remote_keyguard_animation";
-
-    private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 2);
-
-    /**
-     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
-     */
-    public static final boolean sEnableRemoteKeyguardGoingAwayAnimation =
-            sEnableRemoteKeyguardAnimation >= 1;
-
-    /**
-     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
-     */
-    public static final boolean sEnableRemoteKeyguardOccludeAnimation =
-            sEnableRemoteKeyguardAnimation >= 2;
-
-    /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
      * when the display has different orientation.
      */
