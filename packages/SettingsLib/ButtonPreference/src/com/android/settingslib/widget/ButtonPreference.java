@@ -133,6 +133,11 @@ public class ButtonPreference extends Preference {
     }
 
     @Override
+    public CharSequence getTitle() {
+        return mTitle;
+    }
+
+    @Override
     public void setIcon(Drawable icon) {
         mIcon = icon;
         if (mButton == null || icon == null) {
