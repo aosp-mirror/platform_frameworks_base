@@ -139,24 +139,19 @@ public class SubscriptionManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final Uri CONTENT_URI = SimInfo.CONTENT_URI;
 
-    /** @hide */
-    public static final String CACHE_KEY_DEFAULT_SUB_ID_PROPERTY =
+    private static final String CACHE_KEY_DEFAULT_SUB_ID_PROPERTY =
             "cache_key.telephony.get_default_sub_id";
 
-    /** @hide */
-    public static final String CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY =
+    private static final String CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY =
             "cache_key.telephony.get_default_data_sub_id";
 
-    /** @hide */
-    public static final String CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY =
+    private static final String CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY =
             "cache_key.telephony.get_default_sms_sub_id";
 
-    /** @hide */
-    public static final String CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY =
+    private static final String CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY =
             "cache_key.telephony.get_active_data_sub_id";
 
-    /** @hide */
-    public static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
+    private static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
             "cache_key.telephony.get_slot_index";
 
     /** @hide */
