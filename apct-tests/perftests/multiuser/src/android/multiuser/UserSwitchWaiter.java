@@ -17,61 +17,87 @@
 package android.multiuser;
 
 import android.app.ActivityManager;
+import android.app.IActivityManager;
+import android.app.IUserSwitchObserver;
 import android.app.UserSwitchObserver;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.util.FunctionalUtils;
 
-import java.util.concurrent.CountDownLatch;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public class UserSwitchWaiter {
+public class UserSwitchWaiter implements Closeable {
 
     private final String mTag;
     private final int mTimeoutInSecond;
+    private final IActivityManager mActivityManager;
+    private final IUserSwitchObserver mUserSwitchObserver = new UserSwitchObserver() {
+        @Override
+        public void onUserSwitchComplete(int newUserId) {
+            getSemaphoreSwitchComplete(newUserId).release();
+        }
 
-    public UserSwitchWaiter(String tag, int timeoutInSecond) {
+        @Override
+        public void onLockedBootComplete(int newUserId) {
+            getSemaphoreBootComplete(newUserId).release();
+        }
+    };
+
+    private final Map<Integer, Semaphore> mSemaphoresMapSwitchComplete = new ConcurrentHashMap<>();
+    private Semaphore getSemaphoreSwitchComplete(final int userId) {
+        return mSemaphoresMapSwitchComplete.computeIfAbsent(userId,
+                (Integer absentKey) -> new Semaphore(0));
+    }
+
+    private final Map<Integer, Semaphore> mSemaphoresMapBootComplete = new ConcurrentHashMap<>();
+    private Semaphore getSemaphoreBootComplete(final int userId) {
+        return mSemaphoresMapBootComplete.computeIfAbsent(userId,
+                (Integer absentKey) -> new Semaphore(0));
+    }
+
+    public UserSwitchWaiter(String tag, int timeoutInSecond) throws RemoteException {
         mTag = tag;
         mTimeoutInSecond = timeoutInSecond;
+        mActivityManager = ActivityManager.getService();
+
+        mActivityManager.registerUserSwitchObserver(mUserSwitchObserver, mTag);
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            mActivityManager.unregisterUserSwitchObserver(mUserSwitchObserver);
+        } catch (RemoteException e) {
+            Log.e(mTag, "Failed to unregister user switch observer", e);
+        }
     }
 
     public void runThenWaitUntilSwitchCompleted(int userId,
             FunctionalUtils.ThrowingRunnable runnable, Runnable onFail) throws RemoteException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        ActivityManager.getService().registerUserSwitchObserver(
-                new UserSwitchObserver() {
-                    @Override
-                    public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        if (userId == newUserId) {
-                            latch.countDown();
-                        }
-                    }
-                }, mTag);
+        final Semaphore semaphore = getSemaphoreSwitchComplete(userId);
+        semaphore.drainPermits();
         runnable.run();
-        waitForLatch(latch, onFail);
+        waitForSemaphore(semaphore, onFail);
     }
 
     public void runThenWaitUntilBootCompleted(int userId,
             FunctionalUtils.ThrowingRunnable runnable, Runnable onFail) throws RemoteException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        ActivityManager.getService().registerUserSwitchObserver(
-                new UserSwitchObserver() {
-                    @Override
-                    public void onLockedBootComplete(int newUserId) {
-                        if (userId == newUserId) {
-                            latch.countDown();
-                        }
-                    }
-                }, mTag);
+        final Semaphore semaphore = getSemaphoreBootComplete(userId);
+        semaphore.drainPermits();
         runnable.run();
-        waitForLatch(latch, onFail);
+        waitForSemaphore(semaphore, onFail);
     }
 
-    private void waitForLatch(CountDownLatch latch, Runnable onFail) {
+    private void waitForSemaphore(Semaphore semaphore, Runnable onFail) {
         boolean success = false;
         try {
-            success = latch.await(mTimeoutInSecond, TimeUnit.SECONDS);
+            success = semaphore.tryAcquire(mTimeoutInSecond, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Log.e(mTag, "Thread interrupted unexpectedly.", e);
         }
