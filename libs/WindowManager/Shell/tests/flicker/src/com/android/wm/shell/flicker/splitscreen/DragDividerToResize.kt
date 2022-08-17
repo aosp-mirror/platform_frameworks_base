@@ -31,8 +31,6 @@ import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsChanges
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,25 +49,12 @@ import org.junit.runners.Parameterized
 @Group1
 class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
 
-    // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
-    @Before
-    open fun before() {
-        Assume.assumeTrue(tapl.isTablet)
-    }
-
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
                 eachRun {
-                    tapl.goHome()
-                    primaryApp.launchViaIntent(wmHelper)
-                    // TODO(b/231399940): Use recent shortcut to enter split.
-                    tapl.launchedAppState.taskbar
-                        .openAllApps()
-                        .getAppIcon(secondaryApp.appName)
-                        .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
-                    SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
                 }
             }
             transitions {
@@ -108,12 +93,12 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
     @Presubmit
     @Test
     fun primaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
-        primaryApp, landscapePosLeft = false, portraitPosTop = false)
+        primaryApp, landscapePosLeft = true, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
-        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
+        secondaryApp, landscapePosLeft = false, portraitPosTop = true)
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -189,7 +174,7 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
                 supportedRotations = listOf(Surface.ROTATION_0),
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
         }
     }
 }
