@@ -1,0 +1,9 @@
+packages/SystemUI/compose/
+packages/SystemUI/screenshot/
+packages/SystemUI/src/com/android/systemui/people/data
+packages/SystemUI/src/com/android/systemui/people/ui
+packages/SystemUI/src/com/android/systemui/keyguard/data
+packages/SystemUI/src/com/android/systemui/keyguard/dagger
+packages/SystemUI/src/com/android/systemui/keyguard/domain
+packages/SystemUI/src/com/android/systemui/keyguard/shared
+packages/SystemUI/src/com/android/systemui/keyguard/ui
