@@ -2085,19 +2085,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
                     boolean keyguardOccluding, long duration, long statusBarAnimationStartTime,
                     long statusBarAnimationDuration) {
-                // When remote animation is enabled for KEYGUARD_GOING_AWAY transition, SysUI
-                // receives IRemoteAnimationRunner#onAnimationStart to start animation, so we don't
-                // need to call IKeyguardService#keyguardGoingAway here.
-                return handleStartTransitionForKeyguardLw(keyguardGoingAway
-                        && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation,
-                        keyguardOccluding, duration);
+                // When remote animation is enabled for keyguard transition, SysUI receives
+                // IRemoteAnimationRunner#onAnimationStart to start animation, so we don't
+                // need to call IKeyguardService#keyguardGoingAway and #setOccluded.
+                final boolean notifyOccluded =
+                        !WindowManagerService.sEnableRemoteKeyguardOccludeAnimation
+                        && keyguardOccluding;
+                final boolean startKeyguardExitAnimation =
+                        !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
+                        && keyguardGoingAway;
+                return handleTransitionForKeyguardLw(startKeyguardExitAnimation,
+                        notifyOccluded, duration);
             }
 
             @Override
-            public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
-                handleStartTransitionForKeyguardLw(
-                        keyguardGoingAway, false /* keyguardOccludingStarted */,
-                        0 /* duration */);
+            public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
+                    boolean keyguardOccludedCancelled) {
+                // When app KEYGUARD_GOING_AWAY or (UN)OCCLUDE app transition is canceled, we need
+                // to trigger relevant IKeyguardService calls to sync keyguard status in
+                // WindowManagerService and SysUI.
+                handleTransitionForKeyguardLw(
+                        keyguardGoingAwayCancelled /* startKeyguardExitAnimation */,
+                        keyguardOccludedCancelled /* notifyOccluded */, 0 /* duration */);
             }
         });
 
@@ -3263,29 +3272,38 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {
-            setKeyguardOccludedLw(occluded, false /* force */,
-                    false /* transitionStarted */);
+            setKeyguardOccludedLw(occluded, true /* notify */);
         }
     }
 
     @Override
-    public int applyKeyguardOcclusionChange(boolean transitionStarted) {
+    public int applyKeyguardOcclusionChange(boolean notify) {
         if (mKeyguardOccludedChanged) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
-            if (setKeyguardOccludedLw(mPendingKeyguardOccluded, false /* force */,
-                    transitionStarted)) {
+            if (setKeyguardOccludedLw(mPendingKeyguardOccluded, notify)) {
                 return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
         return 0;
     }
 
-    private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway,
-            boolean keyguardOccluding, long duration) {
-        final int redoLayout = applyKeyguardOcclusionChange(keyguardOccluding);
+    /**
+     * Called when keyguard related app transition starts, or cancelled.
+     *
+     * @param startKeyguardExitAnimation Trigger IKeyguardService#startKeyguardExitAnimation to
+     *                                  start keyguard exit animation.
+     * @param notifyOccluded Trigger IKeyguardService#setOccluded binder call to notify whether
+     *                      the top activity can occlude the keyguard or not.
+     * @param duration the duration of the exit animation, in milliseconds.
+     *
+     * @return Whether the flags have changed and we have to redo the layout.
+     */
+    private int handleTransitionForKeyguardLw(boolean startKeyguardExitAnimation,
+            boolean notifyOccluded, long duration) {
+        final int redoLayout = applyKeyguardOcclusionChange(notifyOccluded);
         if (redoLayout != 0) return redoLayout;
-        if (keyguardGoingAway) {
+        if (startKeyguardExitAnimation) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }
@@ -3519,26 +3537,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Updates the occluded state of the Keyguard.
      *
      * @param isOccluded Whether the Keyguard is occluded by another window.
-     * @param force notify the occluded status to KeyguardService and update flags even though
-     *             occlude status doesn't change.
-     * @param transitionStarted {@code true} if keyguard (un)occluded transition started.
+     * @param notify Notify keyguard occlude status change immediately via
+     *       {@link com.android.internal.policy.IKeyguardService}.
      * @return Whether the flags have changed and we have to redo the layout.
      */
-    private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force,
-            boolean transitionStarted) {
+    private boolean setKeyguardOccludedLw(boolean isOccluded, boolean notify) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
         mKeyguardOccludedChanged = false;
-        if (isKeyguardOccluded() == isOccluded && !force) {
+        if (isKeyguardOccluded() == isOccluded) {
             return false;
         }
 
         final boolean showing = mKeyguardDelegate.isShowing();
         final boolean animate = showing && !isOccluded;
-        // When remote animation is enabled for keyguard (un)occlude transition, KeyguardService
-        // uses remote animation start as a signal to update its occlusion status ,so we don't need
-        // to notify here.
-        final boolean notify = !WindowManagerService.sEnableRemoteKeyguardOccludeAnimation
-                || !transitionStarted;
         mKeyguardDelegate.setOccluded(isOccluded, animate, notify);
         return showing;
     }

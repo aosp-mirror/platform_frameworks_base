@@ -169,7 +169,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
+                boolean keyguardOccludedCancelled) {
             continueDeferredCancel();
         }
 

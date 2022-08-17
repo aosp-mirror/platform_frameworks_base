@@ -657,7 +657,7 @@ class TransitionController {
     void dispatchLegacyAppTransitionCancelled() {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             mLegacyListeners.get(i).onAppTransitionCancelledLocked(
-                    false /* keyguardGoingAway */);
+                    false /* keyguardGoingAwayCancelled */, false /* keyguardOccludedCancelled */);
         }
     }
 
