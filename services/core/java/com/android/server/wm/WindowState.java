@@ -5812,20 +5812,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Returns {@code true} if this window is not {@link WindowManager.LayoutParams#TYPE_TOAST}
-     * or {@link WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
-     * since this window doesn't belong to apps.
+     * Returns {@code true} if this window is not {@link WindowManager.LayoutParams#TYPE_TOAST},
+     * {@link WindowManager.LayoutParams#TYPE_APPLICATION_STARTING} or
+     * {@link WindowManager.LayoutParams#TYPE_PRIVATE_PRESENTATION},
+     * since those windows should not count towards the apps visibility.
      */
-    boolean isNonToastOrStarting() {
-        return mAttrs.type != TYPE_TOAST && mAttrs.type != TYPE_APPLICATION_STARTING;
+    boolean isNonToastOrStartingOrPrivatePresentation() {
+        return mAttrs.type != TYPE_TOAST && mAttrs.type != TYPE_APPLICATION_STARTING
+                && mAttrs.type != TYPE_PRIVATE_PRESENTATION;
     }
 
     boolean isNonToastWindowVisibleForUid(int callingUid) {
-        return getOwningUid() == callingUid && isNonToastOrStarting() && isVisibleNow();
+        return getOwningUid() == callingUid && isNonToastOrStartingOrPrivatePresentation()
+                && isVisibleNow();
     }
 
     boolean isNonToastWindowVisibleForPid(int pid) {
-        return mSession.mPid == pid && isNonToastOrStarting() && isVisibleNow();
+        return mSession.mPid == pid && isNonToastOrStartingOrPrivatePresentation()
+                && isVisibleNow();
     }
 
     void setViewVisibility(int viewVisibility) {
