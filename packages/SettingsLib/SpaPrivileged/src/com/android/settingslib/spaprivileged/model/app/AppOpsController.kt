@@ -42,7 +42,7 @@ class AppOpsController(
     }
 
     @Mode
-    private fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
+    fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
 
     private val _isAllowed = object : MutableLiveData<Boolean>() {
         override fun onActive() {
