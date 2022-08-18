@@ -28,6 +28,7 @@ import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SpaEnvironment
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
+import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
@@ -53,6 +54,7 @@ private fun HomePage() {
         SpinnerPageProvider.EntryItem()
         SettingsPagerPageProvider.EntryItem()
         FooterPageProvider.EntryItem()
+        IllustrationPageProvider.EntryItem()
 
         /**
          * A test button to generate hierarchy.

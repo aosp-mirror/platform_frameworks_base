@@ -22,6 +22,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
+import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
@@ -45,6 +46,7 @@ object SpaEnvironment {
                 SpinnerPageProvider,
                 SettingsPagerPageProvider,
                 FooterPageProvider,
+                IllustrationPageProvider,
             ),
             rootPageData = listOf(
                 SettingsPage(HomePageProvider.name),
