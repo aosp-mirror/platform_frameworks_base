@@ -189,7 +189,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
         public boolean dismiss(boolean authenticated, int targetUserId,
-                boolean bypassSecondaryLockScreen);
+                boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode);
         public void userActivity();
         public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
 
@@ -676,11 +676,20 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
      *     completion.
      * @param bypassSecondaryLockScreen true if the user is allowed to bypass the secondary
      *     secondary lock screen requirement, if any.
+     * @param expectedSecurityMode SecurityMode that is invoking this request. SecurityMode.Invalid
+     *      indicates that no check should be done
      * @return true if keyguard is done
      */
     boolean showNextSecurityScreenOrFinish(boolean authenticated, int targetUserId,
-            boolean bypassSecondaryLockScreen) {
+            boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) {
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
+        if (expectedSecurityMode != SecurityMode.Invalid
+                && expectedSecurityMode != getCurrentSecurityMode()) {
+            Log.w(TAG, "Attempted to invoke showNextSecurityScreenOrFinish with securityMode "
+                    + expectedSecurityMode + ", but current mode is " + getCurrentSecurityMode());
+            return false;
+        }
+
         boolean finish = false;
         boolean strongAuth = false;
         int eventSubtype = -1;
@@ -819,14 +828,17 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         @Override
-        public void dismiss(boolean authenticated, int targetId) {
-            dismiss(authenticated, targetId, /* bypassSecondaryLockScreen */ false);
+        public void dismiss(boolean authenticated, int targetId,
+                SecurityMode expectedSecurityMode) {
+            dismiss(authenticated, targetId, /* bypassSecondaryLockScreen */ false,
+                    expectedSecurityMode);
         }
 
         @Override
         public void dismiss(boolean authenticated, int targetId,
-                boolean bypassSecondaryLockScreen) {
-            mSecurityCallback.dismiss(authenticated, targetId, bypassSecondaryLockScreen);
+                boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) {
+            mSecurityCallback.dismiss(authenticated, targetId, bypassSecondaryLockScreen,
+                    expectedSecurityMode);
         }
 
         public boolean isVerifyUnlockOnly() {
@@ -878,10 +890,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         @Override
         public boolean isVerifyUnlockOnly() { return false; }
         @Override
-        public void dismiss(boolean securityVerified, int targetUserId) { }
+        public void dismiss(boolean securityVerified, int targetUserId,
+                SecurityMode expectedSecurityMode) { }
         @Override
         public void dismiss(boolean authenticated, int targetId,
-                boolean bypassSecondaryLockScreen) { }
+                boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) { }
         @Override
         public void onUserInput() { }
         @Override
@@ -933,8 +946,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return mCurrentSecuritySelection;
     }
 
-    public void dismiss(boolean authenticated, int targetUserId) {
-        mCallback.dismiss(authenticated, targetUserId);
+    public void dismiss(boolean authenticated, int targetUserId,
+            SecurityMode expectedSecurityMode) {
+        mCallback.dismiss(authenticated, targetUserId, expectedSecurityMode);
     }
 
     public boolean needsInput() {
