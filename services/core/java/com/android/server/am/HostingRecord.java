@@ -30,6 +30,8 @@ import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HO
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SYSTEM;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_TOP_ACTIVITY;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE_OVER_QUOTA;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TYPE__UNKNOWN;
@@ -93,6 +95,8 @@ public final class HostingRecord {
 
     public static final String TRIGGER_TYPE_UNKNOWN = "unknown";
     public static final String TRIGGER_TYPE_ALARM = "alarm";
+    public static final String TRIGGER_TYPE_PUSH_MESSAGE = "push_message";
+    public static final String TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA = "push_message_over_quota";
 
     @NonNull private final String mHostingType;
     private final String mHostingName;
@@ -308,6 +312,10 @@ public final class HostingRecord {
         switch(triggerType) {
             case TRIGGER_TYPE_ALARM:
                 return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
+            case TRIGGER_TYPE_PUSH_MESSAGE:
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE;
+            case TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA:
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE_OVER_QUOTA;
             default:
                 return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
         }
