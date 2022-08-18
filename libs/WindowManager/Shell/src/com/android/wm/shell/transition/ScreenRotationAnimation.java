@@ -86,8 +86,6 @@ class ScreenRotationAnimation {
     private final float[] mTmpFloats = new float[9];
     /** The leash of the changing window container. */
     private final SurfaceControl mSurfaceControl;
-    private final Rect mStartBounds = new Rect();
-    private final Rect mEndBounds = new Rect();
 
     private final int mAnimHint;
     private final int mStartWidth;
@@ -105,8 +103,7 @@ class ScreenRotationAnimation {
      */
     private SurfaceControl mBackColorSurface;
     /** The leash using to animate screenshot layer. */
-    private SurfaceControl mAnimLeash;
-    private Transaction mTransaction;
+    private final SurfaceControl mAnimLeash;
 
     // The current active animation to move from the old to the new rotated
     // state.  Which animation is run here will depend on the old and new
@@ -133,9 +130,6 @@ class ScreenRotationAnimation {
         mEndHeight = change.getEndAbsBounds().height();
         mStartRotation = change.getStartRotation();
         mEndRotation = change.getEndRotation();
-
-        mStartBounds.set(change.getStartAbsBounds());
-        mEndBounds.set(change.getEndAbsBounds());
 
         mAnimLeash = new SurfaceControl.Builder(session)
                 .setParent(rootLeash)
@@ -169,6 +163,8 @@ class ScreenRotationAnimation {
 
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
             t.show(mAnimLeash);
+            // Crop the real content in case it contains a larger child layer, e.g. wallpaper.
+            t.setCrop(mSurfaceControl, new Rect(0, 0, mEndWidth, mEndHeight));
 
             final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
             final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
@@ -306,7 +302,6 @@ class ScreenRotationAnimation {
         mRotateEnterAnimation.restrictDuration(MAX_ANIMATION_DURATION);
         mRotateEnterAnimation.scaleCurrentDuration(animationScale);
 
-        mTransaction = mTransactionPool.acquire();
         if (customRotate) {
             mRotateAlphaAnimation.initialize(mEndWidth, mEndHeight, mStartWidth, mStartHeight);
             mRotateAlphaAnimation.restrictDuration(MAX_ANIMATION_DURATION);
@@ -386,22 +381,16 @@ class ScreenRotationAnimation {
     }
 
     public void kill() {
-        Transaction t = mTransaction != null ? mTransaction : mTransactionPool.acquire();
+        final Transaction t = mTransactionPool.acquire();
         if (mAnimLeash.isValid()) {
             t.remove(mAnimLeash);
         }
 
-        if (mScreenshotLayer != null) {
-            if (mScreenshotLayer.isValid()) {
-                t.remove(mScreenshotLayer);
-            }
-            mScreenshotLayer = null;
+        if (mScreenshotLayer != null && mScreenshotLayer.isValid()) {
+            t.remove(mScreenshotLayer);
         }
-        if (mBackColorSurface != null) {
-            if (mBackColorSurface.isValid()) {
-                t.remove(mBackColorSurface);
-            }
-            mBackColorSurface = null;
+        if (mBackColorSurface != null && mBackColorSurface.isValid()) {
+            t.remove(mBackColorSurface);
         }
         t.apply();
         mTransactionPool.release(t);
