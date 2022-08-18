@@ -1969,8 +1969,7 @@ public final class BroadcastQueue {
                 info.activityInfo.applicationInfo, true,
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                 new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST, r.curComponent,
-                        r.intent.getAction(), (r.alarm ? HostingRecord.TRIGGER_TYPE_ALARM
-                        : HostingRecord.TRIGGER_TYPE_UNKNOWN)),
+                        r.intent.getAction(), getHostingRecordTriggerType(r)),
                 isActivityCapable ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
                 (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false);
         if (r.curApp == null) {
@@ -1993,6 +1992,16 @@ public final class BroadcastQueue {
         mPendingBroadcastRecvIndex = recIdx;
     }
 
+    private String getHostingRecordTriggerType(BroadcastRecord r) {
+        if (r.alarm) {
+            return HostingRecord.TRIGGER_TYPE_ALARM;
+        } else if (r.pushMessage) {
+            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE;
+        } else if (r.pushMessageOverQuota) {
+            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+        }
+        return HostingRecord.TRIGGER_TYPE_UNKNOWN;
+    }
 
     @Nullable
     private String getTargetPackage(BroadcastRecord r) {
