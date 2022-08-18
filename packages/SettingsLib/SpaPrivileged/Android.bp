@@ -28,5 +28,8 @@ android_library {
         "SettingsLib",
         "androidx.compose.runtime_runtime",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        "-Xopt-in=kotlin.RequiresOptIn",
+    ],
 }
