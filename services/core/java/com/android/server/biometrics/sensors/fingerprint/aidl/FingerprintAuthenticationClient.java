@@ -135,7 +135,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 taskStackListener,
                 lockoutCache,
                 allowBackgroundAuthentication,
-                true /* shouldVibrate */,
+                false /* shouldVibrate */,
                 false /* isKeyguardBypassEnabled */);
         setRequestId(requestId);
         mLockoutCache = lockoutCache;
