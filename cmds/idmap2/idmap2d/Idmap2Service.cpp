@@ -235,9 +235,11 @@ Status Idmap2Service::createFabricatedOverlay(
 
   for (const auto& res : overlay.entries) {
     if (res.dataType == Res_value::TYPE_STRING) {
-      builder.SetResourceValue(res.resourceName, res.dataType, res.stringData.value());
+      builder.SetResourceValue(res.resourceName, res.dataType, res.stringData.value(),
+            res.configuration.value_or(std::string()));
     } else {
-      builder.SetResourceValue(res.resourceName, res.dataType, res.data);
+      builder.SetResourceValue(res.resourceName, res.dataType, res.data,
+            res.configuration.value_or(std::string()));
     }
   }
 

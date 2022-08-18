@@ -70,19 +70,22 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetOverlayable(const std
 }
 
 FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
-    const std::string& resource_name, uint8_t data_type, uint32_t data_value) {
-  entries_.emplace_back(Entry{resource_name, data_type, data_value, ""});
+    const std::string& resource_name, uint8_t data_type, uint32_t data_value,
+    const std::string& configuration) {
+  entries_.emplace_back(Entry{resource_name, data_type, data_value, "", configuration});
   return *this;
 }
 
 FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
-    const std::string& resource_name, uint8_t data_type, const std::string& data_string_value) {
-  entries_.emplace_back(Entry{resource_name, data_type, 0, data_string_value});
+    const std::string& resource_name, uint8_t data_type, const std::string& data_string_value,
+    const std::string& configuration) {
+  entries_.emplace_back(Entry{resource_name, data_type, 0, data_string_value, configuration});
   return *this;
 }
 
 Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
-  using EntryMap = std::map<std::string, TargetValue>;
+  using ConfigMap = std::map<std::string, TargetValue>;
+  using EntryMap = std::map<std::string, ConfigMap>;
   using TypeMap = std::map<std::string, EntryMap>;
   using PackageMap = std::map<std::string, TypeMap>;
   PackageMap package_map;
@@ -123,11 +126,16 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
 
     auto entry = type->second.find(entry_name.to_string());
     if (entry == type->second.end()) {
-      entry = type->second.insert(std::make_pair(entry_name.to_string(), TargetValue())).first;
+      entry = type->second.insert(std::make_pair(entry_name.to_string(), ConfigMap())).first;
     }
 
-    entry->second = TargetValue{
-        res_entry.data_type, res_entry.data_value, res_entry.data_string_value};
+    auto value = entry->second.find(res_entry.configuration);
+    if (value == entry->second.end()) {
+      value = entry->second.insert(std::make_pair(res_entry.configuration, TargetValue())).first;
+    }
+
+    value->second = TargetValue{res_entry.data_type, res_entry.data_value,
+        res_entry.data_string_value};
   }
 
   pb::FabricatedOverlay overlay_pb;
@@ -145,15 +153,18 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
       type_pb->set_name(type.first);
 
       for (auto& entry : type.second) {
-        auto entry_pb = type_pb->add_entries();
-        entry_pb->set_name(entry.first);
-        pb::ResourceValue* value = entry_pb->mutable_res_value();
-        value->set_data_type(entry.second.data_type);
-        if (entry.second.data_type == Res_value::TYPE_STRING) {
-          auto ref = string_pool.MakeRef(entry.second.data_string_value);
-          value->set_data_value(ref.index());
-        } else {
-          value->set_data_value(entry.second.data_value);
+        for (const auto& value: entry.second) {
+          auto entry_pb = type_pb->add_entries();
+          entry_pb->set_name(entry.first);
+          entry_pb->set_configuration(value.first);
+          pb::ResourceValue* pb_value = entry_pb->mutable_res_value();
+          pb_value->set_data_type(value.second.data_type);
+          if (value.second.data_type == Res_value::TYPE_STRING) {
+            auto ref = string_pool.MakeRef(value.second.data_string_value);
+            pb_value->set_data_value(ref.index());
+          } else {
+            pb_value->set_data_value(value.second.data_value);
+          }
         }
       }
     }
@@ -330,8 +341,9 @@ Result<OverlayData> FabContainer::GetOverlayData(const OverlayManifestInfo& info
                                        entry.name().c_str());
         const auto& res_value = entry.res_value();
         result.pairs.emplace_back(OverlayData::Value{
-            name, TargetValue{.data_type = static_cast<uint8_t>(res_value.data_type()),
-                              .data_value = res_value.data_value()}});
+            name, TargetValueWithConfig{.config = entry.configuration(), .value = TargetValue{
+                    .data_type = static_cast<uint8_t>(res_value.data_type()),
+                    .data_value = res_value.data_value()}}});
       }
     }
   }

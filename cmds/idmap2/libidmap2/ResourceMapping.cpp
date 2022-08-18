@@ -160,7 +160,7 @@ Result<ResourceMapping> ResourceMapping::FromContainers(const TargetResourceCont
 
 Result<Unit> ResourceMapping::AddMapping(
     ResourceId target_resource,
-    const std::variant<OverlayData::ResourceIdValue, TargetValue>& value) {
+    const std::variant<OverlayData::ResourceIdValue, TargetValueWithConfig>& value) {
   if (target_map_.find(target_resource) != target_map_.end()) {
     return Error(R"(target resource id "0x%08x" mapped to multiple values)", target_resource);
   }
@@ -176,8 +176,8 @@ Result<Unit> ResourceMapping::AddMapping(
       overlay_map_.insert(std::make_pair(overlay_resource->overlay_id, target_resource));
     }
   } else {
-    auto overlay_value = std::get<TargetValue>(value);
-    target_map_.insert(std::make_pair(target_resource, overlay_value));
+    auto overlay_value = std::get<TargetValueWithConfig>(value);
+    target_map_.insert(std::make_pair(target_resource, overlay_value.value));
   }
 
   return Unit{};
