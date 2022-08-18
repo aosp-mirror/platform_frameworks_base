@@ -853,16 +853,24 @@ int register_android_view_RenderNode(JNIEnv* env) {
     const char* const kClassPathName =
             robolectricApiLevel >= 29 ? "android/graphics/RenderNode" : "android/view/RenderNode";
 
-    jclass clazz = FindClassOrDie(env, kClassPathName);
     if (robolectricApiLevel >= 29) {
+        const char* const classPathPositionUpdater =
+                "android/graphics/RenderNode$PositionUpdateListener";
+        jclass clazz = FindClassOrDie(env, classPathPositionUpdater);
         gPositionListener_PositionChangedMethod =
                 GetMethodIDOrDie(env, clazz, "positionChanged", "(JIIII)V");
         gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz, "positionLost", "(J)V");
-    }
-    if (robolectricApiLevel >= 31) {
-        // applyStretch was added in Android S
-        gPositionListener_ApplyStretchMethod =
-                GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
+        if (robolectricApiLevel >= 31) {
+            // applyStretch was added in Android S
+            gPositionListener_ApplyStretchMethod =
+                    GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
+        }
+    } else {
+        jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
+        gPositionListener_PositionChangedMethod =
+                GetMethodIDOrDie(env, clazz, "updateSurfacePosition_renderWorker", "(JIIII)V");
+        gPositionListener_PositionLostMethod =
+                GetMethodIDOrDie(env, clazz, "surfacePositionLost_uiRtSync", "(J)V");
     }
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
