@@ -671,6 +671,21 @@ class DevicePolicyData {
         if (mFactoryResetReason != null) {
             pw.print("mFactoryResetReason="); pw.println(mFactoryResetReason);
         }
+        if (mDelegationMap.size() != 0) {
+            pw.println("mDelegationMap=");
+            pw.increaseIndent();
+            for (int i = 0; i < mDelegationMap.size(); i++) {
+                List<String> delegationScopes = mDelegationMap.valueAt(i);
+                pw.println(mDelegationMap.keyAt(i) + "[size=" + delegationScopes.size()
+                        + "]");
+                pw.increaseIndent();
+                for (int j = 0; j < delegationScopes.size(); j++) {
+                    pw.println(j + ": " + delegationScopes.get(j));
+                }
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
+        }
         pw.decreaseIndent();
     }
 
