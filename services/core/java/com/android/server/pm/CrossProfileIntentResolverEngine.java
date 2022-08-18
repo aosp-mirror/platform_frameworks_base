@@ -25,12 +25,14 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -54,13 +56,15 @@ public class CrossProfileIntentResolverEngine {
     private final UserManagerService mUserManager;
     private final DomainVerificationManagerInternal mDomainVerificationManager;
     private final DefaultAppProvider mDefaultAppProvider;
+    private final Context mContext;
 
     public CrossProfileIntentResolverEngine(UserManagerService userManager,
             DomainVerificationManagerInternal domainVerificationManager,
-            DefaultAppProvider defaultAppProvider) {
+            DefaultAppProvider defaultAppProvider, Context context) {
         mUserManager = userManager;
         mDomainVerificationManager = domainVerificationManager;
         mDefaultAppProvider = defaultAppProvider;
+        mContext = context;
     }
 
     /**
@@ -196,6 +200,21 @@ public class CrossProfileIntentResolverEngine {
     @SuppressWarnings("unused")
     private CrossProfileResolver chooseCrossProfileResolver(@NonNull Computer computer,
             UserInfo sourceUserInfo, UserInfo targetUserInfo) {
+        //todo change isCloneProfile to user properties b/241532322
+        /**
+         * If source or target user is clone profile, using {@link CloneProfileResolver}
+         * We would allow CloneProfileResolver only if flag
+         * SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE is enabled
+         */
+        if (sourceUserInfo.isCloneProfile() || targetUserInfo.isCloneProfile()) {
+            if (FeatureFlagUtils.isEnabled(mContext,
+                    FeatureFlagUtils.SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE)) {
+                return new CloneProfileResolver(computer.getComponentResolver(),
+                        mUserManager);
+            } else {
+                return null;
+            }
+        }
         return new DefaultCrossProfileResolver(computer.getComponentResolver(),
                 mUserManager, mDomainVerificationManager);
     }
@@ -313,8 +332,6 @@ public class CrossProfileIntentResolverEngine {
         }
 
         if (pkgName == null && intent.hasWebURI()) {
-            // If instant apps are not allowed and there is result only from current or cross
-            // profile return it
             if (!addInstant && ((candidates.size() <= 1 && crossProfileCandidates.isEmpty())
                     || (candidates.isEmpty() && !crossProfileCandidates.isEmpty()))) {
                 candidates.addAll(resolveInfoFromCrossProfileDomainInfo(crossProfileCandidates));
