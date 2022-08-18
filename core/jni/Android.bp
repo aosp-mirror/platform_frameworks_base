@@ -395,7 +395,8 @@ cc_library_shared {
     target: {
       linux_glibc: {
         srcs: [
-	  "android_animation_PropertyValuesHolder.cpp",
+          "android_animation_PropertyValuesHolder.cpp",
+          "libcore_util_NativeAllocationRegistry.cpp",
           "android_database_CursorWindow.cpp",
           "android_database_SQLiteCommon.cpp",
           "android_database_SQLiteConnection.cpp",

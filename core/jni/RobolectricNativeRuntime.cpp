@@ -8,6 +8,8 @@
 
 static JavaVM* javaVM;
 
+extern int register_libcore_util_NativeAllocationRegistry(JNIEnv* env);
+
 namespace android {
 
 extern int register_android_database_CursorWindow(JNIEnv* env);
@@ -29,6 +31,7 @@ static const RegJNIRec sqliteJNI[] = {
 static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_view_Surface),
         REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
+        REG_JNI(register_libcore_util_NativeAllocationRegistry),
 };
 
 JNIEnv* AndroidRuntime::getJNIEnv() {
@@ -86,7 +89,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         if (register_android_graphics_classes(env) < 0) {
             return JNI_ERR;
         }
-        if (register_jni_procs(graphicsJNI, NELEM(sqliteJNI), env) < 0) {
+        if (register_jni_procs(graphicsJNI, NELEM(graphicsJNI), env) < 0) {
             return JNI_ERR;
         }
     }
