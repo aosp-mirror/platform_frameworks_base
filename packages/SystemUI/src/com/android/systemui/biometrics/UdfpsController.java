@@ -434,6 +434,14 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         return portraitTouch;
     }
 
+    private void tryDismissingKeyguard() {
+        if (!mOnFingerDown) {
+            playStartHaptic();
+        }
+        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+        mAttemptedToDismissKeyguard = true;
+    }
+
     @VisibleForTesting
     boolean onTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
         if (mOverlay == null) {
@@ -495,11 +503,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 }
                 if ((withinSensorArea || fromUdfpsView) && shouldTryToDismissKeyguard()) {
                     Log.v(TAG, "onTouch | dismiss keyguard ACTION_DOWN");
-                    if (!mOnFingerDown) {
-                        playStartHaptic();
-                    }
-                    mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
-                    mAttemptedToDismissKeyguard = true;
+                    tryDismissingKeyguard();
                 }
 
                 Trace.endSection();
@@ -534,11 +538,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     if ((fromUdfpsView || actionMoveWithinSensorArea)
                             && shouldTryToDismissKeyguard()) {
                         Log.v(TAG, "onTouch | dismiss keyguard ACTION_MOVE");
-                        if (!mOnFingerDown) {
-                            playStartHaptic();
-                        }
-                        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
-                        mAttemptedToDismissKeyguard = true;
+                        tryDismissingKeyguard();
                         break;
                     }
                     // Map the touch to portrait mode if the device is in landscape mode.
