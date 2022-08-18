@@ -20,8 +20,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,7 +35,12 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 fun Footer(footerText: String) {
     if (footerText.isEmpty()) return
     Column(Modifier.padding(SettingsDimension.itemPadding)) {
-        SettingsIcon(imageVector = Icons.Outlined.Info, contentDescription = null)
+        Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = null,
+            modifier = Modifier.size(SettingsDimension.itemIconSize),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Spacer(modifier = Modifier.height(SettingsDimension.itemPaddingVertical))
         SettingsBody(footerText)
     }
