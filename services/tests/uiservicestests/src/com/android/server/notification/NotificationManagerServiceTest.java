@@ -150,6 +150,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
+import android.media.IRingtonePlayer;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Binder;
@@ -7735,6 +7736,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Check
         n = mBinderService.getActiveNotifications(PKG)[0].getNotification();
         assertEquals(0, n.getBubbleMetadata().getFlags());
+    }
+
+    @Test
+    public void testOnBubbleMetadataChangedToSuppressNotification_soundStopped()
+            throws RemoteException {
+        IRingtonePlayer mockPlayer = mock(IRingtonePlayer.class);
+        when(mAudioManager.getRingtonePlayer()).thenReturn(mockPlayer);
+        // Set up volume to be above 0 for the sound to actually play
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
+
+        setUpPrefsForBubbles(PKG, mUid,
+                true /* global */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                true /* channel */);
+
+        // Post a bubble notification
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Test: suppress notification via bubble metadata update
+        mService.mNotificationDelegate.onBubbleMetadataFlagChanged(nr.getKey(),
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        waitForIdle();
+
+        // Check audio is stopped
+        verify(mockPlayer).stopAsync();
     }
 
     @Test
