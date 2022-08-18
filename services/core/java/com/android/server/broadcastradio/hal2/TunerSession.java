@@ -27,6 +27,7 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
@@ -338,5 +339,18 @@ class TunerSession extends ITuner.Stub {
             return Convert.vendorInfoFromHal(Utils.maybeRethrow(
                     () -> mHwSession.getParameters(Convert.listToArrayList(keys))));
         }
+    }
+
+    void dumpInfo(IndentingPrintWriter pw) {
+        pw.printf("TunerSession\n");
+        pw.increaseIndent();
+        synchronized (mLock) {
+            pw.printf("HIDL HAL Session: %s\n", mHwSession);
+            pw.printf("Is session closed? %s\n", mIsClosed ? "Yes" : "No");
+            pw.printf("Is muted? %s\n", mIsMuted ? "Yes" : "No");
+            pw.printf("ProgramInfoCache: %s\n", mProgramInfoCache);
+            pw.printf("Config: %s\n", mDummyConfig);
+        }
+        pw.decreaseIndent();
     }
 }
