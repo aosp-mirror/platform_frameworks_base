@@ -19,7 +19,7 @@
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ScrollView
+    <com.android.internal.widget.FadingWearableScrollView
         android:id="@+id/scrollView"
         android:fillViewport="true"
         android:layout_width="match_parent"
@@ -110,5 +110,5 @@
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>
-    </ScrollView>
+    </com.android.internal.widget.FadingWearableScrollView>
 </com.android.internal.widget.WatchListDecorLayout>
