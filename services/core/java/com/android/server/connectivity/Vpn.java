@@ -3993,6 +3993,7 @@ public class Vpn {
             mConfig.proxyInfo = profile.proxy;
             mConfig.requiresInternetValidation = profile.requiresInternetValidation;
             mConfig.excludeLocalRoutes = profile.excludeLocalRoutes;
+            mConfig.allowBypass = profile.isBypassable;
 
             switch (profile.type) {
                 case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
