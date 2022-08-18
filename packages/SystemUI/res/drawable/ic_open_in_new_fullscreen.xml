@@ -13,35 +13,19 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/magnification_switch_button_color" />
-            <size
-                android:width="48dp"
-                android:height="48dp" />
-        </shape>
-    </item>
-
-    <item
-        android:gravity="center">
-        <vector
-            android:width="36dp"
-            android:height="36dp"
-            android:viewportWidth="24"
-            android:viewportHeight="24">
-            <group>
-                <clip-path
-                    android:pathData="M0,0h24v24h-24z"/>
-                <path
-                    android:pathData="M11,6.05V8.05H14.59L8,14.64V11.05H6V18.05H13V16.05H9.41L16,9.46V13.05H18V6.05H11Z"
-                    android:fillColor="#ffffff"/>
-                <path
-                    android:pathData="M20,4.05V20.05H4V4.05H20ZM22,2.05H2V22.05H22V2.05Z"
-                    android:fillColor="#ffffff"/>
-            </group>
-        </vector>
-    </item>
-
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group>
+        <clip-path
+            android:pathData="M0,0h24v24h-24z"/>
+        <path
+            android:pathData="M11,6.05V8.05H14.59L8,14.64V11.05H6V18.05H13V16.05H9.41L16,9.46V13.05H18V6.05H11Z"
+            android:fillColor="#000000"/>
+        <path
+            android:pathData="M20,4.05V20.05H4V4.05H20ZM22,2.05H2V22.05H22V2.05Z"
+            android:fillColor="#000000"/>
+    </group>
+</vector>

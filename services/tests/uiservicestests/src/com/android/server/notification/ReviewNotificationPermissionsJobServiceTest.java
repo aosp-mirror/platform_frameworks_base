@@ -20,10 +20,8 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -75,9 +73,6 @@ public class ReviewNotificationPermissionsJobServiceTest extends UiServiceTestCa
 
     @Test
     public void testScheduleJob() {
-        // if asked, the job doesn't currently exist yet
-        when(mMockJobScheduler.getPendingJob(anyInt())).thenReturn(null);
-
         final int rescheduleTimeMillis = 350;  // arbitrary number
 
         // attempt to schedule the job

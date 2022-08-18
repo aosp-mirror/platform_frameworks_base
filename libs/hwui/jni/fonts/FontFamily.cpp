@@ -66,9 +66,9 @@ static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderP
         ScopedUtfChars str(env, langTags);
         localeId = minikin::registerLocaleList(str.c_str());
     }
-    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
-            localeId, static_cast<minikin::FamilyVariant>(variant), std::move(builder->fonts),
-            isCustomFallback);
+    std::shared_ptr<minikin::FontFamily> family =
+            minikin::FontFamily::create(localeId, static_cast<minikin::FamilyVariant>(variant),
+                                        std::move(builder->fonts), isCustomFallback);
     if (family->getCoverage().length() == 0) {
         // No coverage means minikin rejected given font for some reasons.
         jniThrowException(env, "java/lang/IllegalArgumentException",

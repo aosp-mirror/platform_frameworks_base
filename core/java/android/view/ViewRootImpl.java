@@ -2842,7 +2842,6 @@ public final class ViewRootImpl implements ViewParent,
             // However, windows are now always 32 bits by default, so choose 32 bits
             mAttachInfo.mUse32BitDrawingCache = true;
             mAttachInfo.mWindowVisibility = viewVisibility;
-            mAttachInfo.mWindowSecure = (lp.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
             mAttachInfo.mRecomputeGlobalAttributes = false;
             mLastConfigurationFromResources.setTo(config);
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
@@ -6406,6 +6405,12 @@ public final class ViewRootImpl implements ViewParent,
             // Make sure the fallback event policy sees all keys that will be
             // delivered to the view hierarchy.
             mFallbackEventHandler.preDispatchKeyEvent(event);
+
+            // Reset last tracked MotionEvent click toolType.
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                mLastClickToolType = MotionEvent.TOOL_TYPE_UNKNOWN;
+            }
+
             return FORWARD;
         }
 

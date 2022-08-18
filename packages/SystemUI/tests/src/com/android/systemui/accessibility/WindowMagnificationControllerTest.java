@@ -19,6 +19,8 @@ package com.android.systemui.accessibility;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Choreographer.FrameCallback;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.ValueAnimator;
+import android.annotation.IdRes;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -65,6 +68,7 @@ import android.testing.TestableResources;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.IWindowSession;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -126,7 +130,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
     private final ValueAnimator mValueAnimator = ValueAnimator.ofFloat(0, 1.0f).setDuration(0);
+
     private IWindowSession mWindowSessionSpy;
+
+    private View mSpyView;
+    private View.OnTouchListener mTouchListener;
+    private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
 
     @Before
     public void setUp() throws RemoteException {
@@ -165,6 +174,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
+        mSpyView = Mockito.spy(new View(mContext));
+        doAnswer((invocation) -> {
+            mTouchListener = invocation.getArgument(0);
+            return null;
+        }).when(mSpyView).setOnTouchListener(
+                any(View.OnTouchListener.class));
     }
 
     @After
@@ -702,7 +717,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.onSingleTap();
+            mWindowMagnificationController.onSingleTap(mSpyView);
         });
 
         final View mirrorView = mWindowManager.getAttachedView();
@@ -908,6 +923,38 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         assertTrue(magnificationCenterX.get() < bounds.right);
         assertTrue(magnificationCenterY.get() < bounds.bottom);
+    }
+
+    @Test
+    public void performSingleTap_DragHandle() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.enableWindowMagnificationInternal(
+                            1.5f, bounds.centerX(), bounds.centerY());
+                });
+        View dragButton = getInternalView(R.id.drag_handle);
+
+        // Perform a single-tap
+        final long downTime = SystemClock.uptimeMillis();
+        dragButton.dispatchTouchEvent(
+                obtainMotionEvent(downTime, 0, ACTION_DOWN, 100, 100));
+        dragButton.dispatchTouchEvent(
+                obtainMotionEvent(downTime, downTime, ACTION_UP, 100, 100));
+
+        verify(mWindowManager).addView(any(View.class), any());
+    }
+
+    private <T extends View> T getInternalView(@IdRes int idRes) {
+        View mirrorView = mWindowManager.getAttachedView();
+        T view = mirrorView.findViewById(idRes);
+        assertNotNull(view);
+        return view;
+    }
+
+    private MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
+                                          float y) {
+        return mMotionEventHelper.obtainMotionEvent(downTime, eventTime, action, x, y);
     }
 
     private CharSequence getAccessibilityWindowTitle() {

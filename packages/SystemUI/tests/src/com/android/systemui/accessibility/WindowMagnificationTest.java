@@ -158,6 +158,18 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
+    public void onModeSwitch_enabled_notifyCallback() throws RemoteException {
+        final int magnificationModeFullScreen = 1;
+        mCommandQueue.requestWindowMagnificationConnection(true);
+        waitForIdleSync();
+
+        mWindowMagnification.onModeSwitch(TEST_DISPLAY, magnificationModeFullScreen);
+
+        verify(mConnectionCallback).onChangeMagnificationMode(TEST_DISPLAY,
+                magnificationModeFullScreen);
+    }
+
+    @Test
     public void overviewProxyIsConnected_noController_resetFlag() {
         mOverviewProxyListener.onConnectionChanged(true);
 

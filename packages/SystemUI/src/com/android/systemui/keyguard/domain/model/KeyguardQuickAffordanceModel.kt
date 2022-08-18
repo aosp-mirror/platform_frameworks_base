@@ -42,21 +42,4 @@ sealed class KeyguardQuickAffordanceModel {
          */
         @StringRes val contentDescriptionResourceId: Int,
     ) : KeyguardQuickAffordanceModel()
-
-    companion object {
-        fun from(
-            state: KeyguardQuickAffordanceConfig.State?,
-            configKey: KClass<out KeyguardQuickAffordanceConfig>,
-        ): KeyguardQuickAffordanceModel {
-            return when (state) {
-                is KeyguardQuickAffordanceConfig.State.Visible ->
-                    Visible(
-                        configKey = configKey,
-                        icon = state.icon,
-                        contentDescriptionResourceId = state.contentDescriptionResourceId,
-                    )
-                else -> Hidden
-            }
-        }
-    }
 }

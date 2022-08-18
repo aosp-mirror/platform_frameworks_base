@@ -6309,21 +6309,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         }
 
-        /**
-         * Ask the package manager to compile layouts in the given package.
-         */
-        @Override
-        public boolean compileLayouts(String packageName) {
-            AndroidPackage pkg;
-            synchronized (mLock) {
-                pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    return false;
-                }
-            }
-            return mArtManagerService.compileLayouts(pkg);
-        }
-
         @Nullable
         @Override
         public String removeLegacyDefaultBrowserPackageName(int userId) {

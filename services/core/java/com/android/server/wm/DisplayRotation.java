@@ -399,9 +399,8 @@ public class DisplayRotation {
                 return false;
             }
 
-            final ScreenRotationAnimation screenRotationAnimation =
-                    mDisplayContent.getRotationAnimation();
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+            if (mDisplayContent.inTransition()
+                    && !mDisplayContent.mTransitionController.useShellTransitionsRotation()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
                 // animation is finished and the display is unfrozen.
