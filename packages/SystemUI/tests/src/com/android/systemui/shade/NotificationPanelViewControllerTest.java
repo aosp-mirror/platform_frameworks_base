@@ -47,7 +47,6 @@ import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -760,10 +759,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testSetDozing_notifiesNsslAndStateController() {
-        mNotificationPanelViewController.setDozing(true /* dozing */, false /* animate */,
-                null /* touch */);
-        verify(mNotificationStackScrollLayoutController)
-                .setDozing(eq(true), eq(false), eq(null));
+        mNotificationPanelViewController.setDozing(true /* dozing */, false /* animate */);
+        verify(mNotificationStackScrollLayoutController).setDozing(eq(true), eq(false));
         assertThat(mStatusBarStateController.getDozeAmount()).isEqualTo(1f);
     }
 
@@ -1216,7 +1213,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         clearInvocations(mKeyguardStatusViewController);
 
-        mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false, null);
+        mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false);
 
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate= */ true);
     }
@@ -1230,7 +1227,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         clearInvocations(mKeyguardStatusViewController);
 
-        mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false, null);
+        mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false);
 
         verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate= */ true);
     }
@@ -1244,7 +1241,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
 
-        mNotificationPanelViewController.setDozing(true, false, null);
+        mNotificationPanelViewController.setDozing(true, false);
 
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ false);
     }
@@ -1558,8 +1555,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mDozeParameters.getAlwaysOn()).thenReturn(dozingAlwaysOn);
         mNotificationPanelViewController.setDozing(
                 /* dozing= */ dozing,
-                /* animate= */ false,
-                /* wakeUpTouchLocation= */ new PointF()
+                /* animate= */ false
         );
     }
 
