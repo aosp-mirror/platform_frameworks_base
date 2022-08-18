@@ -30,6 +30,7 @@ android_library {
         "androidx.compose.ui_ui-tooling-preview",
         "androidx.navigation_navigation-compose",
         "com.google.android.material_material",
+        "lottie_compose",
     ],
     kotlincflags: [
         "-Xjvm-default=all",
