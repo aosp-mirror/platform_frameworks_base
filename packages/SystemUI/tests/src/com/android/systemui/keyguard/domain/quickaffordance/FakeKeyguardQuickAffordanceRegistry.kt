@@ -23,18 +23,18 @@ import kotlin.reflect.KClass
 /** Fake implementation of [FakeKeyguardQuickAffordanceRegistry], for tests. */
 class FakeKeyguardQuickAffordanceRegistry(
     private val configsByPosition:
-        Map<KeyguardQuickAffordancePosition, List<KeyguardQuickAffordanceConfig>>,
-) : KeyguardQuickAffordanceRegistry {
+        Map<KeyguardQuickAffordancePosition, List<FakeKeyguardQuickAffordanceConfig>>,
+) : KeyguardQuickAffordanceRegistry<FakeKeyguardQuickAffordanceConfig> {
 
     override fun getAll(
         position: KeyguardQuickAffordancePosition
-    ): List<KeyguardQuickAffordanceConfig> {
+    ): List<FakeKeyguardQuickAffordanceConfig> {
         return configsByPosition.getValue(position)
     }
 
     override fun get(
-        configClass: KClass<out KeyguardQuickAffordanceConfig>
-    ): KeyguardQuickAffordanceConfig {
+        configClass: KClass<out FakeKeyguardQuickAffordanceConfig>
+    ): FakeKeyguardQuickAffordanceConfig {
         return configsByPosition.values
             .flatten()
             .associateBy { config -> config::class }

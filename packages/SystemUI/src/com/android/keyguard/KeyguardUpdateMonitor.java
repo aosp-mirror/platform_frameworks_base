@@ -54,7 +54,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -87,7 +86,6 @@ import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -715,7 +713,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void handleFingerprintAuthFailed() {
         Assert.isMainThread();
         if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
-            Log.d(TAG, "handleFingerprintAuthFailed()"
+            mLogger.d("handleFingerprintAuthFailed()"
                     + " triggered while waiting for cancellation, removing watchdog");
             mHandler.removeCallbacks(mFpCancelNotReceived);
         }
@@ -750,7 +748,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void handleFingerprintAuthenticated(int authUserId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFingerPrintAuthenticated");
         if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
-            Log.d(TAG, "handleFingerprintAuthenticated()"
+            mLogger.d("handleFingerprintAuthenticated()"
                     + " triggered while waiting for cancellation, removing watchdog");
             mHandler.removeCallbacks(mFpCancelNotReceived);
         }
@@ -825,7 +823,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE
                 || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED) {
-            Log.d(TAG, "Fingerprint retrying auth due to(" + msgId + ") -> " + errString);
+            mLogger.logRetryAfterFpError(msgId, errString);
             mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
         }
 
@@ -2020,13 +2018,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // in case authenticators aren't registered yet at this point:
         mAuthController.addCallback(new AuthController.Callback() {
             @Override
-            public void onAllAuthenticatorsRegistered(
-                    @BiometricAuthenticator.Modality int modality) {
+            public void onAllAuthenticatorsRegistered() {
                 mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE));
             }
 
             @Override
-            public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
+            public void onEnrollmentsChanged() {
                 mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE));
             }
         });
@@ -2567,8 +2564,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private boolean isOnlyFaceEnrolled() {
-        return isFaceAuthEnabledForUser(getCurrentUser())
-                && !isUnlockWithFingerprintPossible(getCurrentUser());
+        return isFaceEnrolled()
+                && !getCachedIsUnlockWithFingerprintPossible(sCurrentUser);
     }
 
     private void maybeLogListenerModelData(KeyguardListenModel model) {
@@ -2683,7 +2680,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return isUnlockWithFacePossible(userId) || isUnlockWithFingerprintPossible(userId);
     }
 
-    private boolean isUnlockWithFingerprintPossible(int userId) {
+    @VisibleForTesting
+    boolean isUnlockWithFingerprintPossible(int userId) {
+        // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
         mIsUnlockWithFingerprintPossible.put(userId, mFpm != null && mFpm.isHardwareDetected()
                 && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId));
         return mIsUnlockWithFingerprintPossible.get(userId);
@@ -2705,6 +2704,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If face hardware is available, user has enrolled and enabled auth via setting.
      */
     public boolean isFaceAuthEnabledForUser(int userId) {
+        // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
         updateFaceEnrolled(userId);
         return mIsFaceEnrolled;
     }
@@ -3404,7 +3404,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_ASSISTANT_STACK_CHANGED,
                         info.visible));
             } catch (RemoteException e) {
-                Log.e(TAG, "unable to check task stack", e);
+                mLogger.logException(e, "unable to check task stack ");
             }
         }
     };

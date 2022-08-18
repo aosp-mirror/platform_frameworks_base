@@ -24,29 +24,32 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Indicates the strategies can be used when calculating the text wrapping.
+ * Specifies the line-break strategies for text wrapping.
  *
- * See <a href="https://www.w3.org/TR/css-text-3/#line-break-property">the line-break property</a>
+ * <p>See the
+ * <a href="https://www.w3.org/TR/css-text-3/#line-break-property" class="external">
+ * line-break property</a> for more information.</p>
  */
 public final class LineBreakConfig {
 
     /**
-     * No line break style specified.
+     * No line-break rules are used for line breaking.
      */
     public static final int LINE_BREAK_STYLE_NONE = 0;
 
     /**
-     * Use the least restrictive rule for line-breaking. This is usually used for short lines.
+     * The least restrictive line-break rules are used for line breaking. This
+     * setting is typically used for short lines.
      */
     public static final int LINE_BREAK_STYLE_LOOSE = 1;
 
     /**
-     * Indicate breaking text with the most comment set of line-breaking rules.
+     * The most common line-break rules are used for line breaking.
      */
     public static final int LINE_BREAK_STYLE_NORMAL = 2;
 
     /**
-     * Indicates breaking text with the most strictest line-breaking rules.
+     * The most strict line-break rules are used for line breaking.
      */
     public static final int LINE_BREAK_STYLE_STRICT = 3;
 
@@ -59,15 +62,17 @@ public final class LineBreakConfig {
     public @interface LineBreakStyle {}
 
     /**
-     * No line break word style specified.
+     * No line-break word style is used for line breaking.
      */
     public static final int LINE_BREAK_WORD_STYLE_NONE = 0;
 
     /**
-     * Indicates the line breaking is based on the phrased. This makes text wrapping only on
-     * meaningful words. The support of the text wrapping word style varies depending on the
-     * locales. If the locale does not support the phrase based text wrapping,
-     * there will be no effect.
+     * Line breaking is based on phrases, which results in text wrapping only on
+     * meaningful words.
+     *
+     * <p>Support for this line-break word style depends on locale. If the
+     * current locale does not support phrase-based text wrapping, this setting
+     * has no effect.</p>
      */
     public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1;
 
@@ -79,7 +84,7 @@ public final class LineBreakConfig {
     public @interface LineBreakWordStyle {}
 
     /**
-     * A builder for creating {@link LineBreakConfig}.
+     * A builder for creating a {@code LineBreakConfig} instance.
      */
     public static final class Builder {
         // The line break style for the LineBreakConfig.
@@ -95,16 +100,16 @@ public final class LineBreakConfig {
         private boolean mAutoPhraseBreaking = false;
 
         /**
-         * Builder constructor with line break parameters.
+         * Builder constructor.
          */
         public Builder() {
         }
 
         /**
-         * Set the line break style.
+         * Sets the line-break style.
          *
-         * @param lineBreakStyle the new line break style.
-         * @return this Builder
+         * @param lineBreakStyle The new line-break style.
+         * @return This {@code Builder}.
          */
         public @NonNull Builder setLineBreakStyle(@LineBreakStyle int lineBreakStyle) {
             mLineBreakStyle = lineBreakStyle;
@@ -112,10 +117,10 @@ public final class LineBreakConfig {
         }
 
         /**
-         * Set the line break word style.
+         * Sets the line-break word style.
          *
-         * @param lineBreakWordStyle the new line break word style.
-         * @return this Builder
+         * @param lineBreakWordStyle The new line-break word style.
+         * @return This {@code Builder}.
          */
         public @NonNull Builder setLineBreakWordStyle(@LineBreakWordStyle int lineBreakWordStyle) {
             mLineBreakWordStyle = lineBreakWordStyle;
@@ -123,7 +128,7 @@ public final class LineBreakConfig {
         }
 
         /**
-         * Enable or disable the automation of {@link LINE_BREAK_WORD_STYLE_PHRASE}.
+         * Enables or disables the automation of {@link LINE_BREAK_WORD_STYLE_PHRASE}.
          *
          * @hide
          */
@@ -133,9 +138,9 @@ public final class LineBreakConfig {
         }
 
         /**
-         * Build the {@link LineBreakConfig}
+         * Builds a {@link LineBreakConfig} instance.
          *
-         * @return the LineBreakConfig instance.
+         * @return The {@code LineBreakConfig} instance.
          */
         public @NonNull LineBreakConfig build() {
             return new LineBreakConfig(mLineBreakStyle, mLineBreakWordStyle, mAutoPhraseBreaking);
@@ -143,11 +148,12 @@ public final class LineBreakConfig {
     }
 
     /**
-     * Create the LineBreakConfig instance.
+     * Creates a {@code LineBreakConfig} instance with the provided line break
+     * parameters.
      *
-     * @param lineBreakStyle the line break style for text wrapping.
-     * @param lineBreakWordStyle the line break word style for text wrapping.
-     * @return the {@link LineBreakConfig} instance.
+     * @param lineBreakStyle The line-break style for text wrapping.
+     * @param lineBreakWordStyle The line-break word style for text wrapping.
+     * @return The {@code LineBreakConfig} instance.
      * @hide
      */
     public static @NonNull LineBreakConfig getLineBreakConfig(@LineBreakStyle int lineBreakStyle,
@@ -185,8 +191,10 @@ public final class LineBreakConfig {
     private final boolean mAutoPhraseBreaking;
 
     /**
-     * Constructor with the line break parameters.
-     * Use the {@link LineBreakConfig.Builder} to create the LineBreakConfig instance.
+     * Constructor with line-break parameters.
+     *
+     * <p>Use {@link LineBreakConfig.Builder} to create the
+     * {@code LineBreakConfig} instance.</p>
      */
     private LineBreakConfig(@LineBreakStyle int lineBreakStyle,
             @LineBreakWordStyle int lineBreakWordStyle, boolean autoPhraseBreaking) {
@@ -196,18 +204,18 @@ public final class LineBreakConfig {
     }
 
     /**
-     * Get the line break style.
+     * Gets the current line-break style.
      *
-     * @return The current line break style to be used for the text wrapping.
+     * @return The line-break style to be used for text wrapping.
      */
     public @LineBreakStyle int getLineBreakStyle() {
         return mLineBreakStyle;
     }
 
     /**
-     * Get the line break word style.
+     * Gets the current line-break word style.
      *
-     * @return The current line break word style to be used for the text wrapping.
+     * @return The line-break word style to be used for text wrapping.
      */
     public @LineBreakWordStyle int getLineBreakWordStyle() {
         return mLineBreakWordStyle;

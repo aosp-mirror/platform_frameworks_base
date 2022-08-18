@@ -56,7 +56,7 @@ public class SplitScreenShellCommandHandler implements
             return false;
         }
         final int taskId = new Integer(args[1]);
-        final int sideStagePosition = args.length > 3
+        final int sideStagePosition = args.length > 2
                 ? new Integer(args[2]) : SPLIT_POSITION_BOTTOM_OR_RIGHT;
         mController.moveToSideStage(taskId, sideStagePosition);
         return true;

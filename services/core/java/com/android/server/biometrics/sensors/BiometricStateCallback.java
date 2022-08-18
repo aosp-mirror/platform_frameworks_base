@@ -23,64 +23,32 @@ import static android.hardware.biometrics.BiometricStateListener.STATE_IDLE;
 import static android.hardware.biometrics.BiometricStateListener.STATE_KEYGUARD_AUTH;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.IBiometricStateListener;
-import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A callback for receiving notifications about biometric sensor state changes.
- *
- * @param <T> service provider type
- * @param <P> internal property type
  */
-public class BiometricStateCallback<T extends BiometricServiceProvider<P>,
-        P extends SensorPropertiesInternal> implements ClientMonitorCallback {
+public class BiometricStateCallback implements ClientMonitorCallback {
 
     private static final String TAG = "BiometricStateCallback";
 
     @NonNull
-    private final CopyOnWriteArrayList<IBiometricStateListener> mBiometricStateListeners =
-            new CopyOnWriteArrayList<>();
-    @NonNull
-    private final UserManager mUserManager;
-    @BiometricStateListener.State
-    private int mBiometricState;
-    @NonNull
-    private List<T> mProviders = List.of();
+    private final CopyOnWriteArrayList<IBiometricStateListener>
+            mBiometricStateListeners = new CopyOnWriteArrayList<>();
 
-    /**
-     * Create a new callback that must be {@link #start(List)}ed.
-     *
-     * @param userManager user manager
-     */
-    public BiometricStateCallback(@NonNull UserManager userManager) {
+    private @BiometricStateListener.State int mBiometricState;
+
+    public BiometricStateCallback() {
         mBiometricState = STATE_IDLE;
-        mUserManager = userManager;
     }
 
-    /**
-     * This should be called when the service has been initialized and all providers are ready.
-     *
-     * @param allProviders all registered biometric service providers
-     */
-    public synchronized void start(@NonNull List<T> allProviders) {
-        mProviders = Collections.unmodifiableList(allProviders);
-        broadcastCurrentEnrollmentState(null /* listener */);
-    }
-
-    /** Get the current state. */
-    @BiometricStateListener.State
     public int getBiometricState() {
         return mBiometricState;
     }
@@ -152,48 +120,38 @@ public class BiometricStateCallback<T extends BiometricServiceProvider<P>,
     }
 
     /**
-     * Enables clients to register a BiometricStateListener. For example, this is used to forward
-     * fingerprint sensor state changes to SideFpsEventHandler.
-     *
-     * @param listener listener to register
+     * This should be invoked when:
+     * 1) Enrolled --> None-enrolled
+     * 2) None-enrolled --> enrolled
+     * 3) HAL becomes ready
+     * 4) Listener is registered
      */
-    public synchronized void registerBiometricStateListener(
-            @NonNull IBiometricStateListener listener) {
-        mBiometricStateListeners.add(listener);
-        broadcastCurrentEnrollmentState(listener);
-    }
-
-    private synchronized void broadcastCurrentEnrollmentState(
-            @Nullable IBiometricStateListener listener) {
-        for (T provider : mProviders) {
-            for (SensorPropertiesInternal prop : provider.getSensorProperties()) {
-                for (UserInfo userInfo : mUserManager.getAliveUsers()) {
-                    final boolean enrolled = provider.hasEnrollments(prop.sensorId, userInfo.id);
-                    if (listener != null) {
-                        notifyEnrollmentStateChanged(
-                                listener, userInfo.id, prop.sensorId, enrolled);
-                    } else {
-                        notifyAllEnrollmentStateChanged(
-                                userInfo.id, prop.sensorId, enrolled);
-                    }
-                }
-            }
-        }
-    }
-
-    private void notifyAllEnrollmentStateChanged(int userId, int sensorId,
+    public void notifyAllEnrollmentStateChanged(int userId, int sensorId,
             boolean hasEnrollments) {
         for (IBiometricStateListener listener : mBiometricStateListeners) {
             notifyEnrollmentStateChanged(listener, userId, sensorId, hasEnrollments);
         }
     }
 
-    private void notifyEnrollmentStateChanged(@NonNull IBiometricStateListener listener,
+    /**
+     * Notifies the listener of enrollment state changes.
+     */
+    public void notifyEnrollmentStateChanged(@NonNull IBiometricStateListener listener,
             int userId, int sensorId, boolean hasEnrollments) {
         try {
             listener.onEnrollmentsChanged(userId, sensorId, hasEnrollments);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
+    }
+
+    /**
+     * Enables clients to register a BiometricStateListener. For example, this is used to forward
+     * fingerprint sensor state changes to SideFpsEventHandler.
+     *
+     * @param listener
+     */
+    public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
+        mBiometricStateListeners.add(listener);
     }
 }

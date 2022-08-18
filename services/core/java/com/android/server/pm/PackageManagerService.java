@@ -6309,21 +6309,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         }
 
-        /**
-         * Ask the package manager to compile layouts in the given package.
-         */
-        @Override
-        public boolean compileLayouts(String packageName) {
-            AndroidPackage pkg;
-            synchronized (mLock) {
-                pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    return false;
-                }
-            }
-            return mArtManagerService.compileLayouts(pkg);
-        }
-
         @Nullable
         @Override
         public String removeLegacyDefaultBrowserPackageName(int userId) {
@@ -7077,7 +7062,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mResolveActivity.processName = pkg.getProcessName();
             mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
-                    | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+                    | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS
+                    | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
             mResolveActivity.theme = 0;
             mResolveActivity.exported = true;
             mResolveActivity.enabled = true;
@@ -7110,7 +7096,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                 mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
                 mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
-                        | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
+                        | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY
+                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
                 mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                 mResolveActivity.exported = true;
                 mResolveActivity.enabled = true;

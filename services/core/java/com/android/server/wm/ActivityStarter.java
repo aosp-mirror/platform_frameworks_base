@@ -1267,7 +1267,7 @@ class ActivityStarter {
     }
 
     private void onExecutionStarted() {
-        mController.onExecutionStarted(this);
+        mController.onExecutionStarted();
     }
 
     private boolean isHomeApp(int uid, @Nullable String packageName) {

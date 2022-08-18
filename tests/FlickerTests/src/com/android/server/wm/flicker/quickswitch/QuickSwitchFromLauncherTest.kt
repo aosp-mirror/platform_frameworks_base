@@ -29,9 +29,12 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.common.Rect
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -295,6 +298,22 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Ignore("Nav bar window becomes invisible during quick switch")
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    /**
+     * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the start
+     * and end of the WM trace
+     */
+    @Presubmit
+    @Test
+    fun navBarWindowIsVisibleAtStartAndEnd() {
+        Assume.assumeFalse(testSpec.isTablet)
+        testSpec.navBarWindowIsVisibleAtStartAndEnd()
+    }
 
     companion object {
         /** {@inheritDoc} */

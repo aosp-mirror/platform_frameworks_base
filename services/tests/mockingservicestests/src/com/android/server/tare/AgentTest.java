@@ -20,6 +20,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 
 import android.app.AlarmManager;
@@ -92,7 +94,7 @@ public class AgentTest {
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
-        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);
@@ -121,7 +123,7 @@ public class AgentTest {
         Ledger ledger = new Ledger();
 
         doReturn(1000L).when(mIrs).getConsumptionLimitLocked();
-        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);
@@ -168,7 +170,7 @@ public class AgentTest {
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
-        doReturn(1000L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(1000L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);
@@ -187,7 +189,7 @@ public class AgentTest {
         assertEquals(1_000, ledger.getCurrentBalance());
 
         // Shouldn't change in normal operation, but adding test case in case it does.
-        doReturn(900L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(900L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         transaction = new Ledger.Transaction(0, 0, 0, null, 500, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);

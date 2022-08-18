@@ -46,7 +46,6 @@ genrule {
 android_test {
     name: "dex-builder-test",
     srcs: [
-        "src/android/startop/test/ApkLayoutCompilerTest.java",
         "src/android/startop/test/DexBuilderTest.java",
         "src/android/startop/test/LayoutCompilerTest.java",
         "src/android/startop/test/TestClass.java",

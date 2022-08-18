@@ -384,7 +384,7 @@ public class NotificationSnooze extends LinearLayout
     private void undoSnooze(View v) {
         mSelectedOption = null;
         showSnoozeOptions(false);
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
     }
 
     @Override
@@ -433,7 +433,7 @@ public class NotificationSnooze extends LinearLayout
     }
 
     @Override
-    public boolean shouldBeSaved() {
+    public boolean shouldBeSavedOnClose() {
         return true;
     }
 

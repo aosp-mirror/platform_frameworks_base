@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.common.data.model.Position
+import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController

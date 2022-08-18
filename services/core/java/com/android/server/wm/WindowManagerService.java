@@ -2623,37 +2623,38 @@ public class WindowManagerService extends IWindowManager.Stub
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
 
-        String reason = null;
-        if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
-            reason = "applyAnimation";
-            focusMayChange = true;
-            win.mAnimatingExit = true;
-        } else if (win.mDisplayContent.okToAnimate() && win.isExitAnimationRunningSelfOrParent()) {
-            // Currently in a hide animation... turn this into
-            // an exit.
-            win.mAnimatingExit = true;
-        } else if (win.mDisplayContent.okToAnimate()
-                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
-                && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
-            reason = "isWallpaperTarget";
-            // If the wallpaper is currently behind this app window, we need to change both of them
-            // inside of a transaction to avoid artifacts.
-            // For NotificationShade, sysui is in charge of running window animation and it updates
-            // the client view visibility only after both NotificationShade and the wallpaper are
-            // hidden. So we don't need to care about exit animation, but can destroy its surface
-            // immediately.
-            win.mAnimatingExit = true;
-        } else {
+        if (win.isWinVisibleLw() && win.mDisplayContent.okToAnimate()) {
+            String reason = null;
+            if (winAnimator.applyAnimationLocked(transit, false)) {
+                reason = "applyAnimation";
+                focusMayChange = true;
+                win.mAnimatingExit = true;
+            } else if (win.isExitAnimationRunningSelfOrParent()) {
+                reason = "animating";
+                win.mAnimatingExit = true;
+            } else if (win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
+                    && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
+                reason = "isWallpaperTarget";
+                // If the wallpaper is currently behind this app window, they should be updated
+                // in a transaction to avoid artifacts.
+                // For NotificationShade, sysui is in charge of running window animation and it
+                // updates the client view visibility only after both NotificationShade and the
+                // wallpaper are hidden. So the exit animation is not needed and can destroy its
+                // surface immediately.
+                win.mAnimatingExit = true;
+            }
+            if (reason != null) {
+                ProtoLog.d(WM_DEBUG_ANIM,
+                        "Set animatingExit: reason=startExitingAnimation/%s win=%s", reason, win);
+            }
+        }
+        if (!win.mAnimatingExit) {
             boolean stopped = win.mActivityRecord == null || win.mActivityRecord.mAppStopped;
             // We set mDestroying=true so ActivityRecord#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave
             // this to the exit animation.
             win.mDestroying = true;
             win.destroySurface(false, stopped);
-        }
-        if (reason != null) {
-            ProtoLog.d(WM_DEBUG_ANIM, "Set animatingExit: reason=startExitingAnimation/%s win=%s",
-                    reason, win);
         }
         if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.onWindowTransition(win, transit);
@@ -4302,7 +4303,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Even if alwaysSend, we are waiting for a transition or remote to provide
                     // updated configuration, so we can't update configuration yet.
                     if (!pendingRemoteDisplayChange) {
-                        if (!rotationChanged || forceRelayout) {
+                        // The layout-needed flag will be set if there is a rotation change, so
+                        // only set it if the caller requests to force relayout.
+                        if (forceRelayout) {
                             displayContent.setLayoutNeeded();
                             layoutNeeded = true;
                         }

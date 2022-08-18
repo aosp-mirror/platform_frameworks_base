@@ -29,6 +29,7 @@ import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.tare.IEconomyManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
@@ -64,6 +65,8 @@ import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -119,6 +122,7 @@ public class InternalResourceService extends SystemService {
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
 
+    private IAppOpsService mAppOpsService;
     private IDeviceIdleController mDeviceIdleController;
 
     private final Agent mAgent;
@@ -145,6 +149,12 @@ public class InternalResourceService extends SystemService {
     private final CopyOnWriteArraySet<TareStateChangeListener> mStateChangeListeners =
             new CopyOnWriteArraySet<>();
 
+    /**
+     * List of packages that are fully restricted and shouldn't be allowed to run in the background.
+     */
+    @GuardedBy("mLock")
+    private final SparseSetArray<String> mRestrictedApps = new SparseSetArray<>();
+
     /** List of packages that are "exempted" from battery restrictions. */
     // TODO(144864180): include userID
     @GuardedBy("mLock")
@@ -159,6 +169,30 @@ public class InternalResourceService extends SystemService {
     // In the range [0,100] to represent 0% to 100% battery.
     @GuardedBy("mLock")
     private int mCurrentBatteryLevel;
+
+    private final IAppOpsCallback mApbListener = new IAppOpsCallback.Stub() {
+        @Override
+        public void opChanged(int op, int uid, String packageName) {
+            boolean restricted = false;
+            try {
+                restricted = mAppOpsService.checkOperation(
+                        AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName)
+                        != AppOpsManager.MODE_ALLOWED;
+            } catch (RemoteException e) {
+                // Shouldn't happen
+            }
+            final int userId = UserHandle.getUserId(uid);
+            synchronized (mLock) {
+                if (restricted) {
+                    if (mRestrictedApps.add(userId, packageName)) {
+                        mAgent.onAppRestrictedLocked(userId, packageName);
+                    }
+                } else if (mRestrictedApps.remove(UserHandle.getUserId(uid), packageName)) {
+                    mAgent.onAppUnrestrictedLocked(userId, packageName);
+                }
+            }
+        }
+    };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Nullable
@@ -280,9 +314,11 @@ public class InternalResourceService extends SystemService {
 
         switch (phase) {
             case PHASE_SYSTEM_SERVICES_READY:
-                mConfigObserver.start();
+                mAppOpsService = IAppOpsService.Stub.asInterface(
+                        ServiceManager.getService(Context.APP_OPS_SERVICE));
                 mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
                         ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+                mConfigObserver.start();
                 onBootPhaseSystemServicesReady();
                 break;
             case PHASE_THIRD_PARTY_APPS_CAN_START:
@@ -362,6 +398,12 @@ public class InternalResourceService extends SystemService {
     boolean isPackageExempted(final int userId, @NonNull String pkgName) {
         synchronized (mLock) {
             return mExemptedApps.contains(pkgName);
+        }
+    }
+
+    boolean isPackageRestricted(final int userId, @NonNull String pkgName) {
+        synchronized (mLock) {
+            return mRestrictedApps.contains(userId, pkgName);
         }
     }
 
@@ -711,6 +753,13 @@ public class InternalResourceService extends SystemService {
 
         UsageStatsManagerInternal usmi = LocalServices.getService(UsageStatsManagerInternal.class);
         usmi.registerListener(mSurveillanceAgent);
+
+        try {
+            mAppOpsService
+                    .startWatchingMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, null, mApbListener);
+        } catch (RemoteException e) {
+            // shouldn't happen.
+        }
     }
 
     /** Perform long-running and/or heavy setup work. This should be called off the main thread. */
@@ -815,6 +864,11 @@ public class InternalResourceService extends SystemService {
             UsageStatsManagerInternal usmi =
                     LocalServices.getService(UsageStatsManagerInternal.class);
             usmi.unregisterListener(mSurveillanceAgent);
+            try {
+                mAppOpsService.stopWatchingMode(mApbListener);
+            } catch (RemoteException e) {
+                // shouldn't happen.
+            }
         }
         synchronized (mPackageToUidCache) {
             mPackageToUidCache.clear();

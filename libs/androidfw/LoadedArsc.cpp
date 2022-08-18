@@ -820,6 +820,13 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
   return true;
 }
 
+bool LoadedArsc::LoadStringPool(const LoadedIdmap* loaded_idmap) {
+  if (loaded_idmap != nullptr) {
+    global_string_pool_ = util::make_unique<OverlayStringPool>(loaded_idmap);
+  }
+  return true;
+}
+
 std::unique_ptr<LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
                                              const size_t length,
                                              const LoadedIdmap* loaded_idmap,
@@ -854,6 +861,16 @@ std::unique_ptr<LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
 
   return loaded_arsc;
 }
+
+std::unique_ptr<LoadedArsc> LoadedArsc::Load(const LoadedIdmap* loaded_idmap) {
+  ATRACE_NAME("LoadedArsc::Load");
+
+  // Not using make_unique because the constructor is private.
+  std::unique_ptr<LoadedArsc> loaded_arsc(new LoadedArsc());
+  loaded_arsc->LoadStringPool(loaded_idmap);
+  return loaded_arsc;
+}
+
 
 std::unique_ptr<LoadedArsc> LoadedArsc::CreateEmpty() {
   return std::unique_ptr<LoadedArsc>(new LoadedArsc());

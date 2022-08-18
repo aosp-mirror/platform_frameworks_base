@@ -1094,13 +1094,16 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     void updateNotNotifyingEntry(Bubble b, BubbleEntry entry, boolean showInShade) {
+        boolean showInShadeBefore = b.showInShade();
         boolean isBubbleSelected = Objects.equals(b, mBubbleData.getSelectedBubble());
         boolean isBubbleExpandedAndSelected = isStackExpanded() && isBubbleSelected;
         b.setEntry(entry);
         boolean suppress = isBubbleExpandedAndSelected || !showInShade || !b.showInShade();
         b.setSuppressNotification(suppress);
         b.setShowDot(!isBubbleExpandedAndSelected);
-        mImpl.mCachedState.updateBubbleSuppressedState(b);
+        if (showInShadeBefore != b.showInShade()) {
+            mImpl.mCachedState.updateBubbleSuppressedState(b);
+        }
     }
 
     @VisibleForTesting

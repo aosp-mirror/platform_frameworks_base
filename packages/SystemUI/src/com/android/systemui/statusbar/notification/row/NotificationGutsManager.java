@@ -463,7 +463,6 @@ public class NotificationGutsManager implements NotifGutsViewManager {
                         R.dimen.notification_guts_conversation_icon_size));
 
         notificationInfoView.bindNotification(
-                notificationInfoView.getSelectedAction(),
                 mShortcutManager,
                 pmUser,
                 mPeopleSpaceWidgetManager,

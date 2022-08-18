@@ -9088,7 +9088,7 @@ public class TelephonyManager {
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
      *        they are received by the platform, the user should provide an executor which executes
-     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     *        tasks one at a time in serial order.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
@@ -9132,7 +9132,7 @@ public class TelephonyManager {
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
      *        they are received by the platform, the user should provide an executor which executes
-     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     *        tasks one at a time in serial order.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
@@ -16444,7 +16444,12 @@ public class TelephonyManager {
      * the appropriate callback method on the callback object and passes the current (updated)
      * values.
      * <p>
-     *
+     * Note: Be aware of the permission requirements stated on the {@link TelephonyCallback}
+     * listeners you implement.  Your application must be granted these permissions in order to
+     * register a {@link TelephonyCallback} which requires them; a {@link SecurityException} will be
+     * thrown if you do not hold the required permissions for all {@link TelephonyCallback}
+     * listeners you implement.
+     * <p>
      * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
      * applies to the given subId. Otherwise, applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple

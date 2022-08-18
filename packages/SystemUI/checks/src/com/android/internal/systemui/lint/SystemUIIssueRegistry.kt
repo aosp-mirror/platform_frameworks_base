@@ -27,8 +27,13 @@ import com.google.auto.service.AutoService
 class SystemUIIssueRegistry : IssueRegistry() {
 
     override val issues: List<Issue>
-        get() = listOf(BindServiceViaContextDetector.ISSUE,
-                BroadcastSentViaContextDetector.ISSUE)
+        get() = listOf(
+                BindServiceViaContextDetector.ISSUE,
+                BroadcastSentViaContextDetector.ISSUE,
+                GetMainLooperViaContextDetector.ISSUE,
+                RegisterReceiverViaContextDetector.ISSUE,
+                SoftwareBitmapDetector.ISSUE,
+        )
 
     override val api: Int
         get() = CURRENT_API
