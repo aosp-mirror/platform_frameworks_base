@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -46,18 +47,23 @@ import org.junit.runners.Parameterized
 @Group4
 class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
+    private val lockScreen = LockscreenController.get()
+
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
+                test {
+                    lockScreen.setUnlockSwipe()
+                }
                 eachRun {
                     val addBubbleBtn = waitAndGetAddBubbleBtn()
                     addBubbleBtn?.click() ?: error("Bubble widget not found")
-                    device.sleep()
+                    lockScreen.lockScreen()
                     wmHelper.StateSyncBuilder()
-                        .withoutTopVisibleAppWindows()
+                        .withKeyguardShowing()
                         .waitForAndVerify()
-                    device.wakeUp()
+                    lockScreen.turnScreenOn()
                 }
             }
             transitions {
@@ -70,8 +76,7 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                         or WindowInsets.Type.displayCutout()
                 )
                 device.swipe(100, insets.top + 100, 100, device.displayHeight / 2, 4)
-                device.waitForIdle(2000)
-                instrumentation.uiAutomation.syncInputTransactions()
+                wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
                 val notification = device.wait(
                     Until.findObject(
@@ -79,14 +84,14 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                     ), FIND_OBJECT_TIMEOUT
                 )
                 notification?.click() ?: error("Notification not found")
-                instrumentation.uiAutomation.syncInputTransactions()
+                wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
                 val showBubble = device.wait(
                     Until.findObject(
                         By.res("com.android.systemui", "bubble_view")
                     ), FIND_OBJECT_TIMEOUT
                 )
                 showBubble?.click() ?: error("Bubble notify not found")
-                instrumentation.uiAutomation.syncInputTransactions()
+                wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
                 val cancelAllBtn = waitAndGetCancelAllBtn()
                 cancelAllBtn?.click() ?: error("Cancel widget not found")
             }
