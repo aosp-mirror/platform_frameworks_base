@@ -186,7 +186,7 @@ public class Vpn {
     private static final boolean LOGD = true;
     private static final String ANDROID_KEYSTORE_PROVIDER = "AndroidKeyStore";
     /** Key containing prefix of vpn app excluded list */
-    @VisibleForTesting static final String VPN_APP_EXCLUDED = "VPN_APP_EXCLUDED_";
+    @VisibleForTesting static final String VPN_APP_EXCLUDED = "VPNAPPEXCLUDED_";
 
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
     // the device idle allowlist during service launch and VPN bootstrap.
@@ -514,12 +514,8 @@ public class Vpn {
                 @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig config,
                 @Nullable NetworkProvider provider) {
-            return new NetworkAgent(context, looper, logTag, nc, lp, score, config, provider) {
-                @Override
-                public void onNetworkUnwanted() {
-                    // We are user controlled, not driven by NetworkRequest.
-                }
-            };
+            return new VpnNetworkAgentWrapper(
+                    context, looper, logTag, nc, lp, score, config, provider);
         }
     }
 
@@ -1824,7 +1820,7 @@ public class Vpn {
                         Log.wtf(TAG, "Failed to add restricted user to owner", e);
                     }
                     if (mNetworkAgent != null) {
-                        mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+                        doSendNetworkCapabilities(mNetworkAgent, mNetworkCapabilities);
                     }
                 }
                 setVpnForcedLocked(mLockdown);
@@ -1854,7 +1850,7 @@ public class Vpn {
                         Log.wtf(TAG, "Failed to remove restricted user to owner", e);
                     }
                     if (mNetworkAgent != null) {
-                        mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+                        doSendNetworkCapabilities(mNetworkAgent, mNetworkCapabilities);
                     }
                 }
                 setVpnForcedLocked(mLockdown);
@@ -2084,7 +2080,7 @@ public class Vpn {
             return false;
         }
         boolean success = jniAddAddress(mInterface, address, prefixLength);
-        mNetworkAgent.sendLinkProperties(makeLinkProperties());
+        doSendLinkProperties(mNetworkAgent, makeLinkProperties());
         return success;
     }
 
@@ -2093,7 +2089,7 @@ public class Vpn {
             return false;
         }
         boolean success = jniDelAddress(mInterface, address, prefixLength);
-        mNetworkAgent.sendLinkProperties(makeLinkProperties());
+        doSendLinkProperties(mNetworkAgent, makeLinkProperties());
         return success;
     }
 
@@ -2107,8 +2103,11 @@ public class Vpn {
         // Make defensive copy since the content of array might be altered by the caller.
         mConfig.underlyingNetworks =
                 (networks != null) ? Arrays.copyOf(networks, networks.length) : null;
-        mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
-                ? Arrays.asList(mConfig.underlyingNetworks) : null);
+        doSetUnderlyingNetworks(
+                mNetworkAgent,
+                (mConfig.underlyingNetworks != null)
+                        ? Arrays.asList(mConfig.underlyingNetworks)
+                        : null);
         return true;
     }
 
@@ -2917,7 +2916,7 @@ public class Vpn {
                         return; // Link properties are already sent.
                     } else {
                         // Underlying networks also set in agentConnect()
-                        networkAgent.setUnderlyingNetworks(Collections.singletonList(network));
+                        doSetUnderlyingNetworks(networkAgent, Collections.singletonList(network));
                         mNetworkCapabilities =
                                 new NetworkCapabilities.Builder(mNetworkCapabilities)
                                         .setUnderlyingNetworks(Collections.singletonList(network))
@@ -2927,7 +2926,7 @@ public class Vpn {
                     lp = makeLinkProperties(); // Accesses VPN instance fields; must be locked
                 }
 
-                networkAgent.sendLinkProperties(lp);
+                doSendLinkProperties(networkAgent, lp);
             } catch (Exception e) {
                 Log.d(TAG, "Error in ChildOpened for token " + token, e);
                 onSessionLost(token, e);
@@ -2994,7 +2993,7 @@ public class Vpn {
                             new NetworkCapabilities.Builder(mNetworkCapabilities)
                                     .setUnderlyingNetworks(Collections.singletonList(network))
                                     .build();
-                    mNetworkAgent.setUnderlyingNetworks(Collections.singletonList(network));
+                    doSetUnderlyingNetworks(mNetworkAgent, Collections.singletonList(network));
                 }
 
                 mTunnelIface.setUnderlyingNetwork(network);
@@ -3438,7 +3437,7 @@ public class Vpn {
                                     null /*gateway*/, null /*iface*/, RTN_UNREACHABLE));
                         }
                         if (mNetworkAgent != null) {
-                            mNetworkAgent.sendLinkProperties(makeLinkProperties());
+                            doSendLinkProperties(mNetworkAgent, makeLinkProperties());
                         }
                     }
                 }
@@ -4132,6 +4131,20 @@ public class Vpn {
             @NonNull List<String> excludedApps) {
         enforceNotRestrictedUser();
         if (!storeAppExclusionList(packageName, excludedApps)) return false;
+
+        updateAppExclusionList(excludedApps);
+
+        return true;
+    }
+
+    /**
+     * Triggers an update of the VPN network's excluded UIDs if a VPN is running.
+     */
+    public synchronized void refreshPlatformVpnAppExclusionList() {
+        updateAppExclusionList(getAppExclusionList(mPackage));
+    }
+
+    private synchronized void updateAppExclusionList(@NonNull List<String> excludedApps) {
         // Re-build and update NetworkCapabilities via NetworkAgent.
         if (mNetworkAgent != null) {
             // Only update the platform VPN
@@ -4141,11 +4154,9 @@ public class Vpn {
                         .setUids(createUserAndRestrictedProfilesRanges(
                                 mUserId, null /* allowedApplications */, excludedApps))
                         .build();
-                mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+                doSendNetworkCapabilities(mNetworkAgent, mNetworkCapabilities);
             }
         }
-
-        return true;
     }
 
     /**
@@ -4218,6 +4229,85 @@ public class Vpn {
         requireNonNull(packageName, "No package name provided");
         enforceNotRestrictedUser();
         return isCurrentIkev2VpnLocked(packageName) ? makeVpnProfileStateLocked() : null;
+    }
+
+    /** Proxy to allow different testing setups */
+    // TODO: b/240492694 Remove VpnNetworkAgentWrapper and this method when
+    // NetworkAgent#sendLinkProperties can be un-finalized.
+    private static void doSendLinkProperties(
+            @NonNull NetworkAgent agent, @NonNull LinkProperties lp) {
+        if (agent instanceof VpnNetworkAgentWrapper) {
+            ((VpnNetworkAgentWrapper) agent).doSendLinkProperties(lp);
+        } else {
+            agent.sendLinkProperties(lp);
+        }
+    }
+
+    /** Proxy to allow different testing setups */
+    // TODO: b/240492694 Remove VpnNetworkAgentWrapper and this method when
+    // NetworkAgent#sendNetworkCapabilities can be un-finalized.
+    private static void doSendNetworkCapabilities(
+            @NonNull NetworkAgent agent, @NonNull NetworkCapabilities nc) {
+        if (agent instanceof VpnNetworkAgentWrapper) {
+            ((VpnNetworkAgentWrapper) agent).doSendNetworkCapabilities(nc);
+        } else {
+            agent.sendNetworkCapabilities(nc);
+        }
+    }
+
+    /** Proxy to allow different testing setups */
+    // TODO: b/240492694 Remove VpnNetworkAgentWrapper and this method when
+    // NetworkAgent#setUnderlyingNetworks can be un-finalized.
+    private static void doSetUnderlyingNetworks(
+            @NonNull NetworkAgent agent, @NonNull List<Network> networks) {
+        if (agent instanceof VpnNetworkAgentWrapper) {
+            ((VpnNetworkAgentWrapper) agent).doSetUnderlyingNetworks(networks);
+        } else {
+            agent.setUnderlyingNetworks(networks);
+        }
+    }
+
+    /**
+     * Proxy to allow testing
+     *
+     * @hide
+     */
+    // TODO: b/240492694 Remove VpnNetworkAgentWrapper when NetworkAgent's methods can be
+    // un-finalized.
+    @VisibleForTesting
+    public static class VpnNetworkAgentWrapper extends NetworkAgent {
+        /** Create an VpnNetworkAgentWrapper */
+        public VpnNetworkAgentWrapper(
+                @NonNull Context context,
+                @NonNull Looper looper,
+                @NonNull String logTag,
+                @NonNull NetworkCapabilities nc,
+                @NonNull LinkProperties lp,
+                @NonNull NetworkScore score,
+                @NonNull NetworkAgentConfig config,
+                @Nullable NetworkProvider provider) {
+            super(context, looper, logTag, nc, lp, score, config, provider);
+        }
+
+        /** Update the LinkProperties */
+        public void doSendLinkProperties(@NonNull LinkProperties lp) {
+            sendLinkProperties(lp);
+        }
+
+        /** Update the NetworkCapabilities */
+        public void doSendNetworkCapabilities(@NonNull NetworkCapabilities nc) {
+            sendNetworkCapabilities(nc);
+        }
+
+        /** Set the underlying networks */
+        public void doSetUnderlyingNetworks(@NonNull List<Network> networks) {
+            setUnderlyingNetworks(networks);
+        }
+
+        @Override
+        public void onNetworkUnwanted() {
+            // We are user controlled, not driven by NetworkRequest.
+        }
     }
 
     /**
