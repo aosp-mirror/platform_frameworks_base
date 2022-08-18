@@ -92,7 +92,7 @@ public class Flags {
      * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
      * one.
      */
-    public static final UnreleasedFlag MODERN_BOTTOM_AREA = new UnreleasedFlag(206, true);
+    public static final ReleasedFlag MODERN_BOTTOM_AREA = new ReleasedFlag(206, true);
 
 
     public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS = new UnreleasedFlag(207);
