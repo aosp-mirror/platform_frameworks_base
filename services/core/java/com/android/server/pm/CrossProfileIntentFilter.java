@@ -49,6 +49,15 @@ class CrossProfileIntentFilter extends WatchedIntentFilter {
     //flag to decide if intent needs to be resolved cross profile if pkgName is already defined
     public static final int FLAG_IS_PACKAGE_FOR_FILTER = 0x00000008;
 
+    /*
+    This flag, denotes if further cross profile resolution is allowed, e.g. if profile#0 is linked
+    to profile#1 and profile#2 . When intent resolution from profile#1 is started we resolve it in
+    profile#1 and profile#0. The profile#0 is also linked to profile#2, we will only resolve in
+    profile#2 if CrossProfileIntentFilter between profile#1 and profile#0 have set flag
+    FLAG_ALLOW_CHAINED_RESOLUTION.
+     */
+    public static final int FLAG_ALLOW_CHAINED_RESOLUTION = 0x00000010;
+
     private static final String TAG = "CrossProfileIntentFilter";
 
     /**
