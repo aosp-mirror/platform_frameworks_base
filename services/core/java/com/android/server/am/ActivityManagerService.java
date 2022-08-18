@@ -16202,10 +16202,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId,
-            @Nullable IProgressListener unlockListener) {
+    public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId) {
         // Permission check done inside UserController.
-        return mUserController.startUserOnSecondaryDisplay(userId, displayId, unlockListener);
+        return mUserController.startUserOnSecondaryDisplay(userId, displayId,
+                /* unlockListener= */ null);
     }
 
     /**

@@ -2060,7 +2060,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             success = mInterface.startUserInBackgroundWithListener(userId, waiter);
             displaySuffix = "";
         } else {
-            success = mInterface.startUserInBackgroundOnSecondaryDisplay(userId, displayId, waiter);
+            success = mInterface.startUserInBackgroundOnSecondaryDisplay(userId, displayId);
             displaySuffix = " on display " + displayId;
         }
         if (wait && success) {
