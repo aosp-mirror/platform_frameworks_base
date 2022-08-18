@@ -783,6 +783,9 @@ public class InternalResourceService extends SystemService {
                     // Reset the consumption limit since several factors may have changed.
                     mScribe.setConsumptionLimitLocked(
                             mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
+                } else {
+                    // Adjust the supply in case battery level changed while the device was off.
+                    adjustCreditSupplyLocked(true);
                 }
             }
             scheduleUnusedWealthReclamationLocked();
