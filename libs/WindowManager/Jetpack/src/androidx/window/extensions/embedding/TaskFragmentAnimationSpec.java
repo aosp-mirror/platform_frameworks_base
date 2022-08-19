@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.provider.Settings;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -68,10 +69,7 @@ class TaskFragmentAnimationSpec {
 
         // The transition animation should be adjusted based on the developer option.
         final ContentResolver resolver = mContext.getContentResolver();
-        mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.TRANSITION_ANIMATION_SCALE,
-                mContext.getResources().getFloat(
-                        R.dimen.config_appTransitionAnimationDurationScaleDefault));
+        mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
         resolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE), false,
                 new SettingsObserver(handler));
@@ -223,6 +221,12 @@ class TaskFragmentAnimationSpec {
         return animation;
     }
 
+    private float getTransitionAnimationScaleSetting() {
+        return WindowManager.fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mContext.getResources().getFloat(
+                                R.dimen.config_appTransitionAnimationDurationScaleDefault)));
+    }
+
     private class SettingsObserver extends ContentObserver {
         SettingsObserver(@NonNull Handler handler) {
             super(handler);
@@ -230,9 +234,7 @@ class TaskFragmentAnimationSpec {
 
         @Override
         public void onChange(boolean selfChange) {
-            mTransitionAnimationScaleSetting = Settings.Global.getFloat(
-                    mContext.getContentResolver(), Settings.Global.TRANSITION_ANIMATION_SCALE,
-                    mTransitionAnimationScaleSetting);
+            mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
         }
     }
 }
