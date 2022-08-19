@@ -212,6 +212,8 @@ public class SecureSettings {
         Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
         Settings.Secure.WEAR_TALKBACK_ENABLED,
         Settings.Secure.HBM_SETTING_KEY,
-        Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_ENABLED
+        Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_ENABLED,
+        Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_TRIGGER_HINTS_ENABLED,
+        Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_KEYBOARD_SHIFT_ENABLED,
     };
 }
