@@ -16,7 +16,7 @@
 
 package android.window;
 
-import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENT_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
@@ -220,7 +220,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                          {@link WindowContainerTransaction} if needed.
      * @hide
      */
-    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+    public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {}
 
     /**
@@ -280,8 +280,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                             errorBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION,
                                     java.lang.Throwable.class));
                     break;
-                case TYPE_ACTIVITY_REPARENT_TO_TASK:
-                    onActivityReparentToTask(
+                case TYPE_ACTIVITY_REPARENTED_TO_TASK:
+                    onActivityReparentedToTask(
                             change.getTaskId(),
                             change.getActivityIntent(),
                             change.getActivityToken());

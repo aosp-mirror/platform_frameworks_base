@@ -340,7 +340,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         activity.reparent(task, POSITION_TOP);
 
         // Notify the organizer about the reparent.
-        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentToTask(activity);
+        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentedToTask(activity);
         assertNull(activity.mLastTaskFragmentOrganizerBeforePip);
     }
 

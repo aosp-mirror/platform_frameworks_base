@@ -102,7 +102,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     private final SplitController mController;
 
-    SplitPresenter(@NonNull Executor executor, SplitController controller) {
+    SplitPresenter(@NonNull Executor executor, @NonNull SplitController controller) {
         super(executor, controller);
         mController = controller;
         registerOrganizer();
@@ -502,14 +502,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    static Pair<Size, Size> getActivitiesMinDimensionsPair(Activity primaryActivity,
-            Activity secondaryActivity) {
+    static Pair<Size, Size> getActivitiesMinDimensionsPair(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity) {
         return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryActivity));
     }
 
     @NonNull
-    static Pair<Size, Size> getActivityIntentMinDimensionsPair(Activity primaryActivity,
-            Intent secondaryIntent) {
+    static Pair<Size, Size> getActivityIntentMinDimensionsPair(@NonNull Activity primaryActivity,
+            @NonNull Intent secondaryIntent) {
         return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryIntent));
     }
 
