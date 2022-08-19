@@ -59,9 +59,8 @@ public class TypefaceSerializationPerfTest {
         Typeface.loadPreinstalledSystemFontMap();
     }
 
-    @ManualBenchmarkState.ManualBenchmarkTest(
-            warmupDurationNs = WARMUP_DURATION_NS,
-            targetTestDurationNs = TARGET_TEST_DURATION_NS)
+    // testSerializeFontMap uses the default targetTestDurationNs, which is much longer than
+    // TARGET_TEST_DURATION_NS, in order to stabilize test results.
     @Test
     public void testSerializeFontMap() throws Exception {
         Map<String, Typeface> systemFontMap = Typeface.getSystemFontMap();
