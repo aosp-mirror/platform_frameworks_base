@@ -80,9 +80,4 @@ public interface OneHanded {
      * transition start or finish
      */
     void registerTransitionCallback(OneHandedTransitionCallback callback);
-
-    /**
-     * Notifies when user switch complete
-     */
-    void onUserSwitch(int userId);
 }

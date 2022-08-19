@@ -92,6 +92,7 @@ import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.UserChangeListener;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -105,7 +106,8 @@ import java.util.function.Consumer;
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements PipTransitionController.PipTransitionCallback,
-        RemoteCallable<PipController>, ConfigurationChangeListener, KeyguardChangeListener {
+        RemoteCallable<PipController>, ConfigurationChangeListener, KeyguardChangeListener,
+        UserChangeListener {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -528,7 +530,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 });
 
         mOneHandedController.ifPresent(controller -> {
-            controller.asOneHanded().registerTransitionCallback(
+            controller.registerTransitionCallback(
                     new OneHandedTransitionCallback() {
                         @Override
                         public void onStartFinished(Rect bounds) {
@@ -542,8 +544,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     });
         });
 
+        mMediaController.registerSessionListenerForCurrentUser();
+
         mShellController.addConfigurationChangeListener(this);
         mShellController.addKeyguardChangeListener(this);
+        mShellController.addUserChangeListener(this);
     }
 
     @Override
@@ -554,6 +559,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Override
     public ShellExecutor getRemoteCallExecutor() {
         return mMainExecutor;
+    }
+
+    @Override
+    public void onUserChanged(int newUserId, @NonNull Context userContext) {
+        // Re-register the media session listener when switching users
+        mMediaController.registerSessionListenerForCurrentUser();
     }
 
     @Override
@@ -642,10 +653,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         } else {
             updateDisplayLayout.run();
         }
-    }
-
-    private void registerSessionListenerForCurrentUser() {
-        mMediaController.registerSessionListenerForCurrentUser();
     }
 
     private void onSystemUiStateChanged(boolean isValidState, int flag) {
@@ -964,13 +971,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         public void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
             mMainExecutor.execute(() -> {
                 PipController.this.onSystemUiStateChanged(isSysUiStateValid, flag);
-            });
-        }
-
-        @Override
-        public void registerSessionListenerForCurrentUser() {
-            mMainExecutor.execute(() -> {
-                PipController.this.registerSessionListenerForCurrentUser();
             });
         }
 
