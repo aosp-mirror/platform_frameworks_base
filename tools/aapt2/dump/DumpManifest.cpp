@@ -1981,10 +1981,11 @@ class Action : public ManifestExtractor::Element {
       if (ElementCast<Activity>(parent_stack[1])) {
         // Detects the presence of a particular type of activity.
         Activity* activity = ElementCast<Activity>(parent_stack[1]);
-        auto map = std::map<std::string, std::string>({
-            { "android.intent.action.MAIN" , "main" },
-            { "android.intent.action.VIDEO_CAMERA" , "camera" },
-            { "android.intent.action.STILL_IMAGE_CAMERA_SECURE" , "camera-secure" },
+        static const auto map = std::map<std::string, std::string>({
+            {"android.intent.action.MAIN", "main"},
+            {"android.media.action.VIDEO_CAMERA", "camera"},
+            {"android.media.action.STILL_IMAGE_CAMERA", "camera"},
+            {"android.media.action.STILL_IMAGE_CAMERA_SECURE", "camera-secure"},
         });
 
         auto entry = map.find(action);
@@ -2735,10 +2736,9 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
   auto it = apk_->GetFileCollection()->Iterator();
   while (it->HasNext()) {
     auto file_path = it->Next()->GetSource().path;
-    size_t pos = file_path.find("lib/");
-    if (pos != std::string::npos) {
-      file_path = file_path.substr(pos + 4);
-      pos = file_path.find('/');
+    if (file_path.starts_with("lib/")) {
+      file_path = file_path.substr(4);
+      size_t pos = file_path.find('/');
       if (pos != std::string::npos) {
         file_path = file_path.substr(0, pos);
       }
