@@ -904,7 +904,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         setDozing(/* dozing= */ true, /* dozingAlwaysOn= */ true);
 
-        assertKeyguardStatusViewCentered();
+        assertThat(isKeyguardStatusViewCentered()).isTrue();
     }
 
     @Test
@@ -915,7 +915,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         setDozing(/* dozing= */ true, /* dozingAlwaysOn= */ false);
 
-        assertKeyguardStatusViewNotCentered();
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
     }
 
     @Test
@@ -926,19 +926,19 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ true);
 
-        assertKeyguardStatusViewNotCentered();
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
     }
 
     @Test
-    public void keyguardStatusView_splitShade_pulsing_isNotCentered() {
+    public void keyguardStatusView_splitShade_pulsing_isCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
-        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ true);
 
-        assertKeyguardStatusViewNotCentered();
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
     }
 
     @Test
@@ -948,9 +948,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
-        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ true);
 
-        assertKeyguardStatusViewNotCentered();
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
     }
 
     @Test
@@ -963,7 +963,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(KEYGUARD);
         setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
 
-        assertKeyguardStatusViewCentered();
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
     }
 
     @Test
@@ -1208,31 +1208,16 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void clockSize_mediaShowing_inSplitShade_onAod_isLarge() {
-        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+    public void testSwitchesToBigClockInSplitShadeOnAod() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         clearInvocations(mKeyguardStatusViewController);
 
-        mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false, null);
+        mNotificationPanelViewController.setDozing(true, false, null);
 
-        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate= */ true);
-    }
-
-    @Test
-    public void clockSize_mediaShowing_inSplitShade_screenOff_notAod_isSmall() {
-        when(mDozeParameters.getAlwaysOn()).thenReturn(false);
-        mStatusBarStateController.setState(KEYGUARD);
-        enableSplitShade(/* enabled= */ true);
-        when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
-        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
-        clearInvocations(mKeyguardStatusViewController);
-
-        mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false, null);
-
-        verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate= */ true);
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
     }
 
     @Test
@@ -1563,15 +1548,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         );
     }
 
-    private void assertKeyguardStatusViewCentered() {
+    private boolean isKeyguardStatusViewCentered() {
         mNotificationPanelViewController.updateResources();
-        assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd).isAnyOf(
-                ConstraintSet.PARENT_ID, ConstraintSet.UNSET);
-    }
-
-    private void assertKeyguardStatusViewNotCentered() {
-        mNotificationPanelViewController.updateResources();
-        assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd).isEqualTo(
-                R.id.qs_edge_guideline);
+        return getConstraintSetLayout(R.id.keyguard_status_view).endToEnd
+                == ConstraintSet.PARENT_ID;
     }
 }

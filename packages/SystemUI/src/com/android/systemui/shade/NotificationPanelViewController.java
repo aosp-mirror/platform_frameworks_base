@@ -98,7 +98,6 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
-import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUnfoldTransition;
@@ -1416,10 +1415,19 @@ public final class NotificationPanelViewController extends PanelViewController {
     private void updateClockAppearance() {
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
+        final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                .getVisibleNotificationCount() != 0
+                || mMediaDataManager.hasActiveMediaOrRecommendation();
+        boolean splitShadeWithActiveMedia =
+                mSplitShadeEnabled && mMediaDataManager.hasActiveMediaOrRecommendation();
         boolean shouldAnimateClockChange = mScreenOffAnimationController.shouldAnimateClockChange();
-        mKeyguardStatusViewController.displayClock(computeDesiredClockSize(),
-                shouldAnimateClockChange);
-        updateKeyguardStatusViewAlignment(/* animate= */true);
+        if ((hasVisibleNotifications && !mSplitShadeEnabled)
+                || (splitShadeWithActiveMedia && !mDozing)) {
+            mKeyguardStatusViewController.displayClock(SMALL, shouldAnimateClockChange);
+        } else {
+            mKeyguardStatusViewController.displayClock(LARGE, shouldAnimateClockChange);
+        }
+        updateKeyguardStatusViewAlignment(true /* animate */);
         int userSwitcherHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         if (mKeyguardUserSwitcherController != null) {
@@ -1428,7 +1436,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         float expandedFraction =
                 mScreenOffAnimationController.shouldExpandNotifications()
                         ? 1.0f : getExpandedFraction();
-        float darkAmount =
+        float darkamount =
                 mScreenOffAnimationController.shouldExpandNotifications()
                         ? 1.0f : mInterpolatedDarkAmount;
 
@@ -1446,7 +1454,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 mKeyguardStatusViewController.getLockscreenHeight(),
                 userSwitcherHeight,
                 userSwitcherPreferredY,
-                darkAmount, mOverStretchAmount,
+                darkamount, mOverStretchAmount,
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),
                 mDisplayTopInset,
@@ -1478,34 +1486,6 @@ public final class NotificationPanelViewController extends PanelViewController {
         updateClock();
     }
 
-    @ClockSize
-    private int computeDesiredClockSize() {
-        if (mSplitShadeEnabled) {
-            return computeDesiredClockSizeForSplitShade();
-        }
-        return computeDesiredClockSizeForSingleShade();
-    }
-
-    @ClockSize
-    private int computeDesiredClockSizeForSingleShade() {
-        if (hasVisibleNotifications()) {
-            return SMALL;
-        }
-        return LARGE;
-    }
-
-    @ClockSize
-    private int computeDesiredClockSizeForSplitShade() {
-        // Media is not visible to the user on AOD.
-        boolean isMediaVisibleToUser =
-                mMediaDataManager.hasActiveMediaOrRecommendation() && !isOnAod();
-        if (isMediaVisibleToUser) {
-            // When media is visible, it overlaps with the large clock. Use small clock instead.
-            return SMALL;
-        }
-        return LARGE;
-    }
-
     private void updateKeyguardStatusViewAlignment(boolean animate) {
         boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         if (mStatusViewCentered != shouldBeCentered) {
@@ -1532,35 +1512,12 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private boolean shouldKeyguardStatusViewBeCentered() {
-        if (mSplitShadeEnabled) {
-            return shouldKeyguardStatusViewBeCenteredInSplitShade();
-        }
-        return true;
-    }
-
-    private boolean shouldKeyguardStatusViewBeCenteredInSplitShade() {
-        if (!hasVisibleNotifications()) {
-            // No notifications visible. It is safe to have the clock centered as there will be no
-            // overlap.
-            return true;
-        }
-        if (hasPulsingNotifications()) {
-            // Pulsing notification appears on the right. Move clock left to avoid overlap.
-            return false;
-        }
-        // "Visible" notifications are actually not visible on AOD (unless pulsing), so it is safe
-        // to center the clock without overlap.
-        return isOnAod();
-    }
-
-    private boolean isOnAod() {
-        return mDozing && mDozeParameters.getAlwaysOn();
-    }
-
-    private boolean hasVisibleNotifications() {
-        return mNotificationStackScrollLayoutController
+        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
                 .getVisibleNotificationCount() != 0
                 || mMediaDataManager.hasActiveMediaOrRecommendation();
+        boolean isOnAod = mDozing && mDozeParameters.getAlwaysOn();
+        return !mSplitShadeEnabled || !hasVisibleNotifications || isOnAod
+                || hasPulsingNotifications();
     }
 
     /**
@@ -3814,8 +3771,6 @@ public final class NotificationPanelViewController extends PanelViewController {
             mAnimateNextPositionUpdate = false;
         }
         mNotificationStackScrollLayoutController.setPulsing(pulsing, animatePulse);
-
-        updateKeyguardStatusViewAlignment(/* animate= */ true);
     }
 
     public void setAmbientIndicationTop(int ambientIndicationTop, boolean ambientTextVisible) {
