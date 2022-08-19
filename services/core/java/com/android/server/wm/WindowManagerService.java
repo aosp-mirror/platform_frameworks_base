@@ -88,6 +88,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
@@ -1326,15 +1327,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }, UserHandle.ALL, suspendPackagesFilter, null, null);
 
         // Get persisted window scale setting
-        mWindowAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
-        mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.TRANSITION_ANIMATION_SCALE,
-                context.getResources().getFloat(
-                        R.dimen.config_appTransitionAnimationDurationScaleDefault));
+        mWindowAnimationScaleSetting = getWindowAnimationScaleSetting();
+        mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
 
-        setAnimatorDurationScale(Settings.Global.getFloat(resolver,
-                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
+        setAnimatorDurationScale(getAnimatorDurationScaleSetting());
 
         mForceDesktopModeOnExternalDisplays = Settings.Global.getInt(resolver,
                 DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
@@ -1406,6 +1402,22 @@ public class WindowManagerService extends IWindowManager.Stub
         float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
         SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
                 lightRadius);
+    }
+
+    private float getTransitionAnimationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mContext.getResources().getFloat(
+                                R.dimen.config_appTransitionAnimationDurationScaleDefault)));
+    }
+
+    private float getAnimatorDurationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
+    }
+
+    private float getWindowAnimationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting));
     }
 
     /**
@@ -3407,11 +3419,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    static float fixScale(float scale) {
-        if (scale < 0) scale = 0;
-        else if (scale > 20) scale = 20;
-        return Math.abs(scale);
-    }
 
     @Override
     public void setAnimationScale(int which, float scale) {
@@ -5339,24 +5346,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     final int mode = msg.arg1;
                     switch (mode) {
                         case WINDOW_ANIMATION_SCALE: {
-                            mWindowAnimationScaleSetting = Settings.Global.getFloat(
-                                    mContext.getContentResolver(),
-                                    Settings.Global.WINDOW_ANIMATION_SCALE,
-                                    mWindowAnimationScaleSetting);
+                            mWindowAnimationScaleSetting = getWindowAnimationScaleSetting();
                             break;
                         }
                         case TRANSITION_ANIMATION_SCALE: {
-                            mTransitionAnimationScaleSetting = Settings.Global.getFloat(
-                                    mContext.getContentResolver(),
-                                    Settings.Global.TRANSITION_ANIMATION_SCALE,
-                                    mTransitionAnimationScaleSetting);
+                            mTransitionAnimationScaleSetting =
+                                    getTransitionAnimationScaleSetting();
                             break;
                         }
                         case ANIMATION_DURATION_SCALE: {
-                            mAnimatorDurationScaleSetting = Settings.Global.getFloat(
-                                    mContext.getContentResolver(),
-                                    Settings.Global.ANIMATOR_DURATION_SCALE,
-                                    mAnimatorDurationScaleSetting);
+                            mAnimatorDurationScaleSetting = getAnimatorDurationScaleSetting();
                             dispatchNewAnimatorScaleLocked(null);
                             break;
                         }

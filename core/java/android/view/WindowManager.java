@@ -1054,6 +1054,14 @@ public interface WindowManager extends ViewManager {
         }
     }
 
+    /**
+     * Ensure scales are between 0 and 20.
+     * @hide
+     */
+    static float fixScale(float scale) {
+        return Math.max(Math.min(scale, 20), 0);
+    }
+
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
          * X position for this window.  With the default gravity it is ignored.
