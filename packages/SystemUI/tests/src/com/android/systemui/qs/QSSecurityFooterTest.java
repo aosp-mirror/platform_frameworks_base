@@ -690,6 +690,9 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
     @Test
     public void testParentalControls() {
+        // Make sure the security footer is visible, so that the images are updated.
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+
         when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
 
         Drawable testDrawable = new VectorDrawable();

@@ -87,10 +87,13 @@ import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.common.shared.model.Icon;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig;
+import com.android.systemui.security.data.model.SecurityModel;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -102,8 +105,9 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+/** Helper class for the configuration of the QS security footer button. */
 @QSScope
-class QSSecurityFooter extends ViewController<View>
+public class QSSecurityFooter extends ViewController<View>
         implements OnClickListener, DialogInterface.OnClickListener,
         VisibilityChangedDispatcher {
     protected static final String TAG = "QSSecurityFooter";
@@ -130,11 +134,10 @@ class QSSecurityFooter extends ViewController<View>
     protected H mHandler;
 
     private boolean mIsVisible;
+    private boolean mIsClickable;
     @Nullable
     private CharSequence mFooterTextContent = null;
-    private int mFooterIconId;
-    @Nullable
-    private Drawable mPrimaryFooterIconDrawable;
+    private Icon mFooterIcon;
 
     @Nullable
     private VisibilityChangedDispatcher.OnVisibilityChangedListener mVisibilityChangedListener;
@@ -215,7 +218,7 @@ class QSSecurityFooter extends ViewController<View>
         super(rootView);
         mFooterText = mView.findViewById(R.id.footer_text);
         mPrimaryFooterIcon = mView.findViewById(R.id.primary_footer_icon);
-        mFooterIconId = R.drawable.ic_info_outline;
+        mFooterIcon = new Icon.Resource(R.drawable.ic_info_outline);
         mContext = rootView.getContext();
         mDpm = rootView.getContext().getSystemService(DevicePolicyManager.class);
         mMainHandler = mainHandler;
@@ -287,8 +290,18 @@ class QSSecurityFooter extends ViewController<View>
                 .write();
     }
 
+    // TODO(b/242040009): Remove this.
     public void showDeviceMonitoringDialog() {
-        createDialog();
+        showDeviceMonitoringDialog(mContext, mView);
+    }
+
+    /**
+     * Show the device monitoring dialog, and expand it from {@code view} if it's not null.
+     *
+     * Important: {@code view} must be associated to the same {@link Context} as the QSFragment.
+     */
+    public void showDeviceMonitoringDialog(Context quickSettingsContext, @Nullable View view) {
+        createDialog(quickSettingsContext, view);
     }
 
     public void refreshState() {
@@ -296,75 +309,86 @@ class QSSecurityFooter extends ViewController<View>
     }
 
     private void handleRefreshState() {
-        final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
+        SecurityModel securityModel = SecurityModel.create(mSecurityController);
+        SecurityButtonConfig buttonConfig = getButtonConfig(securityModel);
+
+        if (buttonConfig == null) {
+            mIsVisible = false;
+        } else {
+            mIsVisible = true;
+            mIsClickable = buttonConfig.isClickable();
+            mFooterTextContent = buttonConfig.getText();
+            mFooterIcon = buttonConfig.getIcon();
+        }
+
+        // Update the UI.
+        mMainHandler.post(mUpdatePrimaryIcon);
+        mMainHandler.post(mUpdateDisplayState);
+    }
+
+    /**
+     * Return the {@link SecurityButtonConfig} of the security button, or {@code null} if no
+     * security button should be shown.
+     */
+    @Nullable
+    public SecurityButtonConfig getButtonConfig(SecurityModel securityModel) {
+        final boolean isDeviceManaged = securityModel.isDeviceManaged();
         final UserInfo currentUser = mUserTracker.getUserInfo();
         final boolean isDemoDevice = UserManager.isDeviceInDemoMode(mContext) && currentUser != null
                 && currentUser.isDemo();
-        final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
-        final boolean hasCACerts = mSecurityController.hasCACertInCurrentUser();
-        final boolean hasCACertsInWorkProfile = mSecurityController.hasCACertInWorkProfile();
-        final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
-        final String vpnName = mSecurityController.getPrimaryVpnName();
-        final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
-        final CharSequence organizationName = mSecurityController.getDeviceOwnerOrganizationName();
+        final boolean hasWorkProfile = securityModel.getHasWorkProfile();
+        final boolean hasCACerts = securityModel.getHasCACertInCurrentUser();
+        final boolean hasCACertsInWorkProfile = securityModel.getHasCACertInWorkProfile();
+        final boolean isNetworkLoggingEnabled = securityModel.isNetworkLoggingEnabled();
+        final String vpnName = securityModel.getPrimaryVpnName();
+        final String vpnNameWorkProfile = securityModel.getWorkProfileVpnName();
+        final CharSequence organizationName = securityModel.getDeviceOwnerOrganizationName();
         final CharSequence workProfileOrganizationName =
-                mSecurityController.getWorkProfileOrganizationName();
+                securityModel.getWorkProfileOrganizationName();
         final boolean isProfileOwnerOfOrganizationOwnedDevice =
-                mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
-        final boolean isParentalControlsEnabled = mSecurityController.isParentalControlsEnabled();
-        final boolean isWorkProfileOn = mSecurityController.isWorkProfileOn();
+                securityModel.isProfileOwnerOfOrganizationOwnedDevice();
+        final boolean isParentalControlsEnabled = securityModel.isParentalControlsEnabled();
+        final boolean isWorkProfileOn = securityModel.isWorkProfileOn();
         final boolean hasDisclosableWorkProfilePolicy = hasCACertsInWorkProfile
                 || vpnNameWorkProfile != null || (hasWorkProfile && isNetworkLoggingEnabled);
         // Update visibility of footer
-        mIsVisible = (isDeviceManaged && !isDemoDevice)
+        boolean isVisible = (isDeviceManaged && !isDemoDevice)
                 || hasCACerts
                 || vpnName != null
                 || isProfileOwnerOfOrganizationOwnedDevice
                 || isParentalControlsEnabled
                 || (hasDisclosableWorkProfilePolicy && isWorkProfileOn);
+        if (!isVisible && !DEBUG_FORCE_VISIBLE) {
+            return null;
+        }
+
         // Update the view to be untappable if the device is an organization-owned device with a
         // managed profile and there is either:
         // a) no policy set which requires a privacy disclosure.
         // b) a specific work policy set but the work profile is turned off.
-        if (mIsVisible && isProfileOwnerOfOrganizationOwnedDevice
-                && (!hasDisclosableWorkProfilePolicy || !isWorkProfileOn)) {
-            mView.setClickable(false);
-            mView.findViewById(R.id.footer_icon).setVisibility(View.GONE);
-        } else {
-            mView.setClickable(true);
-            mView.findViewById(R.id.footer_icon).setVisibility(View.VISIBLE);
-        }
-        // Update the string
-        mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
+        boolean isClickable = !(isProfileOwnerOfOrganizationOwnedDevice
+                && (!hasDisclosableWorkProfilePolicy || !isWorkProfileOn));
+
+        String text = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
                 vpnNameWorkProfile, organizationName, workProfileOrganizationName,
                 isProfileOwnerOfOrganizationOwnedDevice, isParentalControlsEnabled,
-                isWorkProfileOn);
-        // Update the icon
-        int footerIconId = R.drawable.ic_info_outline;
-        if (vpnName != null || vpnNameWorkProfile != null) {
-            if (mSecurityController.isVpnBranded()) {
-                footerIconId = R.drawable.stat_sys_branded_vpn;
-            } else {
-                footerIconId = R.drawable.stat_sys_vpn_ic;
-            }
-        }
-        if (mFooterIconId != footerIconId) {
-            mFooterIconId = footerIconId;
-        }
+                isWorkProfileOn).toString();
 
-        // Update the primary icon
+        Icon icon;
         if (isParentalControlsEnabled) {
-            if (mPrimaryFooterIconDrawable == null) {
-                DeviceAdminInfo info = mSecurityController.getDeviceAdminInfo();
-                mPrimaryFooterIconDrawable = mSecurityController.getIcon(info);
+            icon = new Icon.Loaded(securityModel.getDeviceAdminIcon());
+        } else if (vpnName != null || vpnNameWorkProfile != null) {
+            if (securityModel.isVpnBranded()) {
+                icon = new Icon.Resource(R.drawable.stat_sys_branded_vpn);
+            } else {
+                icon = new Icon.Resource(R.drawable.stat_sys_vpn_ic);
             }
         } else {
-            mPrimaryFooterIconDrawable = null;
+            icon = new Icon.Resource(R.drawable.ic_info_outline);
         }
-        mMainHandler.post(mUpdatePrimaryIcon);
 
-        mMainHandler.post(mUpdateDisplayState);
+        return new SecurityButtonConfig(icon, text, isClickable);
     }
 
     @Nullable
@@ -547,21 +571,21 @@ class QSSecurityFooter extends ViewController<View>
         }
     }
 
-    private void createDialog() {
+    private void createDialog(Context quickSettingsContext, @Nullable View view) {
         mShouldUseSettingsButton.set(false);
         mHandler.post(() -> {
             String settingsButtonText = getSettingsButton();
-            final View view = createDialogView();
+            final View dialogView = createDialogView();
             mMainHandler.post(() -> {
-                mDialog = new SystemUIDialog(mContext, 0); // Use mContext theme
+                mDialog = new SystemUIDialog(quickSettingsContext, 0);
                 mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
                 mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, mShouldUseSettingsButton.get()
                         ? settingsButtonText : getNegativeButton(), this);
 
-                mDialog.setView(view);
-                if (mView.isAggregatedVisible()) {
-                    mDialogLaunchAnimator.showFromView(mDialog, mView, new DialogCuj(
+                mDialog.setView(dialogView);
+                if (view != null && view.isAggregatedVisible()) {
+                    mDialogLaunchAnimator.showFromView(mDialog, view, new DialogCuj(
                             InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG));
                 } else {
                     mDialog.show();
@@ -876,10 +900,10 @@ class QSSecurityFooter extends ViewController<View>
     private final Runnable mUpdatePrimaryIcon = new Runnable() {
         @Override
         public void run() {
-            if (mPrimaryFooterIconDrawable != null) {
-                mPrimaryFooterIcon.setImageDrawable(mPrimaryFooterIconDrawable);
-            } else {
-                mPrimaryFooterIcon.setImageResource(mFooterIconId);
+            if (mFooterIcon instanceof Icon.Loaded) {
+                mPrimaryFooterIcon.setImageDrawable(((Icon.Loaded) mFooterIcon).getDrawable());
+            } else if (mFooterIcon instanceof Icon.Resource) {
+                mPrimaryFooterIcon.setImageResource(((Icon.Resource) mFooterIcon).getRes());
             }
         }
     };
@@ -893,6 +917,14 @@ class QSSecurityFooter extends ViewController<View>
             mView.setVisibility(mIsVisible || DEBUG_FORCE_VISIBLE ? View.VISIBLE : View.GONE);
             if (mVisibilityChangedListener != null) {
                 mVisibilityChangedListener.onVisibilityChanged(mView.getVisibility());
+            }
+
+            if (mIsVisible && mIsClickable) {
+                mView.setClickable(true);
+                mView.findViewById(R.id.footer_icon).setVisibility(View.VISIBLE);
+            } else {
+                mView.setClickable(false);
+                mView.findViewById(R.id.footer_icon).setVisibility(View.GONE);
             }
         }
     };
