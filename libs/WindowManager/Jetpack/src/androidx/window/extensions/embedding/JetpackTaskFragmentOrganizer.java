@@ -62,13 +62,18 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * Callback that notifies the controller about changes to task fragments.
      */
     interface TaskFragmentCallback {
-        void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo);
-        void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo);
-        void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo);
-        void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig);
-        void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
-                @NonNull IBinder activityToken);
-        void onTaskFragmentError(@Nullable TaskFragmentInfo taskFragmentInfo, int opType);
+        void onTaskFragmentAppeared(@NonNull WindowContainerTransaction wct,
+                @NonNull TaskFragmentInfo taskFragmentInfo);
+        void onTaskFragmentInfoChanged(@NonNull WindowContainerTransaction wct,
+                @NonNull TaskFragmentInfo taskFragmentInfo);
+        void onTaskFragmentVanished(@NonNull WindowContainerTransaction wct,
+                @NonNull TaskFragmentInfo taskFragmentInfo);
+        void onTaskFragmentParentInfoChanged(@NonNull WindowContainerTransaction wct,
+                int taskId, @NonNull Configuration parentConfig);
+        void onActivityReparentedToTask(@NonNull WindowContainerTransaction wct,
+                int taskId, @NonNull Intent activityIntent, @NonNull IBinder activityToken);
+        void onTaskFragmentError(@NonNull WindowContainerTransaction wct,
+                @Nullable TaskFragmentInfo taskFragmentInfo, int opType);
     }
 
     /**
@@ -159,26 +164,15 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     }
 
     /**
-     * Expands an existing TaskFragment to fill parent.
-     * @param fragmentToken token of an existing TaskFragment.
-     */
-    void expandTaskFragment(@NonNull IBinder fragmentToken) {
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        expandTaskFragment(wct, fragmentToken);
-        applyTransaction(wct);
-    }
-
-    /**
      * Expands an Activity to fill parent by moving it to a new TaskFragment.
      * @param fragmentToken token to create new TaskFragment with.
      * @param activity      activity to move to the fill-parent TaskFragment.
      */
-    void expandActivity(@NonNull IBinder fragmentToken, @NonNull Activity activity) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    void expandActivity(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
+            @NonNull Activity activity) {
         createTaskFragmentAndReparentActivity(
                 wct, fragmentToken, activity.getActivityToken(), new Rect(),
                 WINDOWING_MODE_UNDEFINED, activity);
-        applyTransaction(wct);
     }
 
     /**
@@ -278,43 +272,55 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
     @Override
     public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
         mFragmentInfos.put(fragmentToken, taskFragmentInfo);
-        mCallback.onTaskFragmentAppeared(taskFragmentInfo);
+        mCallback.onTaskFragmentAppeared(wct, taskFragmentInfo);
+        applyTransaction(wct);
     }
 
     @Override
     public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
         mFragmentInfos.put(fragmentToken, taskFragmentInfo);
-        mCallback.onTaskFragmentInfoChanged(taskFragmentInfo);
+        mCallback.onTaskFragmentInfoChanged(wct, taskFragmentInfo);
+        applyTransaction(wct);
     }
 
     @Override
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         mFragmentInfos.remove(taskFragmentInfo.getFragmentToken());
-        mCallback.onTaskFragmentVanished(taskFragmentInfo);
+        mCallback.onTaskFragmentVanished(wct, taskFragmentInfo);
+        applyTransaction(wct);
     }
 
     @Override
     public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
-        mCallback.onTaskFragmentParentInfoChanged(taskId, parentConfig);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        mCallback.onTaskFragmentParentInfoChanged(wct, taskId, parentConfig);
+        applyTransaction(wct);
     }
 
     @Override
     public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {
-        mCallback.onActivityReparentedToTask(taskId, activityIntent, activityToken);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        mCallback.onActivityReparentedToTask(wct, taskId, activityIntent, activityToken);
+        applyTransaction(wct);
     }
 
     @Override
     public void onTaskFragmentError(@NonNull IBinder errorCallbackToken,
             @Nullable TaskFragmentInfo taskFragmentInfo,
             int opType, @NonNull Throwable exception) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskFragmentInfo != null) {
             final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
             mFragmentInfos.put(fragmentToken, taskFragmentInfo);
         }
-        mCallback.onTaskFragmentError(taskFragmentInfo, opType);
+        mCallback.onTaskFragmentError(wct, taskFragmentInfo, opType);
+        applyTransaction(wct);
     }
 }
