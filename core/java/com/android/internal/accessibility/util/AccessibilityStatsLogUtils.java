@@ -168,6 +168,17 @@ public final class AccessibilityStatsLogUtils {
     }
 
     /**
+     * Logs the duration for the window magnifier's following typing focus session.
+     *
+     * @param duration The duration of a triple-tap-and-hold activation session.
+     */
+    public static void logMagnificationFollowTypingFocusSession(long duration) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.MAGNIFICATION_FOLLOW_TYPING_FOCUS_ACTIVATED_SESSION_REPORTED,
+                duration);
+    }
+
+    /**
      * Logs the duration for the magnification session which is activated by the triple tap and
      * hold gesture.
      *
