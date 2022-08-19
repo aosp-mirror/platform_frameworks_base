@@ -2885,6 +2885,21 @@ public class UserManager {
     }
 
     /**
+     * Gets the visible users (as defined by {@link #isUserVisible()}.
+     *
+     * @return visible users at the moment.
+     */
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.INTERACT_ACROSS_USERS})
+    public @NonNull List<UserHandle> getVisibleUsers() {
+        try {
+            return mService.getVisibleUsers();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the context user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've
