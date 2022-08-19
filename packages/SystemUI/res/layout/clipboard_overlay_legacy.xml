@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.clipboardoverlay.ClipboardOverlayView
+<com.android.systemui.screenshot.DraggableConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -157,4 +157,4 @@
             android:layout_margin="@dimen/overlay_dismiss_button_margin"
             android:src="@drawable/overlay_cancel"/>
     </FrameLayout>
-</com.android.systemui.clipboardoverlay.ClipboardOverlayView>
+</com.android.systemui.screenshot.DraggableConstraintLayout>

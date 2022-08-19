@@ -309,6 +309,9 @@ public class Flags {
     public static final UnreleasedFlag A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
             new UnreleasedFlag(1600);
 
+    // 1700 - clipboard
+    public static final UnreleasedFlag CLIPBOARD_OVERLAY_REFACTOR = new UnreleasedFlag(1700);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
