@@ -310,9 +310,23 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     boolean mReportedActive;
 
+    /**
+     * Track the most recently completed jobs (that had been executing and were stopped for any
+     * reason, including successful completion).
+     */
     private int mLastCompletedJobIndex = 0;
     private final JobStatus[] mLastCompletedJobs = new JobStatus[NUM_COMPLETED_JOB_HISTORY];
     private final long[] mLastCompletedJobTimeElapsed = new long[NUM_COMPLETED_JOB_HISTORY];
+
+    /**
+     * Track the most recently cancelled jobs (that had internal reason
+     * {@link JobParameters#INTERNAL_STOP_REASON_CANCELED}.
+     */
+    private int mLastCancelledJobIndex = 0;
+    private final JobStatus[] mLastCancelledJobs =
+            new JobStatus[DEBUG ? NUM_COMPLETED_JOB_HISTORY : 0];
+    private final long[] mLastCancelledJobTimeElapsed =
+            new long[DEBUG ? NUM_COMPLETED_JOB_HISTORY : 0];
 
     /**
      * A mapping of which uids are currently in the foreground to their effective bias.
@@ -1398,6 +1412,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             startTrackingJobLocked(incomingJob, cancelled);
         }
         reportActiveLocked();
+        if (mLastCancelledJobs.length > 0
+                && internalReasonCode == JobParameters.INTERNAL_STOP_REASON_CANCELED) {
+            mLastCancelledJobs[mLastCancelledJobIndex] = cancelled;
+            mLastCancelledJobTimeElapsed[mLastCancelledJobIndex] = sElapsedRealtimeClock.millis();
+            mLastCancelledJobIndex = (mLastCancelledJobIndex + 1) % mLastCancelledJobs.length;
+        }
     }
 
     void updateUidState(int uid, int procState) {
@@ -3847,6 +3867,38 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             pw.decreaseIndent();
             pw.println();
+
+            boolean recentCancellationsPrinted = false;
+            for (int r = 1; r <= mLastCancelledJobs.length; ++r) {
+                // Print most recent first
+                final int idx = (mLastCancelledJobIndex + mLastCancelledJobs.length - r)
+                        % mLastCancelledJobs.length;
+                job = mLastCancelledJobs[idx];
+                if (job != null) {
+                    if (!predicate.test(job)) {
+                        continue;
+                    }
+                    if (!recentCancellationsPrinted) {
+                        pw.println();
+                        pw.println("Recently cancelled jobs:");
+                        pw.increaseIndent();
+                        recentCancellationsPrinted = true;
+                    }
+                    TimeUtils.formatDuration(mLastCancelledJobTimeElapsed[idx], nowElapsed, pw);
+                    pw.println();
+                    // Double indent for readability
+                    pw.increaseIndent();
+                    pw.increaseIndent();
+                    pw.println(job.toShortString());
+                    job.dump(pw, true, nowElapsed);
+                    pw.decreaseIndent();
+                    pw.decreaseIndent();
+                }
+            }
+            if (!recentCancellationsPrinted) {
+                pw.decreaseIndent();
+                pw.println();
+            }
 
             if (filterUid == -1) {
                 pw.println();
