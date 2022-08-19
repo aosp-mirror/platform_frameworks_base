@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Handler;
@@ -64,7 +65,6 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -87,7 +87,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private static final long BIOMETRIC_WAKELOCK_TIMEOUT_MS = 15 * 1000;
     private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock:wakelock";
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
-    private static final int FP_ATTEMPTS_BEFORE_SHOW_BOUNCER = 2;
+    private static final int UDFPS_ATTEMPTS_BEFORE_SHOW_BOUNCER = 3;
     private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
             VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
     private static final VibrationEffect ERROR_VIBRATION_EFFECT =
@@ -450,7 +450,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
         Runnable wakeUp = ()-> {
-            if (!wasDeviceInteractive) {
+            if (!wasDeviceInteractive || mUpdateMonitor.isDreaming()) {
                 if (DEBUG_BIO_WAKELOCK) {
                     Log.i(TAG, "bio wakelock: Authenticated, waking up...");
                 }
@@ -661,7 +661,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
         if (!mVibratorHelper.hasVibrator()
                 && (!mUpdateMonitor.isDeviceInteractive() || mUpdateMonitor.isDreaming())) {
-            startWakeAndUnlock(MODE_SHOW_BOUNCER);
+            startWakeAndUnlock(MODE_ONLY_WAKE);
         } else if (biometricSourceType == BiometricSourceType.FINGERPRINT
                 && mUpdateMonitor.isUdfpsSupported()) {
             long currUptimeMillis = SystemClock.uptimeMillis();
@@ -672,7 +672,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             }
             mLastFpFailureUptimeMillis = currUptimeMillis;
 
-            if (mNumConsecutiveFpFailures >= FP_ATTEMPTS_BEFORE_SHOW_BOUNCER) {
+            if (mNumConsecutiveFpFailures >= UDFPS_ATTEMPTS_BEFORE_SHOW_BOUNCER) {
                 startWakeAndUnlock(MODE_SHOW_BOUNCER);
                 UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN, getSessionId());
                 mNumConsecutiveFpFailures = 0;
@@ -698,13 +698,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         Optional.ofNullable(BiometricUiEvent.ERROR_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
                 .ifPresent(event -> UI_EVENT_LOGGER.log(event, getSessionId()));
 
-        // if we're on the shade and we're locked out, immediately show the bouncer
-        if (biometricSourceType == BiometricSourceType.FINGERPRINT
+        final boolean fingerprintLockout = biometricSourceType == BiometricSourceType.FINGERPRINT
                 && (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
-                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
-                && mUpdateMonitor.isUdfpsSupported()
-                && (mStatusBarStateController.getState() == StatusBarState.SHADE
-                    || mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED)) {
+                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT);
+        final boolean faceLockout = biometricSourceType == BiometricSourceType.FACE
+                && (msgId == FaceManager.FACE_ERROR_LOCKOUT
+                || msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT);
+        if (fingerprintLockout || faceLockout) {
             startWakeAndUnlock(MODE_SHOW_BOUNCER);
             UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN, getSessionId());
         }
