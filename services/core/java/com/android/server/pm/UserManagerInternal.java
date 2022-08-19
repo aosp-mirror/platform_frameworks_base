@@ -308,4 +308,10 @@ public abstract class UserManagerInternal {
 
     /** TODO(b/239982558): add javadoc / mention invalid_id is used to unassing */
     public abstract void assignUserToDisplay(@UserIdInt int userId, int displayId);
+
+    /**
+     * Returns {@code true} if the user is visible (as defined by
+     * {@link UserManager#isUserVisible()} in the given display.
+     */
+    public abstract boolean isUserVisible(@UserIdInt int userId, int displayId);
 }

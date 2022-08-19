@@ -6875,7 +6875,12 @@ public class UserManagerService extends IUserManager.Stub {
                 mUsersOnSecondaryDisplays.put(userId, displayId);
             }
         }
-    }
+
+        @Override
+        public boolean isUserVisible(int userId, int displayId) {
+            return isUserVisibleOnDisplay(userId, displayId);
+        }
+    } // class LocalService
 
     /**
      * Check if user has restrictions
