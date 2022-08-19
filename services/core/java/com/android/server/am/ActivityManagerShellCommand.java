@@ -892,6 +892,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
+    // TODO(b/239982558): might need to support --displayId as well
     private int runProfile(PrintWriter pw) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         String profileFile = null;
@@ -2034,26 +2035,42 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runStartUser(PrintWriter pw) throws RemoteException {
         boolean wait = false;
         String opt;
+        int displayId = Display.INVALID_DISPLAY;
         while ((opt = getNextOption()) != null) {
-            if ("-w".equals(opt)) {
-                wait = true;
-            } else {
-                getErrPrintWriter().println("Error: unknown option: " + opt);
-                return -1;
+            switch(opt) {
+                case "-w":
+                    wait = true;
+                    break;
+                case "--display":
+                    displayId = getDisplayIdFromNextArg();
+                    break;
+                default:
+                    getErrPrintWriter().println("Error: unknown option: " + opt);
+                    return -1;
             }
         }
         int userId = Integer.parseInt(getNextArgRequired());
 
         final ProgressWaiter waiter = wait ? new ProgressWaiter() : null;
-        boolean success = mInterface.startUserInBackgroundWithListener(userId, waiter);
+
+        boolean success;
+        String displaySuffix;
+
+        if (displayId == Display.INVALID_DISPLAY) {
+            success = mInterface.startUserInBackgroundWithListener(userId, waiter);
+            displaySuffix = "";
+        } else {
+            success = mInterface.startUserInBackgroundOnSecondaryDisplay(userId, displayId, waiter);
+            displaySuffix = " on display " + displayId;
+        }
         if (wait && success) {
             success = waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
         }
 
         if (success) {
-            pw.println("Success: user started");
+            pw.println("Success: user started" + displaySuffix);
         } else {
-            getErrPrintWriter().println("Error: could not start user");
+            getErrPrintWriter().println("Error: could not start user" + displaySuffix);
         }
         return 0;
     }
@@ -2506,6 +2523,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int getDisplayIdFromNextArg() {
+        int displayId = Integer.parseInt(getNextArgRequired());
+        if (displayId < 0) {
+            throw new IllegalArgumentException("--display must be a non-negative integer");
+        }
+        return displayId;
+    }
+
     int runGetConfig(PrintWriter pw) throws RemoteException {
         int days = -1;
         int displayId = Display.DEFAULT_DISPLAY;
@@ -2524,10 +2549,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             } else if (opt.equals("--device")) {
                 inclDevice = true;
             } else if (opt.equals("--display")) {
-                displayId = Integer.parseInt(getNextArgRequired());
-                if (displayId < 0) {
-                    throw new IllegalArgumentException("--display must be a non-negative integer");
-                }
+                displayId = getDisplayIdFromNextArg();
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
@@ -3714,10 +3736,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      execution of that user if it is currently stopped.");
             pw.println("  get-current-user");
             pw.println("      Returns id of the current foreground user.");
-            pw.println("  start-user [-w] <USER_ID>");
+            pw.println("  start-user [-w] [--display DISPLAY_ID] <USER_ID>");
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
+            pw.println("      --display <DISPLAY_ID>: allows the user to launch activities in the");
+            pw.println("        given display, when supported (typically on automotive builds");
+            pw.println("        wherethe vehicle has multiple displays)");
             pw.println("  unlock-user <USER_ID>");
             pw.println("      Unlock the given user.  This will only work if the user doesn't");
             pw.println("      have an LSKF (PIN/pattern/password).");

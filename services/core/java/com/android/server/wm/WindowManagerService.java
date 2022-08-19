@@ -1869,7 +1869,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.getInsetsStateController().updateAboveInsetsState(
                     false /* notifyInsetsChanged */);
 
-            outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
+            outInsetsState.set(win.getCompatInsetsState(), true /* copySources */);
             getInsetsSourceControls(win, outActiveControls);
 
             if (win.mLayoutAttached) {
@@ -2556,7 +2556,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (outInsetsState != null) {
-                outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
+                outInsetsState.set(win.getCompatInsetsState(), true /* copySources */);
             }
 
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
@@ -8921,7 +8921,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
             InsetsState outInsetsState) {
-        final boolean fromLocal = Binder.getCallingPid() == MY_PID;
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -8935,10 +8934,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final float overrideScale = mAtmService.mCompatModePackages.getCompatScale(
                         attrs.packageName, uid);
                 final InsetsState state = dc.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-                final boolean hasCompatScale =
-                        WindowState.hasCompatScale(attrs, token, overrideScale);
-                outInsetsState.set(state, hasCompatScale || fromLocal);
-                if (hasCompatScale) {
+                outInsetsState.set(state, true /* copySources */);
+                if (WindowState.hasCompatScale(attrs, token, overrideScale)) {
                     final float compatScale = token != null && token.hasSizeCompatBounds()
                             ? token.getSizeCompatScale() * overrideScale
                             : overrideScale;

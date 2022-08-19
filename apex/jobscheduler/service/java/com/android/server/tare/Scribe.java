@@ -19,6 +19,7 @@ package com.android.server.tare;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.server.tare.TareUtils.appToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -136,9 +137,15 @@ public class Scribe {
 
     @GuardedBy("mIrs.getLock()")
     void adjustRemainingConsumableCakesLocked(long delta) {
-        if (delta != 0) {
-            // No point doing any work if the change is 0.
-            mRemainingConsumableCakes += delta;
+        final long staleCakes = mRemainingConsumableCakes;
+        mRemainingConsumableCakes += delta;
+        if (mRemainingConsumableCakes < 0) {
+            Slog.w(TAG, "Overdrew consumable cakes by " + cakeToString(-mRemainingConsumableCakes));
+            // A negative value would interfere with allowing free actions, so set the minimum as 0.
+            mRemainingConsumableCakes = 0;
+        }
+        if (mRemainingConsumableCakes != staleCakes) {
+            // No point doing any work if there was no functional change.
             postWrite();
         }
     }

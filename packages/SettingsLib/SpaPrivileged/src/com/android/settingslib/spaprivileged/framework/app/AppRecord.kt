@@ -17,13 +17,7 @@
 package com.android.settingslib.spaprivileged.framework.app
 
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 
-object PackageManagers {
-    fun getPackageInfoAsUser(packageName: String, userId: Int): PackageInfo =
-        PackageManager.getPackageInfoAsUserCached(packageName, 0, userId)
-
-    fun getApplicationInfoAsUser(packageName: String, userId: Int): ApplicationInfo =
-        PackageManager.getApplicationInfoAsUserCached(packageName, 0, userId)
+interface AppRecord {
+    val app: ApplicationInfo
 }

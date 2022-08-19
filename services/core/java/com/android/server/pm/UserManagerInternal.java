@@ -305,4 +305,7 @@ public abstract class UserManagerInternal {
      * for users that already existed on-disk from an older version of Android.
      */
     public abstract boolean shouldIgnorePrepareStorageErrors(int userId);
+
+    /** TODO(b/239982558): add javadoc / mention invalid_id is used to unassing */
+    public abstract void assignUserToDisplay(@UserIdInt int userId, int displayId);
 }

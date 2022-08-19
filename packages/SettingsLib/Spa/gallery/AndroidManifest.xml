@@ -19,8 +19,7 @@
 
     <application
         android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.SpaLib.DayNight">
+        android:supportsRtl="true">
         <activity
             android:name="com.android.settingslib.spa.gallery.MainActivity"
             android:exported="true">
