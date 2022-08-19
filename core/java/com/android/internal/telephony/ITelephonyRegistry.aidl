@@ -66,8 +66,8 @@ interface ITelephonyRegistry {
     void notifyCellLocationForSubscriber(in int subId, in CellIdentity cellLocation);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
-    void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
-            int foregroundCallState, int backgroundCallState);
+    void notifyPreciseCallState(int phoneId, int subId, in int[] callStates, in String[] imsCallIds,
+            in int[] imsCallServiceTypes, in int[] imsCallTypes);
     void notifyDisconnectCause(int phoneId, int subId, int disconnectCause,
             int preciseDisconnectCause);
     void notifyCellInfoForSubscriber(in int subId, in List<CellInfo> cellInfo);

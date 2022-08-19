@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -62,7 +63,7 @@ import java.util.concurrent.Executor;
  * appropriate sub-interfaces.
  */
 public class TelephonyCallback {
-
+    private static final String LOG_TAG = "TelephonyCallback";
     /**
      * Experiment flag to set the per-pid registration limit for TelephonyCallback
      *
@@ -1332,7 +1333,9 @@ public class TelephonyCallback {
     @SystemApi
     public interface CallAttributesListener {
         /**
-         * Callback invoked when the call attributes changes on the registered subscription.
+         * Callback invoked when the call attributes changes on the active call on the registered
+         * subscription. If the user swaps between a foreground and background call the call
+         * attributes will be reported for the active call only.
          * Note, the registration subscription ID comes from {@link TelephonyManager} object
          * which registers TelephonyCallback by
          * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
@@ -1346,9 +1349,77 @@ public class TelephonyCallback {
          * {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}.
          *
          * @param callAttributes the call attributes
+         * @deprecated Use onCallStatesChanged({@link List<CallState>}) to get each of call
+         *          state for all ongoing calls on the subscription.
          */
         @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
-        void onCallAttributesChanged(@NonNull CallAttributes callAttributes);
+        @Deprecated
+        default void onCallAttributesChanged(@NonNull CallAttributes callAttributes) {
+            Log.w(LOG_TAG, "onCallAttributesChanged(List<CallState>) should be "
+                    + "overridden.");
+        }
+
+        /**
+         * Callback invoked when the call attributes changes on the ongoing calls on the registered
+         * subscription. If there are 1 foreground and 1 background call, Two {@link CallState}
+         * will be passed.
+         * Note, the registration subscription ID comes from {@link TelephonyManager} object
+         * which registers TelephonyCallback by
+         * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
+         * If this TelephonyManager object was created with
+         * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+         * subscription ID. Otherwise, this callback applies to
+         * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+         * In the event that there are no active(state is not
+         * {@link PreciseCallState#PRECISE_CALL_STATE_IDLE}) calls, this API will report empty list.
+         *
+         * The calling app should have carrier privileges
+         * (see {@link TelephonyManager#hasCarrierPrivileges}) if it does not have the
+         * {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}.
+         *
+         * @param callStateList the list of call states for each ongoing call. If there are
+         *                           a active call and a holding call, 1 call attributes for
+         *                           {@link PreciseCallState#PRECISE_CALL_STATE_ACTIVE}  and another
+         *                           for {@link PreciseCallState#PRECISE_CALL_STATE_HOLDING}
+         *                           will be in this list.
+         */
+        // Added as default for backward compatibility
+        @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+        default void onCallStatesChanged(@NonNull List<CallState> callStateList) {
+            if (callStateList.size() > 0) {
+                int foregroundCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+                int backgroundCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+                int ringingCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+                for (CallState cs : callStateList) {
+                    switch (cs.getCallClassification()) {
+                        case CallState.CALL_CLASSIFICATION_FOREGROUND:
+                            foregroundCallState = cs.getCallState();
+                            break;
+                        case CallState.CALL_CLASSIFICATION_BACKGROUND:
+                            backgroundCallState = cs.getCallState();
+                            break;
+                        case CallState.CALL_CLASSIFICATION_RINGING:
+                            ringingCallState = cs.getCallState();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                onCallAttributesChanged(new CallAttributes(
+                        new PreciseCallState(
+                                ringingCallState, foregroundCallState, backgroundCallState,
+                                DisconnectCause.NOT_VALID, PreciseDisconnectCause.NOT_VALID),
+                        callStateList.get(0).getNetworkType(),
+                        callStateList.get(0).getCallQuality()));
+            } else {
+                onCallAttributesChanged(new CallAttributes(
+                        new PreciseCallState(PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                                DisconnectCause.NOT_VALID, PreciseDisconnectCause.NOT_VALID),
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality()));
+            }
+        }
     }
 
     /**
@@ -1702,14 +1773,13 @@ public class TelephonyCallback {
                     () -> mExecutor.execute(() -> listener.onRadioPowerStateChanged(state)));
         }
 
-        public void onCallAttributesChanged(CallAttributes callAttributes) {
+        public void onCallStatesChanged(List<CallState> callStateList) {
             CallAttributesListener listener =
                     (CallAttributesListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> listener.onCallAttributesChanged(
-                            callAttributes)));
+                    () -> mExecutor.execute(() -> listener.onCallStatesChanged(callStateList)));
         }
 
         public void onActiveDataSubIdChanged(int subId) {
