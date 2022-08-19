@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     }
 
     ScreenCaptureResults captureResults = captureListener->waitForResults();
-    if (captureResults.result != NO_ERROR) {
+    if (!captureResults.fenceResult.ok()) {
         close(fd);
         return 1;
     }
