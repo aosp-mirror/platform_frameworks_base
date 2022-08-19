@@ -311,7 +311,7 @@ public class SoundPool extends PlayerBase {
             int priority, int loop, float rate) {
         // FIXME: b/174876164 implement device id for soundpool
         baseStart(0);
-        return _play(soundID, leftVolume, rightVolume, priority, loop, rate);
+        return _play(soundID, leftVolume, rightVolume, priority, loop, rate, getPlayerIId());
     }
 
     /**
@@ -512,7 +512,7 @@ public class SoundPool extends PlayerBase {
             @NonNull Object/*AudioAttributes*/ attributes, @NonNull String opPackageName);
 
     private native final int _play(int soundID, float leftVolume, float rightVolume,
-            int priority, int loop, float rate);
+            int priority, int loop, float rate, int playerIId);
 
     private native final void _setVolume(int streamID, float leftVolume, float rightVolume);
 
