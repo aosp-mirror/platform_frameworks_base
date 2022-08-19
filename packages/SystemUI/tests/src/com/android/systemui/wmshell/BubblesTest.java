@@ -134,6 +134,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -221,6 +222,8 @@ public class BubblesTest extends SysuiTestCase {
 
     @Mock
     private ShellInit mShellInit;
+    @Mock
+    private ShellCommandHandler mShellCommandHandler;
     @Mock
     private ShellController mShellController;
     @Mock
@@ -344,6 +347,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController = new TestableBubbleController(
                 mContext,
                 mShellInit,
+                mShellCommandHandler,
                 mShellController,
                 mBubbleData,
                 mFloatingContentCoordinator,
@@ -383,7 +387,6 @@ public class BubblesTest extends SysuiTestCase {
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
-                mDumpManager,
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
 

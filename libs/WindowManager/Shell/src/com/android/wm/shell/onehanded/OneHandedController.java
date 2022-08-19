@@ -77,8 +77,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
     public static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
-    private volatile boolean mIsOneHandedEnabled;
-    private volatile boolean mIsSwipeToNotificationEnabled;
+    private boolean mIsOneHandedEnabled;
+    private boolean mIsSwipeToNotificationEnabled;
     private boolean mIsShortcutEnabled;
     private boolean mTaskChangeToExit;
     private boolean mLockedDisabled;
@@ -718,18 +718,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             }
             mIOneHanded = new IOneHandedImpl(OneHandedController.this);
             return mIOneHanded;
-        }
-
-        @Override
-        public boolean isOneHandedEnabled() {
-            // This is volatile so return directly
-            return mIsOneHandedEnabled;
-        }
-
-        @Override
-        public boolean isSwipeToNotificationEnabled() {
-            // This is volatile so return directly
-            return mIsSwipeToNotificationEnabled;
         }
 
         @Override

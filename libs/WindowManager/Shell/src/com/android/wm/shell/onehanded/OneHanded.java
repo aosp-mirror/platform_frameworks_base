@@ -37,16 +37,6 @@ public interface OneHanded {
     }
 
     /**
-     * Return one handed settings enabled or not.
-     */
-    boolean isOneHandedEnabled();
-
-    /**
-     * Return swipe to notification settings enabled or not.
-     */
-    boolean isSwipeToNotificationEnabled();
-
-    /**
      * Enters one handed mode.
      */
     void startOneHanded();

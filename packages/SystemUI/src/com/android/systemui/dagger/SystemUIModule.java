@@ -238,7 +238,6 @@ public abstract class SystemUIModule {
                 notifCollection,
                 notifPipeline,
                 sysUiState,
-                dumpManager,
                 sysuiMainExecutor));
     }
 
