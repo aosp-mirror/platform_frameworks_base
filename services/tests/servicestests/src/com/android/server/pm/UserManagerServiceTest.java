@@ -74,6 +74,13 @@ public class UserManagerServiceTest extends AndroidTestCase {
         assertEquals(accountName, um.getUserAccount(tempUserId));
     }
 
+    public void testValidateName() {
+        assertNull(UserManagerService.validateName("android"));
+        assertNull(UserManagerService.validateName("com.company.myapp"));
+        assertNotNull(UserManagerService.validateName("/../../data"));
+        assertNotNull(UserManagerService.validateName("/dir"));
+    }
+
     private Bundle createBundle() {
         Bundle result = new Bundle();
         // Tests for 6 allowed types: Integer, Boolean, String, String[], Bundle and Parcelable[]
