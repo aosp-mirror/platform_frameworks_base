@@ -264,7 +264,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
-    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+    public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {
         synchronized (mLock) {
             // If the activity belongs to the current app process, we treat it as a new activity
@@ -1523,7 +1523,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
 
         @Override
-        public void onActivityPreCreated(Activity activity, Bundle savedInstanceState) {
+        public void onActivityPreCreated(@NonNull Activity activity,
+                @Nullable Bundle savedInstanceState) {
             synchronized (mLock) {
                 final IBinder activityToken = activity.getActivityToken();
                 final IBinder initialTaskFragmentToken = getInitialTaskFragmentToken(activity);
@@ -1552,7 +1553,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         @Override
-        public void onActivityPostCreated(Activity activity, Bundle savedInstanceState) {
+        public void onActivityPostCreated(@NonNull Activity activity,
+                @Nullable Bundle savedInstanceState) {
             // Calling after Activity#onCreate is complete to allow the app launch something
             // first. In case of a configured placeholder activity we want to make sure
             // that we don't launch it if an activity itself already requested something to be
@@ -1563,14 +1565,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         @Override
-        public void onActivityConfigurationChanged(Activity activity) {
+        public void onActivityConfigurationChanged(@NonNull Activity activity) {
             synchronized (mLock) {
                 SplitController.this.onActivityConfigurationChanged(activity);
             }
         }
 
         @Override
-        public void onActivityPostDestroyed(Activity activity) {
+        public void onActivityPostDestroyed(@NonNull Activity activity) {
             synchronized (mLock) {
                 SplitController.this.onActivityDestroyed(activity);
             }
@@ -1582,7 +1584,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         private final Handler mHandler = new Handler(Looper.getMainLooper());
 
         @Override
-        public void execute(Runnable r) {
+        public void execute(@NonNull Runnable r) {
             mHandler.post(r);
         }
     }
@@ -1662,7 +1664,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * If the two rules have the same presentation, we can reuse the same {@link SplitContainer} if
      * there is any.
      */
-    private static boolean canReuseContainer(SplitRule rule1, SplitRule rule2) {
+    private static boolean canReuseContainer(@NonNull SplitRule rule1, @NonNull SplitRule rule2) {
         if (!isContainerReusableRule(rule1) || !isContainerReusableRule(rule2)) {
             return false;
         }
@@ -1670,7 +1672,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Whether the two rules have the same presentation. */
-    private static boolean haveSamePresentation(SplitPairRule rule1, SplitPairRule rule2) {
+    private static boolean haveSamePresentation(@NonNull SplitPairRule rule1,
+            @NonNull SplitPairRule rule2) {
         // TODO(b/231655482): add util method to do the comparison in SplitPairRule.
         return rule1.getSplitRatio() == rule2.getSplitRatio()
                 && rule1.getLayoutDirection() == rule2.getLayoutDirection()
@@ -1684,7 +1687,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Whether it is ok for other rule to reuse the {@link TaskFragmentContainer} of the given
      * rule.
      */
-    private static boolean isContainerReusableRule(SplitRule rule) {
+    private static boolean isContainerReusableRule(@NonNull SplitRule rule) {
         // We don't expect to reuse the placeholder rule.
         if (!(rule instanceof SplitPairRule)) {
             return false;
