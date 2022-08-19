@@ -9126,6 +9126,7 @@ package android.content {
     method @Nullable public String getAttributionTag();
     method @Nullable public android.content.AttributionSource getNext();
     method @Nullable public String getPackageName();
+    method public int getPid();
     method public int getUid();
     method public boolean isTrusted(@NonNull android.content.Context);
     method @NonNull public static android.content.AttributionSource myAttributionSource();
@@ -9140,6 +9141,7 @@ package android.content {
     method @NonNull public android.content.AttributionSource.Builder setAttributionTag(@Nullable String);
     method @NonNull public android.content.AttributionSource.Builder setNext(@Nullable android.content.AttributionSource);
     method @NonNull public android.content.AttributionSource.Builder setPackageName(@Nullable String);
+    method @NonNull public android.content.AttributionSource.Builder setPid(int);
   }
 
   public abstract class BroadcastReceiver {
@@ -31995,6 +31997,7 @@ package android.os {
     method @Deprecated public static final boolean supportsProcesses();
     field public static final int BLUETOOTH_UID = 1002; // 0x3ea
     field public static final int FIRST_APPLICATION_UID = 10000; // 0x2710
+    field public static final int INVALID_PID = -1; // 0xffffffff
     field public static final int INVALID_UID = -1; // 0xffffffff
     field public static final int LAST_APPLICATION_UID = 19999; // 0x4e1f
     field public static final int PHONE_UID = 1001; // 0x3e9
