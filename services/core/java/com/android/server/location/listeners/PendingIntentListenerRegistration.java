@@ -16,63 +16,47 @@
 
 package com.android.server.location.listeners;
 
-import android.annotation.Nullable;
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.app.PendingIntent;
-import android.location.util.identity.CallerIdentity;
 import android.util.Log;
 
 /**
  * A registration that works with PendingIntent keys, and registers a CancelListener to
- * automatically remove the registration if the PendingIntent is canceled. The key for this
- * registration must either be a {@link PendingIntent} or a {@link PendingIntentKey}.
+ * automatically remove the registration if the PendingIntent is canceled.
  *
- * @param <TRequest>  request type
+ * @param <TKey>      key type
  * @param <TListener> listener type
  */
-public abstract class PendingIntentListenerRegistration<TRequest, TListener> extends
-        RemoteListenerRegistration<TRequest, TListener> implements PendingIntent.CancelListener {
+public abstract class PendingIntentListenerRegistration<TKey, TListener> extends
+        RemovableListenerRegistration<TKey, TListener> implements PendingIntent.CancelListener {
 
-    /**
-     * Interface to allowed pending intent retrieval when keys are not themselves PendingIntents.
-     */
-    public interface PendingIntentKey {
-        /**
-         * Returns the pending intent associated with this key.
-         */
-        PendingIntent getPendingIntent();
+    protected PendingIntentListenerRegistration(TListener listener) {
+        super(DIRECT_EXECUTOR, listener);
     }
 
-    protected PendingIntentListenerRegistration(@Nullable TRequest request,
-            CallerIdentity callerIdentity, TListener listener) {
-        super(request, callerIdentity, listener);
+    protected abstract PendingIntent getPendingIntentFromKey(TKey key);
+
+    @Override
+    protected void onRegister() {
+        super.onRegister();
+
+        if (!getPendingIntentFromKey(getKey()).addCancelListener(DIRECT_EXECUTOR, this)) {
+            remove();
+        }
     }
 
     @Override
-    protected final void onRemovableListenerRegister() {
-        getPendingIntentFromKey(getKey()).registerCancelListener(this);
-        onPendingIntentListenerRegister();
+    protected void onUnregister() {
+        getPendingIntentFromKey(getKey()).removeCancelListener(this);
+
+        super.onUnregister();
     }
-
-    @Override
-    protected final void onRemovableListenerUnregister() {
-        onPendingIntentListenerUnregister();
-        getPendingIntentFromKey(getKey()).unregisterCancelListener(this);
-    }
-
-    /**
-     * May be overridden in place of {@link #onRemovableListenerRegister()}.
-     */
-    protected void onPendingIntentListenerRegister() {}
-
-    /**
-     * May be overridden in place of {@link #onRemovableListenerUnregister()}.
-     */
-    protected void onPendingIntentListenerUnregister() {}
 
     @Override
     protected void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
         if (e instanceof PendingIntent.CanceledException) {
-            Log.w(getOwner().getTag(), "registration " + this + " removed", e);
+            Log.w(getTag(), "registration " + this + " removed", e);
             remove();
         } else {
             super.onOperationFailure(operation, e);
@@ -81,21 +65,10 @@ public abstract class PendingIntentListenerRegistration<TRequest, TListener> ext
 
     @Override
     public void onCanceled(PendingIntent intent) {
-        if (Log.isLoggable(getOwner().getTag(), Log.DEBUG)) {
-            Log.d(getOwner().getTag(),
-                    "pending intent registration " + getIdentity() + " canceled");
+        if (Log.isLoggable(getTag(), Log.DEBUG)) {
+            Log.d(getTag(), "pending intent registration " + this + " canceled");
         }
 
         remove();
-    }
-
-    private PendingIntent getPendingIntentFromKey(Object key) {
-        if (key instanceof PendingIntent) {
-            return (PendingIntent) key;
-        } else if (key instanceof PendingIntentKey) {
-            return ((PendingIntentKey) key).getPendingIntent();
-        } else {
-            throw new IllegalArgumentException("key must be PendingIntent or PendingIntentKey");
-        }
     }
 }
