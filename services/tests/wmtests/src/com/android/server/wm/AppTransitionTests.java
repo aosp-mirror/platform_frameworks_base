@@ -474,7 +474,7 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    public void testActivityRecordReparentToTaskFragment() {
+    public void testActivityRecordReparentedToTaskFragment() {
         final ActivityRecord activity = createActivityRecord(mDc);
         final SurfaceControl activityLeash = mock(SurfaceControl.class);
         doNothing().when(activity).setDropInputMode(anyInt());
