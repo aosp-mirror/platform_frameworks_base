@@ -20,6 +20,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -36,11 +38,21 @@ public class BilingualSuggestedLocaleAdapter extends SuggestedLocaleAdapter {
 
     private final Locale mSecondaryLocale;
     private final int mSecondaryLocaleTextDir;
+    private final boolean mShowSelection;
+    private LocaleStore.LocaleInfo mSelectedLocaleInfo;
 
     public BilingualSuggestedLocaleAdapter(
             Set<LocaleStore.LocaleInfo> localeOptions,
             boolean countryMode,
             Locale secondaryLocale) {
+        this(localeOptions, countryMode, secondaryLocale, false);
+    }
+
+    public BilingualSuggestedLocaleAdapter(
+            Set<LocaleStore.LocaleInfo> localeOptions,
+            boolean countryMode,
+            Locale secondaryLocale,
+            boolean showLastSelected) {
         super(localeOptions, countryMode);
         mSecondaryLocale = secondaryLocale;
         if (TextUtils.getLayoutDirectionFromLocale(secondaryLocale) == View.LAYOUT_DIRECTION_RTL) {
@@ -48,6 +60,7 @@ public class BilingualSuggestedLocaleAdapter extends SuggestedLocaleAdapter {
         } else {
             mSecondaryLocaleTextDir = View.TEXT_DIRECTION_LTR;
         }
+        mShowSelection = showLastSelected;
     }
 
     @Override
@@ -90,9 +103,53 @@ public class BilingualSuggestedLocaleAdapter extends SuggestedLocaleAdapter {
                 }
 
                 LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
+                if (mShowSelection) {
+                    setItemState(isSelectedLocaleInfo(item), convertView);
+                }
                 setLocaleToListItem(convertView, item);
         }
         return convertView;
+    }
+
+    /**
+     * Set locale info as selected. Selected info can be the only one. Passing null would result to
+     * nothing is selected.
+     */
+    public void setSelectedLocaleInfo(LocaleStore.LocaleInfo info) {
+        mSelectedLocaleInfo = info;
+        notifyDataSetChanged();
+    }
+
+    /** Return selected locale info. */
+    public LocaleStore.LocaleInfo getSelectedLocaleInfo() {
+        return mSelectedLocaleInfo;
+    }
+
+    private boolean isSelectedLocaleInfo(LocaleStore.LocaleInfo item) {
+        return item != null
+                && mSelectedLocaleInfo != null
+                && item.getId().equals(mSelectedLocaleInfo.getId());
+    }
+
+    private void setItemState(boolean selected, View itemView) {
+        RelativeLayout background = (RelativeLayout) itemView;
+        ImageView indicator = itemView.findViewById(R.id.indicator);
+        TextView textNative = itemView.findViewById(R.id.locale_native);
+        TextView textSecondary = itemView.findViewById(R.id.locale_secondary);
+
+        if (indicator == null || textNative == null || textSecondary == null) {
+            return;
+        }
+
+        textNative.setSelected(selected);
+        textSecondary.setSelected(selected);
+        if (selected) {
+            background.setBackgroundResource(R.drawable.language_picker_item_bg_selected);
+            indicator.setVisibility(View.VISIBLE);
+        } else {
+            background.setBackgroundResource(0);
+            indicator.setVisibility(View.GONE);
+        }
     }
 
     private void setHeaderText(
@@ -114,7 +171,7 @@ public class BilingualSuggestedLocaleAdapter extends SuggestedLocaleAdapter {
         textNative.setTextLocale(localeInfo.getLocale());
         textNative.setContentDescription(localeInfo.getContentDescription(mCountryMode));
 
-        TextView textSecondary = (TextView) itemView.findViewById(R.id.locale_secondary);
+        TextView textSecondary = itemView.findViewById(R.id.locale_secondary);
         textSecondary.setText(localeInfo.getLocale().getDisplayLanguage(mSecondaryLocale));
         textSecondary.setTextDirection(mSecondaryLocaleTextDir);
         if (mCountryMode) {
