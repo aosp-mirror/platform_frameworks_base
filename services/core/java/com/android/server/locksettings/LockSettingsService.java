@@ -1587,7 +1587,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (!savedCredential.isNone()) {
                     throw new IllegalStateException("Saved credential given, but user has no SP");
                 }
-                initializeSyntheticPasswordLocked(savedCredential, userId);
+                initializeSyntheticPasswordLocked(userId);
             } else if (savedCredential.isNone() && isProfileWithUnifiedLock(userId)) {
                 // get credential from keystore when profile has unified lock
                 try {
@@ -2513,35 +2513,21 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Creates the synthetic password (SP) for the given user and protects it with the user's LSKF.
+     * Creates the synthetic password (SP) for the given user and protects it with an empty LSKF.
      * This is called just once in the lifetime of the user: the first time a nonempty LSKF is set,
      * or when an escrow token is activated on a device with an empty LSKF.
-     *
-     * Maintains the SP invariants described in {@link SyntheticPasswordManager}.
      */
     @GuardedBy("mSpManager")
     @VisibleForTesting
-    SyntheticPassword initializeSyntheticPasswordLocked(LockscreenCredential credential,
-            int userId) {
+    SyntheticPassword initializeSyntheticPasswordLocked(int userId) {
         Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
         Preconditions.checkState(getCurrentLskfBasedProtectorId(userId) ==
                 SyntheticPasswordManager.NULL_PROTECTOR_ID,
                 "Cannot reinitialize SP");
 
         final SyntheticPassword sp = mSpManager.newSyntheticPassword(userId);
-        long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(), credential,
-                sp, userId);
-        if (!credential.isNone()) {
-            mSpManager.newSidForUser(getGateKeeperService(), sp, userId);
-            mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
-            setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
-            setKeystorePassword(sp.deriveKeyStorePassword(), userId);
-        } else {
-            clearUserKeyProtection(userId, null);
-            setKeystorePassword(null, userId);
-            gateKeeperClearSecureUserId(userId);
-        }
-        fixateNewestUserKeyAuth(userId);
+        final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
+                LockscreenCredential.createNone(), sp, userId);
         setCurrentLskfBasedProtectorId(protectorId, userId);
         onSyntheticPasswordKnown(userId, sp);
         return sp;
@@ -2818,8 +2804,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (!isUserSecure(userId)) {
                 long protectorId = getCurrentLskfBasedProtectorId(userId);
                 if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
-                    sp = initializeSyntheticPasswordLocked(LockscreenCredential.createNone(),
-                            userId);
+                    sp = initializeSyntheticPasswordLocked(userId);
                 } else {
                     sp = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
                             LockscreenCredential.createNone(), userId, null).syntheticPassword;
