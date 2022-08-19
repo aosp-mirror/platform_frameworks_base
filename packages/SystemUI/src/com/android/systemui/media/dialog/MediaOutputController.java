@@ -314,7 +314,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
     }
 
-    Drawable getAppSourceIcon() {
+    Drawable getAppSourceIconFromPackage() {
         if (mPackageName.isEmpty()) {
             return null;
         }
@@ -423,6 +423,24 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 && getSelectedMediaDevice().contains(device);
         return (!hasAdjustVolumeUserRestriction() && isConnected && !isTransferring())
                 || isSelectedDeviceInGroup;
+    }
+
+    IconCompat getNotificationSmallIcon() {
+        if (TextUtils.isEmpty(mPackageName)) {
+            return null;
+        }
+        for (NotificationEntry entry : mNotifCollection.getAllNotifs()) {
+            final Notification notification = entry.getSbn().getNotification();
+            if (notification.isMediaNotification()
+                    && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
+                final Icon icon = notification.getSmallIcon();
+                if (icon == null) {
+                    break;
+                }
+                return IconCompat.createFromIcon(icon);
+            }
+        }
+        return null;
     }
 
     IconCompat getNotificationIcon() {
