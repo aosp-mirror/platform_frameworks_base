@@ -44,9 +44,13 @@ import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.MaterialYouColorsRule
 import platform.test.screenshot.ScreenshotTestRule
 import platform.test.screenshot.getEmulatedDevicePathConfig
+import platform.test.screenshot.matchers.BitmapMatcher
 
 /** A rule for View screenshot diff unit tests. */
-class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+class ViewScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+    private val matcher: BitmapMatcher = UnitTestBitmapMatcher
+) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
@@ -59,7 +63,6 @@ class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
             .around(deviceEmulationRule)
             .around(screenshotRule)
             .around(activityRule)
-    private val matcher = UnitTestBitmapMatcher
 
     override fun apply(base: Statement, description: Description): Statement {
         return delegateRule.apply(base, description)
