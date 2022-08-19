@@ -151,8 +151,8 @@ public class Flags {
     public static final ResourceBooleanFlag STATUS_BAR_USER_SWITCHER =
             new ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip);
 
-    public static final UnreleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
-            new UnreleasedFlag(603, false);
+    public static final ReleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
+            new ReleasedFlag(603, false);
 
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE = new UnreleasedFlag(604, true);
 
