@@ -17,52 +17,50 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
-import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.gallery.R
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.SettingsPager
+import com.android.settingslib.spa.widget.ui.SettingsTitle
 
-object HomePageProvider : SettingsPageProvider {
-    override val name = Destinations.Home
+object SettingsPagerPageProvider : SettingsPageProvider {
+    override val name = "SettingsPager"
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        HomePage()
+        SettingsPagerPage()
+    }
+
+    @Composable
+    fun EntryItem() {
+        Preference(object : PreferenceModel {
+            override val title = "Sample SettingsPager"
+            override val onClick = navigator(name)
+        })
     }
 }
 
 @Composable
-private fun HomePage() {
-    Column {
-        Text(
-            text = stringResource(R.string.app_name),
-            modifier = Modifier.padding(SettingsDimension.itemPadding),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.headlineMedium,
-        )
-
-        PreferencePageProvider.EntryItem()
-        SwitchPreferencePageProvider.EntryItem()
-        ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
-
-        SliderPageProvider.EntryItem()
-        SettingsPagerPageProvider.EntryItem()
-        FooterPageProvider.EntryItem()
+private fun SettingsPagerPage() {
+    SettingsPager(listOf("Personal", "Work")) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            SettingsTitle(title = "Page $it")
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun HomeScreenPreview() {
+private fun SettingsPagerPagePreview() {
     SettingsTheme {
-        HomePage()
+        SettingsPagerPage()
     }
 }
