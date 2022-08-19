@@ -134,6 +134,23 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
+    public void testStartChangeTransition_doNotFreezeWhenOnlyMoved() {
+        final Rect startBounds = new Rect(0, 0, 1000, 1000);
+        final Rect endBounds = new Rect(startBounds);
+        endBounds.offset(500, 0);
+        mTaskFragment.setBounds(startBounds);
+        doReturn(true).when(mTaskFragment).isVisible();
+        doReturn(true).when(mTaskFragment).isVisibleRequested();
+
+        clearInvocations(mTransaction);
+        mTaskFragment.setBounds(endBounds);
+
+        // No change transition, but update the organized surface position.
+        verify(mTaskFragment, never()).initializeChangeTransition(any(), any());
+        verify(mTransaction).setPosition(mLeash, endBounds.left, endBounds.top);
+    }
+
+    @Test
     public void testNotOkToAnimate_doNotStartChangeTransition() {
         mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
