@@ -571,7 +571,9 @@ public class SpatializerHelper {
     // There may be different devices with the same device type (aliasing).
     // We always send the full device state info on each change.
     private void logDeviceState(SADeviceState deviceState, String event) {
-        final String deviceName = AudioSystem.getDeviceName(deviceState.mDeviceType);
+        final int deviceType = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
+                deviceState.mDeviceType);
+        final String deviceName = AudioSystem.getDeviceName(deviceType);
         new MediaMetrics.Item(METRICS_DEVICE_PREFIX + deviceName)
             .set(MediaMetrics.Property.ADDRESS, deviceState.mDeviceAddress)
             .set(MediaMetrics.Property.ENABLED, deviceState.mEnabled ? "true" : "false")
