@@ -28,11 +28,14 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
+import android.util.proto.ProtoOutputStream;
 
-import com.android.server.biometrics.sensors.BiometricServiceProvider;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.LockoutTracker;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -56,8 +59,23 @@ import java.util.List;
  * fail safely.
  */
 @SuppressWarnings("deprecation")
-public interface ServiceProvider extends
-        BiometricServiceProvider<FingerprintSensorPropertiesInternal> {
+public interface ServiceProvider {
+    /**
+     * Checks if the specified sensor is owned by this provider.
+     */
+    boolean containsSensor(int sensorId);
+
+    @NonNull
+    List<FingerprintSensorPropertiesInternal> getSensorProperties();
+
+    /**
+     * Returns the internal properties of the specified sensor, if owned by this provider.
+     *
+     * @param sensorId The ID of a fingerprint sensor, or -1 for any sensor.
+     * @return An object representing the internal properties of the specified sensor.
+     */
+    @Nullable
+    FingerprintSensorPropertiesInternal getSensorProperties(int sensorId);
 
     void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken);
 
@@ -108,10 +126,15 @@ public interface ServiceProvider extends
     void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments);
 
+    boolean isHardwareDetected(int sensorId);
+
     void rename(int sensorId, int fingerId, int userId, @NonNull String name);
 
     @NonNull
     List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId);
+
+    @LockoutTracker.LockoutMode
+    int getLockoutModeForUser(int sensorId, int userId);
 
     /**
      * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to
@@ -120,6 +143,7 @@ public interface ServiceProvider extends
     void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
             @NonNull IInvalidationCallback callback);
 
+    long getAuthenticatorId(int sensorId, int userId);
 
     void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
 
@@ -136,6 +160,13 @@ public interface ServiceProvider extends
      * @param controller side-fps controller
      */
     void setSidefpsController(@NonNull ISidefpsController controller);
+
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
+            boolean clearSchedulerBuffer);
+
+    void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
+
+    void dumpInternal(int sensorId, @NonNull PrintWriter pw);
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,

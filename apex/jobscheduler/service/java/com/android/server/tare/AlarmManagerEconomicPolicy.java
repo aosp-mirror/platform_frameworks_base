@@ -170,6 +170,9 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
     @Override
     long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
+        if (mIrs.isPackageRestricted(userId, pkgName)) {
+            return 0;
+        }
         if (mIrs.isPackageExempted(userId, pkgName)) {
             return mMinSatiatedBalanceExempted;
         }
@@ -178,7 +181,10 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getMaxSatiatedBalance() {
+    long getMaxSatiatedBalance(int userId, @NonNull String pkgName) {
+        if (mIrs.isPackageRestricted(userId, pkgName)) {
+            return 0;
+        }
         // TODO(230501287): adjust balance based on whether the app has the SCHEDULE_EXACT_ALARM
         // permission granted. Apps without the permission granted shouldn't need a high balance
         // since they won't be able to use exact alarms. Apps with the permission granted could

@@ -2000,6 +2000,18 @@
          are controlled together (aliasing is true) or not. -->
     <bool name="config_alias_ring_notif_stream_types">true</bool>
 
+    <!-- The number of volume steps for the notification stream -->
+    <integer name="config_audio_notif_vol_steps">7</integer>
+
+    <!-- The default volume for the notification stream -->
+    <integer name="config_audio_notif_vol_default">5</integer>
+
+    <!-- The number of volume steps for the ring stream -->
+    <integer name="config_audio_ring_vol_steps">7</integer>
+
+    <!-- The default volume for the ring stream -->
+    <integer name="config_audio_ring_vol_default">5</integer>
+
     <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>

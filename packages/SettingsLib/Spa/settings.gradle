@@ -30,5 +30,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SpaLib"
 include ':spa'
-include ':codelab'
+include ':gallery'
 include ':tests'

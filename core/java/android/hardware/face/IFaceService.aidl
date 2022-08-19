@@ -17,11 +17,9 @@ package android.hardware.face;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricStateListener;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
-import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -165,11 +163,4 @@ interface IFaceService {
     // hidlSensors must be non-null and empty. See AuthService.java
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void registerAuthenticators(in List<FaceSensorPropertiesInternal> hidlSensors);
-
-    // Adds a callback which gets called when the service registers all of the face
-    // authenticators. The callback is automatically removed after it's invoked.
-    void addAuthenticatorsRegisteredCallback(IFaceAuthenticatorsRegisteredCallback callback);
-
-    // Registers BiometricStateListener.
-    void registerBiometricStateListener(IBiometricStateListener listener);
 }

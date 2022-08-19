@@ -1175,14 +1175,55 @@ public class CarrierConfigManager {
             "carrier_data_call_permanent_failure_strings";
 
     /**
-     * Default APN types that are metered by the carrier
-     * @hide
+     * A string array indicating the default APN types that are metered by the carrier.
+     *
+     * The string in the array is the name of the APN type. For example, "default" for
+     * {@link ApnSetting#TYPE_DEFAULT}, "mms" for {@link ApnSetting#TYPE_MMS}, etc.
+     *
+     * The default value is {@code {"default", "mms", "dun", "supl"}}.
+     *
+     * @see ApnSetting#TYPE_DEFAULT
+     * @see ApnSetting#TYPE_MMS
+     * @see ApnSetting#TYPE_SUPL
+     * @see ApnSetting#TYPE_DUN
+     * @see ApnSetting#TYPE_HIPRI
+     * @see ApnSetting#TYPE_FOTA
+     * @see ApnSetting#TYPE_IMS
+     * @see ApnSetting#TYPE_CBS
+     * @see ApnSetting#TYPE_IA
+     * @see ApnSetting#TYPE_EMERGENCY
+     * @see ApnSetting#TYPE_MCX
+     * @see ApnSetting#TYPE_XCAP
+     * @see ApnSetting#TYPE_BIP
+     * @see ApnSetting#TYPE_VSIM
+     * @see ApnSetting#TYPE_ENTERPRISE
      */
     public static final String KEY_CARRIER_METERED_APN_TYPES_STRINGS =
             "carrier_metered_apn_types_strings";
+
     /**
-     * Default APN types that are roaming-metered by the carrier
-     * @hide
+     * A string array indicating the default APN types that are roaming-metered by the carrier.
+     *
+     * The string in the array is the name of the APN type. For example, "default" for
+     * {@link ApnSetting#TYPE_DEFAULT}, "mms" for {@link ApnSetting#TYPE_MMS}, etc.
+     *
+     * The default value is {@code {"default", "mms", "dun", "supl"}}.
+     *
+     * @see ApnSetting#TYPE_DEFAULT
+     * @see ApnSetting#TYPE_MMS
+     * @see ApnSetting#TYPE_SUPL
+     * @see ApnSetting#TYPE_DUN
+     * @see ApnSetting#TYPE_HIPRI
+     * @see ApnSetting#TYPE_FOTA
+     * @see ApnSetting#TYPE_IMS
+     * @see ApnSetting#TYPE_CBS
+     * @see ApnSetting#TYPE_IA
+     * @see ApnSetting#TYPE_EMERGENCY
+     * @see ApnSetting#TYPE_MCX
+     * @see ApnSetting#TYPE_XCAP
+     * @see ApnSetting#TYPE_BIP
+     * @see ApnSetting#TYPE_VSIM
+     * @see ApnSetting#TYPE_ENTERPRISE
      */
     public static final String KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS =
             "carrier_metered_roaming_apn_types_strings";

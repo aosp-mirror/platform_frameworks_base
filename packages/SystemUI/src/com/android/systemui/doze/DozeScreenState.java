@@ -16,15 +16,12 @@
 
 package com.android.systemui.doze;
 
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
-
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSE_DONE;
 
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
@@ -235,17 +232,13 @@ public class DozeScreenState implements DozeMachine.Part {
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
-        public void onAllAuthenticatorsRegistered(@BiometricAuthenticator.Modality int modality) {
-            if (modality == TYPE_FINGERPRINT) {
-                updateUdfpsController();
-            }
+        public void onAllAuthenticatorsRegistered() {
+            updateUdfpsController();
         }
 
         @Override
-        public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
-            if (modality == TYPE_FINGERPRINT) {
-                updateUdfpsController();
-            }
+        public void onEnrollmentsChanged() {
+            updateUdfpsController();
         }
     };
 }
