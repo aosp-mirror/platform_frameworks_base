@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
@@ -86,6 +87,8 @@ import android.testing.TestableLooper;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.ILockSettings;
@@ -96,6 +99,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -190,6 +194,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
     @Mock
     private IActivityManager mActivityService;
+    @Mock
+    private SessionTracker mSessionTracker;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
@@ -212,6 +220,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private MockitoSession mMockitoSession;
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledOnKeyguardCallback;
+    private final InstanceId mKeyguardInstanceId = InstanceId.fakeInstanceId(999);
 
     @Before
     public void setup() throws RemoteException {
@@ -225,6 +234,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(mFaceSensorProperties);
+        when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
 
         // IBiometricsFace@1.0 does not support detection, only authentication.
         when(mFaceSensorProperties.isEmpty()).thenReturn(false);
@@ -656,7 +666,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Stop scanning when bouncer becomes visible
         setKeyguardBouncerVisibility(true);
         clearInvocations(mFaceManager);
-        mKeyguardUpdateMonitor.requestFaceAuth(true);
+        mKeyguardUpdateMonitor.requestFaceAuth(true,
+                FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
                 anyBoolean());
     }
@@ -1500,10 +1511,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         keyguardIsVisible();
 
         mTestableLooper.processAllMessages();
+        clearInvocations(mUiEventLogger);
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
-        mKeyguardUpdateMonitor.requestFaceAuth(true);
+        mKeyguardUpdateMonitor.requestFaceAuth(true,
+                FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+
         verify(mFaceManager).authenticate(any(),
                 mCancellationSignalCaptor.capture(),
                 mAuthenticationCallbackCaptor.capture(),
@@ -1595,7 +1609,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void triggerSuccessfulFaceAuth() {
-        mKeyguardUpdateMonitor.requestFaceAuth(true);
+        mKeyguardUpdateMonitor.requestFaceAuth(true, FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
         verify(mFaceManager).authenticate(any(),
                 any(),
                 mAuthenticationCallbackCaptor.capture(),
@@ -1710,7 +1724,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
                     mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig,
-                    mKeyguardUpdateMonitorLogger);
+                    mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
