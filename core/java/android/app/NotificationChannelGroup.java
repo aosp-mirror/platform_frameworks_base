@@ -42,8 +42,9 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * The maximum length for text fields in a NotificationChannelGroup. Fields will be truncated at
      * this limit.
+     * @hide
      */
-    private static final int MAX_TEXT_LENGTH = 1000;
+    public static final int MAX_TEXT_LENGTH = 1000;
 
     private static final String TAG_GROUP = "channelGroup";
     private static final String ATT_NAME = "name";
@@ -89,13 +90,14 @@ public final class NotificationChannelGroup implements Parcelable {
      */
     protected NotificationChannelGroup(Parcel in) {
         if (in.readByte() != 0) {
-            mId = in.readString();
+            mId = getTrimmedString(in.readString());
         } else {
             mId = null;
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mName = getTrimmedString(mName.toString());
         if (in.readByte() != 0) {
-            mDescription = in.readString();
+            mDescription = getTrimmedString(in.readString());
         } else {
             mDescription = null;
         }
@@ -119,7 +121,7 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        TextUtils.writeToParcel(mName, dest, flags);
+        TextUtils.writeToParcel(mName.toString(), dest, flags);
         if (mDescription != null) {
             dest.writeByte((byte) 1);
             dest.writeString(mDescription);
