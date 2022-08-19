@@ -56,6 +56,8 @@ import java.util.ArrayList;
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:JetpackTaskFragmentOrganizerTest
  */
+// Suppress GuardedBy warning on unit tests
+@SuppressWarnings("GuardedBy")
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -119,7 +121,7 @@ public class JetpackTaskFragmentOrganizerTest {
                 new Intent(), taskContainer, mSplitController);
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
 
         mOrganizer.expandTaskFragment(mTransaction, container.getTaskFragmentToken());
 
