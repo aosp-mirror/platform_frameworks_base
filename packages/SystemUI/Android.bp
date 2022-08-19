@@ -237,6 +237,9 @@ android_library {
         "com.android.systemui",
     ],
     plugins: ["dagger2-compiler"],
+    lint: {
+        test: true,
+    },
 }
 
 // Opt-in config for optimizing the SystemUI target using R8.
