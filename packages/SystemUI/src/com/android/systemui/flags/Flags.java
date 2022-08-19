@@ -179,6 +179,7 @@ public class Flags {
     public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
     public static final ReleasedFlag MEDIA_NEARBY_DEVICES = new ReleasedFlag(903);
     public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
+    public static final UnreleasedFlag MEDIA_DREAM_COMPLICATION = new UnreleasedFlag(905);
 
     // 1000 - dock
     public static final ReleasedFlag SIMULATE_DOCK_THROUGH_CHARGING =
