@@ -528,6 +528,28 @@ public class BroadcastOptions extends ComponentOptions {
         return mIsAlarmBroadcast;
     }
 
+    /**
+     * Did this broadcast originate from a push message from the server?
+     *
+     * @return true if this broadcast is a push message, false otherwise.
+     * @hide
+     */
+    public boolean isPushMessagingBroadcast() {
+        return mTemporaryAppAllowlistReasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING;
+    }
+
+    /**
+     * Did this broadcast originate from a push message from the server which was over the allowed
+     * quota?
+     *
+     * @return true if this broadcast is a push message over quota, false otherwise.
+     * @hide
+     */
+    public boolean isPushMessagingOverQuotaBroadcast() {
+        return mTemporaryAppAllowlistReasonCode
+                == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA;
+    }
+
     /** {@hide} */
     public long getRequireCompatChangeId() {
         return mRequireCompatChangeId;
