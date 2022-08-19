@@ -25,13 +25,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 
 @Composable
-fun SettingsIcon(
-    imageVector: ImageVector,
-    contentDescription: String?,
-) {
+fun SettingsIcon(imageVector: ImageVector) {
     Icon(
         imageVector = imageVector,
-        contentDescription = contentDescription,
+        contentDescription = null,
         modifier = Modifier.size(SettingsDimension.itemIconSize),
         tint = MaterialTheme.colorScheme.onSurface,
     )

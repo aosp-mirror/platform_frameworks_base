@@ -19,6 +19,7 @@ package com.android.settingslib.spa.widget.preference
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.android.settingslib.spa.framework.compose.stateOf
 
@@ -36,6 +37,14 @@ interface PreferenceModel {
      */
     val summary: State<String>
         get() = stateOf("")
+
+    /**
+     * The icon of this [Preference].
+     *
+     * Default is `null` which means no icon.
+     */
+    val icon: (@Composable () -> Unit)?
+        get() = null
 
     /**
      * Indicates whether this [Preference] is enabled.
@@ -61,13 +70,16 @@ interface PreferenceModel {
  */
 @Composable
 fun Preference(model: PreferenceModel) {
-    val modifier = model.onClick?.let { onClick ->
-        Modifier.clickable(enabled = model.enabled.value) { onClick() }
-    } ?: Modifier
+    val modifier = remember(model.enabled.value, model.onClick) {
+      model.onClick?.let { onClick ->
+        Modifier.clickable(enabled = model.enabled.value, onClick = onClick)
+      } ?: Modifier
+    }
     BasePreference(
         title = model.title,
         summary = model.summary,
         modifier = modifier,
+        icon = model.icon,
         enabled = model.enabled,
     )
 }
