@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -88,6 +89,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private final AudioManager mAudioManager = mock(AudioManager.class);
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
+    private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
@@ -119,7 +121,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
