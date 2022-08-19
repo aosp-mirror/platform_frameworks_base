@@ -16903,6 +16903,7 @@ package android.hardware {
     method public int describeContents();
     method public int getFormat();
     method public int getHeight();
+    method public long getId();
     method public int getLayers();
     method public long getUsage();
     method public int getWidth();
