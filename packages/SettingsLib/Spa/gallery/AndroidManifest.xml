@@ -18,7 +18,8 @@
     package="com.android.settingslib.spa.gallery">
 
     <application
-        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_label"
         android:supportsRtl="true">
         <activity
             android:name="com.android.settingslib.spa.gallery.MainActivity"
