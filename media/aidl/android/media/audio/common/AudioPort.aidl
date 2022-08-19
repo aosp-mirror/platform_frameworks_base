@@ -23,8 +23,9 @@ import android.media.audio.common.AudioProfile;
 import android.media.audio.common.ExtraAudioDescriptor;
 
 /**
- * Audio port structure describes the capabilities of an audio port
- * as well as its current configuration.
+ * Audio port structure describes the capabilities of an audio port.
+ * This is a "blueprint" which contains all the possible configurations
+ * that are supported by the port.
  *
  * {@hide}
  */
