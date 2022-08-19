@@ -67,7 +67,7 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
 
                 float rippleInsideAlpha = (1.-inside) * in_fadeFill;
                 float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
-                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * in_color.a;
                 vec4 ripple = in_color * rippleAlpha;
                 return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
             }
@@ -83,7 +83,7 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
 
                 float rippleInsideAlpha = (1.-inside) * in_fadeFill;
                 float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
-                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * in_color.a;
                 vec4 ripple = in_color * rippleAlpha;
                 return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
             }
@@ -99,7 +99,7 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
 
                 float rippleInsideAlpha = (1.-inside) * in_fadeFill;
                 float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
-                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * in_color.a;
                 vec4 ripple = in_color * rippleAlpha;
                 return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
             }
