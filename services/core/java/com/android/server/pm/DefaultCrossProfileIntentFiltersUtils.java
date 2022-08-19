@@ -319,4 +319,135 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 HOME,
                 MOBILE_NETWORK_SETTINGS);
     }
+
+    /**
+     * Clone profile's DefaultCrossProfileIntentFilter
+     */
+
+    /*
+     Allowing media capture from clone to parent profile as clone profile would not have camera
+     */
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_MEDIA_CAPTURE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                                            // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_IMAGE_CAPTURE)
+                    .addAction(MediaStore.ACTION_IMAGE_CAPTURE_SECURE)
+                    .addAction(MediaStore.ACTION_VIDEO_CAPTURE)
+                    .addAction(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+                    .addAction(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
+                    .addAction(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)
+                    .addAction(MediaStore.INTENT_ACTION_VIDEO_CAMERA)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+
+    /*
+     Allowing send action from clone to parent profile to share content from clone apps to parent
+     apps
+     */
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_SEND_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_SEND)
+                    .addAction(Intent.ACTION_SEND_MULTIPLE)
+                    .addAction(Intent.ACTION_SENDTO)
+                    .addDataType("*/*")
+                    .build();
+
+    /*
+     Allowing send action from parent to clone profile to share content from parent apps to clone
+     apps
+     */
+    private static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_SEND_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                                            // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_SEND)
+                    .addAction(Intent.ACTION_SEND_MULTIPLE)
+                    .addAction(Intent.ACTION_SENDTO)
+                    .addDataType("*/*")
+                    .build();
+
+    /*
+     Allowing view action from clone to parent profile to open any app-links or web links
+     */
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_VIEW_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addDataScheme("https")
+                    .addDataScheme("http")
+                    .build();
+
+    /*
+     Allowing view action from parent to clone profile to open any app-links or web links
+     */
+    private static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_VIEW_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                                            // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addDataScheme("https")
+                    .addDataScheme("http")
+                    .build();
+
+    /*
+     Allowing pick,insert and edit action from clone to parent profile to open picker or contacts
+     insert/edit.
+     */
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_PICK_INSERT_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                                            // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_PICK)
+                    .addAction(Intent.ACTION_GET_CONTENT)
+                    .addAction(Intent.ACTION_EDIT)
+                    .addAction(Intent.ACTION_INSERT)
+                    .addAction(Intent.ACTION_INSERT_OR_EDIT)
+                    .addDataType("*/*")
+                    .build();
+
+    /*
+     Allowing pick,insert and edit action from parent to clone profile to open picker
+     */
+    private static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_PICK_INSERT_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                                            // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_PICK)
+                    .addAction(Intent.ACTION_GET_CONTENT)
+                    .addAction(Intent.ACTION_EDIT)
+                    .addAction(Intent.ACTION_INSERT)
+                    .addAction(Intent.ACTION_INSERT_OR_EDIT)
+                    .addDataType("*/*")
+                    .build();
+
+    public static List<DefaultCrossProfileIntentFilter> getDefaultCloneProfileFilters() {
+        return Arrays.asList(
+                PARENT_TO_CLONE_SEND_ACTION,
+                PARENT_TO_CLONE_VIEW_ACTION,
+                PARENT_TO_CLONE_PICK_INSERT_ACTION,
+                CLONE_TO_PARENT_MEDIA_CAPTURE,
+                CLONE_TO_PARENT_SEND_ACTION,
+                CLONE_TO_PARENT_VIEW_ACTION,
+                CLONE_TO_PARENT_PICK_INSERT_ACTION
+
+        );
+    }
 }

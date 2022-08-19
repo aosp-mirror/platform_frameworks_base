@@ -126,6 +126,7 @@ public final class UserTypeFactory {
                 .setCrossProfileIntentFilterAccessControl(
                         CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM)
                 .setIsCredentialSharableWithParent(true)
+                .setDefaultCrossProfileIntentFilters(getDefaultCloneCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT)
@@ -308,6 +309,10 @@ public final class UserTypeFactory {
     private static List<DefaultCrossProfileIntentFilter>
             getDefaultManagedCrossProfileIntentFilter() {
         return DefaultCrossProfileIntentFiltersUtils.getDefaultManagedProfileFilters();
+    }
+
+    private static List<DefaultCrossProfileIntentFilter> getDefaultCloneCrossProfileIntentFilter() {
+        return DefaultCrossProfileIntentFiltersUtils.getDefaultCloneProfileFilters();
     }
 
     /**
