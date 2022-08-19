@@ -110,8 +110,6 @@ public final class CachedAppOptimizer {
 
     private static final String ATRACE_COMPACTION_TRACK = "Compaction";
 
-    private static final int FREEZE_BINDER_TIMEOUT_MS = 100;
-
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
@@ -929,13 +927,11 @@ public final class CachedAppOptimizer {
      * @param pid the target pid for which binder transactions are to be frozen
      * @param freeze specifies whether to flush transactions and then freeze (true) or unfreeze
      * binder for the specificed pid.
-     * @param timeoutMs the timeout in milliseconds to wait for the binder interface to freeze
-     * before giving up.
      *
      * @throws RuntimeException in case a flush/freeze operation could not complete successfully.
      * @return 0 if success, or -EAGAIN indicating there's pending transaction.
      */
-    public static native int freezeBinder(int pid, boolean freeze, int timeoutMs);
+    private static native int freezeBinder(int pid, boolean freeze);
 
     /**
      * Retrieves binder freeze info about a process.
@@ -1302,7 +1298,7 @@ public final class CachedAppOptimizer {
         long freezeTime = opt.getFreezeUnfreezeTime();
 
         try {
-            freezeBinder(pid, false, FREEZE_BINDER_TIMEOUT_MS);
+            freezeBinder(pid, false);
         } catch (RuntimeException e) {
             Slog.e(TAG_AM, "Unable to unfreeze binder for " + pid + " " + app.processName
                     + ". Killing it");
@@ -1934,7 +1930,7 @@ public final class CachedAppOptimizer {
                 // Freeze binder interface before the process, to flush any
                 // transactions that might be pending.
                 try {
-                    if (freezeBinder(pid, true, FREEZE_BINDER_TIMEOUT_MS) != 0) {
+                    if (freezeBinder(pid, true) != 0) {
                         rescheduleFreeze(proc, "outstanding txns");
                         return;
                     }
