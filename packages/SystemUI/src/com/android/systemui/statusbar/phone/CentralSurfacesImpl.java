@@ -120,6 +120,7 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -1612,9 +1613,11 @@ public class CentralSurfacesImpl extends CoreStartable implements
      * Asks {@link KeyguardUpdateMonitor} to run face auth.
      */
     @Override
-    public void requestFaceAuth(boolean userInitiatedRequest) {
+    public void requestFaceAuth(boolean userInitiatedRequest,
+            @FaceAuthApiRequestReason String reason) {
         if (!mKeyguardStateController.canDismissLockScreen()) {
-            mKeyguardUpdateMonitor.requestFaceAuth(userInitiatedRequest);
+            mKeyguardUpdateMonitor.requestFaceAuth(
+                    userInitiatedRequest, reason);
         }
     }
 
