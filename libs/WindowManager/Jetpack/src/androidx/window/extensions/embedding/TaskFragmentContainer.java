@@ -18,8 +18,6 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
@@ -29,6 +27,9 @@ import android.os.IBinder;
 import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -175,6 +176,7 @@ class TaskFragmentContainer {
                 && mInfo.getActivities().size() == collectNonFinishingActivities().size();
     }
 
+    @NonNull
     ActivityStack toActivityStack() {
         return new ActivityStack(collectNonFinishingActivities(), isEmpty());
     }
@@ -249,19 +251,22 @@ class TaskFragmentContainer {
         return mInfo;
     }
 
-    void setInfo(@NonNull TaskFragmentInfo info) {
+    void setInfo(@NonNull WindowContainerTransaction wct, @NonNull TaskFragmentInfo info) {
         if (!mIsFinished && mInfo == null && info.isEmpty()) {
             // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if no
             // pending appeared intent/activities. Otherwise, wait and removing the TaskFragment if
             // it is still empty after timeout.
-            mAppearEmptyTimeout = () -> {
-                mAppearEmptyTimeout = null;
-                mController.onTaskFragmentAppearEmptyTimeout(this);
-            };
             if (mPendingAppearedIntent != null || !mPendingAppearedActivities.isEmpty()) {
+                mAppearEmptyTimeout = () -> {
+                    mAppearEmptyTimeout = null;
+                    // Call without the pass-in wct when timeout. We need to applyWct directly
+                    // in this case.
+                    mController.onTaskFragmentAppearEmptyTimeout(this);
+                };
                 mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
             } else {
-                mAppearEmptyTimeout.run();
+                mAppearEmptyTimeout = null;
+                mController.onTaskFragmentAppearEmptyTimeout(wct, this);
             }
         } else if (mAppearEmptyTimeout != null && !info.isEmpty()) {
             mController.getHandler().removeCallbacks(mAppearEmptyTimeout);

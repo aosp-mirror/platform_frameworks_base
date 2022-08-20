@@ -1566,7 +1566,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task == mLastParentBeforePip && task != null) {
             // Notify the TaskFragmentOrganizer that the activity is reparented back from pip.
             mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
-                    .onActivityReparentToTask(this);
+                    .onActivityReparentedToTask(this);
             // Activity's reparented back from pip, clear the links once established
             clearLastParentBeforePip();
         }

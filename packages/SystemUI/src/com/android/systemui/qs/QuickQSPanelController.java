@@ -39,6 +39,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /** Controller for {@link QuickQSPanel}. */
 @QSScope
@@ -52,20 +53,21 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
                 }
             };
 
-    private final boolean mUsingCollapsedLandscapeMedia;
+    private final Provider<Boolean> mUsingCollapsedLandscapeMediaProvider;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
-            @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA) boolean usingCollapsedLandscapeMedia,
+            @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
+                    Provider<Boolean> usingCollapsedLandscapeMediaProvider,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
             DumpManager dumpManager
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager);
-        mUsingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia;
+        mUsingCollapsedLandscapeMediaProvider = usingCollapsedLandscapeMediaProvider;
     }
 
     @Override
@@ -80,7 +82,8 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         int rotation = getRotation();
         boolean isLandscape = rotation == RotationUtils.ROTATION_LANDSCAPE
                 || rotation == RotationUtils.ROTATION_SEASCAPE;
-        if (!mUsingCollapsedLandscapeMedia || !isLandscape) {
+        boolean usingCollapsedLandscapeMedia = mUsingCollapsedLandscapeMediaProvider.get();
+        if (!usingCollapsedLandscapeMedia || !isLandscape) {
             mMediaHost.setExpansion(MediaHost.EXPANDED);
         } else {
             mMediaHost.setExpansion(MediaHost.COLLAPSED);
@@ -126,7 +129,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         super.setTiles(tiles, /* collapsedView */ true);
     }
 
-    /** */
     public void setContentMargins(int marginStart, int marginEnd) {
         mView.setContentMargins(marginStart, marginEnd, mMediaHost.getHostView());
     }

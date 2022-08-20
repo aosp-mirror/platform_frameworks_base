@@ -21,8 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
@@ -30,6 +28,9 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
 import android.window.TaskFragmentInfo;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

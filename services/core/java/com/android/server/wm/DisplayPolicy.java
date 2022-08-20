@@ -2371,18 +2371,19 @@ public class DisplayPolicy {
             return;
         }
 
-        // The immersive mode confirmation should never affect the system bar visibility, otherwise
+        // Immersive mode confirmation should never affect the system bar visibility, otherwise
         // it will unhide the navigation bar and hide itself.
         if (winCandidate.getAttrs().token == mImmersiveModeConfirmation.getWindowToken()) {
-
-            // The immersive mode confirmation took the focus from mLastFocusedWindow which was
-            // controlling the system ui visibility. So if mLastFocusedWindow can still receive
-            // keys, we let it keep controlling the visibility.
-            final boolean lastFocusCanReceiveKeys =
-                    (mLastFocusedWindow != null && mLastFocusedWindow.canReceiveKeys());
-            winCandidate = isKeyguardShowing() && !isKeyguardOccluded() ? mNotificationShade
-                    : lastFocusCanReceiveKeys ? mLastFocusedWindow
-                            : mTopFullscreenOpaqueWindowState;
+            if (mNotificationShade != null && mNotificationShade.canReceiveKeys()) {
+                // Let notification shade control the system bar visibility.
+                winCandidate = mNotificationShade;
+            } else if (mLastFocusedWindow != null && mLastFocusedWindow.canReceiveKeys()) {
+                // Immersive mode confirmation took the focus from mLastFocusedWindow which was
+                // controlling the system bar visibility. Let it keep controlling the visibility.
+                winCandidate = mLastFocusedWindow;
+            } else {
+                winCandidate = mTopFullscreenOpaqueWindowState;
+            }
             if (winCandidate == null) {
                 return;
             }
