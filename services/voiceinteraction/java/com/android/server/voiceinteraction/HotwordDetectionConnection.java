@@ -18,6 +18,8 @@ package com.android.server.voiceinteraction;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
+import static android.service.voice.HotwordDetectedResult.EXTRA_PROXIMITY_METERS;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_SUCCESS;
@@ -56,6 +58,7 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.attention.AttentionManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -182,6 +185,12 @@ final class HotwordDetectionConnection {
     final int mUser;
     final Context mContext;
 
+    @Nullable final AttentionManagerInternal mAttentionManagerInternal;
+
+    final AttentionManagerInternal.ProximityUpdateCallbackInternal mProximityCallbackInternal =
+            this::setProximityMeters;
+
+
     volatile HotwordDetectionServiceIdentity mIdentity;
     private IMicrophoneHotwordDetectionVoiceInteractionCallback mSoftwareCallback;
     private Instant mLastRestartInstant;
@@ -202,6 +211,8 @@ final class HotwordDetectionConnection {
     private @NonNull ServiceConnection mRemoteHotwordDetectionService;
     private IBinder mAudioFlinger;
     private boolean mDebugHotwordLogging = false;
+    @GuardedBy("mLock")
+    private double mProximityMeters = PROXIMITY_UNKNOWN;
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
@@ -229,6 +240,10 @@ final class HotwordDetectionConnection {
         mServiceConnectionFactory = new ServiceConnectionFactory(intent, bindInstantServiceAllowed);
 
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
+        mAttentionManagerInternal = LocalServices.getService(AttentionManagerInternal.class);
+        if (mAttentionManagerInternal != null) {
+            mAttentionManagerInternal.onStartProximityUpdates(mProximityCallbackInternal);
+        }
 
         mLastRestartInstant = Instant.now();
         updateStateAfterProcessStart(options, sharedMemory);
@@ -393,6 +408,9 @@ final class HotwordDetectionConnection {
         if (mAudioFlinger != null) {
             mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
         }
+        if (mAttentionManagerInternal != null) {
+            mAttentionManagerInternal.onStopProximityUpdates(mProximityCallbackInternal);
+        }
     }
 
     void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory) {
@@ -460,6 +478,7 @@ final class HotwordDetectionConnection {
                         mSoftwareCallback.onError();
                         return;
                     }
+                    saveProximityMetersToBundle(result);
                     mSoftwareCallback.onDetected(result, null, null);
                     if (result != null) {
                         Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -564,6 +583,7 @@ final class HotwordDetectionConnection {
                         externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
                         return;
                     }
+                    saveProximityMetersToBundle(result);
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
                     if (result != null) {
                         Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -643,6 +663,7 @@ final class HotwordDetectionConnection {
                         externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
                         return;
                     }
+                    saveProximityMetersToBundle(result);
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
                     if (result != null) {
                         Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
@@ -1189,6 +1210,20 @@ final class HotwordDetectionConnection {
                 audioManager.removeAssistantServiceUid(uid);
             }
         });
+    }
+
+    private void saveProximityMetersToBundle(HotwordDetectedResult result) {
+        synchronized (mLock) {
+            if (result != null && mProximityMeters != PROXIMITY_UNKNOWN) {
+                result.getExtras().putDouble(EXTRA_PROXIMITY_METERS, mProximityMeters);
+            }
+        }
+    }
+
+    private void setProximityMeters(double proximityMeters) {
+        synchronized (mLock) {
+            mProximityMeters = proximityMeters;
+        }
     }
 
     private static void bestEffortClose(Closeable... closeables) {

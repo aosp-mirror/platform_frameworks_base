@@ -88,6 +88,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
+    @VisibleForTesting boolean mAnimateOnLayout = true;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -305,7 +306,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
 
         if (mDisplayedClockSize != null && !mChildrenAreLaidOut) {
-            post(() -> updateClockViews(mDisplayedClockSize == LARGE, /* animate */ true));
+            post(() -> updateClockViews(mDisplayedClockSize == LARGE, mAnimateOnLayout));
         }
 
         mChildrenAreLaidOut = true;
