@@ -5973,7 +5973,8 @@ public class NotificationManagerService extends SystemService {
         boolean sentAccessibilityEvent = false;
         // If the notification will appear in the status bar, it should send an accessibility
         // event
-        if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
+        if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN
+                && isNotificationForCurrentUser(record)) {
             sendAccessibilityEvent(notification, record.sbn.getPackageName());
             sentAccessibilityEvent = true;
         }
