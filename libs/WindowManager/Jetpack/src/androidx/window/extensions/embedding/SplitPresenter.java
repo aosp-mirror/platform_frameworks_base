@@ -102,37 +102,18 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     private final SplitController mController;
 
-    SplitPresenter(@NonNull Executor executor, SplitController controller) {
+    SplitPresenter(@NonNull Executor executor, @NonNull SplitController controller) {
         super(executor, controller);
         mController = controller;
         registerOrganizer();
     }
 
     /**
-     * Updates the presentation of the provided container.
-     */
-    void updateContainer(@NonNull TaskFragmentContainer container) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mController.updateContainer(wct, container);
-        applyTransaction(wct);
-    }
-
-    /**
      * Deletes the specified container and all other associated and dependent containers in the same
      * transaction.
      */
-    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        cleanupContainer(container, shouldFinishDependent, wct);
-        applyTransaction(wct);
-    }
-
-    /**
-     * Deletes the specified container and all other associated and dependent containers in the same
-     * transaction.
-     */
-    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent,
-            @NonNull WindowContainerTransaction wct) {
+    void cleanupContainer(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
         container.finish(shouldFinishDependent, this, wct, mController);
 
         final TaskFragmentContainer newTopContainer = mController.getTopActiveContainer(
@@ -190,10 +171,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      *                          created and the activity will be re-parented to it.
      * @param rule The split rule to be applied to the container.
      */
-    void createNewSplitContainer(@NonNull Activity primaryActivity,
-            @NonNull Activity secondaryActivity, @NonNull SplitPairRule rule) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-
+    void createNewSplitContainer(@NonNull WindowContainerTransaction wct,
+            @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity,
+            @NonNull SplitPairRule rule) {
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
         final Pair<Size, Size> minDimensionsPair = getActivitiesMinDimensionsPair(primaryActivity,
                 secondaryActivity);
@@ -219,8 +199,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 minDimensionsPair);
 
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
-
-        applyTransaction(wct);
     }
 
     /**
@@ -262,7 +240,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @param rule              The split rule to be applied to the container.
      * @param isPlaceholder     Whether the launch is a placeholder.
      */
-    void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent activityIntent,
+    void startActivityToSide(@NonNull WindowContainerTransaction wct,
+            @NonNull Activity launchingActivity, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions, @NonNull SplitRule rule, boolean isPlaceholder) {
         final Rect parentBounds = getParentContainerBounds(launchingActivity);
         final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(
@@ -284,7 +263,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 launchingActivity, taskId);
         final int windowingMode = mController.getTaskContainer(taskId)
                 .getWindowingModeForSplitTaskFragment(primaryRectBounds);
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
         mController.registerSplit(wct, primaryContainer, launchingActivity, secondaryContainer,
                 rule);
         startActivityToSide(wct, primaryContainer.getTaskFragmentToken(), primaryRectBounds,
@@ -294,7 +272,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // When placeholder is launched in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
         }
-        applyTransaction(wct);
     }
 
     /**
@@ -502,14 +479,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    static Pair<Size, Size> getActivitiesMinDimensionsPair(Activity primaryActivity,
-            Activity secondaryActivity) {
+    static Pair<Size, Size> getActivitiesMinDimensionsPair(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity) {
         return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryActivity));
     }
 
     @NonNull
-    static Pair<Size, Size> getActivityIntentMinDimensionsPair(Activity primaryActivity,
-            Intent secondaryIntent) {
+    static Pair<Size, Size> getActivityIntentMinDimensionsPair(@NonNull Activity primaryActivity,
+            @NonNull Intent secondaryIntent) {
         return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryIntent));
     }
 

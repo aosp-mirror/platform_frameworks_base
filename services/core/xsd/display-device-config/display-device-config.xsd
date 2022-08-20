@@ -23,6 +23,7 @@
 <xs:schema version="2.0"
            elementFormDefault="qualified"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="autobrightness.xsd" />
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
@@ -102,22 +103,6 @@
     </xs:element>
 
     <!-- Type definitions -->
-
-    <xs:complexType name="autoBrightness">
-        <xs:sequence>
-            <!-- Sets the debounce for autoBrightness brightening in millis-->
-            <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"
-                        minOccurs="0" maxOccurs="1">
-                <xs:annotation name="final"/>
-            </xs:element>
-            <!-- Sets the debounce for autoBrightness darkening in millis-->
-            <xs:element name="darkeningLightDebounceMillis" type="xs:nonNegativeInteger"
-                        minOccurs="0" maxOccurs="1">
-                <xs:annotation name="final"/>
-            </xs:element>
-        </xs:sequence>
-    </xs:complexType>
-
     <xs:complexType name="displayQuirks">
         <xs:sequence>
             <xs:element name="quirk" type="xs:string" minOccurs="0" maxOccurs="unbounded" />

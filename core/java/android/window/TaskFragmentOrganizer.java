@@ -16,7 +16,7 @@
 
 package android.window;
 
-import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENT_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
@@ -147,13 +147,25 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         }
     }
 
-    /** Called when a TaskFragment is created and organized by this organizer. */
+    /**
+     * Called when a TaskFragment is created and organized by this organizer.
+     *
+     * @param taskFragmentInfo  Info of the TaskFragment that is created.
+     */
     public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {}
 
-    /** Called when the status of an organized TaskFragment is changed. */
+    /**
+     * Called when the status of an organized TaskFragment is changed.
+     *
+     * @param taskFragmentInfo  Info of the TaskFragment that is changed.
+     */
     public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {}
 
-    /** Called when an organized TaskFragment is removed. */
+    /**
+     * Called when an organized TaskFragment is removed.
+     *
+     * @param taskFragmentInfo  Info of the TaskFragment that is removed.
+     */
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {}
 
     /**
@@ -176,6 +188,9 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * For case like screen size change, it will trigger onTaskFragmentParentInfoChanged with new
      * Task bounds, but may not trigger onTaskFragmentInfoChanged because there can be an override
      * bounds.
+     *
+     * @param taskId    Id of the parent Task that is changed.
+     * @param parentConfig  Config of the parent Task.
      * @hide
      */
     public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
@@ -226,7 +241,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     /**
      * Called when an Activity is reparented to the Task with organized TaskFragment. For example,
      * when an Activity enters and then exits Picture-in-picture, it will be reparented back to its
-     * orginial Task. In this case, we need to notify the organizer so that it can check if the
+     * original Task. In this case, we need to notify the organizer so that it can check if the
      * Activity matches any split rule.
      *
      * @param taskId            The Task that the activity is reparented to.
@@ -238,7 +253,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                          {@link WindowContainerTransaction} if needed.
      * @hide
      */
-    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+    public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {}
 
     /**
@@ -298,8 +313,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                             errorBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION,
                                     java.lang.Throwable.class));
                     break;
-                case TYPE_ACTIVITY_REPARENT_TO_TASK:
-                    onActivityReparentToTask(
+                case TYPE_ACTIVITY_REPARENTED_TO_TASK:
+                    onActivityReparentedToTask(
                             change.getTaskId(),
                             change.getActivityIntent(),
                             change.getActivityToken());
