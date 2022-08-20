@@ -2317,11 +2317,6 @@ public abstract class BatteryStats {
     public abstract void finishIteratingHistoryLocked();
 
     /**
-     * Return the base time offset for the battery history.
-     */
-    public abstract long getHistoryBaseTime();
-
-    /**
      * Returns the number of times the device has been started.
      */
     public abstract int getStartCount();
@@ -7605,8 +7600,6 @@ public abstract class BatteryStats {
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
                 CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
                 getEndPlatformVersion());
-
-        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
         if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
             if (startIteratingHistoryLocked()) {
