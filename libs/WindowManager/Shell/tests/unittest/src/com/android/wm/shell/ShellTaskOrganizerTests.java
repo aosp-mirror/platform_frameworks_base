@@ -16,9 +16,11 @@
 
 package com.android.wm.shell;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -30,6 +32,8 @@ import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIO
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
@@ -38,9 +42,11 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
+import android.app.WindowConfiguration;
 import android.content.LocusId;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
@@ -53,6 +59,8 @@ import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransaction.Change;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -628,6 +636,71 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         verify(mTaskOrganizerController).restartTaskTopActivityProcessIfVisible(task1.token);
     }
 
+    @Test
+    public void testPrepareClearBoundsForTasks() {
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_UNDEFINED);
+        task1.displayId = 1;
+        MockToken token1 = new MockToken();
+        task1.token = token1.token();
+        mOrganizer.onTaskAppeared(task1, null);
+
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_UNDEFINED);
+        task2.displayId = 1;
+        MockToken token2 = new MockToken();
+        task2.token = token2.token();
+        mOrganizer.onTaskAppeared(task2, null);
+
+        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_UNDEFINED);
+        otherDisplayTask.displayId = 2;
+        MockToken otherDisplayToken = new MockToken();
+        otherDisplayTask.token = otherDisplayToken.token();
+        mOrganizer.onTaskAppeared(otherDisplayTask, null);
+
+        WindowContainerTransaction wct = mOrganizer.prepareClearBoundsForTasks(1);
+
+        assertEquals(wct.getChanges().size(), 2);
+        Change boundsChange1 = wct.getChanges().get(token1.binder());
+        assertNotNull(boundsChange1);
+        assertNotEquals(
+                (boundsChange1.getWindowSetMask() & WindowConfiguration.WINDOW_CONFIG_BOUNDS), 0);
+        assertTrue(boundsChange1.getConfiguration().windowConfiguration.getBounds().isEmpty());
+
+        Change boundsChange2 = wct.getChanges().get(token2.binder());
+        assertNotNull(boundsChange2);
+        assertNotEquals(
+                (boundsChange2.getWindowSetMask() & WindowConfiguration.WINDOW_CONFIG_BOUNDS), 0);
+        assertTrue(boundsChange2.getConfiguration().windowConfiguration.getBounds().isEmpty());
+    }
+
+    @Test
+    public void testPrepareClearFreeformForTasks() {
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FREEFORM);
+        task1.displayId = 1;
+        MockToken token1 = new MockToken();
+        task1.token = token1.token();
+        mOrganizer.onTaskAppeared(task1, null);
+
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        task2.displayId = 1;
+        MockToken token2 = new MockToken();
+        task2.token = token2.token();
+        mOrganizer.onTaskAppeared(task2, null);
+
+        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_FREEFORM);
+        otherDisplayTask.displayId = 2;
+        MockToken otherDisplayToken = new MockToken();
+        otherDisplayTask.token = otherDisplayToken.token();
+        mOrganizer.onTaskAppeared(otherDisplayTask, null);
+
+        WindowContainerTransaction wct = mOrganizer.prepareClearFreeformForTasks(1);
+
+        // Only task with freeform windowing mode and the right display should be updated
+        assertEquals(wct.getChanges().size(), 1);
+        Change wmModeChange1 = wct.getChanges().get(token1.binder());
+        assertNotNull(wmModeChange1);
+        assertEquals(wmModeChange1.getWindowingMode(), WINDOWING_MODE_UNDEFINED);
+    }
+
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
@@ -635,4 +708,22 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         return taskInfo;
     }
 
+    private static class MockToken {
+        private final WindowContainerToken mToken;
+        private final IBinder mBinder;
+
+        MockToken() {
+            mToken = mock(WindowContainerToken.class);
+            mBinder = mock(IBinder.class);
+            when(mToken.asBinder()).thenReturn(mBinder);
+        }
+
+        WindowContainerToken token() {
+            return mToken;
+        }
+
+        IBinder binder() {
+            return mBinder;
+        }
+    }
 }
