@@ -221,8 +221,7 @@ public class SystemWindows {
             }
             final Display display = mDisplayController.getDisplay(mDisplayId);
             SurfaceControlViewHost viewRoot =
-                    new SurfaceControlViewHost(
-                            view.getContext(), display, wwm, true /* useSfChoreographer */);
+                    new SurfaceControlViewHost(view.getContext(), display, wwm);
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);

@@ -36,8 +36,10 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.isIndependent;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -1080,6 +1082,39 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(2, info.getChanges().size());
         assertTrue((info.getChanges().get(0).getFlags() & FLAG_IS_EMBEDDED) != 0);
         assertTrue((info.getChanges().get(1).getFlags() & FLAG_IS_EMBEDDED) != 0);
+    }
+
+    @Test
+    public void testIncludeEmbeddedActivityReparent() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final Task task = createTask(mDisplayContent);
+        task.setBounds(new Rect(0, 0, 2000, 1000));
+        final ActivityRecord activity = createActivityRecord(task);
+        activity.mVisibleRequested = true;
+        // Skip manipulate the SurfaceControl.
+        doNothing().when(activity).setDropInputMode(anyInt());
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final TaskFragment embeddedTf = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(organizer)
+                .build();
+        // TaskFragment with different bounds from Task.
+        embeddedTf.setBounds(new Rect(0, 0, 1000, 1000));
+
+        // Start states.
+        transition.collect(activity);
+        transition.collectExistenceChange(embeddedTf);
+
+        // End states.
+        activity.reparent(embeddedTf, POSITION_TOP);
+
+        // Verify that both activity and TaskFragment are included.
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                transition.mParticipants, transition.mChanges);
+        assertTrue(targets.contains(embeddedTf));
+        assertTrue(targets.contains(activity));
     }
 
     private static void makeTaskOrganized(Task... tasks) {

@@ -2841,6 +2841,7 @@ public class UserManager {
     /**
      * @hide
      */
+    @TestApi
     public static boolean isUsersOnSecondaryDisplaysEnabled() {
         return SystemProperties.getBoolean("fw.users_on_secondary_displays",
                 Resources.getSystem()

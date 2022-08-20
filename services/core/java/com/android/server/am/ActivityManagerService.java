@@ -459,6 +459,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback, ActivityManagerGlobalLock {
@@ -4304,7 +4305,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 null /* excludedPackages */, OP_NONE, null /* bOptions */, false /* ordered */,
                 false /* sticky */, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                 Binder.getCallingPid(), userId, false /* allowBackgroundActivityStarts */,
-                null /* backgroundActivityStartsToken */, broadcastAllowList);
+                null /* backgroundActivityStartsToken */,
+                broadcastAllowList, null /* filterExtrasForReceiver */);
     }
 
     private void cleanupDisabledPackageComponentsLocked(
@@ -13357,7 +13359,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, null, -1, -1, false, null, null, null, null, OP_NONE, null,
                             receivers, null, 0, null, null, false, true, true, -1, false, null,
-                            false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */);
+                            false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
+                            null /* filterExtrasForReceiver */);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -13620,7 +13623,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 excludedPermissions, excludedPackages, appOp, bOptions, ordered, sticky, callingPid,
                 callingUid, realCallingUid, realCallingPid, userId,
                 false /* allowBackgroundActivityStarts */,
-                null /* tokenNeededForBackgroundActivityStarts */, null /* broadcastAllowList */);
+                null /* tokenNeededForBackgroundActivityStarts */,
+                null /* broadcastAllowList */, null /* filterExtrasForReceiver */);
     }
 
     @GuardedBy("this")
@@ -13633,7 +13637,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             int realCallingUid, int realCallingPid, int userId,
             boolean allowBackgroundActivityStarts,
             @Nullable IBinder backgroundActivityStartsToken,
-            @Nullable int[] broadcastAllowList) {
+            @Nullable int[] broadcastAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
         intent = new Intent(intent);
 
         final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
@@ -14233,7 +14238,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
                     registeredReceivers, resultTo, resultCode, resultData, resultExtras, ordered,
                     sticky, false, userId, allowBackgroundActivityStarts,
-                    backgroundActivityStartsToken, timeoutExempt);
+                    backgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending
                     && (queue.replaceParallelBroadcastLocked(r) != null);
@@ -14331,7 +14336,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
                     receivers, resultTo, resultCode, resultData, resultExtras,
                     ordered, sticky, false, userId, allowBackgroundActivityStarts,
-                    backgroundActivityStartsToken, timeoutExempt);
+                    backgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
 
@@ -14523,7 +14528,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
                         null, OP_NONE, bOptions, serialized, sticky, -1, uid, realCallingUid,
                         realCallingPid, userId, allowBackgroundActivityStarts,
-                        backgroundActivityStartsToken, broadcastAllowList);
+                        backgroundActivityStartsToken, broadcastAllowList,
+                        null /* filterExtrasForReceiver */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -16202,10 +16208,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId,
-            @Nullable IProgressListener unlockListener) {
+    public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId) {
         // Permission check done inside UserController.
-        return mUserController.startUserOnSecondaryDisplay(userId, displayId, unlockListener);
+        return mUserController.startUserOnSecondaryDisplay(userId, displayId,
+                /* unlockListener= */ null);
     }
 
     /**
@@ -17065,7 +17071,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int broadcastIntent(Intent intent,
                 IIntentReceiver resultTo,
                 String[] requiredPermissions,
-                boolean serialized, int userId, int[] appIdAllowList, @Nullable Bundle bOptions) {
+                boolean serialized, int userId, int[] appIdAllowList,
+                @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+                @Nullable Bundle bOptions) {
             synchronized (ActivityManagerService.this) {
                 intent = verifyBroadcastLocked(intent);
 
@@ -17081,7 +17089,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             AppOpsManager.OP_NONE, bOptions /*options*/, serialized,
                             false /*sticky*/, callingPid, callingUid, callingUid, callingPid,
                             userId, false /*allowBackgroundStarts*/,
-                            null /*tokenNeededForBackgroundActivityStarts*/, appIdAllowList);
+                            null /*tokenNeededForBackgroundActivityStarts*/,
+                            appIdAllowList, filterExtrasForReceiver);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -18405,11 +18414,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, new AttributionSource(shellUid,
+                    return superImpl.apply(code, new AttributionSource(shellUid, /*pid*/ -1,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), attributionSource.getNext()),
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skiProxyOperation);
+                            attributionSource.getToken(), /*renouncedPermissions*/ null,
+                            attributionSource.getNext()), shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, skiProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -18456,12 +18465,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, new AttributionSource(shellUid,
+                    return superImpl.apply(code, new AttributionSource(shellUid, /*pid*/ -1,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), attributionSource.getNext()),
-                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
-                            proxiedAttributionFlags, attributionChainId);
+                            attributionSource.getToken(), /*renouncedPermissions*/ null,
+                            attributionSource.getNext()), startIfModeDefault,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlags,
+                            attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -18480,10 +18490,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    superImpl.apply(code, new AttributionSource(shellUid,
+                    superImpl.apply(code, new AttributionSource(shellUid, /*pid*/ -1,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), attributionSource.getNext()),
-                            skipProxyOperation);
+                            attributionSource.getToken(), /*renouncedPermissions*/ null,
+                            attributionSource.getNext()), skipProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

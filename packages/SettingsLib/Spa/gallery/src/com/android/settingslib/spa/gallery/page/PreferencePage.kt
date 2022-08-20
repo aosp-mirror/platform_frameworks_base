@@ -20,13 +20,16 @@ import android.os.Bundle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DisabledByDefault
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +39,7 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.ui.SettingsIcon
 import kotlinx.coroutines.delay
 
 object PreferencePageProvider : SettingsPageProvider {
@@ -75,14 +79,17 @@ private fun PreferencePage() {
             }
         })
 
-        var count by remember { mutableStateOf(0) }
+        var count by rememberSaveable { mutableStateOf(0) }
         Preference(object : PreferenceModel {
             override val title = "Click me"
             override val summary = derivedStateOf { count.toString() }
             override val onClick: (() -> Unit) = { count++ }
+            override val icon = @Composable {
+                SettingsIcon(imageVector = Icons.Outlined.TouchApp)
+            }
         })
 
-        var ticks by remember { mutableStateOf(0) }
+        var ticks by rememberSaveable { mutableStateOf(0) }
         LaunchedEffect(ticks) {
             delay(1000L)
             ticks++
@@ -96,6 +103,9 @@ private fun PreferencePage() {
             override val title = "Disabled"
             override val summary = "Disabled".toState()
             override val enabled = false.toState()
+            override val icon = @Composable {
+              SettingsIcon(imageVector = Icons.Outlined.DisabledByDefault)
+            }
         })
     }
 }

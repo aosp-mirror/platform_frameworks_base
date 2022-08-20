@@ -1252,6 +1252,20 @@ static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, j
     return fd;
 }
 
+void android_os_Process_freezeCgroupUID(JNIEnv* env, jobject clazz, jint uid, jboolean freeze) {
+    bool success = true;
+
+    if (freeze) {
+        success = SetUserProfiles(uid, {"Frozen"});
+    } else {
+        success = SetUserProfiles(uid, {"Unfrozen"});
+    }
+
+    if (!success) {
+        jniThrowRuntimeException(env, "Could not apply user profile");
+    }
+}
+
 static const JNINativeMethod methods[] = {
         {"getUidForName", "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
         {"getGidForName", "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
@@ -1293,6 +1307,7 @@ static const JNINativeMethod methods[] = {
         {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
         {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
         {"nativePidFdOpen", "(II)I", (void*)android_os_Process_nativePidFdOpen},
+        {"freezeCgroupUid", "(IZ)V", (void*)android_os_Process_freezeCgroupUID},
 };
 
 int register_android_os_Process(JNIEnv* env)

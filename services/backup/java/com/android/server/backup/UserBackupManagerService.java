@@ -160,7 +160,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
@@ -3401,7 +3400,8 @@ public class UserBackupManagerService {
     }
 
     /**
-     * Selects transport {@code transportName} and returns previously selected transport.
+     * Selects transport {@code transportName}, if it is already registered, and returns previously
+     * selected transport. Returns {@code null} if the transport is not registered.
      *
      * @deprecated Use {@link #selectBackupTransportAsync(ComponentName,
      * ISelectBackupTransportCallback)} instead.
@@ -3414,6 +3414,17 @@ public class UserBackupManagerService {
 
         final long oldId = Binder.clearCallingIdentity();
         try {
+            if (!mTransportManager.isTransportRegistered(transportName)) {
+                Slog.v(
+                        TAG,
+                        addUserIdToLogMessage(
+                                mUserId,
+                                "Could not select transport "
+                                        + transportName
+                                        + ", as the transport is not registered."));
+                return null;
+            }
+
             String previousTransportName = mTransportManager.selectTransport(transportName);
             updateStateForTransport(transportName);
             Slog.v(

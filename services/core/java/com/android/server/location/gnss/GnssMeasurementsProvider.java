@@ -40,10 +40,7 @@ import com.android.server.location.injector.SettingsHelper;
 import java.util.Collection;
 
 /**
- * An base implementation for GNSS measurements provider. It abstracts out the responsibility of
- * handling listeners, while still allowing technology specific implementations to be built.
- *
- * @hide
+ * GNSS measurements HAL module and listener multiplexer.
  */
 public final class GnssMeasurementsProvider extends
         GnssListenerMultiplexer<GnssMeasurementRequest, IGnssMeasurementsListener,
@@ -61,7 +58,9 @@ public final class GnssMeasurementsProvider extends
         }
 
         @Override
-        protected void onGnssListenerRegister() {
+        protected void onRegister() {
+            super.onRegister();
+
             executeOperation(listener -> listener.onStatusChanged(
                     GnssMeasurementsEvent.Callback.STATUS_READY));
         }

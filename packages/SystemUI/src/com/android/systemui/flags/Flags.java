@@ -151,8 +151,8 @@ public class Flags {
     public static final ResourceBooleanFlag STATUS_BAR_USER_SWITCHER =
             new ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip);
 
-    public static final UnreleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
-            new UnreleasedFlag(603, false);
+    public static final ReleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
+            new ReleasedFlag(603, false);
 
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE = new UnreleasedFlag(604, true);
 
@@ -236,6 +236,9 @@ public class Flags {
     // 1300 - screenshots
 
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
+
+    // 1400 - columbus, b/242800729
+    public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

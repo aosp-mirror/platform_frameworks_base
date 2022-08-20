@@ -36,6 +36,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.NotifPanelEvents
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
@@ -85,11 +86,20 @@ class MediaHierarchyManager @Inject constructor(
     private val bypassController: KeyguardBypassController,
     private val mediaCarouselController: MediaCarouselController,
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
+    private val keyguardViewController: KeyguardViewController,
+    private val dreamOverlayStateController: DreamOverlayStateController,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    private val keyguardViewController: KeyguardViewController,
-    private val dreamOverlayStateController: DreamOverlayStateController
+    panelEventsEvents: NotifPanelEvents,
 ) {
+
+    /**
+     * Whether we "skip" QQS during panel expansion.
+     *
+     * This means that when expanding the panel we go directly to QS. Also when we are on QS and
+     * start closing the panel, it fully collapses instead of going to QQS.
+     */
+    private var skipQqsOnExpansion: Boolean = false
 
     /**
      * The root overlay of the hierarchy. This is where the media notification is attached to
@@ -504,6 +514,13 @@ class MediaHierarchyManager @Inject constructor(
         mediaCarouselController.updateUserVisibility = {
             mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
         }
+
+        panelEventsEvents.registerListener(object : NotifPanelEvents.Listener {
+            override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
+                skipQqsOnExpansion = isExpandImmediateEnabled
+                updateDesiredLocation()
+            }
+        })
     }
 
     private fun updateConfiguration() {
@@ -701,6 +718,9 @@ class MediaHierarchyManager @Inject constructor(
         if (isCurrentlyInGuidedTransformation()) {
             return false
         }
+        if (skipQqsOnExpansion) {
+            return false
+        }
         // This is an invalid transition, and can happen when using the camera gesture from the
         // lock screen. Disallow.
         if (previousLocation == LOCATION_LOCKSCREEN &&
@@ -852,6 +872,9 @@ class MediaHierarchyManager @Inject constructor(
      * otherwise
      */
     private fun getTransformationProgress(): Float {
+        if (skipQqsOnExpansion) {
+            return -1.0f
+        }
         val progress = getQSTransformationProgress()
         if (statusbarState != StatusBarState.KEYGUARD && progress >= 0) {
             return progress
@@ -1041,6 +1064,10 @@ class MediaHierarchyManager @Inject constructor(
             // in an animated way. Let's keep it in the lockscreen until we're fully awake and
             // reattach it without an animation
             return LOCATION_LOCKSCREEN
+        }
+        if (skipQqsOnExpansion) {
+            // When doing an immediate expand or collapse, we want to keep it in QS.
+            return LOCATION_QS
         }
         return location
     }

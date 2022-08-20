@@ -2626,7 +2626,7 @@ final class InstallPackageHelper {
                     }
                     final String[] pkgNames = new String[]{res.mRemovedInfo.mRemovedPackage};
                     final int[] uids = new int[]{res.mRemovedInfo.mUid};
-                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm.snapshotComputer(),
+                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer,
                             false /* mediaStatus */, true /* replacing */, pkgNames, uids);
                 }
                 res.mRemovedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
@@ -2804,7 +2804,7 @@ final class InstallPackageHelper {
                     }
                     final String[] pkgNames = new String[]{packageName};
                     final int[] uids = new int[]{res.mPkg.getUid()};
-                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm.snapshotComputer(),
+                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer,
                             true /* mediaStatus */, true /* replacing */, pkgNames, uids);
                 }
             } else if (!ArrayUtils.isEmpty(res.mLibraryConsumers)) { // if static shared lib

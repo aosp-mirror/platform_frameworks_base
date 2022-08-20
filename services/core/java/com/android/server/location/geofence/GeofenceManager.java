@@ -59,8 +59,8 @@ import java.util.Objects;
  * Manages all geofences.
  */
 public class GeofenceManager extends
-        ListenerMultiplexer<GeofenceKey, PendingIntent, GeofenceManager.GeofenceRegistration,
-                LocationRequest> implements
+        ListenerMultiplexer<GeofenceManager.GeofenceKey, PendingIntent,
+                GeofenceManager.GeofenceRegistration, LocationRequest> implements
         LocationListener {
 
     private static final String TAG = "GeofenceManager";
@@ -73,13 +73,49 @@ public class GeofenceManager extends
     private static final long MAX_LOCATION_AGE_MS = 5 * 60 * 1000L; // five minutes
     private static final long MAX_LOCATION_INTERVAL_MS = 2 * 60 * 60 * 1000; // two hours
 
-    protected final class GeofenceRegistration extends
-            PendingIntentListenerRegistration<Geofence, PendingIntent> {
+    // geofencing unfortunately allows multiple geofences under the same pending intent, even though
+    // this makes no real sense. therefore we manufacture an artificial key to use (pendingintent +
+    // geofence) instead of (pendingintent).
+    static class GeofenceKey {
+
+        private final PendingIntent mPendingIntent;
+        private final Geofence mGeofence;
+
+        GeofenceKey(PendingIntent pendingIntent, Geofence geofence) {
+            mPendingIntent = Objects.requireNonNull(pendingIntent);
+            mGeofence = Objects.requireNonNull(geofence);
+        }
+
+        public PendingIntent getPendingIntent() {
+            return mPendingIntent;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof GeofenceKey) {
+                GeofenceKey that = (GeofenceKey) o;
+                return mPendingIntent.equals(that.mPendingIntent) && mGeofence.equals(
+                        that.mGeofence);
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return mPendingIntent.hashCode();
+        }
+    }
+
+    protected class GeofenceRegistration extends
+            PendingIntentListenerRegistration<GeofenceKey, PendingIntent> {
 
         private static final int STATE_UNKNOWN = 0;
         private static final int STATE_INSIDE = 1;
         private static final int STATE_OUTSIDE = 2;
 
+        private final Geofence mGeofence;
+        private final CallerIdentity mIdentity;
         private final Location mCenter;
         private final PowerManager.WakeLock mWakeLock;
 
@@ -89,13 +125,15 @@ public class GeofenceManager extends
         // spam us, and because checking the values may be more expensive
         private boolean mPermitted;
 
-        private @Nullable Location mCachedLocation;
+        @Nullable private Location mCachedLocation;
         private float mCachedLocationDistanceM;
 
-        protected GeofenceRegistration(Geofence geofence, CallerIdentity identity,
+        GeofenceRegistration(Geofence geofence, CallerIdentity identity,
                 PendingIntent pendingIntent) {
-            super(geofence, identity, pendingIntent);
+            super(pendingIntent);
 
+            mGeofence = geofence;
+            mIdentity = identity;
             mCenter = new Location("");
             mCenter.setLatitude(geofence.getLatitude());
             mCenter.setLongitude(geofence.getLongitude());
@@ -107,16 +145,36 @@ public class GeofenceManager extends
             mWakeLock.setWorkSource(identity.addToWorkSource(null));
         }
 
+        public Geofence getGeofence() {
+            return mGeofence;
+        }
+
+        public CallerIdentity getIdentity() {
+            return mIdentity;
+        }
+
+        @Override
+        public String getTag() {
+            return TAG;
+        }
+
+        @Override
+        protected PendingIntent getPendingIntentFromKey(GeofenceKey geofenceKey) {
+            return geofenceKey.getPendingIntent();
+        }
+
         @Override
         protected GeofenceManager getOwner() {
             return GeofenceManager.this;
         }
 
         @Override
-        protected void onPendingIntentListenerRegister() {
+        protected void onRegister() {
+            super.onRegister();
+
             mGeofenceState = STATE_UNKNOWN;
             mPermitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
-                    getIdentity());
+                    mIdentity);
         }
 
         @Override
@@ -132,7 +190,7 @@ public class GeofenceManager extends
         }
 
         boolean onLocationPermissionsChanged(@Nullable String packageName) {
-            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
+            if (packageName == null || mIdentity.getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -140,7 +198,7 @@ public class GeofenceManager extends
         }
 
         boolean onLocationPermissionsChanged(int uid) {
-            if (getIdentity().getUid() == uid) {
+            if (mIdentity.getUid() == uid) {
                 return onLocationPermissionsChanged();
             }
 
@@ -149,7 +207,7 @@ public class GeofenceManager extends
 
         private boolean onLocationPermissionsChanged() {
             boolean permitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
-                    getIdentity());
+                    mIdentity);
             if (permitted != mPermitted) {
                 mPermitted = permitted;
                 return true;
@@ -164,12 +222,12 @@ public class GeofenceManager extends
                 mCachedLocationDistanceM = mCenter.distanceTo(mCachedLocation);
             }
 
-            return Math.abs(getRequest().getRadius() - mCachedLocationDistanceM);
+            return Math.abs(mGeofence.getRadius() - mCachedLocationDistanceM);
         }
 
         ListenerOperation<PendingIntent> onLocationChanged(Location location) {
             // remove expired fences
-            if (getRequest().isExpired()) {
+            if (mGeofence.isExpired()) {
                 remove();
                 return null;
             }
@@ -178,7 +236,7 @@ public class GeofenceManager extends
             mCachedLocationDistanceM = mCenter.distanceTo(mCachedLocation);
 
             int oldState = mGeofenceState;
-            float radius = Math.max(getRequest().getRadius(), location.getAccuracy());
+            float radius = Math.max(mGeofence.getRadius(), location.getAccuracy());
             if (mCachedLocationDistanceM <= radius) {
                 mGeofenceState = STATE_INSIDE;
                 if (oldState != STATE_INSIDE) {
@@ -206,14 +264,14 @@ public class GeofenceManager extends
                         null, null, PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
             } catch (PendingIntent.CanceledException e) {
                 mWakeLock.release();
-                removeRegistration(new GeofenceKey(pendingIntent, getRequest()), this);
+                removeRegistration(new GeofenceKey(pendingIntent, mGeofence), this);
             }
         }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append(getIdentity());
+            builder.append(mIdentity);
 
             ArraySet<String> flags = new ArraySet<>(1);
             if (!mPermitted) {
@@ -223,7 +281,7 @@ public class GeofenceManager extends
                 builder.append(" ").append(flags);
             }
 
-            builder.append(" ").append(getRequest());
+            builder.append(" ").append(mGeofence);
             return builder.toString();
         }
     }
@@ -258,10 +316,10 @@ public class GeofenceManager extends
     protected final LocationUsageLogger mLocationUsageLogger;
 
     @GuardedBy("mLock")
-    private @Nullable LocationManager mLocationManager;
+    @Nullable private LocationManager mLocationManager;
 
     @GuardedBy("mLock")
-    private @Nullable Location mLastLocation;
+    @Nullable private Location mLastLocation;
 
     public GeofenceManager(Context context, Injector injector) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
@@ -269,11 +327,6 @@ public class GeofenceManager extends
         mSettingsHelper = injector.getSettingsHelper();
         mLocationPermissionsHelper = injector.getLocationPermissionsHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
-    }
-
-    @Override
-    public String getTag() {
-        return TAG;
     }
 
     private LocationManager getLocationManager() {
@@ -375,7 +428,7 @@ public class GeofenceManager extends
                 /* LocationRequest= */ null,
                 /* hasListener= */ false,
                 true,
-                registration.getRequest(), true);
+                registration.getGeofence(), true);
     }
 
     @Override
@@ -389,7 +442,7 @@ public class GeofenceManager extends
                 /* LocationRequest= */ null,
                 /* hasListener= */ false,
                 true,
-                registration.getRequest(), true);
+                registration.getGeofence(), true);
     }
 
     @Override
@@ -417,7 +470,7 @@ public class GeofenceManager extends
         WorkSource workSource = null;
         double minFenceDistanceM = Double.MAX_VALUE;
         for (GeofenceRegistration registration : registrations) {
-            if (registration.getRequest().isExpired(realtimeMs)) {
+            if (registration.getGeofence().isExpired(realtimeMs)) {
                 continue;
             }
 

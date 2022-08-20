@@ -769,6 +769,6 @@ interface IActivityManager {
      *
      * <p>Typically used only by automotive builds when the vehicle has multiple displays.
      */
-    boolean startUserInBackgroundOnSecondaryDisplay(int userid, int displayId, IProgressListener unlockProgressListener);
+    boolean startUserInBackgroundOnSecondaryDisplay(int userid, int displayId);
 
 }

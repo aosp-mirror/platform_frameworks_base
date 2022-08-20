@@ -27,7 +27,6 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -127,7 +126,7 @@ public final class DistractingPackageHelper {
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendDistractingPackagesChanged(snapshot, changedPackages, changedUids.toArray(), userId,
+            sendDistractingPackagesChanged(changedPackages, changedUids.toArray(), userId,
                     restrictionFlags);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -169,7 +168,7 @@ public final class DistractingPackageHelper {
         if (!changedPackages.isEmpty()) {
             final String[] packageArray = changedPackages.toArray(
                     new String[changedPackages.size()]);
-            sendDistractingPackagesChanged(snapshot, packageArray, changedUids.toArray(), userId,
+            sendDistractingPackagesChanged(packageArray, changedUids.toArray(), userId,
                     RESTRICTION_NONE);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -182,24 +181,21 @@ public final class DistractingPackageHelper {
      * @param uidList The uids of packages which have suspension changes.
      * @param userId The user where packages reside.
      */
-    void sendDistractingPackagesChanged(@NonNull Computer snapshot, @NonNull String[] pkgList,
-            int[] uidList, int userId, int distractionFlags) {
-        final List<BroadcastParams> lists = mBroadcastHelper.getBroadcastParams(
-                snapshot, pkgList, uidList, userId);
+    void sendDistractingPackagesChanged(@NonNull String[] pkgList, int[] uidList, int userId,
+            int distractionFlags) {
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
+        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
+
         final Handler handler = mInjector.getHandler();
-        for (int i = 0; i < lists.size(); i++) {
-            final Bundle extras = new Bundle(3);
-            final BroadcastParams list = lists.get(i);
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, list.getPackageNames());
-            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, list.getUids());
-            extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
-            final SparseArray<int[]> allowList = list.getAllowList().size() == 0
-                    ? null : list.getAllowList();
-            handler.post(() -> mBroadcastHelper.sendPackageBroadcast(
-                    Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */,
-                    extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
-                    null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                    allowList, null /* bOptions */));
-        }
+        handler.post(() -> mBroadcastHelper.sendPackageBroadcast(
+                Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */,
+                extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
+                null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
+                null /* broadcastAllowList */,
+                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
+                        mPm.snapshotComputer(), callingUid, intentExtras),
+                null /* bOptions */));
     }
 }

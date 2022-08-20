@@ -10841,6 +10841,23 @@ public final class Settings {
                 "accessibility_software_cursor_enabled";
 
         /**
+         * Software Cursor settings that specifies whether trigger hints are enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SOFTWARE_CURSOR_TRIGGER_HINTS_ENABLED =
+                "accessibility_software_cursor_trigger_hints_enabled";
+
+        /**
+         * Software Cursor settings that specifies whether triggers are shifted when the keyboard
+         * is shown.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SOFTWARE_CURSOR_KEYBOARD_SHIFT_ENABLED =
+                "accessibility_software_cursor_keyboard_shift_enabled";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide

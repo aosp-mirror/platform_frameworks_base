@@ -30,6 +30,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.graphics.ColorUtils;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -42,7 +44,8 @@ import java.text.NumberFormat;
  * @hide
  */
 final class WirelessChargingLayout extends FrameLayout {
-    private static final long RIPPLE_ANIMATION_DURATION = 1500;
+    private static final long CIRCLE_RIPPLE_ANIMATION_DURATION = 1500;
+    private static final long ROUNDED_BOX_RIPPLE_ANIMATION_DURATION = 1750;
     private static final int SCRIM_COLOR = 0x4C000000;
     private static final int SCRIM_FADE_DURATION = 300;
     private RippleView mRippleView;
@@ -131,17 +134,30 @@ final class WirelessChargingLayout extends FrameLayout {
                 "backgroundColor", SCRIM_COLOR, Color.TRANSPARENT);
         scrimFadeOutAnimator.setDuration(SCRIM_FADE_DURATION);
         scrimFadeOutAnimator.setInterpolator(Interpolators.LINEAR);
-        scrimFadeOutAnimator.setStartDelay(RIPPLE_ANIMATION_DURATION - SCRIM_FADE_DURATION);
+        scrimFadeOutAnimator.setStartDelay((rippleShape == RippleShape.CIRCLE
+                ? CIRCLE_RIPPLE_ANIMATION_DURATION : ROUNDED_BOX_RIPPLE_ANIMATION_DURATION)
+                - SCRIM_FADE_DURATION);
         AnimatorSet animatorSetScrim = new AnimatorSet();
         animatorSetScrim.playTogether(scrimFadeInAnimator, scrimFadeOutAnimator);
         animatorSetScrim.start();
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
         mRippleView.setupShader(rippleShape);
+        if (mRippleView.getRippleShape() == RippleShape.ROUNDED_BOX) {
+            mRippleView.setDuration(ROUNDED_BOX_RIPPLE_ANIMATION_DURATION);
+            mRippleView.setSparkleStrength(0.22f);
+            int color = Utils.getColorAttr(mRippleView.getContext(),
+                    android.R.attr.colorAccent).getDefaultColor();
+            mRippleView.setColor(ColorUtils.setAlphaComponent(color, 28));
+        } else {
+            mRippleView.setDuration(CIRCLE_RIPPLE_ANIMATION_DURATION);
+            mRippleView.setColor(Utils.getColorAttr(mRippleView.getContext(),
+                    android.R.attr.colorAccent).getDefaultColor());
+        }
+
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View view) {
-                mRippleView.setDuration(RIPPLE_ANIMATION_DURATION);
                 mRippleView.startRipple();
                 mRippleView.removeOnAttachStateChangeListener(this);
             }
@@ -232,13 +248,13 @@ final class WirelessChargingLayout extends FrameLayout {
             int height = getMeasuredHeight();
             mRippleView.setCenter(width * 0.5f, height * 0.5f);
             if (mRippleView.getRippleShape() == RippleShape.ROUNDED_BOX) {
-                mRippleView.setMaxSize(width * 1.5f, height * 1.5f);
+                // Those magic numbers are introduced for visual polish. This aspect ratio maps with
+                // the tablet's docking station.
+                mRippleView.setMaxSize(width * 1.36f, height * 1.46f);
             } else {
                 float maxSize = Math.max(width, height);
                 mRippleView.setMaxSize(maxSize, maxSize);
             }
-            mRippleView.setColor(Utils.getColorAttr(mRippleView.getContext(),
-                    android.R.attr.colorAccent).getDefaultColor());
         }
 
         super.onLayout(changed, left, top, right, bottom);

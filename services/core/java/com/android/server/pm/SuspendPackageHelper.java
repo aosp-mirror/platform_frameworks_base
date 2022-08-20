@@ -38,7 +38,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -184,11 +183,9 @@ public final class SuspendPackageHelper {
             }
         });
 
-        final Computer newSnapshot = mPm.snapshotComputer();
-
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(new String[0]);
-            sendPackagesSuspendedForUser(newSnapshot,
+            sendPackagesSuspendedForUser(
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
                     changedPackages, changedUids.toArray(), userId);
@@ -197,7 +194,7 @@ public final class SuspendPackageHelper {
         }
         // Send the suspension changed broadcast to ensure suspension state is not stale.
         if (!modifiedPackages.isEmpty()) {
-            sendPackagesSuspendedForUser(newSnapshot, Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
+            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
                     modifiedPackages.toArray(new String[0]), modifiedUids.toArray(), userId);
         }
         return unmodifiablePackages.toArray(new String[0]);
@@ -326,14 +323,12 @@ public final class SuspendPackageHelper {
             }
         });
 
-        final Computer newSnapshot = mPm.snapshotComputer();
-
         mPm.scheduleWritePackageRestrictions(userId);
         if (!unsuspendedPackages.isEmpty()) {
             final String[] packageArray = unsuspendedPackages.toArray(
                     new String[unsuspendedPackages.size()]);
             sendMyPackageSuspendedOrUnsuspended(packageArray, false, userId);
-            sendPackagesSuspendedForUser(newSnapshot, Intent.ACTION_PACKAGES_UNSUSPENDED,
+            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_UNSUSPENDED,
                     packageArray, unsuspendedUids.toArray(), userId);
         }
     }
@@ -585,23 +580,19 @@ public final class SuspendPackageHelper {
      * @param userId The user where packages reside.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    void sendPackagesSuspendedForUser(@NonNull Computer snapshot, @NonNull String intent,
-            @NonNull String[] pkgList, @NonNull int[] uidList, int userId) {
-        final List<BroadcastParams> lists = mBroadcastHelper.getBroadcastParams(
-                snapshot, pkgList, uidList, userId);
+    void sendPackagesSuspendedForUser(@NonNull String intent, @NonNull String[] pkgList,
+            @NonNull int[] uidList, int userId) {
         final Handler handler = mInjector.getHandler();
-        for (int i = 0; i < lists.size(); i++) {
-            final Bundle extras = new Bundle(3);
-            final BroadcastParams list = lists.get(i);
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, list.getPackageNames());
-            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, list.getUids());
-            final SparseArray<int[]> allowList = list.getAllowList().size() == 0
-                    ? null : list.getAllowList();
-            handler.post(() -> mBroadcastHelper.sendPackageBroadcast(intent, null /* pkg */,
-                    extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
-                    null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                    allowList, null /* bOptions */));
-        }
+        final Bundle extras = new Bundle(3);
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
+        handler.post(() -> mBroadcastHelper.sendPackageBroadcast(intent, null /* pkg */,
+                extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
+                null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
+                null /* broadcastAllowList */,
+                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
+                        mPm.snapshotComputer(), callingUid, intentExtras),
+                null /* bOptions */));
     }
 
     private String getKnownPackageName(@NonNull Computer snapshot,
@@ -652,7 +643,7 @@ public final class SuspendPackageHelper {
                 }
                 mBroadcastHelper.doSendBroadcast(action, null, intentExtras,
                         Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, packageName, null,
-                        targetUserIds, false, null, null);
+                        targetUserIds, false, null, null, null);
             }
         });
     }

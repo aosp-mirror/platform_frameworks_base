@@ -2947,7 +2947,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             @Nullable Bundle bOptions) {
         mHandler.post(() -> mBroadcastHelper.sendPackageBroadcast(action, pkg, extras, flags,
                 targetPkg, finishedReceiver, userIds, instantUserIds, broadcastAllowList,
-                bOptions));
+                null /* filterExtrasForReceiver */, bOptions));
     }
 
     @Override

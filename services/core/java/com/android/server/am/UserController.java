@@ -16,9 +16,11 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.CREATE_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_USERS;
 import static android.app.ActivityManager.STOP_USER_ON_SWITCH_DEFAULT;
 import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
 import static android.app.ActivityManager.StopUserOnSwitch;
@@ -1459,12 +1461,23 @@ class UserController implements Handler.Callback {
         return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
     }
 
-    // TODO(b/239982558): add javadoc
+    // TODO(b/239982558): add javadoc (need to wait until the intents / SystemService callbacks are
+    // defined
     boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId,
             @Nullable IProgressListener unlockListener) {
-        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUserOnSecondaryDisplay");
+        checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
+                MANAGE_USERS, CREATE_USERS);
 
-        return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+        // DEFAULT_DISPLAY is used for "regular" start user operations
+        Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
+                "Cannot use DEFAULT_DISPLAY");
+
+        try {
+            return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+        } catch (RuntimeException e) {
+            Slogf.w(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
+            return false;
+        }
     }
 
     private boolean startUserNoChecks(@UserIdInt int userId, int displayId, boolean foreground,
@@ -1488,9 +1501,15 @@ class UserController implements Handler.Callback {
                     foreground ? " in foreground" : "");
         }
 
-        // TODO(b/240613396) also check if multi-display is supported
+        // TODO(b/239982558): move logic below to a different class (like DisplayAssignmentManager)
         if (displayId != Display.DEFAULT_DISPLAY) {
-            // TODO(b/239982558): add unit test for the exceptional cases below
+            // This is called by startUserOnSecondaryDisplay()
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+                // TODO(b/239824814): add CTS test and/or unit test for all exceptional cases
+                throw new UnsupportedOperationException("Not supported by device");
+            }
+
+            // TODO(b/239982558): call DisplayManagerInternal to check if display is valid instead
             Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
             Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
                     + " on secondary display (%d)", displayId);
@@ -1500,7 +1519,6 @@ class UserController implements Handler.Callback {
             // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
             // we'll need to remove this call and handle that as part of the user state workflow
             // instead.
-            // TODO(b/239982558): check if display is valid
             mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
         }
 
@@ -2608,15 +2626,24 @@ class UserController implements Handler.Callback {
     }
 
     private void checkCallingPermission(String permission, String methodName) {
-        if (mInjector.checkCallingPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission denial: " + methodName
-                    + "() from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + permission;
-            Slogf.w(TAG, msg);
-            throw new SecurityException(msg);
+        checkCallingHasOneOfThosePermissions(methodName, permission);
+    }
+
+    private void checkCallingHasOneOfThosePermissions(String methodName, String...permissions) {
+        for (String permission : permissions) {
+            if (mInjector.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
+        String msg = "Permission denial: " + methodName
+                + "() from pid=" + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid()
+                + " requires "
+                + (permissions.length == 1
+                        ? permissions[0]
+                        : "one of " + Arrays.toString(permissions));
+        Slogf.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     private void enforceShellRestriction(String restriction, @UserIdInt int userId) {

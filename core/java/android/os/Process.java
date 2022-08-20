@@ -364,6 +364,11 @@ public class Process {
     public static final int LAST_APPLICATION_CACHE_GID = 29999;
 
     /**
+     * An invalid PID value.
+     */
+    public static final int INVALID_PID = -1;
+
+    /**
      * Standard priority of application threads.
      * Use with {@link #setThreadPriority(int)} and
      * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
@@ -1461,6 +1466,18 @@ public class Process {
      * @hide
      */
     public static final native int killProcessGroup(int uid, int pid);
+
+    /**
+      * Freeze the cgroup for the given UID.
+      * This cgroup may contain child cgroups which will also be frozen. If this cgroup or its
+      * children contain processes with Binder interfaces, those interfaces should be frozen before
+      * the cgroup to avoid blocking synchronous callers indefinitely.
+      *
+      * @param uid The UID to be frozen
+      * @param freeze true = freeze; false = unfreeze
+      * @hide
+      */
+    public static final native void freezeCgroupUid(int uid, boolean freeze);
 
     /**
      * Remove all process groups.  Expected to be called when ActivityManager

@@ -72,6 +72,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ThermalManagerService extends SystemService {
     private static final String TAG = ThermalManagerService.class.getSimpleName();
 
+    private static final boolean DEBUG = false;
+
+    /** Input range limits for getThermalHeadroom API */
+    public static final int MIN_FORECAST_SEC = 0;
+    public static final int MAX_FORECAST_SEC = 60;
+
     /** Lock to protect listen list. */
     private final Object mLock = new Object();
 
@@ -475,6 +481,13 @@ public class ThermalManagerService extends SystemService {
         @Override
         public float getThermalHeadroom(int forecastSeconds) {
             if (!mHalReady.get()) {
+                return Float.NaN;
+            }
+
+            if (forecastSeconds < MIN_FORECAST_SEC || forecastSeconds > MAX_FORECAST_SEC) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Invalid forecastSeconds: " + forecastSeconds);
+                }
                 return Float.NaN;
             }
 

@@ -4336,10 +4336,39 @@ public class ActivityManager {
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS})
     public boolean switchUser(@NonNull UserHandle user) {
-        if (user == null) {
-            throw new IllegalArgumentException("UserHandle cannot be null.");
-        }
+        Preconditions.checkNotNull(user, "UserHandle cannot be null.");
+
         return switchUser(user.getIdentifier());
+    }
+
+    /**
+     * Starts the given user in background and associate the user with the given display.
+     *
+     * <p>This method will allow the user to launch activities on that display, and it's typically
+     * used only on automotive builds when the vehicle has multiple displays (you can verify if it's
+     * supported by calling {@link UserManager#isBackgroundUsersOnSecondaryDisplaysSupported()}).
+     *
+     * @return whether the user was started.
+     *
+     * @throws UnsupportedOperationException if the device does not support background users on
+     * secondary displays.
+     * @throws IllegalArgumentException if the display does not exist.
+     * @throws IllegalStateException if the user cannot be started on that display (for example, if
+     * there's already a user using that display or if the user is already associated with other
+     * display).
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
+    public boolean startUserInBackgroundOnSecondaryDisplay(@UserIdInt int userId,
+            int displayId) {
+        try {
+            return getService().startUserInBackgroundOnSecondaryDisplay(userId, displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

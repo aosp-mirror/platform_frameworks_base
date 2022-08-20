@@ -29,5 +29,4 @@ android_library {
         "androidx.compose.runtime_runtime",
     ],
     kotlincflags: ["-Xjvm-default=all"],
-    min_sdk_version: "31",
 }
