@@ -158,7 +158,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentAppeared(any());
+        verify(mOrganizer, never()).onTaskFragmentAppeared(any(), any());
 
         // Send callback when the TaskFragment is attached.
         setupMockParent(mTaskFragment, mTask);
@@ -166,7 +166,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentAppeared(any());
+        verify(mOrganizer).onTaskFragmentAppeared(any(), any());
     }
 
     @Test
@@ -179,13 +179,13 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
 
         // Call onTaskFragmentAppeared first.
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentAppeared(any());
+        verify(mOrganizer).onTaskFragmentAppeared(any(), any());
 
         // No callback if the info is not changed.
         doReturn(true).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
@@ -195,7 +195,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
 
         // Trigger callback if the info is changed.
         doReturn(false).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
@@ -204,7 +204,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentInfoChanged(eq(mTaskFragmentInfo));
+        verify(mOrganizer).onTaskFragmentInfoChanged(any(), eq(mTaskFragmentInfo));
     }
 
     @Test
@@ -215,7 +215,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentVanished(any());
+        verify(mOrganizer).onTaskFragmentVanished(any(), any());
     }
 
     @Test
@@ -228,10 +228,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentAppeared(any());
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
-        verify(mOrganizer).onTaskFragmentVanished(eq(mTaskFragmentInfo));
+        verify(mOrganizer, never()).onTaskFragmentAppeared(any(), any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), anyInt(), any());
+        verify(mOrganizer).onTaskFragmentVanished(any(), eq(mTaskFragmentInfo));
 
         // Not trigger onTaskFragmentInfoChanged.
         // Call onTaskFragmentAppeared before calling onTaskFragmentInfoChanged.
@@ -244,10 +244,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentAppeared(any());
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
-        verify(mOrganizer).onTaskFragmentVanished(eq(mTaskFragmentInfo));
+        verify(mOrganizer, never()).onTaskFragmentAppeared(any(), any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), anyInt(), any());
+        verify(mOrganizer).onTaskFragmentVanished(any(), eq(mTaskFragmentInfo));
     }
 
     @Test
@@ -260,7 +260,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mTask.mTaskId), any());
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(any(), eq(mTask.mTaskId), any());
 
         // No extra callback if the info is not changed.
         clearInvocations(mOrganizer);
@@ -269,7 +269,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
+        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), anyInt(), any());
 
         // Trigger callback if the size is changed.
         mTask.getConfiguration().smallestScreenWidthDp = 100;
@@ -277,7 +277,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mTask.mTaskId), any());
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(any(), eq(mTask.mTaskId), any());
 
         // Trigger callback if the windowing mode is changed.
         clearInvocations(mOrganizer);
@@ -286,7 +286,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mTask.mTaskId), any());
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(any(), eq(mTask.mTaskId), any());
     }
 
     @Test
@@ -298,7 +298,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mErrorToken, null /* taskFragment */, -1 /* opType */, exception);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), eq(null), eq(-1),
+        verify(mOrganizer).onTaskFragmentError(any(), eq(mErrorToken), eq(null), eq(-1),
                 eq(exception));
     }
 
@@ -318,14 +318,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onActivityReparentedToTask(anyInt(), any(), any());
+        verify(mOrganizer, never()).onActivityReparentedToTask(any(), anyInt(), any(), any());
 
         // Notify organizer if it was embedded before entered Pip.
         activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onActivityReparentedToTask(eq(task.mTaskId), eq(activity.intent),
+        verify(mOrganizer).onActivityReparentedToTask(any(), eq(task.mTaskId), eq(activity.intent),
                 eq(activity.token));
 
         // Notify organizer if there is any embedded in the Task.
@@ -341,7 +341,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         verify(mOrganizer, times(2))
-                .onActivityReparentedToTask(eq(task.mTaskId), eq(activity.intent),
+                .onActivityReparentedToTask(any(), eq(task.mTaskId), eq(activity.intent),
                         eq(activity.token));
     }
 
@@ -371,7 +371,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         // Allow organizer to reparent activity in other process using the temporary token.
-        verify(mOrganizer).onActivityReparentedToTask(eq(task.mTaskId), eq(activity.intent),
+        verify(mOrganizer).onActivityReparentedToTask(any(), eq(task.mTaskId), eq(activity.intent),
                 token.capture());
         final IBinder temporaryToken = token.getValue();
         assertNotEquals(activity.token, temporaryToken);
@@ -801,7 +801,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         // Verifies that event was not sent
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
     }
 
     @Test
@@ -827,7 +827,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         // Verifies that event was not sent
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
 
         // Mock the task becomes visible, and activity resumed
         doReturn(true).when(task).shouldBeVisible(any());
@@ -835,7 +835,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Verifies that event is sent.
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
     }
 
     /**
@@ -869,7 +869,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         reset(mOrganizer);
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
     }
 
     /**
@@ -887,8 +887,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .createActivityCount(1)
                 .build();
         final ActivityRecord embeddedActivity = taskFragment.getTopNonFinishingActivity();
-        // Add another activity in the Task so that it always contains a non-finishing activitiy.
-        final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
+        // Add another activity in the Task so that it always contains a non-finishing activity.
+        createActivityRecord(task);
         assertTrue(task.shouldBeVisible(null));
 
         // Dispatch pending info changed event from creating the activity
@@ -896,21 +896,21 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         taskFragment.mTaskFragmentAppearedSent = true;
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
 
         // Verify the info changed callback is not called when the task is invisible
         reset(mOrganizer);
         doReturn(false).when(task).shouldBeVisible(any());
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
 
         // Finish the embedded activity, and verify the info changed callback is called because the
         // TaskFragment is becoming empty.
         embeddedActivity.finishing = true;
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
     }
 
     /**
@@ -1020,7 +1020,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(),
+        verify(mOrganizer).onTaskFragmentError(any(), eq(mErrorToken), any(),
                 eq(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT),
                 any(SecurityException.class));
     }
@@ -1059,7 +1059,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(),
+        verify(mOrganizer).onTaskFragmentError(any(), eq(mErrorToken), any(),
                 eq(HIERARCHY_OP_TYPE_REPARENT_CHILDREN), any(SecurityException.class));
     }
 

@@ -35,7 +35,6 @@ import android.app.job.JobParameters;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.pm.ServiceInfo;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.Uri;
@@ -356,7 +355,7 @@ public final class JobStatus {
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
     public Network network;
-    public ServiceInfo serviceInfo;
+    public String serviceProcessName;
 
     /** The evaluated bias of the job when it started running. */
     public int lastEvaluatedBias;
@@ -1757,7 +1756,7 @@ public final class JobStatus {
         // run if its constraints are satisfied).
         // DeviceNotDozing implicit constraint must be satisfied
         // NotRestrictedInBackground implicit constraint must be satisfied
-        return mReadyNotDozing && mReadyNotRestrictedInBg && (serviceInfo != null)
+        return mReadyNotDozing && mReadyNotRestrictedInBg && (serviceProcessName != null)
                 && (mReadyDeadlineSatisfied || isConstraintsSatisfied(satisfiedConstraints));
     }
 
@@ -2296,7 +2295,7 @@ public final class JobStatus {
             pw.println(mReadyDynamicSatisfied);
         }
         pw.print("readyComponentEnabled: ");
-        pw.println(serviceInfo != null);
+        pw.println(serviceProcessName != null);
         if ((getFlags() & JobInfo.FLAG_EXPEDITED) != 0) {
             pw.print("expeditedQuotaApproved: ");
             pw.print(mExpeditedQuotaApproved);
