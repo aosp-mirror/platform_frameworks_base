@@ -59,7 +59,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
     /**
      * Values that have been "interned" by {@link #writeInternedUTF(String)}.
      */
-    private final HashMap<String, Short> mStringRefs = new HashMap<>();
+    private final HashMap<String, Integer> mStringRefs = new HashMap<>();
 
     /**
      * @deprecated callers must specify {@code use4ByteSequence} so they make a
@@ -256,7 +256,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
      * @see FastDataInput#readInternedUTF()
      */
     public void writeInternedUTF(@NonNull String s) throws IOException {
-        Short ref = mStringRefs.get(s);
+        Integer ref = mStringRefs.get(s);
         if (ref != null) {
             writeShort(ref);
         } else {
@@ -265,7 +265,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
 
             // We can only safely intern when we have remaining values; if we're
             // full we at least sent the string value above
-            ref = (short) mStringRefs.size();
+            ref = mStringRefs.size();
             if (ref < MAX_UNSIGNED_SHORT) {
                 mStringRefs.put(s, ref);
             }
