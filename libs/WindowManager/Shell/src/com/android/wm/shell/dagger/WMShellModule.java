@@ -27,6 +27,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
@@ -48,6 +49,8 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.desktopmode.DesktopModeConstants;
+import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -574,6 +577,27 @@ public abstract class WMShellModule {
     }
 
     //
+    // Desktop mode (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopModeController> provideDesktopModeController(
+            Context context, ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
+            @ShellMainThread Handler mainHandler
+    ) {
+        if (DesktopModeConstants.IS_FEATURE_ENABLED) {
+            return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
+                    rootDisplayAreaOrganizer,
+                    mainHandler));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    //
     // Misc
     //
 
@@ -583,7 +607,8 @@ public abstract class WMShellModule {
     @ShellCreateTriggerOverride
     @Provides
     static Object provideIndependentShellComponentsToCreate(
-            SplitscreenPipMixedHandler splitscreenPipMixedHandler) {
+            SplitscreenPipMixedHandler splitscreenPipMixedHandler,
+            Optional<DesktopModeController> desktopModeController) {
         return new Object();
     }
 }

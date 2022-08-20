@@ -30,6 +30,10 @@
             <item res='@*android:color/profile_badge_2' />
         </badge-colors>
         <default-restrictions no_remove_user='true' no_bluetooth='true' />
+        <user-properties
+            showInLauncher='2020'
+            startWithParent='false'
+        />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />
 

@@ -70,7 +70,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.ServiceInfo;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
@@ -385,7 +384,7 @@ public class QuotaControllerTest {
             JobInfo jobInfo) {
         JobStatus js = JobStatus.createFromJobInfo(
                 jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
-        js.serviceInfo = mock(ServiceInfo.class);
+        js.serviceProcessName = "testProcess";
         // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
         js.setStandbyBucket(FREQUENT_INDEX);
         // Make sure Doze and background-not-restricted don't affect tests.
