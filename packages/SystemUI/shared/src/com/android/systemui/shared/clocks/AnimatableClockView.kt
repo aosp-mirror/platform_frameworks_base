@@ -69,6 +69,8 @@ class AnimatableClockView @JvmOverloads constructor(
     private var textAnimator: TextAnimator? = null
     private var onTextAnimatorInitialized: Runnable? = null
 
+    var timeOverrideInMillis: Long? = null
+
     val dozingWeight: Int
         get() = if (useBoldedVersion()) dozingWeightInternal + 100 else dozingWeightInternal
 
@@ -125,7 +127,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun refreshTime() {
-        time.timeInMillis = System.currentTimeMillis()
+        time.timeInMillis = timeOverrideInMillis ?: System.currentTimeMillis()
         contentDescription = DateFormat.format(descFormat, time)
         val formattedText = DateFormat.format(format, time)
         // Setting text actually triggers a layout pass (because the text view is set to
