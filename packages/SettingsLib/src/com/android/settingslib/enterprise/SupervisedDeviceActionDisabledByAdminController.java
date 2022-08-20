@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.android.settingslib.enterprise;
 
-import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,17 +24,19 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
 import com.android.settingslib.RestrictedLockUtils;
 
-public class BiometricActionDisabledByAdminController extends BaseActionDisabledByAdminController {
+import org.jetbrains.annotations.Nullable;
 
-    private static final String TAG = "BiometricActionDisabledByAdminController";
+final class SupervisedDeviceActionDisabledByAdminController
+        extends BaseActionDisabledByAdminController {
+    private static final String TAG = "SupervisedDeviceActionDisabledByAdminController";
+    private final String mRestriction;
 
-    BiometricActionDisabledByAdminController(
-            DeviceAdminStringProvider stringProvider) {
+    SupervisedDeviceActionDisabledByAdminController(
+            DeviceAdminStringProvider stringProvider, String restriction) {
         super(stringProvider);
+        mRestriction = restriction;
     }
 
     @Override
@@ -50,22 +52,27 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
     @Override
     public CharSequence getAdminSupportContentString(Context context,
             @Nullable CharSequence supportMessage) {
-        return mStringProvider.getDisabledBiometricsParentConsentContent();
+        return mStringProvider.getDisabledByParentContent();
     }
 
+    @Nullable
     @Override
-    public DialogInterface.OnClickListener getPositiveButtonListener(@NonNull Context context,
-            @NonNull RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
+    public DialogInterface.OnClickListener getPositiveButtonListener(Context context,
+            RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
+        final Intent intent = new Intent(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING)
+                .setData(new Uri.Builder()
+                        .scheme("policy")
+                        .appendPath("user_restrictions")
+                        .appendPath(mRestriction)
+                        .build())
+                .setPackage(enforcedAdmin.component.getPackageName());
+        ComponentName resolvedSupervisionActivity =
+                intent.resolveActivity(context.getPackageManager());
+        if (resolvedSupervisionActivity == null) {
+            return null;
+        }
         return (dialog, which) -> {
             Log.d(TAG, "Positive button clicked, component: " + enforcedAdmin.component);
-            final Intent intent = new Intent(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING)
-                    .putExtra(Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY,
-                            Settings.SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS)
-                    .setData(new Uri.Builder()
-                            .scheme("policy")
-                            .appendPath("biometric")
-                            .build())
-                    .setPackage(enforcedAdmin.component.getPackageName());
             context.startActivity(intent);
         };
     }
