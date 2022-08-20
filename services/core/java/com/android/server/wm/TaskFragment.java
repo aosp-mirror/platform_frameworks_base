@@ -2340,7 +2340,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        return !startBounds.equals(getBounds());
+        // Only take snapshot if the bounds are resized.
+        final Rect endBounds = getConfiguration().windowConfiguration.getBounds();
+        return endBounds.width() != startBounds.width()
+                || endBounds.height() != startBounds.height();
     }
 
     boolean canHaveEmbeddingActivityTransition(@NonNull ActivityRecord child) {

@@ -137,6 +137,22 @@
       ]
     }
   ],
+  "ironwood-postsubmit": [
+    {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-annotation": "android.platform.test.annotations.IwTest"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
+        }
+      ]
+    }
+  ],
   "auto-end-to-end-postsubmit": [
     {
       "name": "AndroidAutomotiveHomeTests",
