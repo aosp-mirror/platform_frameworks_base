@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 /**
  * An active intent broadcast.
@@ -71,6 +72,8 @@ final class BroadcastRecord extends Binder {
     final boolean ordered;  // serialize the send to receivers?
     final boolean sticky;   // originated from existing sticky data?
     final boolean alarm;    // originated from an alarm triggering?
+    final boolean pushMessage; // originated from a push message?
+    final boolean pushMessageOverQuota; // originated from a push message which was over quota?
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
     final String resolvedType; // the resolved data type
@@ -114,6 +117,11 @@ final class BroadcastRecord extends Binder {
     @Nullable
     final IBinder mBackgroundActivityStartsToken;
 
+    // Filter the intent extras by using the rules of the package visibility before broadcasting
+    // the intent to the receiver.
+    @Nullable
+    final BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver;
+
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
     static final int CALL_IN_RECEIVE = 2;
@@ -134,6 +142,7 @@ final class BroadcastRecord extends Binder {
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
     ActivityInfo curReceiver;   // info about the receiver that is currently running.
+    Bundle curFilteredExtras;   // the bundle that has been filtered by the package visibility rules
 
     boolean mIsReceiverAppRunning; // Was the receiver's app already running.
 
@@ -227,6 +236,9 @@ final class BroadcastRecord extends Binder {
                         pw.println(curReceiver.applicationInfo.sourceDir);
             }
         }
+        if (curFilteredExtras != null) {
+            pw.print(" filtered extras: "); pw.println(curFilteredExtras);
+        }
         if (state != IDLE) {
             String stateStr = " (?)";
             switch (state) {
@@ -273,7 +285,8 @@ final class BroadcastRecord extends Binder {
             BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
             boolean _initialSticky, int _userId, boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken, boolean timeoutExempt) {
+            @Nullable IBinder backgroundActivityStartsToken, boolean timeoutExempt,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -309,6 +322,9 @@ final class BroadcastRecord extends Binder {
         mBackgroundActivityStartsToken = backgroundActivityStartsToken;
         this.timeoutExempt = timeoutExempt;
         alarm = options != null && options.isAlarmBroadcast();
+        pushMessage = options != null && options.isPushMessagingBroadcast();
+        pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
+        this.filterExtrasForReceiver = filterExtrasForReceiver;
     }
 
     /**
@@ -362,6 +378,9 @@ final class BroadcastRecord extends Binder {
         mBackgroundActivityStartsToken = from.mBackgroundActivityStartsToken;
         timeoutExempt = from.timeoutExempt;
         alarm = from.alarm;
+        pushMessage = from.pushMessage;
+        pushMessageOverQuota = from.pushMessageOverQuota;
+        filterExtrasForReceiver = from.filterExtrasForReceiver;
     }
 
     /**
@@ -397,7 +416,7 @@ final class BroadcastRecord extends Binder {
                 requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
                 splitReceivers, resultTo, resultCode, resultData, resultExtras, ordered, sticky,
                 initialSticky, userId, allowBackgroundActivityStarts,
-                mBackgroundActivityStartsToken, timeoutExempt);
+                mBackgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
         split.enqueueTime = this.enqueueTime;
         split.enqueueRealTime = this.enqueueRealTime;
         split.enqueueClockTime = this.enqueueClockTime;
@@ -476,7 +495,8 @@ final class BroadcastRecord extends Binder {
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
                     uid2receiverList.valueAt(i), null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
-                    allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt);
+                    allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt,
+                    filterExtrasForReceiver);
             br.enqueueTime = this.enqueueTime;
             br.enqueueRealTime = this.enqueueRealTime;
             br.enqueueClockTime = this.enqueueClockTime;

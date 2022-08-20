@@ -61,8 +61,8 @@ import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
-import com.android.server.testing.shadows.ShadowBackupEligibilityRules;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
+import com.android.server.testing.shadows.ShadowBackupEligibilityRules;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
@@ -358,6 +358,26 @@ public class UserBackupManagerServiceTest {
         assertThat(oldTransport).isEqualTo(mOldTransport.transportName);
         verify(mTransportManager)
                 .disposeOfTransportClient(eq(mNewTransportMock.mTransportConnection), any());
+    }
+
+    /**
+     * Test verifying that {@link UserBackupManagerService#selectBackupTransport(String)} does not
+     * switch the current transport to the inputted transport, when the inputted transport is not
+     * registered.
+     */
+    @Test
+    public void testSelectBackupTransport_nonRegisteredTransport() throws Exception {
+        setUpForSelectTransport();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        when(mTransportManager.isTransportRegistered(eq(mNewTransport.transportName)))
+                .thenReturn(false);
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
+
+        String oldTransport = backupManagerService.selectBackupTransport(
+                mNewTransport.transportName);
+
+        assertThat(getSettingsTransport()).isNotEqualTo(mNewTransport.transportName);
+        assertThat(oldTransport).isEqualTo(null);
     }
 
     /**

@@ -52,6 +52,7 @@ import android.content.pm.PackagePartitions;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -107,6 +108,7 @@ import android.util.TypedValue;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -180,7 +182,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_NAME = "name";
     private static final String TAG_ACCOUNT = "account";
     private static final String ATTR_FLAGS = "flags";
-    private static final String ATTR_TYPE = "type";
+    private static final String ATTR_TYPE = "type"; // userType
     private static final String ATTR_ICON_PATH = "icon";
     private static final String ATTR_ID = "id";
     private static final String ATTR_CREATION_TIME = "created";
@@ -215,6 +217,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
+    private static final String TAG_USER_PROPERTIES = "userProperties";
     private static final String TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL =
             "lastRequestQuietModeEnabledCall";
     private static final String TAG_IGNORE_PREPARE_STORAGE_ERRORS =
@@ -259,7 +262,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     static final int MAX_RECENTLY_REMOVED_IDS_SIZE = 100;
 
-    private static final int USER_VERSION = 9;
+    private static final int USER_VERSION = 10;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -324,6 +327,9 @@ public class UserManagerService extends IUserManager.Stub {
         PersistableBundle seedAccountOptions;
         // Whether to perist the seed account information to be available after a boot
         boolean persistSeedData;
+
+        /** Properties of the user whose default values originate from its user type. */
+        UserProperties userProperties;
 
         /** Elapsed realtime since boot when the user started. */
         long startRealtime;
@@ -619,6 +625,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
     @GuardedBy("mUserStates")
     private final WatchedUserStates mUserStates = new WatchedUserStates();
+
+    /**
+     * Used on devices that support background users (key) running on secondary displays (value).
+     *
+     * <p>Is {@code null} by default and instantiated on demand when the users are started on
+     * secondary displays.
+     */
+    @Nullable
+    @GuardedBy("mUsersLock")
+    private SparseIntArray mUsersOnSecondaryDisplays;
 
     private static UserManagerService sInstance;
 
@@ -1487,6 +1503,36 @@ public class UserManagerService extends IUserManager.Stub {
         return userTypeDetails != null && userTypeDetails.isSystem();
     }
 
+    /**
+     * Returns a *copy* of the given user's UserProperties, stripping out any information for which
+     * the caller lacks permission.
+     */
+    @Override
+    public @NonNull UserProperties getUserPropertiesCopy(@UserIdInt int userId) {
+        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserProperties");
+        final UserProperties origProperties = getUserPropertiesInternal(userId);
+        if (origProperties != null) {
+            int callingUid = Binder.getCallingUid();
+            boolean exposeAllFields = callingUid == Process.SYSTEM_UID;
+            boolean hasManage = hasPermissionGranted(Manifest.permission.MANAGE_USERS, callingUid);
+            boolean hasQuery = hasPermissionGranted(Manifest.permission.QUERY_USERS, callingUid);
+            return new UserProperties(origProperties, exposeAllFields, hasManage, hasQuery);
+        }
+        // A non-existent or partial user will reach here.
+        throw new IllegalArgumentException("Cannot access properties for user " + userId);
+    }
+
+    /** Returns the user's actual, canonical UserProperties object. Do not edit it externally. */
+    private @Nullable UserProperties getUserPropertiesInternal(@UserIdInt int userId) {
+        synchronized (mUsersLock) {
+            final UserData userData = getUserDataLU(userId);
+            if (userData != null) {
+                return userData.userProperties;
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean hasBadge(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "hasBadge");
@@ -1576,6 +1622,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     public boolean isProfile(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
+        return isProfileUnchecked(userId);
+    }
+
+    private boolean isProfileUnchecked(@UserIdInt int userId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isProfile();
@@ -1663,15 +1713,33 @@ public class UserManagerService extends IUserManager.Stub {
                     + ") is visible");
         }
 
-        // First check current foreground user (on main display)
+        return isUserVisibleUnchecked(userId);
+    }
+
+    private boolean isUserVisibleUnchecked(@UserIdInt int userId) {
+        // First check current foreground user and their profiles (on main display)
+        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
+            return true;
+        }
+
+        // TODO(b/239824814): STOPSHIP - add CTS tests (requires change on testing infra)
+        synchronized (mUsersLock) {
+            if (mUsersOnSecondaryDisplays != null) {
+                // TODO(b/239824814): make sure it handles profile as well
+                return (mUsersOnSecondaryDisplays.indexOfKey(userId) >= 0);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
         int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
 
         if (currentUserId == userId) {
             return true;
         }
 
-        // Then profiles of current user
-        // TODO(b/239824814): consider using AMInternal.isCurrentProfile() instead
         if (isProfile(userId)) {
             int parentId = Binder.withCleanCallingIdentity(() -> getProfileParentId(userId));
             if (parentId == currentUserId) {
@@ -1679,8 +1747,22 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
-        // TODO(b/239824814): support background users on secondary display (and their profiles)
         return false;
+    }
+
+    // TODO(b/239982558): currently used just by shell command, might need to move to
+    // UserManagerInternal if needed by other components (like WindowManagerService)
+    // TODO(b/239982558): add unit test
+    // TODO(b/239982558): try to merge with isUserVisibleUnchecked()
+    private boolean isUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return isCurrentUserOrRunningProfileOfCurrentUser(userId);
+        }
+        synchronized (mUsersLock) {
+            // TODO(b/239824814): make sure it handles profile as well
+            return mUsersOnSecondaryDisplays != null && mUsersOnSecondaryDisplays.get(userId,
+                    Display.INVALID_DISPLAY) == displayId;
+        }
     }
 
     @Override
@@ -3268,6 +3350,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions, int userVersion,
             int userTypeVersion) {
+        Slog.i(LOG_TAG, "Upgrading users from userVersion " + userVersion + " to " + USER_VERSION);
         Set<Integer> userIdsToWrite = new ArraySet<>();
         final int originalVersion = mUserVersion;
         final int originalUserTypeVersion = mUserTypeVersion;
@@ -3403,6 +3486,27 @@ public class UserManagerService extends IUserManager.Stub {
             userVersion = 9;
         }
 
+        if (userVersion < 10) {
+            // Add UserProperties.
+            synchronized (mUsersLock) {
+                for (int i = 0; i < mUsers.size(); i++) {
+                    final UserData userData = mUsers.valueAt(i);
+                    final UserTypeDetails userTypeDetails = mUserTypes.get(userData.info.userType);
+                    if (userTypeDetails == null) {
+                        throw new IllegalStateException(
+                                "Cannot upgrade user because " + userData.info.userType
+                                        + " isn't defined on this device!");
+                    }
+                    userData.userProperties = new UserProperties(
+                            userTypeDetails.getDefaultUserPropertiesReference());
+                    userIdsToWrite.add(userData.info.id);
+                }
+            }
+            userVersion = 10;
+        }
+
+        // Reminder: If you add another upgrade, make sure to increment USER_VERSION too.
+
         // Done with userVersion changes, moving on to deal with userTypeVersion upgrades
         // Upgrade from previous user type to a new user type
         final int newUserTypeVersion = UserTypeFactory.getUserTypeVersion();
@@ -3417,6 +3521,11 @@ public class UserManagerService extends IUserManager.Stub {
             Slog.w(LOG_TAG, "User version " + mUserVersion + " didn't upgrade as expected to "
                     + USER_VERSION);
         } else {
+            if (userVersion > USER_VERSION) {
+                Slog.wtf(LOG_TAG, "Upgraded user version " + mUserVersion + " is higher the SDK's "
+                        + "one of " + USER_VERSION + ". Someone forgot to update USER_VERSION?");
+            }
+
             mUserVersion = userVersion;
             mUserTypeVersion = newUserTypeVersion;
 
@@ -3536,6 +3645,8 @@ public class UserManagerService extends IUserManager.Stub {
         flags |= mUserTypes.get(systemUserType).getDefaultUserInfoFlags();
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags, systemUserType);
         UserData userData = putUserInfo(system);
+        userData.userProperties = new UserProperties(
+                mUserTypes.get(userData.info.userType).getDefaultUserPropertiesReference());
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
         mUserTypeVersion = UserTypeFactory.getUserTypeVersion();
@@ -3710,6 +3821,12 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(null, TAG_SEED_ACCOUNT_OPTIONS);
         }
 
+        if (userData.userProperties != null) {
+            serializer.startTag(null, TAG_USER_PROPERTIES);
+            userData.userProperties.writeToXml(serializer);
+            serializer.endTag(null, TAG_USER_PROPERTIES);
+        }
+
         if (userData.getLastRequestQuietModeEnabledMillis() != 0L) {
             serializer.startTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
             serializer.text(String.valueOf(userData.getLastRequestQuietModeEnabledMillis()));
@@ -3829,6 +3946,7 @@ public class UserManagerService extends IUserManager.Stub {
         String seedAccountName = null;
         String seedAccountType = null;
         PersistableBundle seedAccountOptions = null;
+        UserProperties userProperties = null;
         Bundle baseRestrictions = null;
         Bundle legacyLocalRestrictions = null;
         RestrictionsSet localRestrictions = null;
@@ -3907,6 +4025,17 @@ public class UserManagerService extends IUserManager.Stub {
                 } else if (TAG_SEED_ACCOUNT_OPTIONS.equals(tag)) {
                     seedAccountOptions = PersistableBundle.restoreFromXml(parser);
                     persistSeedData = true;
+                } else if (TAG_USER_PROPERTIES.equals(tag)) {
+                    // We already got the userType above (if it exists), so we can use it.
+                    // And it must exist, since ATTR_TYPE historically predates PROPERTIES.
+                    final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
+                    if (userTypeDetails == null) {
+                        Slog.e(LOG_TAG, "User has properties but no user type!");
+                        return null;
+                    }
+                    final UserProperties defaultProps
+                            = userTypeDetails.getDefaultUserPropertiesReference();
+                    userProperties = new UserProperties(parser, defaultProps);
                 } else if (TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL.equals(tag)) {
                     type = parser.next();
                     if (type == XmlPullParser.TEXT) {
@@ -3943,6 +4072,7 @@ public class UserManagerService extends IUserManager.Stub {
         userData.seedAccountType = seedAccountType;
         userData.persistSeedData = persistSeedData;
         userData.seedAccountOptions = seedAccountOptions;
+        userData.userProperties = userProperties;
         userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
         if (ignorePrepareStorageErrors) {
             userData.setIgnorePrepareStorageErrors();
@@ -4278,6 +4408,8 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                     userData = new UserData();
                     userData.info = userInfo;
+                    userData.userProperties = new UserProperties(
+                            userTypeDetails.getDefaultUserPropertiesReference());
                     mUsers.put(userId, userData);
                 }
                 writeUserLP(userData);
@@ -5604,6 +5736,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         // If we got here, we probably recycled user ids, so invalidate any caches.
         UserManager.invalidateStaticUserProperties();
+        UserManager.invalidateUserPropertiesCache();
         if (nextId < 0) {
             throw new IllegalStateException("No user id available!");
         }
@@ -5776,6 +5909,11 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("          --reboot (which does a full reboot) or");
             pw.println("          --no-restart (which requires a manual restart)");
             pw.println();
+            pw.println("  is-user-visible [--display DISPLAY_ID] <USER_ID>");
+            pw.println("    Checks if the given user is visible in the given display.");
+            pw.println("    If the display option is not set, it uses the user's context to check");
+            pw.println("    (so it emulates what apps would get from UserManager.isUserVisible())");
+            pw.println();
         }
 
         @Override
@@ -5792,6 +5930,8 @@ public class UserManagerService extends IUserManager.Stub {
                         return runReportPackageAllowlistProblems();
                     case "set-system-user-mode-emulation":
                         return runSetSystemUserModeEmulation();
+                    case "is-user-visible":
+                        return runIsUserVisible();
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -5841,9 +5981,6 @@ public class UserManagerService extends IUserManager.Stub {
                 for (int i = 0; i < size; i++) {
                     final UserInfo user = users.get(i);
                     final boolean running = am.isUserRunning(user.id, 0);
-                    final boolean current = user.id == currentUser;
-                    final boolean hasParent = user.profileGroupId != user.id
-                            && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
                     if (verbose) {
                         final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
                         String deviceOwner = "";
@@ -5862,7 +5999,11 @@ public class UserManagerService extends IUserManager.Stub {
                                 Binder.restoreCallingIdentity(ident);
                             }
                         }
-                        pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
+                        final boolean current = user.id == currentUser;
+                        final boolean hasParent = user.profileGroupId != user.id
+                                && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
+                        final boolean visible = isUserVisibleUnchecked(user.id);
+                        pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s%s\n",
                                 i,
                                 user.id,
                                 user.name,
@@ -5874,7 +6015,9 @@ public class UserManagerService extends IUserManager.Stub {
                                 user.preCreated ? " (pre-created)" : "",
                                 user.convertedFromPreCreated ? " (converted)" : "",
                                 deviceOwner, profileOwner,
-                                current ? " (current)" : "");
+                                current ? " (current)" : "",
+                                visible ? " (visible)" : ""
+                        );
                     } else {
                         // NOTE: the standard "list users" command is used by integration tests and
                         // hence should not be changed. If you need to add more info, use the
@@ -6031,6 +6174,56 @@ public class UserManagerService extends IUserManager.Stub {
             return 0;
         }
 
+        private int runIsUserVisible() {
+            PrintWriter pw = getOutPrintWriter();
+            int displayId = Display.INVALID_DISPLAY;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                boolean invalidOption = false;
+                switch (opt) {
+                    case "--display":
+                        displayId = Integer.parseInt(getNextArgRequired());
+                        invalidOption = displayId == Display.INVALID_DISPLAY;
+                        break;
+                    default:
+                        invalidOption = true;
+                }
+                if (invalidOption) {
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+                }
+            }
+            int userId = UserHandle.parseUserArg(getNextArgRequired());
+            switch (userId) {
+                case UserHandle.USER_ALL:
+                case UserHandle.USER_CURRENT_OR_SELF:
+                case UserHandle.USER_NULL:
+                    pw.printf("invalid value (%d) for --user option\n", userId);
+                    return -1;
+                case UserHandle.USER_CURRENT:
+                    userId = ActivityManager.getCurrentUser();
+                    break;
+            }
+
+            boolean isVisible;
+            if (displayId != Display.INVALID_DISPLAY) {
+                isVisible = isUserVisibleOnDisplay(userId, displayId);
+            } else {
+                isVisible = getUserManagerForUser(userId).isUserVisible();
+            }
+            pw.println(isVisible);
+            return 0;
+        }
+
+        /**
+         * Gets the {@link UserManager} associated with the context of the given user.
+         */
+        private UserManager getUserManagerForUser(int userId) {
+            UserHandle user = UserHandle.of(userId);
+            Context context = mContext.createContextAsUser(user, /* flags= */ 0);
+            return context.getSystemService(UserManager.class);
+        }
+
         /**
          * Confirms if the build is debuggable
          *
@@ -6130,12 +6323,17 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.print("  Cached user IDs (including pre-created): ");
                 pw.println(Arrays.toString(mUserIdsIncludingPreCreated));
             }
-
         } // synchronized (mPackagesLock)
 
         // Multiple Users on Multiple Display info
         pw.println("  Supports users on secondary displays: "
                 + UserManager.isUsersOnSecondaryDisplaysEnabled());
+        synchronized (mUsersLock) {
+            if (mUsersOnSecondaryDisplays != null) {
+                pw.print("  Users on secondary displays: ");
+                pw.println(mUsersOnSecondaryDisplays);
+            }
+        }
 
         // Dump some capabilities
         pw.println();
@@ -6298,6 +6496,10 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.print("         account options exist");
                 pw.println();
             }
+        }
+
+        if (userData.userProperties != null) {
+            userData.userProperties.println(pw, "    ");
         }
 
         pw.println("    Ignore errors preparing storage: "
@@ -6684,6 +6886,92 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUsersLock) {
                 UserData userData = mUsers.get(userId);
                 return userData != null && userData.getIgnorePrepareStorageErrors();
+            }
+        }
+
+        @Override
+        public @Nullable UserProperties getUserProperties(@UserIdInt int userId) {
+            final UserProperties props = getUserPropertiesInternal(userId);
+            if (props == null) {
+                Slog.w(LOG_TAG, "A null UserProperties was returned for user " + userId);
+            }
+            return props;
+        }
+
+        @Override
+        public void assignUserToDisplay(int userId, int displayId) {
+            if (DBG) {
+                Slogf.d(LOG_TAG, "assignUserToDisplay(%d, %d): mUsersOnSecondaryDisplays=%s",
+                        userId, displayId, mUsersOnSecondaryDisplays);
+            }
+            // TODO(b/240613396) throw exception if feature not supported
+
+            if (displayId == Display.INVALID_DISPLAY) {
+                synchronized (mUsersLock) {
+                    if (mUsersOnSecondaryDisplays == null) {
+                        if (false) {
+                            // TODO(b/240613396): remove this if once we check for support above
+                            Slogf.wtf(LOG_TAG, "assignUserToDisplay(%d, %d): no "
+                                    + "mUsersOnSecondaryDisplays", userId, displayId);
+                        }
+                        return;
+                    }
+                    if (DBG) {
+                        Slogf.d(LOG_TAG, "Removing %d from mUsersOnSecondaryDisplays", userId);
+                    }
+                    mUsersOnSecondaryDisplays.delete(userId);
+                    if (mUsersOnSecondaryDisplays.size() == 0) {
+                        if (DBG) {
+                            Slogf.d(LOG_TAG, "Removing mUsersOnSecondaryDisplays");
+                        }
+                        mUsersOnSecondaryDisplays = null;
+                    }
+                }
+                return;
+            }
+
+            synchronized (mUsersLock) {
+                if (mUsersOnSecondaryDisplays == null) {
+                    if (DBG) {
+                        Slogf.d(LOG_TAG, "Creating mUsersOnSecondaryDisplays");
+                    }
+                    mUsersOnSecondaryDisplays = new SparseIntArray();
+                }
+                if (DBG) {
+                    Slogf.d(LOG_TAG, "Adding %d->%d to mUsersOnSecondaryDisplays",
+                            userId, displayId);
+                }
+
+                if (isProfileUnchecked(userId)) {
+                    // Profile can only start in the same display as parent
+                    int parentUserId = getProfileParentId(userId);
+                    int parentDisplayId = mUsersOnSecondaryDisplays.get(parentUserId);
+                    if (displayId != parentDisplayId) {
+                        throw new IllegalStateException("Cannot assign profile " + userId + " to "
+                                + "display " + displayId + " as its parent (user " + parentUserId
+                                + ") is assigned to display " + parentDisplayId);
+                    }
+                } else {
+                    // Check if display is available
+                    for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
+                        // Make sure display is not used by other users...
+                        // TODO(b/240736142); currently, if a user was started in a display, it
+                        // would need to be stopped first, so "switching" a user on secondary
+                        // diplay requires 2 non-atomic operations (stop and start). Once this logic
+                        // is refactored, it should be atomic.
+                        if (mUsersOnSecondaryDisplays.valueAt(i) == displayId) {
+                            throw new IllegalStateException("Cannot assign " + userId + " to "
+                                    + "display " + displayId + " as it's  already assigned to "
+                                    + "user " + mUsersOnSecondaryDisplays.keyAt(i));
+                        }
+                        // TODO(b/239982558) also check that user is not already assigned to other
+                        // display (including 0). That would be harder to tested under CTS though
+                        // (for example, would need to add a new AM method to start user in bg on
+                        // main display), so it's better to test on unit tests
+                    }
+                }
+
+                mUsersOnSecondaryDisplays.put(userId, displayId);
             }
         }
     }

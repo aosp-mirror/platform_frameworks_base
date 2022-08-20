@@ -160,12 +160,8 @@ class MediaTttChipControllerSender @Inject constructor(
             duration = ANIMATION_DURATION,
             includeMargins = true,
             includeFadeIn = true,
-        )
-
-        // We can only request focus once the animation finishes.
-        mainExecutor.executeDelayed(
-                { chipInnerView.requestAccessibilityFocus() },
-                ANIMATION_DURATION
+            // We can only request focus once the animation finishes.
+            onAnimationEnd = { chipInnerView.requestAccessibilityFocus() },
         )
     }
 

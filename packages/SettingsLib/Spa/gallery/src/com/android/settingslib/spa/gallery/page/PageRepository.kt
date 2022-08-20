@@ -33,6 +33,7 @@ val galleryPageRepository = SettingsPageRepository(
         SwitchPreferencePageProvider,
         ArgumentPageProvider,
         SliderPageProvider,
+        SettingsPagerPageProvider,
         FooterPageProvider,
     ),
     startDestination = Destinations.Home,

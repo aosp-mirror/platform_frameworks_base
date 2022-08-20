@@ -28,7 +28,6 @@ import android.Manifest;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.BroadcastOptions;
@@ -41,19 +40,20 @@ import android.content.pm.PackageInstaller;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.TextUtils;
+import android.util.IntArray;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * Helper class to send broadcasts for various situations.
@@ -80,6 +80,7 @@ public final class BroadcastHelper {
             final int flags, final String targetPkg, final IIntentReceiver finishedReceiver,
             final int[] userIds, int[] instantUserIds,
             @Nullable SparseArray<int[]> broadcastAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
             @Nullable Bundle bOptions) {
         try {
             final IActivityManager am = ActivityManager.getService();
@@ -93,11 +94,13 @@ public final class BroadcastHelper {
 
             if (ArrayUtils.isEmpty(instantUserIds)) {
                 doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        resolvedUserIds, false /* isInstantApp */, broadcastAllowList, bOptions);
+                        resolvedUserIds, false /* isInstantApp */, broadcastAllowList,
+                        filterExtrasForReceiver, bOptions);
             } else {
                 // send restricted broadcasts for instant apps
                 doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        instantUserIds, true /* isInstantApp */, null, bOptions);
+                        instantUserIds, true /* isInstantApp */, null,
+                        null /* filterExtrasForReceiver */, bOptions);
             }
         } catch (RemoteException ex) {
         }
@@ -113,6 +116,7 @@ public final class BroadcastHelper {
     public void doSendBroadcast(String action, String pkg, Bundle extras,
             int flags, String targetPkg, IIntentReceiver finishedReceiver,
             int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
             @Nullable Bundle bOptions) {
         for (int userId : userIds) {
             final Intent intent = new Intent(action,
@@ -148,45 +152,30 @@ public final class BroadcastHelper {
                     intent, finishedReceiver, requiredPermissions,
                     finishedReceiver != null, userId,
                     broadcastAllowList == null ? null : broadcastAllowList.get(userId),
-                    bOptions);
+                    filterExtrasForReceiver, bOptions);
         }
     }
 
-    public void sendResourcesChangedBroadcast(@NonNull Computer snapshot, boolean mediaStatus,
-            boolean replacing, @NonNull String[] pkgNames, @NonNull int[] uids) {
+    public void sendResourcesChangedBroadcast(@NonNull Supplier<Computer> snapshotComputer,
+            boolean mediaStatus, boolean replacing, @NonNull String[] pkgNames,
+            @NonNull int[] uids) {
         if (ArrayUtils.isEmpty(pkgNames) || ArrayUtils.isEmpty(uids)) {
             return;
         }
-
-        try {
-            final IActivityManager am = ActivityManager.getService();
-            if (am == null) {
-                return;
-            }
-
-            final int[] resolvedUserIds = am.getRunningUserIds();
-            for (int userId : resolvedUserIds) {
-                final var lists = getBroadcastParams(snapshot, pkgNames, uids, userId);
-                for (int i = 0; i < lists.size(); i++) {
-                    // Send broadcasts here
-                    final Bundle extras = new Bundle(3);
-                    final BroadcastParams list = lists.get(i);
-                    extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
-                            list.getPackageNames());
-                    extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, list.getUids());
-                    extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
-                    final SparseArray<int[]> allowList = list.getAllowList().size() == 0
-                            ? null : list.getAllowList();
-                    final String action =
-                            mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
-                                    : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-                    sendPackageBroadcast(action, null /* pkg */, extras, 0 /* flags */,
-                            null /* targetPkg */, null /* finishedReceiver */, new int[]{userId},
-                            null /* instantUserIds */, allowList, null /* bOptions */);
-                }
-            }
-        } catch (RemoteException ex) {
+        Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgNames);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uids);
+        if (replacing) {
+            extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
         }
+        String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
+                : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
+        sendPackageBroadcast(action, null /* pkg */, extras, 0 /* flags */,
+                null /* targetPkg */, null /* finishedReceiver */, null /* userIds */,
+                null /* instantUserIds */, null /* broadcastAllowList */,
+                (callingUid, intentExtras) -> filterExtrasChangedPackageList(
+                        snapshotComputer.get(), callingUid, intentExtras),
+                null /* bOptions */);
     }
 
     /**
@@ -266,7 +255,8 @@ public final class BroadcastHelper {
         final int flags = !componentNames.contains(packageName)
                 ? Intent.FLAG_RECEIVER_REGISTERED_ONLY : 0;
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED, packageName, extras, flags, null, null,
-                userIds, instantUserIds, broadcastAllowList, null);
+                userIds, instantUserIds, broadcastAllowList, null /* filterExtrasForReceiver */,
+                null /* bOptions */);
     }
 
     public static void sendDeviceCustomizationReadyBroadcast() {
@@ -334,53 +324,72 @@ public final class BroadcastHelper {
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds, instantUserIds,
-                broadcastAllowlist, null);
+                broadcastAllowlist, null /* filterExtrasForReceiver */, null);
     }
 
     public void sendFirstLaunchBroadcast(String pkgName, String installerPkg,
             int[] userIds, int[] instantUserIds) {
         sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH, pkgName, null, 0,
-                installerPkg, null, userIds, instantUserIds, null /* broadcastAllowList */, null);
+                installerPkg, null, userIds, instantUserIds, null /* broadcastAllowList */,
+                null /* filterExtrasForReceiver */, null);
     }
 
     /**
-     * Get broadcast params list based on the given package and uid list. The broadcast params are
-     * used to send broadcast separately if the given packages have different visibility allow list.
+     * Filter package names for the intent extras {@link Intent#EXTRA_CHANGED_PACKAGE_LIST} and
+     * {@link Intent#EXTRA_CHANGED_UID_LIST} by using the rules of the package visibility.
      *
-     * @param pkgList The names of packages which have changes.
-     * @param uidList The uids of packages which have changes.
-     * @param userId The user where packages reside.
-     * @return The list of {@link BroadcastParams} object.
+     * @param callingUid The uid that is going to access the intent extras.
+     * @param extras The intent extras to filter
+     * @return An extras that have been filtered, or {@code null} if the given uid is unable to
+     * access all the packages in the extras.
      */
-    public List<BroadcastParams> getBroadcastParams(@NonNull Computer snapshot,
-            @NonNull String[] pkgList, @NonNull int[] uidList, @UserIdInt int userId) {
-        final List<BroadcastParams> lists = new ArrayList<>(pkgList.length);
-        // Get allow lists for the pkg in the pkgList. Merge into the existed pkgs and uids if
-        // allow lists are the same.
-        for (int i = 0; i < pkgList.length; i++) {
-            final String pkgName = pkgList[i];
-            final int uid = uidList[i];
-            if (TextUtils.isEmpty(pkgName) || Process.INVALID_UID == uid) {
+    @Nullable
+    public static Bundle filterExtrasChangedPackageList(@NonNull Computer snapshot, int callingUid,
+            @NonNull Bundle extras) {
+        if (UserHandle.isCore(callingUid)) {
+            // see all
+            return extras;
+        }
+        final String[] pkgs = extras.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+        if (ArrayUtils.isEmpty(pkgs)) {
+            return extras;
+        }
+        final int userId = extras.getInt(
+                Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(callingUid));
+        final int[] uids = extras.getIntArray(Intent.EXTRA_CHANGED_UID_LIST);
+        final Pair<String[], int[]> filteredPkgs =
+                filterPackages(snapshot, pkgs, uids, callingUid, userId);
+        if (ArrayUtils.isEmpty(filteredPkgs.first)) {
+            // caller is unable to access this intent
+            return null;
+        }
+        final Bundle filteredExtras = new Bundle(extras);
+        filteredExtras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, filteredPkgs.first);
+        filteredExtras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, filteredPkgs.second);
+        return filteredExtras;
+    }
+
+    @NonNull
+    private static Pair<String[], int[]> filterPackages(@NonNull Computer snapshot,
+            @NonNull String[] pkgs, @Nullable int[] uids, int callingUid, int userId) {
+        final int pkgSize = pkgs.length;
+        final int uidSize = !ArrayUtils.isEmpty(uids) ? uids.length : 0;
+
+        final ArrayList<String> pkgList = new ArrayList<>(pkgSize);
+        final IntArray uidList = uidSize > 0 ? new IntArray(uidSize) : null;
+        for (int i = 0; i < pkgSize; i++) {
+            final String packageName = pkgs[i];
+            if (snapshot.shouldFilterApplication(
+                    snapshot.getPackageStateInternal(packageName), callingUid, userId)) {
                 continue;
             }
-            int[] allowList = snapshot.getVisibilityAllowList(pkgName, userId);
-            if (allowList == null) {
-                allowList = new int[0];
-            }
-            boolean merged = false;
-            for (int j = 0; j < lists.size(); j++) {
-                final BroadcastParams list = lists.get(j);
-                if (Arrays.equals(list.getAllowList().get(userId), allowList)) {
-                    list.addPackage(pkgName, uid);
-                    merged = true;
-                    break;
-                }
-            }
-            if (!merged) {
-                lists.add(new BroadcastParams(pkgName, uid, allowList, userId));
+            pkgList.add(packageName);
+            if (uidList != null && i < uidSize) {
+                uidList.add(uids[i]);
             }
         }
-
-        return lists;
+        return new Pair<>(
+                pkgList.size() > 0 ? pkgList.toArray(new String[pkgList.size()]) : null,
+                uidList != null && uidList.size() > 0 ? uidList.toArray() : null);
     }
 }

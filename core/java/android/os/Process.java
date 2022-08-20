@@ -364,6 +364,11 @@ public class Process {
     public static final int LAST_APPLICATION_CACHE_GID = 29999;
 
     /**
+     * An invalid PID value.
+     */
+    public static final int INVALID_PID = -1;
+
+    /**
      * Standard priority of application threads.
      * Use with {@link #setThreadPriority(int)} and
      * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal

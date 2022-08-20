@@ -296,27 +296,17 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mMediaOutputController.setRefreshing(true);
         // Update header icon
         final int iconRes = getHeaderIconRes();
-        final IconCompat iconCompat = getHeaderIcon();
-        final Drawable appSourceDrawable = getAppSourceIcon();
+        final IconCompat headerIcon = getHeaderIcon();
+        final IconCompat appSourceIcon = getAppSourceIcon();
         boolean colorSetUpdated = false;
         mCastAppLayout.setVisibility(
                 mMediaOutputController.shouldShowLaunchSection()
                         ? View.VISIBLE : View.GONE);
-        if (appSourceDrawable != null) {
-            mAppResourceIcon.setImageDrawable(appSourceDrawable);
-            mAppButton.setCompoundDrawablesWithIntrinsicBounds(resizeDrawable(appSourceDrawable,
-                            mContext.getResources().getDimensionPixelSize(
-                                    R.dimen.media_output_dialog_app_tier_icon_size
-                            )),
-                    null, null, null);
-        } else {
-            mAppResourceIcon.setVisibility(View.GONE);
-        }
         if (iconRes != 0) {
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageResource(iconRes);
-        } else if (iconCompat != null) {
-            Icon icon = iconCompat.toIcon(mContext);
+        } else if (headerIcon != null) {
+            Icon icon = headerIcon.toIcon(mContext);
             if (icon.getType() != Icon.TYPE_BITMAP && icon.getType() != Icon.TYPE_ADAPTIVE_BITMAP) {
                 // icon doesn't support getBitmap, use default value for color scheme
                 updateButtonBackgroundColorFilter();
@@ -335,6 +325,18 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setImageIcon(icon);
         } else {
             mHeaderIcon.setVisibility(View.GONE);
+        }
+        if (appSourceIcon != null) {
+            Icon appIcon = appSourceIcon.toIcon(mContext);
+            mAppResourceIcon.setColorFilter(mMediaOutputController.getColorItemContent());
+            mAppResourceIcon.setImageIcon(appIcon);
+        } else {
+            Drawable appIconDrawable = mMediaOutputController.getAppSourceIconFromPackage();
+            if (appIconDrawable != null) {
+                mAppResourceIcon.setImageDrawable(appIconDrawable);
+            } else {
+                mAppResourceIcon.setVisibility(View.GONE);
+            }
         }
         if (mHeaderIcon.getVisibility() == View.VISIBLE) {
             final int size = getHeaderIconSize();
@@ -480,7 +482,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     }
 
-    abstract Drawable getAppSourceIcon();
+    abstract IconCompat getAppSourceIcon();
 
     abstract int getHeaderIconRes();
 

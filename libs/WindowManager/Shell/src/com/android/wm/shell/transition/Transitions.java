@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -167,10 +168,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
 
         ContentResolver resolver = mContext.getContentResolver();
-        mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.TRANSITION_ANIMATION_SCALE,
-                mContext.getResources().getFloat(
-                        R.dimen.config_appTransitionAnimationDurationScaleDefault));
+        mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
         dispatchAnimScaleSetting(mTransitionAnimationScaleSetting);
 
         resolver.registerContentObserver(
@@ -183,6 +181,12 @@ public class Transitions implements RemoteCallable<Transitions> {
             // Pre-load the instance.
             TransitionMetrics.getInstance();
         }
+    }
+
+    private float getTransitionAnimationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mContext.getResources().getFloat(
+                                R.dimen.config_appTransitionAnimationDurationScaleDefault)));
     }
 
     public ShellTransitions asRemoteTransitions() {
@@ -963,9 +967,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
-            mTransitionAnimationScaleSetting = Settings.Global.getFloat(
-                    mContext.getContentResolver(), Settings.Global.TRANSITION_ANIMATION_SCALE,
-                    mTransitionAnimationScaleSetting);
+            mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
 
             mMainExecutor.execute(() -> dispatchAnimScaleSetting(mTransitionAnimationScaleSetting));
         }

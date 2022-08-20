@@ -29,7 +29,6 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @RunWith(JUnit4::class)
@@ -53,7 +52,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED),
                 nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
+                nullable(), nullable(), nullable(), nullable())
 
         val modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         val distractionFlags = bundleCaptor.value.getInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS)
@@ -78,7 +77,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(
                 eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
+                nullable())
         assertThat(unactionedPackages).isEmpty()
     }
 
@@ -156,7 +156,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED),
                 nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
+                nullable(), nullable(), nullable(), nullable())
         val modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         val distractionFlags = bundleCaptor.value.getInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS)
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -172,7 +172,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
     }
 
     @Test
@@ -183,7 +183,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
 
         distractingPackageHelper.removeDistractingPackageRestrictions(pms.snapshotComputer(),
                 arrayOfNulls(0), TEST_USER_ID)
@@ -191,68 +191,22 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
     }
 
     @Test
-    fun sendDistractingPackagesChanged_withSameVisibilityAllowList() {
-        distractingPackageHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
-                packagesToChange, uidsToChange, TEST_USER_ID,
-                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS)
+    fun sendDistractingPackagesChanged() {
+        distractingPackageHelper.sendDistractingPackagesChanged(packagesToChange, uidsToChange,
+                TEST_USER_ID, PackageManager.RESTRICTION_HIDE_NOTIFICATIONS)
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED),
                 nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
+                nullable(), nullable(), nullable(), nullable())
 
         var changedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         var changedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
         assertThat(changedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
         assertThat(changedUids).asList().containsExactly(
                 packageSetting1.appId, packageSetting2.appId)
-    }
-
-    @Test
-    fun sendDistractingPackagesChanged_withDifferentVisibilityAllowList() {
-        mockDividedSeparatedBroadcastList(
-                intArrayOf(10001, 10002, 10003), intArrayOf(10001, 10002, 10007))
-
-        distractingPackageHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
-                packagesToChange, uidsToChange, TEST_USER_ID,
-                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS)
-        testHandler.flush()
-        verify(broadcastHelper, times(2)).sendPackageBroadcast(
-                eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
-
-        bundleCaptor.allValues.forEachIndexed { i, it ->
-            var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
-            var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
-            assertThat(changedPackages?.size).isEqualTo(1)
-            assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isEqualTo(packagesToChange[i])
-            assertThat(changedUids?.get(0)).isEqualTo(uidsToChange[i])
-        }
-    }
-
-    @Test
-    fun sendDistractingPackagesChanged_withNullVisibilityAllowList() {
-        mockDividedSeparatedBroadcastList(intArrayOf(10001, 10002, 10003), null)
-
-        distractingPackageHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
-                packagesToChange, uidsToChange, TEST_USER_ID,
-                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS)
-        testHandler.flush()
-        verify(broadcastHelper, times(2)).sendPackageBroadcast(
-                eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
-
-        bundleCaptor.allValues.forEachIndexed { i, it ->
-            var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
-            var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
-            assertThat(changedPackages?.size).isEqualTo(1)
-            assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isEqualTo(packagesToChange[i])
-            assertThat(changedUids?.get(0)).isEqualTo(uidsToChange[i])
-        }
     }
 }

@@ -16,9 +16,11 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.CREATE_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_USERS;
 import static android.app.ActivityManager.STOP_USER_ON_SWITCH_DEFAULT;
 import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
 import static android.app.ActivityManager.StopUserOnSwitch;
@@ -69,6 +71,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -100,6 +103,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -107,6 +111,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FactoryResetter;
 import com.android.server.FgThread;
@@ -1071,6 +1076,12 @@ class UserController implements Handler.Callback {
                         Binder.getCallingPid(), UserHandle.USER_ALL);
             });
         }
+
+        // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
+        // we'll need to remove this call and handle that as part of the user state workflow
+        // instead.
+        // TODO(b/240613396) also check if multi-display is supported
+        mInjector.getUserManagerInternal().assignUserToDisplay(userId, Display.INVALID_DISPLAY);
     }
 
     private void finishUserStopping(final int userId, final UserState uss,
@@ -1357,12 +1368,14 @@ class UserController implements Handler.Callback {
         List<UserInfo> profilesToStart = new ArrayList<>(profiles.size());
         for (UserInfo user : profiles) {
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED
-                    && user.id != currentUserId && !user.isQuietModeEnabled()) {
+                    && user.id != currentUserId
+                    && shouldStartWithParent(user)) {
                 profilesToStart.add(user);
             }
         }
         final int profilesToStartSize = profilesToStart.size();
         int i = 0;
+        // TODO(b/239982558): pass displayId
         for (; i < profilesToStartSize && i < (getMaxRunningUsers() - 1); ++i) {
             startUser(profilesToStart.get(i).id, /* foreground= */ false);
         }
@@ -1371,6 +1384,14 @@ class UserController implements Handler.Callback {
         }
     }
 
+    private boolean shouldStartWithParent(UserInfo user) {
+        final UserProperties properties = mInjector.getUserManagerInternal()
+                .getUserProperties(user.id);
+        return (properties != null && properties.getStartWithParent())
+                && !user.isQuietModeEnabled();
+    }
+
+    // TODO(b/239982558): might need to infer the display id based on parent user
     /**
      * Starts a user only if it's a profile, with a more relaxed permission requirement:
      * {@link android.Manifest.permission#MANAGE_USERS} or
@@ -1399,7 +1420,8 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        return startUserNoChecks(userId, /* foreground= */ false, /* unlockListener= */ null);
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, /* foreground= */ false,
+                /* unlockListener= */ null);
     }
 
     @VisibleForTesting
@@ -1445,26 +1467,70 @@ class UserController implements Handler.Callback {
             @Nullable IProgressListener unlockListener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUser");
 
-        return startUserNoChecks(userId, foreground, unlockListener);
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
     }
 
-    private boolean startUserNoChecks(final @UserIdInt int userId, final boolean foreground,
+    // TODO(b/239982558): add javadoc (need to wait until the intents / SystemService callbacks are
+    // defined
+    boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId,
+            @Nullable IProgressListener unlockListener) {
+        checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
+                MANAGE_USERS, CREATE_USERS);
+
+        // DEFAULT_DISPLAY is used for "regular" start user operations
+        Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
+                "Cannot use DEFAULT_DISPLAY");
+
+        try {
+            return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+        } catch (RuntimeException e) {
+            Slogf.w(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
+            return false;
+        }
+    }
+
+    private boolean startUserNoChecks(@UserIdInt int userId, int displayId, boolean foreground,
             @Nullable IProgressListener unlockListener) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        t.traceBegin("UserController.startUser-" + userId + "-" + (foreground ? "fg" : "bg"));
+        t.traceBegin("UserController.startUser-" + userId
+                + (displayId == Display.DEFAULT_DISPLAY ? "" : "-display-" + displayId)
+                + "-" + (foreground ? "fg" : "bg"));
         try {
-            return startUserInternal(userId, foreground, unlockListener, t);
+            return startUserInternal(userId, displayId, foreground, unlockListener, t);
         } finally {
             t.traceEnd();
         }
     }
 
-    private boolean startUserInternal(@UserIdInt int userId, boolean foreground,
+    private boolean startUserInternal(@UserIdInt int userId, int displayId, boolean foreground,
             @Nullable IProgressListener unlockListener, @NonNull TimingsTraceAndSlog t) {
         if (DEBUG_MU) {
-            Slogf.i(TAG, "Starting user %d%s", userId, foreground ? " in foreground" : "");
+            Slogf.i(TAG, "Starting user %d on display %d %s", userId, displayId,
+                    foreground ? " in foreground" : "");
         }
+
+        // TODO(b/239982558): move logic below to a different class (like DisplayAssignmentManager)
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            // This is called by startUserOnSecondaryDisplay()
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+                // TODO(b/239824814): add CTS test and/or unit test for all exceptional cases
+                throw new UnsupportedOperationException("Not supported by device");
+            }
+
+            // TODO(b/239982558): call DisplayManagerInternal to check if display is valid instead
+            Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
+            Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
+                    + " on secondary display (%d)", displayId);
+            Preconditions.checkArgument(!foreground, "Cannot start user %d in foreground AND "
+                    + "on secondary display (%d)", userId, displayId);
+
+            // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
+            // we'll need to remove this call and handle that as part of the user state workflow
+            // instead.
+            mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
+        }
+
         EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId);
 
         final int callingUid = Binder.getCallingUid();
@@ -1519,6 +1585,7 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
+            // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
                 t.traceBegin("startFreezingScreen");
                 mInjector.getWindowManager().startFreezingScreen(
@@ -2568,15 +2635,24 @@ class UserController implements Handler.Callback {
     }
 
     private void checkCallingPermission(String permission, String methodName) {
-        if (mInjector.checkCallingPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission denial: " + methodName
-                    + "() from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + permission;
-            Slogf.w(TAG, msg);
-            throw new SecurityException(msg);
+        checkCallingHasOneOfThosePermissions(methodName, permission);
+    }
+
+    private void checkCallingHasOneOfThosePermissions(String methodName, String...permissions) {
+        for (String permission : permissions) {
+            if (mInjector.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
+        String msg = "Permission denial: " + methodName
+                + "() from pid=" + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid()
+                + " requires "
+                + (permissions.length == 1
+                        ? permissions[0]
+                        : "one of " + Arrays.toString(permissions));
+        Slogf.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     private void enforceShellRestriction(String restriction, @UserIdInt int userId) {

@@ -955,16 +955,7 @@ public abstract class BatteryStats {
 
         public static final int NUM_WIFI_BATCHED_SCAN_BINS = 5;
 
-        /**
-         * Note that these must match the constants in android.os.PowerManager.
-         * Also, if the user activity types change, the BatteryStatsImpl.VERSION must
-         * also be bumped.
-         */
-        static final String[] USER_ACTIVITY_TYPES = {
-            "other", "button", "touch", "accessibility", "attention"
-        };
-
-        public static final int NUM_USER_ACTIVITY_TYPES = USER_ACTIVITY_TYPES.length;
+        public static final int NUM_USER_ACTIVITY_TYPES = PowerManager.USER_ACTIVITY_EVENT_MAX + 1;
 
         public abstract void noteUserActivityLocked(int type);
         public abstract boolean hasUserActivity();
@@ -2324,11 +2315,6 @@ public abstract class BatteryStats {
     public abstract boolean getNextHistoryLocked(HistoryItem out);
 
     public abstract void finishIteratingHistoryLocked();
-
-    /**
-     * Return the base time offset for the battery history.
-     */
-    public abstract long getHistoryBaseTime();
 
     /**
      * Returns the number of times the device has been started.
@@ -6168,7 +6154,7 @@ public abstract class BatteryStats {
                         }
                         sb.append(val);
                         sb.append(" ");
-                        sb.append(Uid.USER_ACTIVITY_TYPES[i]);
+                        sb.append(PowerManager.userActivityEventToString(i));
                     }
                 }
                 if (hasData) {
@@ -7614,8 +7600,6 @@ public abstract class BatteryStats {
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
                 CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
                 getEndPlatformVersion());
-
-        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
         if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
             if (startIteratingHistoryLocked()) {

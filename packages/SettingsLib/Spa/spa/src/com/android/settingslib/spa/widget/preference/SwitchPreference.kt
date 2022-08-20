@@ -100,7 +100,7 @@ internal fun InternalSwitchPreference(
 ) {
     val checkedValue = checked.value
     val indication = LocalIndication.current
-    val modifier = remember(checkedValue) {
+    val modifier = remember(checkedValue, changeable.value) {
         if (checkedValue != null && onCheckedChange != null) {
             Modifier.toggleable(
                 value = checkedValue,

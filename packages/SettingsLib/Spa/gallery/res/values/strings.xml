@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright (C) 2022 The Android Open Source Project
 
@@ -14,6 +15,8 @@
   limitations under the License.
   -->
 <resources>
+    <!-- Gallery App label. [DO NOT TRANSLATE] -->
+    <string name="app_label" translatable="false">Gallery</string>
     <!-- Gallery App name. [DO NOT TRANSLATE] -->
     <string name="app_name" translatable="false">SpaLib Gallery</string>
 </resources>

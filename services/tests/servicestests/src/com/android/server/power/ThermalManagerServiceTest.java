@@ -381,6 +381,7 @@ public class ThermalManagerServiceTest {
         assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
                         Temperature.TYPE_SKIN)).size());
         assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
+        assertTrue(Float.isNaN(mService.mService.getThermalHeadroom(0)));
     }
 
     @Test
@@ -394,6 +395,14 @@ public class ThermalManagerServiceTest {
                 mFakeHal.getCurrentCoolingDevices(true, CoolingDevice.TYPE_CPU),
                 Arrays.asList(mService.mService.getCurrentCoolingDevicesWithType(
                         CoolingDevice.TYPE_CPU)));
+    }
+
+    @Test
+    public void testGetThermalHeadroomInputRange() throws RemoteException {
+        assertTrue(Float.isNaN(mService.mService.getThermalHeadroom(
+                ThermalManagerService.MIN_FORECAST_SEC - 1)));
+        assertTrue(Float.isNaN(mService.mService.getThermalHeadroom(
+                ThermalManagerService.MAX_FORECAST_SEC + 1)));
     }
 
     @Test

@@ -32,7 +32,6 @@ import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.LocationUtils.createLocation;
 import static com.android.server.location.LocationUtils.createLocationResult;
-import static com.android.server.location.listeners.RemoteListenerRegistration.IN_PROCESS_EXECUTOR;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -534,7 +533,7 @@ public class LocationProviderManagerTest {
                 listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
-        IN_PROCESS_EXECUTOR.execute(() -> {
+        FgThread.getExecutor().execute(() -> {
             try {
                 blocker.await();
             } catch (InterruptedException e) {
@@ -661,7 +660,7 @@ public class LocationProviderManagerTest {
                 listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
-        IN_PROCESS_EXECUTOR.execute(() -> {
+        FgThread.getExecutor().execute(() -> {
             try {
                 blocker.await();
             } catch (InterruptedException e) {

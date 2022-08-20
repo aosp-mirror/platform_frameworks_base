@@ -28,7 +28,6 @@ import com.android.server.testutils.whenever
 import org.junit.Before
 import org.junit.Rule
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -102,7 +101,6 @@ open class PackageHelperTestBase {
         whenever(rule.mocks().userManagerService.hasUserRestriction(
                 eq(UserManager.DISALLOW_UNINSTALL_APPS), eq(TEST_USER_ID))).thenReturn(true)
         mockKnownPackages(pms)
-        mockUnifiedSeparatedBroadcastList()
     }
 
     private fun mockKnownPackages(pms: PackageManagerService) {
@@ -138,27 +136,5 @@ open class PackageHelperTestBase {
                 Build.VERSION.INCREMENTAL)
         rule.system().validateFinalState()
         return pms
-    }
-
-    protected fun mockUnifiedSeparatedBroadcastList() {
-        whenever(broadcastHelper.getBroadcastParams(any(Computer::class.java),
-                any() as Array<String>, any(IntArray::class.java), anyInt()
-        )).thenReturn(ArrayList<BroadcastParams>().apply {
-            this.add(BroadcastParams(packagesToChange[0], uidsToChange[0], IntArray(0),
-                    TEST_USER_ID).apply {
-                this.addPackage(packagesToChange[1], uidsToChange[1])
-            })
-        })
-    }
-
-    protected fun mockDividedSeparatedBroadcastList(allowlist1: IntArray?, allowlist2: IntArray?) {
-        whenever(broadcastHelper.getBroadcastParams(any(Computer::class.java),
-                any() as Array<String>, any(IntArray::class.java), anyInt()
-        )).thenReturn(ArrayList<BroadcastParams>().apply {
-            this.add(BroadcastParams(packagesToChange[0], uidsToChange[0],
-                    allowlist1 ?: IntArray(0), TEST_USER_ID))
-            this.add(BroadcastParams(packagesToChange[1], uidsToChange[1],
-                    allowlist2 ?: IntArray(0), TEST_USER_ID))
-        })
     }
 }

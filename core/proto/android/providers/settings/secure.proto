@@ -89,6 +89,14 @@ message SecureSettingsProto {
         // Setting for accessibility magnification for following typing.
         optional SettingProto accessibility_magnification_follow_typing_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_software_cursor_enabled = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        message SoftwareCursorSettings {
+            optional SettingProto trigger_hints_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+            optional SettingProto keyboard_shift_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        }
+
+        optional SoftwareCursorSettings accessibility_software_cursor_settings = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     }
     optional Accessibility accessibility = 2;
 
