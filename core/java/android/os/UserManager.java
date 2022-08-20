@@ -51,6 +51,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -2786,7 +2787,7 @@ public class UserManager {
         return isUserRunning(user.getIdentifier());
     }
 
-    /** {@hide} */
+    /** @hide */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserRunning(@UserIdInt int userId) {
@@ -2969,7 +2970,7 @@ public class UserManager {
                 }
             };
 
-    /** {@hide} */
+    /** @hide */
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
@@ -2977,13 +2978,13 @@ public class UserManager {
         return mIsUserUnlockedCache.query(userId);
     }
 
-    /** {@hide} */
+    /** @hide */
     public void disableIsUserUnlockedCache() {
         mIsUserUnlockedCache.disableLocal();
         mIsUserUnlockingOrUnlockedCache.disableLocal();
     }
 
-    /** {@hide} */
+    /** @hide */
     public static final void invalidateIsUserUnlockedCache() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_USER_UNLOCKED_PROPERTY);
     }
@@ -3013,7 +3014,7 @@ public class UserManager {
         return isUserUnlockingOrUnlocked(user.getIdentifier());
     }
 
-    /** {@hide} */
+    /** @hide */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
@@ -3081,6 +3082,30 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns a {@link UserProperties} object describing the properties of the given user.
+     *
+     * Note that the caller may not have permission to access all items; requesting any item for
+     * which permission is lacking will throw a {@link SecurityException}.
+     *
+     * <p> Requires
+     * {@code android.Manifest.permission#MANAGE_USERS},
+     * {@code android.Manifest.permission#QUERY_USERS}, or
+     * {@code android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission, or else the caller must be in the same profile group as the caller.
+     *
+     * @param userHandle the user handle of the user whose information is being requested.
+     * @return a UserProperties object for a specific user.
+     * @throws IllegalArgumentException if {@code userHandle} doesn't correspond to an existing user
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
+        return mUserPropertiesCache.query(userHandle.getIdentifier());
     }
 
     /**
@@ -5481,9 +5506,35 @@ public class UserManager {
                 }
             };
 
-    /** {@hide} */
+    /** @hide */
     public static final void invalidateStaticUserProperties() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STATIC_USER_PROPERTIES);
+    }
+
+    /* Cache key for UserProperties object. */
+    private static final String CACHE_KEY_USER_PROPERTIES = "cache_key.user_properties";
+
+    // TODO: It would be better to somehow have this as static, so that it can work cross-context.
+    private final PropertyInvalidatedCache<Integer, UserProperties> mUserPropertiesCache =
+            new PropertyInvalidatedCache<Integer, UserProperties>(16, CACHE_KEY_USER_PROPERTIES) {
+                @Override
+                public UserProperties recompute(Integer userId) {
+                    try {
+                        // If the userId doesn't exist, this will throw rather than cache garbage.
+                        return mService.getUserPropertiesCopy(userId);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public boolean bypass(Integer query) {
+                    return query < 0;
+                }
+            };
+
+    /** @hide */
+    public static final void invalidateUserPropertiesCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_USER_PROPERTIES);
     }
 
     /**

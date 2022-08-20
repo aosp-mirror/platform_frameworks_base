@@ -23,6 +23,7 @@ import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.IntentSender;
 import android.content.RestrictionEntry;
 import android.graphics.Bitmap;
@@ -71,6 +72,7 @@ interface IUserManager {
     boolean isUserOfType(int userId, in String userType);
     @UnsupportedAppUsage
     UserInfo getUserInfo(int userId);
+    UserProperties getUserPropertiesCopy(int userId);
     String getUserAccount(int userId);
     void setUserAccount(int userId, String accountName);
     long getUserCreationTime(int userId);
