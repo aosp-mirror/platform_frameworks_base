@@ -376,7 +376,8 @@ public class AudioDeviceInventory {
                         makeLeAudioDeviceUnavailable(address, btInfo.mAudioSystemDevice);
                     } else if (switchToAvailable) {
                         makeLeAudioDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
-                                streamType, btInfo.mAudioSystemDevice, "onSetBtActiveDevice");
+                                streamType, btInfo.mVolume, btInfo.mAudioSystemDevice,
+                                "onSetBtActiveDevice");
                     }
                     break;
                 default: throw new IllegalArgumentException("Invalid profile "
@@ -1160,8 +1161,8 @@ public class AudioDeviceInventory {
     }
 
     @GuardedBy("mDevicesLock")
-    private void makeLeAudioDeviceAvailable(String address, String name, int streamType, int device,
-            String eventSource) {
+    private void makeLeAudioDeviceAvailable(String address, String name, int streamType,
+            int volumeIndex, int device, String eventSource) {
         if (device != AudioSystem.DEVICE_NONE) {
             /* Audio Policy sees Le Audio similar to A2DP. Let's make sure
              * AUDIO_POLICY_FORCE_NO_BT_A2DP is not set
@@ -1182,7 +1183,9 @@ public class AudioDeviceInventory {
             return;
         }
 
-        final int leAudioVolIndex = mDeviceBroker.getVssVolumeForDevice(streamType, device);
+        final int leAudioVolIndex = (volumeIndex == -1)
+                ? mDeviceBroker.getVssVolumeForDevice(streamType, device)
+                : volumeIndex;
         final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
         mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
         mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");

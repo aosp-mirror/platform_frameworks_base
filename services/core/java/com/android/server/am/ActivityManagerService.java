@@ -14255,10 +14255,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (oldRecord.resultTo != null) {
                     final BroadcastQueue oldQueue = broadcastQueueForIntent(oldRecord.intent);
                     try {
+                        oldRecord.mIsReceiverAppRunning = true;
                         oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid);
+                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid,
+                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + queue.mQueueName + "] sending broadcast result of "
@@ -17385,7 +17387,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // sends to the activity. After this race issue between WM/ATMS and AMS is solved, this
             // workaround can be removed. (b/213288355)
             if (isNewPending) {
-                mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
+                mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid,
+                        OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
             }
             // We need to update the network rules for the app coming to the top state so that
             // it can access network when the device or the app is in a restricted state

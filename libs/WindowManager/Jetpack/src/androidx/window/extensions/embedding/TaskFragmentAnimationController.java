@@ -30,6 +30,8 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.window.TaskFragmentOrganizer;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 /** Controls the TaskFragment remote animations. */
@@ -45,7 +47,7 @@ class TaskFragmentAnimationController {
     /** Task Ids that we have registered for remote animation. */
     private final ArraySet<Integer> mRegisterTasks = new ArraySet<>();
 
-    TaskFragmentAnimationController(TaskFragmentOrganizer organizer) {
+    TaskFragmentAnimationController(@NonNull TaskFragmentOrganizer organizer) {
         mOrganizer = organizer;
         mDefinition = new RemoteAnimationDefinition();
         final RemoteAnimationAdapter animationAdapter =
