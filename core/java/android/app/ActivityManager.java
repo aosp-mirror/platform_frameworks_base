@@ -4336,7 +4336,7 @@ public class ActivityManager {
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS})
     public boolean switchUser(@NonNull UserHandle user) {
-        Preconditions.checkNotNull(user, "UserHandle cannot be null.");
+        Preconditions.checkArgument(user != null, "UserHandle cannot be null.");
 
         return switchUser(user.getIdentifier());
     }
