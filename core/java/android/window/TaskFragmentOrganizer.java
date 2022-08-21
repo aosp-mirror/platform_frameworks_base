@@ -26,6 +26,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -151,22 +152,70 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * Called when a TaskFragment is created and organized by this organizer.
      *
      * @param taskFragmentInfo  Info of the TaskFragment that is created.
+     * @deprecated Use {@link #onTaskFragmentAppeared(WindowContainerTransaction, TaskFragmentInfo)}
+     *             instead.
      */
+    @Deprecated
     public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {}
+
+    /**
+     * Called when a TaskFragment is created and organized by this organizer.
+     *
+     * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed. No
+     *              need to call {@link #applyTransaction} as it will be applied by the caller.
+     * @param taskFragmentInfo  Info of the TaskFragment that is created.
+     */
+    public void onTaskFragmentAppeared(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentInfo taskFragmentInfo) {
+        // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next release.
+        onTaskFragmentAppeared(taskFragmentInfo);
+    }
 
     /**
      * Called when the status of an organized TaskFragment is changed.
      *
      * @param taskFragmentInfo  Info of the TaskFragment that is changed.
+     * @deprecated Use {@link #onTaskFragmentInfoChanged(WindowContainerTransaction,
+     *             TaskFragmentInfo)} instead.
      */
+    @Deprecated
     public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {}
+
+    /**
+     * Called when the status of an organized TaskFragment is changed.
+     *
+     * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed. No
+     *              need to call {@link #applyTransaction} as it will be applied by the caller.
+     * @param taskFragmentInfo  Info of the TaskFragment that is changed.
+     */
+    public void onTaskFragmentInfoChanged(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentInfo taskFragmentInfo) {
+        // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next release.
+        onTaskFragmentInfoChanged(taskFragmentInfo);
+    }
 
     /**
      * Called when an organized TaskFragment is removed.
      *
      * @param taskFragmentInfo  Info of the TaskFragment that is removed.
+     *  @deprecated Use {@link #onTaskFragmentVanished(WindowContainerTransaction,
+     *              TaskFragmentInfo)} instead.
      */
+    @Deprecated
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {}
+
+    /**
+     * Called when an organized TaskFragment is removed.
+     *
+     * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed. No
+     *              need to call {@link #applyTransaction} as it will be applied by the caller.
+     * @param taskFragmentInfo  Info of the TaskFragment that is removed.
+     */
+    public void onTaskFragmentVanished(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentInfo taskFragmentInfo) {
+        // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next release.
+        onTaskFragmentVanished(taskFragmentInfo);
+    }
 
     /**
      * Called when the parent leaf Task of organized TaskFragments is changed.
@@ -176,7 +225,13 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * For case like screen size change, it will trigger onTaskFragmentParentInfoChanged with new
      * Task bounds, but may not trigger onTaskFragmentInfoChanged because there can be an override
      * bounds.
+     *
+     * @param fragmentToken The parent Task this TaskFragment is changed.
+     * @param parentConfig  Config of the parent Task.
+     * @deprecated Use {@link #onTaskFragmentParentInfoChanged(WindowContainerTransaction, int,
+     *             Configuration)} instead.
      */
+    @Deprecated
     public void onTaskFragmentParentInfoChanged(
             @NonNull IBinder fragmentToken, @NonNull Configuration parentConfig) {}
 
@@ -189,11 +244,13 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * Task bounds, but may not trigger onTaskFragmentInfoChanged because there can be an override
      * bounds.
      *
+     * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed. No
+     *              need to call {@link #applyTransaction} as it will be applied by the caller.
      * @param taskId    Id of the parent Task that is changed.
      * @param parentConfig  Config of the parent Task.
-     * @hide
      */
-    public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
+    public void onTaskFragmentParentInfoChanged(@NonNull WindowContainerTransaction wct, int taskId,
+            @NonNull Configuration parentConfig) {
         // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next release.
         final List<IBinder> tokens = mTaskIdToFragmentTokens.get(taskId);
         if (tokens == null || tokens.isEmpty()) {
@@ -211,9 +268,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @param errorCallbackToken    token set in
      *                             {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)}
      * @param exception             exception from the server side.
-     *
-     * @deprecated Use {@link #onTaskFragmentError(IBinder, TaskFragmentInfo, int, Throwable)}
-     * instead.
+     * @deprecated Use {@link #onTaskFragmentError(WindowContainerTransaction, IBinder,
+     *             TaskFragmentInfo, int, Throwable)} instead.
      */
     @Deprecated
     public void onTaskFragmentError(
@@ -223,6 +279,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * Called when the {@link WindowContainerTransaction} created with
      * {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)} failed on the server side.
      *
+     * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed. No
+     *              need to call {@link #applyTransaction} as it will be applied by the caller.
      * @param errorCallbackToken    token set in
      *                             {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)}
      * @param taskFragmentInfo  The {@link TaskFragmentInfo}. This could be {@code null} if no
@@ -231,7 +289,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                          transaction operation.
      * @param exception             exception from the server side.
      */
-    public void onTaskFragmentError(
+    public void onTaskFragmentError(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder errorCallbackToken, @Nullable TaskFragmentInfo taskFragmentInfo,
             int opType, @NonNull Throwable exception) {
         // Doing so to keep compatibility. This will be removed in the next release.
@@ -244,6 +302,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * original Task. In this case, we need to notify the organizer so that it can check if the
      * Activity matches any split rule.
      *
+     * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed. No
+     *              need to call {@link #applyTransaction} as it will be applied by the caller.
      * @param taskId            The Task that the activity is reparented to.
      * @param activityIntent    The intent that the activity is original launched with.
      * @param activityToken     If the activity belongs to the same process as the organizer, this
@@ -251,20 +311,23 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      *                          different process, the server will generate a temporary token that
      *                          the organizer can use to reparent the activity through
      *                          {@link WindowContainerTransaction} if needed.
-     * @hide
      */
-    public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
-            @NonNull IBinder activityToken) {}
+    public void onActivityReparentedToTask(@NonNull WindowContainerTransaction wct,
+            int taskId, @NonNull Intent activityIntent, @NonNull IBinder activityToken) {}
 
     /**
      * Called when the transaction is ready so that the organizer can update the TaskFragments based
      * on the changes in transaction.
+     * Note: {@link WindowOrganizer#applyTransaction} permission requirement is conditional for
+     * {@link TaskFragmentOrganizer}.
+     * @see com.android.server.wm.WindowOrganizerController#enforceTaskPermission
      * @hide
      */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         for (TaskFragmentTransaction.Change change : changes) {
-            // TODO(b/240519866): apply all changes in one WCT.
             final int taskId = change.getTaskId();
             switch (change.getType()) {
                 case TYPE_TASK_FRAGMENT_APPEARED:
@@ -277,10 +340,10 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                     onTaskFragmentParentInfoChanged(change.getTaskFragmentToken(),
                             mTaskIdToConfigurations.get(taskId));
 
-                    onTaskFragmentAppeared(change.getTaskFragmentInfo());
+                    onTaskFragmentAppeared(wct, change.getTaskFragmentInfo());
                     break;
                 case TYPE_TASK_FRAGMENT_INFO_CHANGED:
-                    onTaskFragmentInfoChanged(change.getTaskFragmentInfo());
+                    onTaskFragmentInfoChanged(wct, change.getTaskFragmentInfo());
                     break;
                 case TYPE_TASK_FRAGMENT_VANISHED:
                     // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next
@@ -294,18 +357,19 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                         }
                     }
 
-                    onTaskFragmentVanished(change.getTaskFragmentInfo());
+                    onTaskFragmentVanished(wct, change.getTaskFragmentInfo());
                     break;
                 case TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED:
                     // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next
                     // release.
                     mTaskIdToConfigurations.put(taskId, change.getTaskConfiguration());
 
-                    onTaskFragmentParentInfoChanged(taskId, change.getTaskConfiguration());
+                    onTaskFragmentParentInfoChanged(wct, taskId, change.getTaskConfiguration());
                     break;
                 case TYPE_TASK_FRAGMENT_ERROR:
                     final Bundle errorBundle = change.getErrorBundle();
                     onTaskFragmentError(
+                            wct,
                             change.getErrorCallbackToken(),
                             errorBundle.getParcelable(
                                     KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, TaskFragmentInfo.class),
@@ -315,6 +379,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                     break;
                 case TYPE_ACTIVITY_REPARENTED_TO_TASK:
                     onActivityReparentedToTask(
+                            wct,
                             change.getTaskId(),
                             change.getActivityIntent(),
                             change.getActivityToken());
@@ -324,6 +389,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                             "Unknown TaskFragmentEvent=" + change.getType());
             }
         }
+        // TODO(b/240519866): notify TaskFragmentOrganizerController that the transition is done.
+        applyTransaction(wct);
     }
 
     @Override
