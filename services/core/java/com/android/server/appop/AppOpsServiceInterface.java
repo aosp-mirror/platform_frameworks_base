@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 package com.android.server.appop;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager.Mode;
+import android.util.ArraySet;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import java.io.PrintWriter;
+
 /**
  * Interface for accessing and modifying modes for app-ops i.e. package and uid modes.
- * In the future this interface will also include mode callbacks and op restrictions.
+ * This interface also includes functions for added and removing op mode watchers.
+ * In the future this interface will also include op restrictions.
  */
 public interface AppOpsServiceInterface {
     /**
@@ -95,4 +103,104 @@ public interface AppOpsServiceInterface {
      * Stop tracking app-op modes for all uid and packages.
      */
     void clearAllModes();
+
+    /**
+     * Registers changedListener to listen to op's mode change.
+     * @param changedListener the listener that must be trigger on the op's mode change.
+     * @param details about the listener.
+     * @param op op representing the app-op whose mode change needs to be listened to.
+     */
+    void startWatchingOpModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            @NonNull ModeChangedListenerDetails details, int op);
+
+    /**
+     * Registers changedListener to listen to package's app-op's mode change.
+     * @param changedListener the listener that must be trigger on the mode change.
+     * @param details about the listener.
+     * @param packageName of the package whose app-op's mode change needs to be listened to.
+     */
+    void startWatchingPackageModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            @NonNull ModeChangedListenerDetails details, @NonNull String packageName);
+
+    /**
+     * Stop the changedListener from triggering on any mode change.
+     * @param changedListener the listener that needs to be removed.
+     */
+    void removeListener(@NonNull OnOpModeChangedListener changedListener);
+
+    /**
+     * Temporary API which will be removed once we can safely untangle the methods that use this.
+     * Returns a set of OnOpModeChangedListener that are listening for op's mode changes.
+     * @param op app-op whose mode change is being listened to.
+     */
+    ArraySet<OnOpModeChangedListener> getOpModeChangedListeners(int op);
+
+    /**
+     * Temporary API which will be removed once we can safely untangle the methods that use this.
+     * Returns a set of OnOpModeChangedListener that are listening for package's op's mode changes.
+     * @param packageName of package whose app-op's mode change is being listened to.
+     */
+    ArraySet<OnOpModeChangedListener> getPackageModeChangedListeners(@NonNull String packageName);
+
+    /**
+     * Temporary API which will be removed once we can safely untangle the methods that use this.
+     * For a given mode changed listener, get the details about the listener.
+     * @param onModeChangedListener mode changed listener for whom we need the details.
+     */
+    ModeChangedListenerDetails getDetailsForListener(
+            @NonNull OnOpModeChangedListener onModeChangedListener);
+
+    /**
+     * Temporary API which will be removed once we can safely untangle the methods that use this.
+     * Notify that the app-op's mode is changed by triggering the change listener.
+     * @param changedListener the change listener.
+     * @param op App-op whose mode has changed
+     * @param uid user id associated with the app-op
+     * @param packageName package name that is associated with the app-op
+     */
+    void notifyOpChanged(@NonNull OnOpModeChangedListener changedListener, int op, int uid,
+            @Nullable String packageName);
+
+    /**
+     * Temporary API which will be removed once we can safely untangle the methods that use this.
+     * Notify that the app-op's mode is changed to all packages associated with the uid by
+     * triggering the appropriate change listener.
+     * @param op App-op whose mode has changed
+     * @param uid user id associated with the app-op
+     * @param onlyForeground true if only watchers that
+     * @param callbackToIgnore callback that should be ignored.
+     */
+    void notifyOpChangedForAllPkgsInUid(int op, int uid, boolean onlyForeground,
+            @Nullable OnOpModeChangedListener callbackToIgnore);
+
+    /**
+     * TODO: Move hasForegroundWatchers and hasForegroundWatchers into this.
+     * Go over the list of app-ops for the uid and mark app-ops with MODE_FOREGROUND in
+     * foregroundOps.
+     * @param uid for which the app-op's mode needs to be marked.
+     * @param foregroundOps boolean array where app-ops that have MODE_FOREGROUND are marked true.
+     * @return  foregroundOps.
+     */
+    SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps);
+
+    /**
+     * Go over the list of app-ops for the package name and mark app-ops with MODE_FOREGROUND in
+     * foregroundOps.
+     * @param packageName for which the app-op's mode needs to be marked.
+     * @param foregroundOps boolean array where app-ops that have MODE_FOREGROUND are marked true.
+     * @return foregroundOps.
+     */
+    SparseBooleanArray evalForegroundPackageOps(String packageName,
+            SparseBooleanArray foregroundOps);
+
+    /**
+     * Dump op mode and package mode listeners and their details.
+     * @param dumpOp if -1 then op mode listeners for all app-ops are dumped. If it's set to an
+     *               app-op, only the watchers for that app-op are dumped.
+     * @param dumpUid uid for which we want to dump op mode watchers.
+     * @param dumpPackage if not null and if dumpOp is -1, dumps watchers for the package name.
+     * @param printWriter writer to dump to.
+     */
+    boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage, PrintWriter printWriter);
+
 }
