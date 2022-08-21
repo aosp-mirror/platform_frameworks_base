@@ -238,6 +238,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private DozeLog mDozeLog;
     @Mock
+    private ShadeLogger mShadeLog;
+    @Mock
     private CommandQueue mCommandQueue;
     @Mock
     private VibratorHelper mVibratorHelper;
@@ -524,7 +526,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
-                mMetricsLogger, mConfigurationController,
+                mMetricsLogger,
+                mShadeLog,
+                mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mStatusBarKeyguardViewManager,
