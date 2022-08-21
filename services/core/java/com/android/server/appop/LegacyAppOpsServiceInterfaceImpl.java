@@ -568,7 +568,7 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
                         printedOpHeader = true;
                     }
                     printWriter.print("      #"); printWriter.print(j); printWriter.print(": ");
-                    printWriter.println(mOpModeWatchers.valueAt(i).toString());
+                    printWriter.println(modeChangedListenerSet.valueAt(j).toString());
                 }
             }
         }
