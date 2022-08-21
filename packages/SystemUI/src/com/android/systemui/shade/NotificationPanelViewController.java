@@ -448,7 +448,6 @@ public final class NotificationPanelViewController extends PanelViewController {
      */
     private boolean mQsAnimatorExpand;
     private boolean mIsLaunchTransitionFinished;
-    private boolean mOnlyAffordanceInThisMotion;
     private ValueAnimator mQsSizeChangeAnimator;
 
     private boolean mQsScrimEnabled = true;
@@ -726,6 +725,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             AccessibilityManager accessibilityManager, @DisplayId int displayId,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             MetricsLogger metricsLogger,
+            ShadeLogger shadeLogger,
             ConfigurationController configurationController,
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
@@ -792,6 +792,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 panelExpansionStateManager,
                 ambientState,
                 interactionJankMonitor,
+                shadeLogger,
                 systemClock);
         mView = view;
         mVibratorHelper = vibratorHelper;
@@ -1887,6 +1888,8 @@ public final class NotificationPanelViewController extends PanelViewController {
                 }
                 if (mQsExpansionAnimator != null) {
                     mInitialHeightOnTouch = mQsExpansionHeight;
+                    mShadeLog.logMotionEvent(event,
+                            "onQsIntercept: down action, QS tracking enabled");
                     mQsTracking = true;
                     traceQsJank(true /* startTracing */, false /* wasCancelled */);
                     mNotificationStackScrollLayoutController.cancelLongPress();
@@ -1914,12 +1917,16 @@ public final class NotificationPanelViewController extends PanelViewController {
                     setQsExpansion(h + mInitialHeightOnTouch);
                     trackMovement(event);
                     return true;
+                } else {
+                    mShadeLog.logMotionEvent(event,
+                            "onQsIntercept: move ignored because qs tracking disabled");
                 }
                 if ((h > getTouchSlop(event) || (h < -getTouchSlop(event) && mQsExpanded))
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
                     if (DEBUG_LOGCAT) Log.d(TAG, "onQsIntercept - start tracking expansion");
                     mView.getParent().requestDisallowInterceptTouchEvent(true);
+                    mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);
                     mQsTracking = true;
                     traceQsJank(true /* startTracing */, false /* wasCancelled */);
                     onQsExpansionStarted();
@@ -1935,6 +1942,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
+                mShadeLog.logMotionEvent(event, "onQsIntercept: up action, QS tracking disabled");
                 mQsTracking = false;
                 break;
         }
@@ -1972,7 +1980,6 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     private void initDownStates(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mOnlyAffordanceInThisMotion = false;
             mQsTouchAboveFalsingThreshold = mQsFullyExpanded;
             mDozingOnDown = isDozing();
             mDownX = event.getX();
@@ -2111,6 +2118,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 && collapsedQs && isQsExpansionEnabled();
         if (action == MotionEvent.ACTION_DOWN && expandedShadeCollapsedQs) {
             // Down in the empty area while fully expanded - go to QS.
+            mShadeLog.logMotionEvent(event, "handleQsTouch: down action, QS tracking enabled");
             mQsTracking = true;
             traceQsJank(true /* startTracing */, false /* wasCancelled */);
             mConflictingQsExpansionGesture = true;
@@ -2125,6 +2133,8 @@ public final class NotificationPanelViewController extends PanelViewController {
         if (!mQsExpandImmediate && mQsTracking) {
             onQsTouch(event);
             if (!mConflictingQsExpansionGesture && !mSplitShadeEnabled) {
+                mShadeLog.logMotionEvent(event,
+                        "handleQsTouch: not immediate expand or conflicting gesture");
                 return true;
             }
         }
@@ -2192,6 +2202,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 event.getX(), event.getY(), -1)) {
             if (DEBUG_LOGCAT) Log.d(TAG, "handleQsDown");
             mFalsingCollector.onQsDown();
+            mShadeLog.logMotionEvent(event, "handleQsDown: down action, QS tracking enabled");
             mQsTracking = true;
             onQsExpansionStarted();
             mInitialHeightOnTouch = mQsExpansionHeight;
@@ -2274,6 +2285,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mShadeLog.logMotionEvent(event, "onQsTouch: down action, QS tracking enabled");
                 mQsTracking = true;
                 traceQsJank(true /* startTracing */, false /* wasCancelled */);
                 mInitialTouchY = y;
@@ -2300,6 +2312,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
             case MotionEvent.ACTION_MOVE:
                 if (DEBUG_LOGCAT) Log.d(TAG, "onQSTouch move");
+                mShadeLog.logMotionEvent(event, "onQsTouch: move action, setting QS expansion");
                 setQsExpansion(h + mInitialHeightOnTouch);
                 if (h >= getFalsingThreshold()) {
                     mQsTouchAboveFalsingThreshold = true;
@@ -2309,6 +2322,8 @@ public final class NotificationPanelViewController extends PanelViewController {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                mShadeLog.logMotionEvent(event,
+                        "onQsTouch: up/cancel action, QS tracking disabled");
                 mQsTracking = false;
                 mTrackingPointer = -1;
                 trackMovement(event);
@@ -3131,8 +3146,8 @@ public final class NotificationPanelViewController extends PanelViewController {
                 positionClockAndNotifications();
             }
         }
-        if (mQsExpandImmediate || mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
-                && !mQsExpansionFromOverscroll) {
+        if (mQsExpandImmediate || (mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
+                && !mQsExpansionFromOverscroll)) {
             float t;
             if (mKeyguardShowing) {
 
@@ -4224,6 +4239,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                         || mPulseExpansionHandler.isExpanding();
                 if (pulseShouldGetTouch && mPulseExpansionHandler.onTouchEvent(event)) {
                     // We're expanding all the other ones shouldn't get this anymore
+                    mShadeLog.logMotionEvent(event, "onTouch: PulseExpansionHandler handled event");
                     return true;
                 }
                 if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
@@ -4231,14 +4247,10 @@ public final class NotificationPanelViewController extends PanelViewController {
                         && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN_PEEK, 1);
                 }
-                boolean handled = false;
-                if (mOnlyAffordanceInThisMotion) {
-                    return true;
-                }
-                handled |= mHeadsUpTouchHelper.onTouchEvent(event);
+                boolean handled = mHeadsUpTouchHelper.onTouchEvent(event);
 
                 if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && handleQsTouch(event)) {
-                    if (DEBUG_LOGCAT) Log.d(TAG, "handleQsTouch true");
+                    mShadeLog.logMotionEvent(event, "onTouch: handleQsTouch handled event");
                     return true;
                 }
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
@@ -4810,6 +4822,8 @@ public final class NotificationPanelViewController extends PanelViewController {
                 }
             } else if (!mQsExpanded && mQsExpansionAnimator == null) {
                 setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
+            } else {
+                mShadeLog.v("onLayoutChange: qs expansion not set");
             }
             updateExpandedHeight(getExpandedHeight());
             updateHeader();
