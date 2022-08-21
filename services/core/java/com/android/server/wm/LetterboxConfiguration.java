@@ -191,6 +191,10 @@ final class LetterboxConfiguration {
     // Allows to enable letterboxing strategy for translucent activities ignoring flags.
     private boolean mTranslucentLetterboxingOverrideEnabled;
 
+    // Whether camera compatibility treatment is enabled.
+    // See DisplayRotationCompatPolicy for context.
+    private final boolean mIsCameraCompatTreatmentEnabled;
+
     LetterboxConfiguration(Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
                 () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
@@ -241,6 +245,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
         mTranslucentLetterboxingEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEnabledForTranslucentActivities);
+        mIsCameraCompatTreatmentEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
     }
@@ -947,9 +953,24 @@ final class LetterboxConfiguration {
                 isDeviceInTabletopMode, nextVerticalPosition);
     }
 
-    // TODO(b/262378106): Cache runtime flag and implement DeviceConfig.OnPropertiesChangedListener
+    // TODO(b/262378106): Cache a runtime flag and implement
+    // DeviceConfig.OnPropertiesChangedListener
     static boolean isTranslucentLetterboxingAllowed() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 "enable_translucent_activity_letterbox", false);
     }
+
+    /** Whether camera compatibility treatment is enabled. */
+    boolean isCameraCompatTreatmentEnabled(boolean checkDeviceConfig) {
+        return mIsCameraCompatTreatmentEnabled
+                && (!checkDeviceConfig || isCameraCompatTreatmentAllowed());
+    }
+
+    // TODO(b/262977416): Cache a runtime flag and implement
+    // DeviceConfig.OnPropertiesChangedListener
+    private static boolean isCameraCompatTreatmentAllowed() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                "enable_camera_compat_treatment", false);
+    }
+
 }
