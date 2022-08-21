@@ -202,6 +202,8 @@ public abstract class PanelViewController {
     private final InteractionJankMonitor mInteractionJankMonitor;
     protected final SystemClock mSystemClock;
 
+    protected final ShadeLogger mShadeLog;
+
     protected abstract void onExpandingFinished();
 
     protected void onExpandingStarted() {
@@ -242,6 +244,7 @@ public abstract class PanelViewController {
             PanelExpansionStateManager panelExpansionStateManager,
             AmbientState ambientState,
             InteractionJankMonitor interactionJankMonitor,
+            ShadeLogger shadeLogger,
             SystemClock systemClock) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -254,6 +257,7 @@ public abstract class PanelViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mPanelExpansionStateManager = panelExpansionStateManager;
+        mShadeLog = shadeLogger;
         TouchHandler touchHandler = createTouchHandler();
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -1275,9 +1279,16 @@ public abstract class PanelViewController {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (mInstantExpanding || (mTouchDisabled
-                    && event.getActionMasked() != MotionEvent.ACTION_CANCEL) || (mMotionAborted
-                    && event.getActionMasked() != MotionEvent.ACTION_DOWN)) {
+            if (mInstantExpanding) {
+                mShadeLog.logMotionEvent(event, "onTouch: touch ignored due to instant expanding");
+                return false;
+            }
+            if (mTouchDisabled  && event.getActionMasked() != MotionEvent.ACTION_CANCEL) {
+                mShadeLog.logMotionEvent(event, "onTouch: non-cancel action, touch disabled");
+                return false;
+            }
+            if (mMotionAborted && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                mShadeLog.logMotionEvent(event, "onTouch: non-down action, motion was aborted");
                 return false;
             }
 
@@ -1287,6 +1298,7 @@ public abstract class PanelViewController {
                     // Turn off tracking if it's on or the shade can get stuck in the down position.
                     onTrackingStopped(true /* expand */);
                 }
+                mShadeLog.logMotionEvent(event, "onTouch: drag not enabled");
                 return false;
             }
 
