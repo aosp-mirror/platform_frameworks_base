@@ -16,15 +16,39 @@
 
 package com.android.server.appop;
 
+import static android.app.AppOpsManager.OP_NONE;
+import static android.app.AppOpsManager.WATCH_FOREGROUND_CHANGES;
+import static android.app.AppOpsManager.opRestrictsRead;
+
+import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
+
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.Mode;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.function.pooled.PooledLambda;
+
+import libcore.util.EmptyArray;
+
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Objects;
 
 
 /**
@@ -33,8 +57,13 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface {
 
-    // Should be the same object that the AppOpsService is using for locking.
+    static final String TAG = "LegacyAppOpsServiceInterfaceImpl";
+
+    // Must be the same object that the AppOpsService is using for locking.
     final Object mLock;
+    final Handler mHandler;
+    final Context mContext;
+    final SparseArray<int[]> mSwitchedOps;
 
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -43,13 +72,27 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     @GuardedBy("mLock")
     final ArrayMap<String, SparseIntArray> mPackageModes = new ArrayMap<>();
 
+    final ArrayMap<OnOpModeChangedListener, ModeChangedListenerDetails> mListenerToDetails =
+            new ArrayMap<>();
+    final SparseArray<ArraySet<OnOpModeChangedListener>> mOpModeWatchers = new SparseArray<>();
+    final ArrayMap<String, ArraySet<OnOpModeChangedListener>> mPackageModeWatchers =
+            new ArrayMap<>();
+
     final PersistenceScheduler mPersistenceScheduler;
 
 
+    // Constant meaning that any UID should be matched when dispatching callbacks
+    private static final int UID_ANY = -2;
+
+
     LegacyAppOpsServiceInterfaceImpl(PersistenceScheduler persistenceScheduler,
-            @NonNull Object lock) {
+            @NonNull Object lock, Handler handler, Context context,
+            SparseArray<int[]> switchedOps) {
         this.mPersistenceScheduler = persistenceScheduler;
         this.mLock = lock;
+        this.mHandler = handler;
+        this.mContext = context;
+        this.mSwitchedOps = switchedOps;
     }
 
     @Override
@@ -158,7 +201,6 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
         }
     }
 
-
     @Override
     public boolean areUidModesDefault(int uid) {
         synchronized (mLock) {
@@ -193,6 +235,380 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
             mUidModes.clear();
             mPackageModes.clear();
         }
+    }
+
+    @Override
+    public void startWatchingOpModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            @NonNull ModeChangedListenerDetails details, int op) {
+        Objects.requireNonNull(changedListener);
+        Objects.requireNonNull(details);
+
+        synchronized (mLock) {
+            ArraySet<OnOpModeChangedListener> modeWatcherSet = mOpModeWatchers.get(op);
+            if (modeWatcherSet == null) {
+                modeWatcherSet = new ArraySet<>();
+                mOpModeWatchers.put(op, modeWatcherSet);
+            }
+            modeWatcherSet.add(changedListener);
+            ModeChangedListenerDetails listenerDetails = mListenerToDetails.get(changedListener);
+            if (listenerDetails == null) {
+                mListenerToDetails.put(changedListener, details);
+            }
+        }
+    }
+
+    @Override
+    public void startWatchingPackageModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            @NonNull ModeChangedListenerDetails details, @NonNull String packageName) {
+        Objects.requireNonNull(changedListener);
+        Objects.requireNonNull(details);
+        Objects.requireNonNull(packageName);
+
+        synchronized (mLock) {
+            ArraySet<OnOpModeChangedListener> modeWatcherSet =
+                    mPackageModeWatchers.get(packageName);
+            if (modeWatcherSet == null) {
+                modeWatcherSet = new ArraySet<>();
+                mPackageModeWatchers.put(packageName, modeWatcherSet);
+            }
+            modeWatcherSet.add(changedListener);
+            ModeChangedListenerDetails listenerDetails = mListenerToDetails.get(changedListener);
+            if (listenerDetails == null) {
+                mListenerToDetails.put(changedListener, details);
+            }
+        }
+    }
+
+    @Override
+    public void removeListener(@NonNull OnOpModeChangedListener changedListener) {
+        Objects.requireNonNull(changedListener);
+
+        synchronized (mLock) {
+            for (int i = mOpModeWatchers.size() - 1; i >= 0; i--) {
+                ArraySet<OnOpModeChangedListener> cbs = mOpModeWatchers.valueAt(i);
+                cbs.remove(changedListener);
+                if (cbs.size() <= 0) {
+                    mOpModeWatchers.removeAt(i);
+                }
+            }
+
+            for (int i = mPackageModeWatchers.size() - 1; i >= 0; i--) {
+                ArraySet<OnOpModeChangedListener> cbs = mPackageModeWatchers.valueAt(i);
+                cbs.remove(changedListener);
+                if (cbs.size() <= 0) {
+                    mPackageModeWatchers.removeAt(i);
+                }
+            }
+            mListenerToDetails.remove(changedListener);
+        }
+    }
+
+    @Override
+    public ArraySet<OnOpModeChangedListener> getOpModeChangedListeners(int op) {
+        synchronized (mLock) {
+            ArraySet<OnOpModeChangedListener> modeChangedListenersSet = mOpModeWatchers.get(op);
+            if (modeChangedListenersSet == null) {
+                return new ArraySet<>();
+            }
+            return new ArraySet<>(modeChangedListenersSet);
+        }
+    }
+
+    @Override
+    public ArraySet<OnOpModeChangedListener> getPackageModeChangedListeners(
+            @NonNull String packageName) {
+        Objects.requireNonNull(packageName);
+
+        synchronized (mLock) {
+            ArraySet<OnOpModeChangedListener> modeChangedListenersSet =
+                    mPackageModeWatchers.get(packageName);
+            if (modeChangedListenersSet == null) {
+                return new ArraySet<>();
+            }
+            return new ArraySet<>(modeChangedListenersSet);
+        }
+    }
+
+    @Override
+    public ModeChangedListenerDetails getDetailsForListener(
+            @NonNull OnOpModeChangedListener onModeChangedListener) {
+        Objects.requireNonNull(onModeChangedListener);
+        return mListenerToDetails.get(onModeChangedListener);
+    }
+
+    @Override
+    public void notifyOpChanged(@NonNull OnOpModeChangedListener onModeChangedListener, int code,
+            int uid, @Nullable String packageName) {
+        Objects.requireNonNull(onModeChangedListener);
+
+        final ModeChangedListenerDetails modeChangedListenerDetails =
+                getModeChangedListenerDetails(onModeChangedListener);
+
+        if (uid != UID_ANY && modeChangedListenerDetails.getWatchingUid() >= 0
+                && modeChangedListenerDetails.getWatchingUid() != uid) {
+            return;
+        }
+
+        // See CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE
+        int[] switchedCodes;
+        if (modeChangedListenerDetails.getWatchedOpCode() == ALL_OPS) {
+            switchedCodes = mSwitchedOps.get(code);
+        } else if (modeChangedListenerDetails.getWatchedOpCode() == OP_NONE) {
+            switchedCodes = new int[]{code};
+        } else {
+            switchedCodes = new int[]{modeChangedListenerDetails.getWatchedOpCode()};
+        }
+
+        for (int switchedCode : switchedCodes) {
+            // There are features watching for mode changes such as window manager
+            // and location manager which are in our process. The callbacks in these
+            // features may require permissions our remote caller does not have.
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (shouldIgnoreCallback(switchedCode, modeChangedListenerDetails.getCallingPid(),
+                        modeChangedListenerDetails.getCallingUid())) {
+                    continue;
+                }
+                onModeChangedListener.onOpModeChanged(switchedCode, uid, packageName);
+            } catch (RemoteException e) {
+                /* ignore */
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    private boolean shouldIgnoreCallback(int op, int watcherPid, int watcherUid) {
+        // If it's a restricted read op, ignore it if watcher doesn't have manage ops permission,
+        // as watcher should not use this to signal if the value is changed.
+        return opRestrictsRead(op) && mContext.checkPermission(Manifest.permission.MANAGE_APPOPS,
+                watcherPid, watcherUid) != PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void notifyOpChangedForAllPkgsInUid(int code, int uid, boolean onlyForeground,
+            @Nullable OnOpModeChangedListener callbackToIgnore) {
+        String[] uidPackageNames = getPackagesForUid(uid);
+        ArrayMap<OnOpModeChangedListener, ArraySet<String>> callbackSpecs = null;
+
+        synchronized (mLock) {
+            ArraySet<OnOpModeChangedListener> callbacks = mOpModeWatchers.get(code);
+            if (callbacks != null) {
+                final int callbackCount = callbacks.size();
+                for (int i = 0; i < callbackCount; i++) {
+                    OnOpModeChangedListener callback = callbacks.valueAt(i);
+                    final ModeChangedListenerDetails modeChangedListenerDetails =
+                            getModeChangedListenerDetails(callback);
+
+                    if (onlyForeground && (modeChangedListenerDetails.getFlags()
+                            & WATCH_FOREGROUND_CHANGES) == 0) {
+                        continue;
+                    }
+
+                    ArraySet<String> changedPackages = new ArraySet<>();
+                    Collections.addAll(changedPackages, uidPackageNames);
+                    if (callbackSpecs == null) {
+                        callbackSpecs = new ArrayMap<>();
+                    }
+                    callbackSpecs.put(callback, changedPackages);
+                }
+            }
+
+            for (String uidPackageName : uidPackageNames) {
+                callbacks = mPackageModeWatchers.get(uidPackageName);
+                if (callbacks != null) {
+                    if (callbackSpecs == null) {
+                        callbackSpecs = new ArrayMap<>();
+                    }
+                    final int callbackCount = callbacks.size();
+                    for (int i = 0; i < callbackCount; i++) {
+                        OnOpModeChangedListener callback = callbacks.valueAt(i);
+                        final ModeChangedListenerDetails modeChangedListenerDetails =
+                                getModeChangedListenerDetails(callback);
+
+                        if (onlyForeground && (modeChangedListenerDetails.getFlags()
+                                & WATCH_FOREGROUND_CHANGES) == 0) {
+                            continue;
+                        }
+
+                        ArraySet<String> changedPackages = callbackSpecs.get(callback);
+                        if (changedPackages == null) {
+                            changedPackages = new ArraySet<>();
+                            callbackSpecs.put(callback, changedPackages);
+                        }
+                        changedPackages.add(uidPackageName);
+                    }
+                }
+            }
+
+            if (callbackSpecs != null && callbackToIgnore != null) {
+                callbackSpecs.remove(callbackToIgnore);
+            }
+        }
+
+        if (callbackSpecs == null) {
+            return;
+        }
+
+        for (int i = 0; i < callbackSpecs.size(); i++) {
+            final OnOpModeChangedListener callback = callbackSpecs.keyAt(i);
+            final ArraySet<String> reportedPackageNames = callbackSpecs.valueAt(i);
+            if (reportedPackageNames == null) {
+                mHandler.sendMessage(PooledLambda.obtainMessage(
+                        LegacyAppOpsServiceInterfaceImpl::notifyOpChanged,
+                        this, callback, code, uid, (String) null));
+
+            } else {
+                final int reportedPackageCount = reportedPackageNames.size();
+                for (int j = 0; j < reportedPackageCount; j++) {
+                    final String reportedPackageName = reportedPackageNames.valueAt(j);
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            LegacyAppOpsServiceInterfaceImpl::notifyOpChanged,
+                            this, callback, code, uid, reportedPackageName));
+                }
+            }
+        }
+    }
+
+    private static String[] getPackagesForUid(int uid) {
+        String[] packageNames = null;
+
+        // Very early during boot the package manager is not yet or not yet fully started. At this
+        // time there are no packages yet.
+        if (AppGlobals.getPackageManager() != null) {
+            try {
+                packageNames = AppGlobals.getPackageManager().getPackagesForUid(uid);
+            } catch (RemoteException e) {
+                /* ignore - local call */
+            }
+        }
+        if (packageNames == null) {
+            return EmptyArray.STRING;
+        }
+        return packageNames;
+    }
+
+    @Override
+    public SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps) {
+        synchronized (mLock) {
+            return evalForegroundOps(mUidModes.get(uid), foregroundOps);
+        }
+    }
+
+    @Override
+    public SparseBooleanArray evalForegroundPackageOps(String packageName,
+            SparseBooleanArray foregroundOps) {
+        synchronized (mLock) {
+            return evalForegroundOps(mPackageModes.get(packageName), foregroundOps);
+        }
+    }
+
+    private SparseBooleanArray evalForegroundOps(SparseIntArray opModes,
+            SparseBooleanArray foregroundOps) {
+        SparseBooleanArray tempForegroundOps = foregroundOps;
+        if (opModes != null) {
+            for (int i = opModes.size() - 1; i >= 0; i--) {
+                if (opModes.valueAt(i) == AppOpsManager.MODE_FOREGROUND) {
+                    if (tempForegroundOps == null) {
+                        tempForegroundOps = new SparseBooleanArray();
+                    }
+                    evalForegroundWatchers(opModes.keyAt(i), tempForegroundOps);
+                }
+            }
+        }
+        return tempForegroundOps;
+    }
+
+    private void evalForegroundWatchers(int op, SparseBooleanArray foregroundOps) {
+        boolean curValue = foregroundOps.get(op, false);
+        ArraySet<OnOpModeChangedListener> listenerSet = mOpModeWatchers.get(op);
+        if (listenerSet != null) {
+            for (int cbi = listenerSet.size() - 1; !curValue && cbi >= 0; cbi--) {
+                final ModeChangedListenerDetails details =
+                        getModeChangedListenerDetails(listenerSet.valueAt(cbi));
+                if ((details.getFlags()
+                        & AppOpsManager.WATCH_FOREGROUND_CHANGES) != 0) {
+                    curValue = true;
+                }
+            }
+        }
+        foregroundOps.put(op, curValue);
+    }
+
+    @Override
+    public boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage,
+            PrintWriter printWriter) {
+        boolean needSep = false;
+        if (mOpModeWatchers.size() > 0) {
+            boolean printedHeader = false;
+            for (int i = 0; i < mOpModeWatchers.size(); i++) {
+                if (dumpOp >= 0 && dumpOp != mOpModeWatchers.keyAt(i)) {
+                    continue;
+                }
+                boolean printedOpHeader = false;
+                ArraySet<OnOpModeChangedListener> modeChangedListenerSet =
+                        mOpModeWatchers.valueAt(i);
+                for (int j = 0; j < modeChangedListenerSet.size(); j++) {
+                    final ModeChangedListenerDetails modeChangedListenerDetail =
+                            getModeChangedListenerDetails(modeChangedListenerSet.valueAt(j));
+                    if (dumpPackage != null
+                            && dumpUid != UserHandle.getAppId(modeChangedListenerDetail
+                            .getWatchingUid())) {
+                        continue;
+                    }
+                    needSep = true;
+                    if (!printedHeader) {
+                        printWriter.println("  Op mode watchers:");
+                        printedHeader = true;
+                    }
+                    if (!printedOpHeader) {
+                        printWriter.print("    Op ");
+                        printWriter.print(AppOpsManager.opToName(mOpModeWatchers.keyAt(i)));
+                        printWriter.println(":");
+                        printedOpHeader = true;
+                    }
+                    printWriter.print("      #"); printWriter.print(j); printWriter.print(": ");
+                    printWriter.println(mOpModeWatchers.valueAt(i).toString());
+                }
+            }
+        }
+
+        if (mPackageModeWatchers.size() > 0 && dumpOp < 0) {
+            boolean printedHeader = false;
+            for (int i = 0; i < mPackageModeWatchers.size(); i++) {
+                if (dumpPackage != null
+                        && !dumpPackage.equals(mPackageModeWatchers.keyAt(i))) {
+                    continue;
+                }
+                needSep = true;
+                if (!printedHeader) {
+                    printWriter.println("  Package mode watchers:");
+                    printedHeader = true;
+                }
+                printWriter.print("    Pkg "); printWriter.print(mPackageModeWatchers.keyAt(i));
+                printWriter.println(":");
+                ArraySet<OnOpModeChangedListener> modeChangedListenerSet =
+                        mPackageModeWatchers.valueAt(i);
+
+                for (int j = 0; j < modeChangedListenerSet.size(); j++) {
+                    printWriter.print("      #"); printWriter.print(j); printWriter.print(": ");
+                    printWriter.println(modeChangedListenerSet.valueAt(j).toString());
+                }
+            }
+        }
+        return needSep;
+    }
+
+    private ModeChangedListenerDetails getModeChangedListenerDetails(
+            OnOpModeChangedListener onOpModeChangedListener) throws IllegalStateException {
+        ModeChangedListenerDetails modeChangedListenerDetails =
+                mListenerToDetails.get(onOpModeChangedListener);
+
+        if (modeChangedListenerDetails == null) {
+            throw new IllegalStateException("All OnOpModeChangedListeners must have corresponding "
+                    + "ModeChangedListenerDetails.");
+        }
+        return modeChangedListenerDetails;
     }
 
 }
