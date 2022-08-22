@@ -20,14 +20,18 @@ import android.content.Context
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.statusbar.pipeline.repository.NetworkCapabilityInfo
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.NetworkCapabilityInfo
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted.Companion.Lazily
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * A processor that transforms raw connectivity information that we get from callbacks and turns it
@@ -42,12 +46,16 @@ import kotlinx.coroutines.flow.stateIn
 class ConnectivityInfoProcessor @Inject constructor(
         connectivityInfoCollector: ConnectivityInfoCollector,
         context: Context,
+        // TODO(b/238425913): Don't use the application scope; instead, use the status bar view's
+        // scope so we only do work when there's UI that cares about it.
         @Application private val scope: CoroutineScope,
-        statusBarPipelineFlags: StatusBarPipelineFlags,
+        private val statusBarPipelineFlags: StatusBarPipelineFlags,
+        private val wifiViewModelProvider: Provider<WifiViewModel>,
 ) : CoreStartable(context) {
     // Note: This flow will not start running until a client calls `collect` on it, which means that
     // [connectivityInfoCollector]'s flow will also not start anything until that `collect` call
     // happens.
+    // TODO(b/238425913): Delete this.
     val processedInfoFlow: Flow<ProcessedConnectivityInfo> =
             if (!statusBarPipelineFlags.isNewPipelineEnabled())
                 emptyFlow()
@@ -60,6 +68,14 @@ class ConnectivityInfoProcessor @Inject constructor(
                     )
 
     override fun start() {
+        if (!statusBarPipelineFlags.isNewPipelineEnabled()) {
+            return
+        }
+        // TODO(b/238425913): The view binder should do this instead. For now, do it here so we can
+        // see the logs.
+        scope.launch {
+            wifiViewModelProvider.get().isActivityInVisible.collect { }
+        }
     }
 
     private fun RawConnectivityInfo.process(): ProcessedConnectivityInfo {
