@@ -18,9 +18,22 @@ package com.android.systemui.screenshot
 import android.graphics.Bitmap
 import android.graphics.Rect
 
-interface ImageCapture {
+internal class FakeImageCapture : ImageCapture {
 
-    fun captureDisplay(displayId: Int, crop: Rect? = null): Bitmap?
+    var requestedDisplayId: Int? = null
+    var requestedDisplayCrop: Rect? = null
+    var requestedTaskId: Int? = null
 
-    suspend fun captureTask(taskId: Int): Bitmap?
+    var image: Bitmap? = null
+
+    override fun captureDisplay(displayId: Int, crop: Rect?): Bitmap? {
+        requestedDisplayId = displayId
+        requestedDisplayCrop = crop
+        return image
+    }
+
+    override suspend fun captureTask(taskId: Int): Bitmap? {
+        requestedTaskId = taskId
+        return image
+    }
 }

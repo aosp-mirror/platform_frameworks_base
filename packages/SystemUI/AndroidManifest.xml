@@ -394,6 +394,11 @@
                   android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
+        <service android:name=".screenshot.ScreenshotProxyService"
+                 android:permission="com.android.systemui.permission.SELF"
+                 android:exported="false" />
+
+
         <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"
