@@ -97,6 +97,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final ImageView mArrowLeft;
     private final TvWindowMenuActionButton mA11yDoneButton;
 
+    private final View mPipBackground;
+
     private final ScrollView mScrollView;
     private final HorizontalScrollView mHorizontalScrollView;
     private View mFocusedButton;
@@ -147,6 +149,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 .setOnClickListener(this);
         mExpandButton = findViewById(R.id.tv_pip_menu_expand_button);
         mExpandButton.setOnClickListener(this);
+
+        mPipBackground = findViewById(R.id.tv_pip_menu_background);
 
         mScrollView = findViewById(R.id.tv_pip_menu_scroll);
         mHorizontalScrollView = findViewById(R.id.tv_pip_menu_horizontal_scroll);
@@ -231,7 +235,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                     mCurrentPipBounds.width() / (float) mCurrentPipBounds.height(),
                     finishBounds.width() / (float) finishBounds.height());
             if (ratioChanged) {
-                mPipView.animate()
+                mPipBackground.animate()
                         .alpha(1f)
                         .setInterpolator(TvPipInterpolators.EXIT)
                         .setDuration(mResizeAnimationDuration / 2)
@@ -272,7 +276,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 "%s: onPipTransitionFinished()", TAG);
 
         // Fade in content by fading out view on top.
-        mPipView.animate()
+        mPipBackground.animate()
                 .alpha(0f)
                 .setDuration(mResizeAnimationDuration / 2)
                 .setInterpolator(TvPipInterpolators.ENTER)
