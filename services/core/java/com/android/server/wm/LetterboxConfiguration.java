@@ -265,7 +265,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
+     * Overrides corners radius for activities presented in the letterbox mode. If given value < 0,
      * both it and a value of {@link
      * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
      * corners of the activity won't be rounded.
@@ -275,7 +275,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Resets corners raidus for activities presented in the letterbox mode to {@link
+     * Resets corners radius for activities presented in the letterbox mode to {@link
      * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
      */
     void resetLetterboxActivityCornersRadius() {
@@ -291,7 +291,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Gets corners raidus for activities presented in the letterbox mode.
+     * Gets corners radius for activities presented in the letterbox mode.
      */
     int getLetterboxActivityCornersRadius() {
         return mLetterboxActivityCornersRadius;
@@ -318,7 +318,7 @@ final class LetterboxConfiguration {
     /**
      * Sets color of letterbox background which is used when {@link
      * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
+     * fallback for other background types.
      */
     void setLetterboxBackgroundColor(Color color) {
         mLetterboxBackgroundColorOverride = color;
@@ -327,7 +327,7 @@ final class LetterboxConfiguration {
     /**
      * Sets color ID of letterbox background which is used when {@link
      * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
+     * fallback for other background types.
      */
     void setLetterboxBackgroundColorResourceId(int colorId) {
         mLetterboxBackgroundColorResourceIdOverride = colorId;
