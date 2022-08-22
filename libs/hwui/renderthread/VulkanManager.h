@@ -54,8 +54,6 @@ typedef void(VKAPI_PTR* PFN_vkFrameBoundaryANDROID)(VkDevice device, VkSemaphore
 #include <SkColorSpace.h>
 #include <SkRefCnt.h>
 
-class GrVkExtensions;
-
 namespace android {
 namespace uirenderer {
 namespace renderthread {
