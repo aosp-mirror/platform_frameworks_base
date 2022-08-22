@@ -4239,6 +4239,59 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSubstituteAppName_hasPermission() throws RemoteException {
+        String subName = "Substitute Name";
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME), any(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, subName);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .addExtras(extras);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testSubstituteAppNamePermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertTrue(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME));
+        assertEquals(posted.getNotification().extras
+                .getString(Notification.EXTRA_SUBSTITUTE_APP_NAME), subName);
+    }
+
+    @Test
+    public void testSubstituteAppName_noPermission() throws RemoteException {
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME), any(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, "Substitute Name");
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .addExtras(extras);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testSubstituteAppNamePermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME));
+    }
+
+    @Test
     public void testGetNotificationCountLocked() {
         String sampleTagToExclude = null;
         int sampleIdToExclude = 0;
