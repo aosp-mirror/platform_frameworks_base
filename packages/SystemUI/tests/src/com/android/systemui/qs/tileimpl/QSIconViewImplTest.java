@@ -97,7 +97,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
         ImageView iv = mock(ImageView.class);
         State s = new State();
         s.state = Tile.STATE_ACTIVE;
-        int desiredColor = mIconView.getColor(s.state);
+        int desiredColor = mIconView.getColor(s);
         when(iv.isShown()).thenReturn(true);
 
         mIconView.setIcon(iv, s, true);
@@ -109,7 +109,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
         ImageView iv = mock(ImageView.class);
         State s = new State();
         s.state = Tile.STATE_ACTIVE;
-        int desiredColor = mIconView.getColor(s.state);
+        int desiredColor = mIconView.getColor(s);
         Icon i = mock(Icon.class);
         s.icon = i;
         when(i.toString()).thenReturn("MOCK ICON");
@@ -122,6 +122,18 @@ public class QSIconViewImplTest extends SysuiTestCase {
     @Test
     public void testIconNotSet_toString() {
         assertFalse(mIconView.toString().contains("lastIcon"));
+    }
+
+    @Test
+    public void testIconColorDisabledByPolicy_sameAsUnavailable() {
+        State s1 = new State();
+        s1.state = Tile.STATE_INACTIVE;
+        s1.disabledByPolicy = true;
+
+        State s2 = new State();
+        s2.state = Tile.STATE_UNAVAILABLE;
+
+        assertEquals(mIconView.getColor(s1), mIconView.getColor(s2));
     }
 
     private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {
