@@ -126,7 +126,6 @@ public final class BluetoothProfileConnectionInfo implements Parcelable {
     }
 
     /**
-     * @hide
      * Factory method for <code>BluetoothProfileConnectionInfo</code> for an LE output device
      * @param suppressNoisyIntent if true the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY}
      *     intent will not be sent.
