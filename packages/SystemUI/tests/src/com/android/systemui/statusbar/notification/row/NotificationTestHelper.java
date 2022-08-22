@@ -48,6 +48,7 @@ import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -75,6 +76,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
@@ -144,7 +146,10 @@ public class NotificationTestHelper {
                 mock(KeyguardBypassController.class),
                 mock(GroupMembershipManager.class),
                 mock(VisualStabilityProvider.class),
-                mock(ConfigurationControllerImpl.class)
+                mock(ConfigurationControllerImpl.class),
+                new Handler(mTestLooper.getLooper()),
+                mock(AccessibilityManagerWrapper.class),
+                mock(UiEventLogger.class)
         );
         mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
         mHeadsUpManager.mHandler = new Handler(mTestLooper.getLooper());
