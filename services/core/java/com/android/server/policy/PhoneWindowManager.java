@@ -5118,18 +5118,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void userActivity() {
-        // ***************************************
-        // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-        // ***************************************
-        // THIS IS CALLED FROM DEEP IN THE POWER MANAGER
-        // WITH ITS LOCKS HELD.
-        //
-        // This code must be VERY careful about the locks
-        // it acquires.
-        // In fact, the current code acquires way too many,
-        // and probably has lurking deadlocks.
-
+    public void userActivity(int displayGroupId, int event) {
+        if (displayGroupId == DEFAULT_DISPLAY && event == PowerManager.USER_ACTIVITY_EVENT_TOUCH) {
+            mDefaultDisplayPolicy.onUserActivityEventTouch();
+        }
         synchronized (mScreenLockTimeout) {
             if (mLockScreenTimerActive) {
                 // reset the timer

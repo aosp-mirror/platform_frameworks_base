@@ -311,7 +311,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /**
      * The duration to keep a process in animating state (top scheduling group) when the
-     * wakefulness is changing from awake to doze or sleep.
+     * wakefulness is dozing (unlocking) or changing from awake to doze or sleep (locking).
      */
     private static final long DOZE_ANIMATING_STATE_RETAIN_TIME_MS = 2000;
 
@@ -2927,12 +2927,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
             final WindowState notificationShade = mRootWindowContainer.getDefaultDisplay()
                     .getDisplayPolicy().getNotificationShade();
-            proc = notificationShade != null
-                    ? mProcessMap.getProcess(notificationShade.mSession.mPid) : null;
+            proc = notificationShade != null ? notificationShade.getProcess() : null;
         }
-        if (proc == null) {
-            return;
-        }
+        setProcessAnimatingWhileDozing(proc);
+    }
+
+    // The caller MUST NOT hold the global lock because it calls AM method directly.
+    void setProcessAnimatingWhileDozing(WindowProcessController proc) {
+        if (proc == null) return;
         // Set to activity manager directly to make sure the state can be seen by the subsequent
         // update of scheduling group.
         proc.setRunningAnimationUnsafe();
