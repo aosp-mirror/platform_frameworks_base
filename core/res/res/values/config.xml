@@ -5856,4 +5856,10 @@
 
     <!-- The number of tasks to scan to get the visibility of Home -->
     <integer name="config_maxScanTasksForHomeVisibility">10</integer>
+
+    <!-- Device state that corresponds to rear display mode, feature provided
+         through Jetpack WindowManager
+         TODO(b/236022708) Move rear display state to device state config file
+    -->
+    <integer name="config_deviceStateRearDisplay">-1</integer>
 </resources>
