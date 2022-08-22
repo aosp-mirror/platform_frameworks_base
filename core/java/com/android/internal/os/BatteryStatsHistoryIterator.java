@@ -36,6 +36,7 @@ public class BatteryStatsHistoryIterator {
 
     public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history) {
         mBatteryStatsHistory = history;
+        mBatteryStatsHistory.startIteratingHistory();
     }
 
     /**
@@ -229,12 +230,5 @@ public class BatteryStatsHistoryIterator {
         out.batteryLevel = (byte) ((batteryLevelInt & 0xfe000000) >>> 25);
         out.batteryTemperature = (short) ((batteryLevelInt & 0x01ff8000) >>> 15);
         out.batteryVoltage = (char) ((batteryLevelInt & 0x00007ffe) >>> 1);
-    }
-
-    /**
-     * Should be called when iteration is complete.
-     */
-    public void close() {
-        mBatteryStatsHistory.finishIteratingHistory();
     }
 }
