@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -33,7 +32,6 @@ import static org.mockito.Mockito.never;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Point;
-import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentTransaction;
@@ -67,10 +65,7 @@ public class JetpackTaskFragmentOrganizerTest {
     private WindowContainerTransaction mTransaction;
     @Mock
     private JetpackTaskFragmentOrganizer.TaskFragmentCallback mCallback;
-    @Mock
     private SplitController mSplitController;
-    @Mock
-    private Handler mHandler;
     private JetpackTaskFragmentOrganizer mOrganizer;
 
     @Before
@@ -78,8 +73,9 @@ public class JetpackTaskFragmentOrganizerTest {
         MockitoAnnotations.initMocks(this);
         mOrganizer = new JetpackTaskFragmentOrganizer(Runnable::run, mCallback);
         mOrganizer.registerOrganizer();
+        mSplitController = new SplitController();
         spyOn(mOrganizer);
-        doReturn(mHandler).when(mSplitController).getHandler();
+        spyOn(mSplitController);
     }
 
     @Test
