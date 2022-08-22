@@ -414,7 +414,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".ImageWallpaper"
+        <service android:name=".wallpapers.ImageWallpaper"
                 android:singleUser="true"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
