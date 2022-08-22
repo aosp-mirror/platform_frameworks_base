@@ -1129,10 +1129,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Notifies the keyguard to start fading out.
-     *  @param startTime the start time of the animation in uptime milliseconds
      *
+     * @param startTime the start time of the animation in uptime milliseconds
+     * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    void startKeyguardExitAnimation(long startTime);
+    void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
 
     /**
      * Called when System UI has been started.

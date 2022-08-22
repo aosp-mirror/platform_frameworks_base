@@ -2082,10 +2082,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
             @Override
-            public int onAppTransitionStartingLocked(long statusBarAnimationStartTime,
+            public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
+                    boolean keyguardOccluding, long duration, long statusBarAnimationStartTime,
                     long statusBarAnimationDuration) {
-                return handleTransitionForKeyguardLw(false /* startKeyguardExitAnimation */,
-                        false /* notifyOccluded */);
+                // When remote animation is enabled for keyguard transition, SysUI receives
+                // IRemoteAnimationRunner#onAnimationStart to start animation, so we don't
+                // need to call IKeyguardService#keyguardGoingAway and #setOccluded.
+                final boolean notifyOccluded =
+                        !WindowManagerService.sEnableRemoteKeyguardOccludeAnimation
+                        && keyguardOccluding;
+                final boolean startKeyguardExitAnimation =
+                        !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
+                        && keyguardGoingAway;
+                return handleTransitionForKeyguardLw(startKeyguardExitAnimation,
+                        notifyOccluded, duration);
             }
 
             @Override
@@ -2096,7 +2106,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // WindowManagerService and SysUI.
                 handleTransitionForKeyguardLw(
                         keyguardGoingAwayCancelled /* startKeyguardExitAnimation */,
-                        keyguardOccludedCancelled /* notifyOccluded */);
+                        keyguardOccludedCancelled /* notifyOccluded */, 0 /* duration */);
             }
         });
 
@@ -3285,16 +3295,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      *                                  start keyguard exit animation.
      * @param notifyOccluded Trigger IKeyguardService#setOccluded binder call to notify whether
      *                      the top activity can occlude the keyguard or not.
+     * @param duration the duration of the exit animation, in milliseconds.
      *
      * @return Whether the flags have changed and we have to redo the layout.
      */
     private int handleTransitionForKeyguardLw(boolean startKeyguardExitAnimation,
-            boolean notifyOccluded) {
+            boolean notifyOccluded, long duration) {
         final int redoLayout = applyKeyguardOcclusionChange(notifyOccluded);
         if (redoLayout != 0) return redoLayout;
         if (startKeyguardExitAnimation) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
-            startKeyguardExitAnimation(SystemClock.uptimeMillis());
+            startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }
         return 0;
     }
@@ -3536,8 +3547,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isKeyguardOccluded() == isOccluded) {
             return false;
         }
-        mKeyguardDelegate.setOccluded(isOccluded, notify);
-        return mKeyguardDelegate.isShowing();
+
+        final boolean showing = mKeyguardDelegate.isShowing();
+        final boolean animate = showing && !isOccluded;
+        mKeyguardDelegate.setOccluded(isOccluded, animate, notify);
+        return showing;
     }
 
     /** {@inheritDoc} */
@@ -4933,10 +4947,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void startKeyguardExitAnimation(long startTime) {
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         if (mKeyguardDelegate != null) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.startKeyguardExitAnimation");
-            mKeyguardDelegate.startKeyguardExitAnimation(startTime);
+            mKeyguardDelegate.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }
 

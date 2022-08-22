@@ -638,9 +638,11 @@ class TransitionController {
     }
 
     void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
+        final boolean keyguardGoingAway = info.isKeyguardGoingAway();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             // TODO(shell-transitions): handle (un)occlude transition.
-            mLegacyListeners.get(i).onAppTransitionStartingLocked(
+            mLegacyListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
+                    false /* keyguardOcclude */, 0 /* durationHint */,
                     SystemClock.uptimeMillis() + statusBarTransitionDelay,
                     AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
         }

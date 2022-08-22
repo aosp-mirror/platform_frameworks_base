@@ -375,6 +375,9 @@ public class AppTransition implements Dump {
         final AnimationAdapter topOpeningAnim = wc != null ? wc.getAnimation() : null;
 
         int redoLayout = notifyAppTransitionStartingLocked(
+                AppTransition.isKeyguardGoingAwayTransitOld(transit),
+                AppTransition.isKeyguardOccludeTransitOld(transit),
+                topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
@@ -493,12 +496,14 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int notifyAppTransitionStartingLocked(long statusBarAnimationStartTime,
+    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway,
+            boolean keyguardOcclude, long duration, long statusBarAnimationStartTime,
             long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
-            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(
-                    statusBarAnimationStartTime, statusBarAnimationDuration);
+            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
+                    keyguardOcclude, duration, statusBarAnimationStartTime,
+                    statusBarAnimationDuration);
         }
         return redoLayout;
     }
