@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline
 
-import com.android.systemui.statusbar.pipeline.repository.NetworkCapabilityInfo
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.NetworkCapabilityInfo
 import kotlinx.coroutines.flow.StateFlow
 
 /**
