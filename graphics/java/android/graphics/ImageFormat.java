@@ -26,10 +26,21 @@ public class ImageFormat {
      @Retention(RetentionPolicy.SOURCE)
      @IntDef(value = {
              UNKNOWN,
+             /**
+              * Since some APIs accept either ImageFormat or PixelFormat (and the two
+              * enums do not overlap since they're both partial versions of the
+              * internal format enum), add PixelFormat values here so linting
+              * tools won't complain when method arguments annotated with
+              * ImageFormat are provided with PixelFormat values.
+              */
+             PixelFormat.RGBA_8888,
+             PixelFormat.RGBX_8888,
+             PixelFormat.RGB_888,
              RGB_565,
              YV12,
              Y8,
              Y16,
+             YCBCR_P010,
              NV16,
              NV21,
              YUY2,
