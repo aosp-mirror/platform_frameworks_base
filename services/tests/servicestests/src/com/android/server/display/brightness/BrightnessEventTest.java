@@ -63,7 +63,7 @@ public final class BrightnessEventTest {
         BrightnessEvent secondBrightnessEvent = new BrightnessEvent(1);
         secondBrightnessEvent.copyFrom(mBrightnessEvent);
         secondBrightnessEvent.setTime(0);
-        assertEquals(secondBrightnessEvent.equalsMainData(mBrightnessEvent), true);
+        assertEquals(true, secondBrightnessEvent.equalsMainData(mBrightnessEvent));
     }
 
     @Test
@@ -74,9 +74,28 @@ public final class BrightnessEventTest {
                 + " preBrt=NaN, lux=100.0, fastLux=90.0, slowLux=85.0, preLux=150.0, hbmMax=0.62,"
                 + " hbmMode=off, rbcStrength=-1, thrmMax=0.65, powerFactor=0.2, flags=, reason=doze"
                 + " [ low_pwr ], autoBrightness=true";
-        assertEquals(actualString, expectedString);
+        assertEquals(expectedString, actualString);
     }
 
+    @Test
+    public void testFlagsToString() {
+        mBrightnessEvent.reset();
+        mBrightnessEvent.setFlags(mBrightnessEvent.getFlags() | BrightnessEvent.FLAG_IDLE_CURVE);
+        String actualString = mBrightnessEvent.flagsToString();
+        String expectedString = "idle_curve ";
+        assertEquals(expectedString, actualString);
+    }
+
+    @Test
+    public void testFlagsToString_multipleFlags() {
+        mBrightnessEvent.reset();
+        mBrightnessEvent.setFlags(mBrightnessEvent.getFlags()
+                    | BrightnessEvent.FLAG_IDLE_CURVE
+                    | BrightnessEvent.FLAG_LOW_POWER_MODE);
+        String actualString = mBrightnessEvent.flagsToString();
+        String expectedString = "idle_curve low_power_mode ";
+        assertEquals(expectedString, actualString);
+    }
 
 
     private BrightnessReason getReason(int reason, int modifier) {
