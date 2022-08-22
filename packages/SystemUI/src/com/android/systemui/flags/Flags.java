@@ -174,6 +174,10 @@ public class Flags {
             new ResourceBooleanFlag(800, R.bool.flag_monet);
 
     /***************************************/
+    // 801 - region sampling
+    public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
+
+    /***************************************/
     // 900 - media
     public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
     public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
