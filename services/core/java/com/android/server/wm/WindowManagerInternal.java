@@ -219,13 +219,10 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when a pending app transition gets cancelled.
-         * @param keyguardGoingAwayCancelled {@code true} if keyguard going away transition was
-         *        cancelled.
-         * @param keyguardOccludedCancelled {@code true} if keyguard (un)occluded transition was
-         *        cancelled.
+         *
+         * @param keyguardGoingAway true if keyguard going away transition got cancelled.
          */
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
-                boolean keyguardOccludedCancelled) {}
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {}
 
         /**
          * Called when an app transition is timed out.

@@ -616,8 +616,7 @@ public class DisplayPolicy {
             }
 
             @Override
-            public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
-                    boolean keyguardOccludedCancelled) {
+            public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
                 mHandler.post(mAppTransitionCancelled);
             }
 

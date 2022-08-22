@@ -171,10 +171,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
-     * @param notify {@code true} if the status change should be immediately notified via
-     *        {@link com.android.internal.policy.IKeyguardService}
+     * Applies a keyguard occlusion change if one happened.
+     * @param transitionStarted Whether keyguard (un)occlude transition is starting or not.
      */
-    int applyKeyguardOcclusionChange(boolean notify);
+    int applyKeyguardOcclusionChange(boolean transitionStarted);
 
     /**
      * Interface to the Window Manager state associated with a particular
