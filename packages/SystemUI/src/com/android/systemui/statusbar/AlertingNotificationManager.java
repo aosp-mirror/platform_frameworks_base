@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -49,7 +50,8 @@ public abstract class AlertingNotificationManager {
 
     protected int mMinimumDisplayTime;
     protected int mAutoDismissNotificationDecay;
-    private final Handler mHandler;
+    @VisibleForTesting
+    public Handler mHandler;
 
     /**
      * Called when posting a new notification that should alert the user and appear on screen.
