@@ -63,7 +63,6 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     private static final int TEST_A11Y_AUTO_DISMISS_TIME = 600;
     private static final int TEST_A11Y_TIMEOUT_TIME = 5_000;
 
-    private AccessibilityManagerWrapper mAccessibilityMgr;
     private HeadsUpManager mHeadsUpManager;
     private boolean mLivesPastNormalTime;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
@@ -72,10 +71,15 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Mock private StatusBarNotification mSbn;
     @Mock private Notification mNotification;
     @Mock private HeadsUpManagerLogger mLogger;
+    @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
-        TestableHeadsUpManager(Context context, HeadsUpManagerLogger logger, Handler handler) {
-            super(context, logger, handler);
+        TestableHeadsUpManager(Context context,
+                HeadsUpManagerLogger logger,
+                Handler handler,
+                AccessibilityManagerWrapper accessibilityManagerWrapper,
+                UiEventLogger uiEventLogger) {
+            super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -88,13 +92,11 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Before
     public void setUp() {
         initMocks(this);
-        mAccessibilityMgr = mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
-        mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
         when(mEntry.getSbn()).thenReturn(mSbn);
         when(mSbn.getNotification()).thenReturn(mNotification);
-
         super.setUp();
-        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger, mTestHandler);
+        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger, mTestHandler,
+                mAccessibilityMgr, mUiEventLoggerFake);
     }
 
     @After
