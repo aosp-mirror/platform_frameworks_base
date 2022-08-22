@@ -491,9 +491,9 @@ public class PrefetchControllerTest {
         final PrefetchController.PrefetchChangedListener prefetchChangedListener =
                 new PrefetchController.PrefetchChangedListener() {
                     @Override
-                    public void onPrefetchCacheUpdated(
-                            ArraySet<JobStatus> jobs, int userId, String pkgName,
-                            long prevEstimatedLaunchTime, long newEstimatedLaunchTime) {
+                    public void onPrefetchCacheUpdated(ArraySet<JobStatus> jobs,
+                            int userId, String pkgName, long prevEstimatedLaunchTime,
+                            long newEstimatedLaunchTime, long nowElapsed) {
                         onPrefetchCacheChangedCalled[0] = true;
                     }
                 };
