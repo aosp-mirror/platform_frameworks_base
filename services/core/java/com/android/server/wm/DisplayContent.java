@@ -5946,6 +5946,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (changes != 0) {
             Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " "
                     + mTempConfig + " for displayId=" + mDisplayId);
+            if (isReady() && mTransitionController.isShellTransitionsEnabled()) {
+                requestChangeTransitionIfNeeded(changes, null /* displayChange */);
+            }
             onRequestedOverrideConfigurationChanged(mTempConfig);
 
             final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
@@ -5962,9 +5965,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             mWmService.mDisplayNotificationController.dispatchDisplayChanged(
                     this, getConfiguration());
-            if (isReady() && mTransitionController.isShellTransitionsEnabled()) {
-                requestChangeTransitionIfNeeded(changes, null /* displayChange */);
-            }
         }
         return changes;
     }
