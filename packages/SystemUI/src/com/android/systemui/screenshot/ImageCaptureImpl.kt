@@ -27,13 +27,19 @@ import android.view.SurfaceControl
 import android.view.SurfaceControl.DisplayCaptureArgs
 import android.view.SurfaceControl.ScreenshotHardwareBuffer
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 private const val TAG = "ImageCaptureImpl"
 
+@SysUISingleton
 open class ImageCaptureImpl @Inject constructor(
     private val displayManager: DisplayManager,
-    private val atmService: IActivityTaskManager
+    private val atmService: IActivityTaskManager,
+    @Background private val bgContext: CoroutineDispatcher
 ) : ImageCapture {
 
     override fun captureDisplay(displayId: Int, crop: Rect?): Bitmap? {
@@ -46,8 +52,8 @@ open class ImageCaptureImpl @Inject constructor(
         return buffer?.asBitmap()
     }
 
-    override fun captureTask(taskId: Int): Bitmap? {
-        val snapshot = atmService.takeTaskSnapshot(taskId)
+    override suspend fun captureTask(taskId: Int): Bitmap? {
+        val snapshot = withContext(bgContext) { atmService.takeTaskSnapshot(taskId) } ?: return null
         return Bitmap.wrapHardwareBuffer(snapshot.hardwareBuffer, snapshot.colorSpace)
     }
 
@@ -67,12 +73,17 @@ open class ImageCaptureImpl @Inject constructor(
     }
 
     @VisibleForTesting
-    open fun captureDisplay(displayToken: IBinder, width: Int, height: Int, crop: Rect): ScreenshotHardwareBuffer? {
-        val captureArgs = DisplayCaptureArgs.Builder(displayToken)
-            .setSize(width, height)
-            .setSourceCrop(crop)
-            .build()
+    open fun captureDisplay(
+        displayToken: IBinder,
+        width: Int,
+        height: Int,
+        crop: Rect
+    ): ScreenshotHardwareBuffer? {
+        val captureArgs =
+            DisplayCaptureArgs.Builder(displayToken)
+                .setSize(width, height)
+                .setSourceCrop(crop)
+                .build()
         return SurfaceControl.captureDisplay(captureArgs)
     }
-
 }
