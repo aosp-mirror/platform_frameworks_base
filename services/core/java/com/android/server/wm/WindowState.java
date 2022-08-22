@@ -3803,6 +3803,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return wpc != null && wpc.registeredForDisplayAreaConfigChanges();
     }
 
+    WindowProcessController getProcess() {
+        return mWpcForDisplayAreaConfigChanges;
+    }
+
     /**
      * Fills the given window frames and merged configuration for the client.
      *
@@ -6049,7 +6053,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean hasWallpaperForLetterboxBackground() {
-        return mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox();
+        return mActivityRecord != null && mActivityRecord.hasWallpaperBackgroundForLetterbox();
     }
 
     /**

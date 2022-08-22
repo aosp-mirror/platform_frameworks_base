@@ -20,6 +20,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -43,8 +44,9 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * The maximum length for text fields in a NotificationChannelGroup. Fields will be truncated at
      * this limit.
+     * @hide
      */
-    private static final int MAX_TEXT_LENGTH = 1000;
+    public static final int MAX_TEXT_LENGTH = 1000;
 
     private static final String TAG_GROUP = "channelGroup";
     private static final String ATT_NAME = "name";
@@ -66,7 +68,7 @@ public final class NotificationChannelGroup implements Parcelable {
     private CharSequence mName;
     private String mDescription;
     private boolean mBlocked;
-    private List<NotificationChannel> mChannels = new ArrayList<>();
+    private ParceledListSlice<NotificationChannel> mChannels;
     // Bitwise representation of fields that have been changed by the user
     private int mUserLockedFields;
 
@@ -90,17 +92,19 @@ public final class NotificationChannelGroup implements Parcelable {
      */
     protected NotificationChannelGroup(Parcel in) {
         if (in.readByte() != 0) {
-            mId = in.readString();
+            mId = getTrimmedString(in.readString());
         } else {
             mId = null;
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mName = getTrimmedString(mName.toString());
         if (in.readByte() != 0) {
-            mDescription = in.readString();
+            mDescription = getTrimmedString(in.readString());
         } else {
             mDescription = null;
         }
-        in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader(), android.app.NotificationChannel.class);
+        mChannels = in.readParcelable(
+                NotificationChannelGroup.class.getClassLoader(), ParceledListSlice.class);
         mBlocked = in.readBoolean();
         mUserLockedFields = in.readInt();
     }
@@ -120,14 +124,14 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        TextUtils.writeToParcel(mName, dest, flags);
+        TextUtils.writeToParcel(mName.toString(), dest, flags);
         if (mDescription != null) {
             dest.writeByte((byte) 1);
             dest.writeString(mDescription);
         } else {
             dest.writeByte((byte) 0);
         }
-        dest.writeParcelableList(mChannels, flags);
+        dest.writeParcelable(mChannels, flags);
         dest.writeBoolean(mBlocked);
         dest.writeInt(mUserLockedFields);
     }
@@ -157,7 +161,7 @@ public final class NotificationChannelGroup implements Parcelable {
      * Returns the list of channels that belong to this group
      */
     public List<NotificationChannel> getChannels() {
-        return mChannels;
+        return mChannels == null ? new ArrayList<>() : mChannels.getList();
     }
 
     /**
@@ -191,15 +195,8 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * @hide
      */
-    public void addChannel(NotificationChannel channel) {
-        mChannels.add(channel);
-    }
-
-    /**
-     * @hide
-     */
     public void setChannels(List<NotificationChannel> channels) {
-        mChannels = channels;
+        mChannels = new ParceledListSlice<>(channels);
     }
 
     /**
@@ -334,7 +331,7 @@ public final class NotificationChannelGroup implements Parcelable {
         proto.write(NotificationChannelGroupProto.NAME, mName.toString());
         proto.write(NotificationChannelGroupProto.DESCRIPTION, mDescription);
         proto.write(NotificationChannelGroupProto.IS_BLOCKED, mBlocked);
-        for (NotificationChannel channel : mChannels) {
+        for (NotificationChannel channel : mChannels.getList()) {
             channel.dumpDebug(proto, NotificationChannelGroupProto.CHANNELS);
         }
         proto.end(token);

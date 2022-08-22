@@ -463,13 +463,12 @@ class TransitionController {
     }
 
     /**
-     * Collects the window containers which need to be synced with the changing display (e.g.
-     * rotating) to the given transition or the current collecting transition.
+     * Collects the window containers which need to be synced with the changing display area into
+     * the current collecting transition.
      */
-    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc, @Nullable Transition incoming) {
-        if (incoming == null) incoming = mCollectingTransition;
-        if (incoming == null) return;
-        final Transition transition = incoming;
+    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc) {
+        final Transition transition = mCollectingTransition;
+        if (transition == null || !transition.mParticipants.contains(wc)) return;
         // Collect all visible tasks.
         wc.forAllLeafTasks(task -> {
             if (task.isVisible()) {
