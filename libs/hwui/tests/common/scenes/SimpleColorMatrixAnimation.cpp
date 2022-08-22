@@ -16,7 +16,8 @@
 
 #include "TestSceneBase.h"
 
-#include <SkColorMatrixFilter.h>
+#include <SkColorFilter.h>
+#include <SkColorMatrix.h>
 #include <SkGradientShader.h>
 
 class SimpleColorMatrixAnimation;
