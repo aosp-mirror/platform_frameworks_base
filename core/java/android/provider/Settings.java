@@ -10591,6 +10591,13 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
 
         /**
+         * Whether to enable media controls on lock screen.
+         * When enabled, media controls will appear on lock screen.
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_LOCK_SCREEN = "media_controls_lock_screen";
+
+        /**
          * Controls whether contextual suggestions can be shown in the media controls.
          * @hide
          */

@@ -517,8 +517,6 @@ public class UdfpsController implements DozeReceiver {
                                     scaledMajor);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = mSystemClock.elapsedRealtime();
-                            mPowerManager.userActivity(mSystemClock.uptimeMillis(),
-                                    PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -846,6 +844,9 @@ public class UdfpsController implements DozeReceiver {
             return;
         }
         mLatencyTracker.onActionStart(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
+        // Refresh screen timeout and boost process priority if possible.
+        mPowerManager.userActivity(mSystemClock.uptimeMillis(),
+                PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
 
         if (!mOnFingerDown) {
             playStartHaptic();

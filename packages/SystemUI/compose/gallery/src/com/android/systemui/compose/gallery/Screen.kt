@@ -52,17 +52,29 @@ class ChildScreen(
 ) : Screen(identifier)
 
 /** Create the navigation graph for [screen]. */
-fun NavGraphBuilder.screen(screen: Screen, navController: NavController) {
+fun NavGraphBuilder.screen(
+    screen: Screen,
+    navController: NavController,
+    onControlToggleRequested: () -> Unit,
+) {
     when (screen) {
         is ChildScreen -> composable(screen.identifier) { screen.content(navController) }
         is ParentScreen -> {
             val menuRoute = "${screen.identifier}_menu"
             navigation(startDestination = menuRoute, route = screen.identifier) {
                 // The menu to navigate to one of the children screens.
-                composable(menuRoute) { ScreenMenu(screen, navController) }
+                composable(menuRoute) {
+                    ScreenMenu(screen, navController, onControlToggleRequested)
+                }
 
                 // The content of the child screens.
-                screen.children.forEach { (_, child) -> screen(child, navController) }
+                screen.children.forEach { (_, child) ->
+                    screen(
+                        child,
+                        navController,
+                        onControlToggleRequested,
+                    )
+                }
             }
         }
     }
@@ -72,8 +84,27 @@ fun NavGraphBuilder.screen(screen: Screen, navController: NavController) {
 private fun ScreenMenu(
     screen: ParentScreen,
     navController: NavController,
+    onControlToggleRequested: () -> Unit,
 ) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    LazyColumn(
+        Modifier.padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            Surface(
+                Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                shape = CircleShape,
+            ) {
+                Column(
+                    Modifier.clickable(onClick = onControlToggleRequested).padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("Toggle controls")
+                }
+            }
+        }
+
         screen.children.forEach { (name, child) ->
             item {
                 Surface(

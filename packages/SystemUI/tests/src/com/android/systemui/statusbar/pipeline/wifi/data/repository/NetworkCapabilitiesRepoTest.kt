@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.repository
+package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
@@ -28,7 +28,7 @@ import android.net.NetworkRequest
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.pipeline.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat

@@ -4795,6 +4795,7 @@
 
   <!-- For VirtualDeviceManager -->
   <java-symbol type="string" name="vdm_camera_access_denied" />
+  <java-symbol type="string" name="vdm_secure_window" />
 
   <java-symbol type="color" name="camera_privacy_light_day"/>
   <java-symbol type="color" name="camera_privacy_light_night"/>
