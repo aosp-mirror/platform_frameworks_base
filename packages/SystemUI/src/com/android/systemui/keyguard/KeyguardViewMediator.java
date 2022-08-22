@@ -2377,10 +2377,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private void handleHide() {
         Trace.beginSection("KeyguardViewMediator#handleHide");
 
-        // It's possible that the device was unlocked in a dream state. It's time to wake up.
-        if (mAodShowing || mDreamOverlayShowing) {
-            PowerManager pm = mContext.getSystemService(PowerManager.class);
-            pm.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+        // It's possible that the device was unlocked (via BOUNCER) while dozing. It's time to
+        // wake up.
+        if (mAodShowing) {
+            mPM.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                     "com.android.systemui:BOUNCER_DOZING");
         }
 
@@ -2408,6 +2408,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             mHideAnimation.getDuration(), null /* apps */, null /* wallpapers */,
                             null /* nonApps */, null /* finishedCallback */);
                 });
+            }
+
+            // It's possible that the device was unlocked (via BOUNCER or Fingerprint) while
+            // dreaming. It's time to wake up.
+            if (mDreamOverlayShowing) {
+                mPM.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+                        "com.android.systemui:UNLOCK_DREAMING");
             }
         }
         Trace.endSection();
