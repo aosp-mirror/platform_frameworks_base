@@ -1641,6 +1641,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mainWin.getAttrs().rotationAnimation;
     }
 
+    /** Applies the new configuration and returns {@code true} if there is a display change. */
+    boolean applyDisplayChangeIfNeeded() {
+        boolean changed = false;
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = mParticipants.valueAt(i);
+            final DisplayContent dc = wc.asDisplayContent();
+            if (dc == null || !mChanges.get(dc).hasChanged(dc)) continue;
+            dc.sendNewConfiguration();
+            changed = true;
+        }
+        return changed;
+    }
+
     boolean getLegacyIsReady() {
         return isCollecting() && mSyncId >= 0;
     }
