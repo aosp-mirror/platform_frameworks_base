@@ -171,10 +171,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
-     * Applies a keyguard occlusion change if one happened.
-     * @param transitionStarted Whether keyguard (un)occlude transition is starting or not.
+     * @param notify {@code true} if the status change should be immediately notified via
+     *        {@link com.android.internal.policy.IKeyguardService}
      */
-    int applyKeyguardOcclusionChange(boolean transitionStarted);
+    int applyKeyguardOcclusionChange(boolean notify);
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -1129,11 +1129,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Notifies the keyguard to start fading out.
+     *  @param startTime the start time of the animation in uptime milliseconds
      *
-     * @param startTime the start time of the animation in uptime milliseconds
-     * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+    void startKeyguardExitAnimation(long startTime);
 
     /**
      * Called when System UI has been started.
