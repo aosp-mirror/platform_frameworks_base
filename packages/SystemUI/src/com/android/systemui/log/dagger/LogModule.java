@@ -270,7 +270,7 @@ public class LogModule {
     @SysUISingleton
     @StatusBarConnectivityLog
     public static LogBuffer provideStatusBarConnectivityBuffer(LogBufferFactory factory) {
-        return factory.create("StatusBarConnectivityLog", 64);
+        return factory.create("SbConnectivity", 64);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
