@@ -431,7 +431,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
-    @Nullable private final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
+    @Nullable final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     DisplayFrames mDisplayFrames;
 
     private final RemoteCallbackList<ISystemGestureExclusionListener>
