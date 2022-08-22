@@ -326,7 +326,6 @@ java_defaults {
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/graphics/common/aidl",
-            "frameworks/native/libs/permission/aidl",
         ],
     },
     dxflags: [
@@ -596,7 +595,6 @@ stubs_defaults {
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/graphics/common/aidl",
-            "frameworks/native/libs/permission/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)

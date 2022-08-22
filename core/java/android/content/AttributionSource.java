@@ -100,28 +100,22 @@ public final class AttributionSource implements Parcelable {
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag) {
-        this(uid, Process.INVALID_PID, packageName, attributionTag, sDefaultToken);
-    }
-
-    /** @hide */
-    public AttributionSource(int uid, int pid, @Nullable String packageName,
-            @Nullable String attributionTag) {
-        this(uid, pid, packageName, attributionTag, sDefaultToken);
+        this(uid, packageName, attributionTag, sDefaultToken);
     }
 
     /** @hide */
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token) {
-        this(uid, Process.INVALID_PID, packageName, attributionTag, token,
-                /*renouncedPermissions*/ null, /*next*/ null);
+        this(uid, packageName, attributionTag, token, /*renouncedPermissions*/ null,
+                /*next*/ null);
     }
 
     /** @hide */
-    public AttributionSource(int uid, int pid, @Nullable String packageName,
-            @Nullable String attributionTag, @NonNull IBinder token) {
-        this(uid, pid, packageName, attributionTag, token, /*renouncedPermissions*/ null,
-                /*next*/ null);
+    public AttributionSource(int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @NonNull IBinder token,
+            @Nullable AttributionSource next) {
+        this(uid, packageName, attributionTag, token, /*renouncedPermissions*/ null, next);
     }
 
     /** @hide */
@@ -129,33 +123,26 @@ public final class AttributionSource implements Parcelable {
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable Set<String> renouncedPermissions,
             @Nullable AttributionSource next) {
-        this(uid, Process.INVALID_PID, packageName, attributionTag, sDefaultToken,
-                (renouncedPermissions != null)
-                ? renouncedPermissions.toArray(new String[0]) : null, /*next*/ next);
+        this(uid, packageName, attributionTag, (renouncedPermissions != null)
+                ? renouncedPermissions.toArray(new String[0]) : null, next);
     }
 
     /** @hide */
     public AttributionSource(@NonNull AttributionSource current, @Nullable AttributionSource next) {
-        this(current.getUid(), current.getPid(), current.getPackageName(),
-                current.getAttributionTag(), current.getToken(),
-                current.mAttributionSourceState.renouncedPermissions, next);
+        this(current.getUid(), current.getPackageName(), current.getAttributionTag(),
+                current.getToken(), current.mAttributionSourceState.renouncedPermissions, next);
     }
 
-    /** @hide */
-    public AttributionSource(int uid, int pid, @Nullable String packageName,
-            @Nullable String attributionTag, @Nullable String[] renouncedPermissions,
-            @Nullable AttributionSource next) {
-        this(uid, pid, packageName, attributionTag, sDefaultToken, renouncedPermissions, next);
+    AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
+            @Nullable String[] renouncedPermissions, @Nullable AttributionSource next) {
+        this(uid, packageName, attributionTag, sDefaultToken, renouncedPermissions, next);
     }
 
-    /** @hide */
-    public AttributionSource(int uid, int pid, @Nullable String packageName,
-            @Nullable String attributionTag, @NonNull IBinder token,
-            @Nullable String[] renouncedPermissions,
+    AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
+            @NonNull IBinder token, @Nullable String[] renouncedPermissions,
             @Nullable AttributionSource next) {
         mAttributionSourceState = new AttributionSourceState();
         mAttributionSourceState.uid = uid;
-        mAttributionSourceState.pid = pid;
         mAttributionSourceState.token = token;
         mAttributionSourceState.packageName = packageName;
         mAttributionSourceState.attributionTag = attributionTag;
@@ -169,17 +156,7 @@ public final class AttributionSource implements Parcelable {
 
         // Since we just unpacked this object as part of it transiting a Binder
         // call, this is the perfect time to enforce that its UID and PID can be trusted
-        enforceCallingUid();
-
-        // If this object is being constructed as part of a oneway Binder call, getCallingPid will
-        // return 0 instead of the true PID. In that case, invalidate the PID by setting it to
-        // INVALID_PID (-1).
-        final int callingPid = Binder.getCallingPid();
-        if (callingPid == 0) {
-            mAttributionSourceState.pid = Process.INVALID_PID;
-        }
-
-        enforceCallingPid();
+        enforceCallingUidAndPid();
     }
 
     /** @hide */
@@ -189,19 +166,19 @@ public final class AttributionSource implements Parcelable {
 
     /** @hide */
     public AttributionSource withNextAttributionSource(@Nullable AttributionSource next) {
-        return new AttributionSource(getUid(), getPid(), getPackageName(), getAttributionTag(),
-                getToken(), mAttributionSourceState.renouncedPermissions, next);
+        return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
+                mAttributionSourceState.renouncedPermissions, next);
     }
 
     /** @hide */
     public AttributionSource withPackageName(@Nullable String packageName) {
-        return new AttributionSource(getUid(), getPid(), packageName, getAttributionTag(),
-               getToken(), mAttributionSourceState.renouncedPermissions, getNext());
+        return new AttributionSource(getUid(), packageName, getAttributionTag(),
+                mAttributionSourceState.renouncedPermissions, getNext());
     }
 
     /** @hide */
     public AttributionSource withToken(@NonNull Binder token) {
-        return new AttributionSource(getUid(), getPid(), getPackageName(), getAttributionTag(),
+        return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
                 token, mAttributionSourceState.renouncedPermissions, getNext());
     }
 
@@ -245,7 +222,6 @@ public final class AttributionSource implements Parcelable {
         }
         try {
             return new AttributionSource.Builder(uid)
-                .setPid(Process.myPid())
                 .setPackageName(AppGlobals.getPackageManager().getPackagesForUid(uid)[0])
                 .build();
         } catch (Exception ignored) {
@@ -280,6 +256,18 @@ public final class AttributionSource implements Parcelable {
         public void close() {
             mParcel.recycle();
         }
+    }
+
+    /**
+     * If you are handling an IPC and you don't trust the caller you need to validate whether the
+     * attribution source is one for the calling app to prevent the caller to pass you a source from
+     * another app without including themselves in the attribution chain.
+     *
+     * @throws SecurityException if the attribution source cannot be trusted to be from the caller.
+     */
+    private void enforceCallingUidAndPid() {
+        enforceCallingUid();
+        enforceCallingPid();
     }
 
     /**
@@ -318,10 +306,7 @@ public final class AttributionSource implements Parcelable {
     }
 
     /**
-     * Validate that the pid being claimed for the calling app is not spoofed.
-     *
-     * Note that the PID may be unavailable, for example if we're in a oneway Binder call. In this
-     * case, calling enforceCallingPid is guaranteed to fail. The caller should anticipate this.
+     * Validate that the pid being claimed for the calling app is not spoofed
      *
      * @throws SecurityException if the attribution source cannot be trusted to be from the caller.
      * @hide
@@ -329,12 +314,8 @@ public final class AttributionSource implements Parcelable {
     @TestApi
     public void enforceCallingPid() {
         if (!checkCallingPid()) {
-            if (Binder.getCallingPid() == 0) {
-                throw new SecurityException("Calling pid unavailable due to oneway Binder call.");
-            } else {
-                throw new SecurityException("Calling pid: " + Binder.getCallingPid()
-                        + " doesn't match source pid: " + mAttributionSourceState.pid);
-            }
+            throw new SecurityException("Calling pid: " + Binder.getCallingPid()
+                    + " doesn't match source pid: " + mAttributionSourceState.pid);
         }
     }
 
@@ -345,8 +326,7 @@ public final class AttributionSource implements Parcelable {
      */
     private boolean checkCallingPid() {
         final int callingPid = Binder.getCallingPid();
-        if (mAttributionSourceState.pid != Process.INVALID_PID
-                && callingPid != mAttributionSourceState.pid) {
+        if (mAttributionSourceState.pid != -1 && callingPid != mAttributionSourceState.pid) {
             return false;
         }
         return true;
@@ -463,13 +443,6 @@ public final class AttributionSource implements Parcelable {
     }
 
     /**
-     * The PID that is accessing the permission protected data.
-     */
-    public int getPid() {
-        return mAttributionSourceState.pid;
-    }
-
-    /**
      * The package that is accessing the permission protected data.
      */
     public @Nullable String getPackageName() {
@@ -577,7 +550,6 @@ public final class AttributionSource implements Parcelable {
                 throw new IllegalArgumentException("current AttributionSource can not be null");
             }
             mAttributionSourceState.uid = current.getUid();
-            mAttributionSourceState.pid = current.getPid();
             mAttributionSourceState.packageName = current.getPackageName();
             mAttributionSourceState.attributionTag = current.getAttributionTag();
             mAttributionSourceState.token = current.getToken();
@@ -586,24 +558,11 @@ public final class AttributionSource implements Parcelable {
         }
 
         /**
-         * The PID of the process that is accessing the permission protected data.
-         *
-         * If not called, pid will default to Process.INVALID_PID (-1). This indicates that the PID
-         * data is missing. Supplying a PID is not required, but recommended when accessible.
-         */
-        public @NonNull Builder setPid(int value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x2;
-            mAttributionSourceState.pid = value;
-            return this;
-        }
-
-        /**
          * The package that is accessing the permission protected data.
          */
         public @NonNull Builder setPackageName(@Nullable String value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4;
+            mBuilderFieldsSet |= 0x2;
             mAttributionSourceState.packageName = value;
             return this;
         }
@@ -613,7 +572,7 @@ public final class AttributionSource implements Parcelable {
          */
         public @NonNull Builder setAttributionTag(@Nullable String value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8;
+            mBuilderFieldsSet |= 0x4;
             mAttributionSourceState.attributionTag = value;
             return this;
         }
@@ -646,7 +605,7 @@ public final class AttributionSource implements Parcelable {
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(@Nullable Set<String> value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x10;
+            mBuilderFieldsSet |= 0x8;
             mAttributionSourceState.renouncedPermissions = (value != null)
                     ? value.toArray(new String[0]) : null;
             return this;
@@ -657,7 +616,7 @@ public final class AttributionSource implements Parcelable {
          */
         public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x20;
+            mBuilderFieldsSet |= 0x10;
             mAttributionSourceState.next = (value != null) ? new AttributionSourceState[]
                     {value.mAttributionSourceState} : mAttributionSourceState.next;
             return this;
@@ -669,18 +628,15 @@ public final class AttributionSource implements Parcelable {
             mBuilderFieldsSet |= 0x40; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x2) == 0) {
-                mAttributionSourceState.pid = Process.INVALID_PID;
-            }
-            if ((mBuilderFieldsSet & 0x4) == 0) {
                 mAttributionSourceState.packageName = null;
             }
-            if ((mBuilderFieldsSet & 0x8) == 0) {
+            if ((mBuilderFieldsSet & 0x4) == 0) {
                 mAttributionSourceState.attributionTag = null;
             }
-            if ((mBuilderFieldsSet & 0x10) == 0) {
+            if ((mBuilderFieldsSet & 0x8) == 0) {
                 mAttributionSourceState.renouncedPermissions = null;
             }
-            if ((mBuilderFieldsSet & 0x20) == 0) {
+            if ((mBuilderFieldsSet & 0x10) == 0) {
                 mAttributionSourceState.next = null;
             }
 

@@ -8578,9 +8578,9 @@ public class AppOpsManager {
     public int noteProxyOp(int op, @Nullable String proxiedPackageName, int proxiedUid,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, /*pid*/ -1, proxiedPackageName,
-                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
-                        message, /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8664,7 +8664,7 @@ public class AppOpsManager {
     public int noteProxyOpNoThrow(@NonNull String op, @Nullable String proxiedPackageName,
             int proxiedUid, @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOpNoThrow(strOpToOp(op), new AttributionSource(
-                mContext.getAttributionSource(), new AttributionSource(proxiedUid, /*pid*/ -1,
+                mContext.getAttributionSource(), new AttributionSource(proxiedUid,
                         proxiedPackageName, proxiedAttributionTag, mContext.getAttributionSource()
                         .getToken())), message,/*skipProxyOperation*/ false);
     }
@@ -9076,9 +9076,9 @@ public class AppOpsManager {
     public int startProxyOp(@NonNull String op, int proxiedUid, @NonNull String proxiedPackageName,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return startProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, /*pid*/ -1, proxiedPackageName,
-                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
-                        message, /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -9124,7 +9124,7 @@ public class AppOpsManager {
             @Nullable String message) {
         return startProxyOpNoThrow(AppOpsManager.strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        /*pid*/ -1, proxiedPackageName, proxiedAttributionTag,
+                        proxiedPackageName, proxiedAttributionTag,
                         mContext.getAttributionSource().getToken())), message,
                         /*skipProxyOperation*/ false);
     }
@@ -9270,9 +9270,8 @@ public class AppOpsManager {
     public void finishProxyOp(@NonNull String op, int proxiedUid,
             @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag) {
         finishProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, /*pid*/ -1, proxiedPackageName,
-                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
-                        /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, proxiedPackageName,  proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), /*skipProxyOperation*/ false);
     }
 
     /**
