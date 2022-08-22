@@ -406,7 +406,7 @@ public final class FlexibilityController extends StateController {
                 final ArraySet<JobStatus> changedJobs = new ArraySet<>();
                 synchronized (mLock) {
                     final long nowElapsed = sElapsedRealtimeClock.millis();
-                    for (int j = 1; j <= mFlexibilityTracker.size(); j++) {
+                    for (int j = 0; j < mFlexibilityTracker.size(); j++) {
                         final ArraySet<JobStatus> jobs = mFlexibilityTracker
                                 .getJobsByNumRequiredConstraints(j);
                         for (int i = 0; i < jobs.size(); i++) {
@@ -445,7 +445,7 @@ public final class FlexibilityController extends StateController {
 
         FlexibilityTracker(int numFlexibleConstraints) {
             mTrackedJobs = new ArrayList<>();
-            for (int i = 0; i < numFlexibleConstraints; i++) {
+            for (int i = 0; i <= numFlexibleConstraints; i++) {
                 mTrackedJobs.add(new ArraySet<JobStatus>());
             }
         }
@@ -457,15 +457,15 @@ public final class FlexibilityController extends StateController {
                 Slog.wtfStack(TAG, "Asked for a larger number of constraints than exists.");
                 return null;
             }
-            return mTrackedJobs.get(numRequired - 1);
+            return mTrackedJobs.get(numRequired);
         }
 
         /** adds a JobStatus object based on number of required flexible constraints. */
         public void add(JobStatus js) {
-            if (js.getNumRequiredFlexibleConstraints() <= 0) {
+            if (js.getNumRequiredFlexibleConstraints() < 0) {
                 return;
             }
-            mTrackedJobs.get(js.getNumRequiredFlexibleConstraints() - 1).add(js);
+            mTrackedJobs.get(js.getNumRequiredFlexibleConstraints()).add(js);
         }
 
         /** Removes a JobStatus object. */
@@ -473,7 +473,7 @@ public final class FlexibilityController extends StateController {
             if (js.getNumRequiredFlexibleConstraints() == 0) {
                 return;
             }
-            mTrackedJobs.get(js.getNumRequiredFlexibleConstraints() - 1).remove(js);
+            mTrackedJobs.get(js.getNumRequiredFlexibleConstraints()).remove(js);
         }
 
         public void resetJobNumDroppedConstraints(JobStatus js, long nowElapsed) {
@@ -498,21 +498,15 @@ public final class FlexibilityController extends StateController {
         /**
          * Adjusts number of required flexible constraints and sorts it into the tracker.
          * Returns false if the job status's number of flexible constraints is now 0.
-         * Jobs with 0 required flexible constraints are removed from the tracker.
          */
-        public boolean adjustJobsRequiredConstraints(JobStatus js, int n, long nowElapsed) {
-            if (n == 0) {
-                return false;
+        public boolean adjustJobsRequiredConstraints(JobStatus js, int adjustBy, long nowElapsed) {
+            if (adjustBy != 0) {
+                remove(js);
+                js.adjustNumRequiredFlexibleConstraints(adjustBy);
+                js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
+                add(js);
             }
-            remove(js);
-            js.adjustNumRequiredFlexibleConstraints(n);
-            js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
-            if (js.getNumRequiredFlexibleConstraints() <= 0) {
-                maybeStopTrackingJobLocked(js, null, false);
-                return false;
-            }
-            add(js);
-            return true;
+            return js.getNumRequiredFlexibleConstraints() > 0;
         }
 
         public int size() {
