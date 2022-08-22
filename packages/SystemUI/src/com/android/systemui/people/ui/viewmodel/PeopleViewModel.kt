@@ -31,7 +31,6 @@ import com.android.systemui.people.data.model.PeopleTileModel
 import com.android.systemui.people.data.repository.PeopleTileRepository
 import com.android.systemui.people.data.repository.PeopleWidgetRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,7 +51,7 @@ class PeopleViewModel(
      * reactive and you have to manually call [onTileRefreshRequested] to refresh the tiles.
      */
     private val _priorityTiles = MutableStateFlow(priorityTiles())
-    val priorityTiles: Flow<List<PeopleTileViewModel>> = _priorityTiles.asStateFlow()
+    val priorityTiles: StateFlow<List<PeopleTileViewModel>> = _priorityTiles.asStateFlow()
 
     /**
      * The list of the priority tiles/conversations.
@@ -61,7 +60,7 @@ class PeopleViewModel(
      * reactive and you have to manually call [onTileRefreshRequested] to refresh the tiles.
      */
     private val _recentTiles = MutableStateFlow(recentTiles())
-    val recentTiles: Flow<List<PeopleTileViewModel>> = _recentTiles.asStateFlow()
+    val recentTiles: StateFlow<List<PeopleTileViewModel>> = _recentTiles.asStateFlow()
 
     /** The ID of the widget currently being edited/added. */
     private val _appWidgetId = MutableStateFlow(INVALID_APPWIDGET_ID)

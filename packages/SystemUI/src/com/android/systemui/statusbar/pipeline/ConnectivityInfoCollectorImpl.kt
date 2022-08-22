@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.pipeline
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.statusbar.pipeline.repository.NetworkCapabilitiesRepo
-import kotlinx.coroutines.CoroutineScope
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.NetworkCapabilitiesRepo
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted.Companion.Lazily
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map

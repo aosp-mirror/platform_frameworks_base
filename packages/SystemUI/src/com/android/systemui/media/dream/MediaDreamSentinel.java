@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dream;
 
+import static com.android.systemui.flags.Flags.MEDIA_DREAM_COMPLICATION;
+
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -23,6 +25,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaData;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.SmartspaceMediaData;
@@ -34,7 +37,7 @@ import javax.inject.Inject;
  * the media complication as appropriate
  */
 public class MediaDreamSentinel extends CoreStartable {
-    private MediaDataManager.Listener mListener = new MediaDataManager.Listener() {
+    private final MediaDataManager.Listener mListener = new MediaDataManager.Listener() {
         private boolean mAdded;
         @Override
         public void onSmartspaceMediaDataRemoved(@NonNull String key, boolean immediately) {
@@ -63,6 +66,10 @@ public class MediaDreamSentinel extends CoreStartable {
         public void onMediaDataLoaded(@NonNull String key, @Nullable String oldKey,
                 @NonNull MediaData data, boolean immediately, int receivedSmartspaceCardLatency,
                 boolean isSsReactivated) {
+            if (!mFeatureFlags.isEnabled(MEDIA_DREAM_COMPLICATION)) {
+                return;
+            }
+
             if (mAdded) {
                 return;
             }
@@ -79,15 +86,18 @@ public class MediaDreamSentinel extends CoreStartable {
     private final MediaDataManager mMediaDataManager;
     private final DreamOverlayStateController mDreamOverlayStateController;
     private final MediaDreamComplication mComplication;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public MediaDreamSentinel(Context context, MediaDataManager mediaDataManager,
             DreamOverlayStateController dreamOverlayStateController,
-            MediaDreamComplication complication) {
+            MediaDreamComplication complication,
+            FeatureFlags featureFlags) {
         super(context);
         mMediaDataManager = mediaDataManager;
         mDreamOverlayStateController = dreamOverlayStateController;
         mComplication = complication;
+        mFeatureFlags = featureFlags;
     }
 
     @Override
