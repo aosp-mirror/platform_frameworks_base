@@ -2270,7 +2270,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Zapnúť v Nastaveniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Zavrieť"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Odblokujte mikrofón zariadenia"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte fotoaparát zariadenia"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte kameru zariadenia"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pre aplikáciu &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a všetky aplikácie a služby"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Odblokovať"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Ochrana súkromia senzorov"</string>

@@ -331,7 +331,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"መስተጋበር የሚፈጥሩት የመስኮት ይዘት ይመርምሩ።"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"በመንካት ያስሱን ያብሩ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"መታ የተደረጉ ንጥሎች ጮክ ተብለው ይነገሩና የጣት ምልክቶችን በመጠቀም ማያ ገጹ ሊታሰስ ይችላል።"</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"የሚተይቡት ጽሑፍ ይመልከቱ"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"የሚተይቡት ጽሁፍ ይመልከቱ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"እንደ የክሬዲት ካርድ ቁጥሮች እና የይለፍ ቃላት ያሉ የግል ውሂብ ያካትታል።"</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"የመቆጣጠሪያ ማሳያ እንዲጎላ አደራረግ"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"የማሳያውን የማጉያ ደረጃ እና አቀማመጥ ይቆጣጠሩ።"</string>
@@ -372,9 +372,9 @@
     <string name="permlab_sendSms" msgid="7757368721742014252">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"መተግበሪያው የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲልክ ይፈቅድለታል። ይህ ያልተጠበቁ ወጪዎችን ሊያስከትል ይችላል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ መልዕክቶችን በመላክ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"የጽሑፍ መልዕክቶችዎን ያንብቡ (ኤስ.ኤም.ኤስ. ወይም ኤም.ኤም.ኤስ.)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"ይህ መተግበሪያ በእርስዎ ጡባዊ ላይ የተከማቹ ሁሉንም አጭር የስልክ መልዕክት (ጽሑፍ) መልእክቶን ማንበብ ይችላል።"</string>
-    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"ይህ መተግበሪያ በእርስዎ Android TV መሣሪያ ላይ ያሉትን ሁሉንም ኤስኤምኤስ (ጽሑፍ) መልዕክቶችን ማንበብ ይችላል።"</string>
-    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የተከማቹ ሁሉንም አጭር የስልክ መልዕክት (ጽሑፍ) መልእክቶን ማንበብ ይችላል።"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"ይህ መተግበሪያ በእርስዎ ጡባዊ ላይ የተከማቹ ሁሉንም አጭር የስልክ መልዕክት (ጽሁፍ) መልእክቶን ማንበብ ይችላል።"</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"ይህ መተግበሪያ በእርስዎ Android TV መሣሪያ ላይ ያሉትን ሁሉንም ኤስኤምኤስ (ጽሁፍ) መልዕክቶችን ማንበብ ይችላል።"</string>
+    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የተከማቹ ሁሉንም አጭር የስልክ መልዕክት (ጽሁፍ) መልእክቶን ማንበብ ይችላል።"</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"የፅሁፍ መልዕክቶችን ተቀበል (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"መተግበሪያው የWAP መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ፈቃድ የተላኩልዎን መልዕክቶች ለእርስዎ ሳያሳይዎ የመቆጣጠር ወይም የመሰረዝ ብቃትን ያጠቃልላል።"</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"አሂድ መተግበሪያዎችን ሰርስረው ያውጡ"</string>
@@ -555,7 +555,7 @@
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"የማያ ገጽዎን መቆለፊያ ያሰናክሉ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"መተግበሪያው መቆለፊያውና ማንኛውም የተጎዳኘ የይለፍ ቃል ደህንነት እንዲያሰናክል ይፈቅድለታል። ለምሳሌ ስልኩ ገቢ የስልክ ጥሪ በሚቀበልበት ጊዜ መቆለፊያውን ያሰናክልና ከዚያም ጥሪው ሲጠናቀቅ መቆለፊያውን በድጋሚ ያነቃዋል።"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"የማያ ገጽ መቆለፊያ ውስብስብነትን ጠይቅ"</string>
-    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"መተግበሪያው የማያ ገጽ መቆለፊያው ውስብስብነት ደረጃ (ከፍተኛ፣ መካከለኛ፣ ዝቅተኛ ወይም ምንም) እንዲያውቅ ያስችለዋል፣ ይህም ሊሆኑ የሚችለው የማያ ገጽ መቆለፊያው ርዝመት እና ዓይነት ክልል ያመለክታል። መተግበሪያው እንዲሁም ለተጠቃሚዎች የማያ ገጽ መቆለፊያውን ወደተወሰነ ደረጃ እንዲያዘምኑት ሊጠቁማቸው ይችላል። የማያ ገጽ መቆለፊያው በስነጣ አልባ ጽሑፍ እንደማይከማች ልብ ይበሉ፣ በዚህም መተግበሪያው ትክክለኛውን የይለፍ ቃል አያውቅም።"</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"መተግበሪያው የማያ ገጽ መቆለፊያው ውስብስብነት ደረጃ (ከፍተኛ፣ መካከለኛ፣ ዝቅተኛ ወይም ምንም) እንዲያውቅ ያስችለዋል፣ ይህም ሊሆኑ የሚችለው የማያ ገጽ መቆለፊያው ርዝመት እና ዓይነት ክልል ያመለክታል። መተግበሪያው እንዲሁም ለተጠቃሚዎች የማያ ገጽ መቆለፊያውን ወደተወሰነ ደረጃ እንዲያዘምኑት ሊጠቁማቸው ይችላል። የማያ ገጽ መቆለፊያው በስነጣ አልባ ጽሁፍ እንደማይከማች ልብ ይበሉ፣ በዚህም መተግበሪያው ትክክለኛውን የይለፍ ቃል አያውቅም።"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"ማሳወቂያዎች አሳይ"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"መተግበሪያው ማሳወቂያዎችን እንዲያሳይ ያስችለዋል"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ባዮሜትራዊ ሃርድዌርን መጠቀም"</string>
@@ -1055,10 +1055,10 @@
     <string name="save_password_remember" msgid="6490888932657708341">"አስታውስ"</string>
     <string name="save_password_never" msgid="6776808375903410659">"በፍፁም"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ይህን ገጽ  ለመክፈት ፈቃድ የለህም።"</string>
-    <string name="text_copied" msgid="2531420577879738860">"ፅሁፍ ወደ ቅንጥብ ሰሌዳ ተገልብጧል።"</string>
+    <string name="text_copied" msgid="2531420577879738860">"ጽሁፍ ወደ ቅንጥብ ሰሌዳ ተገልብጧል።"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ተለጥፏል"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከእርስዎ ቅንጥብ ሰሌዳ ተለጥፏል"</string>
-    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ጽሑፍ ለጥፏል"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ጽሁፍ ለጥፏል"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ምስል ለጥፏል"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> እርስዎ የቀዱትን ይዘት ለጥፏል"</string>
     <string name="more_item_label" msgid="7419249600215749115">"ተጨማሪ"</string>
@@ -1139,7 +1139,7 @@
     <string name="replace" msgid="7842675434546657444">"ተካ..."</string>
     <string name="delete" msgid="1514113991712129054">"ሰርዝ"</string>
     <string name="copyUrl" msgid="6229645005987260230">"የURL ቅጂ"</string>
-    <string name="selectTextMode" msgid="3225108910999318778">"ፅሁፍ ምረጥ"</string>
+    <string name="selectTextMode" msgid="3225108910999318778">"ጽሁፍ ምረጥ"</string>
     <string name="undo" msgid="3175318090002654673">"ቀልብስ"</string>
     <string name="redo" msgid="7231448494008532233">"ድገም"</string>
     <string name="autofill" msgid="511224882647795296">"ራስ-ሙላ"</string>
@@ -2127,7 +2127,7 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ከDpad በስተግራ"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"ከDpad በስተቀኝ"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"የDpad ማዕከል"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የሥዕል ገላጭ ጽሑፍ አሞሌ።"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የሥዕል ገላጭ ጽሁፍ አሞሌ።"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ወደ የRESTRICTED ባልዲ ተከትቷል"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>፦"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"አንድ ምስል ልከዋል"</string>

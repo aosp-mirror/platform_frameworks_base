@@ -1018,7 +1018,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="9161712335355510035">"تأیید"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"نکته: برای نزدیک‌نمایی و دورنمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="7065519579174882778">"نکته: برای زوم‌پیش و زوم‌پس کردن، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"تکمیل خودکار با <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
