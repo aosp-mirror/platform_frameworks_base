@@ -31,6 +31,9 @@ import kotlinx.coroutines.flow.onEach
 class ConnectivityPipelineLogger @Inject constructor(
     @StatusBarConnectivityLog private val buffer: LogBuffer,
 ) {
+    /**
+     * Logs a change in one of the **raw inputs** to the connectivity pipeline.
+     */
     fun logInputChange(callbackName: String, changeInfo: String) {
         buffer.log(
                 SB_LOGGING_TAG,
@@ -45,6 +48,41 @@ class ConnectivityPipelineLogger @Inject constructor(
         )
     }
 
+    /**
+     * Logs a **data transformation** that we performed within the connectivity pipeline.
+     */
+    fun logTransformation(transformationName: String, oldValue: Any?, newValue: Any?) {
+        if (oldValue == newValue) {
+            buffer.log(
+                SB_LOGGING_TAG,
+                LogLevel.INFO,
+                {
+                    str1 = transformationName
+                    str2 = oldValue.toString()
+                },
+                {
+                    "Transform: $str1: $str2 (transformation didn't change it)"
+                }
+            )
+        } else {
+            buffer.log(
+                SB_LOGGING_TAG,
+                LogLevel.INFO,
+                {
+                    str1 = transformationName
+                    str2 = oldValue.toString()
+                    str3 = newValue.toString()
+                },
+                {
+                    "Transform: $str1: $str2 -> $str3"
+                }
+            )
+        }
+    }
+
+    /**
+     * Logs a change in one of the **outputs** to the connectivity pipeline.
+     */
     fun logOutputChange(outputParamName: String, changeInfo: String) {
         buffer.log(
                 SB_LOGGING_TAG,
