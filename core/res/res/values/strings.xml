@@ -3962,7 +3962,7 @@
     <string name="ext_media_new_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
-    <string name="ext_media_ready_notification_message">For transferring photos and media</string>
+    <string name="ext_media_ready_notification_message">For storing  photos, videos, music and more</string>
     <!-- TV specific notification body when external media is ready for use [CHAR LIMIT=75] -->
     <string name="ext_media_ready_notification_message" product="tv">Browse media files</string>
 
@@ -3978,11 +3978,11 @@
     <string name="ext_media_unmountable_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
-    <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_unsupported_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> detected </string>
     <!-- Automotive specific notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title" product="automotive"><xliff:g id="name" example="SD card">%s</xliff:g> isn\u2019t working</string>
     <!-- Notification body when external media is unsupported [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
+    <string name="ext_media_unsupported_notification_message">Tap to set up .</string>
     <!-- TV-specific notification body when external media is unsupported [CHAR LIMIT=75] -->
     <string name="ext_media_unsupported_notification_message" product="tv">Select to set up <xliff:g id="name" example="SD card">%s</xliff:g> in a supported format.</string>
     <!-- Automotive specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
@@ -4013,7 +4013,7 @@
     <!-- Notification action to transfer media [CHAR LIMIT=40] -->
     <string name="ext_media_seamless_action">Switch output</string>
 
-    <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
+    <!-- Notification title when adoptable storage media is ejected [CHAR LIMIT=30] -->
     <string name="ext_media_missing_title"><xliff:g id="name" example="SD card">%s</xliff:g> missing</string>
     <!-- Notification body when external media is missing [CHAR LIMIT=30] -->
     <string name="ext_media_missing_message">Insert device again</string>
