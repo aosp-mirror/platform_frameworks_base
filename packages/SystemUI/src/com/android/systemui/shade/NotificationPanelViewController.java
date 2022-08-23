@@ -1341,6 +1341,9 @@ public final class NotificationPanelViewController extends PanelViewController {
         mIsFullWidth = isFullWidth;
         mScrimController.setClipsQsScrim(isFullWidth);
         mNotificationStackScrollLayoutController.setIsFullWidth(isFullWidth);
+        if (mQs != null) {
+            mQs.setIsNotificationPanelFullWidth(isFullWidth);
+        }
     }
 
     private void startQsSizeChangeAnimation(int oldHeight, final int newHeight) {
@@ -2450,8 +2453,8 @@ public final class NotificationPanelViewController extends PanelViewController {
         final float squishiness;
         if ((mQsExpandImmediate || mQsExpanded) && !mSplitShadeEnabled) {
             squishiness = 1;
-        } else if (mLockscreenShadeTransitionController.getQSDragProgress() > 0) {
-            squishiness = mLockscreenShadeTransitionController.getQSDragProgress();
+        } else if (mTransitioningToFullShadeProgress > 0.0f) {
+            squishiness = mLockscreenShadeTransitionController.getQsSquishTransitionFraction();
         } else {
             squishiness = mNotificationStackScrollLayoutController
                     .getNotificationSquishinessFraction();
@@ -3739,6 +3742,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             mQs.setHeaderClickable(isQsExpansionEnabled());
             mQs.setOverscrolling(mStackScrollerOverscrolling);
             mQs.setInSplitShade(mSplitShadeEnabled);
+            mQs.setIsNotificationPanelFullWidth(mIsFullWidth);
 
             // recompute internal state when qspanel height changes
             mQs.getView().addOnLayoutChangeListener(

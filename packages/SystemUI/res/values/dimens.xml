@@ -1223,6 +1223,17 @@
          fade and expand. -->
     <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
 
+    <!-- Distance delay for the QS transition to start during the lockscreen shade expansion. -->
+    <dimen name="lockscreen_shade_qs_transition_delay">0dp</dimen>
+
+    <!-- Distance that it takes to complete the QS "squish" transition during the lockscreen shade
+         expansion. -->
+    <dimen name="lockscreen_shade_qs_squish_transition_distance">@dimen/lockscreen_shade_qs_transition_distance</dimen>
+
+    <!-- The fraction at which the QS "squish" transition should start during the lockscreen shade
+         expansion. 0 is fully collapsed, 1 is fully expanded. -->
+    <item type="dimen" format="float" name="lockscreen_shade_qs_squish_start_fraction">0</item>
+
     <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
          change.  -->
     <dimen name="lockscreen_shade_depth_controller_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
