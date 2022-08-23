@@ -493,16 +493,14 @@ class OwnersData {
     }
 
     static class OwnerInfo {
-        public final String name;
         public final String packageName;
         public final ComponentName admin;
         public String remoteBugreportUri;
         public String remoteBugreportHash;
         public boolean isOrganizationOwnedDevice;
 
-        OwnerInfo(String name, ComponentName admin, String remoteBugreportUri,
+        OwnerInfo(ComponentName admin, String remoteBugreportUri,
                 String remoteBugreportHash, boolean isOrganizationOwnedDevice) {
-            this.name = name;
             this.admin = admin;
             this.packageName = admin.getPackageName();
             this.remoteBugreportUri = remoteBugreportUri;
@@ -512,9 +510,6 @@ class OwnersData {
 
         public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
             out.startTag(null, tag);
-            if (name != null) {
-                out.attribute(null, ATTR_NAME, name);
-            }
             if (admin != null) {
                 out.attribute(null, ATTR_COMPONENT_NAME, admin.flattenToString());
             }
@@ -532,7 +527,6 @@ class OwnersData {
         }
 
         public static OwnerInfo readFromXml(TypedXmlPullParser parser) {
-            final String name = parser.getAttributeValue(null, ATTR_NAME);
             final String componentName = parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
             final String remoteBugreportUri =
                     parser.getAttributeValue(null, ATTR_REMOTE_BUGREPORT_URI);
@@ -556,13 +550,11 @@ class OwnersData {
                 return null;
             }
 
-            return new OwnerInfo(
-                    name, admin, remoteBugreportUri, remoteBugreportHash, isOrgOwnedDevice);
+            return new OwnerInfo(admin, remoteBugreportUri, remoteBugreportHash, isOrgOwnedDevice);
         }
 
         public void dump(IndentingPrintWriter pw) {
             pw.println("admin=" + admin);
-            pw.println("name=" + name);
             pw.println("package=" + packageName);
             pw.println("isOrganizationOwnedDevice=" + isOrganizationOwnedDevice);
         }

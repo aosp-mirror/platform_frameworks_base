@@ -193,12 +193,6 @@ class Owners {
         }
     }
 
-    String getDeviceOwnerName() {
-        synchronized (mData) {
-            return mData.mDeviceOwner != null ? mData.mDeviceOwner.name : null;
-        }
-    }
-
     ComponentName getDeviceOwnerComponent() {
         synchronized (mData) {
             return mData.mDeviceOwner != null ? mData.mDeviceOwner.admin : null;
@@ -217,7 +211,7 @@ class Owners {
         }
     }
 
-    void setDeviceOwner(ComponentName admin, String ownerName, int userId) {
+    void setDeviceOwner(ComponentName admin, int userId) {
         if (userId < 0) {
             Slog.e(TAG, "Invalid user id for device owner user: " + userId);
             return;
@@ -226,7 +220,7 @@ class Owners {
             // A device owner is allowed to access device identifiers. Even though this flag
             // is not currently checked for device owner, it is set to true here so that it is
             // semantically compatible with the meaning of this flag.
-            mData.mDeviceOwner = new OwnerInfo(ownerName, admin, /* remoteBugreportUri =*/ null,
+            mData.mDeviceOwner = new OwnerInfo(admin, /* remoteBugreportUri =*/ null,
                     /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ true);
             mData.mDeviceOwnerUserId = userId;
 
@@ -248,10 +242,10 @@ class Owners {
         }
     }
 
-    void setProfileOwner(ComponentName admin, String ownerName, int userId) {
+    void setProfileOwner(ComponentName admin, int userId) {
         synchronized (mData) {
             // For a newly set PO, there's no need for migration.
-            mData.mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
+            mData.mProfileOwners.put(userId, new OwnerInfo(admin,
                     /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null,
                     /* isOrganizationOwnedDevice =*/ false));
             mUserManagerInternal.setUserManaged(userId, true);
@@ -270,7 +264,7 @@ class Owners {
     void transferProfileOwner(ComponentName target, int userId) {
         synchronized (mData) {
             final OwnerInfo ownerInfo = mData.mProfileOwners.get(userId);
-            final OwnerInfo newOwnerInfo = new OwnerInfo(target.getPackageName(), target,
+            final OwnerInfo newOwnerInfo = new OwnerInfo(target,
                     ownerInfo.remoteBugreportUri, ownerInfo.remoteBugreportHash,
                     ownerInfo.isOrganizationOwnedDevice);
             mData.mProfileOwners.put(userId, newOwnerInfo);
@@ -282,9 +276,7 @@ class Owners {
         synchronized (mData) {
             Integer previousDeviceOwnerType = mData.mDeviceOwnerTypes.remove(
                     mData.mDeviceOwner.packageName);
-            // We don't set a name because it's not used anyway.
-            // See DevicePolicyManagerService#getDeviceOwnerName
-            mData.mDeviceOwner = new OwnerInfo(null, target,
+            mData.mDeviceOwner = new OwnerInfo(target,
                     mData.mDeviceOwner.remoteBugreportUri,
                     mData.mDeviceOwner.remoteBugreportHash,
                     mData.mDeviceOwner.isOrganizationOwnedDevice);
@@ -302,13 +294,6 @@ class Owners {
         synchronized (mData) {
             OwnerInfo profileOwner = mData.mProfileOwners.get(userId);
             return profileOwner != null ? profileOwner.admin : null;
-        }
-    }
-
-    String getProfileOwnerName(int userId) {
-        synchronized (mData) {
-            OwnerInfo profileOwner = mData.mProfileOwners.get(userId);
-            return profileOwner != null ? profileOwner.name : null;
         }
     }
 
