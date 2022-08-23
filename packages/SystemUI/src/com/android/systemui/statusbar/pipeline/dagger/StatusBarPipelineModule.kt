@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.pipeline.dagger
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.statusbar.pipeline.ConnectivityInfoCollector
-import com.android.systemui.statusbar.pipeline.ConnectivityInfoCollectorImpl
 import com.android.systemui.statusbar.pipeline.ConnectivityInfoProcessor
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl
@@ -34,11 +32,6 @@ abstract class StatusBarPipelineModule {
     @IntoMap
     @ClassKey(ConnectivityInfoProcessor::class)
     abstract fun bindConnectivityInfoProcessor(cip: ConnectivityInfoProcessor): CoreStartable
-
-    @Binds
-    abstract fun provideConnectivityInfoCollector(
-            impl: ConnectivityInfoCollectorImpl
-    ): ConnectivityInfoCollector
 
     @Binds
     abstract fun wifiRepository(impl: WifiRepositoryImpl): WifiRepository

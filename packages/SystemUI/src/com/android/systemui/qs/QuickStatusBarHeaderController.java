@@ -80,7 +80,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             FeatureFlags featureFlags,
             VariableDateViewController.Factory variableDateViewControllerFactory,
             BatteryMeterViewController batteryMeterViewController,
-            StatusBarContentInsetsProvider statusBarContentInsetsProvider) {
+            StatusBarContentInsetsProvider statusBarContentInsetsProvider,
+            StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory) {
         super(view);
         mPrivacyIconsController = headerPrivacyIconsController;
         mStatusBarIconController = statusBarIconController;
@@ -103,7 +104,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mView.requireViewById(R.id.date_clock)
         );
 
-        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, featureFlags);
+        mIconManager = tintedIconManagerFactory.create(mIconContainer);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mColorExtractor = colorExtractor;
         mOnColorsChangedListener = (extractor, which) -> {

@@ -66,6 +66,7 @@ public abstract class TvPipModule {
     @Provides
     static Optional<Pip> providePip(
             Context context,
+            ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
@@ -84,6 +85,7 @@ public abstract class TvPipModule {
         return Optional.of(
                 TvPipController.create(
                         context,
+                        shellInit,
                         shellController,
                         tvPipBoundsState,
                         tvPipBoundsAlgorithm,

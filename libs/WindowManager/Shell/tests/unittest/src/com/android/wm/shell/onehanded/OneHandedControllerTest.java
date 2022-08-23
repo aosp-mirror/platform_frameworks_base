@@ -171,6 +171,11 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
+    public void testControllerRegistersUserChangeListener() {
+        verify(mMockShellController, times(1)).addUserChangeListener(any());
+    }
+
+    @Test
     public void testDefaultShouldNotInOneHanded() {
         // Assert default transition state is STATE_NONE
         assertThat(mSpiedTransitionState.getState()).isEqualTo(STATE_NONE);

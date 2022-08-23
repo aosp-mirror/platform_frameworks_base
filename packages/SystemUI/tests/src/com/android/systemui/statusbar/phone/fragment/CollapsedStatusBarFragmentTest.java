@@ -113,6 +113,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private NotificationPanelViewController mNotificationPanelViewController;
     @Mock
+    private StatusBarIconController.DarkIconManager.Factory mIconManagerFactory;
+    @Mock
+    private StatusBarIconController.DarkIconManager mIconManager;
+    @Mock
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock
     private DumpManager mDumpManager;
@@ -463,6 +467,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mOperatorNameViewControllerFactory = mock(OperatorNameViewController.Factory.class);
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
+        when(mIconManagerFactory.create(any())).thenReturn(mIconManager);
         mSecureSettings = mock(SecureSettings.class);
 
         setUpNotificationIconAreaController();
@@ -475,6 +480,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 new PanelExpansionStateManager(),
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
+                mIconManagerFactory,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
                 mNotificationPanelViewController,

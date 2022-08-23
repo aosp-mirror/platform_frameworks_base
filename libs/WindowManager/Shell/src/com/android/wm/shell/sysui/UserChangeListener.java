@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.model
+package com.android.wm.shell.sysui;
 
-/** Provides information about the current wifi state. */
-data class WifiModel(
-    /** See [android.net.wifi.WifiInfo.ssid]. */
-    val ssid: String? = null,
-    /** See [android.net.wifi.WifiInfo.isPasspointAp]. */
-    val isPasspointAccessPoint: Boolean = false,
-    /** See [android.net.wifi.WifiInfo.isOsuAp]. */
-    val isOnlineSignUpForPasspointAccessPoint: Boolean = false,
-    /** See [android.net.wifi.WifiInfo.passpointProviderFriendlyName]. */
-    val passpointProviderFriendlyName: String? = null,
-)
+import android.content.Context;
+import android.content.pm.UserInfo;
+
+import androidx.annotation.NonNull;
+
+import java.util.List;
+
+/**
+ * Callbacks for when the user or user's profiles changes.
+ */
+public interface UserChangeListener {
+    /**
+     * Called when the current (parent) user changes.
+     */
+    default void onUserChanged(int newUserId, @NonNull Context userContext) {}
+
+    /**
+     * Called when a profile belonging to the user changes.
+     */
+    default void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {}
+}
