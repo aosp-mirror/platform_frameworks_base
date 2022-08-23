@@ -17,8 +17,12 @@
 package com.android.server.wm;
 
 import android.annotation.UiThread;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
@@ -305,21 +309,21 @@ class AppWarnings {
     private void hideDialogsForPackageUiThread(String name) {
         // Hides the "unsupported display" dialog if necessary.
         if (mUnsupportedDisplaySizeDialog != null && (name == null || name.equals(
-                mUnsupportedDisplaySizeDialog.getPackageName()))) {
+                mUnsupportedDisplaySizeDialog.mPackageName))) {
             mUnsupportedDisplaySizeDialog.dismiss();
             mUnsupportedDisplaySizeDialog = null;
         }
 
         // Hides the "unsupported compile SDK" dialog if necessary.
         if (mUnsupportedCompileSdkDialog != null && (name == null || name.equals(
-                mUnsupportedCompileSdkDialog.getPackageName()))) {
+                mUnsupportedCompileSdkDialog.mPackageName))) {
             mUnsupportedCompileSdkDialog.dismiss();
             mUnsupportedCompileSdkDialog = null;
         }
 
         // Hides the "deprecated target sdk version" dialog if necessary.
         if (mDeprecatedTargetSdkVersionDialog != null && (name == null || name.equals(
-                mDeprecatedTargetSdkVersionDialog.getPackageName()))) {
+                mDeprecatedTargetSdkVersionDialog.mPackageName))) {
             mDeprecatedTargetSdkVersionDialog.dismiss();
             mDeprecatedTargetSdkVersionDialog = null;
         }
@@ -428,6 +432,49 @@ class AppWarnings {
 
         public void hideDialogsForPackage(String name) {
             obtainMessage(MSG_HIDE_DIALOGS_FOR_PACKAGE, name).sendToTarget();
+        }
+    }
+
+    static class BaseDialog {
+        final AppWarnings mManager;
+        final String mPackageName;
+        AlertDialog mDialog;
+        private BroadcastReceiver mCloseReceiver;
+
+        BaseDialog(AppWarnings manager, String packageName) {
+            mManager = manager;
+            mPackageName = packageName;
+        }
+
+        @UiThread
+        void show() {
+            if (mDialog == null) return;
+            if (mCloseReceiver == null) {
+                mCloseReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                            mManager.mUiHandler.hideDialogsForPackage(mPackageName);
+                        }
+                    }
+                };
+                mManager.mUiContext.registerReceiver(mCloseReceiver,
+                        new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                        Context.RECEIVER_EXPORTED);
+            }
+            Slog.w(TAG, "Showing " + getClass().getSimpleName() + " for package " + mPackageName);
+            mDialog.show();
+        }
+
+        @UiThread
+        void dismiss() {
+            if (mDialog == null) return;
+            if (mCloseReceiver != null) {
+                mManager.mUiContext.unregisterReceiver(mCloseReceiver);
+                mCloseReceiver = null;
+            }
+            mDialog.dismiss();
+            mDialog = null;
         }
     }
 
