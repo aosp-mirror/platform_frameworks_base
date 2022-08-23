@@ -169,6 +169,11 @@ public class RoutingControlActionTest {
                     }
 
                     @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
+
+                    @Override
                     protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
                     }

@@ -1529,7 +1529,32 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command) {
         assertRunOnServiceThread();
-        sendCecCommand(command, null);
+        switch (command.getOpcode()) {
+            case Constants.MESSAGE_ACTIVE_SOURCE:
+            case Constants.MESSAGE_IMAGE_VIEW_ON:
+            case Constants.MESSAGE_INACTIVE_SOURCE:
+            case Constants.MESSAGE_ROUTING_CHANGE:
+            case Constants.MESSAGE_SET_STREAM_PATH:
+            case Constants.MESSAGE_TEXT_VIEW_ON:
+                sendCecCommandWithRetries(command);
+                break;
+            default:
+                sendCecCommand(command, null);
+        }
+    }
+
+    /**
+     * Create a {@link SendCecCommandAction} that will retry to send the CEC message in case it
+     * fails.
+     * @param command that has to be sent in the CEC bus.
+     */
+    @ServiceThreadOnly
+    public void sendCecCommandWithRetries(HdmiCecMessage command) {
+        assertRunOnServiceThread();
+        HdmiCecLocalDevice localDevice = getAllCecLocalDevices().get(0);
+        if (localDevice != null) {
+            localDevice.addAndStartAction(new SendCecCommandAction(localDevice, command));
+        }
     }
 
     /**
