@@ -292,10 +292,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL,
     };
 
-    private static class InstanceHolder {
-        public static final InteractionJankMonitor INSTANCE =
-            new InteractionJankMonitor(new HandlerThread(DEFAULT_WORKER_NAME));
-    }
+    private static volatile InteractionJankMonitor sInstance;
 
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
             this::updateProperties;
@@ -387,7 +384,15 @@ public class InteractionJankMonitor {
      * @return instance of InteractionJankMonitor
      */
     public static InteractionJankMonitor getInstance() {
-        return InstanceHolder.INSTANCE;
+        // Use DCL here since this method might be invoked very often.
+        if (sInstance == null) {
+            synchronized (InteractionJankMonitor.class) {
+                if (sInstance == null) {
+                    sInstance = new InteractionJankMonitor(new HandlerThread(DEFAULT_WORKER_NAME));
+                }
+            }
+        }
+        return sInstance;
     }
 
     /**
