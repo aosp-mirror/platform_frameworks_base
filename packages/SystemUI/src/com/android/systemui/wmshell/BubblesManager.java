@@ -50,9 +50,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -77,7 +75,6 @@ import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -92,7 +89,7 @@ import java.util.function.IntConsumer;
  * The SysUi side bubbles manager which communicate with other SysUi components.
  */
 @SysUISingleton
-public class BubblesManager implements Dumpable {
+public class BubblesManager {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubblesManager" : TAG_BUBBLES;
 
@@ -137,7 +134,6 @@ public class BubblesManager implements Dumpable {
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
             return new BubblesManager(context,
@@ -156,7 +152,6 @@ public class BubblesManager implements Dumpable {
                     notifCollection,
                     notifPipeline,
                     sysUiState,
-                    dumpManager,
                     sysuiMainExecutor);
         } else {
             return null;
@@ -180,7 +175,6 @@ public class BubblesManager implements Dumpable {
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         mContext = context;
         mBubbles = bubbles;
@@ -202,8 +196,6 @@ public class BubblesManager implements Dumpable {
                 : statusBarService;
 
         setupNotifPipeline();
-
-        dumpManager.registerDumpable(TAG, this);
 
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -646,11 +638,6 @@ public class BubblesManager implements Dumpable {
                 entry.getRow().updateBubbleButton();
             }
         }
-    }
-
-    @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        mBubbles.dump(pw, args);
     }
 
     /** Checks whether bubbles are enabled for this user, handles negative userIds. */
