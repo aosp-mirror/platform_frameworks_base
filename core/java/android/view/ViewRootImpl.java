@@ -173,6 +173,7 @@ import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.accessibility.AccessibilityManager.HighTextContrastChangeListener;
@@ -5318,6 +5319,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mAccessibilityInteractionConnectionManager.ensureNoConnection();
+        mAccessibilityInteractionConnectionManager.ensureNoDirectConnection();
         removeSendWindowContentChangedCallback();
 
         destroyHardwareRenderer();
@@ -9570,6 +9572,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Return the connection ID for the {@link AccessibilityInteractionController} of this instance.
+     * @see AccessibilityNodeInfo#makeQueryableFromAppProcess(View)
+     */
+    public int getDirectAccessibilityConnectionId() {
+        return mAccessibilityInteractionConnectionManager.ensureDirectConnection();
+    }
+
     @Override
     public boolean showContextMenuForChild(View originalView) {
         return false;
@@ -10445,6 +10455,8 @@ public final class ViewRootImpl implements ViewParent,
      */
     final class AccessibilityInteractionConnectionManager
             implements AccessibilityStateChangeListener {
+        private int mDirectConnectionId = AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID;
+
         @Override
         public void onAccessibilityStateChanged(boolean enabled) {
             if (enabled) {
@@ -10486,6 +10498,21 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mAccessibilityWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
                 mAccessibilityWindowAttributes = null;
                 mAccessibilityManager.removeAccessibilityInteractionConnection(mWindow);
+            }
+        }
+
+        public int ensureDirectConnection() {
+            if (mDirectConnectionId == AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID) {
+                mDirectConnectionId = AccessibilityInteractionClient.addDirectConnection(
+                        new AccessibilityInteractionConnection(ViewRootImpl.this));
+            }
+            return mDirectConnectionId;
+        }
+
+        public void ensureNoDirectConnection() {
+            if (mDirectConnectionId != AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID) {
+                AccessibilityInteractionClient.removeConnection(mDirectConnectionId);
+                mDirectConnectionId = AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID;
             }
         }
     }
