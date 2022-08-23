@@ -538,7 +538,6 @@ public class BubbleController implements ConfigurationChangeListener {
 
         if (mNotifEntryToExpandOnShadeUnlock != null) {
             expandStackAndSelectBubble(mNotifEntryToExpandOnShadeUnlock);
-            mNotifEntryToExpandOnShadeUnlock = null;
         }
 
         updateStack();
