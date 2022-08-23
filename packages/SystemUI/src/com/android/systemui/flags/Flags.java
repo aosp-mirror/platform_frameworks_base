@@ -186,6 +186,9 @@ public class Flags {
     // 801 - region sampling
     public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
 
+    // 802 - wallpaper rendering
+    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
+
     /***************************************/
     // 900 - media
     public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
