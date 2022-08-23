@@ -544,6 +544,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     || message.getOpcode() == Constants.MESSAGE_SET_STREAM_PATH
                     || message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE) {
                 removeAction(ActiveSourceAction.class);
+                removeAction(OneTouchPlayAction.class);
                 return;
             }
         }
