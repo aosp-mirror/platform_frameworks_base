@@ -125,9 +125,14 @@ Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
 }
 
 Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
-                                       int weight, int italic) {
+                                       int weight, int italic, const Typeface* fallback) {
     Typeface* result = new Typeface;
-    result->fFontCollection = minikin::FontCollection::create(families);
+    if (fallback == nullptr) {
+        result->fFontCollection = minikin::FontCollection::create(std::move(families));
+    } else {
+        result->fFontCollection =
+                fallback->fFontCollection->createCollectionWithFamilies(std::move(families));
+    }
 
     if (weight == RESOLVE_BY_FONT_TABLE || italic == RESOLVE_BY_FONT_TABLE) {
         int weightFromFont;
