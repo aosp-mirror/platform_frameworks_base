@@ -51,3 +51,9 @@ java_test_host {
         unit_test: true,
     },
 }
+
+python_binary_host {
+    name: "lint_fix",
+    main: "fix/lint_fix.py",
+    srcs: ["fix/lint_fix.py"],
+}
