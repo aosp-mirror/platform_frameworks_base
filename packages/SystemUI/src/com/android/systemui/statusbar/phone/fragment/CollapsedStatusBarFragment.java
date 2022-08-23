@@ -130,6 +130,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
+    private final StatusBarIconController.DarkIconManager.Factory mDarkIconManagerFactory;
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final DumpManager mDumpManager;
@@ -185,6 +186,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             PanelExpansionStateManager panelExpansionStateManager,
             FeatureFlags featureFlags,
             StatusBarIconController statusBarIconController,
+            StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             NotificationPanelViewController notificationPanelViewController,
@@ -207,6 +209,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mFeatureFlags = featureFlags;
         mStatusBarIconController = statusBarIconController;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
+        mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanelViewController = notificationPanelViewController;
         mNetworkController = networkController;
@@ -247,7 +250,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons), mFeatureFlags);
+        mDarkIconManager = mDarkIconManagerFactory.create(view.findViewById(R.id.statusIcons));
         mDarkIconManager.setShouldLog(true);
         updateBlockedIcons();
         mStatusBarIconController.addIconGroup(mDarkIconManager);

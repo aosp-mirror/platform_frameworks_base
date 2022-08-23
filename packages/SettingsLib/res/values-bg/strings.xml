@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Висококачествено аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Висококачествено аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слухови апарати"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Установена е връзка със слухов апарат"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Свързано с(ъс) LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Свързано с LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Установена е връзка с медийно аудио"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Връзка със звука на телефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Установена е връзка със сървър за трансфер на файлове"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Дава възможност за преоразмеряване на всички активности в режима за няколко прозореца независимо от стойностите в манифеста."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Активиране на прозорците в свободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Активиране на поддръжката за експерименталните прозорци в свободна форма."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Режим за компютри"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Парола за резервни копия"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Понастоящем пълните резервни копия за настолен компютър не са защитени"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Докоснете, за да промените или премахнете паролата за пълни резервни копия на настолния компютър"</string>
@@ -476,13 +477,15 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Оставащо време до пълно зареждане: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Оставащо време до пълно зареждане: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – зареждането временно е ограничено"</string>
+    <!-- no translation found for power_charging_limited (6971664137170239141) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Неизвестно"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарежда се"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Зарежда се бързо"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Зарежда се бавно"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Зарежда се безжично"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Докинг станция за зарежд."</string>
+    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не се зарежда"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Свързано, не се зарежда"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Заредена"</string>

@@ -308,6 +308,12 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnViewDetachedRemovesViews() {
+        mController.onViewDetached();
+        verify(mView).removeAllStatusBarItemViews();
+    }
+
+    @Test
     public void testWifiIconHiddenWhenWifiBecomesAvailable() {
         // Make sure wifi starts out unavailable when onViewAttached is called, and then returns
         // true on the second query.

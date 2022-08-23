@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 
 import android.net.wifi.WifiManager
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -34,13 +35,15 @@ import kotlinx.coroutines.flow.map
 class WifiInteractor @Inject constructor(
         repository: WifiRepository,
 ) {
-    private val ssid: Flow<String?> = repository.wifiModel.map { info ->
-        when {
-            info == null -> null
-            info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
-                info.passpointProviderFriendlyName
-            info.ssid != WifiManager.UNKNOWN_SSID -> info.ssid
-            else -> null
+    private val ssid: Flow<String?> = repository.wifiNetwork.map { info ->
+        when (info) {
+            is WifiNetworkModel.Inactive -> null
+            is WifiNetworkModel.Active -> when {
+                info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
+                    info.passpointProviderFriendlyName
+                info.ssid != WifiManager.UNKNOWN_SSID -> info.ssid
+                else -> null
+            }
         }
     }
 

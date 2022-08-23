@@ -141,12 +141,13 @@ class MediaTttChipControllerReceiver @Inject constructor(
 
     override fun updateChipView(newChipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
         super.updateChipView(newChipInfo, currentChipView)
-        setIcon(
+        val iconName = setIcon(
                 currentChipView,
                 newChipInfo.routeInfo.clientPackageName,
                 newChipInfo.appIconDrawableOverride,
                 newChipInfo.appNameOverride
         )
+        currentChipView.contentDescription = iconName
     }
 
     override fun animateChipIn(chipView: ViewGroup) {
@@ -159,6 +160,8 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 .alpha(1f)
                 .setDuration(5.frames)
                 .start()
+        // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
+        appIconView.postOnAnimation { chipView.requestAccessibilityFocus() }
         startRipple(chipView.requireViewById(R.id.ripple))
     }
 
