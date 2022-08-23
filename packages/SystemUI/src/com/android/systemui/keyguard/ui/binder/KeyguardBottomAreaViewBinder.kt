@@ -251,9 +251,21 @@ object KeyguardBottomAreaViewBinder {
             Utils.getColorAttr(view.context, com.android.internal.R.attr.colorSurface)
 
         view.contentDescription = view.context.getString(viewModel.contentDescriptionResourceId)
-        view.setOnClickListener {
+        view.isClickable = viewModel.isClickable
+        if (viewModel.isClickable) {
+            view.setOnClickListener(OnClickListener(viewModel, falsingManager))
+        } else {
+            view.setOnClickListener(null)
+        }
+    }
+
+    private class OnClickListener(
+        private val viewModel: KeyguardQuickAffordanceViewModel,
+        private val falsingManager: FalsingManager,
+    ) : View.OnClickListener {
+        override fun onClick(view: View) {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                return@setOnClickListener
+                return
             }
 
             if (viewModel.configKey != null) {
