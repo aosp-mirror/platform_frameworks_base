@@ -130,7 +130,6 @@ public final class SurfaceControl implements Parcelable {
             float x, float y);
     private static native void nativeSetScale(long transactionObj, long nativeObject,
             float x, float y);
-    private static native void nativeSetSize(long transactionObj, long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long transactionObj,
             long nativeObject, Region region);
     private static native void nativeSetAlpha(long transactionObj, long nativeObject, float alpha);
@@ -2973,7 +2972,6 @@ public final class SurfaceControl implements Parcelable {
                 @IntRange(from = 0) int w, @IntRange(from = 0) int h) {
             checkPreconditions(sc);
             mResizedSurfaces.put(sc, new Point(w, h));
-            nativeSetSize(mNativeObject, sc.mNativeObject, w, h);
             return this;
         }
 
