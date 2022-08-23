@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiModel
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +47,7 @@ class WifiInteractorTest : SysuiTestCase() {
 
     @Test
     fun hasActivityIn_noInOrOut_outputsFalse() = runBlocking(IMMEDIATE) {
-        repository.setWifiModel(WifiModel(ssid = "AB"))
+        repository.setWifiNetwork(VALID_WIFI_NETWORK_MODEL)
         repository.setWifiActivity(WifiActivityModel(hasActivityIn = false, hasActivityOut = false))
 
         var latest: Boolean? = null
@@ -63,7 +63,7 @@ class WifiInteractorTest : SysuiTestCase() {
 
     @Test
     fun hasActivityIn_onlyOut_outputsFalse() = runBlocking(IMMEDIATE) {
-        repository.setWifiModel(WifiModel(ssid = "AB"))
+        repository.setWifiNetwork(VALID_WIFI_NETWORK_MODEL)
         repository.setWifiActivity(WifiActivityModel(hasActivityIn = false, hasActivityOut = true))
 
         var latest: Boolean? = null
@@ -79,7 +79,7 @@ class WifiInteractorTest : SysuiTestCase() {
 
     @Test
     fun hasActivityIn_onlyIn_outputsTrue() = runBlocking(IMMEDIATE) {
-        repository.setWifiModel(WifiModel(ssid = "AB"))
+        repository.setWifiNetwork(VALID_WIFI_NETWORK_MODEL)
         repository.setWifiActivity(WifiActivityModel(hasActivityIn = true, hasActivityOut = false))
 
         var latest: Boolean? = null
@@ -95,7 +95,7 @@ class WifiInteractorTest : SysuiTestCase() {
 
     @Test
     fun hasActivityIn_inAndOut_outputsTrue() = runBlocking(IMMEDIATE) {
-        repository.setWifiModel(WifiModel(ssid = "AB"))
+        repository.setWifiNetwork(VALID_WIFI_NETWORK_MODEL)
         repository.setWifiActivity(WifiActivityModel(hasActivityIn = true, hasActivityOut = true))
 
         var latest: Boolean? = null
@@ -111,7 +111,7 @@ class WifiInteractorTest : SysuiTestCase() {
 
     @Test
     fun hasActivityIn_ssidNull_outputsFalse() = runBlocking(IMMEDIATE) {
-        repository.setWifiModel(WifiModel(ssid = null))
+        repository.setWifiNetwork(WifiNetworkModel.Active(networkId = 1, ssid = null))
         repository.setWifiActivity(WifiActivityModel(hasActivityIn = true, hasActivityOut = true))
 
         var latest: Boolean? = null
@@ -127,7 +127,7 @@ class WifiInteractorTest : SysuiTestCase() {
 
     @Test
     fun hasActivityIn_multipleChanges_multipleOutputChanges() = runBlocking(IMMEDIATE) {
-        repository.setWifiModel(WifiModel(ssid = "AB"))
+        repository.setWifiNetwork(VALID_WIFI_NETWORK_MODEL)
 
         var latest: Boolean? = null
         val job = underTest
@@ -157,6 +157,10 @@ class WifiInteractorTest : SysuiTestCase() {
         assertThat(latest).isFalse()
 
         job.cancel()
+    }
+
+    companion object {
+        val VALID_WIFI_NETWORK_MODEL = WifiNetworkModel.Active(networkId = 1, ssid = "AB")
     }
 }
 
