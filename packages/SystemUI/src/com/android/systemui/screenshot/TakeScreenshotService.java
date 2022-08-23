@@ -70,7 +70,7 @@ import javax.inject.Inject;
 public class TakeScreenshotService extends Service {
     private static final String TAG = logTag(TakeScreenshotService.class);
 
-    private ScreenshotController mScreenshot;
+    private final ScreenshotController mScreenshot;
 
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -152,10 +152,7 @@ public class TakeScreenshotService extends Service {
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onUnbind");
         }
-        if (mScreenshot != null) {
-            mScreenshot.removeWindow();
-            mScreenshot = null;
-        }
+        mScreenshot.removeWindow();
         unregisterReceiver(mCloseSystemDialogs);
         return false;
     }
@@ -163,10 +160,7 @@ public class TakeScreenshotService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mScreenshot != null) {
-            mScreenshot.onDestroy();
-            mScreenshot = null;
-        }
+        mScreenshot.onDestroy();
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onDestroy");
         }
