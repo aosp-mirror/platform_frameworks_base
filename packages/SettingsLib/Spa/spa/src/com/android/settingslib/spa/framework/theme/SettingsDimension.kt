@@ -31,4 +31,5 @@ object SettingsDimension {
         end = itemPaddingEnd,
         bottom = itemPaddingVertical,
     )
+    val itemPaddingAround = 8.dp
 }

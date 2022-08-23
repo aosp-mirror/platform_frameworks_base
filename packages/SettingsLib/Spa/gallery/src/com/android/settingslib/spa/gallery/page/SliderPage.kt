@@ -17,9 +17,6 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessAlarm
 import androidx.compose.material.icons.outlined.MusicNote
@@ -29,18 +26,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsSlider
 import com.android.settingslib.spa.widget.ui.SettingsSliderModel
 
+private const val TITLE = "Sample Slider"
+
 object SliderPageProvider : SettingsPageProvider {
-    override val name = Destinations.Slider
+    override val name = "Slider"
 
     @Composable
     override fun Page(arguments: Bundle?) {
@@ -50,15 +49,15 @@ object SliderPageProvider : SettingsPageProvider {
     @Composable
     fun EntryItem() {
         Preference(object : PreferenceModel {
-            override val title = "Sample Slider"
-            override val onClick = navigator(Destinations.Slider)
+            override val title = TITLE
+            override val onClick = navigator(name)
         })
     }
 }
 
 @Composable
 private fun SliderPage() {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
+    RegularScaffold(title = TITLE) {
         SettingsSlider(object : SettingsSliderModel {
             override val title = "Slider"
             override val initValue = 40
