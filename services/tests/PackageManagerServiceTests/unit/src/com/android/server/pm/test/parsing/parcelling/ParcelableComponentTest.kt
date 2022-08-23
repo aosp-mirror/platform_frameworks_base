@@ -293,12 +293,21 @@ abstract class ParcelableComponentTest(
         first?.let { property(it) } == second?.let { property(it) }
     }
 
-    @Test
-    fun valueComparison() {
+    fun buildBefore(): Pair<List<Param>, Parcelable> {
         val params = baseParams.mapNotNull(::buildParams) + extraParams().filterNotNull()
         val before = initialObject()
 
         params.forEach { it.setFunction(arrayOf(before, it.value())) }
+        finalizeObject(before)
+        return params to before
+    }
+
+    protected open fun finalizeObject(parcelable: Parcelable) {
+    }
+
+    @Test
+    fun valueComparison() {
+        val (params, before) = buildBefore()
 
         val parcel = Parcel.obtain()
         writeToParcel(parcel, before)
@@ -307,6 +316,15 @@ abstract class ParcelableComponentTest(
 
         parcel.setDataPosition(0)
 
+        val baseline = initialObject()
+        finalizeObject(baseline)
+
+        val baselineParcel = Parcel.obtain()
+        writeToParcel(baselineParcel, baseline)
+
+        // Check that something substantial actually changed in the test object
+        expect.that(parcel.dataSize()).isGreaterThan(baselineParcel.dataSize())
+
         val after = creator.createFromParcel(parcel)
 
         expect.withMessage("Mismatched write and read data sizes")
@@ -314,6 +332,7 @@ abstract class ParcelableComponentTest(
             .isEqualTo(dataSize)
 
         parcel.recycle()
+        baselineParcel.recycle()
 
         runAssertions(params, before, after)
     }

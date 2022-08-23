@@ -1208,9 +1208,21 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     @NonNull
+    public PackageSetting addUsesLibraryInfo(@NonNull SharedLibraryInfo value) {
+        pkgState.addUsesLibraryInfo(value);
+        return this;
+    }
+
+    @NonNull
     @Override
     public List<String> getUsesLibraryFiles() {
         return pkgState.getUsesLibraryFiles();
+    }
+
+    @NonNull
+    public PackageSetting addUsesLibraryFile(String value) {
+        pkgState.addUsesLibraryFile(value);
+        return this;
     }
 
     @Override

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.server.pm.PackageSetting;
 
@@ -67,6 +68,18 @@ public class PackageStateUnserialized {
 
     public PackageStateUnserialized(@NonNull PackageSetting packageSetting) {
         mPackageSetting = packageSetting;
+    }
+
+    @NonNull
+    public PackageStateUnserialized addUsesLibraryInfo(@NonNull SharedLibraryInfo value) {
+        usesLibraryInfos = CollectionUtils.add(usesLibraryInfos, value);
+        return this;
+    }
+
+    @NonNull
+    public PackageStateUnserialized addUsesLibraryFile(@NonNull String value) {
+        usesLibraryFiles = CollectionUtils.add(usesLibraryFiles, value);
+        return this;
     }
 
     private long[] lazyInitLastPackageUsageTimeInMills() {

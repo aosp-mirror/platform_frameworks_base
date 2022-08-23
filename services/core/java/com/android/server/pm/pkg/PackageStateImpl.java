@@ -33,6 +33,7 @@ import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -170,7 +171,7 @@ public class PackageStateImpl implements PackageState {
         mLastModifiedTime = pkgState.getLastModifiedTime();
         mLastUpdateTime = pkgState.getLastUpdateTime();
         mLongVersionCode = pkgState.getVersionCode();
-        mMimeGroups = pkgState.getMimeGroups();
+        mMimeGroups = Collections.unmodifiableMap(pkgState.getMimeGroups());
         mPath = pkgState.getPath();
         mPrimaryCpuAbi = pkgState.getPrimaryCpuAbi();
         mSecondaryCpuAbi = pkgState.getSecondaryCpuAbi();
@@ -180,8 +181,8 @@ public class PackageStateImpl implements PackageState {
         mUsesSdkLibrariesVersionsMajor = pkgState.getUsesSdkLibrariesVersionsMajor();
         mUsesStaticLibraries = pkgState.getUsesStaticLibraries();
         mUsesStaticLibrariesVersions = pkgState.getUsesStaticLibrariesVersions();
-        mUsesLibraryInfos = pkgState.getUsesLibraryInfos();
-        mUsesLibraryFiles = pkgState.getUsesLibraryFiles();
+        mUsesLibraryInfos = Collections.unmodifiableList(pkgState.getUsesLibraryInfos());
+        mUsesLibraryFiles = Collections.unmodifiableList(pkgState.getUsesLibraryFiles());
         setBoolean(Booleans.FORCE_QUERYABLE_OVERRIDE, pkgState.isForceQueryableOverride());
         setBoolean(Booleans.HIDDEN_UNTIL_INSTALLED, pkgState.isHiddenUntilInstalled());
         setBoolean(Booleans.INSTALL_PERMISSIONS_FIXED, pkgState.isInstallPermissionsFixed());
@@ -195,8 +196,8 @@ public class PackageStateImpl implements PackageState {
         int userStatesSize = userStates.size();
         mUserStates = new SparseArray<>(userStatesSize);
         for (int index = 0; index < userStatesSize; index++) {
-            mUserStates.put(mUserStates.keyAt(index),
-                    UserStateImpl.copy(mUserStates.valueAt(index)));
+            mUserStates.put(userStates.keyAt(index),
+                    UserStateImpl.copy(userStates.valueAt(index)));
         }
     }
 

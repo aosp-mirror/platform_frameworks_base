@@ -23,7 +23,6 @@ import android.content.pm.FeatureGroupInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
-import com.android.server.pm.pkg.parsing.ParsingPackage
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -65,6 +64,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "addMimeGroupsFromComponent",
         "assignDerivedFields",
         "assignDerivedFields2",
+        "makeImmutable",
         "buildFakeForDeletion",
         "buildAppClassNamesByProcess",
         "capPermissionPriorities",
@@ -219,6 +219,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isNativeLibraryRootRequiresIsa,
         AndroidPackage::isOdm,
         AndroidPackage::isOem,
+        AndroidPackage::isOnBackInvokedCallbackEnabled,
         AndroidPackage::isOverlay,
         AndroidPackage::isOverlayIsStatic,
         AndroidPackage::isPartiallyDirectBootAware,
@@ -279,7 +280,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         adder(AndroidPackage::getUsesOptionalNativeLibraries, "testUsesOptionalNativeLibrary"),
         getSetByValue(
             AndroidPackage::areAttributionsUserVisible,
-            ParsingPackage::setAttributionsAreUserVisible,
+            PackageImpl::setAttributionsAreUserVisible,
             true
         ),
         getSetByValue2(
@@ -513,11 +514,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             }
         ),
         getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
-        getSetByValue(
-            AndroidPackage::isOnBackInvokedCallbackEnabled,
-            ParsingPackage::setOnBackInvokedCallbackEnabled,
-            true
-        )
     )
 
     override fun initialObject() = PackageImpl.forParsing(
@@ -560,9 +556,12 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         .setSplitHasCode(1, false)
         .setSplitClassLoaderName(0, "testSplitClassLoaderNameZero")
         .setSplitClassLoaderName(1, "testSplitClassLoaderNameOne")
-
         .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"))
         .addUsesStaticLibrary("testStatic", 3L, arrayOf("testCertDigest2"))
+
+    override fun finalizeObject(parcelable: Parcelable) {
+        (parcelable as PackageImpl).hideAsParsed().hideAsFinal()
+    }
 
     override fun extraAssertions(before: Parcelable, after: Parcelable) {
         super.extraAssertions(before, after)
