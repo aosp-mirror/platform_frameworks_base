@@ -20,10 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
@@ -81,9 +77,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
@@ -93,7 +91,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionFlags;
 import android.view.WindowManager.TransitionOldType;
 import android.view.WindowManager.TransitionType;
-import android.view.animation.Animation;
 import android.window.ITaskFragmentOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -295,7 +292,6 @@ public class AppTransitionController {
 
             final int flags = appTransition.getTransitFlags();
             layoutRedo = appTransition.goodToGo(transit, topOpeningApp);
-            handleNonAppWindowsInTransition(transit, flags);
             appTransition.postAnimationCallback();
             appTransition.clear();
         } finally {
@@ -1037,6 +1033,32 @@ public class AppTransitionController {
             return;
         }
 
+        if (AppTransition.isActivityTransitOld(transit)) {
+            final ArrayList<Pair<ActivityRecord, Rect>> closingLetterboxes = new ArrayList();
+            for (int i = 0; i < closingApps.size(); ++i) {
+                ActivityRecord closingApp = closingApps.valueAt(i);
+                if (closingApp.areBoundsLetterboxed()) {
+                    final Rect insets = closingApp.getLetterboxInsets();
+                    closingLetterboxes.add(new Pair(closingApp, insets));
+                }
+            }
+
+            for (int i = 0; i < openingApps.size(); ++i) {
+                ActivityRecord openingApp = openingApps.valueAt(i);
+                if (openingApp.areBoundsLetterboxed()) {
+                    final Rect openingInsets = openingApp.getLetterboxInsets();
+                    for (Pair<ActivityRecord, Rect> closingLetterbox : closingLetterboxes) {
+                        final Rect closingInsets = closingLetterbox.second;
+                        if (openingInsets.equals(closingInsets)) {
+                            ActivityRecord closingApp = closingLetterbox.first;
+                            openingApp.setNeedsLetterboxedAnimation(true);
+                            closingApp.setNeedsLetterboxedAnimation(true);
+                        }
+                    }
+                }
+            }
+        }
+
         final ArraySet<WindowContainer> openingWcs = getAnimationTargets(
                 openingApps, closingApps, true /* visible */);
         final ArraySet<WindowContainer> closingWcs = getAnimationTargets(
@@ -1140,30 +1162,6 @@ public class AppTransitionController {
             WindowContainer wc = apps.valueAt(i);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now changing app %s", wc);
             wc.applyAnimation(null, transit, true, false, null /* sources */);
-        }
-    }
-
-    private void handleNonAppWindowsInTransition(@TransitionOldType int transit, int flags) {
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
-            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
-                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
-                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
-                Animation anim = mService.mPolicy.createKeyguardWallpaperExit(
-                        (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0);
-                if (anim != null) {
-                    anim.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
-                    mDisplayContent.mWallpaperController.startWallpaperAnimation(anim);
-                }
-            }
-        }
-        if ((transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER)
-                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
-            mDisplayContent.startKeyguardExitOnNonAppWindows(
-                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
-                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
-                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
         }
     }
 

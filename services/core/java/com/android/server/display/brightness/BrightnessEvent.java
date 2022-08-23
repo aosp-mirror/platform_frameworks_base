@@ -21,6 +21,8 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Represents a particular brightness change event.
  */
@@ -29,7 +31,8 @@ public final class BrightnessEvent {
     public static final int FLAG_INVALID_LUX = 0x2;
     public static final int FLAG_DOZE_SCALE = 0x4;
     public static final int FLAG_USER_SET = 0x8;
-    public static final int FLAG_IDLE_CURVE = 0x16;
+    public static final int FLAG_IDLE_CURVE = 0x10;
+    public static final int FLAG_LOW_POWER_MODE = 0x20;
 
     private BrightnessReason mReason = new BrightnessReason();
     private int mDisplayId;
@@ -317,6 +320,10 @@ public final class BrightnessEvent {
         this.mRbcStrength = mRbcStrength;
     }
 
+    public boolean isRbcEnabled() {
+        return (mFlags & FLAG_RBC) != 0;
+    }
+
     public float getThermalMax() {
         return mThermalMax;
     }
@@ -331,6 +338,10 @@ public final class BrightnessEvent {
 
     public void setPowerFactor(float mPowerFactor) {
         this.mPowerFactor = mPowerFactor;
+    }
+
+    public boolean isLowPowerModeSet() {
+        return (mFlags & FLAG_LOW_POWER_MODE) != 0;
     }
 
     public int getFlags() {
@@ -361,11 +372,17 @@ public final class BrightnessEvent {
         this.mAutomaticBrightnessEnabled = mAutomaticBrightnessEnabled;
     }
 
-    private String flagsToString() {
+    /**
+     * A utility to stringify flags from a BrightnessEvent
+     * @return Stringified flags from BrightnessEvent
+     */
+    @VisibleForTesting
+    public String flagsToString() {
         return ((mFlags & FLAG_USER_SET) != 0 ? "user_set " : "")
                 + ((mFlags & FLAG_RBC) != 0 ? "rbc " : "")
                 + ((mFlags & FLAG_INVALID_LUX) != 0 ? "invalid_lux " : "")
                 + ((mFlags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "")
-                + ((mFlags & FLAG_IDLE_CURVE) != 0 ? "idle_curve " : "");
+                + ((mFlags & FLAG_IDLE_CURVE) != 0 ? "idle_curve " : "")
+                + ((mFlags & FLAG_LOW_POWER_MODE) != 0 ? "low_power_mode " : "");
     }
 }

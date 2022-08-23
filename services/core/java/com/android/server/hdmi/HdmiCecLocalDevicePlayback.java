@@ -530,6 +530,25 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
     }
 
+    /**
+     * Called after logical address allocation is finished, allowing a local device to react to
+     * messages in the buffer before they are processed. This method may be used to cancel deferred
+     * actions.
+     */
+    @Override
+    protected void preprocessBufferedMessages(List<HdmiCecMessage> bufferedMessages) {
+        for (HdmiCecMessage message: bufferedMessages) {
+            // Prevent the device from broadcasting <Active Source> message if the active path
+            // changed during address allocation.
+            if (message.getOpcode() == Constants.MESSAGE_ROUTING_CHANGE
+                    || message.getOpcode() == Constants.MESSAGE_SET_STREAM_PATH
+                    || message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE) {
+                removeAction(ActiveSourceAction.class);
+                return;
+            }
+        }
+    }
+
     @Override
     protected int findKeyReceiverAddress() {
         return Constants.ADDR_TV;

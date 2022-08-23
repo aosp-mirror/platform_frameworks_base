@@ -26,8 +26,8 @@ import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProvider
-import com.android.systemui.plugins.RegionDarkness
 import com.android.systemui.shared.R
+import com.android.systemui.shared.regionsampling.RegionDarkness
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone

@@ -649,6 +649,13 @@ abstract class HdmiCecLocalDevice {
         return Constants.NOT_HANDLED;
     }
 
+    /**
+     * Called after logical address allocation is finished, allowing a local device to react to
+     * messages in the buffer before they are processed. This method may be used to cancel deferred
+     * actions.
+     */
+    protected void preprocessBufferedMessages(List<HdmiCecMessage> bufferedMessages) {}
+
     @Constants.RcProfile
     protected abstract int getRcProfile();
 
@@ -963,8 +970,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    final void handleAddressAllocated(int logicalAddress, int reason) {
+    final void handleAddressAllocated(
+            int logicalAddress, List<HdmiCecMessage> bufferedMessages, int reason) {
         assertRunOnServiceThread();
+        preprocessBufferedMessages(bufferedMessages);
         mPreferredAddress = logicalAddress;
         updateDeviceFeatures();
         if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {

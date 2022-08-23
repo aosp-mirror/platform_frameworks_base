@@ -17,8 +17,10 @@
 package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.app.GameManagerService.WRITE_SETTINGS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -35,11 +37,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.GameManager;
 import android.app.GameModeInfo;
 import android.app.GameState;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -97,6 +103,7 @@ public class GameManagerServiceTests {
     private PowerManagerInternal mMockPowerManager;
     @Mock
     private UserManager mMockUserManager;
+    private BroadcastReceiver mShutDownActionReceiver;
 
     // Stolen from ConnectivityServiceTest.MockContext
     class MockContext extends ContextWrapper {
@@ -165,6 +172,12 @@ public class GameManagerServiceTests {
             }
             throw new UnsupportedOperationException("Couldn't find system service: " + name);
         }
+
+        @Override
+        public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter) {
+            mShutDownActionReceiver =  receiver;
+            return null;
+        }
     }
 
     @Before
@@ -200,15 +213,16 @@ public class GameManagerServiceTests {
     @After
     public void tearDown() throws Exception {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+        deleteFolder(InstrumentationRegistry.getTargetContext().getFilesDir());
     }
 
     private void startUser(GameManagerService gameManagerService, int userId) {
         UserInfo userInfo = new UserInfo(userId, "name", 0);
-        gameManagerService.onUserStarting(new SystemService.TargetUser(userInfo));
+        gameManagerService.onUserStarting(new SystemService.TargetUser(userInfo),
+                InstrumentationRegistry.getContext().getFilesDir());
         mTestLooper.dispatchAll();
     }
 
@@ -584,7 +598,7 @@ public class GameManagerServiceTests {
             gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         }
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(scaling, config.getGameModeConfiguration(gameMode).getScaling(), 0.01f);
     }
 
@@ -594,7 +608,7 @@ public class GameManagerServiceTests {
 
         // Validate GamePackageConfiguration returns the correct value.
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(config.getGameModeConfiguration(gameMode).getUseAngle(), angleEnabled);
 
         // Validate GameManagerService.isAngleEnabled() returns the correct value.
@@ -607,7 +621,7 @@ public class GameManagerServiceTests {
 
         // Validate GamePackageConfiguration returns the correct value.
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(
                 loadingBoost, config.getGameModeConfiguration(gameMode).getLoadingBoostDuration());
 
@@ -623,7 +637,7 @@ public class GameManagerServiceTests {
             gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         }
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(fps, config.getGameModeConfiguration(gameMode).getFps());
     }
 
@@ -1049,7 +1063,7 @@ public class GameManagerServiceTests {
                 mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(90,
                 config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE).getFps());
         assertEquals(30, config.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY).getFps());
@@ -1064,7 +1078,7 @@ public class GameManagerServiceTests {
                 mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(0,
                 config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE).getFps());
         assertEquals(0, config.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY).getFps());
@@ -1092,7 +1106,7 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         GameManagerService.GamePackageConfiguration config =
-                gameManagerService.getConfig(mPackageName);
+                gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
@@ -1339,10 +1353,15 @@ public class GameManagerServiceTests {
         mTestLooper.dispatchAll();
 
         /* Expected fileOutput (order may vary)
+         # user 1001:
          com.android.app2 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.5,fps=60
          com.android.app1 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
          com.android.app0 <UID>   0   2   angle=0,scaling=0.6,fps=120 3   angle=0,scaling=0.7,fps=30
 
+         # user 1002:
+         com.android.app2 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
+         com.android.app1 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
+         com.android.app0 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
          The current game mode would only be set to non-zero if the current user have that game
          installed.
         */
@@ -1386,7 +1405,7 @@ public class GameManagerServiceTests {
         assertEquals(splitLine[3], "2");
         assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
         assertEquals(splitLine[5], "3");
-        assertEquals(splitLine[6], "angle=0,scaling=0.5,fps=60");
+        assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
         splitLine = fileOutput.get(1).split("\\s+");
         assertEquals(splitLine[0], "com.android.app1");
         assertEquals(splitLine[2], "3");
@@ -1398,7 +1417,7 @@ public class GameManagerServiceTests {
         assertEquals(splitLine[0], "com.android.app0");
         assertEquals(splitLine[2], "0");
         assertEquals(splitLine[3], "2");
-        assertEquals(splitLine[4], "angle=0,scaling=0.6,fps=120");
+        assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
         assertEquals(splitLine[5], "3");
         assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
 
@@ -1493,12 +1512,52 @@ public class GameManagerServiceTests {
 
     @Test
     public void testGetResolutionScalingFactor_noUserId() {
-        mockModifyGameModeDenied();
+        mockModifyGameModeGranted();
         mockDeviceConfigAll();
         GameManagerService gameManagerService =
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_2);
-        assertEquals(-1f, gameManagerService.getResolutionScalingFactor(mPackageName,
-                GameManager.GAME_MODE_BATTERY, USER_ID_1), 0.001f);
+        assertThrows(IllegalArgumentException.class, () -> {
+            gameManagerService.getResolutionScalingFactor(mPackageName,
+                    GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testWritingSettingFile_onShutdown() throws InterruptedException {
+        mockModifyGameModeGranted();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onBootCompleted();
+        startUser(gameManagerService, USER_ID_1);
+        Thread.sleep(500);
+        gameManagerService.setGameModeConfigOverride("com.android.app1", USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+        gameManagerService.setGameMode("com.android.app1", USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE);
+        GameManagerSettings settings = new GameManagerSettings(
+                InstrumentationRegistry.getContext().getFilesDir());
+        Thread.sleep(500);
+        // no data written as delayed messages are queued
+        assertFalse(settings.readPersistentDataLocked());
+        assertTrue(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
+        Intent shutdown = new Intent();
+        shutdown.setAction(Intent.ACTION_SHUTDOWN);
+        mShutDownActionReceiver.onReceive(mMockContext, shutdown);
+        Thread.sleep(500);
+        // data is written on processing new message with no delay on shutdown,
+        // and all queued messages should be removed
+        assertTrue(settings.readPersistentDataLocked());
+        assertFalse(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
+    }
+
+    private static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                deleteFolder(file);
+            }
+        }
+        folder.delete();
     }
 }

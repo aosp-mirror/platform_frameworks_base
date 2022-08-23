@@ -50,11 +50,10 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
@@ -284,6 +283,30 @@ class MediaDataManagerTest : SysuiTestCase() {
                 MediaData.PLAYBACK_CAST_REMOTE)
         verify(logger).logActiveMediaAdded(anyInt(), eq(SYSTEM_PACKAGE_NAME),
             eq(mediaDataCaptor.value.instanceId), eq(MediaData.PLAYBACK_CAST_REMOTE))
+    }
+
+    @Test
+    fun testOnNotificationAdded_hasSubstituteName_isUsed() {
+        val subName = "Substitute Name"
+        val notif = SbnBuilder().run {
+            modifyNotification(context).also {
+                it.extras = Bundle().apply {
+                    putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, subName)
+                }
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                })
+            }
+            build()
+        }
+
+        mediaDataManager.onNotificationAdded(KEY, notif)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+            eq(0), eq(false))
+
+        assertThat(mediaDataCaptor.value!!.app).isEqualTo(subName)
     }
 
     @Test

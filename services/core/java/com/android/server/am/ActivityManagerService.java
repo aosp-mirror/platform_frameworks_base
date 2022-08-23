@@ -18414,11 +18414,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, new AttributionSource(shellUid, /*pid*/ -1,
+                    return superImpl.apply(code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), /*renouncedPermissions*/ null,
-                            attributionSource.getNext()), shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, skiProxyOperation);
+                            attributionSource.getToken(), attributionSource.getNext()),
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skiProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -18465,13 +18465,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, new AttributionSource(shellUid, /*pid*/ -1,
+                    return superImpl.apply(code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), /*renouncedPermissions*/ null,
-                            attributionSource.getNext()), startIfModeDefault,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlags,
-                            attributionChainId);
+                            attributionSource.getToken(), attributionSource.getNext()),
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
+                            proxiedAttributionFlags, attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -18490,10 +18489,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    superImpl.apply(code, new AttributionSource(shellUid, /*pid*/ -1,
+                    superImpl.apply(code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), /*renouncedPermissions*/ null,
-                            attributionSource.getNext()), skipProxyOperation);
+                            attributionSource.getToken(), attributionSource.getNext()),
+                            skipProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

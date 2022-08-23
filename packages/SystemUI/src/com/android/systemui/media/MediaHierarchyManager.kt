@@ -22,7 +22,12 @@ import android.animation.ValueAnimator
 import android.annotation.IntDef
 import android.content.Context
 import android.content.res.Configuration
+import android.database.ContentObserver
 import android.graphics.Rect
+import android.net.Uri
+import android.os.Handler
+import android.os.UserHandle
+import android.provider.Settings
 import android.util.Log
 import android.util.MathUtils
 import android.view.View
@@ -33,12 +38,12 @@ import com.android.keyguard.KeyguardViewController
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.NotifPanelEvents
 import com.android.systemui.statusbar.CrossFadeHelper
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
@@ -47,6 +52,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
@@ -85,13 +91,21 @@ class MediaHierarchyManager @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
     private val mediaCarouselController: MediaCarouselController,
-    private val notifLockscreenUserManager: NotificationLockscreenUserManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
     panelEventsEvents: NotifPanelEvents,
+    private val secureSettings: SecureSettings,
+    @Main private val handler: Handler,
 ) {
+
+    /**
+     * Track the media player setting status on lock screen.
+     */
+    private var allowMediaPlayerOnLockScreen: Boolean = true
+    private val lockScreenMediaPlayerUri =
+            secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
 
     /**
      * Whether we "skip" QQS during panel expansion.
@@ -521,6 +535,23 @@ class MediaHierarchyManager @Inject constructor(
                 updateDesiredLocation()
             }
         })
+
+        val settingsObserver: ContentObserver = object : ContentObserver(handler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                if (uri == lockScreenMediaPlayerUri) {
+                    allowMediaPlayerOnLockScreen =
+                            secureSettings.getBoolForUser(
+                                    Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+                                    true,
+                                    UserHandle.USER_CURRENT
+                            )
+                }
+            }
+        }
+        secureSettings.registerContentObserverForUser(
+                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+                settingsObserver,
+                UserHandle.USER_ALL)
     }
 
     private fun updateConfiguration() {
@@ -1036,7 +1067,6 @@ class MediaHierarchyManager @Inject constructor(
         }
         val onLockscreen = (!bypassController.bypassEnabled &&
             (statusbarState == StatusBarState.KEYGUARD))
-        val allowedOnLockscreen = notifLockscreenUserManager.shouldShowLockscreenNotifications()
         val location = when {
             dreamOverlayActive -> LOCATION_DREAM_OVERLAY
             (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
@@ -1044,7 +1074,7 @@ class MediaHierarchyManager @Inject constructor(
             !hasActiveMedia -> LOCATION_QS
             onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
             onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
-            onLockscreen && allowedOnLockscreen -> LOCATION_LOCKSCREEN
+            onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
             else -> LOCATION_QQS
         }
         // When we're on lock screen and the player is not active, we should keep it in QS.
@@ -1116,7 +1146,7 @@ class MediaHierarchyManager @Inject constructor(
         return !statusBarStateController.isDozing &&
                 !keyguardViewController.isBouncerShowing &&
                 statusBarStateController.state == StatusBarState.KEYGUARD &&
-                notifLockscreenUserManager.shouldShowLockscreenNotifications() &&
+                allowMediaPlayerOnLockScreen &&
                 statusBarStateController.isExpanded &&
                 !qsExpanded
     }

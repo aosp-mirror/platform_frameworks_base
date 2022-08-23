@@ -1079,9 +1079,10 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void notifyAddressAllocated(ArrayList<HdmiCecLocalDevice> devices, int initiatedBy) {
         assertRunOnServiceThread();
+        List<HdmiCecMessage> bufferedMessages = mCecMessageBuffer.getBuffer();
         for (HdmiCecLocalDevice device : devices) {
             int address = device.getDeviceInfo().getLogicalAddress();
-            device.handleAddressAllocated(address, initiatedBy);
+            device.handleAddressAllocated(address, bufferedMessages, initiatedBy);
         }
         if (isTvDeviceEnabled()) {
             tv().setSelectRequestBuffer(mSelectRequestBuffer);
@@ -1361,8 +1362,9 @@ public class HdmiControlService extends SystemService {
 
         @Constants.HandleMessageResult int handleMessageResult =
                 dispatchMessageToLocalDevice(message);
-        if (handleMessageResult == Constants.NOT_HANDLED
-                && !mAddressAllocated
+        // mAddressAllocated is false during address allocation, meaning there is no device to
+        // handle the message, so it should be buffered, if possible.
+        if (!mAddressAllocated
                 && mCecMessageBuffer.bufferMessage(message)) {
             return Constants.HANDLED;
         }
@@ -3286,7 +3288,8 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void onWakeUp(@WakeReason final int wakeUpAction) {
+    @VisibleForTesting
+    protected void onWakeUp(@WakeReason final int wakeUpAction) {
         assertRunOnServiceThread();
         mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON,
                 false);

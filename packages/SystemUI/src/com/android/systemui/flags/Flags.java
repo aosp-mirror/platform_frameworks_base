@@ -182,6 +182,7 @@ public class Flags {
     public static final UnreleasedFlag MEDIA_SESSION_ACTIONS = new UnreleasedFlag(901);
     public static final ReleasedFlag MEDIA_NEARBY_DEVICES = new ReleasedFlag(903);
     public static final ReleasedFlag MEDIA_MUTE_AWAIT = new ReleasedFlag(904);
+    public static final UnreleasedFlag MEDIA_DREAM_COMPLICATION = new UnreleasedFlag(905);
 
     // 1000 - dock
     public static final ReleasedFlag SIMULATE_DOCK_THROUGH_CHARGING =
@@ -236,6 +237,7 @@ public class Flags {
     // 1300 - screenshots
 
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
+    public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
 
     // 1400 - columbus, b/242800729
     public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
