@@ -17,9 +17,6 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DisabledByDefault
 import androidx.compose.material.icons.outlined.TouchApp
@@ -31,7 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
@@ -39,11 +35,14 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsIcon
 import kotlinx.coroutines.delay
 
+private const val TITLE = "Sample Preference"
+
 object PreferencePageProvider : SettingsPageProvider {
-    override val name = Destinations.Preference
+    override val name = "Preference"
 
     @Composable
     override fun Page(arguments: Bundle?) {
@@ -53,15 +52,15 @@ object PreferencePageProvider : SettingsPageProvider {
     @Composable
     fun EntryItem() {
         Preference(object : PreferenceModel {
-            override val title = "Sample Preference"
-            override val onClick = navigator(Destinations.Preference)
+            override val title = TITLE
+            override val onClick = navigator(name)
         })
     }
 }
 
 @Composable
 private fun PreferencePage() {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
+    RegularScaffold(title = TITLE) {
         Preference(object : PreferenceModel {
             override val title = "Preference"
         })
