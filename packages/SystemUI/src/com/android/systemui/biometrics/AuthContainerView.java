@@ -129,6 +129,8 @@ public class AuthContainerView extends LinearLayout
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
 
     private final @Background DelayableExecutor mBackgroundExecutor;
+    private int mOrientation;
+    private boolean mSkipFirstLostFocus = false;
 
     // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
     @Nullable @AuthDialogCallback.DismissedReason private Integer mPendingCallbackReason;
@@ -441,6 +443,12 @@ public class AuthContainerView extends LinearLayout
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         if (!hasWindowFocus) {
+            //it's a workaround to avoid closing BP incorrectly
+            //BP gets a onWindowFocusChanged(false) and then gets a onWindowFocusChanged(true)
+            if (mSkipFirstLostFocus) {
+                mSkipFirstLostFocus = false;
+                return;
+            }
             Log.v(TAG, "Lost window focus, dismissing the dialog");
             animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
         }
@@ -449,6 +457,9 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+        //save the first orientation
+        mOrientation = getResources().getConfiguration().orientation;
 
         mWakefulnessLifecycle.addObserver(this);
 
@@ -621,6 +632,12 @@ public class AuthContainerView extends LinearLayout
         if (mBiometricView != null) {
             mBiometricView.restoreState(savedState);
         }
+
+        if (savedState != null) {
+            mSkipFirstLostFocus = savedState.getBoolean(
+                    AuthDialog.KEY_BIOMETRIC_ORIENTATION_CHANGED);
+        }
+
         wm.addView(this, getLayoutParams(mWindowToken, mConfig.mPromptInfo.getTitle()));
     }
 
@@ -676,6 +693,10 @@ public class AuthContainerView extends LinearLayout
         outState.putBoolean(AuthDialog.KEY_BIOMETRIC_SHOWING,
                 mBiometricView != null && mCredentialView == null);
         outState.putBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING, mCredentialView != null);
+
+        if (mOrientation != getResources().getConfiguration().orientation) {
+            outState.putBoolean(AuthDialog.KEY_BIOMETRIC_ORIENTATION_CHANGED, true);
+        }
 
         if (mBiometricView != null) {
             mBiometricView.onSaveState(outState);
