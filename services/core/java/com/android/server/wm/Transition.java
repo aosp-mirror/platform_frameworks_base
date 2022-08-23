@@ -31,7 +31,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -66,6 +72,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -73,6 +80,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 
@@ -1058,9 +1066,36 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
     private void handleNonAppWindowsInTransition(@NonNull DisplayContent dc,
             @TransitionType int transit, @TransitionFlags int flags) {
+        if ((transit == TRANSIT_KEYGUARD_GOING_AWAY
+                || (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0)
+                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
+            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
+                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
+                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
+                Animation anim = mController.mAtm.mWindowManager.mPolicy
+                        .createKeyguardWallpaperExit(
+                                (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0);
+                if (anim != null) {
+                    anim.scaleCurrentDuration(
+                            mController.mAtm.mWindowManager.getTransitionAnimationScaleLocked());
+                    dc.mWallpaperController.startWallpaperAnimation(anim);
+                }
+            }
+            dc.startKeyguardExitOnNonAppWindows(
+                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0,
+                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
+                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
+            if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
+                // When remote animation is enabled for KEYGUARD_GOING_AWAY transition, SysUI
+                // receives IRemoteAnimationRunner#onAnimationStart to start animation, so we don't
+                // need to call IKeyguardService#keyguardGoingAway here.
+                mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(
+                        SystemClock.uptimeMillis(), 0 /* duration */);
+            }
+        }
         if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
             mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange(
-                    false /* notify */);
+                    true /* keyguardOccludingStarted */);
         }
     }
 
