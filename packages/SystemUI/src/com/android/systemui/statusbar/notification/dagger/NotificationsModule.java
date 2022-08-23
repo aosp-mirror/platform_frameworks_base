@@ -29,7 +29,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
@@ -50,11 +49,9 @@ import com.android.systemui.statusbar.notification.collection.inflation.BindEven
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -162,20 +159,6 @@ public interface NotificationsModule {
     /** Provides an instance of {@link NotifGutsViewManager} */
     @Binds
     NotifGutsViewManager bindNotifGutsViewManager(NotificationGutsManager notificationGutsManager);
-
-    /** Provides an instance of {@link VisualStabilityManager} */
-    @SysUISingleton
-    @Provides
-    static VisualStabilityManager provideVisualStabilityManager(
-            VisualStabilityProvider visualStabilityProvider,
-            StatusBarStateController statusBarStateController,
-            WakefulnessLifecycle wakefulnessLifecycle) {
-        return new VisualStabilityManager(
-                visualStabilityProvider,
-                statusBarStateController,
-                wakefulnessLifecycle
-        );
-    }
 
     /** Provides an instance of {@link NotificationLogger} */
     @SysUISingleton
