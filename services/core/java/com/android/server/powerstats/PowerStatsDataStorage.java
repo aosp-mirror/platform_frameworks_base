@@ -220,18 +220,17 @@ public class PowerStatsDataStorage {
     public void write(byte[] data) {
         if (data != null && data.length > 0) {
             mLock.lock();
-
-            long currentTimeMillis = System.currentTimeMillis();
             try {
+                long currentTimeMillis = System.currentTimeMillis();
                 DataElement dataElement = new DataElement(data);
                 mFileRotator.rewriteActive(new DataRewriter(dataElement.toByteArray()),
                         currentTimeMillis);
                 mFileRotator.maybeRotate(currentTimeMillis);
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to write to on-device storage: " + e);
+            } finally {
+                mLock.unlock();
             }
-
-            mLock.unlock();
         }
     }
 
@@ -240,21 +239,31 @@ public class PowerStatsDataStorage {
      * DataElement retrieved from on-device storage, callback is called.
      */
     public void read(DataElementReadCallback callback) throws IOException {
-        mFileRotator.readMatching(new DataReader(callback), Long.MIN_VALUE, Long.MAX_VALUE);
+        mLock.lock();
+        try {
+            mFileRotator.readMatching(new DataReader(callback), Long.MIN_VALUE, Long.MAX_VALUE);
+        } finally {
+            mLock.unlock();
+        }
     }
 
     /**
      * Deletes all stored log data.
      */
     public void deleteLogs() {
-        File[] files = mDataStorageDir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            int versionDot = mDataStorageFilename.lastIndexOf('.');
-            String beforeVersionDot = mDataStorageFilename.substring(0, versionDot);
-            // Check that the stems before the version match.
-            if (files[i].getName().startsWith(beforeVersionDot)) {
-                files[i].delete();
+        mLock.lock();
+        try {
+            File[] files = mDataStorageDir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                int versionDot = mDataStorageFilename.lastIndexOf('.');
+                String beforeVersionDot = mDataStorageFilename.substring(0, versionDot);
+                // Check that the stems before the version match.
+                if (files[i].getName().startsWith(beforeVersionDot)) {
+                    files[i].delete();
+                }
             }
+        } finally {
+            mLock.unlock();
         }
     }
 }
