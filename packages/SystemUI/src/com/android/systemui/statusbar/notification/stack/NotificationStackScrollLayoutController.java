@@ -33,7 +33,6 @@ import static com.android.systemui.statusbar.phone.NotificationIconAreaControlle
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -1235,8 +1234,8 @@ public class NotificationStackScrollLayoutController {
         mView.setAnimationsEnabled(enabled);
     }
 
-    public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation) {
-        mView.setDozing(dozing, animate, wakeUpTouchLocation);
+    public void setDozing(boolean dozing, boolean animate) {
+        mView.setDozing(dozing, animate);
     }
 
     public void setPulsing(boolean pulsing, boolean animatePulse) {

@@ -18,6 +18,7 @@ package com.android.systemui.dagger;
 
 import android.app.INotificationManager;
 import android.content.Context;
+import android.service.dreams.IDreamManager;
 
 import androidx.annotation.Nullable;
 
@@ -213,6 +214,7 @@ public abstract class SystemUIModule {
             ShadeController shadeController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
+            IDreamManager dreamManager,
             NotificationVisibilityProvider visibilityProvider,
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
@@ -230,6 +232,7 @@ public abstract class SystemUIModule {
                 shadeController,
                 statusBarService,
                 notificationManager,
+                dreamManager,
                 visibilityProvider,
                 interruptionStateProvider,
                 zenModeController,
@@ -238,7 +241,6 @@ public abstract class SystemUIModule {
                 notifCollection,
                 notifPipeline,
                 sysUiState,
-                dumpManager,
                 sysuiMainExecutor));
     }
 

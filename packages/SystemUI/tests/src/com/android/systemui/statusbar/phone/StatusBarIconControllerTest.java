@@ -40,11 +40,15 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconMana
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import javax.inject.Provider;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -67,7 +71,11 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     @Test
     public void testSetCalledOnAdd_DarkIconManager() {
         LinearLayout layout = new LinearLayout(mContext);
-        TestDarkIconManager manager = new TestDarkIconManager(layout, mock(FeatureFlags.class));
+        TestDarkIconManager manager = new TestDarkIconManager(
+                layout,
+                mock(FeatureFlags.class),
+                mock(StatusBarPipelineFlags.class),
+                () -> mock(WifiViewModel.class));
         testCallOnAdd_forManager(manager);
     }
 
@@ -104,8 +112,12 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     private static class TestDarkIconManager extends DarkIconManager
             implements TestableIconManager {
 
-        TestDarkIconManager(LinearLayout group, FeatureFlags featureFlags) {
-            super(group, featureFlags);
+        TestDarkIconManager(
+                LinearLayout group,
+                FeatureFlags featureFlags,
+                StatusBarPipelineFlags statusBarPipelineFlags,
+                Provider<WifiViewModel> wifiViewModelProvider) {
+            super(group, featureFlags, statusBarPipelineFlags, wifiViewModelProvider);
         }
 
         @Override
@@ -123,7 +135,7 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         }
 
         @Override
-        protected StatusBarWifiView addSignalIcon(int index, String slot, WifiIconState state) {
+        protected StatusBarWifiView addWifiIcon(int index, String slot, WifiIconState state) {
             StatusBarWifiView mock = mock(StatusBarWifiView.class);
             mGroup.addView(mock, index);
             return mock;
@@ -140,7 +152,10 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
 
     private static class TestIconManager extends IconManager implements TestableIconManager {
         TestIconManager(ViewGroup group) {
-            super(group, mock(FeatureFlags.class));
+            super(group,
+                    mock(FeatureFlags.class),
+                    mock(StatusBarPipelineFlags.class),
+                    () -> mock(WifiViewModel.class));
         }
 
         @Override
@@ -158,7 +173,7 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         }
 
         @Override
-        protected StatusBarWifiView addSignalIcon(int index, String slot, WifiIconState state) {
+        protected StatusBarWifiView addWifiIcon(int index, String slot, WifiIconState state) {
             StatusBarWifiView mock = mock(StatusBarWifiView.class);
             mGroup.addView(mock, index);
             return mock;

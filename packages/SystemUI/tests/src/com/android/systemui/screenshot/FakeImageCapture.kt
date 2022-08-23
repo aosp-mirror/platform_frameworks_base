@@ -13,21 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.screenshot
 
-package com.android.systemui.statusbar.pipeline
+import android.graphics.Bitmap
+import android.graphics.Rect
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+internal class FakeImageCapture : ImageCapture {
 
-/**
- * A test-friendly implementation of [ConnectivityInfoCollector] that just emits whatever value it
- * receives in [emitValue].
- */
-class FakeConnectivityInfoCollector : ConnectivityInfoCollector {
-    private val _rawConnectivityInfoFlow = MutableStateFlow(RawConnectivityInfo())
-    override val rawConnectivityInfoFlow = _rawConnectivityInfoFlow.asStateFlow()
+    var requestedDisplayId: Int? = null
+    var requestedDisplayCrop: Rect? = null
+    var requestedTaskId: Int? = null
 
-    suspend fun emitValue(value: RawConnectivityInfo) {
-        _rawConnectivityInfoFlow.emit(value)
+    var image: Bitmap? = null
+
+    override fun captureDisplay(displayId: Int, crop: Rect?): Bitmap? {
+        requestedDisplayId = displayId
+        requestedDisplayCrop = crop
+        return image
+    }
+
+    override suspend fun captureTask(taskId: Int): Bitmap? {
+        requestedTaskId = taskId
+        return image
     }
 }

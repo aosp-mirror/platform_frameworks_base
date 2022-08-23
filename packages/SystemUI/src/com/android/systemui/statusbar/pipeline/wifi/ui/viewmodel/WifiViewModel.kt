@@ -16,12 +16,15 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
+import android.graphics.Color
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
 /**
@@ -30,9 +33,10 @@ import kotlinx.coroutines.flow.flowOf
  * TODO(b/238425913): Hook this up to the real status bar wifi view using a view binder.
  */
 class WifiViewModel @Inject constructor(
-        private val constants: WifiConstants,
-        private val logger: ConnectivityPipelineLogger,
-        private val interactor: WifiInteractor,
+    statusBarPipelineFlags: StatusBarPipelineFlags,
+    private val constants: WifiConstants,
+    private val logger: ConnectivityPipelineLogger,
+    private val interactor: WifiInteractor,
 ) {
     val isActivityInVisible: Flow<Boolean>
         get() =
@@ -42,4 +46,11 @@ class WifiViewModel @Inject constructor(
                 interactor.hasActivityIn
             }
                 .logOutputChange(logger, "activityInVisible")
+
+    /** The tint that should be applied to the icon. */
+    val tint: Flow<Int> = if (!statusBarPipelineFlags.useNewPipelineDebugColoring()) {
+        emptyFlow()
+    } else {
+        flowOf(Color.CYAN)
+    }
 }

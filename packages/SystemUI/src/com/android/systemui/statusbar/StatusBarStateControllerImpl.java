@@ -303,11 +303,6 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public void setDozeAmount(float dozeAmount, boolean animated) {
-        setAndInstrumentDozeAmount(null, dozeAmount, animated);
-    }
-
-    @Override
     public void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated) {
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animated && mDozeAmountTarget == dozeAmount) {

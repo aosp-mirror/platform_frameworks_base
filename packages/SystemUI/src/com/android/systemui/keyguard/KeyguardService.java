@@ -323,6 +323,8 @@ public class KeyguardService extends Service {
         if (sEnableRemoteKeyguardOccludeAnimation) {
             Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
             // Register for occluding
+            final RemoteTransition occludeTransition = new RemoteTransition(
+                    mOccludeAnimation, getIApplicationThread());
             TransitionFilter f = new TransitionFilter();
             f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
             f.mRequirements = new TransitionFilter.Requirement[]{
@@ -337,10 +339,11 @@ public class KeyguardService extends Service {
             f.mRequirements[1].mMustBeIndependent = false;
             f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
             f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-            mShellTransitions.registerRemote(f,
-                    new RemoteTransition(mOccludeAnimation, getIApplicationThread()));
+            mShellTransitions.registerRemote(f, occludeTransition);
 
             // Now register for un-occlude.
+            final RemoteTransition unoccludeTransition = new RemoteTransition(
+                    mUnoccludeAnimation, getIApplicationThread());
             f = new TransitionFilter();
             f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
             f.mRequirements = new TransitionFilter.Requirement[]{
@@ -358,8 +361,23 @@ public class KeyguardService extends Service {
             f.mRequirements[0].mMustBeIndependent = false;
             f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
             f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-            mShellTransitions.registerRemote(f,
-                    new RemoteTransition(mUnoccludeAnimation, getIApplicationThread()));
+            mShellTransitions.registerRemote(f, unoccludeTransition);
+
+            // Register for specific transition type.
+            // Above filter cannot fulfill all conditions.
+            // E.g. close top activity while screen off but next activity is occluded, this should
+            // an occluded transition, but since the activity is invisible, the condition would
+            // match unoccluded transition.
+            // But on the contrary, if we add above condition in occluded transition, then when user
+            // trying to dismiss occluded activity when unlock keyguard, the condition would match
+            // occluded transition.
+            f = new TransitionFilter();
+            f.mTypeSet = new int[]{TRANSIT_KEYGUARD_OCCLUDE};
+            mShellTransitions.registerRemote(f, occludeTransition);
+
+            f = new TransitionFilter();
+            f.mTypeSet = new int[]{TRANSIT_KEYGUARD_UNOCCLUDE};
+            mShellTransitions.registerRemote(f, unoccludeTransition);
         }
     }
 
