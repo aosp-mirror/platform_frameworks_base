@@ -85,6 +85,7 @@
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
+    <uses-permission android:name="android.permission.NETWORK_STACK"/>
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -393,6 +394,11 @@
                   android:exported="false"
                   android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
+
+        <service android:name=".screenshot.ScreenshotProxyService"
+                 android:permission="com.android.systemui.permission.SELF"
+                 android:exported="false" />
+
 
         <service android:name=".screenrecord.RecordingService" />
 

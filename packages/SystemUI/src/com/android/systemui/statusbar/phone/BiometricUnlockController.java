@@ -512,7 +512,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK");
                 } else {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_FROM_DREAM");
-                    mUpdateMonitor.awakenFromDream();
+                    // Don't call awaken from Dream here. In order to avoid flickering, wait until
+                    // later to awaken.
                 }
                 mNotificationShadeWindowController.setNotificationShadeFocusable(false);
                 mKeyguardViewMediator.onWakeAndUnlocking();

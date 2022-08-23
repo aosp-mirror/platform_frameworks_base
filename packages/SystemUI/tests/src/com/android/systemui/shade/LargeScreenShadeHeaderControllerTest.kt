@@ -43,6 +43,8 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var view: View
     @Mock private lateinit var statusIcons: StatusIconContainer
     @Mock private lateinit var statusBarIconController: StatusBarIconController
+    @Mock private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
+    @Mock private lateinit var iconManager: StatusBarIconController.TintedIconManager
     @Mock private lateinit var qsCarrierGroupController: QSCarrierGroupController
     @Mock private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
     @Mock private lateinit var featureFlags: FeatureFlags
@@ -91,10 +93,12 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
         whenever(variableDateViewControllerFactory.create(any()))
             .thenReturn(variableDateViewController)
+        whenever(iconManagerFactory.create(any())).thenReturn(iconManager)
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(false)
         mLargeScreenShadeHeaderController = LargeScreenShadeHeaderController(
                 view,
                 statusBarIconController,
+                iconManagerFactory,
                 privacyIconsController,
                 insetsProvider,
                 configurationController,

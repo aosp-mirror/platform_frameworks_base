@@ -23,7 +23,7 @@ import com.android.settingslib.SignalIcon.IconGroup;
 /** */
 public class WifiIcons {
 
-    static final int[] WIFI_FULL_ICONS = {
+    public static final int[] WIFI_FULL_ICONS = {
             com.android.internal.R.drawable.ic_wifi_signal_0,
             com.android.internal.R.drawable.ic_wifi_signal_1,
             com.android.internal.R.drawable.ic_wifi_signal_2,

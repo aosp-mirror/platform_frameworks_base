@@ -51,12 +51,6 @@ public interface Pip {
     }
 
     /**
-     * Registers the session listener for the current user.
-     */
-    default void registerSessionListenerForCurrentUser() {
-    }
-
-    /**
      * Sets both shelf visibility and its height.
      *
      * @param visible visibility of shelf.

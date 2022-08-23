@@ -431,7 +431,7 @@ public class StackAnimationController extends
     }
 
     /** Description of current animation controller state. */
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw) {
         pw.println("StackAnimationController state:");
         pw.print("  isActive:             "); pw.println(isActiveController());
         pw.print("  restingStackPos:      ");

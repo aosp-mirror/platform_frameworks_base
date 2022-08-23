@@ -155,7 +155,11 @@ public class Flags {
     public static final ReleasedFlag STATUS_BAR_LETTERBOX_APPEARANCE =
             new ReleasedFlag(603, false);
 
-    public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE = new UnreleasedFlag(604, true);
+    public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_BACKEND =
+            new UnreleasedFlag(604, true);
+
+    public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_FRONTEND =
+            new UnreleasedFlag(605, true);
 
     /***************************************/
     // 700 - dialer/calls
@@ -172,6 +176,10 @@ public class Flags {
     // 800 - general visual/theme
     public static final ResourceBooleanFlag MONET =
             new ResourceBooleanFlag(800, R.bool.flag_monet);
+
+    /***************************************/
+    // 801 - region sampling
+    public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
 
     /***************************************/
     // 900 - media
@@ -234,6 +242,7 @@ public class Flags {
     // 1300 - screenshots
 
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
+    public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
