@@ -468,7 +468,7 @@ public class ExpandedAnimationController
     }
 
     /** Description of current animation controller state. */
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw) {
         pw.println("ExpandedAnimationController state:");
         pw.print("  isActive:          "); pw.println(isActiveController());
         pw.print("  animatingExpand:   "); pw.println(mAnimatingExpand);

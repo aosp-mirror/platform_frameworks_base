@@ -16,21 +16,24 @@
 
 package com.android.wm.shell.sysui;
 
+import android.content.Context;
+import android.content.pm.UserInfo;
+
+import androidx.annotation.NonNull;
+
+import java.util.List;
+
 /**
- * Callbacks for when the keyguard changes.
+ * Callbacks for when the user or user's profiles changes.
  */
-public interface KeyguardChangeListener {
+public interface UserChangeListener {
     /**
-     * Called when the keyguard is showing (and if so, whether it is occluded).
+     * Called when the current (parent) user changes.
      */
-    default void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
-            boolean animatingDismiss) {}
+    default void onUserChanged(int newUserId, @NonNull Context userContext) {}
 
     /**
-     * Called when the keyguard dismiss animation has finished.
-     *
-     * TODO(b/206741900) deprecate this path once we're able to animate the PiP window as part of
-     * keyguard dismiss animation.
+     * Called when a profile belonging to the user changes.
      */
-    default void onKeyguardDismissAnimationFinished() {}
+    default void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {}
 }
