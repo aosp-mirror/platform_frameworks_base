@@ -371,7 +371,7 @@
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Onyesha masasisho ya safu za maunzi"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Angaza kijani safu za maunzi zinaposasisha"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Tatua uondoaji wa GPU"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"Lemaza miekeleo ya HW"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Zima miekeleo ya HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Daima tumia GPU kwa mchanganyiko wa skrini"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Kuiga nafasi ya rangi"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Wezesha ufuatiliaji wa OpenGL"</string>
@@ -595,7 +595,7 @@
     <string name="guest_reset_guest" msgid="6110013010356013758">"Badilisha kipindi cha mgeni"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Ungependa kubadilisha kipindi cha mgeni?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Ungependa kumwondoa mgeni?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Badilisha"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Weka upya"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ondoa"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Inabadilisha kipindi cha mgeni…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Piga picha"</string>

@@ -373,7 +373,7 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> is eigenaar van dit apparaat en kan het netwerkverkeer bijhouden"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Dit apparaat wordt geleverd door <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Dit apparaat is eigendom van je organisatie en heeft verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en heeft verbinding met internet via <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en heeft internetverbinding via <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Dit apparaat is eigendom van je organisatie"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Dit apparaat is eigendom van je organisatie en heeft verbinding met internet via VPN\'s"</string>

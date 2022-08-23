@@ -59,6 +59,18 @@
     },
     {
       "file_patterns": [
+        "Parcel\\.java",
+        "[^/]*Bundle[^/]*\\.java"
+      ],
+      "name": "FrameworksMockingCoreTests",
+      "options": [
+        { "include-filter":  "android.os.BundleRecyclingTest"},
+        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
+        { "exclude-annotation": "org.junit.Ignore" }
+      ]
+    },
+    {
+      "file_patterns": [
         "BatteryUsageStats[^/]*\\.java",
         "PowerComponents\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"

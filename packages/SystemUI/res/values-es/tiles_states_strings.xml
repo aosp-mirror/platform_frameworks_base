@@ -59,7 +59,7 @@
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"No disponible"</item>
     <item msgid="5044688398303285224">"Desactivada"</item>
-    <item msgid="8527389108867454098">"Activada"</item>
+    <item msgid="8527389108867454098">"Activado"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"No disponible"</item>
@@ -88,7 +88,7 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"No disponible"</item>
-    <item msgid="1909756493418256167">"Desactivada"</item>
+    <item msgid="1909756493418256167">"Desactivado"</item>
     <item msgid="4531508423703413340">"Activado"</item>
   </string-array>
   <string-array name="tile_states_inversion">
