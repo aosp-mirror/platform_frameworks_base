@@ -87,6 +87,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -402,6 +403,11 @@ public class InteractionJankMonitor {
      */
     @VisibleForTesting
     public InteractionJankMonitor(@NonNull HandlerThread worker) {
+        // Check permission early.
+        DeviceConfig.enforceReadPermission(
+            ActivityThread.currentApplication().getApplicationContext(),
+            DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR);
+
         mRunningTrackers = new SparseArray<>();
         mTimeoutActions = new SparseArray<>();
         mWorker = worker;
