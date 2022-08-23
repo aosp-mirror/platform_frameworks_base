@@ -31,8 +31,8 @@ import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spaprivileged.framework.app.AppRecord
-import com.android.settingslib.spaprivileged.framework.app.PackageManagers
+import com.android.settingslib.spaprivileged.model.app.AppRecord
+import com.android.settingslib.spaprivileged.model.app.PackageManagers
 import kotlinx.coroutines.Dispatchers
 
 private const val PERMISSION = "permission"
