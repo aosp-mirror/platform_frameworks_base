@@ -3121,6 +3121,7 @@
   <java-symbol type="string" name="language_picker_section_all" />
   <java-symbol type="string" name="region_picker_section_all" />
   <java-symbol type="string" name="language_picker_section_suggested" />
+  <java-symbol type="string" name="language_picker_regions_section_suggested" />
   <java-symbol type="string" name="language_selection_title" />
   <java-symbol type="string" name="search_language_hint" />
 

@@ -5431,8 +5431,10 @@
     <!-- Hint text in a search edit box (used to filter long language / country lists) [CHAR LIMIT=25] -->
     <string name="search_language_hint">Type language name</string>
 
-    <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
+    <!-- List section subheader for the language picker, containing a list of suggested languages [CHAR LIMIT=30] -->
     <string name="language_picker_section_suggested">Suggested</string>
+    <!-- "List section subheader for the language picker, containing a list of suggested regions available for that language [CHAR LIMIT=30] -->
+    <string name="language_picker_regions_section_suggested">Suggested</string>
     <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
     <string name="language_picker_section_all">All languages</string>
     <!-- List section subheader for the region picker, containing a list of all regions supported for the selected language.
