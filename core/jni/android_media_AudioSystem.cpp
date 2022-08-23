@@ -2739,12 +2739,26 @@ static jint android_media_AudioSystem_setDevicesRoleForStrategy(JNIEnv *env, job
 }
 
 static jint android_media_AudioSystem_removeDevicesRoleForStrategy(JNIEnv *env, jobject thiz,
-                                                                   jint strategy, jint role) {
+                                                                   jint strategy, jint role,
+                                                                   jintArray jDeviceTypes,
+                                                                   jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::removeDevicesRoleForStrategy((product_strategy_t)strategy,
+                                                      (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_clearDevicesRoleForStrategy(JNIEnv *env, jobject thiz,
+                                                                  jint strategy, jint role) {
     return (jint)
-            check_AudioSystem_Command(AudioSystem::removeDevicesRoleForStrategy((product_strategy_t)
-                                                                                        strategy,
-                                                                                (device_role_t)
-                                                                                        role),
+            check_AudioSystem_Command(AudioSystem::clearDevicesRoleForStrategy((product_strategy_t)
+                                                                                       strategy,
+                                                                               (device_role_t)role),
                                       {NAME_NOT_FOUND});
 }
 
@@ -3341,8 +3355,10 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_isCallScreeningModeSupported},
          {"setDevicesRoleForStrategy", "(II[I[Ljava/lang/String;)I",
           (void *)android_media_AudioSystem_setDevicesRoleForStrategy},
-         {"removeDevicesRoleForStrategy", "(II)I",
+         {"removeDevicesRoleForStrategy", "(II[I[Ljava/lang/String;)I",
           (void *)android_media_AudioSystem_removeDevicesRoleForStrategy},
+         {"clearDevicesRoleForStrategy", "(II)I",
+          (void *)android_media_AudioSystem_clearDevicesRoleForStrategy},
          {"getDevicesForRoleAndStrategy", "(IILjava/util/List;)I",
           (void *)android_media_AudioSystem_getDevicesForRoleAndStrategy},
          {"setDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",

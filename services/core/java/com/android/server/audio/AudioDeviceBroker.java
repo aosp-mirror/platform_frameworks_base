@@ -36,6 +36,7 @@ import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioRoutesObserver;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
+import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.MediaMetrics;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -871,6 +872,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return mDeviceInventory.removePreferredDevicesForStrategySync(strategy);
     }
 
+    /*package*/ int setDeviceAsNonDefaultForStrategySync(int strategy,
+            @NonNull AudioDeviceAttributes device) {
+        return mDeviceInventory.setDeviceAsNonDefaultForStrategySync(strategy, device);
+    }
+
+    /*package*/ int removeDeviceAsNonDefaultForStrategySync(int strategy,
+            @NonNull AudioDeviceAttributes device) {
+        return mDeviceInventory.removeDeviceAsNonDefaultForStrategySync(strategy, device);
+    }
+
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
             @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
         mDeviceInventory.registerStrategyPreferredDevicesDispatcher(dispatcher);
@@ -879,6 +890,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ void unregisterStrategyPreferredDevicesDispatcher(
             @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
         mDeviceInventory.unregisterStrategyPreferredDevicesDispatcher(dispatcher);
+    }
+
+    /*package*/ void registerStrategyNonDefaultDevicesDispatcher(
+            @NonNull IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        mDeviceInventory.registerStrategyNonDefaultDevicesDispatcher(dispatcher);
+    }
+
+    /*package*/ void unregisterStrategyNonDefaultDevicesDispatcher(
+            @NonNull IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        mDeviceInventory.unregisterStrategyNonDefaultDevicesDispatcher(dispatcher);
     }
 
     /*package*/ int setPreferredDevicesForCapturePresetSync(int capturePreset,
@@ -1037,6 +1058,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /*package*/ void postSaveRemovePreferredDevicesForStrategy(int strategy) {
         sendIMsgNoDelay(MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_QUEUE, strategy);
+    }
+
+    /*package*/ void postSaveSetDeviceAsNonDefaultForStrategy(
+            int strategy, AudioDeviceAttributes device) {
+        sendILMsgNoDelay(MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy, device);
+    }
+
+    /*package*/ void postSaveRemoveDeviceAsNonDefaultForStrategy(
+            int strategy, AudioDeviceAttributes device) {
+        sendILMsgNoDelay(
+                MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy, device);
     }
 
     /*package*/ void postSaveSetPreferredDevicesForCapturePreset(
@@ -1508,6 +1540,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     final int strategy = msg.arg1;
                     mDeviceInventory.onSaveRemovePreferredDevices(strategy);
                 } break;
+                case MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY: {
+                    final int strategy = msg.arg1;
+                    final AudioDeviceAttributes device = (AudioDeviceAttributes) msg.obj;
+                    mDeviceInventory.onSaveSetDeviceAsNonDefault(strategy, device);
+                } break;
+                case MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY: {
+                    final int strategy = msg.arg1;
+                    final AudioDeviceAttributes device = (AudioDeviceAttributes) msg.obj;
+                    mDeviceInventory.onSaveRemoveDeviceAsNonDefault(strategy, device);
+                } break;
                 case MSG_CHECK_MUTE_MUSIC:
                     checkMessagesMuteMusic(0);
                     break;
@@ -1592,6 +1634,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
     //
     // process set volume for Le Audio, obj is BleVolumeInfo
     private static final int MSG_II_SET_LE_AUDIO_OUT_VOLUME = 46;
+
+    private static final int MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY = 47;
+    private static final int MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY = 48;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {

@@ -1858,6 +1858,76 @@ public class AudioManager {
 
     /**
      * @hide
+     * Set a device as non-default for a given strategy, i.e. the audio routing to be avoided by
+     * this audio strategy.
+     * <p>Use
+     * {@link #removeDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)}
+     * to cancel setting this preference for this strategy.</p>
+     * @param strategy the audio strategy whose routing will be affected
+     * @param device the audio device to not route to when available
+     * @return true if the operation was successful, false otherwise
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean setDeviceAsNonDefaultForStrategy(@NonNull AudioProductStrategy strategy,
+                                                    @NonNull AudioDeviceAttributes device) {
+        Objects.requireNonNull(strategy);
+        Objects.requireNonNull(device);
+        try {
+            final int status =
+                    getService().setDeviceAsNonDefaultForStrategy(strategy.getId(), device);
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Removes the audio device(s) from the non-default device list previously set with
+     * {@link #setDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)}
+     * @param strategy the audio strategy whose routing will be affected
+     * @param device the audio device to remove from the non-default device list
+     * @return true if the operation was successful, false otherwise (invalid strategy, or no
+     *     device set for example)
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean removeDeviceAsNonDefaultForStrategy(@NonNull AudioProductStrategy strategy,
+                                                       @NonNull AudioDeviceAttributes device) {
+        Objects.requireNonNull(strategy);
+        Objects.requireNonNull(device);
+        try {
+            final int status =
+                    getService().removeDeviceAsNonDefaultForStrategy(strategy.getId(), device);
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the audio device(s) from the non-default device list previously set with
+     * {@link #setDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)}
+     * @param strategy the audio strategy to query
+     * @return list of non-default devices for the strategy
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @NonNull
+    public List<AudioDeviceAttributes> getNonDefaultDevicesForStrategy(
+            @NonNull AudioProductStrategy strategy) {
+        Objects.requireNonNull(strategy);
+        try {
+            return getService().getNonDefaultDevicesForStrategy(strategy.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * Interface to be notified of changes in the preferred audio device set for a given audio
      * strategy.
      * <p>Note that this listener will only be invoked whenever
@@ -1891,9 +1961,11 @@ public class AudioManager {
      * Interface to be notified of changes in the preferred audio devices set for a given audio
      * strategy.
      * <p>Note that this listener will only be invoked whenever
-     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)} or
-     * {@link #setPreferredDevicesForStrategy(AudioProductStrategy, List<AudioDeviceAttributes>)}
-     * {@link #removePreferredDeviceForStrategy(AudioProductStrategy)} causes a change in
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)},
+     * {@link #setPreferredDevicesForStrategy(AudioProductStrategy, List<AudioDeviceAttributes>)},
+     * {@link #setDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)},
+     * {@link #removeDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)}
+     * or {@link #removePreferredDeviceForStrategy(AudioProductStrategy)} causes a change in
      * preferred device(s). It will not be invoked directly after registration with
      * {@link #addOnPreferredDevicesForStrategyChangedListener(
      * Executor, OnPreferredDevicesForStrategyChangedListener)}
@@ -1984,11 +2056,84 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Interface to be notified of changes in the non-default audio devices set for a given audio
+     * strategy.
+     * <p>Note that this listener will only be invoked whenever
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)},
+     * {@link #setPreferredDevicesForStrategy(AudioProductStrategy, List<AudioDeviceAttributes>)},
+     * {@link #setDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)},
+     * {@link #removeDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)}
+     * or {@link #removePreferredDeviceForStrategy(AudioProductStrategy)} causes a change in
+     * non-default device(s). It will not be invoked directly after registration with
+     * {@link #addOnNonDefaultDevicesForStrategyChangedListener(
+     * Executor, OnNonDefaultDevicesForStrategyChangedListener)}
+     * to indicate which strategies had preferred devices at the time of registration.</p>
+     * @see #setDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)
+     * @see #removeDeviceAsNonDefaultForStrategy(AudioProductStrategy, AudioDeviceAttributes)
+     */
+    @SystemApi
+    public interface OnNonDefaultDevicesForStrategyChangedListener {
+        /**
+         * Called on the listener to indicate that the non-default audio devices for the given
+         * strategy has changed.
+         * @param strategy the {@link AudioProductStrategy} whose non-default device changed
+         * @param devices a list of newly set non-default audio devices
+         */
+        void onNonDefaultDevicesForStrategyChanged(@NonNull AudioProductStrategy strategy,
+                                                   @NonNull List<AudioDeviceAttributes> devices);
+    }
+
+    /**
+     * @hide
+     * Adds a listener for being notified of changes to the non-default audio devices for
+     * strategies.
+     * @param executor
+     * @param listener
+     * @throws SecurityException if the caller doesn't hold the required permission
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void addOnNonDefaultDevicesForStrategyChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnNonDefaultDevicesForStrategyChangedListener listener)
+            throws SecurityException {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+
+        mNonDefDevListenerMgr.addListener(
+                executor, listener, "addOnNonDefaultDevicesForStrategyChangedListener",
+                () -> new StrategyNonDefaultDevicesDispatcherStub());
+    }
+
+    /**
+     * @hide
+     * Removes a previously added listener of changes to the non-default audio device for
+     * strategies.
+     * @param listener
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void removeOnNonDefaultDevicesForStrategyChangedListener(
+            @NonNull OnNonDefaultDevicesForStrategyChangedListener listener) {
+        Objects.requireNonNull(listener);
+        mNonDefDevListenerMgr.removeListener(
+                listener, "removeOnNonDefaultDevicesForStrategyChangedListener");
+    }
+
+    /**
      * Manages the OnPreferredDevicesForStrategyChangedListener listeners and the
      * StrategyPreferredDevicesDispatcherStub
      */
     private final CallbackUtil.LazyListenerManager<OnPreferredDevicesForStrategyChangedListener>
             mPrefDevListenerMgr = new CallbackUtil.LazyListenerManager();
+
+    /**
+     * Manages the OnNonDefaultDevicesForStrategyChangedListener listeners and the
+     * StrategyNonDefaultDevicesDispatcherStub
+     */
+    private final CallbackUtil.LazyListenerManager<OnNonDefaultDevicesForStrategyChangedListener>
+            mNonDefDevListenerMgr = new CallbackUtil.LazyListenerManager();
 
     private final class StrategyPreferredDevicesDispatcherStub
             extends IStrategyPreferredDevicesDispatcher.Stub
@@ -2011,6 +2156,35 @@ public class AudioManager {
                     getService().registerStrategyPreferredDevicesDispatcher(this);
                 } else {
                     getService().unregisterStrategyPreferredDevicesDispatcher(this);
+                }
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    private final class StrategyNonDefaultDevicesDispatcherStub
+            extends IStrategyNonDefaultDevicesDispatcher.Stub
+            implements CallbackUtil.DispatcherStub {
+
+        @Override
+        public void dispatchNonDefDevicesChanged(int strategyId,
+                                                 @NonNull List<AudioDeviceAttributes> devices) {
+            final AudioProductStrategy strategy =
+                    AudioProductStrategy.getAudioProductStrategyWithId(strategyId);
+
+            mNonDefDevListenerMgr.callListeners(
+                    (listener) -> listener.onNonDefaultDevicesForStrategyChanged(
+                            strategy, devices));
+        }
+
+        @Override
+        public void register(boolean register) {
+            try {
+                if (register) {
+                    getService().registerStrategyNonDefaultDevicesDispatcher(this);
+                } else {
+                    getService().unregisterStrategyNonDefaultDevicesDispatcher(this);
                 }
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();

@@ -31,6 +31,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
 import android.media.ICapturePresetDevicesRoleDispatcher;
+import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.MediaMetrics;
 import android.media.permission.ClearCallingIdentityContext;
@@ -144,6 +145,10 @@ public class AudioDeviceInventory {
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mPreferredDevices =
             new ArrayMap<>();
 
+    // List of non-default devices for strategies
+    private final ArrayMap<Integer, List<AudioDeviceAttributes>> mNonDefaultDevices =
+            new ArrayMap<>();
+
     // List of preferred devices of capture preset
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mPreferredDevicesForCapturePreset =
             new ArrayMap<>();
@@ -158,9 +163,13 @@ public class AudioDeviceInventory {
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers =
             new RemoteCallbackList<IAudioRoutesObserver>();
 
-    // Monitoring of strategy-preferred device
+    // Monitoring of preferred device for strategies
     final RemoteCallbackList<IStrategyPreferredDevicesDispatcher> mPrefDevDispatchers =
             new RemoteCallbackList<IStrategyPreferredDevicesDispatcher>();
+
+    // Monitoring of non-default device for strategies
+    final RemoteCallbackList<IStrategyNonDefaultDevicesDispatcher> mNonDefDevDispatchers =
+            new RemoteCallbackList<IStrategyNonDefaultDevicesDispatcher>();
 
     // Monitoring of devices for role and capture preset
     final RemoteCallbackList<ICapturePresetDevicesRoleDispatcher> mDevRoleCapturePresetDispatchers =
@@ -256,6 +265,9 @@ public class AudioDeviceInventory {
         pw.println("\n" + prefix + "Preferred devices for strategy:");
         mPreferredDevices.forEach((strategy, device) -> {
             pw.println("  " + prefix + "strategy:" + strategy + " device:" + device); });
+        pw.println("\n" + prefix + "Non-default devices for strategy:");
+        mNonDefaultDevices.forEach((strategy, device) -> {
+            pw.println("  " + prefix + "strategy:" + strategy + " device:" + device); });
         pw.println("\n" + prefix + "Connected devices:");
         mConnectedDevices.forEach((key, deviceInfo) -> {
             pw.println("  " + prefix + deviceInfo.toString()); });
@@ -292,6 +304,11 @@ public class AudioDeviceInventory {
             mPreferredDevices.forEach((strategy, devices) -> {
                 mAudioSystem.setDevicesRoleForStrategy(
                         strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices); });
+        }
+        synchronized (mNonDefaultDevices) {
+            mNonDefaultDevices.forEach((strategy, devices) -> {
+                mAudioSystem.setDevicesRoleForStrategy(
+                        strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices); });
         }
         synchronized (mPreferredDevicesForCapturePreset) {
             // TODO: call audiosystem to restore
@@ -610,12 +627,58 @@ public class AudioDeviceInventory {
     /*package*/ void onSaveSetPreferredDevices(int strategy,
                                                @NonNull List<AudioDeviceAttributes> devices) {
         mPreferredDevices.put(strategy, devices);
+        List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
+        if (nonDefaultDevices != null) {
+            nonDefaultDevices.removeAll(devices);
+
+            if (nonDefaultDevices.isEmpty()) {
+                mNonDefaultDevices.remove(strategy);
+            } else {
+                mNonDefaultDevices.put(strategy, nonDefaultDevices);
+            }
+            dispatchNonDefaultDevice(strategy, nonDefaultDevices);
+        }
+
         dispatchPreferredDevice(strategy, devices);
     }
 
     /*package*/ void onSaveRemovePreferredDevices(int strategy) {
         mPreferredDevices.remove(strategy);
         dispatchPreferredDevice(strategy, new ArrayList<AudioDeviceAttributes>());
+    }
+
+    /*package*/ void onSaveSetDeviceAsNonDefault(int strategy,
+                                                 @NonNull AudioDeviceAttributes device) {
+        List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
+        if (nonDefaultDevices == null) {
+            nonDefaultDevices = new ArrayList<>();
+        }
+
+        if (!nonDefaultDevices.contains(device)) {
+            nonDefaultDevices.add(device);
+        }
+
+        mNonDefaultDevices.put(strategy, nonDefaultDevices);
+        dispatchNonDefaultDevice(strategy, nonDefaultDevices);
+
+        List<AudioDeviceAttributes> preferredDevices = mPreferredDevices.get(strategy);
+
+        if (preferredDevices != null) {
+            preferredDevices.remove(device);
+            mPreferredDevices.put(strategy, preferredDevices);
+
+            dispatchPreferredDevice(strategy, preferredDevices);
+        }
+    }
+
+    /*package*/ void onSaveRemoveDeviceAsNonDefault(int strategy,
+                                                    @NonNull AudioDeviceAttributes device) {
+        List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
+        if (nonDefaultDevices != null) {
+            nonDefaultDevices.remove(device);
+            mNonDefaultDevices.put(strategy, nonDefaultDevices);
+            dispatchNonDefaultDevice(strategy, nonDefaultDevices);
+        }
     }
 
     /*package*/ void onSaveSetPreferredDevicesForCapturePreset(
@@ -633,7 +696,7 @@ public class AudioDeviceInventory {
     }
 
     //------------------------------------------------------------
-    // preferred device(s)
+    // preferred/non-default device(s)
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
@@ -661,7 +724,7 @@ public class AudioDeviceInventory {
                             "removePreferredDevicesForStrategySync, strategy: "
                             + strategy)).printLog(TAG));
 
-            status = mAudioSystem.removeDevicesRoleForStrategy(
+            status = mAudioSystem.clearDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_PREFERRED);
         }
 
@@ -671,6 +734,50 @@ public class AudioDeviceInventory {
         return status;
     }
 
+    /*package*/ int setDeviceAsNonDefaultForStrategySync(int strategy,
+            @NonNull AudioDeviceAttributes device) {
+        int status = AudioSystem.ERROR;
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            List<AudioDeviceAttributes> devices = new ArrayList<>();
+            devices.add(device);
+
+            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
+                            "setDeviceAsNonDefaultForStrategySync, strategy: " + strategy
+                            + " device: " + device)).printLog(TAG));
+            status = mAudioSystem.setDevicesRoleForStrategy(
+                    strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices);
+        }
+
+        if (status == AudioSystem.SUCCESS) {
+            mDeviceBroker.postSaveSetDeviceAsNonDefaultForStrategy(strategy, device);
+        }
+        return status;
+    }
+
+    /*package*/ int removeDeviceAsNonDefaultForStrategySync(int strategy,
+            @NonNull AudioDeviceAttributes device) {
+        int status = AudioSystem.ERROR;
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            List<AudioDeviceAttributes> devices = new ArrayList<>();
+            devices.add(device);
+
+            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
+                            "removeDeviceAsNonDefaultForStrategySync, strategy: "
+                            + strategy + " devices: " + device)).printLog(TAG));
+
+            status = mAudioSystem.removeDevicesRoleForStrategy(
+                    strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices);
+        }
+
+        if (status == AudioSystem.SUCCESS) {
+            mDeviceBroker.postSaveRemoveDeviceAsNonDefaultForStrategy(strategy, device);
+        }
+        return status;
+    }
+
+
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
             @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
         mPrefDevDispatchers.register(dispatcher);
@@ -679,6 +786,16 @@ public class AudioDeviceInventory {
     /*package*/ void unregisterStrategyPreferredDevicesDispatcher(
             @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
         mPrefDevDispatchers.unregister(dispatcher);
+    }
+
+    /*package*/ void registerStrategyNonDefaultDevicesDispatcher(
+            @NonNull IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        mNonDefDevDispatchers.register(dispatcher);
+    }
+
+    /*package*/ void unregisterStrategyNonDefaultDevicesDispatcher(
+            @NonNull IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        mNonDefDevDispatchers.unregister(dispatcher);
     }
 
     /*package*/ int setPreferredDevicesForCapturePresetSync(
@@ -1529,6 +1646,19 @@ public class AudioDeviceInventory {
             }
         }
         mPrefDevDispatchers.finishBroadcast();
+    }
+
+    private void dispatchNonDefaultDevice(int strategy,
+                                          @NonNull List<AudioDeviceAttributes> devices) {
+        final int nbDispatchers = mNonDefDevDispatchers.beginBroadcast();
+        for (int i = 0; i < nbDispatchers; i++) {
+            try {
+                mNonDefDevDispatchers.getBroadcastItem(i).dispatchNonDefDevicesChanged(
+                        strategy, devices);
+            } catch (RemoteException e) {
+            }
+        }
+        mNonDefDevDispatchers.finishBroadcast();
     }
 
     private void dispatchDevicesRoleForCapturePreset(

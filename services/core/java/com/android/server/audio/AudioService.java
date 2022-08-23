@@ -116,6 +116,7 @@ import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerOutputCallback;
+import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaMetrics;
@@ -2800,11 +2801,12 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#setPreferredDevicesForStrategy(AudioProductStrategy,
      *                                                  List<AudioDeviceAttributes>)
      */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int setPreferredDevicesForStrategy(int strategy, List<AudioDeviceAttributes> devices) {
+        super.setPreferredDevicesForStrategy_enforcePermission();
         if (devices == null) {
             return AudioSystem.ERROR;
         }
-        enforceModifyAudioRoutingPermission();
         final String logString = String.format(
                 "setPreferredDeviceForStrategy u/pid:%d/%d strat:%d dev:%s",
                 Binder.getCallingUid(), Binder.getCallingPid(), strategy,
@@ -2862,6 +2864,81 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * @see AudioManager#setDeviceAsNonDefaultForStrategy(AudioProductStrategy,
+     *                                                    AudioDeviceAttributes)
+     * @see AudioManager#setDeviceAsNonDefaultForStrategy(AudioProductStrategy,
+     *                                                     List<AudioDeviceAttributes>)
+     */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int setDeviceAsNonDefaultForStrategy(int strategy,
+                                                @NonNull AudioDeviceAttributes device) {
+        super.setDeviceAsNonDefaultForStrategy_enforcePermission();
+        Objects.requireNonNull(device);
+        final String logString = String.format(
+                "setDeviceAsNonDefaultForStrategy u/pid:%d/%d strat:%d dev:%s",
+                Binder.getCallingUid(), Binder.getCallingPid(), strategy, device.toString());
+        sDeviceLogger.enqueue(new EventLogger.StringEvent(logString).printLog(TAG));
+        if (device.getRole() == AudioDeviceAttributes.ROLE_INPUT) {
+            Log.e(TAG, "Unsupported input routing in " + logString);
+            return AudioSystem.ERROR;
+        }
+
+        final int status = mDeviceBroker.setDeviceAsNonDefaultForStrategySync(strategy, device);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in %s)", status, logString));
+        }
+
+        return status;
+    }
+
+    /**
+     * @see AudioManager#removeDeviceAsNonDefaultForStrategy(AudioProductStrategy,
+     *                                                       AudioDeviceAttributes)
+     */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int removeDeviceAsNonDefaultForStrategy(int strategy,
+                                                   AudioDeviceAttributes device) {
+        super.removeDeviceAsNonDefaultForStrategy_enforcePermission();
+        Objects.requireNonNull(device);
+        final String logString = String.format(
+                "removeDeviceAsNonDefaultForStrategy strat:%d dev:%s", strategy, device.toString());
+        sDeviceLogger.enqueue(new EventLogger.StringEvent(logString).printLog(TAG));
+        if (device.getRole() == AudioDeviceAttributes.ROLE_INPUT) {
+            Log.e(TAG, "Unsupported input routing in " + logString);
+            return AudioSystem.ERROR;
+        }
+
+        final int status = mDeviceBroker.removeDeviceAsNonDefaultForStrategySync(strategy, device);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in %s)", status, logString));
+        }
+        return status;
+    }
+
+    /**
+     * @see AudioManager#getNonDefaultDevicesForStrategy(AudioProductStrategy)
+     */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public List<AudioDeviceAttributes> getNonDefaultDevicesForStrategy(int strategy) {
+        super.getNonDefaultDevicesForStrategy_enforcePermission();
+        List<AudioDeviceAttributes> devices = new ArrayList<>();
+        int status = AudioSystem.ERROR;
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            status = AudioSystem.getDevicesForRoleAndStrategy(
+                    strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices);
+        }
+
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in getNonDefaultDeviceForStrategy(%d)",
+                    status, strategy));
+            return new ArrayList<AudioDeviceAttributes>();
+        } else {
+            return devices;
+        }
+    }
+
     /** @see AudioManager#addOnPreferredDevicesForStrategyChangedListener(
      *               Executor, AudioManager.OnPreferredDevicesForStrategyChangedListener)
      */
@@ -2884,6 +2961,30 @@ public class AudioService extends IAudioService.Stub
         }
         enforceModifyAudioRoutingPermission();
         mDeviceBroker.unregisterStrategyPreferredDevicesDispatcher(dispatcher);
+    }
+
+    /** @see AudioManager#addOnNonDefaultDevicesForStrategyChangedListener(
+     *               Executor, AudioManager.OnNonDefaultDevicesForStrategyChangedListener)
+     */
+    public void registerStrategyNonDefaultDevicesDispatcher(
+            @Nullable IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.registerStrategyNonDefaultDevicesDispatcher(dispatcher);
+    }
+
+    /** @see AudioManager#removeOnNonDefaultDevicesForStrategyChangedListener(
+     *               AudioManager.OnNonDefaultDevicesForStrategyChangedListener)
+     */
+    public void unregisterStrategyNonDefaultDevicesDispatcher(
+            @Nullable IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.unregisterStrategyNonDefaultDevicesDispatcher(dispatcher);
     }
 
     /**
