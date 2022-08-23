@@ -16,13 +16,23 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.model
 
+import androidx.annotation.VisibleForTesting
+
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel {
     /** A model representing that we have no active wifi network. */
     object Inactive : WifiNetworkModel()
 
+    /**
+     * A model representing that our wifi network is actually a carrier merged network, meaning it's
+     * treated as more of a mobile network.
+     *
+     * See [android.net.wifi.WifiInfo.isCarrierMerged] for more information.
+     */
+    object CarrierMerged : WifiNetworkModel()
+
     /** Provides information about an active wifi network. */
-    class Active(
+    data class Active(
         /**
          * The [android.net.Network.netId] we received from
          * [android.net.ConnectivityManager.NetworkCallback] in association with this wifi network.
@@ -30,6 +40,19 @@ sealed class WifiNetworkModel {
          * Importantly, **not** [android.net.wifi.WifiInfo.getNetworkId].
          */
         val networkId: Int,
+
+        /** See [android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED]. */
+        val isValidated: Boolean = false,
+
+        /**
+         * The wifi signal level, guaranteed to be 0 <= level <= 4.
+         *
+         * Null if we couldn't fetch the level for some reason.
+         *
+         * TODO(b/238425913): The level will only be null if we have a null WifiManager. Is there a
+         *   way we can guarantee a non-null WifiManager?
+         */
+        val level: Int? = null,
 
         /** See [android.net.wifi.WifiInfo.ssid]. */
         val ssid: String? = null,
@@ -42,5 +65,18 @@ sealed class WifiNetworkModel {
 
         /** See [android.net.wifi.WifiInfo.passpointProviderFriendlyName]. */
         val passpointProviderFriendlyName: String? = null,
-    ) : WifiNetworkModel()
+    ) : WifiNetworkModel() {
+        init {
+            require(level == null || level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
+                "0 <= wifi level <= 4 required; level was $level"
+            }
+        }
+
+        companion object {
+            @VisibleForTesting
+            internal const val MIN_VALID_LEVEL = 0
+            @VisibleForTesting
+            internal const val MAX_VALID_LEVEL = 4
+        }
+    }
 }
