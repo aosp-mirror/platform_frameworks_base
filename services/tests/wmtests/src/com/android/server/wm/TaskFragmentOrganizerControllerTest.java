@@ -25,6 +25,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
@@ -46,7 +47,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -65,6 +65,7 @@ import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizerToken;
+import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
@@ -90,6 +91,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     private TaskFragmentOrganizerController mController;
     private WindowOrganizerController mWindowOrganizerController;
+    private TransitionController mTransitionController;
     private TaskFragmentOrganizer mOrganizer;
     private TaskFragmentOrganizerToken mOrganizerToken;
     private ITaskFragmentOrganizer mIOrganizer;
@@ -107,9 +109,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private Task mTask;
 
     @Before
-    public void setup() {
+    public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mWindowOrganizerController = mAtm.mWindowOrganizerController;
+        mTransitionController = mWindowOrganizerController.mTransitionController;
         mController = mWindowOrganizerController.mTaskFragmentOrganizerController;
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
         mOrganizerToken = mOrganizer.getOrganizerToken();
@@ -128,11 +131,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         spyOn(mController);
         spyOn(mOrganizer);
         spyOn(mTaskFragment);
+        spyOn(mWindowOrganizerController);
+        spyOn(mTransitionController);
         doReturn(mIOrganizer).when(mTaskFragment).getTaskFragmentOrganizer();
         doReturn(mTaskFragmentInfo).when(mTaskFragment).getTaskFragmentInfo();
         doReturn(new SurfaceControl()).when(mTaskFragment).getSurfaceControl();
         doReturn(mFragmentToken).when(mTaskFragment).getFragmentToken();
         doReturn(new Configuration()).when(mTaskFragmentInfo).getConfiguration();
+
+        // To prevent it from calling the real server.
+        doNothing().when(mOrganizer).onTransactionHandled(any(), any());
     }
 
     @Test
@@ -866,7 +874,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertFalse(parentTask.shouldBeVisible(null));
 
         // Verify the info changed callback still occurred despite the task being invisible
-        reset(mOrganizer);
+        clearInvocations(mOrganizer);
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
         verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
@@ -899,7 +907,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
 
         // Verify the info changed callback is not called when the task is invisible
-        reset(mOrganizer);
+        clearInvocations(mOrganizer);
         doReturn(false).when(task).shouldBeVisible(any());
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
@@ -1090,6 +1098,40 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         assertWithMessage("setBounds must not be performed.")
                 .that(mTaskFragment.getBounds()).isEqualTo(task.getBounds());
+    }
+
+    @Test
+    public void testOnTransactionReady_invokeOnTransactionHandled() {
+        mController.registerOrganizer(mIOrganizer);
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        mOrganizer.onTransactionReady(transaction);
+
+        // Organizer should always trigger #onTransactionHandled when receives #onTransactionReady
+        verify(mOrganizer).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mOrganizer, never()).applyTransaction(any());
+    }
+
+    @Test
+    public void testDispatchTransaction_deferTransitionReady() {
+        mController.registerOrganizer(mIOrganizer);
+        setupMockParent(mTaskFragment, mTask);
+        final ArgumentCaptor<IBinder> tokenCaptor = ArgumentCaptor.forClass(IBinder.class);
+        final ArgumentCaptor<WindowContainerTransaction> wctCaptor =
+                ArgumentCaptor.forClass(WindowContainerTransaction.class);
+        doReturn(true).when(mTransitionController).isCollecting();
+
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        // Defer transition when send TaskFragment transaction during transition collection.
+        verify(mTransitionController).deferTransitionReady();
+        verify(mOrganizer).onTransactionHandled(tokenCaptor.capture(), wctCaptor.capture());
+
+        mController.onTransactionHandled(mIOrganizer, tokenCaptor.getValue(), wctCaptor.getValue());
+
+        // Apply the organizer change and continue transition.
+        verify(mWindowOrganizerController).applyTransaction(wctCaptor.getValue());
+        verify(mTransitionController).continueTransitionReady();
     }
 
     /**
