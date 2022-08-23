@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,9 +78,9 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
                 listOf(
-                    ComponentMatcher.IME,
-                    ComponentMatcher.SPLASH_SCREEN,
-                    ComponentMatcher.SNAPSHOT
+                    ComponentNameMatcher.IME,
+                    ComponentNameMatcher.SPLASH_SCREEN,
+                    ComponentNameMatcher.SNAPSHOT
                 )
             )
         }
@@ -93,8 +93,8 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
                 listOf(
-                    ComponentMatcher.IME,
-                    ComponentMatcher.SPLASH_SCREEN
+                    ComponentNameMatcher.IME,
+                    ComponentNameMatcher.SPLASH_SCREEN
                 )
             )
         }

@@ -24,7 +24,7 @@ import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
 /**
@@ -65,9 +65,9 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
                 .then()
                 .isInvisible(testApp, isOptional = true)
                 .then()
-                .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                 .then()
-                .isVisible(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
+                .isVisible(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
                 .then()
                 .isVisible(testApp)
         }
@@ -77,9 +77,9 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
         testSpec.assertLayers {
             this.isInvisible(testApp)
                 .then()
-                .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                 .then()
-                .isVisible(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
+                .isVisible(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
                 .then()
                 .isVisible(testApp)
         }
@@ -110,9 +110,9 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
         testSpec.assertWm {
             this.isAppWindowInvisible(testApp)
                 .then()
-                .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                 .then()
-                .isAppWindowVisible(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
+                .isAppWindowVisible(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
                 .then()
                 .isAppWindowVisible(testApp)
         }
@@ -130,8 +130,8 @@ abstract class OpenAppTransition(testSpec: FlickerTestParameter) : BaseTest(test
                 .then()
                 .isAppWindowOnTop(
                     testApp
-                        .or(ComponentMatcher.SNAPSHOT)
-                        .or(ComponentMatcher.SPLASH_SCREEN)
+                        .or(ComponentNameMatcher.SNAPSHOT)
+                        .or(ComponentNameMatcher.SPLASH_SCREEN)
                 )
         }
     }

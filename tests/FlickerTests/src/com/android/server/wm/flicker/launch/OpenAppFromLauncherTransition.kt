@@ -19,7 +19,7 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
 /**
@@ -46,7 +46,7 @@ abstract class OpenAppFromLauncherTransition(
      */
     open fun appLayerReplacesLauncher() {
         testSpec.replacesLayer(
-            ComponentMatcher.LAUNCHER, testApp,
+            ComponentNameMatcher.LAUNCHER, testApp,
             ignoreEntriesWithRotationLayer = true, ignoreSnapshot = true,
             ignoreSplashscreen = true
         )
@@ -61,12 +61,12 @@ abstract class OpenAppFromLauncherTransition(
     @Test
     open fun appWindowReplacesLauncherAsTopWindow() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(ComponentMatcher.LAUNCHER)
+            this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
                 .then()
                 .isAppWindowOnTop(
                     testApp
-                        .or(ComponentMatcher.SNAPSHOT)
-                        .or(ComponentMatcher.SPLASH_SCREEN)
+                        .or(ComponentNameMatcher.SNAPSHOT)
+                        .or(ComponentNameMatcher.SPLASH_SCREEN)
                 )
         }
     }

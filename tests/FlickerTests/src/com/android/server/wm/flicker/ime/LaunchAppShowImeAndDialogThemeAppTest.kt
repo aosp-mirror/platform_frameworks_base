@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.FixMethodOrder
@@ -101,7 +101,7 @@ class LaunchAppShowImeAndDialogThemeAppTest(
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {
-            this.isVisible(ComponentMatcher.IME)
+            this.isVisible(ComponentNameMatcher.IME)
         }
     }
 
@@ -112,7 +112,7 @@ class LaunchAppShowImeAndDialogThemeAppTest(
     @Test
     fun imeSnapshotNotVisible() {
         testSpec.assertLayers {
-            this.isInvisible(ComponentMatcher.IME_SNAPSHOT)
+            this.isInvisible(ComponentNameMatcher.IME_SNAPSHOT)
         }
     }
 

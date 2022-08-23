@@ -23,7 +23,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.ComponentMatcher.Companion.LAUNCHER
+import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.LAUNCHER
 import org.junit.Test
 
 /**

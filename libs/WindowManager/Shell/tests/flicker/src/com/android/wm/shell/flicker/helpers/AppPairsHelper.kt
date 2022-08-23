@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import com.android.server.wm.traces.common.IComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 
 class AppPairsHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    component: IComponentMatcher
+    component: ComponentNameMatcher
 ) : BaseAppHelper(instrumentation, activityLabel, component)

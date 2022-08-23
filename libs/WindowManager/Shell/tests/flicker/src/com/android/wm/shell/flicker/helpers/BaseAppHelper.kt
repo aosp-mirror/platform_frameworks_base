@@ -26,13 +26,13 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.traces.common.IComponentMatcher
+import com.android.server.wm.traces.common.IComponentNameMatcher
 import java.io.IOException
 
 abstract class BaseAppHelper(
     instrumentation: Instrumentation,
     launcherName: String,
-    component: IComponentMatcher
+    component: IComponentNameMatcher
 ) : StandardAppHelper(
     instrumentation,
     launcherName,
@@ -45,9 +45,6 @@ abstract class BaseAppHelper(
         get() = context.packageManager.run {
             hasSystemFeature(FEATURE_LEANBACK) || hasSystemFeature(FEATURE_LEANBACK_ONLY)
         }
-
-    val defaultWindowName: String
-        get() = toWindowName()
 
     val ui: UiObject2?
         get() = uiDevice.findObject(appSelector)
