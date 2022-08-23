@@ -1098,6 +1098,7 @@ public final class OverlayManagerService extends SystemService {
         private void enforceActor(@NonNull OverlayIdentifier overlay, @NonNull String methodName,
                 int realUserId) throws SecurityException {
             OverlayInfo overlayInfo = mImpl.getOverlayInfo(overlay, realUserId);
+
             if (overlayInfo == null) {
                 throw new IllegalArgumentException("Unable to retrieve overlay information for "
                         + overlay);

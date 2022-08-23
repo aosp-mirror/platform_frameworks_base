@@ -161,14 +161,13 @@ Result<ResourceMapping> ResourceMapping::FromContainers(const TargetResourceCont
 Result<Unit> ResourceMapping::AddMapping(
     ResourceId target_resource,
     const std::variant<OverlayData::ResourceIdValue, TargetValueWithConfig>& value) {
-  if (target_map_.find(target_resource) != target_map_.end()) {
-    return Error(R"(target resource id "0x%08x" mapped to multiple values)", target_resource);
-  }
-
   // TODO(141485591): Ensure that the overlay type is compatible with the target type. If the
   // runtime types are not compatible, it could cause runtime crashes when the resource is resolved.
 
   if (auto overlay_resource = std::get_if<OverlayData::ResourceIdValue>(&value)) {
+    if (target_map_.find(target_resource) != target_map_.end()) {
+      return Error(R"(target resource id "0x%08x" mapped to multiple values)", target_resource);
+    }
     target_map_.insert(std::make_pair(target_resource, overlay_resource->overlay_id));
     if (overlay_resource->rewrite_id) {
       // An overlay resource can override multiple target resources at once. Rewrite the overlay
@@ -176,8 +175,18 @@ Result<Unit> ResourceMapping::AddMapping(
       overlay_map_.insert(std::make_pair(overlay_resource->overlay_id, target_resource));
     }
   } else {
-    auto overlay_value = std::get<TargetValueWithConfig>(value);
-    target_map_.insert(std::make_pair(target_resource, overlay_value.value));
+    auto[iter, inserted] = target_map_.try_emplace(target_resource, ConfigMap());
+    auto& resource_value = iter->second;
+    if (!inserted && std::holds_alternative<ResourceId>(resource_value)) {
+      return Error(R"(target resource id "0x%08x" mapped to multiple values)", target_resource);
+    }
+    auto& config_map = std::get<ConfigMap>(resource_value);
+    const auto& config_value = std::get<TargetValueWithConfig>(value);
+    if (config_map.find(config_value.config) != config_map.end()) {
+      return Error(R"(target resource id "0x%08x" mapped to multiple values with the same config)",
+                   target_resource);
+    }
+    config_map.insert(config_value.to_pair());
   }
 
   return Unit{};

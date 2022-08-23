@@ -33,7 +33,8 @@
 using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 
 namespace android::idmap2 {
-using TargetResourceMap = std::map<ResourceId, std::variant<ResourceId, TargetValue>>;
+using ConfigMap = std::unordered_map<std::string, TargetValue>;
+using TargetResourceMap = std::map<ResourceId, std::variant<ResourceId, ConfigMap>>;
 using OverlayResourceMap = std::map<ResourceId, ResourceId>;
 
 class ResourceMapping {

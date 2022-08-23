@@ -111,19 +111,20 @@ Result<Unit> MappingExists(const ResourceMapping& mapping, const ResourceId& tar
     return Error("Failed to find mapping for target resource");
   }
 
-  auto actual_overlay_value = std::get_if<TargetValue>(&entry_map->second);
-  if (actual_overlay_value == nullptr) {
+  auto config_map = std::get_if<ConfigMap>(&entry_map->second);
+  if (config_map == nullptr || config_map->empty()) {
     return Error("Target resource is not mapped to an inline value");
   }
+  auto actual_overlay_value = config_map->begin()->second;
 
-  if (actual_overlay_value->data_type != type) {
+  if (actual_overlay_value.data_type != type) {
     return Error(R"(Expected type: "0x%02x" Actual type: "0x%02x")", type,
-                 actual_overlay_value->data_type);
+                 actual_overlay_value.data_type);
   }
 
-  if (actual_overlay_value->data_value != value) {
+  if (actual_overlay_value.data_value != value) {
     return Error(R"(Expected value: "0x%08x" Actual value: "0x%08x")", type,
-                 actual_overlay_value->data_value);
+                 actual_overlay_value.data_value);
   }
 
   return Result<Unit>({});
