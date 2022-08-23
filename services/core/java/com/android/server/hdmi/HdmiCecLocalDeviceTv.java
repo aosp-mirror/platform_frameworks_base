@@ -837,7 +837,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void enableAudioReturnChannel(boolean enabled) {
         assertRunOnServiceThread();
         HdmiDeviceInfo avr = getAvrDeviceInfo();
-        if (avr != null) {
+        if (avr != null && avr.getPortId() != Constants.INVALID_PORT_ID) {
             mService.enableAudioReturnChannel(avr.getPortId(), enabled);
         }
     }
@@ -1336,19 +1336,31 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
+    private void forceDisableArcOnAllPins() {
+        List<HdmiPortInfo> ports = mService.getPortInfo();
+        for (HdmiPortInfo port : ports) {
+            if (isArcFeatureEnabled(port.getId())) {
+                mService.enableAudioReturnChannel(port.getId(), false);
+            }
+        }
+    }
+
+    @ServiceThreadOnly
     private void disableArcIfExist() {
         assertRunOnServiceThread();
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
             return;
         }
-        disableArc();
 
         // Seq #44.
         removeAllRunningArcAction();
         if (!hasAction(RequestArcTerminationAction.class) && isArcEstablished()) {
             addAndStartAction(new RequestArcTerminationAction(this, avr.getLogicalAddress()));
         }
+
+        // Disable ARC Pin earlier, prevent the case where AVR doesn't send <Terminate ARC> in time
+        forceDisableArcOnAllPins();
     }
 
     @ServiceThreadOnly
