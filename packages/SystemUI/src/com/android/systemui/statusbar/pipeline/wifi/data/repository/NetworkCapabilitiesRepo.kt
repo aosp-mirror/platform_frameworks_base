@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.android.systemui.statusbar.pipeline.repository
+package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
 import android.annotation.SuppressLint
 import android.net.ConnectivityManager
@@ -25,7 +25,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.statusbar.pipeline.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,7 +35,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.stateIn
 
-/** Repository that contains all relevant [NetworkCapabilites] for the current networks */
+/**
+ * Repository that contains all relevant [NetworkCapabilities] for the current networks.
+ *
+ * TODO(b/238425913): Figure out how to merge this with [WifiRepository].
+ */
 @SysUISingleton
 class NetworkCapabilitiesRepo @Inject constructor(
     connectivityManager: ConnectivityManager,
@@ -88,5 +92,3 @@ data class NetworkCapabilityInfo(
     val network: Network,
     val capabilities: NetworkCapabilities,
 )
-
-private const val TAG = "ConnectivityRepository"

@@ -1645,11 +1645,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTempBrightnessEvent.setHbmMax(mHbmController.getCurrentBrightnessMax());
         mTempBrightnessEvent.setHbmMode(mHbmController.getHighBrightnessMode());
         mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
-                | (mIsRbcActive ? BrightnessEvent.FLAG_RBC : 0));
-        mTempBrightnessEvent.setRbcStrength((mCdsi != null && mCdsi.isReduceBrightColorsActivated())
+                | (mIsRbcActive ? BrightnessEvent.FLAG_RBC : 0)
+                | (mPowerRequest.lowPowerMode ? BrightnessEvent.FLAG_LOW_POWER_MODE : 0));
+        mTempBrightnessEvent.setRbcStrength(mCdsi != null
                 ? mCdsi.getReduceBrightColorsStrength() : -1);
-        mTempBrightnessEvent.setPowerFactor(
-                mPowerRequest.lowPowerMode ? mPowerRequest.screenLowPowerBrightnessFactor : 1.0f);
+        mTempBrightnessEvent.setPowerFactor(mPowerRequest.screenLowPowerBrightnessFactor);
         // Temporary is what we use during slider interactions. We avoid logging those so that
         // we don't spam logcat when the slider is being used.
         boolean tempToTempTransition =
@@ -1662,10 +1662,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mTempBrightnessEvent.setInitialBrightness(lastBrightness);
             mTempBrightnessEvent.setFastAmbientLux(
                     mAutomaticBrightnessController == null
-                        ? -1 : mAutomaticBrightnessController.getFastAmbientLux());
+                        ? -1f : mAutomaticBrightnessController.getFastAmbientLux());
             mTempBrightnessEvent.setSlowAmbientLux(
                     mAutomaticBrightnessController == null
-                        ? -1 : mAutomaticBrightnessController.getSlowAmbientLux());
+                        ? -1f : mAutomaticBrightnessController.getSlowAmbientLux());
             mTempBrightnessEvent.setAutomaticBrightnessEnabled(mPowerRequest.useAutoBrightness);
             mLastBrightnessEvent.copyFrom(mTempBrightnessEvent);
             BrightnessEvent newEvent = new BrightnessEvent(mTempBrightnessEvent);
@@ -2769,12 +2769,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void logManualBrightnessEvent(BrightnessEvent event) {
-        float hbmMaxNits =
+        float appliedLowPowerMode = event.isLowPowerModeSet() ? event.getPowerFactor() : -1f;
+        int appliedRbcStrength  = event.isRbcEnabled() ? event.getRbcStrength() : -1;
+        float appliedHbmMaxNits =
                 event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF
                 ? -1f : convertToNits(event.getHbmMax());
-
         // thermalCapNits set to -1 if not currently capping max brightness
-        float thermalCapNits =
+        float appliedThermalCapNits =
                 event.getThermalMax() == PowerManager.BRIGHTNESS_MAX
                 ? -1f : convertToNits(event.getThermalMax());
 
@@ -2784,10 +2785,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 event.getSlowAmbientLux(),
                 event.getPhysicalDisplayId(),
                 event.isShortTermModelActive(),
-                event.getPowerFactor(),
-                event.getRbcStrength(),
-                hbmMaxNits,
-                thermalCapNits,
+                appliedLowPowerMode,
+                appliedRbcStrength,
+                appliedHbmMaxNits,
+                appliedThermalCapNits,
                 event.isAutomaticBrightnessEnabled(),
                 FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__REASON__REASON_MANUAL);
     }

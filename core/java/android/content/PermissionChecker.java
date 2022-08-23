@@ -152,7 +152,7 @@ public final class PermissionChecker {
             @NonNull String permission, int pid, int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable String message, boolean startDataDelivery) {
         return checkPermissionForDataDelivery(context, permission, pid, new AttributionSource(uid,
-                pid, packageName, attributionTag), message, startDataDelivery);
+                packageName, attributionTag), message, startDataDelivery);
     }
 
     /**

@@ -18,7 +18,6 @@ package com.android.systemui.shared.regionsampling
 import android.graphics.Rect
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.plugins.RegionDarkness
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper.SamplingCallback
 import java.io.PrintWriter

@@ -1916,10 +1916,10 @@ public class DisplayContentTests extends WindowTestsBase {
         testPlayer.start();
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
-        assertEquals(dc, DisplayRotation.getDisplayFromTransition(testPlayer.mLastTransit));
         WindowContainerToken dcToken = dc.mRemoteToken.toWindowContainerToken();
         assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
                 testPlayer.mLastReady.getChange(dcToken).getStartRotation());
+        assertTrue(testPlayer.mLastTransit.applyDisplayChangeIfNeeded());
         testPlayer.finish();
     }
 

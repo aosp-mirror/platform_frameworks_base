@@ -17,6 +17,7 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.systemui.plugins.annotations.ProvidesInterface
+import com.android.systemui.shared.regionsampling.RegionDarkness
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -116,12 +117,3 @@ data class ClockMetadata(
     val clockId: ClockId,
     val name: String
 )
-
-/**
- * Enum for whether clock region is dark or light.
- */
-enum class RegionDarkness(val isDark: Boolean) {
-    DEFAULT(false),
-    DARK(true),
-    LIGHT(false)
-}

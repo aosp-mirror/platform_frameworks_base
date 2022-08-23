@@ -463,13 +463,12 @@ class TransitionController {
     }
 
     /**
-     * Collects the window containers which need to be synced with the changing display (e.g.
-     * rotating) to the given transition or the current collecting transition.
+     * Collects the window containers which need to be synced with the changing display area into
+     * the current collecting transition.
      */
-    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc, @Nullable Transition incoming) {
-        if (incoming == null) incoming = mCollectingTransition;
-        if (incoming == null) return;
-        final Transition transition = incoming;
+    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc) {
+        final Transition transition = mCollectingTransition;
+        if (transition == null || !transition.mParticipants.contains(wc)) return;
         // Collect all visible tasks.
         wc.forAllLeafTasks(task -> {
             if (task.isVisible()) {
@@ -638,11 +637,9 @@ class TransitionController {
     }
 
     void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
-        final boolean keyguardGoingAway = info.isKeyguardGoingAway();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             // TODO(shell-transitions): handle (un)occlude transition.
-            mLegacyListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
-                    false /* keyguardOcclude */, 0 /* durationHint */,
+            mLegacyListeners.get(i).onAppTransitionStartingLocked(
                     SystemClock.uptimeMillis() + statusBarTransitionDelay,
                     AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
         }
@@ -657,7 +654,7 @@ class TransitionController {
     void dispatchLegacyAppTransitionCancelled() {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             mLegacyListeners.get(i).onAppTransitionCancelledLocked(
-                    false /* keyguardGoingAway */);
+                    false /* keyguardGoingAwayCancelled */, false /* keyguardOccludedCancelled */);
         }
     }
 

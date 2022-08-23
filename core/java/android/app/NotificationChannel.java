@@ -124,8 +124,13 @@ public final class NotificationChannel implements Parcelable {
     /**
      * The maximum length for text fields in a NotificationChannel. Fields will be truncated at this
      * limit.
+     * @hide
      */
-    private static final int MAX_TEXT_LENGTH = 1000;
+    public static final int MAX_TEXT_LENGTH = 1000;
+    /**
+     * @hide
+     */
+    public static final int MAX_VIBRATION_LENGTH = 1000;
 
     private static final String TAG_CHANNEL = "channel";
     private static final String ATT_NAME = "name";
@@ -283,17 +288,17 @@ public final class NotificationChannel implements Parcelable {
      */
     protected NotificationChannel(Parcel in) {
         if (in.readByte() != 0) {
-            mId = in.readString();
+            mId = getTrimmedString(in.readString());
         } else {
             mId = null;
         }
         if (in.readByte() != 0) {
-            mName = in.readString();
+            mName = getTrimmedString(in.readString());
         } else {
             mName = null;
         }
         if (in.readByte() != 0) {
-            mDesc = in.readString();
+            mDesc = getTrimmedString(in.readString());
         } else {
             mDesc = null;
         }
@@ -302,18 +307,22 @@ public final class NotificationChannel implements Parcelable {
         mLockscreenVisibility = in.readInt();
         if (in.readByte() != 0) {
             mSound = Uri.CREATOR.createFromParcel(in);
+            mSound = Uri.parse(getTrimmedString(mSound.toString()));
         } else {
             mSound = null;
         }
         mLights = in.readByte() != 0;
         mVibration = in.createLongArray();
+        if (mVibration != null && mVibration.length > MAX_VIBRATION_LENGTH) {
+            mVibration = Arrays.copyOf(mVibration, MAX_VIBRATION_LENGTH);
+        }
         mUserLockedFields = in.readInt();
         mFgServiceShown = in.readByte() != 0;
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
         mDeleted = in.readByte() != 0;
         if (in.readByte() != 0) {
-            mGroup = in.readString();
+            mGroup = getTrimmedString(in.readString());
         } else {
             mGroup = null;
         }
@@ -322,8 +331,8 @@ public final class NotificationChannel implements Parcelable {
         mBlockableSystem = in.readBoolean();
         mAllowBubbles = in.readInt();
         mOriginalImportance = in.readInt();
-        mParentId = in.readString();
-        mConversationId = in.readString();
+        mParentId = getTrimmedString(in.readString());
+        mConversationId = getTrimmedString(in.readString());
         mDemoted = in.readBoolean();
         mImportantConvo = in.readBoolean();
         mDeletedTime = in.readLong();

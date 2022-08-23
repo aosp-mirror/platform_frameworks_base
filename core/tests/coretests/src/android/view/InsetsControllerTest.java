@@ -929,6 +929,23 @@ public class InsetsControllerTest {
         });
     }
 
+    @Test
+    public void testImeRequestedVisibleWhenImeNotControllable() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Simulate IME insets is not controllable
+            mController.onControlsChanged(new InsetsSourceControl[0]);
+            final InsetsSourceConsumer imeInsetsConsumer = mController.getSourceConsumer(ITYPE_IME);
+            assertNull(imeInsetsConsumer.getControl());
+
+            // Verify IME requested visibility should be updated to IME consumer from controller.
+            mController.show(ime());
+            assertTrue(imeInsetsConsumer.isRequestedVisible());
+
+            mController.hide(ime());
+            assertFalse(imeInsetsConsumer.isRequestedVisible());
+        });
+    }
+
     private void waitUntilNextFrame() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         Choreographer.getMainThreadInstance().postCallback(Choreographer.CALLBACK_COMMIT,

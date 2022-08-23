@@ -231,7 +231,7 @@ final class AutofillManagerServiceImpl
             sendStateToClients(/* resetClient= */ false);
         }
         updateRemoteAugmentedAutofillService();
-        updateRemoteInlineSuggestionRenderServiceLocked();
+        getRemoteInlineSuggestionRenderServiceLocked();
 
         return enabledChanged;
     }
@@ -685,8 +685,12 @@ final class AutofillManagerServiceImpl
 
     @GuardedBy("mLock")
     void resetExtServiceLocked() {
-        if (sVerbose) Slog.v(TAG, "reset autofill service.");
+        if (sVerbose) Slog.v(TAG, "reset autofill service in ExtServices.");
         mFieldClassificationStrategy.reset();
+        if (mRemoteInlineSuggestionRenderService != null) {
+            mRemoteInlineSuggestionRenderService.destroy();
+            mRemoteInlineSuggestionRenderService = null;
+        }
     }
 
     @GuardedBy("mLock")
@@ -1581,18 +1585,6 @@ final class AutofillManagerServiceImpl
             }
         }
         return mFieldClassificationStrategy.getDefaultAlgorithm();
-    }
-
-    private void updateRemoteInlineSuggestionRenderServiceLocked() {
-        if (mRemoteInlineSuggestionRenderService != null) {
-            if (sVerbose) {
-                Slog.v(TAG, "updateRemoteInlineSuggestionRenderService(): "
-                        + "destroying old remote service");
-            }
-            mRemoteInlineSuggestionRenderService = null;
-        }
-
-        mRemoteInlineSuggestionRenderService = getRemoteInlineSuggestionRenderServiceLocked();
     }
 
     @Nullable RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderServiceLocked() {
