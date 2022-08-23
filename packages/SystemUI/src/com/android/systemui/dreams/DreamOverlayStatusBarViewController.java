@@ -192,6 +192,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mDreamOverlayNotificationCountProvider.ifPresent(
                 provider -> provider.removeCallback(mNotificationCountCallback));
         mStatusBarItemsProvider.removeCallback(mStatusBarItemsProviderCallback);
+        mView.removeAllStatusBarItemViews();
         mTouchInsetSession.clear();
 
         mIsAttached = false;
