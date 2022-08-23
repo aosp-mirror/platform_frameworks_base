@@ -1621,7 +1621,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, entering PIP mode "
                         + "directly: %s, didAutoPip: %b", prev, didAutoPip);
             } else {
-                schedulePauseActivity(prev, userLeaving, pauseImmediately, reason);
+                schedulePauseActivity(prev, userLeaving, pauseImmediately,
+                        false /* autoEnteringPip */, reason);
             }
         } else {
             mPausingActivity = null;
@@ -1675,7 +1676,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     void schedulePauseActivity(ActivityRecord prev, boolean userLeaving,
-            boolean pauseImmediately, String reason) {
+            boolean pauseImmediately, boolean autoEnteringPip, String reason) {
         ProtoLog.v(WM_DEBUG_STATES, "Enqueueing pending pause: %s", prev);
         try {
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
@@ -1683,7 +1684,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
                     prev.token, PauseActivityItem.obtain(prev.finishing, userLeaving,
-                            prev.configChangeFlags, pauseImmediately));
+                            prev.configChangeFlags, pauseImmediately, autoEnteringPip));
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
             Slog.w(TAG, "Exception thrown during pause", e);
