@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
@@ -1006,7 +1007,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // WHEN udfps is now enrolled
         when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(true);
-        callback.onEnrollmentsChanged();
+        callback.onEnrollmentsChanged(TYPE_FINGERPRINT);
 
         // THEN isUdfspEnrolled is TRUE
         assertThat(mKeyguardUpdateMonitor.isUdfpsEnrolled()).isTrue();

@@ -60,6 +60,9 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -154,7 +157,9 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
     @Captor
-    ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
+    ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
+    @Captor
+    ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> mFaceAuthenticatorsRegisteredCaptor;
     @Captor
     ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
     @Captor
@@ -193,25 +198,38 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDisplayManager.getStableDisplaySize()).thenReturn(new Point());
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+        when(mFaceManager.isHardwareDetected()).thenReturn(true);
 
-        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
-        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
-                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                "00000001" /* serialNumber */, "" /* softwareVersion */));
-        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
-                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */));
+        final List<ComponentInfoInternal> fpComponentInfo = List.of(
+                new ComponentInfoInternal("faceSensor" /* componentId */,
+                        "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                        "00000001" /* serialNumber */, "" /* softwareVersion */));
+        final List<ComponentInfoInternal> faceComponentInfo = List.of(
+                new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                        "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                        "vendor/version/revision" /* softwareVersion */));
 
-        FingerprintSensorPropertiesInternal prop = new FingerprintSensorPropertiesInternal(
-                1 /* sensorId */,
-                SensorProperties.STRENGTH_STRONG,
-                1 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                true /* resetLockoutRequireHardwareAuthToken */);
-        List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(prop);
-        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
+        final List<FingerprintSensorPropertiesInternal> fpProps = List.of(
+                new FingerprintSensorPropertiesInternal(
+                        1 /* sensorId */,
+                        SensorProperties.STRENGTH_STRONG,
+                        1 /* maxEnrollmentsPerUser */,
+                        fpComponentInfo,
+                        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                        true /* resetLockoutRequireHardwareAuthToken */));
+        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(fpProps);
+
+        final List<FaceSensorPropertiesInternal> faceProps = List.of(
+                new FaceSensorPropertiesInternal(
+                        2 /* sensorId */,
+                        SensorProperties.STRENGTH_STRONG,
+                        1 /* maxEnrollmentsPerUser */,
+                        fpComponentInfo,
+                        FaceSensorProperties.TYPE_RGB,
+                        true /* supportsFaceDetection */,
+                        true /* supportsSelfIllumination */,
+                        true /* resetLockoutRequireHardwareAuthToken */));
+        when(mFaceManager.getSensorPropertiesInternal()).thenReturn(faceProps);
 
         mAuthController = new TestableAuthController(mContextSpy, mExecution, mCommandQueue,
                 mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
@@ -219,12 +237,15 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController.start();
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
-                mAuthenticatorsRegisteredCaptor.capture());
+                mFpAuthenticatorsRegisteredCaptor.capture());
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(
+                mFaceAuthenticatorsRegisteredCaptor.capture());
 
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
 
-        mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
+        mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(fpProps);
+        mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(faceProps);
 
         // Ensures that the operations posted on the handler get executed.
         mTestableLooper.processAllMessages();
@@ -237,6 +258,7 @@ public class AuthControllerTest extends SysuiTestCase {
             throws RemoteException {
         // This test is sensitive to prior FingerprintManager interactions.
         reset(mFingerprintManager);
+        reset(mFaceManager);
 
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
@@ -246,21 +268,27 @@ public class AuthControllerTest extends SysuiTestCase {
         authController.start();
 
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
-                mAuthenticatorsRegisteredCaptor.capture());
+                mFpAuthenticatorsRegisteredCaptor.capture());
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(
+                mFaceAuthenticatorsRegisteredCaptor.capture());
         mTestableLooper.processAllMessages();
 
         verify(mFingerprintManager, never()).registerBiometricStateListener(any());
+        verify(mFaceManager, never()).registerBiometricStateListener(any());
 
-        mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(new ArrayList<>());
+        mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
+        mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
         mTestableLooper.processAllMessages();
 
         verify(mFingerprintManager).registerBiometricStateListener(any());
+        verify(mFaceManager).registerBiometricStateListener(any());
     }
 
     @Test
     public void testDoesNotCrash_afterEnrollmentsChangedForUnknownSensor() throws RemoteException {
         // This test is sensitive to prior FingerprintManager interactions.
         reset(mFingerprintManager);
+        reset(mFaceManager);
 
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
@@ -270,18 +298,25 @@ public class AuthControllerTest extends SysuiTestCase {
         authController.start();
 
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
-                mAuthenticatorsRegisteredCaptor.capture());
+                mFpAuthenticatorsRegisteredCaptor.capture());
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(
+                mFaceAuthenticatorsRegisteredCaptor.capture());
 
         // Emulates a device with no authenticators (empty list).
-        mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(new ArrayList<>());
+        mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
+        mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
         mTestableLooper.processAllMessages();
 
         verify(mFingerprintManager).registerBiometricStateListener(
                 mBiometricStateCaptor.capture());
+        verify(mFaceManager).registerBiometricStateListener(
+                mBiometricStateCaptor.capture());
 
         // Enrollments changed for an unknown sensor.
-        mBiometricStateCaptor.getValue().onEnrollmentsChanged(0 /* userId */,
-                0xbeef /* sensorId */, true /* hasEnrollments */);
+        for (BiometricStateListener listener : mBiometricStateCaptor.getAllValues()) {
+            listener.onEnrollmentsChanged(0 /* userId */,
+                    0xbeef /* sensorId */, true /* hasEnrollments */);
+        }
         mTestableLooper.processAllMessages();
 
         // Nothing should crash.
@@ -827,4 +862,3 @@ public class AuthControllerTest extends SysuiTestCase {
         }
     }
 }
-
