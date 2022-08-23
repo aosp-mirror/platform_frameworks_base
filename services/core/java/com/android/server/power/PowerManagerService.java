@@ -1169,6 +1169,7 @@ public final class PowerManagerService extends SystemService
                 return;
             }
 
+            Slog.i(TAG, "onFlip(): Face " + (isFaceDown ? "down." : "up."));
             mIsFaceDown = isFaceDown;
             if (isFaceDown) {
                 final long currentTime = mClock.uptimeMillis();
@@ -1888,12 +1889,13 @@ public final class PowerManagerService extends SystemService
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void userActivityFromNative(long eventTime, int event, int displayId, int flags) {
+    private void userActivityFromNative(long eventTime, @PowerManager.UserActivityEvent int event,
+            int displayId, int flags) {
         userActivityInternal(displayId, eventTime, event, flags, Process.SYSTEM_UID);
     }
 
-    private void userActivityInternal(int displayId, long eventTime, int event, int flags,
-            int uid) {
+    private void userActivityInternal(int displayId, long eventTime,
+            @PowerManager.UserActivityEvent int event, int flags, int uid) {
         synchronized (mLock) {
             if (displayId == Display.INVALID_DISPLAY) {
                 if (userActivityNoUpdateLocked(eventTime, event, flags, uid)) {
@@ -1944,11 +1946,12 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private boolean userActivityNoUpdateLocked(final PowerGroup powerGroup, long eventTime,
-            int event, int flags, int uid) {
+            @PowerManager.UserActivityEvent int event, int flags, int uid) {
         final int groupId = powerGroup.getGroupId();
         if (DEBUG_SPEW) {
             Slog.d(TAG, "userActivityNoUpdateLocked: groupId=" + groupId
-                    + ", eventTime=" + eventTime + ", event=" + event
+                    + ", eventTime=" + eventTime
+                    + ", event=" + PowerManager.userActivityEventToString(event)
                     + ", flags=0x" + Integer.toHexString(flags) + ", uid=" + uid);
         }
 
@@ -1983,7 +1986,7 @@ public final class PowerManagerService extends SystemService
             if ((flags & PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS) != 0) {
                 if (eventTime > powerGroup.getLastUserActivityTimeNoChangeLightsLocked()
                         && eventTime > powerGroup.getLastUserActivityTimeLocked()) {
-                    powerGroup.setLastUserActivityTimeNoChangeLightsLocked(eventTime);
+                    powerGroup.setLastUserActivityTimeNoChangeLightsLocked(eventTime, event);
                     mDirty |= DIRTY_USER_ACTIVITY;
                     if (event == PowerManager.USER_ACTIVITY_EVENT_BUTTON) {
                         mDirty |= DIRTY_QUIESCENT;
@@ -1993,7 +1996,7 @@ public final class PowerManagerService extends SystemService
                 }
             } else {
                 if (eventTime > powerGroup.getLastUserActivityTimeLocked()) {
-                    powerGroup.setLastUserActivityTimeLocked(eventTime);
+                    powerGroup.setLastUserActivityTimeLocked(eventTime, event);
                     mDirty |= DIRTY_USER_ACTIVITY;
                     if (event == PowerManager.USER_ACTIVITY_EVENT_BUTTON) {
                         mDirty |= DIRTY_QUIESCENT;
@@ -2020,7 +2023,8 @@ public final class PowerManagerService extends SystemService
             @WakeReason int reason, String details, int uid, String opPackageName, int opUid) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "wakePowerGroupLocked: eventTime=" + eventTime
-                    + ", groupId=" + powerGroup.getGroupId() + ", uid=" + uid);
+                    + ", groupId=" + powerGroup.getGroupId()
+                    + ", reason=" + PowerManager.wakeReasonToString(reason) + ", uid=" + uid);
         }
         if (mForceSuspendActive || !mSystemReady) {
             return;
@@ -2043,11 +2047,11 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private boolean dozePowerGroupLocked(final PowerGroup powerGroup, long eventTime,
-            int reason, int uid) {
+            @GoToSleepReason int reason, int uid) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "dozePowerGroup: eventTime=" + eventTime
-                    + ", groupId=" + powerGroup.getGroupId() + ", reason=" + reason
-                    + ", uid=" + uid);
+                    + ", groupId=" + powerGroup.getGroupId()
+                    + ", reason=" + PowerManager.sleepReasonToString(reason) + ", uid=" + uid);
         }
 
         if (!mSystemReady || !mBootCompleted) {
@@ -2058,10 +2062,12 @@ public final class PowerManagerService extends SystemService
     }
 
     @GuardedBy("mLock")
-    private boolean sleepPowerGroupLocked(final PowerGroup powerGroup, long eventTime, int reason,
-            int uid) {
+    private boolean sleepPowerGroupLocked(final PowerGroup powerGroup, long eventTime,
+            @GoToSleepReason int reason, int uid) {
         if (DEBUG_SPEW) {
-            Slog.d(TAG, "sleepPowerGroup: eventTime=" + eventTime + ", uid=" + uid);
+            Slog.d(TAG, "sleepPowerGroup: eventTime=" + eventTime
+                    + ", groupId=" + powerGroup.getGroupId()
+                    + ", reason=" + PowerManager.sleepReasonToString(reason) + ", uid=" + uid);
         }
         if (!mBootCompleted || !mSystemReady) {
             return false;
@@ -2122,7 +2128,10 @@ public final class PowerManagerService extends SystemService
             case WAKEFULNESS_DOZING:
                 traceMethodName = "goToSleep";
                 Slog.i(TAG, "Going to sleep due to " + PowerManager.sleepReasonToString(reason)
-                        + " (uid " + uid + ")...");
+                        + " (uid " + uid + ", screenOffTimeout=" + mScreenOffTimeoutSetting
+                        + ", activityTimeoutWM=" + mUserActivityTimeoutOverrideFromWindowManager
+                        + ", maxDimRatio=" + mMaximumScreenDimRatioConfig
+                        + ", maxDimDur=" + mMaximumScreenDimDurationConfig + ")...");
 
                 mLastGlobalSleepTime = eventTime;
                 mLastGlobalSleepReason = reason;
@@ -4207,7 +4216,7 @@ public final class PowerManagerService extends SystemService
     void onUserActivity() {
         synchronized (mLock) {
             mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP).setLastUserActivityTimeLocked(
-                    mClock.uptimeMillis());
+                    mClock.uptimeMillis(), PowerManager.USER_ACTIVITY_EVENT_OTHER);
         }
     }
 
@@ -5590,7 +5599,8 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
-        public void userActivity(int displayId, long eventTime, int event, int flags) {
+        public void userActivity(int displayId, long eventTime,
+                @PowerManager.UserActivityEvent int event, int flags) {
             final long now = mClock.uptimeMillis();
             if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
                     != PackageManager.PERMISSION_GRANTED
