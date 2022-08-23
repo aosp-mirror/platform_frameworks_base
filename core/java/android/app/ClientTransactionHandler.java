@@ -97,8 +97,8 @@ public abstract class ClientTransactionHandler {
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(@NonNull ActivityClientRecord r, boolean finished,
-            boolean userLeaving, int configChanges, PendingTransactionActions pendingActions,
-            String reason);
+            boolean userLeaving, int configChanges, boolean autoEnteringPip,
+            PendingTransactionActions pendingActions, String reason);
 
     /**
      * Resume the activity.
