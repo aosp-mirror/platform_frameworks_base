@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
-import com.android.settingslib.spaprivileged.framework.app.PackageManagers
-import com.android.settingslib.spaprivileged.framework.app.rememberAppRepository
+import com.android.settingslib.spaprivileged.model.app.PackageManagers
+import com.android.settingslib.spaprivileged.model.app.rememberAppRepository
 
 @Composable
 fun AppInfo(packageName: String, userId: Int) {

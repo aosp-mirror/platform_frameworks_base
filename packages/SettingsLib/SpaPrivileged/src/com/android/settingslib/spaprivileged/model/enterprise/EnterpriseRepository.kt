@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spaprivileged.framework.enterprise
+package com.android.settingslib.spaprivileged.model.enterprise
 
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources.Strings.Settings.PERSONAL_CATEGORY_HEADER

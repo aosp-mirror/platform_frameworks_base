@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import com.android.settingslib.spaprivileged.framework.app.AppRecord
+import com.android.settingslib.spaprivileged.model.app.AppRecord
 
 interface TogglePermissionAppListModel<T : AppRecord> {
     val pageTitleResId: Int

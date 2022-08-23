@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spaprivileged.framework.app
+package com.android.settingslib.spaprivileged.model.app
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
