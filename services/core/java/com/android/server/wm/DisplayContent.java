@@ -2095,13 +2095,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * @see DisplayWindowPolicyController#canShowTasksInRecents()
+     * @see DisplayWindowPolicyController#canShowTasksInHostDeviceRecents()
      */
-    boolean canShowTasksInRecents() {
+    boolean canShowTasksInHostDeviceRecents() {
         if (mDwpcHelper == null) {
             return true;
         }
-        return mDwpcHelper.canShowTasksInRecents();
+        return mDwpcHelper.canShowTasksInHostDeviceRecents();
     }
 
     /**

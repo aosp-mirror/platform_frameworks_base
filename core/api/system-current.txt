@@ -2978,6 +2978,7 @@ package android.companion.virtual {
     method @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
     method public int getDefaultActivityPolicy();
     method public int getDefaultNavigationPolicy();
+    method public int getDefaultRecentsPolicy();
     method public int getDevicePolicy(int);
     method public int getLockState();
     method @Nullable public String getName();
@@ -2994,6 +2995,7 @@ package android.companion.virtual {
     field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
+    field public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1; // 0x1
   }
 
   public static final class VirtualDeviceParams.Builder {
@@ -3004,6 +3006,7 @@ package android.companion.virtual {
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDefaultRecentsPolicy(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);

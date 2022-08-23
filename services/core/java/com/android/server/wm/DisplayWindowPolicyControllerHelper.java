@@ -153,13 +153,13 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canShowTasksInRecents()
+     * @see DisplayWindowPolicyController#canShowTasksInHostDeviceRecents()
      */
-    public final boolean canShowTasksInRecents() {
+    public final boolean canShowTasksInHostDeviceRecents() {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
-        return mDisplayWindowPolicyController.canShowTasksInRecents();
+        return mDisplayWindowPolicyController.canShowTasksInHostDeviceRecents();
     }
 
     /**

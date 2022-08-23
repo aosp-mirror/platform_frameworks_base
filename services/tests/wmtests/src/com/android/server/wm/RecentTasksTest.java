@@ -819,7 +819,7 @@ public class RecentTasksTest extends WindowTestsBase {
     @Test
     public void testVisibleTask_displayCanNotShowTaskFromRecents_expectNotVisible() {
         final DisplayContent displayContent = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        doReturn(false).when(displayContent).canShowTasksInRecents();
+        doReturn(false).when(displayContent).canShowTasksInHostDeviceRecents();
         final Task task = displayContent.getDefaultTaskDisplayArea().createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         mRecentTasks.add(task);

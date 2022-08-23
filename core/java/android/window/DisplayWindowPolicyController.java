@@ -128,9 +128,10 @@ public abstract class DisplayWindowPolicyController {
             ActivityInfo activityInfo, int windowFlags, int systemWindowFlags);
 
     /**
-     * Returns {@code true} if the tasks which is on this virtual display can be showed on Recents.
+     * Returns {@code true} if the tasks which is on this virtual display can be showed in the
+     * host device of the recently launched activities list.
      */
-    public abstract boolean canShowTasksInRecents();
+    public abstract boolean canShowTasksInHostDeviceRecents();
 
     /**
      * This is called when the top activity of the display is changed.
