@@ -226,7 +226,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
 
         appIconView.contentDescription = appNameOverride ?: iconInfo.iconName
         appIconView.setImageDrawable(appIconDrawableOverride ?: iconInfo.icon)
-        return appIconView.contentDescription.toString()
+        return appIconView.contentDescription
     }
 
     /**
