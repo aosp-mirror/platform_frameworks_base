@@ -22,7 +22,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Parcel;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
@@ -32,10 +31,8 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.PowerProfile;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -220,18 +217,7 @@ public class BatteryUsageStatsProvider {
             }
 
             BatteryStatsImpl batteryStatsImpl = (BatteryStatsImpl) mStats;
-
-            // Make a copy of battery history to avoid concurrent modification.
-            Parcel historyBuffer = Parcel.obtain();
-            historyBuffer.appendFrom(batteryStatsImpl.mHistoryBuffer, 0,
-                    batteryStatsImpl.mHistoryBuffer.dataSize());
-
-            final File systemDir =
-                    batteryStatsImpl.mBatteryStatsHistory.getHistoryDirectory().getParentFile();
-            final BatteryStatsHistory batteryStatsHistory =
-                    new BatteryStatsHistory(historyBuffer, systemDir, null);
-
-            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsHistory);
+            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsImpl.copyHistory());
         }
 
         BatteryUsageStats stats = batteryUsageStatsBuilder.build();
