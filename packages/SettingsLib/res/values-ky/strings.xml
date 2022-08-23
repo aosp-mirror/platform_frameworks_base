@@ -396,7 +396,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Көмөкчү экрандардын эмуляциясы"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Колдонмолор"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Аракеттер сакталбасын"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Колдонуучу чыгып кетери менен бардык аракеттер өчүрүлөт"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Колдонуучу чыгып кетери менен бардык аракеттер өчүп калат"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Фондогу процесстер чеги"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Фондук режимдеги ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондогу колдонмо жооп бербей жатат деп билдирип турат"</string>

@@ -385,7 +385,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"사각형이 아닌 클립 작업 디버그"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"프로필 HWUI 렌더링"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"HWUI 렌더링 프로파일"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU 디버그 레이어 사용 설정"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"디버그 앱에 GPU 디버그 레이어 로드 허용"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"상세 공급업체 로깅 사용 설정"</string>

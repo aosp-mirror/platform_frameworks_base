@@ -116,12 +116,12 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ଫୋନ୍‌ କଲ୍‌‌ଗୁଡ଼ିକ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ଇନ୍‌ପୁଟ୍‌ ଡିଭାଇସ୍"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ଇଣ୍ଟର୍‌ନେଟ୍‌ ଆକ୍ସେସ୍"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"ଯୋଗାଯୋଗ ସେୟାରିଂ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"ଯୋଗାଯୋଗ ସେୟାର୍‌ କରିବା ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ଇଣ୍ଟରନେଟ ଆକ୍ସେସ"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"କଣ୍ଟାକ୍ଟ ସେୟାରିଂ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"କଣ୍ଟାକ୍ଟ ସେୟାର କରିବା ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ଇଣ୍ଟର୍‌ନେଟ୍‌ ସଂଯୋଗ ଶେୟାରିଙ୍ଗ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ଟେକ୍ସଟ୍ ମେସେଜ୍"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM ଆକ୍ସେସ୍‌"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM ଆକ୍ସେସ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ଅଡିଓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ଅଡିଓ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ଶ୍ରବଣ ଯନ୍ତ୍ର"</string>
@@ -156,7 +156,7 @@
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପେୟାରିଙ୍ଗ ପାଇଁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରିଦିଆଗଲା।"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"କମ୍ପ୍ୟୁଟର୍"</string>
     <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"ହେଡ୍‌ସେଟ୍‌"</string>
-    <string name="bluetooth_talkback_phone" msgid="868393783858123880">"ଫୋନ୍‌"</string>
+    <string name="bluetooth_talkback_phone" msgid="868393783858123880">"ଫୋନ"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"ଇମେଜିଙ୍ଗ"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ହେଡ୍‌ଫୋନ୍‌"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"ଇନ୍‌ପୁଟ୍‌ ଉପକରଣ"</string>
@@ -246,7 +246,7 @@
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ଛଅ ଡିଜିଟ୍ କୋଡ୍ ବ୍ୟବହାର କରି ନୂଆ ଡିଭାଇସଗୁଡ଼ିକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ପେୟାର୍ ହୋଇଥିବା ଡିଭାଇସଗୁଡ଼ିକ"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ଡିଭାଇସ୍ ବିବରଣୀ"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ଡିଭାଇସର ବିବରଣୀ"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"ଭୁଲିଯାଆନ୍ତୁ"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ଡିଭାଇସ୍ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"ସଂଯୋଗ ବିଫଳ ହେଲା"</string>
@@ -394,7 +394,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ଟ୍ରାଞ୍ଜିସନ୍‌ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ଆନିମେଟର୍‌ ଅବଧି ସ୍କେଲ୍‌"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ସେକେଣ୍ଡାରୀ ଡିସ୍‌ପ୍ଲେ ସିମୁଲେଟ୍ କରନ୍ତୁ"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"ଆପ୍‌ଗୁଡ଼ିକ"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"ଆପ୍ସ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ରଖନ୍ତୁ ନାହିଁ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ୟୁଜର୍ ଏହାକୁ ଛାଡ଼ିବା କ୍ଷଣି ସମସ୍ତ କାର୍ଯ୍ୟକଳାପ ନଷ୍ଟ କରିଦିଅନ୍ତୁ"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ପ୍ରୋସେସ୍ ସୀମା"</string>
@@ -550,7 +550,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ସଂଯୋଗ କରିବାରେ ସମସ୍ୟା ହେଉଛି। ଡିଭାଇସ୍ ବନ୍ଦ କରି ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ତାରଯୁକ୍ତ ଅଡିଓ ଡିଭାଇସ୍"</string>
     <string name="help_label" msgid="3528360748637781274">"ସାହାଯ୍ୟ ଓ ମତାମତ"</string>
-    <string name="storage_category" msgid="2287342585424631813">"ଷ୍ଟୋରେଜ୍"</string>
+    <string name="storage_category" msgid="2287342585424631813">"ଷ୍ଟୋରେଜ"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ଦେଖନ୍ତୁ ଏବଂ ଏହାକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ କୌଣସି ସେୟାର୍ କରାଯାଇଥିବା ଡାଟା ନାହିଁ।"</string>
