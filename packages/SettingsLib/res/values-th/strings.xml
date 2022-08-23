@@ -585,7 +585,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"กำลังสร้างผู้เข้าร่วมใหม่…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"กำลังสร้างผู้ใช้ชั่วคราวใหม่…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"สร้างผู้เข้าร่วมใหม่ไม่สำเร็จ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ชื่อเล่น"</string>
