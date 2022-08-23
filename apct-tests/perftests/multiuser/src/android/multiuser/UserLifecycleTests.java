@@ -155,6 +155,7 @@ public class UserLifecycleTests {
     public void tearDown() throws Exception {
         setSystemProperty("debug.usercontroller.user_switch_timeout_ms", mUserSwitchTimeoutMs);
         mBroadcastWaiter.close();
+        mUserSwitchWaiter.close();
         for (int userId : mUsersToRemove) {
             try {
                 mUm.removeUser(userId);
@@ -207,10 +208,10 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
-            mRunner.resumeTiming();
-            Log.i(TAG, "Starting timer");
-
             runThenWaitForBroadcasts(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+
                 mIam.startUserInBackground(userId);
             }, Intent.ACTION_USER_STARTED);
 
@@ -360,10 +361,10 @@ public class UserLifecycleTests {
             }, Intent.ACTION_MEDIA_MOUNTED);
 
             mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(startUser, () -> {
-                mRunner.resumeTiming();
-                Log.i(TAG, "Starting timer");
-
                 runThenWaitForBroadcasts(userId, () -> {
+                    mRunner.resumeTiming();
+                    Log.i(TAG, "Starting timer");
+
                     mAm.switchUser(startUser);
                 }, Intent.ACTION_USER_STOPPED);
 
