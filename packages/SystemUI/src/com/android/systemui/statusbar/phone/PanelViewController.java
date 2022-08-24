@@ -395,7 +395,7 @@ public abstract class PanelViewController {
         mInitialOffsetOnTouch = expandedHeight;
         mInitialTouchY = newY;
         mInitialTouchX = newX;
-        mInitialTouchFromKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        mInitialTouchFromKeyguard = mKeyguardStateController.isShowing();
         if (startTracking) {
             mTouchSlopExceeded = true;
             setExpandedHeight(mInitialOffsetOnTouch);
@@ -414,9 +414,7 @@ public abstract class PanelViewController {
             float vectorVel = (float) Math.hypot(
                     mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 
-            final boolean onKeyguard =
-                    mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
-
+            final boolean onKeyguard = mKeyguardStateController.isShowing();
             final boolean expand;
             if (mKeyguardStateController.isKeyguardFadingAway()
                     || (mInitialTouchFromKeyguard && !onKeyguard)) {
