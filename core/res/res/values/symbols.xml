@@ -2219,7 +2219,6 @@
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
   <java-symbol type="bool" name="config_dreamsOnlyEnabledForSystemUser" />
   <java-symbol type="array" name="config_supportedDreamComplications" />
-  <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
   <java-symbol type="string" name="config_loggable_dream_prefix" />
