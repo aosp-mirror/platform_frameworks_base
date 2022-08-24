@@ -20,6 +20,7 @@ package com.android.wm.shell.flicker
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.traces.layers.LayerTraceEntrySubject
 import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
@@ -94,25 +95,27 @@ fun FlickerTestParameter.layerKeepVisible(
 
 fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
     component: IComponentMatcher,
-    splitLeftTop: Boolean
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean
 ) {
     assertLayers {
-        this.isInvisible(component)
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
             .then()
-            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-            .isVisible(component)
+            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
             .then()
-            .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-            .splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+            .splitAppLayerBoundsSnapToDivider(
+                component, landscapePosLeft, portraitPosTop, endRotation)
     }
 }
 
 fun FlickerTestParameter.splitAppLayerBoundsBecomesInvisible(
     component: IComponentMatcher,
-    splitLeftTop: Boolean
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean
 ) {
     assertLayers {
-        this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+        this.splitAppLayerBoundsSnapToDivider(
+                component, landscapePosLeft, portraitPosTop, endRotation)
             .then()
             .isVisible(component, true)
             .then()
@@ -122,58 +125,96 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesInvisible(
 
 fun FlickerTestParameter.splitAppLayerBoundsIsVisibleAtEnd(
     component: IComponentMatcher,
-    splitLeftTop: Boolean
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean
 ) {
     assertLayersEnd {
-        val dividerRegion = layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
-        visibleRegion(component).coversAtMost(
-            if (splitLeftTop) {
-                getSplitLeftTopRegion(dividerRegion, endRotation)
-            } else {
-                getSplitRightBottomRegion(dividerRegion, endRotation)
-            }
-        )
+        splitAppLayerBoundsSnapToDivider(component, landscapePosLeft, portraitPosTop, endRotation)
     }
 }
 
 fun FlickerTestParameter.splitAppLayerBoundsKeepVisible(
     component: IComponentMatcher,
-    splitLeftTop: Boolean
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean
 ) {
     assertLayers {
-        this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+        splitAppLayerBoundsSnapToDivider(component, landscapePosLeft, portraitPosTop, endRotation)
     }
 }
 
 fun FlickerTestParameter.splitAppLayerBoundsChanges(
     component: IComponentMatcher,
-    splitLeftTop: Boolean
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean
 ) {
     assertLayers {
-        if (splitLeftTop) {
-            this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+        if (landscapePosLeft) {
+            this.splitAppLayerBoundsSnapToDivider(
+                    component, landscapePosLeft, portraitPosTop, endRotation)
                 .then()
                 .isInvisible(component)
                 .then()
-                .splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+                .splitAppLayerBoundsSnapToDivider(
+                    component, landscapePosLeft, portraitPosTop, endRotation)
         } else {
-            this.splitAppLayerBoundsSnapToDivider(component, splitLeftTop, endRotation)
+            this.splitAppLayerBoundsSnapToDivider(
+                component, landscapePosLeft, portraitPosTop, endRotation)
         }
     }
 }
 
 fun LayersTraceSubject.splitAppLayerBoundsSnapToDivider(
     component: IComponentMatcher,
-    splitLeftTop: Boolean,
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean,
     rotation: Int
 ): LayersTraceSubject {
     return invoke("splitAppLayerBoundsSnapToDivider") {
-        val dividerRegion = it.layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
-        it.visibleRegion(component).coversAtMost(
-            if (splitLeftTop) {
-                getSplitLeftTopRegion(dividerRegion, rotation)
+        it.splitAppLayerBoundsSnapToDivider(component, landscapePosLeft, portraitPosTop, rotation)
+    }
+}
+
+fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
+    component: IComponentMatcher,
+    landscapePosLeft: Boolean,
+    portraitPosTop: Boolean,
+    rotation: Int
+): LayerTraceEntrySubject {
+    val displayBounds = WindowUtils.getDisplayBounds(rotation)
+    return invoke {
+        val dividerRegion = layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
+        visibleRegion(component).coversAtMost(
+            if (displayBounds.width > displayBounds.height) {
+                if (landscapePosLeft) {
+                    Region.from(
+                        0,
+                        0,
+                        (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                        displayBounds.bounds.bottom)
+                } else {
+                    Region.from(
+                        (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                        0,
+                        displayBounds.bounds.right,
+                        displayBounds.bounds.bottom
+                    )
+                }
             } else {
-                getSplitRightBottomRegion(dividerRegion, rotation)
+                if (portraitPosTop) {
+                    Region.from(
+                        0,
+                        0,
+                        displayBounds.bounds.right,
+                        (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2)
+                } else {
+                    Region.from(
+                        0,
+                        (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
+                        displayBounds.bounds.right,
+                        displayBounds.bounds.bottom
+                    )
+                }
             }
         )
     }
@@ -184,6 +225,10 @@ fun FlickerTestParameter.appWindowBecomesVisible(
 ) {
     assertWm {
         this.isAppWindowInvisible(component)
+            .then()
+            .notContains(component, isOptional = true)
+            .then()
+            .isAppWindowInvisible(component, isOptional = true)
             .then()
             .isAppWindowVisible(component)
     }
@@ -208,7 +253,7 @@ fun FlickerTestParameter.appWindowIsVisibleAtEnd(
 }
 
 fun FlickerTestParameter.appWindowKeepVisible(
-        component: IComponentMatcher
+    component: IComponentMatcher
 ) {
     assertWm {
         this.isAppWindowVisible(component)
@@ -313,42 +358,6 @@ fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
         Region.from(
             dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset, 0,
             displayBounds.bounds.right, displayBounds.bounds.bottom
-        )
-    }
-}
-
-fun getSplitLeftTopRegion(dividerRegion: Region, rotation: Int): Region {
-    val displayBounds = WindowUtils.getDisplayBounds(rotation)
-    return if (displayBounds.width > displayBounds.height) {
-        Region.from(
-            0,
-            0,
-            (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-            displayBounds.bounds.bottom)
-    } else {
-        Region.from(
-            0,
-            0,
-            displayBounds.bounds.right,
-            (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2)
-    }
-}
-
-fun getSplitRightBottomRegion(dividerRegion: Region, rotation: Int): Region {
-    val displayBounds = WindowUtils.getDisplayBounds(rotation)
-    return if (displayBounds.width > displayBounds.height) {
-        Region.from(
-            (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-            0,
-            displayBounds.bounds.right,
-            displayBounds.bounds.bottom
-        )
-    } else {
-        Region.from(
-            0,
-            (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
-            displayBounds.bounds.right,
-            displayBounds.bounds.bottom
         )
     }
 }

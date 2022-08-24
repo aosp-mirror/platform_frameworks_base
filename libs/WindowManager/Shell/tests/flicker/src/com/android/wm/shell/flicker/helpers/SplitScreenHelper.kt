@@ -105,6 +105,25 @@ class SplitScreenHelper(
                 .waitForAndVerify()
         }
 
+        fun splitFromOverview(tapl: LauncherInstrumentation) {
+            // Note: The initial split position in landscape is different between tablet and phone.
+            // In landscape, tablet will let the first app split to right side, and phone will
+            // split to left side.
+            if (tapl.isTablet) {
+                tapl.workspace.switchToOverview().overviewActions
+                    .clickSplit()
+                    .currentTask
+                    .open()
+            } else {
+                tapl.workspace.switchToOverview().currentTask
+                    .tapMenu()
+                    .tapSplitMenuItem()
+                    .currentTask
+                    .open()
+            }
+            SystemClock.sleep(TIMEOUT_MS)
+        }
+
         fun dragFromNotificationToSplit(
             instrumentation: Instrumentation,
             device: UiDevice,

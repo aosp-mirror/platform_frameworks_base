@@ -99,12 +99,12 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, splitLeftTop = false)
+        primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        secondaryApp, splitLeftTop = true)
+        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
 
     @Presubmit
     @Test
