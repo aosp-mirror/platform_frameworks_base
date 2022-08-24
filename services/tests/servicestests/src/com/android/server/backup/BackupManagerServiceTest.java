@@ -507,9 +507,21 @@ public class BackupManagerServiceTest {
     }
 
     @Test
-    public void dump_callerDoesNotHavePermission_ignored() {
+    public void dump_callerDoesNotHaveDumpPermission_ignored() {
         when(mContextMock.checkCallingOrSelfPermission(
                 android.Manifest.permission.DUMP)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        mService.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
+
+        verifyNoMoreInteractions(mUserBackupManagerService);
+        verifyNoMoreInteractions(mNonSystemUserBackupManagerService);
+    }
+
+    @Test
+    public void dump_callerDoesNotHavePackageUsageStatsPermission_ignored() {
+        when(mContextMock.checkCallingOrSelfPermission(
+                Manifest.permission.PACKAGE_USAGE_STATS)).thenReturn(
                 PackageManager.PERMISSION_DENIED);
 
         mService.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
