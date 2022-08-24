@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
-import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -68,7 +67,7 @@ public final class NotificationChannelGroup implements Parcelable {
     private CharSequence mName;
     private String mDescription;
     private boolean mBlocked;
-    private ParceledListSlice<NotificationChannel> mChannels;
+    private List<NotificationChannel> mChannels = new ArrayList<>();
     // Bitwise representation of fields that have been changed by the user
     private int mUserLockedFields;
 
@@ -103,8 +102,7 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             mDescription = null;
         }
-        mChannels = in.readParcelable(
-                NotificationChannelGroup.class.getClassLoader(), ParceledListSlice.class);
+        in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader(), android.app.NotificationChannel.class);
         mBlocked = in.readBoolean();
         mUserLockedFields = in.readInt();
     }
@@ -131,7 +129,7 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        dest.writeParcelable(mChannels, flags);
+        dest.writeParcelableList(mChannels, flags);
         dest.writeBoolean(mBlocked);
         dest.writeInt(mUserLockedFields);
     }
@@ -161,7 +159,7 @@ public final class NotificationChannelGroup implements Parcelable {
      * Returns the list of channels that belong to this group
      */
     public List<NotificationChannel> getChannels() {
-        return mChannels == null ? new ArrayList<>() : mChannels.getList();
+        return mChannels;
     }
 
     /**
@@ -195,8 +193,15 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * @hide
      */
+    public void addChannel(NotificationChannel channel) {
+        mChannels.add(channel);
+    }
+
+    /**
+     * @hide
+     */
     public void setChannels(List<NotificationChannel> channels) {
-        mChannels = new ParceledListSlice<>(channels);
+        mChannels = channels;
     }
 
     /**
@@ -331,7 +336,7 @@ public final class NotificationChannelGroup implements Parcelable {
         proto.write(NotificationChannelGroupProto.NAME, mName.toString());
         proto.write(NotificationChannelGroupProto.DESCRIPTION, mDescription);
         proto.write(NotificationChannelGroupProto.IS_BLOCKED, mBlocked);
-        for (NotificationChannel channel : mChannels.getList()) {
+        for (NotificationChannel channel : mChannels) {
             channel.dumpDebug(proto, NotificationChannelGroupProto.CHANNELS);
         }
         proto.end(token);
