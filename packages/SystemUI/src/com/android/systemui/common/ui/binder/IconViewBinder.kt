@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.ui
+package com.android.systemui.common.ui.binder
 
 import android.widget.ImageView
 import com.android.systemui.common.shared.model.Icon
