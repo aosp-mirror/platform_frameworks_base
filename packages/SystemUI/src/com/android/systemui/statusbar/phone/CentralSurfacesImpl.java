@@ -67,7 +67,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.hardware.devicestate.DeviceStateManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -446,7 +445,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
-    private PointF mWakeUpTouchLocation;
     private LightRevealScrim mLightRevealScrim;
     private PowerButtonReveal mPowerButtonReveal;
 
@@ -602,8 +600,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     private boolean mLaunchEmergencyActionOnFinishedGoingToSleep;
     private int mLastCameraLaunchSource;
     protected PowerManager.WakeLock mGestureWakeLock;
-
-    private final int[] mTmpInt2 = new int[2];
 
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
@@ -1430,16 +1426,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mPowerManager.wakeUp(
                     time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
-
-            // NOTE, the incoming view can sometimes be the entire container... unsure if
-            // this location is valuable enough
-            if (where != null) {
-                where.getLocationInWindow(mTmpInt2);
-                mWakeUpTouchLocation = new PointF(mTmpInt2[0] + where.getWidth() / 2,
-                        mTmpInt2[1] + where.getHeight() / 2);
-            } else {
-                mWakeUpTouchLocation = new PointF(-1, -1);
-            }
             mFalsingCollector.onScreenOnFromTouch();
         }
     }
@@ -1955,7 +1941,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     PowerManager.WAKE_REASON_APPLICATION,
                     "com.android.systemui:full_screen_intent");
             mWakeUpComingFromTouch = false;
-            mWakeUpTouchLocation = null;
         }
     }
 
@@ -3225,7 +3210,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 || (mDozing && mDozeParameters.shouldControlScreenOff()
                 && visibleNotOccludedOrWillBe);
 
-        mNotificationPanelViewController.setDozing(mDozing, animate, mWakeUpTouchLocation);
+        mNotificationPanelViewController.setDozing(mDozing, animate);
         updateQsExpansionEnabled();
         Trace.endSection();
     }
@@ -3556,7 +3541,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mLaunchCameraWhenFinishedWaking = false;
             mDeviceInteractive = false;
             mWakeUpComingFromTouch = false;
-            mWakeUpTouchLocation = null;
             updateVisibleToUser();
 
             updateNotificationPanelTouchState();

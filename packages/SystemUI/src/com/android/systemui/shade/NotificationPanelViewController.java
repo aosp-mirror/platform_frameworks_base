@@ -54,7 +54,6 @@ import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
@@ -3752,13 +3751,12 @@ public final class NotificationPanelViewController extends PanelViewController {
      *
      * @param dozing              {@code true} when dozing.
      * @param animate             if transition should be animated.
-     * @param wakeUpTouchLocation touch event location - if woken up by SLPI sensor.
      */
-    public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation) {
+    public void setDozing(boolean dozing, boolean animate) {
         if (dozing == mDozing) return;
         mView.setDozing(dozing);
         mDozing = dozing;
-        mNotificationStackScrollLayoutController.setDozing(mDozing, animate, wakeUpTouchLocation);
+        mNotificationStackScrollLayoutController.setDozing(mDozing, animate);
         mKeyguardBottomArea.setDozing(mDozing, animate);
         mKeyguardBottomAreaInteractorProvider.get().setAnimateDozingTransitions(animate);
         mKeyguardStatusBarViewController.setDozing(mDozing);
@@ -4683,7 +4681,7 @@ public final class NotificationPanelViewController extends PanelViewController {
      * change.
      */
     public void showAodUi() {
-        setDozing(true /* dozing */, false /* animate */, null);
+        setDozing(true /* dozing */, false /* animate */);
         mStatusBarStateController.setUpcomingState(KEYGUARD);
         mEntryManager.updateNotifications("showAodUi");
         mStatusBarStateListener.onStateChanged(KEYGUARD);
