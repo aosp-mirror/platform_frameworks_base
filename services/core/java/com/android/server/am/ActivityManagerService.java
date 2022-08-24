@@ -2401,13 +2401,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
 
-        mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "foreground", foreConstants, false);
-        mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "background", backConstants, true);
-        mBgOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "offload_bg", offloadConstants, true);
-        mFgOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "offload_fg", foreConstants, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;

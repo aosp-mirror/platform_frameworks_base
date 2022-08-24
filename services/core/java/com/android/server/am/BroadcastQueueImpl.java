@@ -104,7 +104,7 @@ import java.util.Set;
  * foreground priority, and one for normal (background-priority) broadcasts, and one to
  * offload special broadcasts that we know take a long time, such as BOOT_COMPLETED.
  */
-public class BroadcastQueue {
+public class BroadcastQueueImpl extends BroadcastQueue {
     private static final String TAG = "BroadcastQueue";
     private static final String TAG_MU = TAG + POSTFIX_MU;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
@@ -112,19 +112,6 @@ public class BroadcastQueue {
     static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
     static final int MAX_BROADCAST_SUMMARY_HISTORY
             = ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
-
-    final ActivityManagerService mService;
-
-    /**
-     * Behavioral parameters such as timeouts and deferral policy, tracking Settings
-     * for runtime configurability
-     */
-    final BroadcastConstants mConstants;
-
-    /**
-     * Recognizable moniker for this queue
-     */
-    final String mQueueName;
 
     /**
      * If true, we can delay broadcasts while waiting services to finish in the previous
@@ -233,14 +220,11 @@ public class BroadcastQueue {
         }
     }
 
-    BroadcastQueue(ActivityManagerService service, Handler handler,
+    BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, boolean allowDelayBehindServices) {
-        mService = service;
+        super(service, handler, name, constants);
         mHandler = new BroadcastHandler(handler.getLooper());
-        mQueueName = name;
         mDelayBehindServices = allowDelayBehindServices;
-
-        mConstants = constants;
         mDispatcher = new BroadcastDispatcher(this, mConstants, mHandler, mService);
     }
 
