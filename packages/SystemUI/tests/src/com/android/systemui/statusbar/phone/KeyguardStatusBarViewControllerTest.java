@@ -47,7 +47,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -89,7 +88,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarIconController mStatusBarIconController;
     @Mock
-    private FeatureFlags mFeatureFlags;
+    private StatusBarIconController.TintedIconManager.Factory mIconManagerFactory;
+    @Mock
+    private StatusBarIconController.TintedIconManager mIconManager;
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
     @Mock
@@ -129,6 +130,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         MockitoAnnotations.initMocks(this);
 
+        when(mIconManagerFactory.create(any())).thenReturn(mIconManager);
+
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
             mKeyguardStatusBarView =
@@ -148,7 +151,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mBatteryController,
                 mUserInfoController,
                 mStatusBarIconController,
-                new StatusBarIconController.TintedIconManager.Factory(mFeatureFlags),
+                mIconManagerFactory,
                 mBatteryMeterViewController,
                 mNotificationPanelViewStateProvider,
                 mKeyguardStateController,
