@@ -40,6 +40,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.notNull
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -98,6 +99,8 @@ class DefaultClockProviderTest : SysuiTestCase() {
 
         verify(mockSmallClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
         verify(mockLargeClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
+        verify(mockSmallClockView).onTimeZoneChanged(notNull())
+        verify(mockLargeClockView).onTimeZoneChanged(notNull())
         verify(mockSmallClockView).refreshTime()
         verify(mockLargeClockView).refreshTime()
         verify(mockLargeClockView).setLayoutParams(any())

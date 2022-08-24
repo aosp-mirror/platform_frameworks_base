@@ -118,6 +118,7 @@ class DefaultClock(
         recomputePadding()
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
         events.onColorPaletteChanged(resources, true, true)
+        events.onTimeZoneChanged(TimeZone.getDefault())
         events.onTimeTick()
     }
 
