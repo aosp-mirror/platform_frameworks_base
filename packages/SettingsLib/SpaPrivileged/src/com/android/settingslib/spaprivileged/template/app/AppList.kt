@@ -42,7 +42,7 @@ import kotlinx.coroutines.Dispatchers
 private const val TAG = "AppList"
 
 @Composable
-fun <T : AppRecord> AppList(
+internal fun <T : AppRecord> AppList(
     userInfo: UserInfo,
     listModel: AppListModel<T>,
     showSystem: State<Boolean>,
