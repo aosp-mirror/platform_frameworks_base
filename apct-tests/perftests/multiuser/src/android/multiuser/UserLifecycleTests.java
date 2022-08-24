@@ -425,7 +425,7 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
             startUserInBackgroundAndWaitForUnlock(userId);
-            stopUser(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId, true);
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -480,7 +480,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
-            stopUser(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId, true);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
@@ -677,6 +677,19 @@ public class UserLifecycleTests {
         return success[0];
     }
 
+    /**
+     * Waits for broadcast idle before stopping a user, to prevent timeouts on stop user.
+     * Stopping a user heavily depends on broadcast queue, and that gets crowded after user creation
+     * or user switches, which leads to a timeout on stopping user and cause the tests to be flaky.
+     * Do not call this method while timing is on. i.e. between mRunner.resumeTiming() and
+     * mRunner.pauseTiming(). Otherwise it would cause the test results to be spiky.
+     */
+    private void stopUserAfterWaitingForBroadcastIdle(int userId, boolean force)
+            throws RemoteException {
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        stopUser(userId, force);
+    }
+
     private void stopUser(int userId, boolean force) throws RemoteException {
         final CountDownLatch latch = new CountDownLatch(1);
         mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
@@ -712,7 +725,7 @@ public class UserLifecycleTests {
         attestTrue("Didn't switch back to user, " + origUser, origUser == mAm.getCurrentUser());
 
         if (stopNewUser) {
-            stopUser(testUser, true);
+            stopUserAfterWaitingForBroadcastIdle(testUser, true);
             attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
         }
 
