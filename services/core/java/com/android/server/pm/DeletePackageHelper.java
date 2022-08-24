@@ -184,11 +184,11 @@ final class DeletePackageHelper {
 
             if (pkg != null) {
                 SharedLibraryInfo libraryInfo = null;
-                if (pkg.getStaticSharedLibName() != null) {
-                    libraryInfo = computer.getSharedLibraryInfo(pkg.getStaticSharedLibName(),
+                if (pkg.getStaticSharedLibraryName() != null) {
+                    libraryInfo = computer.getSharedLibraryInfo(pkg.getStaticSharedLibraryName(),
                             pkg.getStaticSharedLibVersion());
-                } else if (pkg.getSdkLibName() != null) {
-                    libraryInfo = computer.getSharedLibraryInfo(pkg.getSdkLibName(),
+                } else if (pkg.getSdkLibraryName() != null) {
+                    libraryInfo = computer.getSharedLibraryInfo(pkg.getSdkLibraryName(),
                             pkg.getSdkLibVersionMajor());
                 }
 
@@ -544,7 +544,7 @@ final class DeletePackageHelper {
             }
             outInfo.mRemovedPackage = ps.getPackageName();
             outInfo.mInstallerPackageName = ps.getInstallSource().installerPackageName;
-            outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibName() != null;
+            outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibraryName() != null;
             outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
             outInfo.mBroadcastUsers = userIds;
@@ -895,8 +895,8 @@ final class DeletePackageHelper {
             final String packageName = ps.getPkg().getPackageName();
             // Skip over if system app, static shared library or and SDK library.
             if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0
-                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibName())
-                    || !TextUtils.isEmpty(ps.getPkg().getSdkLibName())) {
+                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibraryName())
+                    || !TextUtils.isEmpty(ps.getPkg().getSdkLibraryName())) {
                 continue;
             }
             if (DEBUG_CLEAN_APKS) {

@@ -81,6 +81,7 @@ import com.android.server.pm.pkg.parsing.ParsingUtils;
 import libcore.util.EmptyArray;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -472,7 +473,11 @@ public class PackageInfoUtils {
             PackageStateUnserialized pkgState = pkgSetting.getTransientState();
             info.hiddenUntilInstalled = pkgState.isHiddenUntilInstalled();
             List<String> usesLibraryFiles = pkgState.getUsesLibraryFiles();
-            List<SharedLibraryInfo> usesLibraryInfos = pkgState.getUsesLibraryInfos();
+            var usesLibraries = pkgState.getUsesLibraryInfos();
+            var usesLibraryInfos = new ArrayList<SharedLibraryInfo>();
+            for (int index = 0; index < usesLibraries.size(); index++) {
+                usesLibraryInfos.add(usesLibraries.get(index).getInfo());
+            }
             info.sharedLibraryFiles = usesLibraryFiles.isEmpty()
                     ? null : usesLibraryFiles.toArray(new String[0]);
             info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;

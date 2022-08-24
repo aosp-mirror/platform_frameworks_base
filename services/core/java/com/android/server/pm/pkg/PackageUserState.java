@@ -33,10 +33,16 @@ import java.util.Map;
  *
  * @hide
  */
-// TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 @Immutable
 public interface PackageUserState {
+
+    /**
+     * @return whether the package is marked as installed
+     */
+    boolean isInstalled();
+
+    // Methods below this comment are not yet exposed as API
 
     /**
      * @hide
@@ -148,12 +154,6 @@ public interface PackageUserState {
      * @see PackageManager#setApplicationHiddenSettingAsUser(String, boolean, UserHandle)
      */
     boolean isHidden();
-
-    /**
-     * @return whether the package is marked as installed for all users
-     * @hide
-     */
-    boolean isInstalled();
 
     /**
      * @return whether the package is marked as an ephemeral app, which restricts permissions,

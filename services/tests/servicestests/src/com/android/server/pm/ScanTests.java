@@ -241,7 +241,7 @@ public class ScanTests {
     @Test
     public void installSdkLibrary() throws Exception {
         final ParsedPackage pkg = ((ParsedPackage) createBasicPackage("ogl.sdk_123")
-                .setSdkLibName("ogl.sdk")
+                .setSdkLibraryName("ogl.sdk")
                 .setSdkLibVersionMajor(123)
                 .hideAsParsed())
                 .setPackageName("ogl.sdk_123")
@@ -272,7 +272,7 @@ public class ScanTests {
     @Test
     public void installStaticSharedLibrary() throws Exception {
         final ParsedPackage pkg = ((ParsedPackage) createBasicPackage("static.lib.pkg")
-                .setStaticSharedLibName("static.lib")
+                .setStaticSharedLibraryName("static.lib")
                 .setStaticSharedLibVersion(123L)
                 .hideAsParsed())
                 .setPackageName("static.lib.pkg.123")

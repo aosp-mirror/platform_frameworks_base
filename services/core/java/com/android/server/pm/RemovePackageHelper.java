@@ -215,21 +215,21 @@ final class RemovePackageHelper {
         r = null;
 
         // Any package can hold SDK or static shared libraries.
-        if (pkg.getSdkLibName() != null) {
+        if (pkg.getSdkLibraryName() != null) {
             if (mSharedLibraries.removeSharedLibrary(
-                    pkg.getSdkLibName(), pkg.getSdkLibVersionMajor())) {
+                    pkg.getSdkLibraryName(), pkg.getSdkLibVersionMajor())) {
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
                         r.append(' ');
                     }
-                    r.append(pkg.getSdkLibName());
+                    r.append(pkg.getSdkLibraryName());
                 }
             }
         }
-        if (pkg.getStaticSharedLibName() != null) {
-            if (mSharedLibraries.removeSharedLibrary(pkg.getStaticSharedLibName(),
+        if (pkg.getStaticSharedLibraryName() != null) {
+            if (mSharedLibraries.removeSharedLibrary(pkg.getStaticSharedLibraryName(),
                     pkg.getStaticSharedLibVersion())) {
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
@@ -237,7 +237,7 @@ final class RemovePackageHelper {
                     } else {
                         r.append(' ');
                     }
-                    r.append(pkg.getStaticSharedLibName());
+                    r.append(pkg.getStaticSharedLibraryName());
                 }
             }
         }
@@ -271,7 +271,7 @@ final class RemovePackageHelper {
             outInfo.mRemovedPackage = packageName;
             outInfo.mInstallerPackageName = deletedPs.getInstallSource().installerPackageName;
             outInfo.mIsStaticSharedLib = deletedPkg != null
-                    && deletedPkg.getStaticSharedLibName() != null;
+                    && deletedPkg.getStaticSharedLibraryName() != null;
             outInfo.populateUsers(deletedPs.queryInstalledUsers(
                     mUserManagerInternal.getUserIds(), true), deletedPs);
             outInfo.mIsExternal = deletedPs.isExternalStorage();

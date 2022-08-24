@@ -400,7 +400,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
     @Nullable
     private SharedLibraryInfo getLatestStaticSharedLibraVersionLPr(@NonNull AndroidPackage pkg) {
         WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
-                pkg.getStaticSharedLibName());
+                pkg.getStaticSharedLibraryName());
         if (versionedLib == null) {
             return null;
         }
@@ -457,15 +457,15 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         // - Package manager is in a state where package isn't scanned yet. This will
         //   get called again after scanning to fix the dependencies.
         if (AndroidPackageUtils.isLibrary(pkg)) {
-            if (pkg.getSdkLibName() != null) {
+            if (pkg.getSdkLibraryName() != null) {
                 SharedLibraryInfo definedLibrary = getSharedLibraryInfo(
-                        pkg.getSdkLibName(), pkg.getSdkLibVersionMajor());
+                        pkg.getSdkLibraryName(), pkg.getSdkLibVersionMajor());
                 if (definedLibrary != null) {
                     action.accept(definedLibrary, libInfo);
                 }
-            } else if (pkg.getStaticSharedLibName() != null) {
+            } else if (pkg.getStaticSharedLibraryName() != null) {
                 SharedLibraryInfo definedLibrary = getSharedLibraryInfo(
-                        pkg.getStaticSharedLibName(), pkg.getStaticSharedLibVersion());
+                        pkg.getStaticSharedLibraryName(), pkg.getStaticSharedLibVersion());
                 if (definedLibrary != null) {
                     action.accept(definedLibrary, libInfo);
                 }
@@ -691,9 +691,9 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                         && !hasString(pkg.getUsesLibraries(), changingPkg.getLibraryNames())
                         && !hasString(pkg.getUsesOptionalLibraries(), changingPkg.getLibraryNames())
                         && !ArrayUtils.contains(pkg.getUsesStaticLibraries(),
-                        changingPkg.getStaticSharedLibName())
+                        changingPkg.getStaticSharedLibraryName())
                         && !ArrayUtils.contains(pkg.getUsesSdkLibraries(),
-                        changingPkg.getSdkLibName())) {
+                        changingPkg.getSdkLibraryName())) {
                     continue;
                 }
                 if (resultList == null) {

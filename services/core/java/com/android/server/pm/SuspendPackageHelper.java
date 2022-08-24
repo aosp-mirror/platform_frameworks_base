@@ -548,7 +548,7 @@ public final class SuspendPackageHelper {
                     if (pkg.isSdkLibrary()) {
                         Slog.w(TAG, "Cannot suspend package: " + packageName
                                 + " providing SDK library: "
-                                + pkg.getSdkLibName());
+                                + pkg.getSdkLibraryName());
                         continue;
                     }
                     // Cannot suspend static shared libs as they are considered
@@ -557,7 +557,7 @@ public final class SuspendPackageHelper {
                     if (pkg.isStaticSharedLibrary()) {
                         Slog.w(TAG, "Cannot suspend package: " + packageName
                                 + " providing static shared library: "
-                                + pkg.getStaticSharedLibName());
+                                + pkg.getStaticSharedLibraryName());
                         continue;
                     }
                 }

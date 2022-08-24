@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.pm.SharedLibraryInfo;
 
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import java.util.ArrayList;
@@ -79,8 +80,8 @@ final class SharedLibraryUtils {
         if (!pkgSetting.getTransientState().getUsesLibraryInfos().isEmpty()) {
             ArrayList<SharedLibraryInfo> retValue = new ArrayList<>();
             Set<String> collectedNames = new HashSet<>();
-            for (SharedLibraryInfo info : pkgSetting.getTransientState().getUsesLibraryInfos()) {
-                findSharedLibrariesRecursive(info, retValue, collectedNames);
+            for (SharedLibraryWrapper info : pkgSetting.getTransientState().getUsesLibraryInfos()) {
+                findSharedLibrariesRecursive(info.getInfo(), retValue, collectedNames);
             }
             return retValue;
         } else {
