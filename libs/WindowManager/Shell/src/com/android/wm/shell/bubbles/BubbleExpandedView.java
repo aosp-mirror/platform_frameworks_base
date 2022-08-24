@@ -1044,7 +1044,7 @@ public class BubbleExpandedView extends LinearLayout {
     /**
      * Description of current expanded view state.
      */
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw) {
         pw.print("BubbleExpandedView");
         pw.print("  taskId:               "); pw.println(mTaskId);
         pw.print("  stackView:            "); pw.println(mStackView);

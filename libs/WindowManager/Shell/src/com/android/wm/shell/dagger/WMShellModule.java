@@ -145,6 +145,7 @@ public abstract class WMShellModule {
     @Provides
     static BubbleController provideBubbleController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             BubbleData data,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -165,7 +166,7 @@ public abstract class WMShellModule {
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
-        return new BubbleController(context, shellInit, shellController, data,
+        return new BubbleController(context, shellInit, shellCommandHandler, shellController, data,
                 null /* synchronizer */, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, userManager,
