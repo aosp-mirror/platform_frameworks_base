@@ -1655,7 +1655,8 @@ final class AccessibilityController {
             }
 
             // If the window is completely covered by other windows - ignore.
-            if (unaccountedSpace.quickReject(regionInScreen)) {
+            Region intersectionWindow = mTempRegion1;
+            if (!intersectionWindow.op(unaccountedSpace, regionInScreen, Region.Op.INTERSECT)) {
                 return false;
             }
 
