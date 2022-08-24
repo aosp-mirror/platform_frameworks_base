@@ -454,6 +454,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -5501,7 +5502,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentSender pendingResult, int matchFlags) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "queryIntentComponentsForIntentSender()");
-        Preconditions.checkNotNull(pendingResult);
+        Objects.requireNonNull(pendingResult);
         final PendingIntentRecord res;
         try {
             res = (PendingIntentRecord) pendingResult;
@@ -5513,17 +5514,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
         final int userId = res.key.userId;
+        final int uid = res.uid;
+        final String resolvedType = res.key.requestResolvedType;
         switch (res.key.type) {
             case ActivityManager.INTENT_SENDER_ACTIVITY:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryIntentActivitiesAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentActivities(
+                        intent, resolvedType, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_SERVICE:
             case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryIntentServicesAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentServices(
+                        intent, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_BROADCAST:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryBroadcastReceiversAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentReceivers(
+                        intent, resolvedType, matchFlags, uid, userId, false));
             default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
                 throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
         }
