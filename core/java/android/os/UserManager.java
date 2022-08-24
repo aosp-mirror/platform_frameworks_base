@@ -1995,7 +1995,8 @@ public class UserManager {
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
-        mContext = context.getApplicationContext();
+        Context appContext = context.getApplicationContext();
+        mContext = (appContext == null ? context : appContext);
         mUserId = context.getUserId();
     }
 
