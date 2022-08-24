@@ -10627,7 +10627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
                 pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
-                        + queue.mBroadcastsScheduled);
+                        + queue.hasBroadcastsScheduled());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -15186,7 +15186,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // It's not the current receiver, but it might be starting up to become one
         for (BroadcastQueue queue : mBroadcastQueues) {
-            final BroadcastRecord r = queue.mPendingBroadcast;
+            final BroadcastRecord r = queue.getPendingBroadcastLocked();
             if (r != null && r.curApp == app) {
                 // found it; report which queue it's in
                 receivingQueues.add(queue);
@@ -15301,7 +15301,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isIdle()) {
+            if (!q.isIdle()) {
                 return false;
             }
         }

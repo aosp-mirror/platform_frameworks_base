@@ -104,7 +104,7 @@ import java.util.Set;
  * foreground priority, and one for normal (background-priority) broadcasts, and one to
  * offload special broadcasts that we know take a long time, such as BOOT_COMPLETED.
  */
-public final class BroadcastQueue {
+public class BroadcastQueue {
     private static final String TAG = "BroadcastQueue";
     private static final String TAG_MU = TAG + POSTFIX_MU;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
@@ -254,11 +254,27 @@ public final class BroadcastQueue {
         return mQueueName;
     }
 
+    public boolean isDelayBehindServices() {
+        return mDelayBehindServices;
+    }
+
+    public boolean hasBroadcastsScheduled() {
+        return mBroadcastsScheduled;
+    }
+
+    public BroadcastRecord getPendingBroadcastLocked() {
+        return mPendingBroadcast;
+    }
+
+    public BroadcastRecord getActiveBroadcastLocked() {
+        return mDispatcher.getActiveBroadcastLocked();
+    }
+
     public boolean isPendingBroadcastProcessLocked(int pid) {
         return mPendingBroadcast != null && mPendingBroadcast.curApp.getPid() == pid;
     }
 
-    boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
+    public boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
         return mPendingBroadcast != null && mPendingBroadcast.curApp == app;
     }
 
@@ -606,8 +622,8 @@ public final class BroadcastQueue {
 
         // If we want to wait behind services *AND* we're finishing the head/
         // active broadcast on its queue
-        if (waitForServices && r.curComponent != null && r.queue.mDelayBehindServices
-                && r.queue.mDispatcher.getActiveBroadcastLocked() == r) {
+        if (waitForServices && r.curComponent != null && r.queue.isDelayBehindServices()
+                && r.queue.getActiveBroadcastLocked() == r) {
             ActivityInfo nextReceiver;
             if (r.nextReceiver < r.receivers.size()) {
                 Object obj = r.receivers.get(r.nextReceiver);
@@ -652,7 +668,7 @@ public final class BroadcastQueue {
         }
     }
 
-    void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
+    public void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky, int sendingUser,
             int receiverUid, int callingUid, long dispatchDelay,
@@ -1195,7 +1211,7 @@ public final class BroadcastQueue {
         return intent;
     }
 
-    final void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj) {
+    public void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj) {
         BroadcastRecord r;
 
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "processNextBroadcast ["
@@ -2307,7 +2323,7 @@ public final class BroadcastQueue {
         mSummaryHistoryNext = ringAdvance(mSummaryHistoryNext, 1, MAX_BROADCAST_SUMMARY_HISTORY);
     }
 
-    boolean cleanupDisabledPackageReceiversLocked(
+    public boolean cleanupDisabledPackageReceiversLocked(
             String packageName, Set<String> filterByClasses, int userId, boolean doit) {
         boolean didSomething = false;
         for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
@@ -2358,28 +2374,28 @@ public final class BroadcastQueue {
                 record.intent == null ? "" : record.intent.getAction());
     }
 
-    boolean isIdle() {
+    public boolean isIdle() {
         return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
     }
 
     // Used by wait-for-broadcast-idle : fast-forward all current deferrals to
     // be immediately deliverable.
-    void cancelDeferrals() {
+    public void cancelDeferrals() {
         synchronized (mService) {
             mDispatcher.cancelDeferralsLocked();
             scheduleBroadcastsLocked();
         }
     }
 
-    String describeState() {
+    public String describeState() {
         synchronized (mService) {
             return mParallelBroadcasts.size() + " parallel; "
                     + mDispatcher.describeStateLocked();
         }
     }
 
-    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
         int N;
@@ -2425,7 +2441,7 @@ public final class BroadcastQueue {
         proto.end(token);
     }
 
-    final boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+    public boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage, boolean needSep) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         if (!mParallelBroadcasts.isEmpty() || !mDispatcher.isEmpty()
