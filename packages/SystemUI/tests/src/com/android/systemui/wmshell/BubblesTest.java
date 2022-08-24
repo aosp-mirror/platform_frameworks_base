@@ -1395,6 +1395,33 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
+    /**
+     * Test to verify behavior for following situation:
+     * <ul>
+     *     <li>status bar shade state is set to <code>false</code></li>
+     *     <li>there is a bubble pending to be expanded</li>
+     * </ul>
+     * Test that duplicate status bar state updates to <code>false</code> do not clear the
+     * pending bubble to be
+     * expanded.
+     */
+    @Test
+    public void testOnStatusBarStateChanged_statusBarChangeDoesNotClearExpandingBubble() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.onStatusBarStateChanged(false);
+        // Set the bubble to expand once status bar state changes
+        mBubbleController.expandStackAndSelectBubble(mBubbleEntry);
+        // Check that stack is currently collapsed
+        assertStackCollapsed();
+        // Post status bar state change update with the same value
+        mBubbleController.onStatusBarStateChanged(false);
+        // Stack should remain collapsedb
+        assertStackCollapsed();
+        // Post status bar state change which should trigger bubble to expand
+        mBubbleController.onStatusBarStateChanged(true);
+        assertStackExpanded();
+    }
+
     @Test
     public void testSetShouldAutoExpand_notifiesFlagChanged() {
         mBubbleController.updateBubble(mBubbleEntry);
