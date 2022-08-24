@@ -40,6 +40,7 @@ import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.BroadcastOptions;
@@ -235,6 +236,59 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         return mDispatcher.getActiveBroadcastLocked();
     }
 
+    public void enqueueBroadcastLocked(BroadcastRecord r) {
+        final boolean replacePending = (r.intent.getFlags()
+                & Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
+
+        // Ordered broadcasts obviously need to be dispatched in serial order,
+        // but this implementation expects all manifest receivers to also be
+        // dispatched in a serial fashion
+        boolean serialDispatch = r.ordered;
+        if (!serialDispatch) {
+            final int N = (r.receivers != null) ? r.receivers.size() : 0;
+            for (int i = 0; i < N; i++) {
+                if (r.receivers.get(i) instanceof ResolveInfo) {
+                    serialDispatch = true;
+                    break;
+                }
+            }
+        }
+
+        if (serialDispatch) {
+            final BroadcastRecord oldRecord =
+                    replacePending ? replaceOrderedBroadcastLocked(r) : null;
+            if (oldRecord != null) {
+                // Replaced, fire the result-to receiver.
+                if (oldRecord.resultTo != null) {
+                    try {
+                        oldRecord.mIsReceiverAppRunning = true;
+                        performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
+                                oldRecord.intent,
+                                Activity.RESULT_CANCELED, null, null,
+                                false, false, oldRecord.userId, oldRecord.callingUid, r.callingUid,
+                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failure ["
+                                + mQueueName + "] sending broadcast result of "
+                                + oldRecord.intent, e);
+
+                    }
+                }
+            } else {
+                enqueueOrderedBroadcastLocked(r);
+                scheduleBroadcastsLocked();
+            }
+        } else {
+            final boolean replaced = replacePending
+                    && (replaceParallelBroadcastLocked(r) != null);
+            // Note: We assume resultTo is null for non-ordered broadcasts.
+            if (!replaced) {
+                enqueueParallelBroadcastLocked(r);
+                scheduleBroadcastsLocked();
+            }
+        }
+    }
+
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
         r.enqueueClockTime = System.currentTimeMillis();
         r.enqueueTime = SystemClock.uptimeMillis();
@@ -366,6 +420,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
      */
     public void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
         mDispatcher.updateUidReadyForBootCompletedBroadcastLocked(uid);
+        scheduleBroadcastsLocked();
     }
 
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {

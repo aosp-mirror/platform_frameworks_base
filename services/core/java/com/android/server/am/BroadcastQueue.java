@@ -16,13 +16,12 @@
 
 package com.android.server.am;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.FileDescriptor;
@@ -65,13 +64,16 @@ public abstract class BroadcastQueue {
 
     public abstract BroadcastRecord getActiveBroadcastLocked();
 
-    public abstract void enqueueParallelBroadcastLocked(BroadcastRecord r);
-
-    public abstract void enqueueOrderedBroadcastLocked(BroadcastRecord r);
-
-    public abstract BroadcastRecord replaceParallelBroadcastLocked(BroadcastRecord r);
-
-    public abstract BroadcastRecord replaceOrderedBroadcastLocked(BroadcastRecord r);
+    /**
+     * Enqueue the given broadcast to be eventually dispatched.
+     * <p>
+     * Callers must populate {@link BroadcastRecord#receivers} with the relevant
+     * targets before invoking this method.
+     * <p>
+     * When {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} is set, this method
+     * internally handles replacement of any matching broadcasts.
+     */
+    public abstract void enqueueBroadcastLocked(BroadcastRecord r);
 
     public abstract void updateUidReadyForBootCompletedBroadcastLocked(int uid);
 
@@ -80,8 +82,6 @@ public abstract class BroadcastQueue {
     public abstract void skipPendingBroadcastLocked(int pid);
 
     public abstract void skipCurrentReceiverLocked(ProcessRecord app);
-
-    public abstract void scheduleBroadcastsLocked();
 
     public abstract BroadcastRecord getMatchingOrderedReceiver(IBinder receiver);
 
@@ -96,12 +96,6 @@ public abstract class BroadcastQueue {
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices);
 
     public abstract void backgroundServicesFinishedLocked(int userId);
-
-    public abstract void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
-            Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky, int sendingUser,
-            int receiverUid, int callingUid, long dispatchDelay,
-            long receiveDelay) throws RemoteException;
 
     public abstract void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj);
 
