@@ -958,6 +958,11 @@ public class Transitions implements RemoteCallable<Transitions> {
                         transitions.mRemoteTransitionHandler.removeFiltered(remoteTransition);
                     });
         }
+
+        @Override
+        public IBinder getShellApplyToken() {
+            return SurfaceControl.Transaction.getDefaultApplyToken();
+        }
     }
 
     private class SettingsObserver extends ContentObserver {
