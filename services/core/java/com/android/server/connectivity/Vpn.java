@@ -756,6 +756,8 @@ public class Vpn {
             int errorCode, @NonNull final String packageName, @Nullable final String sessionKey,
             @NonNull final VpnProfileState profileState, @Nullable final Network underlyingNetwork,
             @Nullable final NetworkCapabilities nc, @Nullable final LinkProperties lp) {
+        // Add log for debugging flaky test. b/242833779
+        Log.d(TAG, "buildVpnManagerEventIntent: sessionKey = " + sessionKey);
         final Intent intent = new Intent(VpnManager.ACTION_VPN_MANAGER_EVENT);
         intent.setPackage(packageName);
         intent.addCategory(category);
@@ -2778,6 +2780,8 @@ public class Vpn {
             mIpSecManager = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
             mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this, mExecutor);
             mSessionKey = UUID.randomUUID().toString();
+            // Add log for debugging flaky test. b/242833779
+            Log.d(TAG, "Generate session key = " + mSessionKey);
 
             // Set the policy so that cancelled tasks will be removed from the work queue
             mExecutor.setRemoveOnCancelPolicy(true);
@@ -3972,7 +3976,13 @@ public class Vpn {
     @GuardedBy("this")
     @Nullable
     private String getSessionKeyLocked() {
-        return isIkev2VpnRunner() ? ((IkeV2VpnRunner) mVpnRunner).mSessionKey : null;
+        // Add log for debugging flaky test. b/242833779
+        final boolean isIkev2VpnRunner = isIkev2VpnRunner();
+        final String sessionKey =
+                isIkev2VpnRunner ? ((IkeV2VpnRunner) mVpnRunner).mSessionKey : null;
+        Log.d(TAG, "getSessionKeyLocked: isIkev2VpnRunner = " + isIkev2VpnRunner
+                + ", sessionKey = " + sessionKey);
+        return sessionKey;
     }
 
     /**
