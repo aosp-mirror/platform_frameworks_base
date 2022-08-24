@@ -25,7 +25,10 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.SettingsPager
+import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
+
+private const val TITLE = "Sample SettingsPager"
 
 object SettingsPagerPageProvider : SettingsPageProvider {
     override val name = "SettingsPager"
@@ -38,7 +41,7 @@ object SettingsPagerPageProvider : SettingsPageProvider {
     @Composable
     fun EntryItem() {
         Preference(object : PreferenceModel {
-            override val title = "Sample SettingsPager"
+            override val title = TITLE
             override val onClick = navigator(name)
         })
     }
@@ -46,8 +49,10 @@ object SettingsPagerPageProvider : SettingsPageProvider {
 
 @Composable
 private fun SettingsPagerPage() {
-    SettingsPager(listOf("Personal", "Work")) {
-        PlaceholderTitle("Page $it")
+    SettingsScaffold(title = TITLE) {
+        SettingsPager(listOf("Personal", "Work")) {
+            PlaceholderTitle("Page $it")
+        }
     }
 }
 
