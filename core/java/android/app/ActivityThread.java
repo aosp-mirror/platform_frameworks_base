@@ -4162,7 +4162,8 @@ public final class ActivityThread extends ClientTransactionHandler
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
         transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.activity.isFinishing(),
-                /* userLeaving */ true, r.activity.mConfigChangeFlags, /* dontReport */ false));
+                /* userLeaving */ true, r.activity.mConfigChangeFlags, /* dontReport */ false,
+                /* autoEnteringPip */ false));
         executeTransaction(transaction);
     }
 
@@ -4952,12 +4953,18 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @Override
     public void handlePauseActivity(ActivityClientRecord r, boolean finished, boolean userLeaving,
-            int configChanges, PendingTransactionActions pendingActions, String reason) {
+            int configChanges, boolean autoEnteringPip, PendingTransactionActions pendingActions,
+            String reason) {
         if (userLeaving) {
             performUserLeavingActivity(r);
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
+        if (autoEnteringPip) {
+            // Set mIsInPictureInPictureMode earlier in case of auto-enter-pip, see also
+            // {@link Activity#enterPictureInPictureMode(PictureInPictureParams)}.
+            r.activity.mIsInPictureInPictureMode = true;
+        }
         performPauseActivity(r, finished, reason, pendingActions);
 
         // Make sure any pending writes are now committed.
