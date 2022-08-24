@@ -502,14 +502,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         GamePackageConfiguration(PackageManager packageManager, String packageName, int userId) {
             mPackageName = packageName;
-
-            // set flag default values
-            mPerfModeOptedIn = false;
-            mBatteryModeOptedIn = false;
-            mAllowDownscale = true;
-            mAllowAngle = true;
-            mAllowFpsOverride = true;
-
             try {
                 final ApplicationInfo ai = packageManager.getApplicationInfoAsUser(packageName,
                         PackageManager.GET_META_DATA, userId);
@@ -519,6 +511,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
                         mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
                         mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
+                    } else {
+                        mPerfModeOptedIn = false;
+                        mBatteryModeOptedIn = false;
+                        mAllowDownscale = true;
+                        mAllowAngle = true;
+                        mAllowFpsOverride = true;
                     }
                 }
             } catch (NameNotFoundException e) {
