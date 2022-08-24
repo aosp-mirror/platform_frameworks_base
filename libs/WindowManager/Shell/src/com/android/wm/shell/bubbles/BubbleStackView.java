@@ -111,6 +111,9 @@ public class BubbleStackView extends FrameLayout
     public static final boolean HOME_GESTURE_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.bubbles_home_gesture", true);
 
+    public static final boolean ENABLE_FLING_TO_DISMISS_BUBBLE =
+            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_bubble", true);
+
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** How far the flyout needs to be dragged before it's dismissed regardless of velocity. */

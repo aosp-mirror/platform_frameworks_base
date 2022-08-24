@@ -3563,7 +3563,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING)) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
-                            false /* pauseImmediately */, "auto-pip");
+                            false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
                 }
             }
         };
@@ -4624,7 +4624,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** Update AMS states when an activity is resumed. */
-    void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
+    void setLastResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final Task task = r.getTask();
         if (task.isActivityTypeStandard()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {

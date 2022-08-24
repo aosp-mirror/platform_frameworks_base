@@ -956,16 +956,7 @@ public abstract class BatteryStats implements Parcelable {
 
         public static final int NUM_WIFI_BATCHED_SCAN_BINS = 5;
 
-        /**
-         * Note that these must match the constants in android.os.PowerManager.
-         * Also, if the user activity types change, the BatteryStatsImpl.VERSION must
-         * also be bumped.
-         */
-        static final String[] USER_ACTIVITY_TYPES = {
-            "other", "button", "touch", "accessibility", "attention"
-        };
-
-        public static final int NUM_USER_ACTIVITY_TYPES = USER_ACTIVITY_TYPES.length;
+        public static final int NUM_USER_ACTIVITY_TYPES = PowerManager.USER_ACTIVITY_EVENT_MAX + 1;
 
         public abstract void noteUserActivityLocked(int type);
         public abstract boolean hasUserActivity();
@@ -6177,7 +6168,7 @@ public abstract class BatteryStats implements Parcelable {
                         }
                         sb.append(val);
                         sb.append(" ");
-                        sb.append(Uid.USER_ACTIVITY_TYPES[i]);
+                        sb.append(PowerManager.userActivityEventToString(i));
                     }
                 }
                 if (hasData) {

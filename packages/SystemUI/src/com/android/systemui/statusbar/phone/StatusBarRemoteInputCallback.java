@@ -259,8 +259,9 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity || appRequestedAuth) {
             mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
-            final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
-                    pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
+            final boolean afterKeyguardGone = mActivityIntentHelper
+                    .wouldPendingLaunchResolverActivity(pendingIntent,
+                            mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
                 mActionClickLogger.logKeyguardGone(pendingIntent);
 

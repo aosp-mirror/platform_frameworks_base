@@ -2041,6 +2041,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-108248992": {
+      "message": "Defer transition ready for TaskFragmentTransaction=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "-106400104": {
       "message": "Preload recents with %s",
       "level": "DEBUG",
@@ -2088,6 +2094,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-79016993": {
+      "message": "Continue transition ready for TaskFragmentTransaction=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
     },
     "-70719599": {
       "message": "Unregister remote animations for organizer=%s uid=%d pid=%d",
