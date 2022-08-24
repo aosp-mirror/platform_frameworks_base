@@ -80,6 +80,8 @@ public class BiometricStateCallbackTest {
         when(mFakeProvider.hasEnrollments(eq(SENSOR_ID), eq(USER_ID))).thenReturn(true);
         when(mUserManager.getAliveUsers()).thenReturn(
                 List.of(new UserInfo(USER_ID, "name", 0)));
+        when(mBiometricStateListener.asBinder()).thenReturn(mBiometricStateListener);
+
 
         mCallback = new BiometricStateCallback<>(mUserManager);
         mCallback.registerBiometricStateListener(mBiometricStateListener);
@@ -107,6 +109,14 @@ public class BiometricStateCallbackTest {
     @Test
     public void testEnrollmentsToEnrollments_callbackNotNotified() {
         testEnrollmentCallback(false /* changed */, true /* isNowEnrolled */,
+                false /* expectCallback */, false /* expectedCallbackValue */);
+    }
+
+    @Test
+    public void testBinderDeath() {
+        mCallback.binderDied(mBiometricStateListener.asBinder());
+
+        testEnrollmentCallback(true /* changed */, false /* isNowEnrolled */,
                 false /* expectCallback */, false /* expectedCallbackValue */);
     }
 
