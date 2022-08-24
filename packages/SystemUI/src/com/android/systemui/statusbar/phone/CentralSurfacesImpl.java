@@ -4065,7 +4065,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback,
             @Nullable ActivityLaunchAnimator.Controller animationController) {
         final boolean willLaunchResolverActivity = intent.isActivity()
-                && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
+                && mActivityIntentHelper.wouldPendingLaunchResolverActivity(intent,
                 mLockscreenUserManager.getCurrentUserId());
 
         boolean animate = !willLaunchResolverActivity
