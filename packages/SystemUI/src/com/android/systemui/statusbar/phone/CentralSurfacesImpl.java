@@ -203,7 +203,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -508,7 +507,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     private boolean mExpandedVisible;
 
-    protected final NotificationEntryManager mEntryManager;
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
@@ -681,7 +679,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
-            NotificationEntryManager notificationEntryManager,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
@@ -768,7 +765,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
-        mEntryManager = notificationEntryManager;
         mGutsManager = notificationGutsManager;
         mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
@@ -839,11 +835,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
         mPanelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
 
-        mBubbleExpandListener =
-                (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
-                    mNotificationsController.requestNotificationUpdate("onBubbleExpandChanged");
-                    updateScrimController();
-                });
+        mBubbleExpandListener = (isExpanding, key) ->
+                mContext.getMainExecutor().execute(this::updateScrimController);
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
@@ -1616,15 +1609,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     }
 
     /**
-     * Request a notification update
-     * @param reason why we're requesting a notification update
-     */
-    @Override
-    public void requestNotificationUpdate(String reason) {
-        mNotificationsController.requestNotificationUpdate(reason);
-    }
-
-    /**
      * Asks {@link KeyguardUpdateMonitor} to run face auth.
      */
     @Override
@@ -2327,8 +2311,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.dump(pw);
         }
-
-        mNotificationsController.dump(pw, args, DUMPTRUCK);
 
         if (DEBUG_GESTURES) {
             pw.print("  status bar gestures: ");
@@ -4233,14 +4215,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                         maybeEscalateHeadsUp();
                     }
                 }
-
-                // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
-                //  KeyguardCoordinator
-                @Override
-                public void onStrongAuthStateChanged(int userId) {
-                    super.onStrongAuthStateChanged(userId);
-                    mNotificationsController.requestNotificationUpdate("onStrongAuthStateChanged");
-                }
             };
 
 
@@ -4429,7 +4403,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     updateQsExpansionEnabled();
                     mKeyguardViewMediator.setDozing(mDozing);
 
-                    mNotificationsController.requestNotificationUpdate("onDozingChanged");
                     updateDozingState();
                     mDozeServiceHost.updateDozing();
                     updateScrimController();

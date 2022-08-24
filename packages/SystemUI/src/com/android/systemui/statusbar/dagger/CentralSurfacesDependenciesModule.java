@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.dagger;
 
 import android.app.IActivityManager;
 import android.content.Context;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -42,14 +41,12 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -99,11 +96,8 @@ public interface CentralSurfacesDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
-            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
-            Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
@@ -114,7 +108,6 @@ public interface CentralSurfacesDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 visibilityProvider,
-                notificationEntryManager,
                 centralSurfacesOptionalLazy,
                 statusBarStateController,
                 remoteInputUriController,
