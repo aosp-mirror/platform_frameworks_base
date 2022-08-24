@@ -1299,8 +1299,8 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_REMOTE_SUBMIX_NAME = "remote_submix";
     /** @hide */ public static final String DEVICE_OUT_TELEPHONY_TX_NAME = "telephony_tx";
     /** @hide */ public static final String DEVICE_OUT_LINE_NAME = "line";
-    /** @hide */ public static final String DEVICE_OUT_HDMI_ARC_NAME = "hmdi_arc";
-    /** @hide */ public static final String DEVICE_OUT_HDMI_EARC_NAME = "hmdi_earc";
+    /** @hide */ public static final String DEVICE_OUT_HDMI_ARC_NAME = "hdmi_arc";
+    /** @hide */ public static final String DEVICE_OUT_HDMI_EARC_NAME = "hdmi_earc";
     /** @hide */ public static final String DEVICE_OUT_SPDIF_NAME = "spdif";
     /** @hide */ public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
     /** @hide */ public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
