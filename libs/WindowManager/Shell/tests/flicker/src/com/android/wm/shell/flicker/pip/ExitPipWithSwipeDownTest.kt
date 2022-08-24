@@ -24,7 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,9 +63,9 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
                 val barComponent = if (testSpec.isTablet) {
-                    ComponentMatcher.TASK_BAR
+                    ComponentNameMatcher.TASK_BAR
                 } else {
-                    ComponentMatcher.NAV_BAR
+                    ComponentNameMatcher.NAV_BAR
                 }
                 val barLayerHeight = wmHelper.currentState.layerState
                     .getLayerWithBuffer(barComponent)

@@ -28,6 +28,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.traces.common.IComponentMatcher
+import com.android.server.wm.traces.common.IComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SPLIT_DECOR_MANAGER
@@ -37,8 +38,8 @@ import com.android.wm.shell.flicker.testapp.Components
 class SplitScreenHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: IComponentMatcher
-) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
+    componentInfo: IComponentNameMatcher
+) : BaseAppHelper(instrumentation, activityLabel, componentInfo) {
 
     companion object {
         const val TEST_REPETITIONS = 1
@@ -280,12 +281,12 @@ class SplitScreenHelper(
         fun copyContentFromLeftToRight(
             instrumentation: Instrumentation,
             device: UiDevice,
-            sourceApp: IComponentMatcher,
-            destinationApp: IComponentMatcher,
+            sourceApp: IComponentNameMatcher,
+            destinationApp: IComponentNameMatcher,
         ) {
             // Copy text from sourceApp
             val textView = device.wait(Until.findObject(
-                By.res(sourceApp.packageNames.firstOrNull(), "SplitScreenTest")), TIMEOUT_MS)
+                By.res(sourceApp.packageName, "SplitScreenTest")), TIMEOUT_MS)
             longPress(instrumentation, textView.getVisibleCenter())
 
             val copyBtn = device.wait(Until.findObject(By.text("Copy")), TIMEOUT_MS)
@@ -293,7 +294,7 @@ class SplitScreenHelper(
 
             // Paste text to destinationApp
             val editText = device.wait(Until.findObject(
-                By.res(destinationApp.packageNames.firstOrNull(), "plain_text_input")), TIMEOUT_MS)
+                By.res(destinationApp.packageName, "plain_text_input")), TIMEOUT_MS)
             longPress(instrumentation, editText.getVisibleCenter())
 
             val pasteBtn = device.wait(Until.findObject(By.text("Paste")), TIMEOUT_MS)

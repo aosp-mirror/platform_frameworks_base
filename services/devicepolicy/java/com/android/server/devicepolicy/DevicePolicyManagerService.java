@@ -8363,6 +8363,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 + PackageManager.FEATURE_DEVICE_ADMIN + " feature.");
     }
 
+    // TODO(b/240562946): Remove owner name from API parameters.
     @Override
     public boolean setDeviceOwner(ComponentName admin, String ownerName, int userId,
             boolean setProfileOwnerOnCurrentUserIfNecessary) {
@@ -8397,7 +8398,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .write();
             }
 
-            mOwners.setDeviceOwner(admin, ownerName, userId);
+            mOwners.setDeviceOwner(admin, userId);
             mOwners.writeDeviceOwner();
             setDeviceOwnershipSystemPropertyLocked();
 
@@ -8649,6 +8650,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    // TODO(b/240562946): Remove api as owner name is not used.
     /**
      * Returns the "name" of the device owner.  It'll work for non-DO users too, but requires
      * MANAGE_USERS.
@@ -8819,6 +8821,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
+    // TODO(b/240562946): Remove owner name from API parameters.
     @Override
     public boolean setProfileOwner(ComponentName who, String ownerName, int userHandle) {
         if (!mHasFeature) {
@@ -8866,7 +8869,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // Shutting down backup manager service permanently.
             toggleBackupServiceActive(userHandle, /* makeActive= */ false);
 
-            mOwners.setProfileOwner(who, ownerName, userHandle);
+            mOwners.setProfileOwner(who, userHandle);
             mOwners.writeProfileOwner(userHandle);
             Slogf.i(LOG_TAG, "Profile owner set: " + who + " on user " + userHandle);
 
@@ -9337,6 +9340,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return who.getPackageName().equals(configPackage);
     }
 
+    // TODO(b/240562946): Remove api as owner name is not used.
     @Override
     public String getProfileOwnerName(int userHandle) {
         if (!mHasFeature) {

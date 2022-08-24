@@ -26,7 +26,7 @@ import androidx.window.extensions.WindowExtensions
 import androidx.window.extensions.WindowExtensionsProvider
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.IComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.windowmanager.WindowManagerState.Companion.STATE_RESUMED
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
@@ -35,7 +35,7 @@ import org.junit.Assume.assumeNotNull
 class ActivityEmbeddingAppHelper @JvmOverloads constructor(
         instr: Instrumentation,
         launcherName: String = ActivityOptions.ACTIVITY_EMBEDDING_LAUNCHER_NAME,
-        component: IComponentMatcher = MAIN_ACTIVITY_COMPONENT,
+        component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT,
         launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
                 .getInstance(instr)
                 .launcherStrategy

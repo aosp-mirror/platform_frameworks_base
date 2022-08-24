@@ -44,6 +44,10 @@ m out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/a
   environment variable with the id of the lint. For example:
   `ANDROID_LINT_CHECK=UnusedTokenOfOriginalCallingIdentity m out/[...]/lint-report.html`
 
+## How to apply automatic fixes suggested by lint
+
+See [lint_fix](fix/README.md)
+
 ## Create or update a baseline
 
 Baseline files can be used to silence known errors (and warnings) that are deemed to be safe. When

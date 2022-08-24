@@ -30,9 +30,9 @@ import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.testapp.ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME
 import com.android.server.wm.flicker.testapp.ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
-import com.android.server.wm.traces.common.ComponentMatcher
-import com.android.server.wm.traces.common.ComponentMatcher.Companion.SPLASH_SCREEN
-import com.android.server.wm.traces.common.ComponentMatcher.Companion.WALLPAPER_BBQ_WRAPPER
+import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.SPLASH_SCREEN
+import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
 import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import org.junit.FixMethodOrder
@@ -117,7 +117,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Test
     fun launcherWindowIsNeverVisible() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(ComponentMatcher.LAUNCHER)
+            this.isAppWindowInvisible(ComponentNameMatcher.LAUNCHER)
         }
     }
 
@@ -130,7 +130,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Test
     fun launcherLayerIsNeverVisible() {
         testSpec.assertLayers {
-            this.isInvisible(ComponentMatcher.LAUNCHER)
+            this.isInvisible(ComponentNameMatcher.LAUNCHER)
         }
     }
 
@@ -140,7 +140,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     @Postsubmit
     @Test
     fun colorLayerIsVisibleDuringTransition() {
-        val bgColorLayer = ComponentMatcher("", "colorBackgroundLayer")
+        val bgColorLayer = ComponentNameMatcher("", "colorBackgroundLayer")
         val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
         testSpec.assertLayers {

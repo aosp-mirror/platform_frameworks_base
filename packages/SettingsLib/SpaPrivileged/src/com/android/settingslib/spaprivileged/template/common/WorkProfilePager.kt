@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spaprivileged.template.scaffold
+package com.android.settingslib.spaprivileged.template.common
 
 import android.content.pm.UserInfo
 import android.os.UserHandle
@@ -23,7 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.android.settingslib.spa.widget.scaffold.SettingsPager
-import com.android.settingslib.spaprivileged.framework.enterprise.EnterpriseRepository
+import com.android.settingslib.spaprivileged.model.enterprise.EnterpriseRepository
 
 @Composable
 fun WorkProfilePager(content: @Composable (userInfo: UserInfo) -> Unit) {

@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -118,7 +118,7 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Test
     fun launcherWindowNotOnTop() {
         testSpec.assertWm {
-            this.isAppWindowNotOnTop(ComponentMatcher.LAUNCHER)
+            this.isAppWindowNotOnTop(ComponentNameMatcher.LAUNCHER)
         }
     }
 
@@ -128,7 +128,7 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Presubmit
     @Test
     fun launcherLayerNotVisible() {
-        testSpec.assertLayers { this.isInvisible(ComponentMatcher.LAUNCHER) }
+        testSpec.assertLayers { this.isInvisible(ComponentNameMatcher.LAUNCHER) }
     }
 
     companion object {

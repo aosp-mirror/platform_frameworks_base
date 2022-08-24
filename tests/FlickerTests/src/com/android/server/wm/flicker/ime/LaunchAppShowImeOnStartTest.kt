@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.ImeStateInitializeHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -114,7 +114,7 @@ class LaunchAppShowImeOnStartTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun imeLayerNotExistsStart() {
         testSpec.assertLayersStart {
-            this.isInvisible(ComponentMatcher.IME)
+            this.isInvisible(ComponentNameMatcher.IME)
         }
     }
 
@@ -125,7 +125,7 @@ class LaunchAppShowImeOnStartTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {
-            this.isVisible(ComponentMatcher.IME)
+            this.isVisible(ComponentNameMatcher.IME)
         }
     }
 

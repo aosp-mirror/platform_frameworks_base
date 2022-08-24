@@ -19,7 +19,7 @@ package com.android.server.wm.flicker
 
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.IComponentMatcher
 
 /**
@@ -28,7 +28,7 @@ import com.android.server.wm.traces.common.IComponentMatcher
  */
 fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
     assertWm {
-        this.isAboveAppWindowVisible(ComponentMatcher.STATUS_BAR)
+        this.isAboveAppWindowVisible(ComponentNameMatcher.STATUS_BAR)
     }
 }
 
@@ -38,7 +38,7 @@ fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
  */
 fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
     assertWm {
-        this.isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
+        this.isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
     }
 }
 
@@ -48,10 +48,10 @@ fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
  */
 fun FlickerTestParameter.navBarWindowIsVisibleAtStartAndEnd() {
     assertWmStart {
-        this.isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
+        this.isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
     }
     assertWmEnd {
-        this.isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
+        this.isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
     }
 }
 
@@ -61,7 +61,7 @@ fun FlickerTestParameter.navBarWindowIsVisibleAtStartAndEnd() {
  */
 fun FlickerTestParameter.taskBarWindowIsAlwaysVisible() {
     assertWm {
-        this.isAboveAppWindowVisible(ComponentMatcher.TASK_BAR)
+        this.isAboveAppWindowVisible(ComponentNameMatcher.TASK_BAR)
     }
 }
 
@@ -71,7 +71,7 @@ fun FlickerTestParameter.taskBarWindowIsAlwaysVisible() {
  */
 fun FlickerTestParameter.taskBarWindowIsVisibleAtEnd() {
     assertWmEnd {
-        this.isAboveAppWindowVisible(ComponentMatcher.TASK_BAR)
+        this.isAboveAppWindowVisible(ComponentNameMatcher.TASK_BAR)
     }
 }
 
@@ -114,10 +114,10 @@ fun FlickerTestParameter.entireScreenCovered(allStates: Boolean = true) {
  */
 fun FlickerTestParameter.navBarLayerIsVisibleAtStartAndEnd() {
     assertLayersStart {
-        this.isVisible(ComponentMatcher.NAV_BAR)
+        this.isVisible(ComponentNameMatcher.NAV_BAR)
     }
     assertLayersEnd {
-        this.isVisible(ComponentMatcher.NAV_BAR)
+        this.isVisible(ComponentNameMatcher.NAV_BAR)
     }
 }
 
@@ -136,7 +136,7 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtStartAndEnd() {
  */
 fun FlickerTestParameter.taskBarLayerIsVisibleAtStart() {
     assertLayersStart {
-        this.isVisible(ComponentMatcher.TASK_BAR)
+        this.isVisible(ComponentNameMatcher.TASK_BAR)
     }
 }
 
@@ -146,7 +146,7 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtStart() {
  */
 fun FlickerTestParameter.taskBarLayerIsVisibleAtEnd() {
     assertLayersEnd {
-        this.isVisible(ComponentMatcher.TASK_BAR)
+        this.isVisible(ComponentNameMatcher.TASK_BAR)
     }
 }
 
@@ -156,10 +156,10 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtEnd() {
  */
 fun FlickerTestParameter.statusBarLayerIsVisibleAtStartAndEnd() {
     assertLayersStart {
-        this.isVisible(ComponentMatcher.STATUS_BAR)
+        this.isVisible(ComponentNameMatcher.STATUS_BAR)
     }
     assertLayersEnd {
-        this.isVisible(ComponentMatcher.STATUS_BAR)
+        this.isVisible(ComponentNameMatcher.STATUS_BAR)
     }
 }
 
@@ -171,7 +171,7 @@ fun FlickerTestParameter.navBarLayerPositionAtStart() {
     assertLayersStart {
         val display = this.entry.displays.firstOrNull { !it.isVirtual }
                 ?: error("There is no display!")
-        this.visibleRegion(ComponentMatcher.NAV_BAR)
+        this.visibleRegion(ComponentNameMatcher.NAV_BAR)
             .coversExactly(WindowUtils.getNavigationBarPosition(display, isGesturalNavigation))
     }
 }
@@ -184,7 +184,7 @@ fun FlickerTestParameter.navBarLayerPositionAtEnd() {
     assertLayersEnd {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentMatcher.NAV_BAR)
+        this.visibleRegion(ComponentNameMatcher.NAV_BAR)
             .coversExactly(WindowUtils.getNavigationBarPosition(display, isGesturalNavigation))
     }
 }
@@ -206,7 +206,7 @@ fun FlickerTestParameter.statusBarLayerPositionAtStart() {
     assertLayersStart {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentMatcher.STATUS_BAR)
+        this.visibleRegion(ComponentNameMatcher.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
 }
@@ -219,7 +219,7 @@ fun FlickerTestParameter.statusBarLayerPositionAtEnd() {
     assertLayersEnd {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentMatcher.STATUS_BAR)
+        this.visibleRegion(ComponentNameMatcher.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
 }
@@ -244,7 +244,7 @@ fun FlickerTestParameter.snapshotStartingWindowLayerCoversExactlyOnApp(
         invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
             val snapshotLayers = it.subjects.filter { subject ->
                 subject.name.contains(
-                    ComponentMatcher.SNAPSHOT.toLayerName()) && subject.isVisible
+                    ComponentNameMatcher.SNAPSHOT.toLayerName()) && subject.isVisible
             }
             // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
             if (snapshotLayers.isNotEmpty()) {
@@ -291,10 +291,10 @@ fun FlickerTestParameter.replacesLayer(
         val assertion = this.isVisible(originalLayer)
 
         if (ignoreEntriesWithRotationLayer) {
-            assertion.then().isVisible(ComponentMatcher.ROTATION, isOptional = true)
+            assertion.then().isVisible(ComponentNameMatcher.ROTATION, isOptional = true)
         }
         if (ignoreSnapshot) {
-            assertion.then().isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+            assertion.then().isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
         }
         if (ignoreSplashscreen) {
             assertion.then().isSplashScreenVisibleFor(newLayer, isOptional = true)

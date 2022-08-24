@@ -137,9 +137,9 @@ public final class FlexibilityController extends StateController {
             new PrefetchController.PrefetchChangedListener() {
                 @Override
                 public void onPrefetchCacheUpdated(ArraySet<JobStatus> jobs, int userId,
-                        String pkgName, long prevEstimatedLaunchTime, long newEstimatedLaunchTime) {
+                        String pkgName, long prevEstimatedLaunchTime,
+                        long newEstimatedLaunchTime, long nowElapsed) {
                     synchronized (mLock) {
-                        final long nowElapsed = sElapsedRealtimeClock.millis();
                         final long prefetchThreshold =
                                 mPrefetchController.getLaunchTimeThresholdMs();
                         boolean jobWasInPrefetchWindow  = prevEstimatedLaunchTime
@@ -158,8 +158,8 @@ public final class FlexibilityController extends StateController {
                             if (!js.hasFlexibilityConstraint()) {
                                 continue;
                             }
-                            mFlexibilityTracker.resetJobNumDroppedConstraints(js);
-                            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js);
+                            mFlexibilityTracker.resetJobNumDroppedConstraints(js, nowElapsed);
+                            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js, nowElapsed);
                         }
                     }
                 }
@@ -191,7 +191,7 @@ public final class FlexibilityController extends StateController {
             js.setTrackingController(JobStatus.TRACKING_FLEXIBILITY);
             final long nowElapsed = sElapsedRealtimeClock.millis();
             js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
-            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js);
+            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js, nowElapsed);
         }
     }
 
@@ -239,7 +239,7 @@ public final class FlexibilityController extends StateController {
      * Changes flexibility constraint satisfaction for affected jobs.
      */
     @VisibleForTesting
-    void setConstraintSatisfied(int constraint, boolean state) {
+    void setConstraintSatisfied(int constraint, boolean state, long nowElapsed) {
         synchronized (mLock) {
             final boolean old = (mSatisfiedFlexibleConstraints & constraint) != 0;
             if (old == state) {
@@ -254,8 +254,6 @@ public final class FlexibilityController extends StateController {
             // Only the max of the number of required flexible constraints will need to be updated
             // The rest did not have a change in state and are still satisfied or unsatisfied.
             final int numConstraintsToUpdate = Math.max(curSatisfied, prevSatisfied);
-
-            final long nowElapsed = sElapsedRealtimeClock.millis();
 
             // In order to get the range of all potentially satisfied jobs, we start at the number
             // of satisfied system-wide constraints and iterate to the max number of potentially
@@ -329,10 +327,9 @@ public final class FlexibilityController extends StateController {
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    int getCurPercentOfLifecycleLocked(JobStatus js) {
+    int getCurPercentOfLifecycleLocked(JobStatus js, long nowElapsed) {
         final long earliest = getLifeCycleBeginningElapsedLocked(js);
         final long latest = getLifeCycleEndElapsedLocked(js, earliest);
-        final long nowElapsed = sElapsedRealtimeClock.millis();
         if (latest == NO_LIFECYCLE_END || earliest >= nowElapsed) {
             return 0;
         }
@@ -414,8 +411,8 @@ public final class FlexibilityController extends StateController {
                                 .getJobsByNumRequiredConstraints(j);
                         for (int i = 0; i < jobs.size(); i++) {
                             JobStatus js = jobs.valueAt(i);
-                            mFlexibilityTracker.resetJobNumDroppedConstraints(js);
-                            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js);
+                            mFlexibilityTracker.resetJobNumDroppedConstraints(js, nowElapsed);
+                            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js, nowElapsed);
                             if (js.setFlexibilityConstraintSatisfied(
                                     nowElapsed, isFlexibilitySatisfiedLocked(js))) {
                                 changedJobs.add(js);
@@ -479,8 +476,8 @@ public final class FlexibilityController extends StateController {
             mTrackedJobs.get(js.getNumRequiredFlexibleConstraints() - 1).remove(js);
         }
 
-        public void resetJobNumDroppedConstraints(JobStatus js) {
-            final int curPercent = getCurPercentOfLifecycleLocked(js);
+        public void resetJobNumDroppedConstraints(JobStatus js, long nowElapsed) {
+            final int curPercent = getCurPercentOfLifecycleLocked(js, nowElapsed);
             int toDrop = 0;
             final int jsMaxFlexibleConstraints = NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS
                     + (js.getPreferUnmetered() ? 1 : 0);
@@ -489,7 +486,8 @@ public final class FlexibilityController extends StateController {
                     toDrop++;
                 }
             }
-            adjustJobsRequiredConstraints(js, js.getNumDroppedFlexibleConstraints() - toDrop);
+            adjustJobsRequiredConstraints(
+                    js, js.getNumDroppedFlexibleConstraints() - toDrop, nowElapsed);
         }
 
         /** Returns all tracked jobs. */
@@ -502,13 +500,12 @@ public final class FlexibilityController extends StateController {
          * Returns false if the job status's number of flexible constraints is now 0.
          * Jobs with 0 required flexible constraints are removed from the tracker.
          */
-        public boolean adjustJobsRequiredConstraints(JobStatus js, int n) {
+        public boolean adjustJobsRequiredConstraints(JobStatus js, int n, long nowElapsed) {
             if (n == 0) {
                 return false;
             }
             remove(js);
             js.adjustNumRequiredFlexibleConstraints(n);
-            final long nowElapsed = sElapsedRealtimeClock.millis();
             js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
             if (js.getNumRequiredFlexibleConstraints() <= 0) {
                 maybeStopTrackingJobLocked(js, null, false);
@@ -553,7 +550,7 @@ public final class FlexibilityController extends StateController {
             return js.getSourceUserId() == userId;
         }
 
-        public void scheduleDropNumConstraintsAlarm(JobStatus js) {
+        public void scheduleDropNumConstraintsAlarm(JobStatus js, long nowElapsed) {
             long nextTimeElapsed;
             synchronized (mLock) {
                 final long earliest = getLifeCycleBeginningElapsedLocked(js);
@@ -567,7 +564,7 @@ public final class FlexibilityController extends StateController {
 
                 if (latest - nextTimeElapsed < mDeadlineProximityLimitMs) {
                     mFlexibilityTracker.adjustJobsRequiredConstraints(
-                            js, -js.getNumRequiredFlexibleConstraints());
+                            js, -js.getNumRequiredFlexibleConstraints(), nowElapsed);
                     return;
                 }
                 addAlarm(js, nextTimeElapsed);
@@ -578,21 +575,21 @@ public final class FlexibilityController extends StateController {
         protected void processExpiredAlarms(@NonNull ArraySet<JobStatus> expired) {
             synchronized (mLock) {
                 ArraySet<JobStatus> changedJobs = new ArraySet<>();
+                final long nowElapsed = sElapsedRealtimeClock.millis();
                 for (int i = 0; i < expired.size(); i++) {
                     JobStatus js = expired.valueAt(i);
                     boolean wasFlexibilitySatisfied = js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE);
 
                     final long earliest = getLifeCycleBeginningElapsedLocked(js);
                     final long latest = getLifeCycleEndElapsedLocked(js, earliest);
-                    final long nowElapsed = sElapsedRealtimeClock.millis();
 
                     if (latest - nowElapsed < mDeadlineProximityLimitMs) {
                         mFlexibilityTracker.adjustJobsRequiredConstraints(js,
-                                -js.getNumRequiredFlexibleConstraints());
+                                -js.getNumRequiredFlexibleConstraints(), nowElapsed);
                     } else {
                         long nextTimeElapsed =
                                 getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
-                        if (mFlexibilityTracker.adjustJobsRequiredConstraints(js, -1)
+                        if (mFlexibilityTracker.adjustJobsRequiredConstraints(js, -1,  nowElapsed)
                                 && nextTimeElapsed != NO_LIFECYCLE_END) {
                             mFlexibilityAlarmQueue.addAlarm(js, nextTimeElapsed);
                         }

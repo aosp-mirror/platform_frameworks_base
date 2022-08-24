@@ -602,8 +602,9 @@ public class DisplayPolicy {
             }
 
             @Override
-            public int onAppTransitionStartingLocked(long statusBarAnimationStartTime,
-                    long statusBarAnimationDuration) {
+            public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
+                    boolean keyguardOccluding, long duration,
+                    long statusBarAnimationStartTime, long statusBarAnimationDuration) {
                 mHandler.post(() -> {
                     StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
                     if (statusBar != null) {
@@ -615,8 +616,7 @@ public class DisplayPolicy {
             }
 
             @Override
-            public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
-                    boolean keyguardOccludedCancelled) {
+            public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
                 mHandler.post(mAppTransitionCancelled);
             }
 
@@ -794,11 +794,11 @@ public class DisplayPolicy {
     }
 
     public void setAwake(boolean awake) {
-        if (awake == mAwake) {
-            return;
-        }
-        mAwake = awake;
-        synchronized (mService.mGlobalLock) {
+        synchronized (mLock) {
+            if (awake == mAwake) {
+                return;
+            }
+            mAwake = awake;
             if (!mDisplayContent.isDefaultDisplay) {
                 return;
             }

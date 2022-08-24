@@ -6598,8 +6598,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
-                boolean keyguardOccludedCancelled) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
             // It is only needed when freezing display in legacy transition.
             if (mTransitionController.isShellTransitionsEnabled()) return;
             continueUpdateOrientationForDiffOrienLaunchingApp();

@@ -50,7 +50,12 @@ class AnimatableClockView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : TextView(context, attrs, defStyleAttr, defStyleRes) {
 
-    private var lastMeasureCall: CharSequence = ""
+    private var lastMeasureCall: CharSequence? = null
+    private var lastDraw: CharSequence? = null
+    private var lastTextUpdate: CharSequence? = null
+    private var lastOnTextChanged: CharSequence? = null
+    private var lastInvalidate: CharSequence? = null
+    private var lastTimeZoneChange: CharSequence? = null
 
     private val time = Calendar.getInstance()
 
@@ -142,7 +147,6 @@ class AnimatableClockView @JvmOverloads constructor(
         // relayout if the text didn't actually change.
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
-
             // Because the TextLayout may mutate under the hood as a result of the new text, we
             // notify the TextAnimator that it may have changed and request a measure/layout. A
             // crash will occur on the next invocation of setTextStyle if the layout is mutated
@@ -151,18 +155,19 @@ class AnimatableClockView @JvmOverloads constructor(
                 textAnimator?.updateLayout(layout)
             }
             requestLayout()
+            lastTextUpdate = getTimestamp()
         }
     }
 
     fun onTimeZoneChanged(timeZone: TimeZone?) {
         time.timeZone = timeZone
         refreshFormat()
+        lastTimeZoneChange = "${getTimestamp()} timeZone=${time.timeZone}"
     }
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        lastMeasureCall = DateFormat.format(descFormat, System.currentTimeMillis())
         val animator = textAnimator
         if (animator == null) {
             textAnimator = TextAnimator(layout) { invalidate() }
@@ -171,11 +176,32 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
+        lastMeasureCall = getTimestamp()
     }
 
     override fun onDraw(canvas: Canvas) {
+        lastDraw = getTimestamp()
         // intentionally doesn't call super.onDraw here or else the text will be rendered twice
         textAnimator?.draw(canvas)
+    }
+
+    override fun invalidate() {
+        super.invalidate()
+        lastInvalidate = getTimestamp()
+    }
+
+    private fun getTimestamp(): CharSequence {
+        return "${DateFormat.format("HH:mm:ss", System.currentTimeMillis())} text=$text"
+    }
+
+    override fun onTextChanged(
+            text: CharSequence,
+            start: Int,
+            lengthBefore: Int,
+            lengthAfter: Int
+    ) {
+        super.onTextChanged(text, start, lengthBefore, lengthAfter)
+        lastOnTextChanged = "${getTimestamp()}"
     }
 
     fun setLineSpacingScale(scale: Float) {
@@ -370,7 +396,12 @@ class AnimatableClockView @JvmOverloads constructor(
         pw.println("    measuredWidth=$measuredWidth")
         pw.println("    measuredHeight=$measuredHeight")
         pw.println("    singleLineInternal=$isSingleLineInternal")
+        pw.println("    lastTextUpdate=$lastTextUpdate")
+        pw.println("    lastOnTextChanged=$lastOnTextChanged")
+        pw.println("    lastInvalidate=$lastInvalidate")
         pw.println("    lastMeasureCall=$lastMeasureCall")
+        pw.println("    lastDraw=$lastDraw")
+        pw.println("    lastTimeZoneChange=$lastTimeZoneChange")
         pw.println("    currText=$text")
         pw.println("    currTimeContextDesc=$contentDescription")
         pw.println("    time=$time")

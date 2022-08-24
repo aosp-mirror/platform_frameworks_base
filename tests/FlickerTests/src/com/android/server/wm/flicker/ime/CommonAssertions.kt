@@ -18,52 +18,52 @@
 package com.android.server.wm.flicker.ime
 
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
-        this.isInvisible(ComponentMatcher.IME)
+        this.isInvisible(ComponentNameMatcher.IME)
             .then()
-            .isVisible(ComponentMatcher.IME)
+            .isVisible(ComponentNameMatcher.IME)
     }
 }
 
 fun FlickerTestParameter.imeLayerBecomesInvisible() {
     assertLayers {
-        this.isVisible(ComponentMatcher.IME)
+        this.isVisible(ComponentNameMatcher.IME)
             .then()
-            .isInvisible(ComponentMatcher.IME)
+            .isInvisible(ComponentNameMatcher.IME)
     }
 }
 
 fun FlickerTestParameter.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertWm {
-            this.isNonAppWindowVisible(ComponentMatcher.IME)
+            this.isNonAppWindowVisible(ComponentNameMatcher.IME)
                 .then()
-                .isNonAppWindowInvisible(ComponentMatcher.IME)
+                .isNonAppWindowInvisible(ComponentNameMatcher.IME)
                 .then()
-                .isNonAppWindowVisible(ComponentMatcher.IME)
+                .isNonAppWindowVisible(ComponentNameMatcher.IME)
         }
     } else {
         assertWm {
-            this.isNonAppWindowVisible(ComponentMatcher.IME)
+            this.isNonAppWindowVisible(ComponentNameMatcher.IME)
         }
     }
 }
 
 fun FlickerTestParameter.imeWindowBecomesVisible() {
     assertWm {
-        this.isNonAppWindowInvisible(ComponentMatcher.IME)
+        this.isNonAppWindowInvisible(ComponentNameMatcher.IME)
             .then()
-            .isNonAppWindowVisible(ComponentMatcher.IME)
+            .isNonAppWindowVisible(ComponentNameMatcher.IME)
     }
 }
 
 fun FlickerTestParameter.imeWindowBecomesInvisible() {
     assertWm {
-        this.isNonAppWindowVisible(ComponentMatcher.IME)
+        this.isNonAppWindowVisible(ComponentNameMatcher.IME)
             .then()
-            .isNonAppWindowInvisible(ComponentMatcher.IME)
+            .isNonAppWindowInvisible(ComponentNameMatcher.IME)
     }
 }

@@ -31,7 +31,7 @@ import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -177,20 +177,20 @@ open class SwitchImeWindowsFromGestureNavTest(
     @Test
     open fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         testSpec.assertLayersStart {
-            isVisible(ComponentMatcher.IME)
+            isVisible(ComponentNameMatcher.IME)
         }
         testSpec.assertLayersTag(TAG_IME_VISIBLE) {
-            isVisible(ComponentMatcher.IME)
+            isVisible(ComponentNameMatcher.IME)
         }
         testSpec.assertLayersEnd {
-            isVisible(ComponentMatcher.IME)
+            isVisible(ComponentNameMatcher.IME)
         }
     }
 
     @Test
     fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
         testSpec.assertLayersTag(TAG_IME_INVISIBLE) {
-            isInvisible(ComponentMatcher.IME)
+            isInvisible(ComponentNameMatcher.IME)
         }
     }
 

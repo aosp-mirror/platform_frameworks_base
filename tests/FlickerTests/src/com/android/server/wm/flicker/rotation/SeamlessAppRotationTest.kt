@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -186,7 +186,7 @@ open class SeamlessAppRotationTest(
     @Test
     fun statusBarWindowIsAlwaysInvisible() {
         testSpec.assertWm {
-            this.isAboveAppWindowInvisible(ComponentMatcher.STATUS_BAR)
+            this.isAboveAppWindowInvisible(ComponentNameMatcher.STATUS_BAR)
         }
     }
 
@@ -198,7 +198,7 @@ open class SeamlessAppRotationTest(
     @Test
     fun statusBarLayerIsAlwaysInvisible() {
         testSpec.assertLayers {
-            this.isInvisible(ComponentMatcher.STATUS_BAR)
+            this.isInvisible(ComponentNameMatcher.STATUS_BAR)
         }
     }
 

@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -73,9 +73,9 @@ class CloseImeWindowToAppTest(testSpec: FlickerTestParameter) : BaseTest(testSpe
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(
-                ComponentMatcher.IME,
-                ComponentMatcher.SPLASH_SCREEN,
-                ComponentMatcher.SNAPSHOT))
+                ComponentNameMatcher.IME,
+                ComponentNameMatcher.SPLASH_SCREEN,
+                ComponentNameMatcher.SNAPSHOT))
         }
     }
 

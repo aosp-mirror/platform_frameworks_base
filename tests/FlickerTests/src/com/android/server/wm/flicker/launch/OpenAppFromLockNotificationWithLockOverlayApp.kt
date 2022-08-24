@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -88,7 +88,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
                     .then()
-                    .isAppWindowOnTop(ComponentMatcher.SNAPSHOT, isOptional = true)
+                    .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                     .then()
                     .isAppWindowOnTop(showWhenLockedApp)
         }
@@ -100,7 +100,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
         testSpec.assertLayers {
             this.isInvisible(showWhenLockedApp)
                     .then()
-                    .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                    .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                     .then()
                     .isVisible(showWhenLockedApp)
         }
