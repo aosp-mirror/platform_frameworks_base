@@ -42,8 +42,8 @@
 
     <!-- Educative text instructing the user to double press the HOME button to access the pip
         controls menu [CHAR LIMIT=50] -->
-    <string name="pip_edu_text"> Double press <annotation icon="home_icon"> HOME </annotation> for
-        controls </string>
+    <string name="pip_edu_text">Double press <annotation icon="home_icon">HOME</annotation> for
+        controls</string>
 
     <!-- Accessibility announcement when opening the PiP menu. [CHAR LIMIT=NONE] -->
     <string name="a11y_pip_menu_entered">Picture-in-Picture menu.</string>

@@ -127,7 +127,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private int mPipForceCloseDelay;
 
     private int mResizeAnimationDuration;
-    private int mEduTextWindowExitAnimationDurationMs;
+    private int mEduTextWindowExitAnimationDuration;
 
     public static Pip create(
             Context context,
@@ -377,10 +377,10 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     }
 
     @Override
-    public void onPipTargetBoundsChange(Rect newTargetBounds, int animationDuration) {
-        mPipTaskOrganizer.scheduleAnimateResizePip(newTargetBounds,
+    public void onPipTargetBoundsChange(Rect targetBounds, int animationDuration) {
+        mPipTaskOrganizer.scheduleAnimateResizePip(targetBounds,
                 animationDuration, rect -> mTvPipMenuController.updateExpansionState());
-        mTvPipMenuController.onPipTransitionStarted(newTargetBounds);
+        mTvPipMenuController.onPipTransitionToTargetBoundsStarted(targetBounds);
     }
 
     /**
@@ -417,7 +417,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     @Override
     public void closeEduText() {
-        updatePinnedStackBounds(mEduTextWindowExitAnimationDurationMs, false);
+        updatePinnedStackBounds(mEduTextWindowExitAnimationDuration, false);
     }
 
     private void registerSessionListenerForCurrentUser() {
@@ -459,27 +459,30 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     }
 
     @Override
-    public void onPipTransitionStarted(int direction, Rect pipBounds) {
+    public void onPipTransitionStarted(int direction, Rect currentPipBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: onPipTransition_Started(), state=%s", TAG, stateToName(mState));
-        mTvPipMenuController.notifyPipAnimating(true);
+                "%s: onPipTransition_Started(), state=%s, direction=%d",
+                TAG, stateToName(mState), direction);
     }
 
     @Override
     public void onPipTransitionCanceled(int direction) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransition_Canceled(), state=%s", TAG, stateToName(mState));
-        mTvPipMenuController.notifyPipAnimating(false);
+        mTvPipMenuController.onPipTransitionFinished(
+                PipAnimationController.isInPipDirection(direction));
     }
 
     @Override
     public void onPipTransitionFinished(int direction) {
-        if (PipAnimationController.isInPipDirection(direction) && mState == STATE_NO_PIP) {
+        final boolean enterPipTransition = PipAnimationController.isInPipDirection(direction);
+        if (enterPipTransition && mState == STATE_NO_PIP) {
             setState(STATE_PIP);
         }
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: onPipTransition_Finished(), state=%s", TAG, stateToName(mState));
-        mTvPipMenuController.notifyPipAnimating(false);
+                "%s: onPipTransition_Finished(), state=%s, direction=%d",
+                TAG, stateToName(mState), direction);
+        mTvPipMenuController.onPipTransitionFinished(enterPipTransition);
     }
 
     private void setState(@State int state) {
@@ -493,8 +496,8 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         final Resources res = mContext.getResources();
         mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipForceCloseDelay = res.getInteger(R.integer.config_pipForceCloseDelay);
-        mEduTextWindowExitAnimationDurationMs =
-                res.getInteger(R.integer.pip_edu_text_window_exit_animation_duration_ms);
+        mEduTextWindowExitAnimationDuration =
+                res.getInteger(R.integer.pip_edu_text_window_exit_animation_duration);
     }
 
     private void registerTaskStackListenerCallback(TaskStackListenerImpl taskStackListener) {
