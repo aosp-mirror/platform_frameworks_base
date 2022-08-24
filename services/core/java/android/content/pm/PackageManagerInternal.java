@@ -998,4 +998,10 @@ public abstract class PackageManagerInternal {
      * Returns {@code true} if the package is suspending any packages for the user.
      */
     public abstract boolean isSuspendingAnyPackages(String suspendingPackage, int userId);
+
+    /**
+     * Get installed SDK version of the package
+     * @param pkg package for which to retrieve the installed sdk version
+     */
+    public abstract int getInstalledSdkVersion(AndroidPackage pkg);
 }
