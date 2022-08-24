@@ -201,13 +201,13 @@
     <string name="kg_prompt_reason_restart_password">Password required after device restarts</string>
 
     <!-- An explanation text that the pattern needs to be solved since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_timeout_pattern">Pattern required for additional security</string>
+    <string name="kg_prompt_reason_timeout_pattern">For additional security, use pattern instead</string>
 
     <!-- An explanation text that the pin needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_timeout_pin">PIN required for additional security</string>
+    <string name="kg_prompt_reason_timeout_pin">For additional security, use PIN instead</string>
 
     <!-- An explanation text that the password needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_timeout_password">Password required for additional security</string>
+    <string name="kg_prompt_reason_timeout_password">For additional security, use password instead</string>
 
     <!-- An explanation text that the credential needs to be entered because a device admin has
     locked the device. [CHAR LIMIT=80] -->

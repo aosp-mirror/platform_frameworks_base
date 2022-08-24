@@ -794,6 +794,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
                     mUpdateMonitor.getStrongAuthTracker();
             int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
+            boolean allowedNonStrongAfterIdleTimeout =
+                    strongAuthTracker.isNonStrongBiometricAllowedAfterIdleTimeout(currentUser);
 
             if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
                 return KeyguardSecurityView.PROMPT_REASON_RESTART;
@@ -814,6 +816,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 return KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
             } else if (any && (strongAuth
                     & STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
+            } else if (any && !allowedNonStrongAfterIdleTimeout) {
                 return KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
             }
             return KeyguardSecurityView.PROMPT_REASON_NONE;
