@@ -61,15 +61,9 @@ public abstract class BroadcastQueue {
 
     public abstract boolean isDelayBehindServices();
 
-    public abstract boolean hasBroadcastsScheduled();
-
     public abstract BroadcastRecord getPendingBroadcastLocked();
 
     public abstract BroadcastRecord getActiveBroadcastLocked();
-
-    public abstract boolean isPendingBroadcastProcessLocked(int pid);
-
-    public abstract boolean isPendingBroadcastProcessLocked(ProcessRecord app);
 
     public abstract void enqueueParallelBroadcastLocked(BroadcastRecord r);
 
@@ -91,6 +85,13 @@ public abstract class BroadcastQueue {
 
     public abstract BroadcastRecord getMatchingOrderedReceiver(IBinder receiver);
 
+    /**
+     * Signal delivered back from a {@link BroadcastReceiver} to indicate that
+     * it's finished processing the current broadcast being dispatched to it.
+     * <p>
+     * If this signal isn't delivered back in a timely fashion, we assume the
+     * receiver has somehow wedged and we trigger an ANR.
+     */
     public abstract boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices);
 
@@ -104,14 +105,34 @@ public abstract class BroadcastQueue {
 
     public abstract void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj);
 
+    /**
+     * Signal from OS internals that the given package (or some subset of that
+     * package) has been disabled or uninstalled, and that any pending
+     * broadcasts should be cleaned up.
+     */
     public abstract boolean cleanupDisabledPackageReceiversLocked(
             String packageName, Set<String> filterByClasses, int userId, boolean doit);
 
+    /**
+     * Quickly determine if this queue has broadcasts that are still waiting to
+     * be delivered at some point in the future.
+     *
+     * @see #flush()
+     */
     public abstract boolean isIdle();
 
-    public abstract void cancelDeferrals();
-
+    /**
+     * Brief summary of internal state, useful for debugging purposes.
+     */
     public abstract String describeState();
+
+    /**
+     * Flush any broadcasts still waiting to be delivered, causing them to be
+     * delivered as soon as possible.
+     *
+     * @see #isIdle()
+     */
+    public abstract void flush();
 
     public abstract void dumpDebug(ProtoOutputStream proto, long fieldId);
 

@@ -223,17 +223,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         mConstants.startObserving(mHandler, resolver);
     }
 
-    @Override
-    public String toString() {
-        return mQueueName;
-    }
-
     public boolean isDelayBehindServices() {
         return mDelayBehindServices;
-    }
-
-    public boolean hasBroadcastsScheduled() {
-        return mBroadcastsScheduled;
     }
 
     public BroadcastRecord getPendingBroadcastLocked() {
@@ -242,14 +233,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     public BroadcastRecord getActiveBroadcastLocked() {
         return mDispatcher.getActiveBroadcastLocked();
-    }
-
-    public boolean isPendingBroadcastProcessLocked(int pid) {
-        return mPendingBroadcast != null && mPendingBroadcast.curApp.getPid() == pid;
-    }
-
-    public boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
-        return mPendingBroadcast != null && mPendingBroadcast.curApp == app;
     }
 
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
@@ -1704,6 +1687,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     public boolean isIdle() {
         return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
+    }
+
+    public void flush() {
+        cancelDeferrals();
     }
 
     // Used by wait-for-broadcast-idle : fast-forward all current deferrals to

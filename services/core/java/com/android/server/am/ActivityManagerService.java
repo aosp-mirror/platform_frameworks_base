@@ -10626,8 +10626,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
-                pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
-                        + queue.hasBroadcastsScheduled());
+                pw.println("  Queue " + queue.toString() + ": " + queue.describeState());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -13082,17 +13081,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean isPendingBroadcastProcessLocked(int pid) {
-        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mFgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            BroadcastRecord r = queue.getPendingBroadcastLocked();
+            if (r != null && r.curApp.getPid() == pid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
-        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mBgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mFgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            BroadcastRecord r = queue.getPendingBroadcastLocked();
+            if (r != null && r.curApp == app) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void skipPendingBroadcastLocked(int pid) {
@@ -17890,7 +17895,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             pw.flush();
                         }
                         Slog.v(TAG, msg);
-                        queue.cancelDeferrals();
+                        queue.flush();
                         idle = false;
                     }
                 }
