@@ -219,6 +219,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                     + "use ShellInit callbacks to ensure proper ordering");
         }
         mHandlers.add(handler);
+        // Set initial scale settings.
+        handler.setAnimScaleSetting(mTransitionAnimationScaleSetting);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: %s",
                 handler.getClass().getSimpleName());
     }
