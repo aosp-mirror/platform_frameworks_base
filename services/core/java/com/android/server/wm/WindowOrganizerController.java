@@ -99,6 +99,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.IntSupplier;
 
 /**
@@ -1524,7 +1525,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final int type = hop.getType();
             // Check for each type of the operations that are allowed for TaskFragmentOrganizer.
             switch (type) {
-                case HIERARCHY_OP_TYPE_REORDER:
                 case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT:
                     enforceTaskFragmentOrganized(func,
                             WindowContainer.fromBinder(hop.getContainer()), organizer);
@@ -1540,14 +1540,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // We are allowing organizer to create TaskFragment. We will check the
                     // ownerToken in #createTaskFragment, and trigger error callback if that is not
                     // valid.
+                    break;
                 case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
-                case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
-                case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
                 case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT:
-                    // We are allowing organizer to start/reparent activity to a TaskFragment it
-                    // created, or set two TaskFragments adjacent to each other. Nothing to check
-                    // here because the TaskFragment may not be created yet, but will be created in
-                    // the same transaction.
+                    enforceTaskFragmentOrganized(func, hop.getContainer(), organizer);
+                    break;
+                case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
+                    enforceTaskFragmentOrganized(func, hop.getNewParent(), organizer);
+                    break;
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
+                    enforceTaskFragmentOrganized(func, hop.getContainer(), organizer);
+                    if (hop.getAdjacentRoot() != null) {
+                        enforceTaskFragmentOrganized(func, hop.getAdjacentRoot(), organizer);
+                    }
                     break;
                 case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
                     enforceTaskFragmentOrganized(func,
@@ -1570,8 +1575,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    private void enforceTaskFragmentOrganized(String func, @Nullable WindowContainer wc,
-            ITaskFragmentOrganizer organizer) {
+    /**
+     * Makes sure that the given {@link WindowContainer} is a {@link TaskFragment} organized by the
+     * given {@link ITaskFragmentOrganizer}.
+     */
+    private void enforceTaskFragmentOrganized(@NonNull String func, @Nullable WindowContainer wc,
+            @NonNull ITaskFragmentOrganizer organizer) {
         if (wc == null) {
             Slog.e(TAG, "Attempt to operate on window that no longer exists");
             return;
@@ -1581,6 +1590,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (tf == null || !tf.hasTaskFragmentOrganizer(organizer)) {
             String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid() + " trying to modify window container not"
+                    + " belonging to the TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+    }
+
+    /**
+     * Makes sure that the {@link TaskFragment} of the given fragment token is created and organized
+     * by the given {@link ITaskFragmentOrganizer}.
+     */
+    private void enforceTaskFragmentOrganized(@NonNull String func,
+            @NonNull IBinder fragmentToken, @NonNull ITaskFragmentOrganizer organizer) {
+        Objects.requireNonNull(fragmentToken);
+        final TaskFragment tf = mLaunchTaskFragments.get(fragmentToken);
+        // When the TaskFragment is {@code null}, it means that the TaskFragment will be created
+        // later in the same transaction, in which case it will always be organized by the given
+        // organizer.
+        if (tf != null && !tf.hasTaskFragmentOrganizer(organizer)) {
+            String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid() + " trying to modify TaskFragment not"
                     + " belonging to the TaskFragmentOrganizer=" + organizer;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
@@ -1669,6 +1698,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         final ITaskFragmentOrganizer organizer = ITaskFragmentOrganizer.Stub.asInterface(
                 creationParams.getOrganizer().asBinder());
 
+        if (mLaunchTaskFragments.containsKey(creationParams.getFragmentToken())) {
+            final Throwable exception =
+                    new IllegalArgumentException("TaskFragment token must be unique");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, null /* taskFragment */,
+                    HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT, exception);
+            return;
+        }
         if (ownerActivity == null || ownerActivity.getTask() == null) {
             final Throwable exception =
                     new IllegalArgumentException("Not allowed to operate with invalid ownerToken");
