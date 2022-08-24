@@ -217,7 +217,7 @@ public class ITvInteractiveAppSessionWrapper
             case DO_DISPATCH_SURFACE_CHANGED: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mSessionImpl.dispatchSurfaceChanged(
-                        (Integer) args.arg1, (Integer) args.arg2, (Integer) args.arg3);
+                        (Integer) args.argi1, (Integer) args.argi2, (Integer) args.argi3);
                 args.recycle();
                 break;
             }

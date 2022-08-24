@@ -375,6 +375,9 @@ public class AppTransition implements Dump {
         final AnimationAdapter topOpeningAnim = wc != null ? wc.getAnimation() : null;
 
         int redoLayout = notifyAppTransitionStartingLocked(
+                AppTransition.isKeyguardGoingAwayTransitOld(transit),
+                AppTransition.isKeyguardOccludeTransitOld(transit),
+                topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
@@ -413,11 +416,8 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final boolean keyguardGoingAwayCancelled = mNextAppTransitionRequests.contains(
+        final boolean keyguardGoingAway = mNextAppTransitionRequests.contains(
                 TRANSIT_KEYGUARD_GOING_AWAY);
-        final boolean keyguardOccludedCancelled =
-                mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_OCCLUDE)
-                || mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_UNOCCLUDE);
 
         // The RemoteAnimationControl didn't register AppTransitionListener and
         // only initialized the finish and timeout callback when goodToGo().
@@ -429,7 +429,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionRequests.clear();
         clear();
         setReady();
-        notifyAppTransitionCancelledLocked(keyguardGoingAwayCancelled, keyguardOccludedCancelled);
+        notifyAppTransitionCancelledLocked(keyguardGoingAway);
     }
 
     private void setAppTransitionState(int state) {
@@ -479,11 +479,9 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled,
-            boolean keyguardOccludedCancelled) {
+    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAway) {
         for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAwayCancelled,
-                    keyguardOccludedCancelled);
+            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAway);
         }
     }
 
@@ -493,12 +491,14 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int notifyAppTransitionStartingLocked(long statusBarAnimationStartTime,
+    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway,
+            boolean keyguardOcclude, long duration, long statusBarAnimationStartTime,
             long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
-            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(
-                    statusBarAnimationStartTime, statusBarAnimationDuration);
+            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
+                    keyguardOcclude, duration, statusBarAnimationStartTime,
+                    statusBarAnimationDuration);
         }
         return redoLayout;
     }

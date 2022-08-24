@@ -820,14 +820,6 @@ static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionO
     transaction->setStretchEffect(ctrl, stretch);
 }
 
-static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject, jint w, jint h) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setSize(ctrl, w, h);
-}
-
 static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint flags, jint mask) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2121,6 +2113,20 @@ static jint nativeGetLayerId(JNIEnv* env, jclass clazz, jlong nativeSurfaceContr
     return surface->getLayerId();
 }
 
+static void nativeSetDefaultApplyToken(JNIEnv* env, jclass clazz, jobject applyToken) {
+    sp<IBinder> token(ibinderForJavaObject(env, applyToken));
+    if (token == nullptr) {
+        ALOGE("Null apply token provided.");
+        return;
+    }
+    SurfaceComposerClient::Transaction::setDefaultApplyToken(token);
+}
+
+static jobject nativeGetDefaultApplyToken(JNIEnv* env, jclass clazz) {
+    sp<IBinder> token = SurfaceComposerClient::Transaction::getDefaultApplyToken();
+    return javaObjectForIBinder(env, token);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -2163,8 +2169,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetPosition },
     {"nativeSetScale", "(JJFF)V",
             (void*)nativeSetScale },
-    {"nativeSetSize", "(JJII)V",
-            (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
     {"nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
@@ -2343,6 +2347,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*) nativeSanitize },
     {"nativeSetDestinationFrame", "(JJIIII)V",
                 (void*)nativeSetDestinationFrame },
+    {"nativeSetDefaultApplyToken", "(Landroid/os/IBinder;)V",
+                (void*)nativeSetDefaultApplyToken },
+    {"nativeGetDefaultApplyToken", "()Landroid/os/IBinder;",
+                (void*)nativeGetDefaultApplyToken },
         // clang-format on
 };
 

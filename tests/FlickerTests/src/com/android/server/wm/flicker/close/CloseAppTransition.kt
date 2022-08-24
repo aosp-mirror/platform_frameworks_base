@@ -24,7 +24,7 @@ import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.traces.common.ComponentMatcher.Companion.LAUNCHER
+import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.LAUNCHER
 import org.junit.Test
 
 /**

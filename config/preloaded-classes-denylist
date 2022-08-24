@@ -9,4 +9,3 @@ android.net.rtp.AudioGroup
 android.net.rtp.AudioStream
 android.net.rtp.RtpStream
 java.util.concurrent.ThreadLocalRandom
-com.android.internal.jank.InteractionJankMonitor$InstanceHolder

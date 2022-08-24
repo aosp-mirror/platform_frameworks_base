@@ -18,14 +18,6 @@ package com.android.settingslib.spa.gallery.page
 
 import com.android.settingslib.spa.framework.api.SettingsPageRepository
 
-object Destinations {
-    const val Home = "Home"
-    const val Preference = "Preference"
-    const val SwitchPreference = "SwitchPreference"
-    const val Argument = "Argument"
-    const val Slider = "Slider"
-}
-
 val galleryPageRepository = SettingsPageRepository(
     allPages = listOf(
         HomePageProvider,
@@ -36,5 +28,5 @@ val galleryPageRepository = SettingsPageRepository(
         SettingsPagerPageProvider,
         FooterPageProvider,
     ),
-    startDestination = Destinations.Home,
+    startDestination = HomePageProvider.name,
 )

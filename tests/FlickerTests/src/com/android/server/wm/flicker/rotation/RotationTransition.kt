@@ -22,7 +22,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Test
 
 /**
@@ -55,9 +55,9 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
                 ignoreLayers = listOf(
-                    ComponentMatcher.SPLASH_SCREEN,
-                    ComponentMatcher.SNAPSHOT,
-                    ComponentMatcher("", "SecondaryHomeHandle")
+                    ComponentNameMatcher.SPLASH_SCREEN,
+                    ComponentNameMatcher.SNAPSHOT,
+                    ComponentNameMatcher("", "SecondaryHomeHandle")
                 )
             )
         }

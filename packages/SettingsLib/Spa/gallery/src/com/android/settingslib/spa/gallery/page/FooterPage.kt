@@ -17,12 +17,8 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
@@ -30,7 +26,10 @@ import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Footer
+
+private const val TITLE = "Sample Footer"
 
 object FooterPageProvider : SettingsPageProvider {
     override val name = "Footer"
@@ -43,7 +42,7 @@ object FooterPageProvider : SettingsPageProvider {
     @Composable
     fun EntryItem() {
         Preference(object : PreferenceModel {
-            override val title = "Sample Footer"
+            override val title = TITLE
             override val onClick = navigator(name)
         })
     }
@@ -51,7 +50,7 @@ object FooterPageProvider : SettingsPageProvider {
 
 @Composable
 private fun FooterPage() {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
+    RegularScaffold(title = TITLE) {
         Preference(remember {
             object : PreferenceModel {
                 override val title = "Some Preference"

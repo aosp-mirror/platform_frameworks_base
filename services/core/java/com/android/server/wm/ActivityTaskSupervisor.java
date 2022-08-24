@@ -789,7 +789,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
             // schedule launch ticks to collect information about slow apps.
             r.startLaunchTickingLocked();
-
+            r.lastLaunchTime = SystemClock.uptimeMillis();
             r.setProcess(proc);
 
             // Ensure activity is allowed to be resumed after process has set.
@@ -835,8 +835,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             final IActivityClientController activityClientController =
                     proc.hasEverLaunchedActivity() ? null : mService.mActivityClientController;
             r.launchCount++;
-            r.lastLaunchTime = SystemClock.uptimeMillis();
-            proc.setLastActivityLaunchTime(r.lastLaunchTime);
 
             if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
 

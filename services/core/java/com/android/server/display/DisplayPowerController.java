@@ -813,13 +813,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info);
-                if (DEBUG) {
-                    Trace.beginAsyncSection("DisplayPowerController#updatePowerState", 0);
-                }
                 updatePowerState();
-                if (DEBUG) {
-                    Trace.endAsyncSection("DisplayPowerController#updatePowerState", 0);
-                }
             }
         });
     }
@@ -1147,6 +1141,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void updatePowerState() {
+        if (DEBUG) {
+            Trace.beginSection("DisplayPowerController#updatePowerState");
+        }
+        updatePowerStateInternal();
+        if (DEBUG) {
+            Trace.endSection();
+        }
+    }
+
+    private void updatePowerStateInternal() {
         // Update the power state request.
         final boolean mustNotify;
         final int previousPolicy;

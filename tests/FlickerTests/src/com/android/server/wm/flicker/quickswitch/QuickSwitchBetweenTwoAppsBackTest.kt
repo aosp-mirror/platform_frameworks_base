@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
 import org.junit.Assume
 import org.junit.Before
@@ -178,7 +178,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
         testSpec.assertWm {
             this.isAppWindowInvisible(testApp1)
                 .then()
-                .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                 .then()
                 .isAppWindowVisible(testApp1)
         }
@@ -238,9 +238,9 @@ open class QuickSwitchBetweenTwoAppsBackTest(
             this.isAppWindowVisible(testApp2)
                 .then()
                 // TODO: Do we actually want to test this? Seems too implementation specific...
-                .isAppWindowVisible(ComponentMatcher.LAUNCHER, isOptional = true)
+                .isAppWindowVisible(ComponentNameMatcher.LAUNCHER, isOptional = true)
                 .then()
-                .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                 .then()
                 .isAppWindowVisible(testApp1)
         }
@@ -257,9 +257,9 @@ open class QuickSwitchBetweenTwoAppsBackTest(
         testSpec.assertLayers {
             this.isVisible(testApp2)
                 .then()
-                .isVisible(ComponentMatcher.LAUNCHER, isOptional = true)
+                .isVisible(ComponentNameMatcher.LAUNCHER, isOptional = true)
                 .then()
-                .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                 .then()
                 .isVisible(testApp1)
         }

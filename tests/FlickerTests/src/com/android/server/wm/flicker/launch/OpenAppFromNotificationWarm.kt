@@ -34,7 +34,6 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtEnd
 import com.android.server.wm.flicker.taskBarWindowIsVisibleAtEnd
-import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore

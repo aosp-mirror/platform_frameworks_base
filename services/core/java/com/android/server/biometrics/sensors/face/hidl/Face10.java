@@ -484,6 +484,11 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
+    public boolean hasEnrollments(int sensorId, int userId) {
+        return !getEnrolledFaces(sensorId, userId).isEmpty();
+    }
+
+    @Override
     @LockoutTracker.LockoutMode
     public int getLockoutModeForUser(int sensorId, int userId) {
         return mLockoutTracker.getLockoutModeForUser(userId);

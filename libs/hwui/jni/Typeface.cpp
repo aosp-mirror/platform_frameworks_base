@@ -109,27 +109,14 @@ static jint Typeface_getWeight(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray,
                                       jlong fallbackPtr, int weight, int italic) {
     ScopedLongArrayRO families(env, familyArray);
-    std::vector<std::shared_ptr<minikin::FontFamily>> familyVec;
     Typeface* typeface = (fallbackPtr == 0) ? nullptr : toTypeface(fallbackPtr);
-    if (typeface != nullptr) {
-        const std::shared_ptr<minikin::FontCollection>& fallbackCollection =
-                toTypeface(fallbackPtr)->fFontCollection;
-        familyVec.reserve(families.size() + fallbackCollection->getFamilyCount());
-        for (size_t i = 0; i < families.size(); i++) {
-            FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(families[i]);
-            familyVec.emplace_back(family->family);
-        }
-        for (size_t i = 0; i < fallbackCollection->getFamilyCount(); i++) {
-            familyVec.emplace_back(fallbackCollection->getFamilyAt(i));
-        }
-    } else {
-        familyVec.reserve(families.size());
-        for (size_t i = 0; i < families.size(); i++) {
-            FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(families[i]);
-            familyVec.emplace_back(family->family);
-        }
+    std::vector<std::shared_ptr<minikin::FontFamily>> familyVec;
+    familyVec.reserve(families.size());
+    for (size_t i = 0; i < families.size(); i++) {
+        FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(families[i]);
+        familyVec.emplace_back(family->family);
     }
-    return toJLong(Typeface::createFromFamilies(std::move(familyVec), weight, italic));
+    return toJLong(Typeface::createFromFamilies(std::move(familyVec), weight, italic, typeface));
 }
 
 // CriticalNative

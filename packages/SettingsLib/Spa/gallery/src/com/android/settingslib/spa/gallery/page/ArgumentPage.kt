@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
@@ -28,12 +27,14 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
+private const val TITLE = "Sample page with arguments"
 private const val STRING_PARAM_NAME = "stringParam"
 private const val INT_PARAM_NAME = "intParam"
 
 object ArgumentPageProvider : SettingsPageProvider {
-    override val name = Destinations.Argument
+    override val name = "Argument"
 
     override val arguments = listOf(
         navArgument(STRING_PARAM_NAME) { type = NavType.StringType },
@@ -51,17 +52,17 @@ object ArgumentPageProvider : SettingsPageProvider {
     @Composable
     fun EntryItem(stringParam: String, intParam: Int) {
         Preference(object : PreferenceModel {
-            override val title = "Sample page with arguments"
+            override val title = TITLE
             override val summary =
                 "$STRING_PARAM_NAME=$stringParam, $INT_PARAM_NAME=$intParam".toState()
-            override val onClick = navigator("${Destinations.Argument}/$stringParam/$intParam")
+            override val onClick = navigator("$name/$stringParam/$intParam")
         })
     }
 }
 
 @Composable
 fun ArgumentPage(stringParam: String, intParam: Int) {
-    Column {
+    RegularScaffold(title = TITLE) {
         Preference(object : PreferenceModel {
             override val title = "String param value"
             override val summary = stringParam.toState()

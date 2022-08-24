@@ -310,11 +310,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void startKeyguardExitAnimation(long startTime) {
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
     }
 
     @Override
-    public int applyKeyguardOcclusionChange(boolean notify) {
+    public int applyKeyguardOcclusionChange(boolean keyguardOccludingStarted) {
         return 0;
     }
 

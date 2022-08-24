@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -152,7 +152,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun startsWithLauncherWindowsCoverFullScreen() {
         testSpec.assertWmStart {
-            this.visibleRegion(ComponentMatcher.LAUNCHER).coversExactly(startDisplayBounds)
+            this.visibleRegion(ComponentNameMatcher.LAUNCHER).coversExactly(startDisplayBounds)
         }
     }
 
@@ -164,7 +164,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun startsWithLauncherLayersCoverFullScreen() {
         testSpec.assertLayersStart {
-            this.visibleRegion(ComponentMatcher.LAUNCHER).coversExactly(startDisplayBounds)
+            this.visibleRegion(ComponentNameMatcher.LAUNCHER).coversExactly(startDisplayBounds)
         }
     }
 
@@ -175,7 +175,7 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun startsWithLauncherBeingOnTop() {
         testSpec.assertWmStart {
-            this.isAppWindowOnTop(ComponentMatcher.LAUNCHER)
+            this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
         }
     }
 
@@ -228,9 +228,9 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun launcherWindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(ComponentMatcher.LAUNCHER)
+            this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
                     .then()
-                    .isAppWindowNotOnTop(ComponentMatcher.LAUNCHER)
+                    .isAppWindowNotOnTop(ComponentNameMatcher.LAUNCHER)
         }
     }
 
@@ -243,9 +243,9 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun launcherLayerBecomesAndStaysInvisible() {
         testSpec.assertLayers {
-            this.isVisible(ComponentMatcher.LAUNCHER)
+            this.isVisible(ComponentNameMatcher.LAUNCHER)
                     .then()
-                    .isInvisible(ComponentMatcher.LAUNCHER)
+                    .isInvisible(ComponentNameMatcher.LAUNCHER)
         }
     }
 
@@ -258,9 +258,9 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun appWindowIsVisibleOnceLauncherWindowIsInvisible() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(ComponentMatcher.LAUNCHER)
+            this.isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
                     .then()
-                    .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                    .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                     .then()
                     .isAppWindowVisible(testApp)
         }
@@ -275,9 +275,9 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Test
     fun appLayerIsVisibleOnceLauncherLayerIsInvisible() {
         testSpec.assertLayers {
-            this.isVisible(ComponentMatcher.LAUNCHER)
+            this.isVisible(ComponentNameMatcher.LAUNCHER)
                     .then()
-                    .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
+                    .isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
                     .then()
                     .isVisible(testApp)
         }

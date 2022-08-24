@@ -105,7 +105,7 @@ public class PrefetchController extends StateController {
     public interface PrefetchChangedListener {
         /** Callback to inform listeners when estimated launch times change. */
         void onPrefetchCacheUpdated(ArraySet<JobStatus> jobs, int userId, String pkgName,
-                long prevEstimatedLaunchTime, long newEstimatedLaunchTime);
+                long prevEstimatedLaunchTime, long newEstimatedLaunchTime, long nowElapsed);
     }
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -308,8 +308,9 @@ public class PrefetchController extends StateController {
                     final long nowElapsed = sElapsedRealtimeClock.millis();
                     updateThresholdAlarmLocked(userId, pkgName, now, nowElapsed);
                     for (int i = 0; i < mPrefetchChangedListeners.size(); i++) {
-                        mPrefetchChangedListeners.valueAt(i).onPrefetchCacheUpdated(jobs,
-                                userId, pkgName, prevEstimatedLaunchTime, newEstimatedLaunchTime);
+                        mPrefetchChangedListeners.valueAt(i).onPrefetchCacheUpdated(
+                                jobs, userId, pkgName, prevEstimatedLaunchTime,
+                                newEstimatedLaunchTime, nowElapsed);
                     }
                     if (maybeUpdateConstraintForPkgLocked(now, nowElapsed, userId, pkgName)) {
                         mStateChangedListener.onControllerStateChanged(jobs);

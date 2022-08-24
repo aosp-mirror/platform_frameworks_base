@@ -176,12 +176,13 @@ public final class BatteryController extends RestrictingController {
             Slog.d(TAG, "maybeReportNewChargingStateLocked: "
                     + powerConnected + "/" + stablePower + "/" + batteryNotLow);
         }
-        mFlexibilityController.setConstraintSatisfied(
-                JobStatus.CONSTRAINT_CHARGING, mService.isBatteryCharging());
-        mFlexibilityController
-            .setConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW, batteryNotLow);
-
         final long nowElapsed = sElapsedRealtimeClock.millis();
+
+        mFlexibilityController.setConstraintSatisfied(
+                JobStatus.CONSTRAINT_CHARGING, mService.isBatteryCharging(), nowElapsed);
+        mFlexibilityController.setConstraintSatisfied(
+                        JobStatus.CONSTRAINT_BATTERY_NOT_LOW, batteryNotLow, nowElapsed);
+
         for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
             final JobStatus ts = mTrackedTasks.valueAt(i);
             if (ts.hasChargingConstraint()) {

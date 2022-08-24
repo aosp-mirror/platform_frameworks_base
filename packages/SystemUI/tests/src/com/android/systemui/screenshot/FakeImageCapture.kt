@@ -13,13 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.screenshot
 
-package com.android.settingslib.spaprivileged.framework.app
+import android.graphics.Bitmap
+import android.graphics.Rect
 
-import android.content.pm.ApplicationInfo
-import android.os.UserHandle
+internal class FakeImageCapture : ImageCapture {
 
-val ApplicationInfo.userId: Int
-    get() = UserHandle.getUserId(uid)
+    var requestedDisplayId: Int? = null
+    var requestedDisplayCrop: Rect? = null
+    var requestedTaskId: Int? = null
 
-fun ApplicationInfo.toRoute() = "$packageName/$userId"
+    var image: Bitmap? = null
+
+    override fun captureDisplay(displayId: Int, crop: Rect?): Bitmap? {
+        requestedDisplayId = displayId
+        requestedDisplayCrop = crop
+        return image
+    }
+
+    override suspend fun captureTask(taskId: Int): Bitmap? {
+        requestedTaskId = taskId
+        return image
+    }
+}

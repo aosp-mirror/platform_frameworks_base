@@ -4830,6 +4830,7 @@
   <java-symbol type="drawable" name="ic_swap_horiz" />
   <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
   <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
+  <java-symbol type="integer" name="config_deviceStateRearDisplay"/>
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />

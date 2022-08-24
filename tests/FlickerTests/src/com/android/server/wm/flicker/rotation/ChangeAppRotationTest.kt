@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -106,10 +106,10 @@ class ChangeAppRotationTest(
         testSpec.assertLayers {
             this.isVisible(testApp)
                 .then()
-                .isVisible(ComponentMatcher.ROTATION)
+                .isVisible(ComponentNameMatcher.ROTATION)
                 .then()
                 .isVisible(testApp)
-                .isInvisible(ComponentMatcher.ROTATION)
+                .isInvisible(ComponentNameMatcher.ROTATION)
         }
     }
 

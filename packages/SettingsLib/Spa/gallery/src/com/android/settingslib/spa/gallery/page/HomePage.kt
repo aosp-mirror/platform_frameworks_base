@@ -31,7 +31,7 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 
 object HomePageProvider : SettingsPageProvider {
-    override val name = Destinations.Home
+    override val name = "Home"
 
     @Composable
     override fun Page(arguments: Bundle?) {
