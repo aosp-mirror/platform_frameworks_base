@@ -2401,13 +2401,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
 
-        mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "foreground", foreConstants, false);
-        mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "background", backConstants, true);
-        mBgOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "offload_bg", offloadConstants, true);
-        mFgOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "offload_fg", foreConstants, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
@@ -10627,7 +10627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
                 pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
-                        + queue.mBroadcastsScheduled);
+                        + queue.hasBroadcastsScheduled());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -15186,7 +15186,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // It's not the current receiver, but it might be starting up to become one
         for (BroadcastQueue queue : mBroadcastQueues) {
-            final BroadcastRecord r = queue.mPendingBroadcast;
+            final BroadcastRecord r = queue.getPendingBroadcastLocked();
             if (r != null && r.curApp == app) {
                 // found it; report which queue it's in
                 receivingQueues.add(queue);
@@ -15301,7 +15301,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isIdle()) {
+            if (!q.isIdle()) {
                 return false;
             }
         }
