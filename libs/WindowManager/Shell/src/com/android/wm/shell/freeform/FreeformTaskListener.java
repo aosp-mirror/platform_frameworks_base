@@ -187,12 +187,14 @@ public class FreeformTaskListener<T extends AutoCloseable>
             RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        T windowDecor = mWindowDecorOfVanishedTasks.get(taskInfo.taskId);
-        mWindowDecorOfVanishedTasks.remove(taskInfo.taskId);
+        T windowDecor;
         final State<T> state = mTasks.get(taskInfo.taskId);
         if (state != null) {
-            windowDecor = windowDecor == null ? state.mWindowDecoration : windowDecor;
+            windowDecor = state.mWindowDecoration;
             state.mWindowDecoration = null;
+        } else {
+            windowDecor =
+                    mWindowDecorOfVanishedTasks.removeReturnOld(taskInfo.taskId);
         }
         mWindowDecorationViewModel.setupWindowDecorationForTransition(
                 taskInfo, startT, finishT, windowDecor);
@@ -231,7 +233,8 @@ public class FreeformTaskListener<T extends AutoCloseable>
         if (mWindowDecorOfVanishedTasks.size() == 0) {
             return;
         }
-        Log.w(TAG, "Clearing window decors of vanished tasks. There could be visual defects "
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "Clearing window decors of vanished tasks. There could be visual defects "
                 + "if any of them is used later in transitions.");
         for (int i = 0; i < mWindowDecorOfVanishedTasks.size(); ++i) {
             releaseWindowDecor(mWindowDecorOfVanishedTasks.valueAt(i));

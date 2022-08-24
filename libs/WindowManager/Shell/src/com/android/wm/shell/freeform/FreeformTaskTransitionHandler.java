@@ -32,6 +32,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -50,6 +51,7 @@ public class FreeformTaskTransitionHandler
 
     private final Transitions mTransitions;
     private final FreeformTaskListener<?> mFreeformTaskListener;
+    private final FullscreenTaskListener<?> mFullscreenTaskListener;
     private final WindowDecorViewModel<?> mWindowDecorViewModel;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
@@ -58,8 +60,10 @@ public class FreeformTaskTransitionHandler
             ShellInit shellInit,
             Transitions transitions,
             WindowDecorViewModel<?> windowDecorViewModel,
+            FullscreenTaskListener<?> fullscreenTaskListener,
             FreeformTaskListener<?> freeformTaskListener) {
         mTransitions = transitions;
+        mFullscreenTaskListener = fullscreenTaskListener;
         mFreeformTaskListener = freeformTaskListener;
         mWindowDecorViewModel = windowDecorViewModel;
         if (shellInit != null && Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -150,10 +154,16 @@ public class FreeformTaskTransitionHandler
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        if (change.getTaskInfo().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return false;
+        switch (change.getTaskInfo().getWindowingMode()){
+            case WINDOWING_MODE_FREEFORM:
+                mFreeformTaskListener.createWindowDecoration(change, startT, finishT);
+                break;
+            case WINDOWING_MODE_FULLSCREEN:
+                mFullscreenTaskListener.createWindowDecoration(change, startT, finishT);
+                break;
+            default:
+                return false;
         }
-        mFreeformTaskListener.createWindowDecoration(change, startT, finishT);
 
         // Intercepted transition to manage the window decorations. Let other handlers animate.
         return false;
@@ -164,15 +174,22 @@ public class FreeformTaskTransitionHandler
             ArrayList<AutoCloseable> windowDecors,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        if (change.getTaskInfo().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return false;
+        final AutoCloseable windowDecor;
+        switch (change.getTaskInfo().getWindowingMode()) {
+            case WINDOWING_MODE_FREEFORM:
+                windowDecor = mFreeformTaskListener.giveWindowDecoration(change.getTaskInfo(),
+                        startT, finishT);
+                break;
+            case WINDOWING_MODE_FULLSCREEN:
+                windowDecor = mFullscreenTaskListener.giveWindowDecoration(change.getTaskInfo(),
+                        startT, finishT);
+                break;
+            default:
+                windowDecor = null;
         }
-        final AutoCloseable windowDecor =
-                mFreeformTaskListener.giveWindowDecoration(change.getTaskInfo(), startT, finishT);
         if (windowDecor != null) {
             windowDecors.add(windowDecor);
         }
-
         // Intercepted transition to manage the window decorations. Let other handlers animate.
         return false;
     }
@@ -197,24 +214,29 @@ public class FreeformTaskTransitionHandler
         }
 
         boolean handled = false;
+        boolean adopted = false;
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
         if (type == Transitions.TRANSIT_MAXIMIZE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             handled = true;
             windowDecor = mFreeformTaskListener.giveWindowDecoration(
                     change.getTaskInfo(), startT, finishT);
-            // TODO(b/235638450): Let fullscreen task listener adopt the window decor.
+            adopted = mFullscreenTaskListener.adoptWindowDecoration(change,
+                    startT, finishT, windowDecor);
         }
 
         if (type == Transitions.TRANSIT_RESTORE_FROM_MAXIMIZE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             handled = true;
-            // TODO(b/235638450): Let fullscreen task listener transfer the window decor.
-            mFreeformTaskListener.adoptWindowDecoration(change, startT, finishT, windowDecor);
+            windowDecor = mFullscreenTaskListener.giveWindowDecoration(
+                    change.getTaskInfo(), startT, finishT);
+            adopted = mFreeformTaskListener.adoptWindowDecoration(change,
+                    startT, finishT, windowDecor);
         }
 
-        releaseWindowDecor(windowDecor);
-
+        if (!adopted) {
+            releaseWindowDecor(windowDecor);
+        }
         return handled;
     }
 
@@ -225,7 +247,7 @@ public class FreeformTaskTransitionHandler
             releaseWindowDecor(windowDecor);
         }
         mFreeformTaskListener.onTaskTransitionFinished();
-        // TODO(b/235638450): Dispatch it to fullscreen task listener.
+        mFullscreenTaskListener.onTaskTransitionFinished();
         finishCallback.onTransitionFinished(null, null);
     }
 

@@ -85,6 +85,7 @@ import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.util.Optional;
 
@@ -294,23 +295,31 @@ public abstract class WMShellBaseModule {
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
     @BindsOptionalOf
     @DynamicOverride
-    abstract FullscreenTaskListener optionalFullscreenTaskListener();
+    abstract FullscreenTaskListener<?> optionalFullscreenTaskListener();
 
     @WMSingleton
     @Provides
-    static FullscreenTaskListener provideFullscreenTaskListener(
-            @DynamicOverride Optional<FullscreenTaskListener> fullscreenTaskListener,
+    static FullscreenTaskListener<?> provideFullscreenTaskListener(
+            @DynamicOverride Optional<FullscreenTaskListener<?>> fullscreenTaskListener,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
-            Optional<RecentTasksController> recentTasksOptional) {
+            Optional<RecentTasksController> recentTasksOptional,
+            Optional<WindowDecorViewModel<?>> windowDecorViewModelOptional) {
         if (fullscreenTaskListener.isPresent()) {
             return fullscreenTaskListener.get();
         } else {
             return new FullscreenTaskListener(shellInit, shellTaskOrganizer, syncQueue,
-                    recentTasksOptional);
+                    recentTasksOptional, windowDecorViewModelOptional);
         }
     }
+
+    //
+    // Window Decoration
+    //
+
+    @BindsOptionalOf
+    abstract WindowDecorViewModel<?> optionalWindowDecorViewModel();
 
     //
     // Unfold transition
@@ -627,11 +636,12 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ActivityEmbeddingController provideActivityEmbeddingController(
+    static Optional<ActivityEmbeddingController> provideActivityEmbeddingController(
             Context context,
             ShellInit shellInit,
             Transitions transitions) {
-        return new ActivityEmbeddingController(context, shellInit, transitions);
+        return Optional.ofNullable(
+                ActivityEmbeddingController.create(context, shellInit, transitions));
     }
 
     //
@@ -679,14 +689,14 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
-            FullscreenTaskListener fullscreenTaskListener,
+            FullscreenTaskListener<?> fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
             Optional<RecentTasksController> recentTasksOptional,
             Optional<OneHandedController> oneHandedControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
-            ActivityEmbeddingController activityEmbeddingOptional,
+            Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellCreateTriggerOverride Optional<Object> overriddenCreateTrigger) {

@@ -980,7 +980,8 @@ public class Activity extends ContextThemeWrapper
     boolean mEnterAnimationComplete;
 
     private boolean mIsInMultiWindowMode;
-    private boolean mIsInPictureInPictureMode;
+    /** @hide */
+    boolean mIsInPictureInPictureMode;
 
     private boolean mShouldDockBigOverlays;
 

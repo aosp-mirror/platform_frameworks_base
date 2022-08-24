@@ -1515,6 +1515,10 @@ public final class ColorDisplayService extends SystemService {
             return mReduceBrightColorsTintController.isActivated();
         }
 
+        public int getReduceBrightColorsStrength() {
+            return mReduceBrightColorsTintController.getStrength();
+        }
+
         /**
          * Gets the computed brightness, in nits, when the reduce bright colors feature is applied
          * at the current strength.

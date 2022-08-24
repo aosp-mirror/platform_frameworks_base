@@ -156,10 +156,10 @@ public class Flags {
             new ReleasedFlag(603, false);
 
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_BACKEND =
-            new UnreleasedFlag(604, true);
+            new UnreleasedFlag(604, false);
 
     public static final UnreleasedFlag NEW_STATUS_BAR_PIPELINE_FRONTEND =
-            new UnreleasedFlag(605, true);
+            new UnreleasedFlag(605, false);
 
     /***************************************/
     // 700 - dialer/calls
