@@ -2427,9 +2427,6 @@
     <!-- The list of supported dream complications -->
     <integer-array name="config_supportedDreamComplications">
     </integer-array>
-    <!-- The list of dream complications which should be enabled by default -->
-    <integer-array name="config_dreamComplicationsEnabledByDefault">
-    </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
     <bool name="config_dreamsEnabledOnBattery">false</bool>
