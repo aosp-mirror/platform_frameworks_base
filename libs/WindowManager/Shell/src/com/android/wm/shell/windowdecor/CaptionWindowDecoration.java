@@ -142,7 +142,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             return;
         }
 
-        if (oldDecorationSurface != mDecorationContainerSurface) {
+        if (oldDecorationSurface != mDecorationContainerSurface || mDragResizeListener == null) {
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
