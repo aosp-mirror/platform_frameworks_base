@@ -29,8 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
+import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
@@ -45,7 +47,7 @@ fun AppInfo(packageName: String, userId: Int) {
         horizontalAlignment = Alignment.CenterHorizontally) {
         val packageInfo = remember { PackageManagers.getPackageInfoAsUser(packageName, userId) }
         Box(modifier = Modifier.padding(8.dp)) {
-            AppIcon(app = packageInfo.applicationInfo, size = 48)
+            AppIcon(app = packageInfo.applicationInfo, size = SettingsDimension.appIconInfoSize)
         }
         AppLabel(packageInfo.applicationInfo)
         Spacer(modifier = Modifier.height(4.dp))
@@ -54,12 +56,12 @@ fun AppInfo(packageName: String, userId: Int) {
 }
 
 @Composable
-fun AppIcon(app: ApplicationInfo, size: Int) {
+fun AppIcon(app: ApplicationInfo, size: Dp) {
     val appRepository = rememberAppRepository()
     Image(
         painter = rememberDrawablePainter(appRepository.produceIcon(app).value),
         contentDescription = null,
-        modifier = Modifier.size(size.dp)
+        modifier = Modifier.size(size)
     )
 }
 
