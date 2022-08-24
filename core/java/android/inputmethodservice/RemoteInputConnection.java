@@ -17,6 +17,7 @@
 package android.inputmethodservice;
 
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +29,7 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.SurroundingText;
@@ -41,6 +43,8 @@ import com.android.internal.inputmethod.InputConnectionProtoDumper;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * Takes care of remote method invocations of {@link InputConnection} in the IME side.
@@ -408,6 +412,13 @@ final class RemoteInputConnection implements InputConnection {
     @AnyThread
     public boolean performPrivateCommand(String action, Bundle data) {
         return mInvoker.performPrivateCommand(action, data);
+    }
+
+    @AnyThread
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        mInvoker.performHandwritingGesture(gesture, executor, consumer);
     }
 
     @AnyThread

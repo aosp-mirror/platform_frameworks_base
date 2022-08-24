@@ -17,11 +17,15 @@
 package com.android.internal.inputmethod;
 
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
@@ -85,6 +89,15 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
     void performPrivateCommand(in InputConnectionCommandHeader header, String action,
             in Bundle data);
+
+    void performHandwritingSelectGesture(in InputConnectionCommandHeader header,
+            in SelectGesture gesture, in ResultReceiver resultReceiver);
+
+    void performHandwritingInsertGesture(in InputConnectionCommandHeader header,
+            in InsertGesture gesture, in ResultReceiver resultReceiver);
+
+    void performHandwritingDeleteGesture(in InputConnectionCommandHeader header,
+            in DeleteGesture gesture, in ResultReceiver resultReceiver);
 
     void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
 
