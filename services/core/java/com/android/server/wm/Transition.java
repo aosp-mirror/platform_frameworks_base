@@ -1880,6 +1880,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     void deferTransitionReady() {
         ++mReadyTracker.mDeferReadyDepth;
+        // Make sure it wait until #continueTransitionReady() is called.
+        mSyncEngine.setReady(mSyncId, false);
     }
 
     /** This undoes one call to {@link #deferTransitionReady}. */
