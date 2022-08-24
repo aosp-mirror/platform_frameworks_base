@@ -34,10 +34,18 @@ class ConvertCommand : public Command {
     AddOptionalFlag("--output-format", android::base::StringPrintf("Format of the output. "
             "Accepted values are '%s' and '%s'. When not set, defaults to '%s'.",
         kOutputFormatProto, kOutputFormatBinary, kOutputFormatBinary), &output_format_);
-    AddOptionalSwitch("--enable-sparse-encoding",
+    AddOptionalSwitch(
+        "--enable-sparse-encoding",
         "Enables encoding sparse entries using a binary search tree.\n"
-        "This decreases APK size at the cost of resource retrieval performance.",
-         &table_flattener_options_.use_sparse_entries);
+        "This decreases APK size at the cost of resource retrieval performance.\n"
+        "Only applies sparse encoding to Android O+ resources or all resources if minSdk of "
+        "the APK is O+",
+        &enable_sparse_encoding_);
+    AddOptionalSwitch("--force-sparse-encoding",
+                      "Enables encoding sparse entries using a binary search tree.\n"
+                      "This decreases APK size at the cost of resource retrieval performance.\n"
+                      "Applies sparse encoding to all resources regardless of minSdk.",
+                      &force_sparse_encoding_);
     AddOptionalSwitch("--keep-raw-values",
         android::base::StringPrintf("Preserve raw attribute values in xml files when using the"
             " '%s' output format", kOutputFormatBinary),
@@ -56,6 +64,8 @@ class ConvertCommand : public Command {
   std::string output_path_;
   std::optional<std::string> output_format_;
   bool verbose_ = false;
+  bool enable_sparse_encoding_ = false;
+  bool force_sparse_encoding_ = false;
 };
 
 int Convert(IAaptContext* context, LoadedApk* input, IArchiveWriter* output_writer,
