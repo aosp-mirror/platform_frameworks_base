@@ -45,6 +45,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -81,6 +82,7 @@ import java.util.List;
  *  A CompanionDevice activity response for showing the available
  *  nearby devices to be associated with.
  */
+@SuppressLint("LongLogTag")
 public class CompanionDeviceActivity extends FragmentActivity implements
         CompanionVendorHelperDialogFragment.CompanionVendorHelperDialogListener {
     private static final boolean DEBUG = false;
@@ -94,6 +96,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
     private static final String EXTRA_RESULT_RECEIVER = "result_receiver";
+    private static final String EXTRA_FORCE_CANCEL_CONFIRMATION = "cancel_confirmation";
 
     private static final String FRAGMENT_DIALOG_TAG = "fragment_dialog";
 
@@ -162,6 +165,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (DEBUG) Log.d(TAG, "onCreate()");
+        boolean forceCancelDialog = getIntent().getBooleanExtra("cancel_confirmation", false);
+        // Must handle the force cancel request in onNewIntent.
+        if (forceCancelDialog) {
+            Log.i(TAG, "The confirmation does not exist, skipping the cancel request");
+            finish();
+        }
 
         super.onCreate(savedInstanceState);
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
@@ -195,10 +204,23 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     @Override
     protected void onNewIntent(Intent intent) {
+        // Force cancels the CDM dialog if this activity receives another intent with
+        // EXTRA_FORCE_CANCEL_CONFIRMATION.
+        boolean forCancelDialog = intent.getBooleanExtra(EXTRA_FORCE_CANCEL_CONFIRMATION, false);
+
+        if (forCancelDialog) {
+
+            Log.i(TAG, "Cancelling the user confirmation");
+
+            cancel(false, false);
+            return;
+        }
+
         // Handle another incoming request (while we are not done with the original - mRequest -
         // yet).
         final AssociationRequest request = requireNonNull(
                 intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST));
+
         if (DEBUG) Log.d(TAG, "onNewIntent(), request=" + request);
 
         // We can only "process" one request at a time.

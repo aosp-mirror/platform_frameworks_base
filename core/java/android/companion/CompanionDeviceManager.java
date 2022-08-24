@@ -403,6 +403,34 @@ public final class CompanionDeviceManager {
     }
 
     /**
+     * Cancel the current association activity.
+     *
+     * <p>The app should launch the returned {@code intentSender} by calling
+     * {@link Activity#startIntentSenderForResult(IntentSender, int, Intent, int, int, int)} to
+     * cancel the current association activity</p>
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
+     * @return An {@link IntentSender} that the app should use to launch in order to cancel the
+     * current association activity
+     */
+    @UserHandleAware
+    @Nullable
+    public IntentSender buildAssociationCancellationIntent() {
+        if (!checkFeaturePresent()) return null;
+
+        try {
+            PendingIntent pendingIntent = mService.buildAssociationCancellationIntent(
+                    mContext.getOpPackageName(), mContext.getUserId());
+            return pendingIntent.getIntentSender();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
