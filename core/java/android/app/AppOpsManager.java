@@ -1907,7 +1907,6 @@ public class AppOpsManager {
             OP_SCHEDULE_EXACT_ALARM,
             OP_MANAGE_MEDIA,
             OP_TURN_SCREEN_ON,
-            OP_GET_USAGE_STATS,
     };
 
     /**
