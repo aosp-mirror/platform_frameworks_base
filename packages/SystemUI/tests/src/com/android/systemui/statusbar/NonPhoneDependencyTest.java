@@ -27,12 +27,9 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
-import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
 import org.junit.Before;
@@ -53,10 +50,8 @@ import org.mockito.MockitoAnnotations;
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
-    @Mock private NotificationEntryListener mEntryListener;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationRemoteInputManager.Callback mRemoteInputManagerCallback;
-    @Mock private CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
 
     @Before
@@ -70,7 +65,6 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
     @Ignore("Causes binder calls which fail")
     @Test
     public void testNotificationManagementCodeHasNoDependencyOnStatusBarWindowManager() {
-        NotificationEntryManager entryManager = Dependency.get(NotificationEntryManager.class);
         NotificationGutsManager gutsManager = Dependency.get(NotificationGutsManager.class);
         NotificationLogger notificationLogger = Dependency.get(NotificationLogger.class);
         NotificationMediaManager mediaManager = Dependency.get(NotificationMediaManager.class);
@@ -78,7 +72,6 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 Dependency.get(NotificationRemoteInputManager.class);
         NotificationLockscreenUserManager lockscreenUserManager =
                 Dependency.get(NotificationLockscreenUserManager.class);
-        entryManager.addNotificationEntryListener(mEntryListener);
         gutsManager.setUpWithPresenter(mPresenter, mListContainer,
                 mOnSettingsClickListener);
         notificationLogger.setUpWithContainer(mListContainer);

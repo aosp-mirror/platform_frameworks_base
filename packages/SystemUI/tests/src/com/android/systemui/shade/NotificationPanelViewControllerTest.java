@@ -124,7 +124,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
@@ -228,8 +227,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private DynamicPrivacyController mDynamicPrivacyController;
-    @Mock
-    private NotificationEntryManager mNotificationEntryManager;
     @Mock
     private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock
@@ -517,7 +514,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
-                mNotificationEntryManager,
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarWindowStateController,

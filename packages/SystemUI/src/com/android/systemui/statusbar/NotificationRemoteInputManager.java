@@ -53,8 +53,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -256,7 +254,6 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             RemoteInputUriController remoteInputUriController,
@@ -279,25 +276,6 @@ public class NotificationRemoteInputManager implements Dumpable {
         mClickNotifier = clickNotifier;
 
         dumpManager.registerDumpable(this);
-
-        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
-            @Override
-            public void onPreEntryUpdated(NotificationEntry entry) {
-                // Mark smart replies as sent whenever a notification is updated - otherwise the
-                // smart replies are never marked as sent.
-                mSmartReplyController.stopSending(entry);
-            }
-
-            @Override
-            public void onEntryRemoved(
-                    @Nullable NotificationEntry entry,
-                    NotificationVisibility visibility,
-                    boolean removedByUser,
-                    int reason) {
-                // We're removing the notification, the smart controller can forget about it.
-                mSmartReplyController.stopSending(entry);
-            }
-        });
     }
 
     /** Add a listener for various remote input events.  Works with NEW pipeline only. */
