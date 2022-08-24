@@ -194,9 +194,9 @@ TEST(ResourceMappingTests, InlineResources) {
 TEST(ResourceMappingTests, FabricatedOverlay) {
   auto frro = FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "test.target")
                   .SetOverlayable("TestResources")
-                  .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U)
-                  .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000)
-                  .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar")
+                  .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "")
+                  .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "")
+                  .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "")
                   .Build();
 
   ASSERT_TRUE(frro);

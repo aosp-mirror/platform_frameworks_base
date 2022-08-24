@@ -39,10 +39,11 @@ struct FabricatedOverlay {
     Builder& SetOverlayable(const std::string& name);
 
     Builder& SetResourceValue(const std::string& resource_name, uint8_t data_type,
-                              uint32_t data_value);
+                              uint32_t data_value, const std::string& configuration);
 
     Builder& SetResourceValue(const std::string& resource_name, uint8_t data_type,
-                              const std::string& data_string_value);
+                              const std::string& data_string_value,
+                              const std::string& configuration);
 
     WARN_UNUSED Result<FabricatedOverlay> Build();
 
@@ -52,6 +53,7 @@ struct FabricatedOverlay {
       DataType data_type;
       DataValue data_value;
       std::string data_string_value;
+      std::string configuration;
     };
 
     std::string package_name_;

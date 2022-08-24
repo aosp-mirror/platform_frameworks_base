@@ -257,6 +257,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         String name = "";
         String filename = null;
         String opt;
+        String configuration = null;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "--user":
@@ -273,6 +274,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     break;
                 case "--file":
                     filename = getNextArgRequired();
+                    break;
+                case "--config":
+                    configuration = getNextArgRequired();
                     break;
                 default:
                     err.println("Error: Unknown option: " + opt);
@@ -307,7 +311,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
             final String resourceName = getNextArgRequired();
             final String typeStr = getNextArgRequired();
             final String strData = String.join(" ", peekRemainingArgs());
-            addOverlayValue(overlayBuilder, resourceName, typeStr, strData);
+            addOverlayValue(overlayBuilder, resourceName, typeStr, strData, configuration);
         }
 
         mInterface.commit(new OverlayManagerTransaction.Builder()
@@ -363,8 +367,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
                             err.println("Error: value missing at line " + parser.getLineNumber());
                             return 1;
                         }
+                        String config = parser.getAttributeValue(null, "config");
                         addOverlayValue(overlayBuilder, targetPackage + ':' + target,
-                                overlayType, value);
+                                overlayType, value, config);
                     }
                 }
             }
@@ -379,7 +384,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
     }
 
     private void addOverlayValue(FabricatedOverlay.Builder overlayBuilder,
-            String resourceName, String typeString, String valueString) {
+            String resourceName, String typeString, String valueString, String configuration) {
         final int type;
         typeString = typeString.toLowerCase(Locale.getDefault());
         if (TYPE_MAP.containsKey(typeString)) {
@@ -392,7 +397,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
             }
         }
         if (type == TypedValue.TYPE_STRING) {
-            overlayBuilder.setResourceValue(resourceName, type, valueString);
+            overlayBuilder.setResourceValue(resourceName, type, valueString, configuration);
         } else {
             final int intData;
             if (valueString.startsWith("0x")) {
@@ -400,7 +405,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
             } else {
                 intData = Integer.parseUnsignedInt(valueString);
             }
-            overlayBuilder.setResourceValue(resourceName, type, intData);
+            overlayBuilder.setResourceValue(resourceName, type, intData, configuration);
         }
     }
 
