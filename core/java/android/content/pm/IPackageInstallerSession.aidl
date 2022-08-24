@@ -20,6 +20,7 @@ import android.content.pm.Checksum;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.PackageInstaller;
 import android.content.IntentSender;
 import android.os.ParcelFileDescriptor;
 
@@ -58,4 +59,6 @@ interface IPackageInstallerSession {
 
     boolean isStaged();
     int getInstallFlags();
+
+    void requestUserPreapproval(in PackageInstaller.PreapprovalDetails details, in IntentSender statusReceiver);
 }

@@ -170,6 +170,10 @@ public class PackageInstaller {
     /** {@hide} */
     public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
 
+    /** @hide */
+    public static final String ACTION_CONFIRM_PRE_APPROVAL =
+            "android.content.pm.action.CONFIRM_PRE_APPROVAL";
+
     /**
      * An integer session ID that an operation is working with.
      *
@@ -205,6 +209,17 @@ public class PackageInstaller {
      * @see Intent#getIntExtra(String, int)
      */
     public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
+
+    /**
+     * Indicate if the status is for a pre-approval request.
+     *
+     * If callers use the same {@link IntentSender} for both
+     * {@link Session#requestUserPreapproval(PreapprovalDetails, IntentSender)} and
+     * {@link Session#commit(IntentSender)}, they can use this to differentiate between them.
+     *
+     * @see Intent#getBooleanExtra(String, boolean)
+     */
+    public static final String EXTRA_PRE_APPROVAL = "android.content.pm.extra.PRE_APPROVAL";
 
     /**
      * Detailed string representation of the status, including raw details that
@@ -1667,6 +1682,41 @@ public class PackageInstaller {
                 e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * Attempt to request the approval before committing this session.
+         *
+         * For installers that have been granted the
+         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
+         * permission, they can request the approval from users before
+         * {@link Session#commit(IntentSender)} is called. This may require user intervention as
+         * well. The result of the request will be reported through the given callback.
+         *
+         * @param details the adequate context to this session for requesting the approval from
+         *                users prior to commit.
+         * @param statusReceiver called when the state of the session changes.
+         *                       Intents sent to this receiver contain
+         *                       {@link #EXTRA_STATUS}. Refer to the individual
+         *                       status codes on how to handle them.
+         *
+         * @throws IllegalArgumentException when {@link PreapprovalDetails} is {@code null}.
+         * @throws IllegalArgumentException if {@link IntentSender} is {@code null}.
+         * @throws IllegalStateException if called on a multi-package session (no matter
+         *                               the parent session or any of the children sessions).
+         * @throws IllegalStateException if called again after this method has been called on
+         *                               this session.
+         * @throws SecurityException when the caller does not own this session.
+         */
+        public void requestUserPreapproval(@NonNull PreapprovalDetails details,
+                @NonNull IntentSender statusReceiver) {
+            Preconditions.checkArgument(details != null, "preapprovalDetails cannot be null.");
+            Preconditions.checkArgument(statusReceiver != null, "statusReceiver cannot be null.");
+            try {
+                mSession.requestUserPreapproval(details, statusReceiver);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -2631,6 +2681,9 @@ public class PackageInstaller {
         /** {@hide} */
         public int installerUid;
 
+        /** @hide */
+        public boolean isPreapprovalRequested;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public SessionInfo() {
@@ -2678,6 +2731,7 @@ public class PackageInstaller {
             mSessionErrorCode = source.readInt();
             mSessionErrorMessage = source.readString();
             isCommitted = source.readBoolean();
+            isPreapprovalRequested = source.readBoolean();
             rollbackDataPolicy = source.readInt();
             createdMillis = source.readLong();
             requireUserAction = source.readInt();
@@ -3257,6 +3311,7 @@ public class PackageInstaller {
             dest.writeInt(mSessionErrorCode);
             dest.writeString(mSessionErrorMessage);
             dest.writeBoolean(isCommitted);
+            dest.writeBoolean(isPreapprovalRequested);
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(createdMillis);
             dest.writeInt(requireUserAction);
