@@ -68,6 +68,13 @@ public final class VirtualDisplay {
     }
 
     /**
+     * @hide
+     */
+    public IVirtualDisplayCallback getToken() {
+        return mToken;
+    }
+
+    /**
      * Sets the surface that backs the virtual display.
      * <p>
      * Detaching the surface that backs a virtual display has a similar effect to

@@ -161,6 +161,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    void setDisplayIdToMirror(IBinder appToken, int displayId) {
+        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
+        if (device != null) {
+            device.setDisplayIdToMirror(displayId);
+        }
+    }
+
     public DisplayDevice releaseVirtualDisplayLocked(IBinder appToken) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
         if (device != null) {
@@ -311,6 +318,15 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         @Override
         public int getDisplayIdToMirrorLocked() {
             return mDisplayIdToMirror;
+        }
+
+        void setDisplayIdToMirror(int displayIdToMirror) {
+            if (mDisplayIdToMirror != displayIdToMirror) {
+                mDisplayIdToMirror = displayIdToMirror;
+                mInfo = null;
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
+                sendTraversalRequestLocked();
+            }
         }
 
         @Override
