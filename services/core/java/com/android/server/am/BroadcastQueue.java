@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,12 @@ import java.util.Set;
  * Queue of broadcast intents and associated bookkeeping.
  */
 public abstract class BroadcastQueue {
+    public static final String TAG = "BroadcastQueue";
+
     final ActivityManagerService mService;
     final Handler mHandler;
     final BroadcastConstants mConstants;
+    final BroadcastSkipPolicy mSkipPolicy;
     final String mQueueName;
 
     BroadcastQueue(ActivityManagerService service, Handler handler,
@@ -44,6 +47,7 @@ public abstract class BroadcastQueue {
         mHandler = handler;
         mQueueName = name;
         mConstants = constants;
+        mSkipPolicy = new BroadcastSkipPolicy(service);
     }
 
     void start(ContentResolver resolver) {
