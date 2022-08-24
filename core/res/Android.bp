@@ -73,18 +73,18 @@ genrule {
         ":remote-color-resources-compile-colors",
     ],
     out: ["remote-color-resources.apk"],
-    cmd: "$(location aapt2) link -o $(out) --manifest $(in)"
+    cmd: "$(location aapt2) link -o $(out) --manifest $(in)",
 }
 
 genrule {
     name: "remote-color-resources-arsc",
     srcs: [":remote-color-resources-apk"],
     out: ["res/raw/remote_views_color_resources.arsc"],
-    cmd: "mkdir -p $(genDir)/remote-color-resources-arsc && "
-        + "unzip -x $(in) resources.arsc -d $(genDir)/remote-color-resources-arsc && "
-        + "mkdir -p $$(dirname $(out)) && "
-        + "mv $(genDir)/remote-color-resources-arsc/resources.arsc $(out) && "
-        + "echo 'Created $(out)'"
+    cmd: "mkdir -p $(genDir)/remote-color-resources-arsc && " +
+        "unzip -x $(in) resources.arsc -d $(genDir)/remote-color-resources-arsc && " +
+        "mkdir -p $$(dirname $(out)) && " +
+        "mv $(genDir)/remote-color-resources-arsc/resources.arsc $(out) && " +
+        "echo 'Created $(out)'",
 }
 
 genrule {
@@ -95,11 +95,11 @@ genrule {
         "remote_color_resources_res/symbols.xml",
     ],
     out: ["remote_views_color_resources.zip"],
-    cmd: "INPUTS=($(in)) && "
-        + "RES_DIR=$$(dirname $$(dirname $${INPUTS[0]})) && "
-        + "mkdir -p $$RES_DIR/values && "
-        + "cp $${INPUTS[1]} $$RES_DIR/values && "
-        + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR"
+    cmd: "INPUTS=($(in)) && " +
+        "RES_DIR=$$(dirname $$(dirname $${INPUTS[0]})) && " +
+        "mkdir -p $$RES_DIR/values && " +
+        "cp $${INPUTS[1]} $$RES_DIR/values && " +
+        "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR",
 }
 
 android_app {
@@ -154,31 +154,21 @@ java_genrule {
     cmd: "cp $(in) $(out)",
 }
 
-// This logic can be removed once robolectric's transition to binary resources is complete
-filegroup {
-    name: "robolectric_framework_raw_res_files",
-    srcs: [
-        "assets/**/*",
-        "res/**/*",
-        ":remote-color-resources-arsc",
-    ],
-}
-
 // Generate a text file containing a list of permissions that non-system apps
 // are allowed to obtain.
 genrule {
-  name: "permission-list-normal",
-  out: ["permission-list-normal.txt"],
-  srcs: ["AndroidManifest.xml"],
-  cmd: "cat $(in) " +
-       // xmllint has trouble accessing attributes under the android namespace.
-       // Strip these prefixes prior to processing with xmllint.
-       " | sed -r 's/android:(name|protectionLevel)/\\1/g' " +
-       " | $(location xmllint) /dev/stdin --xpath " +
-       " '//permission[not(contains(@protectionLevel, \"signature\"))]/@name'" +
-       // The result of xmllint is name="value" pairs. Format these to just the
-       // permission name, one per-line.
-       " | sed -r 's/\\s*name=\\s*//g' | tr -d '\"'" +
-       " > $(out)",
-  tools: ["xmllint"]
+    name: "permission-list-normal",
+    out: ["permission-list-normal.txt"],
+    srcs: ["AndroidManifest.xml"],
+    cmd: "cat $(in) " +
+        // xmllint has trouble accessing attributes under the android namespace.
+        // Strip these prefixes prior to processing with xmllint.
+        " | sed -r 's/android:(name|protectionLevel)/\\1/g' " +
+        " | $(location xmllint) /dev/stdin --xpath " +
+        " '//permission[not(contains(@protectionLevel, \"signature\"))]/@name'" +
+        // The result of xmllint is name="value" pairs. Format these to just the
+        // permission name, one per-line.
+        " | sed -r 's/\\s*name=\\s*//g' | tr -d '\"'" +
+        " > $(out)",
+    tools: ["xmllint"],
 }
