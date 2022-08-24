@@ -20,7 +20,6 @@ import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -236,11 +235,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     private boolean mIsHeadsUp;
 
-    /**
-     * Whether or not the notification should be redacted on the lock screen, i.e has sensitive
-     * content which should be redacted on the lock screen.
-     */
-    private boolean mNeedsRedaction;
     private boolean mLastChronometerRunning = true;
     private ViewStub mChildrenContainerStub;
     private GroupMembershipManager mGroupMembershipManager;
@@ -1500,23 +1494,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setUsesIncreasedHeadsUpHeight(boolean use) {
         mUseIncreasedHeadsUpHeight = use;
-    }
-
-    /** @deprecated TODO: Remove this when the old pipeline code is removed. */
-    @Deprecated
-    public void setNeedsRedaction(boolean needsRedaction) {
-        if (mNeedsRedaction != needsRedaction) {
-            mNeedsRedaction = needsRedaction;
-            if (!isRemoved()) {
-                RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-                if (needsRedaction) {
-                    params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
-                } else {
-                    params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
-                }
-                mRowContentBindStage.requestRebind(mEntry, null /* callback */);
-            }
-        }
     }
 
     public interface ExpansionLogger {
