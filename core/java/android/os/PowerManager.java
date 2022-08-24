@@ -348,44 +348,6 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_EVENT_DEVICE_STATE = 6;
 
     /**
-     * @hide
-     */
-    public static final int USER_ACTIVITY_EVENT_MAX =  USER_ACTIVITY_EVENT_DEVICE_STATE;
-
-    /**
-     * @hide
-     */
-    @IntDef(prefix = { "USER_ACTIVITY_EVENT_" }, value = {
-            USER_ACTIVITY_EVENT_OTHER,
-            USER_ACTIVITY_EVENT_BUTTON,
-            USER_ACTIVITY_EVENT_TOUCH,
-            USER_ACTIVITY_EVENT_ACCESSIBILITY,
-            USER_ACTIVITY_EVENT_ATTENTION,
-            USER_ACTIVITY_EVENT_FACE_DOWN,
-            USER_ACTIVITY_EVENT_DEVICE_STATE,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface UserActivityEvent{}
-
-    /**
-     *
-     * Convert the user activity event to a string for debugging purposes.
-     * @hide
-     */
-    public static String userActivityEventToString(@UserActivityEvent int userActivityEvent) {
-        switch (userActivityEvent) {
-            case USER_ACTIVITY_EVENT_OTHER: return "other";
-            case USER_ACTIVITY_EVENT_BUTTON: return "button";
-            case USER_ACTIVITY_EVENT_TOUCH: return "touch";
-            case USER_ACTIVITY_EVENT_ACCESSIBILITY: return "accessibility";
-            case USER_ACTIVITY_EVENT_ATTENTION: return "attention";
-            case USER_ACTIVITY_EVENT_FACE_DOWN: return "faceDown";
-            case USER_ACTIVITY_EVENT_DEVICE_STATE: return "deviceState";
-            default: return Integer.toString(userActivityEvent);
-        }
-    }
-
-    /**
      * User activity flag: If already dimmed, extend the dim timeout
      * but do not brighten.  This flag is useful for keeping the screen on
      * a little longer without causing a visible change such as when
