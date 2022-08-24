@@ -122,6 +122,11 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_ENABLE_SPA = "settings_enable_spa";
 
+    /** Flag to enable/disable adb log metrics
+     *  @hide
+     */
+    public static final String SETTINGS_ADB_METRICS_WRITER = "settings_adb_metrics_writer";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -155,6 +160,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
