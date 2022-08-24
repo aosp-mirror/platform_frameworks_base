@@ -74,6 +74,7 @@ interface IUserManager {
     String getUserAccount(int userId);
     void setUserAccount(int userId, String accountName);
     long getUserCreationTime(int userId);
+    boolean isUserSwitcherEnabled(int mUserId);
     boolean isRestricted(int userId);
     boolean canHaveRestrictedProfile(int userId);
     int getUserSerialNumber(int userId);
