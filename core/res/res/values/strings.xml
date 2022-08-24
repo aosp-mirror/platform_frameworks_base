@@ -3365,6 +3365,13 @@
     <!-- Default not selected text used by accessibility for an element that can be selected or unselected. [CHAR LIMIT=NONE] -->
     <string name="not_selected">not selected</string>
 
+    <!-- Default label text used by accessibility for ratingbars. [CHAR LIMIT=NONE] -->
+    <string name ="rating_label">{ rating, plural,
+        =1 {One star out of {max}}
+        other {# stars out of {max}}
+    }
+    </string>
+
     <!-- Default state description for indeterminate progressbar. [CHAR LIMIT=NONE] -->
     <string name="in_progress">in progress</string>
 
