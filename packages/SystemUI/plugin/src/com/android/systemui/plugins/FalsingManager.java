@@ -102,6 +102,12 @@ public interface FalsingManager {
      */
     boolean isFalseDoubleTap();
 
+    /**
+     * Whether the last proximity event reported NEAR. May be used to short circuit motion events
+     * that require the proximity sensor is not covered.
+     */
+    boolean isProximityNear();
+
     boolean isClassifierEnabled();
 
     boolean shouldEnforceBouncer();
