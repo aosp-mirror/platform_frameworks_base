@@ -16,16 +16,21 @@
 
 package com.android.wm.shell.fullscreen;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.graphics.Point;
-import android.util.Slog;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -34,36 +39,49 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
   * Organizes tasks presented in {@link android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN}.
+ * @param <T> the type of window decoration instance
   */
-public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
+public class FullscreenTaskListener<T extends AutoCloseable>
+        implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FullscreenTaskListener";
 
     private final ShellTaskOrganizer mShellTaskOrganizer;
+
+    private final SparseArray<State<T>> mTasks = new SparseArray<>();
+    private final SparseArray<T> mWindowDecorOfVanishedTasks = new SparseArray<>();
+
+    private static class State<T extends AutoCloseable> {
+        RunningTaskInfo mTaskInfo;
+        SurfaceControl mLeash;
+        T mWindowDecoration;
+    }
     private final SyncTransactionQueue mSyncQueue;
     private final Optional<RecentTasksController> mRecentTasksOptional;
-
-    private final SparseArray<TaskData> mDataByTaskId = new SparseArray<>();
-
+    private final Optional<WindowDecorViewModel<T>> mWindowDecorViewModelOptional;
     /**
      * This constructor is used by downstream products.
      */
     public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
-        this(null /* shellInit */, null /* shellTaskOrganizer */, syncQueue, Optional.empty());
+        this(null /* shellInit */, null /* shellTaskOrganizer */, syncQueue, Optional.empty(),
+                Optional.empty());
     }
 
     public FullscreenTaskListener(ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
-            Optional<RecentTasksController> recentTasksOptional) {
+            Optional<RecentTasksController> recentTasksOptional,
+            Optional<WindowDecorViewModel<T>> windowDecorViewModelOptional) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mRecentTasksOptional = recentTasksOptional;
+        mWindowDecorViewModelOptional = windowDecorViewModelOptional;
         // Note: Some derivative FullscreenTaskListener implementations do not use ShellInit
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
@@ -76,55 +94,204 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
-        if (mDataByTaskId.get(taskInfo.taskId) != null) {
+        if (mTasks.get(taskInfo.taskId) != null) {
             throw new IllegalStateException("Task appeared more than once: #" + taskInfo.taskId);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                 taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
-        mDataByTaskId.put(taskInfo.taskId, new TaskData(leash, positionInParent));
-
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
-        mSyncQueue.runInSync(t -> {
-            // Reset several properties back to fullscreen (PiP, for example, leaves all these
-            // properties in a bad state).
-            t.setWindowCrop(leash, null);
-            t.setPosition(leash, positionInParent.x, positionInParent.y);
-            t.setAlpha(leash, 1f);
-            t.setMatrix(leash, 1, 0, 0, 1);
-            t.show(leash);
-        });
+        final State<T> state = new State();
+        state.mLeash = leash;
+        state.mTaskInfo = taskInfo;
+        mTasks.put(taskInfo.taskId, state);
 
         updateRecentsForVisibleFullscreenTask(taskInfo);
-    }
-
-    @Override
-    public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
-
-        updateRecentsForVisibleFullscreenTask(taskInfo);
-
-        final TaskData data = mDataByTaskId.get(taskInfo.taskId);
-        final Point positionInParent = taskInfo.positionInParent;
-        if (!positionInParent.equals(data.positionInParent)) {
-            data.positionInParent.set(positionInParent.x, positionInParent.y);
+        if (shouldShowWindowDecor(taskInfo) && mWindowDecorViewModelOptional.isPresent()) {
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            state.mWindowDecoration =
+                    mWindowDecorViewModelOptional.get().createWindowDecoration(taskInfo,
+                            leash, t, t);
+            t.apply();
+        } else {
             mSyncQueue.runInSync(t -> {
-                t.setPosition(data.surface, positionInParent.x, positionInParent.y);
+                // Reset several properties back to fullscreen (PiP, for example, leaves all these
+                // properties in a bad state).
+                t.setWindowCrop(leash, null);
+                t.setPosition(leash, positionInParent.x, positionInParent.y);
+                t.setAlpha(leash, 1f);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                t.show(leash);
             });
         }
     }
 
     @Override
-    public void onTaskVanished(RunningTaskInfo taskInfo) {
-        if (mDataByTaskId.get(taskInfo.taskId) == null) {
-            Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
+    public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
+        final State<T> state = mTasks.get(taskInfo.taskId);
+        final Point oldPositionInParent = state.mTaskInfo.positionInParent;
+        state.mTaskInfo = taskInfo;
+        if (state.mWindowDecoration != null) {
+            mWindowDecorViewModelOptional.get().onTaskInfoChanged(
+                    state.mTaskInfo, state.mWindowDecoration);
+        }
+        updateRecentsForVisibleFullscreenTask(taskInfo);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
+
+        final Point positionInParent = state.mTaskInfo.positionInParent;
+        if (!oldPositionInParent.equals(state.mTaskInfo.positionInParent)) {
+            mSyncQueue.runInSync(t -> {
+                t.setPosition(state.mLeash, positionInParent.x, positionInParent.y);
+            });
+        }
+    }
+
+    @Override
+    public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+        final State<T> state = mTasks.get(taskInfo.taskId);
+        if (state == null) {
+            // This is possible if the transition happens before this method.
+            return;
+        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
+                taskInfo.taskId);
+        mTasks.remove(taskInfo.taskId);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            // Save window decorations of closing tasks so that we can hand them over to the
+            // transition system if this method happens before the transition. In case where the
+            // transition didn't happen, it'd be cleared when the next transition finished.
+            if (state.mWindowDecoration != null) {
+                mWindowDecorOfVanishedTasks.put(taskInfo.taskId, state.mWindowDecoration);
+            }
+            return;
+        }
+        releaseWindowDecor(state.mWindowDecoration);
+    }
+
+    /**
+     * Creates a window decoration for a transition.
+     *
+     * @param change the change of this task transition that needs to have the task layer as the
+     *               leash
+     */
+    public void createWindowDecoration(TransitionInfo.Change change,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT) {
+        final State<T> state = createOrUpdateTaskState(change.getTaskInfo(), change.getLeash());
+        if (!mWindowDecorViewModelOptional.isPresent()
+                || !shouldShowWindowDecor(state.mTaskInfo)) {
             return;
         }
 
-        mDataByTaskId.remove(taskInfo.taskId);
+        state.mWindowDecoration = mWindowDecorViewModelOptional.get().createWindowDecoration(
+                state.mTaskInfo, state.mLeash, startT, finishT);
+    }
 
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
-                taskInfo.taskId);
+    /**
+     * Adopt the incoming window decoration and lets the window decoration prepare for a transition.
+     *
+     * @param change the change of this task transition that needs to have the task layer as the
+     *               leash
+     * @param startT the start transaction of this transition
+     * @param finishT the finish transaction of this transition
+     * @param windowDecor the window decoration to adopt
+     * @return {@code true} if it adopts the window decoration; {@code false} otherwise
+     */
+    public boolean adoptWindowDecoration(
+            TransitionInfo.Change change,
+            SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT,
+            @Nullable AutoCloseable windowDecor) {
+        if (!mWindowDecorViewModelOptional.isPresent()
+                || !shouldShowWindowDecor(change.getTaskInfo())) {
+            return false;
+        }
+        final State<T> state = createOrUpdateTaskState(change.getTaskInfo(), change.getLeash());
+        state.mWindowDecoration = mWindowDecorViewModelOptional.get().adoptWindowDecoration(
+                windowDecor);
+        if (state.mWindowDecoration != null) {
+            mWindowDecorViewModelOptional.get().setupWindowDecorationForTransition(
+                    state.mTaskInfo, startT, finishT, state.mWindowDecoration);
+            return true;
+        } else {
+            state.mWindowDecoration = mWindowDecorViewModelOptional.get().createWindowDecoration(
+                    state.mTaskInfo, state.mLeash, startT, finishT);
+            return false;
+        }
+    }
+
+    /**
+     * Clear window decors of vanished tasks.
+     */
+    public void onTaskTransitionFinished() {
+        if (mWindowDecorOfVanishedTasks.size() == 0) {
+            return;
+        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "Clearing window decors of vanished tasks. There could be visual defects "
+                + "if any of them is used later in transitions.");
+        for (int i = 0; i < mWindowDecorOfVanishedTasks.size(); ++i) {
+            releaseWindowDecor(mWindowDecorOfVanishedTasks.valueAt(i));
+        }
+        mWindowDecorOfVanishedTasks.clear();
+    }
+
+    /**
+     * Gives out the ownership of the task's window decoration. The given task is leaving (of has
+     * left) this task listener. This is the transition system asking for the ownership.
+     *
+     * @param taskInfo the maximizing task
+     * @return the window decor of the maximizing task if any
+     */
+    public T giveWindowDecoration(
+            ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT) {
+        T windowDecor;
+        final State<T> state = mTasks.get(taskInfo.taskId);
+        if (state != null) {
+            windowDecor = state.mWindowDecoration;
+            state.mWindowDecoration = null;
+        } else {
+            windowDecor =
+                    mWindowDecorOfVanishedTasks.removeReturnOld(taskInfo.taskId);
+        }
+        if (mWindowDecorViewModelOptional.isPresent()) {
+            mWindowDecorViewModelOptional.get().setupWindowDecorationForTransition(
+                    taskInfo, startT, finishT, windowDecor);
+        }
+
+        return windowDecor;
+    }
+
+    private State<T> createOrUpdateTaskState(ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl leash) {
+        State<T> state = mTasks.get(taskInfo.taskId);
+        if (state != null) {
+            updateTaskInfo(taskInfo);
+            return state;
+        }
+
+        state = new State<T>();
+        state.mTaskInfo = taskInfo;
+        state.mLeash = leash;
+        mTasks.put(taskInfo.taskId, state);
+
+        return state;
+    }
+
+    private State<T> updateTaskInfo(ActivityManager.RunningTaskInfo taskInfo) {
+        final State<T> state = mTasks.get(taskInfo.taskId);
+        state.mTaskInfo = taskInfo;
+        return state;
+    }
+
+    private void releaseWindowDecor(T windowDecor) {
+        try {
+            windowDecor.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to release window decoration.", e);
+        }
     }
 
     private void updateRecentsForVisibleFullscreenTask(RunningTaskInfo taskInfo) {
@@ -148,17 +315,17 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     private SurfaceControl findTaskSurface(int taskId) {
-        if (!mDataByTaskId.contains(taskId)) {
+        if (!mTasks.contains(taskId)) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        return mDataByTaskId.get(taskId).surface;
+        return mTasks.get(taskId).mLeash;
     }
 
     @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + this);
-        pw.println(innerPrefix + mDataByTaskId.size() + " Tasks");
+        pw.println(innerPrefix + mTasks.size() + " Tasks");
     }
 
     @Override
@@ -166,16 +333,10 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_FULLSCREEN);
     }
 
-    /**
-     * Per-task data for each managed task.
-     */
-    private static class TaskData {
-        public final SurfaceControl surface;
-        public final Point positionInParent;
-
-        public TaskData(SurfaceControl surface, Point positionInParent) {
-            this.surface = surface;
-            this.positionInParent = positionInParent;
-        }
+    private static boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
+        return taskInfo.getConfiguration().windowConfiguration.getDisplayWindowingMode()
+                == WINDOWING_MODE_FREEFORM;
     }
+
+
 }
