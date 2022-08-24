@@ -78,7 +78,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
         when(mMediaOutputController.getMediaDevices()).thenReturn(mMediaDevices);
         when(mMediaOutputController.hasAdjustVolumeUserRestriction()).thenReturn(false);
-        when(mMediaOutputController.isTransferring()).thenReturn(false);
+        when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(false);
         when(mMediaOutputController.getDeviceIconCompat(mMediaDevice1)).thenReturn(mIconCompat);
         when(mMediaOutputController.getDeviceIconCompat(mMediaDevice2)).thenReturn(mIconCompat);
         when(mMediaOutputController.getCurrentConnectedMediaDevice()).thenReturn(mMediaDevice1);
@@ -208,7 +208,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void onBindViewHolder_inTransferring_bindTransferringDevice_verifyView() {
-        when(mMediaOutputController.isTransferring()).thenReturn(true);
+        when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(true);
         when(mMediaDevice1.getState()).thenReturn(
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
@@ -224,7 +224,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void onBindViewHolder_inTransferring_bindNonTransferringDevice_verifyView() {
-        when(mMediaOutputController.isTransferring()).thenReturn(true);
+        when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(true);
         when(mMediaDevice2.getState()).thenReturn(
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
