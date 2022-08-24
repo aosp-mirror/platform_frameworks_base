@@ -78,6 +78,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -635,7 +636,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // remove the surfaces yet. If it is currently visible, but not expected-visible,
                 // then doing commitVisibility here would actually be out-of-order and leave the
                 // activity in a bad state.
-                if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
+                // TODO (b/243755838) Create a screen off transition to correct the visible status
+                // of activities.
+                final boolean isScreenOff = ar.mDisplayContent == null
+                        || ar.mDisplayContent.getDisplayInfo().state == Display.STATE_OFF;
+                if ((!visibleAtTransitionEnd || isScreenOff) && !ar.isVisibleRequested()) {
                     final boolean commitVisibility = !checkEnterPipOnFinish(ar);
                     // Avoid commit visibility if entering pip or else we will get a sudden
                     // "flash" / surface going invisible for a split second.
