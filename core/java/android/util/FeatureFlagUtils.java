@@ -52,13 +52,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_SUPPORT_LARGE_SCREEN = "settings_support_large_screen";
 
     /**
-     * Support per app's language selection
-     * @hide
-     */
-    public static final String SETTINGS_APP_LANGUAGE_SELECTION = "settings_app_language_selection";
-
-
-    /**
      * Feature flag to allow/restrict intent redirection from/to clone profile.
      * Default value is false,this is to ensure that framework is not impacted by intent redirection
      * till we are ready to launch.
@@ -138,7 +131,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
         DEFAULT_FLAGS.put("settings_search_always_expand", "true");
-        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "true");
         DEFAULT_FLAGS.put(SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE, "false");
         DEFAULT_FLAGS.put(SETTINGS_APP_LOCALE_OPT_IN_ENABLED, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
@@ -153,7 +145,6 @@ public class FeatureFlagUtils {
     private static final Set<String> PERSISTENT_FLAGS;
     static {
         PERSISTENT_FLAGS = new HashSet<>();
-        PERSISTENT_FLAGS.add(SETTINGS_APP_LANGUAGE_SELECTION);
         PERSISTENT_FLAGS.add(SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE);
         PERSISTENT_FLAGS.add(SETTINGS_APP_LOCALE_OPT_IN_ENABLED);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
