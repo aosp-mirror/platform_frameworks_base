@@ -1317,7 +1317,6 @@ final class RemoteSelectionToolbar {
         contentContainer.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         contentContainer.setTag(FloatingToolbar.FLOATING_TOOLBAR_TAG);
-        contentContainer.setContentDescription(FloatingToolbar.FLOATING_TOOLBAR_TAG);
         contentContainer.setClipToOutline(true);
         return contentContainer;
     }
