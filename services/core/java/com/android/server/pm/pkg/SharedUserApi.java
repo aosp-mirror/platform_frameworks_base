@@ -27,6 +27,7 @@ import com.android.server.pm.pkg.component.ParsedProcess;
 
 import java.util.List;
 
+/** @hide */
 public interface SharedUserApi {
 
     @NonNull

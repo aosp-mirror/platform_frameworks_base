@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+/** @hide */
 @DataClass(genConstructor = false, genBuilder = false, genEqualsHashCode = true)
 @DataClass.Suppress({"mOverlayPathsLock", "mOverlayPaths", "mSharedLibraryOverlayPathsLock",
         "mSharedLibraryOverlayPaths", "setOverlayPaths", "setCachedOverlayPaths"})

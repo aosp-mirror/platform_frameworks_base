@@ -24,6 +24,7 @@ import android.util.SparseArray;
 
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 
+/** @hide */
 public class PackageStateUtils {
 
     public static boolean isMatch(PackageState packageState, long flags) {

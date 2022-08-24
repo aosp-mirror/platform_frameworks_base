@@ -26,9 +26,8 @@ import android.util.ArraySet;
 
 import java.util.Map;
 
+
 /**
- * The API surface for {@link PackageUserStateInternal}, for use by in-process mainline consumers.
- *
  * The parent of this class is {@link PackageState}, which handles non-user state, exposing this
  * interface for per-user state.
  *
@@ -36,123 +35,164 @@ import java.util.Map;
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-@Immutable.Ignore(reason = "Exposed through PackageState pending refactor")
+@Immutable
 public interface PackageUserState {
 
-    /** @hide */
+    /**
+     * @hide
+     */
     @NonNull
     PackageUserState DEFAULT = PackageUserStateInternal.DEFAULT;
 
     /**
      * Combination of {@link #getOverlayPaths()} and {@link #getSharedLibraryOverlayPaths()}
+     *
      * @hide
      */
+    @Immutable.Ignore
     @Nullable
     OverlayPaths getAllOverlayPaths();
 
     /**
      * Credential encrypted /data partition inode.
+     *
+     * @hide
      */
     long getCeDataInode();
 
     /**
      * Fully qualified class names of components explicitly disabled.
+     *
+     * @hide
      */
     @NonNull
     ArraySet<String> getDisabledComponents();
 
+    /**
+     * @hide
+     */
     @PackageManager.DistractionRestriction
     int getDistractionFlags();
 
     /**
      * Fully qualified class names of components explicitly enabled.
+     *
+     * @hide
      */
     @NonNull
     ArraySet<String> getEnabledComponents();
 
     /**
      * Retrieve the effective enabled state of the package itself.
+     *
+     * @hide
      */
     @PackageManager.EnabledState
     int getEnabledState();
 
     /**
+     * @hide
      * @see PackageManager#setHarmfulAppWarning(String, CharSequence)
      */
     @Nullable
     String getHarmfulAppWarning();
 
+    /**
+     * @hide
+     */
     @PackageManager.InstallReason
     int getInstallReason();
 
     /**
      * Tracks the last calling package to set a specific enabled state for the package.
+     *
+     * @hide
      */
     @Nullable
     String getLastDisableAppCaller();
 
-    /** @hide */
+    /**
+     * @hide
+     */
+    @Immutable.Ignore
     @Nullable
     OverlayPaths getOverlayPaths();
 
-    /** @hide */
+    /**
+     * @hide
+     */
+    @Immutable.Ignore
     @NonNull
     Map<String, OverlayPaths> getSharedLibraryOverlayPaths();
 
+    /**
+     * @hide
+     */
     @PackageManager.UninstallReason
     int getUninstallReason();
 
     /**
      * @return whether the given fully qualified class name is explicitly enabled
+     * @hide
      */
     boolean isComponentEnabled(@NonNull String componentName);
 
     /**
      * @return {@link #isComponentEnabled(String)} but for explicitly disabled
+     * @hide
      */
     boolean isComponentDisabled(@NonNull String componentName);
 
     /**
+     * @hide
      * @see PackageManager#setApplicationHiddenSettingAsUser(String, boolean, UserHandle)
      */
     boolean isHidden();
 
     /**
      * @return whether the package is marked as installed for all users
+     * @hide
      */
     boolean isInstalled();
 
     /**
      * @return whether the package is marked as an ephemeral app, which restricts permissions,
      * features, visibility
+     * @hide
      */
     boolean isInstantApp();
 
     /**
      * @return whether the package has not been launched since being explicitly stopped
+     * @hide
      */
     boolean isNotLaunched();
 
     /**
      * @return whether the package has been stopped, which can occur if it's force-stopped, data
      * cleared, or just been installed
+     * @hide
      */
     boolean isStopped();
 
     /**
      * @return whether the package has been suspended, maybe by the device admin, disallowing its
      * launch
+     * @hide
      */
     boolean isSuspended();
 
     /**
      * @return whether the package was installed as a virtual preload, which may be done as part
      * of device infrastructure auto installation outside of the initial device image
+     * @hide
      */
     boolean isVirtualPreload();
 
     /**
      * The "package:type/entry" form of the theme resource ID previously set as the splash screen.
+     *
+     * @hide
      * @see android.window.SplashScreen#setSplashScreenTheme(int)
      * @see android.content.res.Resources#getResourceName(int)
      */
@@ -163,8 +203,10 @@ public interface PackageUserState {
      * In epoch milliseconds. The timestamp of the first install of the app of the particular user
      * on the device, surviving past app updates. Different users might have a different first
      * install time.
-     *
+     * <p/>
      * This does not survive full removal of the app (i.e., uninstalls for all users).
+     *
+     * @hide
      */
     long getFirstInstallTime();
 }

@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
  *
  * These fields are also not copied into any cloned PackageSetting, to preserve the old behavior
  * where they would be lost implicitly by re-generating the package object.
+ * @hide
  */
 @DataClass(genSetters = true, genConstructor = false, genBuilder = false)
 @DataClass.Suppress({"setLastPackageUsageTimeInMills", "setPackageSetting"})
