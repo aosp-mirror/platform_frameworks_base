@@ -20,13 +20,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.android.settingslib.spa.framework.compose.HorizontalPager
+import com.android.settingslib.spa.framework.compose.rememberPagerState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import kotlin.math.absoluteValue
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit) {
@@ -37,10 +38,11 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
     }
 
     Column {
-        var currentPage by rememberSaveable { mutableStateOf(0) }
+        val coroutineScope = rememberCoroutineScope()
+        val pagerState = rememberPagerState()
 
         TabRow(
-            selectedTabIndex = currentPage,
+            selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.padding(horizontal = SettingsDimension.itemPaddingEnd),
             containerColor = Color.Transparent,
             indicator = {},
@@ -49,12 +51,19 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
             titles.forEachIndexed { page, title ->
                 SettingsTab(
                     title = title,
-                    selected = currentPage == page,
-                    onClick = { currentPage = page },
+                    selected = pagerState.currentPage == page,
+                    currentPageOffset = pagerState.currentPageOffset.absoluteValue,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(page)
+                        }
+                    },
                 )
             }
         }
 
-        content(currentPage)
+        HorizontalPager(count = titles.size, state = pagerState) { page ->
+            content(page)
+        }
     }
 }
