@@ -29,6 +29,7 @@ import android.util.AttributeSet
 import android.widget.TextView
 import com.android.internal.R.attr.contentDescription
 import com.android.internal.R.attr.format
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
@@ -77,7 +78,8 @@ class AnimatableClockView @JvmOverloads constructor(
     private var textAnimator: TextAnimator? = null
     private var onTextAnimatorInitialized: Runnable? = null
 
-    var timeOverrideInMillis: Long? = null
+    @VisibleForTesting var isAnimationEnabled: Boolean = true
+    @VisibleForTesting var timeOverrideInMillis: Long? = null
 
     val dozingWeight: Int
         get() = if (useBoldedVersion()) dozingWeightInternal + 100 else dozingWeightInternal
@@ -217,7 +219,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateAppearOnLockscreen() {
-        if (textAnimator == null) {
+        if (isAnimationEnabled && textAnimator == null) {
             return
         }
         setTextStyle(
@@ -233,7 +235,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = lockScreenWeight,
             textSize = -1f,
             color = lockScreenColor,
-            animate = true,
+            animate = isAnimationEnabled,
             duration = APPEAR_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -241,7 +243,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateFoldAppear(animate: Boolean = true) {
-        if (textAnimator == null) {
+        if (isAnimationEnabled && textAnimator == null) {
             return
         }
         setTextStyle(
@@ -257,7 +259,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = dozingWeightInternal,
             textSize = -1f,
             color = dozingColor,
-            animate = animate,
+            animate = animate && isAnimationEnabled,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
             duration = ANIMATION_DURATION_FOLD_TO_AOD.toLong(),
             delay = 0,
@@ -275,7 +277,7 @@ class AnimatableClockView @JvmOverloads constructor(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
                 textSize = -1f,
                 color = null,
-                animate = true,
+                animate = isAnimationEnabled,
                 duration = CHARGE_ANIM_DURATION_PHASE_1,
                 delay = 0,
                 onAnimationEnd = null
@@ -285,7 +287,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = if (isDozing()) lockScreenWeight else dozingWeight,
             textSize = -1f,
             color = null,
-            animate = true,
+            animate = isAnimationEnabled,
             duration = CHARGE_ANIM_DURATION_PHASE_0,
             delay = chargeAnimationDelay.toLong(),
             onAnimationEnd = startAnimPhase2
@@ -297,7 +299,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
             textSize = -1f,
             color = if (isDozing) dozingColor else lockScreenColor,
-            animate = animate,
+            animate = animate && isAnimationEnabled,
             duration = DOZE_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -331,7 +333,7 @@ class AnimatableClockView @JvmOverloads constructor(
                 weight = weight,
                 textSize = textSize,
                 color = color,
-                animate = animate,
+                animate = animate && isAnimationEnabled,
                 duration = duration,
                 interpolator = interpolator,
                 delay = delay,
@@ -369,7 +371,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = weight,
             textSize = textSize,
             color = color,
-            animate = animate,
+            animate = animate && isAnimationEnabled,
             interpolator = null,
             duration = duration,
             delay = delay,

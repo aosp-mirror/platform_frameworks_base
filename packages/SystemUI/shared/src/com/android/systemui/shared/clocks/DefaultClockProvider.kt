@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable
 import android.icu.text.NumberFormat
 import android.util.TypedValue
 import android.view.LayoutInflater
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.ClockAnimations
@@ -82,6 +83,9 @@ class DefaultClock(
     private val burmeseLineSpacing =
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
+
+    private var smallRegionDarkness = false
+    private var largeRegionDarkness = false
 
     private fun updateClockColor(clock: AnimatableClockView, isRegionDark: Boolean) {
         val color = if (isRegionDark) {
@@ -227,7 +231,7 @@ class DefaultClock(
     override fun dump(pw: PrintWriter) = clocks.forEach { it.dump(pw) }
 
     companion object {
-        private const val DOZE_COLOR = Color.WHITE
+        @VisibleForTesting const val DOZE_COLOR = Color.WHITE
         private const val FORMAT_NUMBER = 1234567890
     }
 }
