@@ -88,6 +88,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
@@ -198,6 +199,7 @@ import android.window.ClientWindowFrames;
 import android.window.CompatOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
+import android.window.ScreenCapture;
 import android.window.SurfaceSyncGroup;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -10689,6 +10691,25 @@ public final class ViewRootImpl implements ViewParent,
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                         .notifyOutsideTouchClientThread();
+            }
+        }
+
+        @Override
+        public void takeScreenshotOfWindow(int interactionId,
+                ScreenCapture.ScreenCaptureListener listener,
+                IAccessibilityInteractionConnectionCallback callback) {
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                        .takeScreenshotOfWindowClientThread(interactionId, listener, callback);
+            } else {
+                try {
+                    callback.sendTakeScreenshotOfWindowError(
+                            AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR,
+                            interactionId);
+                } catch (RemoteException re) {
+                    /* best effort - ignore */
+                }
             }
         }
     }
