@@ -246,5 +246,10 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         public boolean canShowTasksInRecents() {
             return true;
         }
+
+        @Override
+        public boolean isEnteringPipAllowed(int uid) {
+            return true;
+        }
     }
 }

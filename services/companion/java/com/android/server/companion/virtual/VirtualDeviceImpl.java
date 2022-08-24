@@ -579,6 +579,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             mParams.getBlockedActivities(),
                             mParams.getDefaultActivityPolicy(),
                             createListenerAdapter(),
+                            this::onEnteringPipBlocked,
                             this::onActivityBlocked,
                             this::onSecureWindowShown,
                             mAssociationInfo.getDeviceProfile());
@@ -732,6 +733,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     boolean isDisplayOwnedByVirtualDevice(int displayId) {
         return mVirtualDisplayIds.contains(displayId);
+    }
+
+    void onEnteringPipBlocked(int uid) {
+        showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_pip_blocked,
+                Toast.LENGTH_LONG, mContext.getMainLooper());
     }
 
     interface OnDeviceCloseListener {

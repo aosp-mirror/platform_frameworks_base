@@ -162,6 +162,17 @@ class DisplayWindowPolicyControllerHelper {
         return mDisplayWindowPolicyController.canShowTasksInRecents();
     }
 
+    /**
+     * @see DisplayWindowPolicyController#isEnteringPipAllowed(int)
+     */
+    public final boolean isEnteringPipAllowed(int uid) {
+        if (mDisplayWindowPolicyController == null) {
+            return true;
+        }
+        return mDisplayWindowPolicyController.isEnteringPipAllowed(uid);
+    }
+
+
     void dump(String prefix, PrintWriter pw) {
         if (mDisplayWindowPolicyController != null) {
             pw.println();
