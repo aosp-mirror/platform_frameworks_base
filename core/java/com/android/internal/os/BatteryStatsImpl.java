@@ -6144,8 +6144,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public void noteUserActivityLocked(int uid, @PowerManager.UserActivityEvent int event,
-            long elapsedRealtimeMs, long uptimeMs) {
+    public void noteUserActivityLocked(int uid, int event, long elapsedRealtimeMs, long uptimeMs) {
         if (mOnBatteryInternal) {
             uid = mapUid(uid);
             getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs).noteUserActivityLocked(event);
@@ -9957,14 +9956,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public void noteUserActivityLocked(@PowerManager.UserActivityEvent int event) {
+        public void noteUserActivityLocked(int type) {
             if (mUserActivityCounters == null) {
                 initUserActivityLocked();
             }
-            if (event >= 0 && event < NUM_USER_ACTIVITY_TYPES) {
-                mUserActivityCounters[event].stepAtomic();
+            if (type >= 0 && type < NUM_USER_ACTIVITY_TYPES) {
+                mUserActivityCounters[type].stepAtomic();
             } else {
-                Slog.w(TAG, "Unknown user activity event " + event + " was specified.",
+                Slog.w(TAG, "Unknown user activity type " + type + " was specified.",
                         new Throwable());
             }
         }
