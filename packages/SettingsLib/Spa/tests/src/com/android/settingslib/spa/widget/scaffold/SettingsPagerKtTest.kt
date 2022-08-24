@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -43,7 +44,7 @@ class SettingsPagerKtTest {
         composeTestRule.onNodeWithText("Personal").assertIsSelected()
         composeTestRule.onNodeWithText("Page 0").assertIsDisplayed()
         composeTestRule.onNodeWithText("Work").assertIsNotSelected()
-        composeTestRule.onNodeWithText("Page 1").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Page 1").assertIsNotDisplayed()
     }
 
     @Test
@@ -55,7 +56,7 @@ class SettingsPagerKtTest {
         composeTestRule.onNodeWithText("Work").performClick()
 
         composeTestRule.onNodeWithText("Personal").assertIsNotSelected()
-        composeTestRule.onNodeWithText("Page 0").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Page 0").assertIsNotDisplayed()
         composeTestRule.onNodeWithText("Work").assertIsSelected()
         composeTestRule.onNodeWithText("Page 1").assertIsDisplayed()
     }
