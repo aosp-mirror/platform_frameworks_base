@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -37,6 +38,23 @@ constructor(
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
 ) {
+    /**
+     * Whether quick affordances are "opaque enough" to be considered visible to and interactive by
+     * the user. If they are not interactive, user input should not be allowed on them.
+     *
+     * Note that there is a margin of error, where we allow very, very slightly transparent views to
+     * be considered "fully opaque" for the purpose of being interactive. This is to accommodate the
+     * error margin of floating point arithmetic.
+     *
+     * A view that is visible but with an alpha of less than our threshold either means it's not
+     * fully done fading in or is fading/faded out. Either way, it should not be
+     * interactive/clickable unless "fully opaque" to avoid issues like in b/241830987.
+     */
+    private val areQuickAffordancesFullyOpaque: Flow<Boolean> =
+        bottomAreaInteractor.alpha
+            .map { alpha -> alpha >= AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD }
+            .distinctUntilChanged()
+
     /** An observable for the view-model of the "start button" quick affordance. */
     val startButton: Flow<KeyguardQuickAffordanceViewModel> =
         button(KeyguardQuickAffordancePosition.BOTTOM_START)
@@ -77,14 +95,19 @@ constructor(
         return combine(
                 quickAffordanceInteractor.quickAffordance(position),
                 bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged(),
-            ) { model, animateReveal ->
-                model.toViewModel(animateReveal)
+                areQuickAffordancesFullyOpaque,
+            ) { model, animateReveal, isFullyOpaque ->
+                model.toViewModel(
+                    animateReveal = animateReveal,
+                    isClickable = isFullyOpaque,
+                )
             }
             .distinctUntilChanged()
     }
 
     private fun KeyguardQuickAffordanceModel.toViewModel(
         animateReveal: Boolean,
+        isClickable: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -100,8 +123,20 @@ constructor(
                             animationController = parameters.animationController,
                         )
                     },
+                    isClickable = isClickable,
                 )
             is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
         }
+    }
+
+    companion object {
+        // We select a value that's less than 1.0 because we want floating point math precision to
+        // not be a factor in determining whether the affordance UI is fully opaque. The number we
+        // choose needs to be close enough 1.0 such that the user can't easily tell the difference
+        // between the UI with an alpha at the threshold and when the alpha is 1.0. At the same
+        // time, we don't want the number to be too close to 1.0 such that there is a chance that we
+        // never treat the affordance UI as "fully opaque" as that would risk making it forever not
+        // clickable.
+        @VisibleForTesting const val AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD = 0.95f
     }
 }
