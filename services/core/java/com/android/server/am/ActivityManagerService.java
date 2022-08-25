@@ -4954,10 +4954,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (!badApp) {
-            updateUidReadyForBootCompletedBroadcastLocked(app.uid);
-        }
-
         // Check if a next-broadcast receiver is in this process...
         if (!badApp) {
             try {
@@ -13069,12 +13065,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException e) {
             Slog.e(TAG, "Error looking up if " + callerPackage + " is an instant app.", e);
             return true;
-        }
-    }
-
-    void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.updateUidReadyForBootCompletedBroadcastLocked(uid);
         }
     }
 

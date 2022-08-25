@@ -424,6 +424,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     public boolean onApplicationAttachedLocked(ProcessRecord app) {
+        updateUidReadyForBootCompletedBroadcastLocked(app.uid);
+
         if (mPendingBroadcast != null && mPendingBroadcast.curApp == app) {
             return sendPendingBroadcastsLocked(app);
         } else {

@@ -75,8 +75,6 @@ public abstract class BroadcastQueue {
      */
     public abstract void enqueueBroadcastLocked(BroadcastRecord r);
 
-    public abstract void updateUidReadyForBootCompletedBroadcastLocked(int uid);
-
     public abstract BroadcastRecord getMatchingOrderedReceiver(IBinder receiver);
 
     /**
