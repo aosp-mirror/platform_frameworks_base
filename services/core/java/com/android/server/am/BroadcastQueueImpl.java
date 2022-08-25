@@ -423,6 +423,26 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         scheduleBroadcastsLocked();
     }
 
+    public boolean onApplicationAttachedLocked(ProcessRecord app) {
+        if (mPendingBroadcast != null && mPendingBroadcast.curApp == app) {
+            return sendPendingBroadcastsLocked(app);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean onApplicationTimeoutLocked(ProcessRecord app) {
+        return skipCurrentOrPendingReceiverLocked(app);
+    }
+
+    public boolean onApplicationProblemLocked(ProcessRecord app) {
+        return skipCurrentOrPendingReceiverLocked(app);
+    }
+
+    public boolean onApplicationCleanupLocked(ProcessRecord app) {
+        return skipCurrentOrPendingReceiverLocked(app);
+    }
+
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {
         boolean didSomething = false;
         final BroadcastRecord br = mPendingBroadcast;
@@ -452,18 +472,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         return didSomething;
     }
 
-    public void skipPendingBroadcastLocked(int pid) {
-        final BroadcastRecord br = mPendingBroadcast;
-        if (br != null && br.curApp.getPid() == pid) {
-            br.state = BroadcastRecord.IDLE;
-            br.nextReceiver = mPendingBroadcastRecvIndex;
-            mPendingBroadcast = null;
-            scheduleBroadcastsLocked();
-        }
-    }
-
     // Skip the current receiver, if any, that is in flight to the given process
-    public void skipCurrentReceiverLocked(ProcessRecord app) {
+    public boolean skipCurrentOrPendingReceiverLocked(ProcessRecord app) {
         BroadcastRecord r = null;
         final BroadcastRecord curActive = mDispatcher.getActiveBroadcastLocked();
         if (curActive != null && curActive.curApp == app) {
@@ -481,6 +491,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
         if (r != null) {
             skipReceiverLocked(r);
+            return true;
+        } else {
+            return false;
         }
     }
 

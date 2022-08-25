@@ -605,7 +605,9 @@ class ProcessErrorStateRecord {
                         mService.mContext, mApp.info.packageName, mApp.info.flags);
             }
         }
-        mService.skipCurrentReceiverLocked(mApp);
+        for (BroadcastQueue queue : mService.mBroadcastQueues) {
+            queue.onApplicationProblemLocked(mApp);
+        }
     }
 
     @GuardedBy("mService")
