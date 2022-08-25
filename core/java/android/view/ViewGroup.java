@@ -3919,6 +3919,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    void calculateAccessibilityDataPrivate() {
+        super.calculateAccessibilityDataPrivate();
+        for (int i = 0; i < mChildrenCount; i++) {
+            mChildren[i].calculateAccessibilityDataPrivate();
+        }
+    }
+
+    @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void dispatchDetachedFromWindow() {
         // If we still have a touch target, we are still in the process of
