@@ -29,6 +29,7 @@ import static com.android.server.job.controllers.FlexibilityController.FcConfig.
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_FALLBACK_FLEXIBILITY_DEADLINE;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_FLEXIBILITY_ENABLED;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS;
+import static com.android.server.job.controllers.FlexibilityController.NUM_FLEXIBLE_CONSTRAINTS;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_FLEXIBLE;
@@ -191,7 +192,7 @@ public class FlexibilityControllerTest {
      */
     @Test
     public void testDefaultVariableValues() {
-        assertEquals(FlexibilityController.NUM_FLEXIBLE_CONSTRAINTS,
+        assertEquals(NUM_FLEXIBLE_CONSTRAINTS,
                 mFlexibilityController.mFcConfig.DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS.length
         );
     }
@@ -497,9 +498,9 @@ public class FlexibilityControllerTest {
     public void testFlexibilityTracker() {
         FlexibilityController.FlexibilityTracker flexTracker =
                 mFlexibilityController.new
-                        FlexibilityTracker(FlexibilityController.NUM_FLEXIBLE_CONSTRAINTS);
-
-        assertEquals(4, flexTracker.size());
+                        FlexibilityTracker(NUM_FLEXIBLE_CONSTRAINTS);
+        // Plus one for jobs with 0 required constraint.
+        assertEquals(NUM_FLEXIBLE_CONSTRAINTS + 1, flexTracker.size());
         JobStatus[] jobs = new JobStatus[4];
         JobInfo.Builder jb;
         for (int i = 0; i < jobs.length; i++) {
@@ -519,47 +520,53 @@ public class FlexibilityControllerTest {
 
         synchronized (mFlexibilityController.mLock) {
             ArrayList<ArraySet<JobStatus>> trackedJobs = flexTracker.getArrayList();
-            assertEquals(0, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
-            assertEquals(3, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
-
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
-            assertEquals(0, trackedJobs.get(0).size());
-            assertEquals(1, trackedJobs.get(1).size());
-            assertEquals(2, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(3, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
-            assertEquals(2, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(1, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
-            assertEquals(0, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
+
+            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
+            assertEquals(2, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
-            assertEquals(2, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.remove(jobs[1]);
-            assertEquals(0, trackedJobs.get(0).size());
+            assertEquals(2, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
-            assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(1, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.resetJobNumDroppedConstraints(jobs[0], FROZEN_TIME);
-            assertEquals(0, trackedJobs.get(0).size());
+            assertEquals(2, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
-            assertEquals(2, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.adjustJobsRequiredConstraints(jobs[0], -2, FROZEN_TIME);
-
-            assertEquals(1, trackedJobs.get(0).size());
-            assertEquals(0, trackedJobs.get(1).size());
-            assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(2, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(1, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
 
             final long nowElapsed = ((DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS / 2)
                     + HOUR_IN_MILLIS);
@@ -567,10 +574,11 @@ public class FlexibilityControllerTest {
                     Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
             flexTracker.resetJobNumDroppedConstraints(jobs[0], nowElapsed);
-            assertEquals(0, trackedJobs.get(0).size());
-            assertEquals(1, trackedJobs.get(1).size());
+            assertEquals(2, trackedJobs.get(0).size());
+            assertEquals(0, trackedJobs.get(1).size());
             assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(1, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
         }
     }
 
