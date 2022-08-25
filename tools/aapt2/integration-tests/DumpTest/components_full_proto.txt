@@ -94,6 +94,7 @@ badging {
     provided_components: "camera"
     provided_components: "camera-secure"
   }
+  locales: "--_--"
   densities: 160
   densities: 240
   densities: 320
