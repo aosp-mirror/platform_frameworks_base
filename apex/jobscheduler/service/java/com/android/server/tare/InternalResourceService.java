@@ -64,6 +64,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
+import android.util.SparseLongArray;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -108,6 +109,16 @@ public class InternalResourceService extends SystemService {
     /** The amount of time to delay reclamation by after boot. */
     private static final long RECLAMATION_STARTUP_DELAY_MS = 30_000L;
     /**
+     * The amount of time after TARE has first been set up that a system installer will be allowed
+     * expanded credit privileges.
+     */
+    static final long INSTALLER_FIRST_SETUP_GRACE_PERIOD_MS = 7 * DAY_IN_MILLIS;
+    /**
+     * The amount of time to wait after TARE has first been set up before considering adjusting the
+     * stock/consumption limit.
+     */
+    private static final long STOCK_ADJUSTMENT_FIRST_SETUP_GRACE_PERIOD_MS = 5 * DAY_IN_MILLIS;
+    /**
      * The battery level above which we may consider quantitative easing (increasing the consumption
      * limit).
      */
@@ -127,7 +138,7 @@ public class InternalResourceService extends SystemService {
     private static final long STOCK_RECALCULATION_MIN_DATA_DURATION_MS = 8 * HOUR_IN_MILLIS;
     private static final int PACKAGE_QUERY_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                    | PackageManager.MATCH_APEX;
+                    | PackageManager.MATCH_APEX | PackageManager.GET_PERMISSIONS;
 
     /** Global lock for all resource economy state. */
     private final Object mLock = new Object();
@@ -178,6 +189,13 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Boolean> mVipOverrides = new SparseArrayMap<>();
+
+    /**
+     * Set of temporary Very Important Packages and when their VIP status ends, in the elapsed
+     * realtime ({@link android.annotation.ElapsedRealtimeLong}) timebase.
+     */
+    @GuardedBy("mLock")
+    private final SparseArrayMap<String, Long> mTemporaryVips = new SparseArrayMap<>();
 
     /** Set of apps each installer is responsible for installing. */
     @GuardedBy("mLock")
@@ -308,6 +326,7 @@ public class InternalResourceService extends SystemService {
     private static final int MSG_PROCESS_USAGE_EVENT = 2;
     private static final int MSG_NOTIFY_STATE_CHANGE_LISTENERS = 3;
     private static final int MSG_NOTIFY_STATE_CHANGE_LISTENER = 4;
+    private static final int MSG_CLEAN_UP_TEMP_VIP_LIST = 5;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
 
     /**
@@ -413,6 +432,13 @@ public class InternalResourceService extends SystemService {
         return userPkgs;
     }
 
+    @Nullable
+    InstalledPackageInfo getInstalledPackageInfo(final int userId, @NonNull final String pkgName) {
+        synchronized (mLock) {
+            return mPkgCache.get(userId, pkgName);
+        }
+    }
+
     @GuardedBy("mLock")
     long getConsumptionLimitLocked() {
         return mCurrentBatteryLevel * mScribe.getSatiatedConsumptionLimitLocked() / 100;
@@ -427,6 +453,11 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     long getInitialSatiatedConsumptionLimitLocked() {
         return mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit();
+    }
+
+
+    long getRealtimeSinceFirstSetupMs() {
+        return mScribe.getRealtimeSinceFirstSetupMs(SystemClock.elapsedRealtime());
     }
 
     int getUid(final int userId, @NonNull final String pkgName) {
@@ -470,6 +501,10 @@ public class InternalResourceService extends SystemService {
     }
 
     boolean isVip(final int userId, @NonNull String pkgName) {
+        return isVip(userId, pkgName, SystemClock.elapsedRealtime());
+    }
+
+    boolean isVip(final int userId, @NonNull String pkgName, final long nowElapsed) {
         synchronized (mLock) {
             final Boolean override = mVipOverrides.get(userId, pkgName);
             if (override != null) {
@@ -480,6 +515,12 @@ public class InternalResourceService extends SystemService {
             // The government, I mean the system, can create ARCs as it needs to in order to
             // operate.
             return true;
+        }
+        synchronized (mLock) {
+            final Long expirationTimeElapsed = mTemporaryVips.get(userId, pkgName);
+            if (expirationTimeElapsed != null) {
+                return nowElapsed <= expirationTimeElapsed;
+            }
         }
         return false;
     }
@@ -569,7 +610,7 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            final InstalledPackageInfo ipo = new InstalledPackageInfo(packageInfo);
+            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), packageInfo);
             final InstalledPackageInfo oldIpo = mPkgCache.add(userId, pkgName, ipo);
             maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             mUidToPackageCache.add(uid, pkgName);
@@ -626,11 +667,16 @@ public class InternalResourceService extends SystemService {
             final List<PackageInfo> pkgs =
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
-                final InstalledPackageInfo ipo = new InstalledPackageInfo(pkgs.get(i));
+                final InstalledPackageInfo ipo =
+                        new InstalledPackageInfo(getContext(), pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
             mAgent.grantBirthrightsLocked(userId);
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            mScribe.setUserAddedTimeLocked(userId, nowElapsed);
+            grantInstallersTemporaryVipStatusLocked(userId,
+                    nowElapsed, INSTALLER_FIRST_SETUP_GRACE_PERIOD_MS);
         }
     }
 
@@ -647,6 +693,7 @@ public class InternalResourceService extends SystemService {
             mInstallers.delete(userId);
             mPkgCache.delete(userId);
             mAgent.onUserRemovedLocked(userId);
+            mScribe.onUserRemovedLocked(userId);
         }
     }
 
@@ -657,6 +704,10 @@ public class InternalResourceService extends SystemService {
     void maybePerformQuantitativeEasingLocked() {
         if (mConfigObserver.ENABLE_TIP3) {
             maybeAdjustDesiredStockLevelLocked();
+            return;
+        }
+        if (getRealtimeSinceFirstSetupMs() < STOCK_ADJUSTMENT_FIRST_SETUP_GRACE_PERIOD_MS) {
+            // Things can be very tumultuous soon after first setup.
             return;
         }
         // We don't need to increase the limit if the device runs out of consumable credits
@@ -685,6 +736,10 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     void maybeAdjustDesiredStockLevelLocked() {
         if (!mConfigObserver.ENABLE_TIP3) {
+            return;
+        }
+        if (getRealtimeSinceFirstSetupMs() < STOCK_ADJUSTMENT_FIRST_SETUP_GRACE_PERIOD_MS) {
+            // Things can be very tumultuous soon after first setup.
             return;
         }
         // Don't adjust the limit too often or while the battery is low.
@@ -773,6 +828,28 @@ public class InternalResourceService extends SystemService {
             mScribe.adjustRemainingConsumableCakesLocked((long) (perc * shortfall));
         }
         mAgent.onCreditSupplyChanged();
+    }
+
+    @GuardedBy("mLock")
+    private void grantInstallersTemporaryVipStatusLocked(int userId, long nowElapsed,
+            long grantDurationMs) {
+        final long grantEndTimeElapsed = nowElapsed + grantDurationMs;
+        final int uIdx = mPkgCache.indexOfKey(userId);
+        if (uIdx < 0) {
+            return;
+        }
+        for (int pIdx = mPkgCache.numElementsForKey(uIdx) - 1; pIdx >= 0; --pIdx) {
+            final InstalledPackageInfo ipo = mPkgCache.valueAt(uIdx, pIdx);
+
+            if (ipo.isSystemInstaller) {
+                final Long currentGrantEndTimeElapsed = mTemporaryVips.get(userId, ipo.packageName);
+                if (currentGrantEndTimeElapsed == null
+                        || currentGrantEndTimeElapsed < grantEndTimeElapsed) {
+                    mTemporaryVips.add(userId, ipo.packageName, grantEndTimeElapsed);
+                }
+            }
+        }
+        mHandler.sendEmptyMessageDelayed(MSG_CLEAN_UP_TEMP_VIP_LIST, grantDurationMs);
     }
 
     @GuardedBy("mLock")
@@ -870,7 +947,8 @@ public class InternalResourceService extends SystemService {
             final List<PackageInfo> pkgs =
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
-                final InstalledPackageInfo ipo = new InstalledPackageInfo(pkgs.get(i));
+                final InstalledPackageInfo ipo =
+                        new InstalledPackageInfo(getContext(), pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
@@ -953,11 +1031,17 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
             loadInstalledPackageListLocked();
+            final SparseLongArray timeSinceUsersAdded;
             final boolean isFirstSetup = !mScribe.recordExists();
+            final long nowElapsed = SystemClock.elapsedRealtime();
             if (isFirstSetup) {
                 mAgent.grantBirthrightsLocked();
                 mScribe.setConsumptionLimitLocked(
                         mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
+                // Set the last reclamation time to now so we don't start reclaiming assets
+                // too early.
+                mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
+                timeSinceUsersAdded = new SparseLongArray();
             } else {
                 mScribe.loadFromDiskLocked();
                 if (mScribe.getSatiatedConsumptionLimitLocked()
@@ -970,6 +1054,21 @@ public class InternalResourceService extends SystemService {
                 } else {
                     // Adjust the supply in case battery level changed while the device was off.
                     adjustCreditSupplyLocked(true);
+                }
+                timeSinceUsersAdded = mScribe.getRealtimeSinceUsersAddedLocked(nowElapsed);
+            }
+
+            final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            for (int userId : userIds) {
+                final long timeSinceUserAddedMs = timeSinceUsersAdded.get(userId, 0);
+                // Temporarily mark installers as VIPs so they aren't subject to credit
+                // limits and policies on first boot.
+                if (timeSinceUserAddedMs < INSTALLER_FIRST_SETUP_GRACE_PERIOD_MS) {
+                    final long remainingGraceDurationMs =
+                            INSTALLER_FIRST_SETUP_GRACE_PERIOD_MS - timeSinceUserAddedMs;
+
+                    grantInstallersTemporaryVipStatusLocked(userId, nowElapsed,
+                            remainingGraceDurationMs);
                 }
             }
             scheduleUnusedWealthReclamationLocked();
@@ -1079,6 +1178,36 @@ public class InternalResourceService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_CLEAN_UP_TEMP_VIP_LIST: {
+                    removeMessages(MSG_CLEAN_UP_TEMP_VIP_LIST);
+
+                    synchronized (mLock) {
+                        final long nowElapsed = SystemClock.elapsedRealtime();
+
+                        long earliestExpiration = Long.MAX_VALUE;
+                        for (int u = 0; u < mTemporaryVips.numMaps(); ++u) {
+                            final int userId = mTemporaryVips.keyAt(u);
+
+                            for (int p = mTemporaryVips.numElementsForKeyAt(u) - 1; p >= 0; --p) {
+                                final String pkgName = mTemporaryVips.keyAt(u, p);
+                                final Long expiration = mTemporaryVips.valueAt(u, p);
+
+                                if (expiration == null || expiration < nowElapsed) {
+                                    mTemporaryVips.delete(userId, pkgName);
+                                } else {
+                                    earliestExpiration = Math.min(earliestExpiration, expiration);
+                                }
+                            }
+                        }
+
+                        if (earliestExpiration < Long.MAX_VALUE) {
+                            sendEmptyMessageDelayed(MSG_CLEAN_UP_TEMP_VIP_LIST,
+                                    earliestExpiration - nowElapsed);
+                        }
+                    }
+                }
+                break;
+
                 case MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER: {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     final int userId = args.argi1;
@@ -1558,6 +1687,7 @@ public class InternalResourceService extends SystemService {
             boolean printedVips = false;
             pw.println();
             pw.print("VIPs:");
+            pw.increaseIndent();
             for (int u = 0; u < mVipOverrides.numMaps(); ++u) {
                 final int userId = mVipOverrides.keyAt(u);
 
@@ -1576,6 +1706,32 @@ public class InternalResourceService extends SystemService {
             } else {
                 pw.print(" None");
             }
+            pw.decreaseIndent();
+            pw.println();
+
+            boolean printedTempVips = false;
+            pw.println();
+            pw.print("Temp VIPs:");
+            pw.increaseIndent();
+            for (int u = 0; u < mTemporaryVips.numMaps(); ++u) {
+                final int userId = mTemporaryVips.keyAt(u);
+
+                for (int p = 0; p < mTemporaryVips.numElementsForKeyAt(u); ++p) {
+                    final String pkgName = mTemporaryVips.keyAt(u, p);
+
+                    printedTempVips = true;
+                    pw.println();
+                    pw.print(appToString(userId, pkgName));
+                    pw.print("=");
+                    pw.print(mTemporaryVips.valueAt(u, p));
+                }
+            }
+            if (printedTempVips) {
+                pw.println();
+            } else {
+                pw.print(" None");
+            }
+            pw.decreaseIndent();
             pw.println();
 
             pw.println();
