@@ -2281,7 +2281,7 @@
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"バックグラウンド アクティビティ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"アプリがバッテリーを消費しています"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"アプリがまだアクティブです"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用量を管理できます。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用状況を管理できます。"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、実行中のアプリをご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"実行中のアプリをチェック"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>

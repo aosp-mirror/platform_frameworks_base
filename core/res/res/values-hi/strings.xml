@@ -1983,7 +1983,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"सुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करें"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>
