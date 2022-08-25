@@ -35,6 +35,7 @@ open class RegionSamplingInstance(
 ) {
     private var isDark = RegionDarkness.DEFAULT
     private var samplingBounds = Rect()
+    private val tmpScreenLocation = IntArray(2)
     @VisibleForTesting var regionSampler: RegionSamplingHelper? = null
 
     /**
@@ -99,10 +100,21 @@ open class RegionSamplingInstance(
                             isDark = convertToClockDarkness(isRegionDark)
                             updateFun.updateColors()
                         }
-
+                        /**
+                        * The method getLocationOnScreen is used to obtain the view coordinates
+                        * relative to its left and top edges on the device screen.
+                        * Directly accessing the X and Y coordinates of the view returns the
+                        * location relative to its parent view instead.
+                        */
                         override fun getSampledRegion(sampledView: View): Rect {
-                            samplingBounds = Rect(sampledView.left, sampledView.top,
-                                    sampledView.right, sampledView.bottom)
+                            val screenLocation = tmpScreenLocation
+                            sampledView.getLocationOnScreen(screenLocation)
+                            val left = screenLocation[0]
+                            val top = screenLocation[1]
+                            samplingBounds.left = left
+                            samplingBounds.top = top
+                            samplingBounds.right = left + sampledView.width
+                            samplingBounds.bottom = top + sampledView.height
                             return samplingBounds
                         }
 
