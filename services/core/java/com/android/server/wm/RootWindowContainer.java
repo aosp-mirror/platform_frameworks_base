@@ -847,6 +847,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (recentsAnimationController != null) {
             recentsAnimationController.checkAnimationReady(defaultDisplay.mWallpaperController);
         }
+        final BackNaviAnimationController bnac = mWmService.getBackNaviAnimationController();
+        if (bnac != null) {
+            bnac.checkAnimationReady(defaultDisplay.mWallpaperController);
+        }
 
         for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
