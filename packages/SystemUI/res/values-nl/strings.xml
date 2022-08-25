@@ -937,7 +937,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nieuwe informatie"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Actieve apps"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Deze apps zijn actief, ook als je ze niet gebruikt. Dit verbetert de functionaliteit, maar kan ook van invloed zijn op de batterijduur."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Deze apps zijn actief, ook als je ze niet gebruikt. Dit verbetert de functionaliteit, maar kan de batterijduur ook beïnvloeden."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stoppen"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestopt"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Klaar"</string>

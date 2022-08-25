@@ -223,10 +223,10 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Вход"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Слухови апарати"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Включва се..."</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоматична ориентация"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Авт. ориентация"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично завъртане на екрана"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Местоположение"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Достъп до камерата"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камера: достъп"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Достъп до микрофона"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Налице"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокирано"</string>
@@ -244,7 +244,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Няма налични устройства"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"не е установена връзка с Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркост"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Цветове: инверт."</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекция на цветове"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Потребителски настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -269,7 +269,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Служебни приложения"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветление"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветл."</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ще се вкл. по залез"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрев"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ще се включи в <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -476,7 +476,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки за заключения екран"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Сканиране на QR код"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR код: сканиране"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Няма да чуете следващия си будилник в <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -549,7 +549,7 @@
       <item quantity="other">%d минути</item>
       <item quantity="one">%d минута</item>
     </plurals>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Режим за запазване на батерията"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Запазване на батерията"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Бутон „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Начало"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Назад"</string>
@@ -599,7 +599,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Отваряне на настройките"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Слушалките (без микрофон) са свързани"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Слушалките са свързани"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Икономия на данни"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Данни: икономия"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Функцията „Икономия на данни“ е включена"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Изкл."</string>

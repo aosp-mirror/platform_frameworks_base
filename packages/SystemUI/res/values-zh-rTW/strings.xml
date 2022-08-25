@@ -119,7 +119,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"電話"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"語音小幫手"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"錢包"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR 圖碼掃描器"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR code 掃描器"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"解除鎖定"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"裝置已鎖定"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"掃描臉孔"</string>
@@ -936,8 +936,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個應用程式正在運作</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資訊"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的應用程式"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使您並未使用，這些應用程式仍會持續啟用並執行。這可提升其功能，但也可能影響電池續航力。"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"運作中的應用程式"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使您並未使用，這些應用程式仍會持續運作。這可提升應用程式效能，但也可能影響電池續航力。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>
