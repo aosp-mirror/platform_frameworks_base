@@ -13349,8 +13349,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
-                            r.queue.processNextBroadcastLocked(/* frommsg */ false,
-                                    /* skipOomAdj */ true);
                         }
                     }
 
@@ -14545,9 +14543,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (r != null) {
                     doNext = r.queue.finishReceiverLocked(r, resultCode,
                         resultData, resultExtras, resultAbort, true);
-                }
-                if (doNext) {
-                    r.queue.processNextBroadcastLocked(/*fromMsg=*/ false, /*skipOomAdj=*/ true);
                 }
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);

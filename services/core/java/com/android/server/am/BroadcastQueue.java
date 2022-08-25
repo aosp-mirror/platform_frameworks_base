@@ -91,8 +91,6 @@ public abstract class BroadcastQueue {
 
     public abstract void backgroundServicesFinishedLocked(int userId);
 
-    public abstract void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj);
-
     /**
      * Signal from OS internals that the given process has just been actively
      * attached, and is ready to begin receiving broadcasts.

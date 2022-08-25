@@ -677,8 +677,12 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // We will process the next receiver right now if this is finishing
         // an app receiver (which is always asynchronous) or after we have
         // come back from calling a receiver.
-        return state == BroadcastRecord.APP_RECEIVE
-                || state == BroadcastRecord.CALL_DONE_RECEIVE;
+        final boolean doNext = (state == BroadcastRecord.APP_RECEIVE)
+                || (state == BroadcastRecord.CALL_DONE_RECEIVE);
+        if (doNext) {
+            processNextBroadcastLocked(/* fromMsg= */ false, /* skipOomAdj= */ true);
+        }
+        return doNext;
     }
 
     public void backgroundServicesFinishedLocked(int userId) {
