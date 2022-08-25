@@ -32,6 +32,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -81,18 +82,6 @@ public final class FlexibilityController extends StateController {
     private static final long NO_LIFECYCLE_END = Long.MAX_VALUE;
 
     /**
-     * Keeps track of what flexible constraints are satisfied at the moment.
-     * Is updated by the other controllers.
-     */
-    @VisibleForTesting
-    @GuardedBy("mLock")
-    int mSatisfiedFlexibleConstraints;
-
-    /** Hard cutoff to remove flexible constraints. */
-    private long mDeadlineProximityLimitMs =
-            FcConfig.DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS;
-
-    /**
      * The default deadline that all flexible constraints should be dropped by if a job lacks
      * a deadline.
      */
@@ -109,12 +98,27 @@ public final class FlexibilityController extends StateController {
     private long mMinTimeBetweenFlexibilityAlarmsMs =
             FcConfig.DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS;
 
+    /** Hard cutoff to remove flexible constraints. */
+    private long mDeadlineProximityLimitMs =
+            FcConfig.DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS;
+
     /**
      * The percent of a job's lifecycle to drop number of required constraints.
      * mPercentToDropConstraints[i] denotes that at x% of a Jobs lifecycle,
      * the controller should have i+1 constraints dropped.
      */
     private int[] mPercentToDropConstraints;
+
+    @VisibleForTesting
+    boolean mDeviceSupportsFlexConstraints;
+
+    /**
+     * Keeps track of what flexible constraints are satisfied at the moment.
+     * Is updated by the other controllers.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    int mSatisfiedFlexibleConstraints;
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -124,7 +128,6 @@ public final class FlexibilityController extends StateController {
     final FlexibilityAlarmQueue mFlexibilityAlarmQueue;
     @VisibleForTesting
     final FcConfig mFcConfig;
-
     @VisibleForTesting
     final PrefetchController mPrefetchController;
 
@@ -172,6 +175,9 @@ public final class FlexibilityController extends StateController {
     public FlexibilityController(
             JobSchedulerService service, PrefetchController prefetchController) {
         super(service);
+        mDeviceSupportsFlexConstraints = !mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE);
+        mFlexibilityEnabled &= mDeviceSupportsFlexConstraints;
         mFlexibilityTracker = new FlexibilityTracker(NUM_FLEXIBLE_CONSTRAINTS);
         mFcConfig = new FcConfig();
         mFlexibilityAlarmQueue = new FlexibilityAlarmQueue(
@@ -191,10 +197,14 @@ public final class FlexibilityController extends StateController {
     @GuardedBy("mLock")
     public void maybeStartTrackingJobLocked(JobStatus js, JobStatus lastJob) {
         if (js.hasFlexibilityConstraint()) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            if (!mDeviceSupportsFlexConstraints) {
+                js.setFlexibilityConstraintSatisfied(nowElapsed, true);
+                return;
+            }
+            js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
             mFlexibilityTracker.add(js);
             js.setTrackingController(JobStatus.TRACKING_FLEXIBILITY);
-            final long nowElapsed = sElapsedRealtimeClock.millis();
-            js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
             mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js, nowElapsed);
         }
     }
@@ -655,7 +665,8 @@ public final class FlexibilityController extends StateController {
                 @NonNull String key) {
             switch (key) {
                 case KEY_FLEXIBILITY_ENABLED:
-                    FLEXIBILITY_ENABLED = properties.getBoolean(key, DEFAULT_FLEXIBILITY_ENABLED);
+                    FLEXIBILITY_ENABLED = properties.getBoolean(key, DEFAULT_FLEXIBILITY_ENABLED)
+                            && mDeviceSupportsFlexConstraints;
                     if (mFlexibilityEnabled != FLEXIBILITY_ENABLED) {
                         mFlexibilityEnabled = FLEXIBILITY_ENABLED;
                         mShouldReevaluateConstraints = true;

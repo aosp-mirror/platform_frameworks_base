@@ -33,6 +33,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.BatteryManagerInternal;
 import android.os.RemoteException;
@@ -75,6 +76,8 @@ public class BatteryControllerTest {
     private JobSchedulerService mJobSchedulerService;
     @Mock
     private PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    private PackageManager mPackageManager;
 
     @Before
     public void setUp() {
@@ -100,6 +103,9 @@ public class BatteryControllerTest {
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
         mFlexibilityController =
                 new FlexibilityController(mJobSchedulerService, mock(PrefetchController.class));
         mBatteryController = new BatteryController(mJobSchedulerService, mFlexibilityController);

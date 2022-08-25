@@ -51,6 +51,7 @@ import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -96,6 +97,8 @@ public class ConnectivityControllerTest {
     private NetworkPolicyManagerInternal mNetPolicyManagerInternal;
     @Mock
     private JobSchedulerService mService;
+    @Mock
+    private PackageManager mPackageManager;
 
     private Constants mConstants;
 
@@ -114,10 +117,6 @@ public class ConnectivityControllerTest {
 
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(NetworkPolicyManagerInternal.class, mNetPolicyManagerInternal);
-
-        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
-        mFlexibilityController =
-                new FlexibilityController(mService, mock(PrefetchController.class));
 
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =
@@ -142,6 +141,13 @@ public class ConnectivityControllerTest {
         when(mService.getTestableContext()).thenReturn(mContext);
         when(mService.getLock()).thenReturn(mService);
         when(mService.getConstants()).thenReturn(mConstants);
+        // Instantiate Flexibility Controller
+        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
+        mFlexibilityController =
+                new FlexibilityController(mService, mock(PrefetchController.class));
     }
 
     @Test
