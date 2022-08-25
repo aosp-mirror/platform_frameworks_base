@@ -8550,6 +8550,13 @@ public class CarrierConfigManager {
      * IWLAN handover rules that determine whether handover is allowed or disallowed between
      * cellular and IWLAN.
      *
+     * Rule syntax: "source=[GERAN|UTRAN|EUTRAN|NGRAN|IWLAN|UNKNOWN], target=[GERAN|UTRAN|EUTRAN
+     * |NGRAN|IWLAN], type=[allowed|disallowed], roaming=[true|false], capabilities=[INTERNET|MMS
+     * |FOTA|IMS|CBS|SUPL|EIMS|XCAP|DUN]"
+     *
+     * Note that UNKNOWN can be only specified in the source access network and can be only used
+     * in the disallowed rule.
+     *
      * The handover rules will be matched in the order. Here are some sample rules.
      * <string-array name="iwlan_handover_rules" num="5">
      *     <!-- Handover from IWLAN to 2G/3G is not allowed -->
