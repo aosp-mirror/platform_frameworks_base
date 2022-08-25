@@ -454,6 +454,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -2400,13 +2401,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
 
-        mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "foreground", foreConstants, false);
-        mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "background", backConstants, true);
-        mBgOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "offload_bg", offloadConstants, true);
-        mFgOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "offload_fg", foreConstants, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
@@ -5501,7 +5502,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentSender pendingResult, int matchFlags) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "queryIntentComponentsForIntentSender()");
-        Preconditions.checkNotNull(pendingResult);
+        Objects.requireNonNull(pendingResult);
         final PendingIntentRecord res;
         try {
             res = (PendingIntentRecord) pendingResult;
@@ -5513,17 +5514,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
         final int userId = res.key.userId;
+        final int uid = res.uid;
+        final String resolvedType = res.key.requestResolvedType;
         switch (res.key.type) {
             case ActivityManager.INTENT_SENDER_ACTIVITY:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryIntentActivitiesAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentActivities(
+                        intent, resolvedType, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_SERVICE:
             case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryIntentServicesAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentServices(
+                        intent, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_BROADCAST:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryBroadcastReceiversAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentReceivers(
+                        intent, resolvedType, matchFlags, uid, userId, false));
             default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
                 throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
         }
@@ -10624,7 +10627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
                 pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
-                        + queue.mBroadcastsScheduled);
+                        + queue.hasBroadcastsScheduled());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -15183,7 +15186,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // It's not the current receiver, but it might be starting up to become one
         for (BroadcastQueue queue : mBroadcastQueues) {
-            final BroadcastRecord r = queue.mPendingBroadcast;
+            final BroadcastRecord r = queue.getPendingBroadcastLocked();
             if (r != null && r.curApp == app) {
                 // found it; report which queue it's in
                 receivingQueues.add(queue);
@@ -15298,7 +15301,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isIdle()) {
+            if (!q.isIdle()) {
                 return false;
             }
         }

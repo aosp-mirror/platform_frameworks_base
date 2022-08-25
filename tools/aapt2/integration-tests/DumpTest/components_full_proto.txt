@@ -1677,7 +1677,7 @@ xml_files {
                       attribute {
                         namespace_uri: "http://schemas.android.com/apk/res/android"
                         name: "name"
-                        value: "android.intent.action.VIDEO_CAMERA"
+                        value: "android.media.action.VIDEO_CAMERA"
                         resource_id: 16842755
                       }
                     }
@@ -1691,7 +1691,7 @@ xml_files {
                       attribute {
                         namespace_uri: "http://schemas.android.com/apk/res/android"
                         name: "name"
-                        value: "android.intent.action.STILL_IMAGE_CAMERA_SECURE"
+                        value: "android.media.action.STILL_IMAGE_CAMERA_SECURE"
                         resource_id: 16842755
                       }
                     }

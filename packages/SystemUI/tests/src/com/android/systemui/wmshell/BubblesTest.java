@@ -135,6 +135,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -224,6 +225,8 @@ public class BubblesTest extends SysuiTestCase {
 
     @Mock
     private ShellInit mShellInit;
+    @Mock
+    private ShellCommandHandler mShellCommandHandler;
     @Mock
     private ShellController mShellController;
     @Mock
@@ -349,6 +352,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController = new TestableBubbleController(
                 mContext,
                 mShellInit,
+                mShellCommandHandler,
                 mShellController,
                 mBubbleData,
                 mFloatingContentCoordinator,
@@ -389,7 +393,6 @@ public class BubblesTest extends SysuiTestCase {
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
-                mDumpManager,
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
 
@@ -1393,6 +1396,33 @@ public class BubblesTest extends SysuiTestCase {
 
         mBubbleController.onStatusBarStateChanged(true);
         assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    /**
+     * Test to verify behavior for following situation:
+     * <ul>
+     *     <li>status bar shade state is set to <code>false</code></li>
+     *     <li>there is a bubble pending to be expanded</li>
+     * </ul>
+     * Test that duplicate status bar state updates to <code>false</code> do not clear the
+     * pending bubble to be
+     * expanded.
+     */
+    @Test
+    public void testOnStatusBarStateChanged_statusBarChangeDoesNotClearExpandingBubble() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.onStatusBarStateChanged(false);
+        // Set the bubble to expand once status bar state changes
+        mBubbleController.expandStackAndSelectBubble(mBubbleEntry);
+        // Check that stack is currently collapsed
+        assertStackCollapsed();
+        // Post status bar state change update with the same value
+        mBubbleController.onStatusBarStateChanged(false);
+        // Stack should remain collapsedb
+        assertStackCollapsed();
+        // Post status bar state change which should trigger bubble to expand
+        mBubbleController.onStatusBarStateChanged(true);
+        assertStackExpanded();
     }
 
     @Test

@@ -925,6 +925,7 @@
   <java-symbol type="string" name="mobile_provisioning_apn" />
   <java-symbol type="string" name="mobile_provisioning_url" />
   <java-symbol type="string" name="quick_contacts_not_available" />
+  <java-symbol type="string" name="rating_label" />
   <java-symbol type="string" name="reboot_to_update_package" />
   <java-symbol type="string" name="reboot_to_update_prepare" />
   <java-symbol type="string" name="reboot_to_update_title" />
@@ -2228,7 +2229,6 @@
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
   <java-symbol type="bool" name="config_dreamsOnlyEnabledForSystemUser" />
   <java-symbol type="array" name="config_supportedDreamComplications" />
-  <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
   <java-symbol type="string" name="config_loggable_dream_prefix" />
@@ -3141,6 +3141,7 @@
   <java-symbol type="string" name="language_picker_section_all" />
   <java-symbol type="string" name="region_picker_section_all" />
   <java-symbol type="string" name="language_picker_section_suggested" />
+  <java-symbol type="string" name="language_picker_regions_section_suggested" />
   <java-symbol type="string" name="language_picker_section_suggested_bilingual" />
   <java-symbol type="string" name="region_picker_section_suggested_bilingual" />
   <java-symbol type="string" name="language_selection_title" />

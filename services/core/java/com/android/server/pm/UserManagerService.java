@@ -911,7 +911,7 @@ public class UserManagerService extends IUserManager.Stub {
     private @NonNull List<UserInfo> getUsersInternal(boolean excludePartial, boolean excludeDying,
             boolean excludePreCreated) {
         synchronized (mUsersLock) {
-            ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
+            ArrayList<UserInfo> users = new ArrayList<>(mUsers.size());
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
@@ -1763,6 +1763,32 @@ public class UserManagerService extends IUserManager.Stub {
             // TODO(b/239824814): make sure it handles profile as well
             return mUsersOnSecondaryDisplays != null && mUsersOnSecondaryDisplays.get(userId,
                     Display.INVALID_DISPLAY) == displayId;
+        }
+    }
+
+    @Override
+    public List<UserHandle> getVisibleUsers() {
+        if (!hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller needs MANAGE_USERS or INTERACT_ACROSS_USERS "
+                    + "permission to get list of visible users");
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            // TODO(b/2399825580): refactor into UserDisplayAssigner
+            synchronized (mUsersLock) {
+                int usersSize = mUsers.size();
+                ArrayList<UserHandle> visibleUsers = new ArrayList<>(usersSize);
+                for (int i = 0; i < usersSize; i++) {
+                    UserInfo ui = mUsers.valueAt(i).info;
+                    if (!ui.partial && !ui.preCreated && !mRemovingUserIds.get(ui.id)
+                            && isUserVisibleUnchecked(ui.id)) {
+                        visibleUsers.add(UserHandle.of(ui.id));
+                    }
+                }
+                return visibleUsers;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 

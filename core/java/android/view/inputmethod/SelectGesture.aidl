@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline
+package android.view.inputmethod;
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
-/**
- * A test-friendly implementation of [ConnectivityInfoCollector] that just emits whatever value it
- * receives in [emitValue].
- */
-class FakeConnectivityInfoCollector : ConnectivityInfoCollector {
-    private val _rawConnectivityInfoFlow = MutableStateFlow(RawConnectivityInfo())
-    override val rawConnectivityInfoFlow = _rawConnectivityInfoFlow.asStateFlow()
-
-    suspend fun emitValue(value: RawConnectivityInfo) {
-        _rawConnectivityInfoFlow.emit(value)
-    }
-}
+parcelable SelectGesture;

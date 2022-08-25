@@ -87,6 +87,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -292,7 +293,10 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL,
     };
 
-    private static volatile InteractionJankMonitor sInstance;
+    private static class InstanceHolder {
+        public static final InteractionJankMonitor INSTANCE =
+            new InteractionJankMonitor(new HandlerThread(DEFAULT_WORKER_NAME));
+    }
 
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
             this::updateProperties;
@@ -384,15 +388,7 @@ public class InteractionJankMonitor {
      * @return instance of InteractionJankMonitor
      */
     public static InteractionJankMonitor getInstance() {
-        // Use DCL here since this method might be invoked very often.
-        if (sInstance == null) {
-            synchronized (InteractionJankMonitor.class) {
-                if (sInstance == null) {
-                    sInstance = new InteractionJankMonitor(new HandlerThread(DEFAULT_WORKER_NAME));
-                }
-            }
-        }
-        return sInstance;
+        return InstanceHolder.INSTANCE;
     }
 
     /**
@@ -402,6 +398,11 @@ public class InteractionJankMonitor {
      */
     @VisibleForTesting
     public InteractionJankMonitor(@NonNull HandlerThread worker) {
+        // Check permission early.
+        DeviceConfig.enforceReadPermission(
+            ActivityThread.currentApplication().getApplicationContext(),
+            DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR);
+
         mRunningTrackers = new SparseArray<>();
         mTimeoutActions = new SparseArray<>();
         mWorker = worker;

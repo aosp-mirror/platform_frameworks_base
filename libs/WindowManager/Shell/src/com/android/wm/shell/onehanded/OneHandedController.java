@@ -59,6 +59,7 @@ import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.UserChangeListener;
 
 import java.io.PrintWriter;
 
@@ -67,7 +68,7 @@ import java.io.PrintWriter;
  */
 public class OneHandedController implements RemoteCallable<OneHandedController>,
         DisplayChangeController.OnDisplayChangingListener, ConfigurationChangeListener,
-        KeyguardChangeListener {
+        KeyguardChangeListener, UserChangeListener {
     private static final String TAG = "OneHandedController";
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -76,8 +77,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
     public static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
-    private volatile boolean mIsOneHandedEnabled;
-    private volatile boolean mIsSwipeToNotificationEnabled;
+    private boolean mIsOneHandedEnabled;
+    private boolean mIsSwipeToNotificationEnabled;
     private boolean mIsShortcutEnabled;
     private boolean mTaskChangeToExit;
     private boolean mLockedDisabled;
@@ -294,6 +295,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mState.addSListeners(mTutorialHandler);
         mShellController.addConfigurationChangeListener(this);
         mShellController.addKeyguardChangeListener(this);
+        mShellController.addUserChangeListener(this);
     }
 
     public OneHanded asOneHanded() {
@@ -627,7 +629,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         stopOneHanded();
     }
 
-    private void onUserSwitch(int newUserId) {
+    @Override
+    public void onUserChanged(int newUserId, @NonNull Context userContext) {
         unregisterSettingObservers();
         mUserId = newUserId;
         registerSettingObservers(newUserId);
@@ -718,18 +721,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         }
 
         @Override
-        public boolean isOneHandedEnabled() {
-            // This is volatile so return directly
-            return mIsOneHandedEnabled;
-        }
-
-        @Override
-        public boolean isSwipeToNotificationEnabled() {
-            // This is volatile so return directly
-            return mIsSwipeToNotificationEnabled;
-        }
-
-        @Override
         public void startOneHanded() {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.startOneHanded();
@@ -768,13 +759,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         public void registerTransitionCallback(OneHandedTransitionCallback callback) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.registerTransitionCallback(callback);
-            });
-        }
-
-        @Override
-        public void onUserSwitch(int userId) {
-            mMainExecutor.execute(() -> {
-                OneHandedController.this.onUserSwitch(userId);
             });
         }
     }

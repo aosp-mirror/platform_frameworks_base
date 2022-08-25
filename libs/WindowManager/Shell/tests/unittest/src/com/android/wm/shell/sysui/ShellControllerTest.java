@@ -17,11 +17,15 @@
 package com.android.wm.shell.sysui;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -35,6 +39,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @SmallTest
@@ -42,22 +48,29 @@ import java.util.Locale;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class ShellControllerTest extends ShellTestCase {
 
+    private static final int TEST_USER_ID = 100;
+
     @Mock
     private ShellInit mShellInit;
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
     private ShellExecutor mExecutor;
+    @Mock
+    private Context mTestUserContext;
 
     private ShellController mController;
     private TestConfigurationChangeListener mConfigChangeListener;
     private TestKeyguardChangeListener mKeyguardChangeListener;
+    private TestUserChangeListener mUserChangeListener;
+
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mKeyguardChangeListener = new TestKeyguardChangeListener();
         mConfigChangeListener = new TestConfigurationChangeListener();
+        mUserChangeListener = new TestUserChangeListener();
         mController = new ShellController(mShellInit, mShellCommandHandler, mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
@@ -65,6 +78,46 @@ public class ShellControllerTest extends ShellTestCase {
     @After
     public void tearDown() {
         // Do nothing
+    }
+
+    @Test
+    public void testAddUserChangeListener_ensureCallback() {
+        mController.addUserChangeListener(mUserChangeListener);
+
+        mController.onUserChanged(TEST_USER_ID, mTestUserContext);
+        assertTrue(mUserChangeListener.userChanged == 1);
+        assertTrue(mUserChangeListener.lastUserContext == mTestUserContext);
+    }
+
+    @Test
+    public void testDoubleAddUserChangeListener_ensureSingleCallback() {
+        mController.addUserChangeListener(mUserChangeListener);
+        mController.addUserChangeListener(mUserChangeListener);
+
+        mController.onUserChanged(TEST_USER_ID, mTestUserContext);
+        assertTrue(mUserChangeListener.userChanged == 1);
+        assertTrue(mUserChangeListener.lastUserContext == mTestUserContext);
+    }
+
+    @Test
+    public void testAddRemoveUserChangeListener_ensureNoCallback() {
+        mController.addUserChangeListener(mUserChangeListener);
+        mController.removeUserChangeListener(mUserChangeListener);
+
+        mController.onUserChanged(TEST_USER_ID, mTestUserContext);
+        assertTrue(mUserChangeListener.userChanged == 0);
+        assertTrue(mUserChangeListener.lastUserContext == null);
+    }
+
+    @Test
+    public void testUserProfilesChanged() {
+        mController.addUserChangeListener(mUserChangeListener);
+
+        ArrayList<UserInfo> profiles = new ArrayList<>();
+        profiles.add(mock(UserInfo.class));
+        profiles.add(mock(UserInfo.class));
+        mController.onUserProfilesChanged(profiles);
+        assertTrue(mUserChangeListener.lastUserProfiles.equals(profiles));
     }
 
     @Test
@@ -330,6 +383,29 @@ public class ShellControllerTest extends ShellTestCase {
         @Override
         public void onKeyguardDismissAnimationFinished() {
             dismissAnimationFinished++;
+        }
+    }
+
+    private class TestUserChangeListener implements UserChangeListener {
+        // Counts of number of times each of the callbacks are called
+        public int userChanged;
+        public int lastUserId;
+        public Context lastUserContext;
+        public int userProfilesChanged;
+        public List<? extends UserInfo> lastUserProfiles;
+
+
+        @Override
+        public void onUserChanged(int newUserId, @NonNull Context userContext) {
+            userChanged++;
+            lastUserId = newUserId;
+            lastUserContext = userContext;
+        }
+
+        @Override
+        public void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
+            userProfilesChanged++;
+            lastUserProfiles = profiles;
         }
     }
 }

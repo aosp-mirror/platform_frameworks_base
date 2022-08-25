@@ -111,6 +111,9 @@ public class BubbleStackView extends FrameLayout
     public static final boolean HOME_GESTURE_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.bubbles_home_gesture", true);
 
+    public static final boolean ENABLE_FLING_TO_DISMISS_BUBBLE =
+            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_bubble", true);
+
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** How far the flyout needs to be dragged before it's dismissed regardless of velocity. */
@@ -299,7 +302,7 @@ public class BubbleStackView extends FrameLayout
     private BubblesNavBarGestureTracker mBubblesNavBarGestureTracker;
 
     /** Description of current animation controller state. */
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw) {
         pw.println("Stack view state:");
 
         String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
@@ -313,8 +316,8 @@ public class BubbleStackView extends FrameLayout
         pw.print("  expandedContainerMatrix: ");
         pw.println(mExpandedViewContainer.getAnimationMatrix());
 
-        mStackAnimationController.dump(pw, args);
-        mExpandedAnimationController.dump(pw, args);
+        mStackAnimationController.dump(pw);
+        mExpandedAnimationController.dump(pw);
 
         if (mExpandedBubble != null) {
             pw.println("Expanded bubble state:");

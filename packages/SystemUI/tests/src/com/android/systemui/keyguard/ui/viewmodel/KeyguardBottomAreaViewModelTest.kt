@@ -37,6 +37,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -127,6 +129,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         val testConfig =
             TestConfig(
                 isVisible = true,
+                isClickable = true,
                 icon = mock(),
                 canShowWhileLocked = false,
                 intent = Intent("action"),
@@ -154,6 +157,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         val config =
             TestConfig(
                 isVisible = true,
+                isClickable = true,
                 icon = mock(),
                 canShowWhileLocked = false,
                 intent = null, // This will cause it to tell the system that the click was handled.
@@ -201,6 +205,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         val testConfig =
             TestConfig(
                 isVisible = true,
+                isClickable = true,
                 icon = mock(),
                 canShowWhileLocked = false,
                 intent = Intent("action"),
@@ -260,6 +265,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             testConfig =
                 TestConfig(
                     isVisible = true,
+                    isClickable = true,
                     icon = mock(),
                     canShowWhileLocked = true,
                 )
@@ -269,6 +275,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             testConfig =
                 TestConfig(
                     isVisible = true,
+                    isClickable = true,
                     icon = mock(),
                     canShowWhileLocked = false,
                 )
@@ -342,6 +349,129 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         job.cancel()
     }
 
+    @Test
+    fun `isClickable - true when alpha at threshold`() = runBlockingTest {
+        repository.setKeyguardShowing(true)
+        repository.setBottomAreaAlpha(
+            KeyguardBottomAreaViewModel.AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD
+        )
+
+        val testConfig =
+            TestConfig(
+                isVisible = true,
+                isClickable = true,
+                icon = mock(),
+                canShowWhileLocked = false,
+                intent = Intent("action"),
+            )
+        val configKey =
+            setUpQuickAffordanceModel(
+                position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                testConfig = testConfig,
+            )
+
+        var latest: KeyguardQuickAffordanceViewModel? = null
+        val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+
+        assertQuickAffordanceViewModel(
+            viewModel = latest,
+            testConfig = testConfig,
+            configKey = configKey,
+        )
+        job.cancel()
+    }
+
+    @Test
+    fun `isClickable - true when alpha above threshold`() = runBlockingTest {
+        repository.setKeyguardShowing(true)
+        var latest: KeyguardQuickAffordanceViewModel? = null
+        val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+        repository.setBottomAreaAlpha(
+            min(1f, KeyguardBottomAreaViewModel.AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD + 0.1f),
+        )
+
+        val testConfig =
+            TestConfig(
+                isVisible = true,
+                isClickable = true,
+                icon = mock(),
+                canShowWhileLocked = false,
+                intent = Intent("action"),
+            )
+        val configKey =
+            setUpQuickAffordanceModel(
+                position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                testConfig = testConfig,
+            )
+
+        assertQuickAffordanceViewModel(
+            viewModel = latest,
+            testConfig = testConfig,
+            configKey = configKey,
+        )
+        job.cancel()
+    }
+
+    @Test
+    fun `isClickable - false when alpha below threshold`() = runBlockingTest {
+        repository.setKeyguardShowing(true)
+        var latest: KeyguardQuickAffordanceViewModel? = null
+        val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+        repository.setBottomAreaAlpha(
+            max(0f, KeyguardBottomAreaViewModel.AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD - 0.1f),
+        )
+
+        val testConfig =
+            TestConfig(
+                isVisible = true,
+                isClickable = false,
+                icon = mock(),
+                canShowWhileLocked = false,
+                intent = Intent("action"),
+            )
+        val configKey =
+            setUpQuickAffordanceModel(
+                position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                testConfig = testConfig,
+            )
+
+        assertQuickAffordanceViewModel(
+            viewModel = latest,
+            testConfig = testConfig,
+            configKey = configKey,
+        )
+        job.cancel()
+    }
+
+    @Test
+    fun `isClickable - false when alpha at zero`() = runBlockingTest {
+        repository.setKeyguardShowing(true)
+        var latest: KeyguardQuickAffordanceViewModel? = null
+        val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+        repository.setBottomAreaAlpha(0f)
+
+        val testConfig =
+            TestConfig(
+                isVisible = true,
+                isClickable = false,
+                icon = mock(),
+                canShowWhileLocked = false,
+                intent = Intent("action"),
+            )
+        val configKey =
+            setUpQuickAffordanceModel(
+                position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                testConfig = testConfig,
+            )
+
+        assertQuickAffordanceViewModel(
+            viewModel = latest,
+            testConfig = testConfig,
+            configKey = configKey,
+        )
+        job.cancel()
+    }
+
     private suspend fun setDozeAmountAndCalculateExpectedTranslationY(dozeAmount: Float): Float {
         repository.setDozeAmount(dozeAmount)
         return dozeAmount * (RETURNED_BURN_IN_OFFSET - DEFAULT_BURN_IN_OFFSET)
@@ -384,6 +514,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     ) {
         checkNotNull(viewModel)
         assertThat(viewModel.isVisible).isEqualTo(testConfig.isVisible)
+        assertThat(viewModel.isClickable).isEqualTo(testConfig.isClickable)
         if (testConfig.isVisible) {
             assertThat(viewModel.icon).isEqualTo(testConfig.icon)
             viewModel.onClicked.invoke(
@@ -404,6 +535,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
     private data class TestConfig(
         val isVisible: Boolean,
+        val isClickable: Boolean = false,
         val icon: ContainedDrawable? = null,
         val canShowWhileLocked: Boolean = false,
         val intent: Intent? = null,

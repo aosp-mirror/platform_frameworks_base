@@ -31,6 +31,8 @@ import kotlinx.coroutines.withContext
 fun rememberAppRepository(): AppRepository = rememberContext(::AppRepositoryImpl)
 
 interface AppRepository {
+    fun loadLabel(app: ApplicationInfo): String
+
     @Composable
     fun produceLabel(app: ApplicationInfo): State<String>
 
@@ -38,8 +40,10 @@ interface AppRepository {
     fun produceIcon(app: ApplicationInfo): State<Drawable?>
 }
 
-private class AppRepositoryImpl(private val context: Context) : AppRepository {
+internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     private val packageManager = context.packageManager
+
+    override fun loadLabel(app: ApplicationInfo): String = app.loadLabel(packageManager).toString()
 
     @Composable
     override fun produceLabel(app: ApplicationInfo) = produceState(initialValue = "", app) {

@@ -94,12 +94,12 @@ class SwitchAppByDoubleTapDivider (testSpec: FlickerTestParameter) : SplitScreen
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, splitLeftTop = true)
+        primaryApp, landscapePosLeft = true, portraitPosTop = true)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        secondaryApp, splitLeftTop = false)
+        secondaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test

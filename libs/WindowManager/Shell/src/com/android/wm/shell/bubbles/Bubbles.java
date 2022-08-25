@@ -35,7 +35,6 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.HashMap;
@@ -91,18 +90,6 @@ public interface Bubbles {
      */
     boolean isBubbleExpanded(String key);
 
-    /** @return {@code true} if stack of bubbles is expanded or not. */
-    boolean isStackExpanded();
-
-    /**
-     * Removes a group key indicating that the summary for this group should no longer be
-     * suppressed.
-     *
-     * @param callback If removed, this callback will be called with the summary key of the group
-     */
-    void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
-            Executor callbackExecutor);
-
     /** Tell the stack of bubbles to collapse. */
     void collapseStack();
 
@@ -129,9 +116,6 @@ public interface Bubbles {
 
     /** Called for any taskbar changes. */
     void onTaskbarChanged(Bundle b);
-
-    /** Open the overflow view. */
-    void openBubbleOverflow();
 
     /**
      * We intercept notification entries (including group summaries) dismissed by the user when
@@ -251,9 +235,6 @@ public interface Bubbles {
      * @param removedUserId the id of the removed user.
      */
     void onUserRemoved(int removedUserId);
-
-    /** Description of current bubble state. */
-    void dump(PrintWriter pw, String[] args);
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {
