@@ -221,7 +221,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar la pantalla automáticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Protector de pantalla"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a la cámara"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al mic."</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
@@ -239,8 +239,8 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Red Wi-Fi no conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversión de color"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de colores"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corregir colores"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuración del usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
@@ -280,7 +280,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Grabación de pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
-    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo de una mano"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo una mano"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Quieres desbloquear el micrófono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"¿Quieres desbloquear la cámara del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"¿Quieres desbloquear la cámara y el micrófono del dispositivo?"</string>
@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Desbloqueo con rostro. Presiona para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Rostro reconocido. Presiona para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Rostro reconocido. Presiona el desbloqueo para abrir."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Se desbloqueó con el rostro"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Se reconoció el rostro"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Mover hacia la izquierda"</item>
     <item msgid="5558598599408514296">"Mover hacia abajo"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando lento • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Conectado y cargando • Carga completa en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando • Se completará en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar usuario"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú expandible"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
@@ -748,6 +751,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Interruptor"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir desplazamiento en diagonal"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"Cambiar tamaño"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Cambiar tipo de ampliación"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Finalizar cambio de tamaño"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"Controlador superior"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Controlador izquierdo"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Controlador derecho"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Controlador inferior"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Tamaño de ampliación"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Mediano"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"Pequeño"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grande"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Cerrar"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Editar"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Configuración de la ventana de ampliación"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Presiona para abrir las funciones de accesibilidad. Personaliza o cambia botón en Config.\n\n"<annotation id="link">"Ver config"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Se seleccionaron <xliff:g id="COUNT">%1$d</xliff:g> dispositivos"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"No se pudo conectar. Presiona para volver a intentarlo."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Conectar un dispositivo"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sesión, abre la app"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconocida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Detener transmisión"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"La red Wi-Fi no está disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo prioridad"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Se estableció la alarma"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"La cámara está desactivada"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"El micrófono está desactivado"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"La cámara y el micrófono están apagados"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}other{# notificaciones}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Transmitiendo"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"¿Quieres dejar de transmitir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Si transmites <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambias la salida, tu transmisión actual se detendrá"</string>

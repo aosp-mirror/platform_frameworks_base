@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ముఖం గుర్తించబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ముఖం గుర్తించబడింది. తెరవడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ముఖం గుర్తించబడింది"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"ఎడమవైపుగా జరపండి"</item>
     <item msgid="5558598599408514296">"కిందికి జరపండి"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తి ఛార్జ్"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తి ఛార్జ్"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జింగ్ డాక్ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
@@ -358,7 +361,7 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>తో రికార్డ్ చేయడం లేదా ప్రసారం చేయడం ప్రారంభించాలా?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"అన్నీ క్లియర్ చేయండి"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"మేనేజ్ చేయండి"</string>
-    <string name="manage_notifications_history_text" msgid="57055985396576230">"చరిత్ర"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"హిస్టరీ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"కొత్తవి"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"నిశ్శబ్దం"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"నోటిఫికేషన్‌లు"</string>
@@ -455,7 +458,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s వాల్యూమ్ నియంత్రణలు"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు రింగ్ అవుతాయి (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"సిస్టమ్ UI ట్యూనర్"</string>
-    <string name="status_bar" msgid="4357390266055077437">"స్టేటస్‌ పట్టీ"</string>
+    <string name="status_bar" msgid="4357390266055077437">"స్టేటస్‌ బార్‌"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"డెమో మోడ్ ప్రారంభించండి"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
@@ -511,7 +514,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"సంభాషణ నోటిఫికేషన్‌ల ఎగువున, లాక్ స్క్రీన్‌లో ప్రొఫైల్ ఫోటో‌గా చూపిస్తుంది, బబుల్‌గా కనిపిస్తుంది, \'అంతరాయం కలిగించవద్దు\'ను అంతరాయం కలిగిస్తుంది"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> సంభాషణ ఫీచర్‌లను సపోర్ట్ చేయదు"</string>
-    <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
+    <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను ఎడిట్ చేయడం వీలుపడదు."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"కాల్ నోటిఫికేషన్‌లను ఎడిట్ చేయడం సాధ్యం కాదు."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల గ్రూప్‌ను ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
@@ -554,7 +557,7 @@
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"తర్వాత"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"మునుపటి"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"రివైండ్ చేయి"</string>
-    <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"వేగంగా ఫార్వార్డ్ చేయి"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"వేగంగా ఫార్వర్డ్ చేయి"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
@@ -617,7 +620,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ఎడమ వైపు చిహ్నం"</string>
     <string name="right_icon" msgid="1103955040645237425">"కుడివైపు ఉన్న చిహ్నం"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"టైల్స్‌ను జోడించడానికి పట్టుకుని, లాగండి"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్స్‌ను వేరే క్రమంలో అమర్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"మీ వద్ద కనీసం <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> టైల్‌లు ఉండాలి"</string>
     <string name="qs_edit" msgid="5583565172803472437">"ఎడిట్ చేయండి"</string>
@@ -736,18 +739,34 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"స్క్రీన్ రికార్డింగ్"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"శీర్షిక లేదు"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"స్టాండ్‌బై"</string>
-    <string name="magnification_window_title" msgid="4863914360847258333">"మాగ్నిఫికేషన్ విండో"</string>
-    <string name="magnification_controls_title" msgid="8421106606708891519">"మాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"మ్యాగ్నిఫికేషన్ విండో"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"మ్యాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"దగ్గరగా జూమ్ చేయండి"</string>
     <string name="accessibility_control_zoom_out" msgid="69578832020304084">"దూరంగా జూమ్ చేయండి"</string>
     <string name="accessibility_control_move_up" msgid="6622825494014720136">"పైకి పంపండి"</string>
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"కిందకి పంపండి"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ఎడమవైపుగా జరపండి"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"కుడివైపుగా జరపండి"</string>
-    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"మాగ్నిఫికేషన్ స్విచ్"</string>
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"మ్యాగ్నిఫికేషన్ స్విచ్"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
-    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"వికర్ణ స్క్రోలింగ్‌ను అనుమతించండి"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"సైజ్ మార్చండి"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"మ్యాగ్నిఫికేషన్ రకాన్ని మార్చండి"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"సైజ్‌ను మార్చడం ముగించండి"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"ఎగువ హ్యాండిల్"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"ఎడమవైపు హ్యాండిల్"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"కుడివైపు హ్యాండిల్"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"కింద హ్యాండిల్"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"మాగ్నిఫయర్ సైజ్"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"జూమ్ చేయండి"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"మధ్యస్థం"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"చిన్నది"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"పెద్దది"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"మూసివేయండి"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"ఎడిట్ చేయండి"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"మాగ్నిఫయర్ విండో సెట్టింగ్‌లు"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"యాక్సెసిబిలిటీ ఫీచర్‌లను తెరవడానికి ట్యాప్ చేయండి. సెట్టింగ్‌లలో ఈ బటన్‌ను అనుకూలంగా మార్చండి లేదా రీప్లేస్ చేయండి.\n\n"<annotation id="link">"వీక్షణ సెట్టింగ్‌లు"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువ ఎడమ వైపునకు తరలించు"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> పరికరాలు ఎంచుకోబడ్డాయి"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(డిస్కనెక్ట్ అయ్యింది)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"స్విచ్ చేయడం సాధ్యం కాదు. మళ్ళీ ట్రై చేయడానికి ట్యాప్ చేయండి."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"పరికరాన్ని కనెక్ట్ చేయండి"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ఈ సెషన్‌ను ప్రసారం చేయడానికి, దయచేసి యాప్‌ను తెరవండి."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"తెలియని యాప్"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ప్రసారాన్ని ఆపివేయండి"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi అందుబాటులో లేదు"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ముఖ్యమైన ఫైల్స్ మోడ్"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"అలారం సెట్ చేశాను"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"కెమెరా ఆఫ్‌లో ఉంది"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"మైక్ ఆఫ్‌లో ఉంది"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"కెమెరా, మైక్ ఆఫ్‌లో ఉన్నాయి"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# నోటిఫికేషన్}other{# నోటిఫికేషన్‌లు}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ప్రసారం చేస్తోంది"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రసారం చేయడాన్ని ఆపివేయాలా?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"మీరు <xliff:g id="SWITCHAPP">%1$s</xliff:g> ప్రసారం చేస్తే లేదా అవుట్‌పుట్‌ను మార్చినట్లయితే, మీ ప్రస్తుత ప్రసారం ఆగిపోతుంది"</string>
