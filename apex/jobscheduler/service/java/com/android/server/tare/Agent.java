@@ -1325,7 +1325,6 @@ class Agent {
 
     @GuardedBy("mLock")
     void dumpLocked(IndentingPrintWriter pw) {
-        pw.println();
         mBalanceThresholdAlarmQueue.dump(pw);
 
         pw.println();

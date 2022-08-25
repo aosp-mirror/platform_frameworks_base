@@ -405,6 +405,10 @@ public abstract class EconomicPolicy {
                 return "PROMOTION";
             case REGULATION_DEMOTION:
                 return "DEMOTION";
+            case REGULATION_BG_RESTRICTED:
+                return "BG_RESTRICTED";
+            case REGULATION_BG_UNRESTRICTED:
+                return "BG_UNRESTRICTED";
         }
         return "UNKNOWN_REGULATION:" + Integer.toHexString(eventId);
     }
