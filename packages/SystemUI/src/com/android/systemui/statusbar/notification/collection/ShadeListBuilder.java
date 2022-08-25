@@ -958,9 +958,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
      * filtered out during any of the filtering steps.
      */
     private void annulAddition(ListEntry entry) {
-        entry.setParent(null);
-        entry.getAttachState().setSection(null);
-        entry.getAttachState().setPromoter(null);
+        entry.getAttachState().detach();
     }
 
     private void assignSections() {
@@ -1198,9 +1196,9 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 o2.getSectionIndex());
         if (cmp != 0) return cmp;
 
-        int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
-        int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
-        cmp = Integer.compare(index1, index2);
+        cmp = Integer.compare(
+                getStableOrderIndex(o1),
+                getStableOrderIndex(o2));
         if (cmp != 0) return cmp;
 
         NotifComparator sectionComparator = getSectionComparator(o1, o2);
@@ -1214,31 +1212,32 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             if (cmp != 0) return cmp;
         }
 
-        final NotificationEntry rep1 = o1.getRepresentativeEntry();
-        final NotificationEntry rep2 = o2.getRepresentativeEntry();
-            cmp = rep1.getRanking().getRank() - rep2.getRanking().getRank();
+        cmp = Integer.compare(
+                o1.getRepresentativeEntry().getRanking().getRank(),
+                o2.getRepresentativeEntry().getRanking().getRank());
         if (cmp != 0) return cmp;
 
-        cmp = Long.compare(
-                rep2.getSbn().getNotification().when,
-                rep1.getSbn().getNotification().when);
+        cmp = -1 * Long.compare(
+                o1.getRepresentativeEntry().getSbn().getNotification().when,
+                o2.getRepresentativeEntry().getSbn().getNotification().when);
         return cmp;
     };
 
 
     private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
-        int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
-        int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
-        int cmp = Integer.compare(index1, index2);
+        int cmp = Integer.compare(
+                getStableOrderIndex(o1),
+                getStableOrderIndex(o2));
         if (cmp != 0) return cmp;
 
-        cmp = o1.getRepresentativeEntry().getRanking().getRank()
-                - o2.getRepresentativeEntry().getRanking().getRank();
+        cmp = Integer.compare(
+                o1.getRepresentativeEntry().getRanking().getRank(),
+                o2.getRepresentativeEntry().getRanking().getRank());
         if (cmp != 0) return cmp;
 
-        cmp = Long.compare(
-                o2.getRepresentativeEntry().getSbn().getNotification().when,
-                o1.getRepresentativeEntry().getSbn().getNotification().when);
+        cmp = -1 * Long.compare(
+                o1.getRepresentativeEntry().getSbn().getNotification().when,
+                o2.getRepresentativeEntry().getSbn().getNotification().when);
         return cmp;
     };
 
@@ -1248,8 +1247,16 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
      */
     private boolean mForceReorderable = false;
 
-    private boolean canReorder(ListEntry entry) {
-        return mForceReorderable || getStabilityManager().isEntryReorderingAllowed(entry);
+    private int getStableOrderIndex(ListEntry entry) {
+        if (mForceReorderable) {
+            // this is used to determine if the list is correctly sorted
+            return -1;
+        }
+        if (getStabilityManager().isEntryReorderingAllowed(entry)) {
+            // let the stability manager constrain or allow reordering
+            return -1;
+        }
+        return entry.getPreviousAttachState().getStableIndex();
     }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {

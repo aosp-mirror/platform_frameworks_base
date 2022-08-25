@@ -226,6 +226,7 @@ import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
+import android.window.BackAnimationAdaptor;
 import android.window.BackNavigationInfo;
 import android.window.IWindowOrganizerController;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
@@ -457,7 +458,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private final ClientLifecycleManager mLifecycleManager;
 
     @Nullable
-    private final BackNavigationController mBackNavigationController;
+    final BackNavigationController mBackNavigationController;
 
     private TaskChangeNotificationController mTaskChangeNotificationController;
     /** The controller for all operations related to locktask. */
@@ -1836,13 +1837,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public BackNavigationInfo startBackNavigation(boolean requestAnimation,
-            IWindowFocusObserver observer) {
+            IWindowFocusObserver observer, BackAnimationAdaptor backAnimationAdaptor) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
         if (mBackNavigationController == null) {
             return null;
         }
-        return mBackNavigationController.startBackNavigation(requestAnimation, observer);
+        return mBackNavigationController.startBackNavigation(
+                requestAnimation, observer, backAnimationAdaptor);
     }
 
     /**

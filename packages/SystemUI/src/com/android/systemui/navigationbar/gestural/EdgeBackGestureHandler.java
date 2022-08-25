@@ -814,8 +814,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         }
         mLogGesture = false;
         String logPackageName = "";
+        Map<String, Integer> vocab = mVocab;
         // Due to privacy, only top 100 most used apps by all users can be logged.
-        if (mUseMLModel && mVocab.containsKey(mPackageName) && mVocab.get(mPackageName) < 100) {
+        if (mUseMLModel && vocab != null && vocab.containsKey(mPackageName)
+                && vocab.get(mPackageName) < 100) {
             logPackageName = mPackageName;
         }
         SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backType,

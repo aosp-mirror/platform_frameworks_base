@@ -171,10 +171,11 @@
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="audioserver" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="audioserver" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="audioserver" />
-    <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="audioserver" />
+    <assign-permission name="android.permission.INTERACT_ACROSS_USERS_FULL" uid="audioserver" />
     <assign-permission name="android.permission.OBSERVE_SENSOR_PRIVACY" uid="audioserver" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="cameraserver" />
+    <assign-permission name="android.permission.INTERACT_ACROSS_USERS_FULL" uid="cameraserver" />
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="cameraserver" />
     <assign-permission name="android.permission.WAKE_LOCK" uid="cameraserver" />
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="cameraserver" />
