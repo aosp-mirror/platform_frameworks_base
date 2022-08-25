@@ -212,15 +212,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Ponastavitev višine govora"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Ponastavitev višine govorjenega besedila na privzete nastavitve."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Zelo počasi"</item>
-    <item msgid="1815382991399815061">"Počasi"</item>
-    <item msgid="3075292553049300105">"Običajno"</item>
-    <item msgid="1158955023692670059">"Hitro"</item>
-    <item msgid="5664310435707146591">"Hitreje"</item>
-    <item msgid="5491266922147715962">"Zelo hitro"</item>
-    <item msgid="7659240015901486196">"Naglo"</item>
-    <item msgid="7147051179282410945">"Zelo naglo"</item>
-    <item msgid="581904787661470707">"Najhitreje"</item>
+    <item msgid="4563475121751694801">"60 %"</item>
+    <item msgid="6323184326270638754">"80 %"</item>
+    <item msgid="2569200872125313769">"100 %"</item>
+    <item msgid="9010794089704942570">"150 %"</item>
+    <item msgid="4634010129655810634">"200 %"</item>
+    <item msgid="8929490998534497543">"250 %"</item>
+    <item msgid="8442352376763286772">"300 %"</item>
+    <item msgid="4446831566506165093">"350 %"</item>
+    <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Izbira profila"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osebno"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Poskrbi, da je ne glede na vrednosti v manifestu mogoče vsem aktivnostim spremeniti velikost za način z več okni."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Omogoči okna svobodne oblike"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogoči podporo za poskusna okna svobodne oblike."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Namizni način"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Geslo za varnostno kopijo namizja"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Popolne varnostne kopije namizja trenutno niso zaščitene."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dotaknite se, če želite spremeniti ali odstraniti geslo za popolno varnostno kopiranje namizja"</string>
@@ -476,13 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Še <xliff:g id="TIME">%1$s</xliff:g> do napolnjenosti"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – še <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Začasno omejeno polnjenje"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – Polnjenje je začasno zaustavljeno"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Neznano"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Polnjenje"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Hitro polnjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Počasno polnjenje"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Brezžično polnjenje"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Polnjenje na nosilcu"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Polnjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Se ne polni"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, se ne polni"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napolnjeno"</string>
@@ -655,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetna povezava je prekinjena."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Klicanje ni mogoče."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Ura"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Vreme"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kakovost zraka"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"O zasedbi"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Nadzor doma"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Hitri pregled"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Izbira profilne slike"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Privzeta ikona uporabnika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizična tipkovnica"</string>
