@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsShape
@@ -35,8 +36,12 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 internal fun SettingsTab(
     title: String,
     selected: Boolean,
+    currentPageOffset: Float,
     onClick: () -> Unit,
 ) {
+    // Shows a color transition during pager scroll.
+    // 0f -> Selected, 1f -> Not selected
+    val colorFraction = if (selected) (currentPageOffset * 2).coerceAtMost(1f) else 1f
     Tab(
         selected = selected,
         onClick = onClick,
@@ -44,29 +49,33 @@ internal fun SettingsTab(
             .height(48.dp)
             .padding(horizontal = 4.dp, vertical = 6.dp)
             .clip(SettingsShape.CornerMedium)
-            .background(color = when {
-                selected -> SettingsTheme.colorScheme.primaryContainer
-                else -> SettingsTheme.colorScheme.surface
-            }),
+            .background(
+                color = lerp(
+                    start = SettingsTheme.colorScheme.primaryContainer,
+                    stop = SettingsTheme.colorScheme.surface,
+                    fraction = colorFraction,
+                ),
+            ),
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelLarge,
-            color = when {
-                selected -> SettingsTheme.colorScheme.onPrimaryContainer
-                else -> SettingsTheme.colorScheme.secondaryText
-            },
+            color = lerp(
+                start = SettingsTheme.colorScheme.onPrimaryContainer,
+                stop = SettingsTheme.colorScheme.secondaryText,
+                fraction = colorFraction,
+            ),
         )
     }
 }
 
 @Preview
 @Composable
-private fun SettingsTabPreview() {
+fun SettingsTabPreview() {
     SettingsTheme {
         Column {
-            SettingsTab(title = "Personal", selected = true) {}
-            SettingsTab(title = "Work", selected = false) {}
+            SettingsTab(title = "Personal", selected = true, currentPageOffset = 0f) {}
+            SettingsTab(title = "Work", selected = false, currentPageOffset = 0f) {}
         }
     }
 }

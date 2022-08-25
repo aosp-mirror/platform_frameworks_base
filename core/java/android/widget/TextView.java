@@ -4891,24 +4891,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * <p>Line-break style specifies the line-break strategies that can be used
      * for text wrapping. The line-break style affects rule-based line breaking
-     * by specifying the strictness of line-breaking rules.</p>
+     * by specifying the strictness of line-breaking rules.
      *
-     * <p>The following are types of line-break styles:</p>
+     * <p>The following are types of line-break styles:
      * <ul>
-     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE}</li>
-     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL}</li>
-     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}</li>
+     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE}
+     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL}
+     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}
      * </ul>
      *
      * <p>The default line-break style is
      * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}, which specifies that no
-     * line-breaking rules are used.</p>
+     * line-breaking rules are used.
      *
      * <p>See the
      * <a href="https://www.w3.org/TR/css-text-3/#line-break-property" class="external">
-     * line-break property</a> for more information.</p>
+     * line-break property</a> for more information.
      *
-     * @param lineBreakStyle The line break style for the text.
+     * @param lineBreakStyle The line-break style for the text.
      */
     public void setLineBreakStyle(@LineBreakConfig.LineBreakStyle int lineBreakStyle) {
         if (mLineBreakStyle != lineBreakStyle) {
@@ -4927,17 +4927,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * <p>The line-break word style affects dictionary-based line breaking by
      * providing phrase-based line-breaking opportunities. Use
      * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE} to specify
-     * phrase-based line breaking.</p>
+     * phrase-based line breaking.
      *
      * <p>The default line-break word style is
      * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE}, which specifies that
-     * no line-breaking word style is used.</p>
+     * no line-breaking word style is used.
      *
      * <p>See the
      * <a href="https://www.w3.org/TR/css-text-3/#word-break-property" class="external">
-     * word-break property</a> for more information.</p>
+     * word-break property</a> for more information.
      *
-     * @param lineBreakWordStyle The line break word style for the text.
+     * @param lineBreakWordStyle The line-break word style for the text.
      */
     public void setLineBreakWordStyle(@LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
         mUserSpeficiedLineBreakwordStyle = true;

@@ -42,7 +42,6 @@ package android {
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
     field public static final String SET_GAME_SERVICE = "android.permission.SET_GAME_SERVICE";
     field public static final String SET_KEYBOARD_LAYOUT = "android.permission.SET_KEYBOARD_LAYOUT";
-    field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
@@ -3202,6 +3201,11 @@ package android.widget {
 
   public class PopupMenu {
     method public android.widget.ListView getMenuListView();
+  }
+
+  public class RatingBar extends android.widget.AbsSeekBar {
+    field public static final String PLURALS_MAX = "max";
+    field public static final String PLURALS_RATING = "rating";
   }
 
   public class Spinner extends android.widget.AbsSpinner implements android.content.DialogInterface.OnClickListener {

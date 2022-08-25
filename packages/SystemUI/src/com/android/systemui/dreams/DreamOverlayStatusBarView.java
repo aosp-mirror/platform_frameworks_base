@@ -113,12 +113,16 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     }
 
     void setExtraStatusBarItemViews(List<View> views) {
-        mSystemStatusViewGroup.removeAllViews();
+        removeAllStatusBarItemViews();
         views.forEach(view -> mSystemStatusViewGroup.addView(view));
     }
 
     private View fetchStatusIconForResId(int resId) {
         final View statusIcon = findViewById(resId);
         return Objects.requireNonNull(statusIcon);
+    }
+
+    void removeAllStatusBarItemViews() {
+        mSystemStatusViewGroup.removeAllViews();
     }
 }

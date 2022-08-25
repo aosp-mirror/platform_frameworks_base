@@ -22,15 +22,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 /**
@@ -39,40 +34,19 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
  * For example, this is for the pages with some preferences and is scrollable when the items out of
  * the screen.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegularScaffold(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            SmallTopAppBar(
-                title = {
-                    Text(
-                        text = title,
-                        modifier = Modifier.padding(SettingsDimension.itemPaddingAround),
-                    )
-                },
-                navigationIcon = { NavigateUp() },
-                actions = actions,
-                colors = settingsTopAppBarColors(),
-            )
-        },
-    ) { paddingValues ->
+    SettingsScaffold(title, actions) { paddingValues ->
         Column(Modifier.verticalScroll(rememberScrollState())) {
             Spacer(Modifier.padding(paddingValues))
             content()
         }
     }
 }
-
-@Composable
-internal fun settingsTopAppBarColors() = TopAppBarDefaults.largeTopAppBarColors(
-    containerColor = SettingsTheme.colorScheme.surfaceHeader,
-    scrolledContainerColor = SettingsTheme.colorScheme.surfaceHeader,
-)
 
 @Preview
 @Composable

@@ -17,7 +17,6 @@
 
 package com.android.server.companion;
 
-import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
@@ -88,7 +87,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
-import android.util.Base64;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -754,6 +752,11 @@ public class CompanionDeviceManagerService extends SystemService {
             }
 
             mDevicePresenceMonitor.onSelfManagedDeviceDisconnected(associationId);
+        }
+
+        @Override
+        public boolean isCompanionApplicationBound(String packageName, int userId) {
+            return mCompanionAppController.isCompanionApplicationBound(userId, packageName);
         }
 
         private void registerDevicePresenceListenerActive(String packageName, String deviceAddress,

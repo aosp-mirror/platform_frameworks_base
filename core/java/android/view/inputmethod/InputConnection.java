@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -31,6 +32,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * The InputConnection interface is the communication channel from an
@@ -966,6 +969,17 @@ public interface InputConnection {
      * valid.
      */
     boolean performPrivateCommand(String action, Bundle data);
+
+    /**
+     * Perform a handwriting gesture on text.
+     *
+     * @param gesture the gesture to perform
+     * @param executor if the caller passes a non-null consumer  TODO(b/210039666): complete doc
+     * @param consumer if the caller passes a non-null receiver, the editor must invoke this
+     */
+    default void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {}
 
     /**
      * The editor is requested to call

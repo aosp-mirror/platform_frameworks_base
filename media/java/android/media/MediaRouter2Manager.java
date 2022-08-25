@@ -79,8 +79,9 @@ public final class MediaRouter2Manager {
     final String mPackageName;
 
     private final Context mContext;
-    @GuardedBy("sLock")
-    private Client mClient;
+
+    private final Client mClient;
+
     private final IMediaRouterService mMediaRouterService;
     private final AtomicInteger mScanRequestCount = new AtomicInteger(/* initialValue= */ 0);
     final Handler mHandler;
@@ -120,7 +121,12 @@ public final class MediaRouter2Manager {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         mPackageName = mContext.getPackageName();
         mHandler = new Handler(context.getMainLooper());
-        mHandler.post(this::getOrCreateClient);
+        mClient = new Client();
+        try {
+            mMediaRouterService.registerManager(mClient, mPackageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -167,7 +173,7 @@ public final class MediaRouter2Manager {
     public void registerScanRequest() {
         if (mScanRequestCount.getAndIncrement() == 0) {
             try {
-                mMediaRouterService.startScan(getOrCreateClient());
+                mMediaRouterService.startScan(mClient);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -194,7 +200,7 @@ public final class MediaRouter2Manager {
                 })
                 == 0) {
             try {
-                mMediaRouterService.stopScan(getOrCreateClient());
+                mMediaRouterService.stopScan(mClient);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -358,8 +364,7 @@ public final class MediaRouter2Manager {
     @Nullable
     public RoutingSessionInfo getSystemRoutingSession(@Nullable String packageName) {
         try {
-            return mMediaRouterService.getSystemSessionInfoForPackage(
-                    getOrCreateClient(), packageName);
+            return mMediaRouterService.getSystemSessionInfoForPackage(mClient, packageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -424,7 +429,7 @@ public final class MediaRouter2Manager {
     @NonNull
     public List<RoutingSessionInfo> getRemoteSessions() {
         try {
-            return mMediaRouterService.getRemoteSessions(getOrCreateClient());
+            return mMediaRouterService.getRemoteSessions(mClient);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -512,8 +517,7 @@ public final class MediaRouter2Manager {
 
         try {
             int requestId = mNextRequestId.getAndIncrement();
-            mMediaRouterService.setRouteVolumeWithManager(
-                    getOrCreateClient(), requestId, route, volume);
+            mMediaRouterService.setRouteVolumeWithManager(mClient, requestId, route, volume);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -540,7 +544,7 @@ public final class MediaRouter2Manager {
         try {
             int requestId = mNextRequestId.getAndIncrement();
             mMediaRouterService.setSessionVolumeWithManager(
-                    getOrCreateClient(), requestId, sessionInfo.getId(), volume);
+                    mClient, requestId, sessionInfo.getId(), volume);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -765,7 +769,7 @@ public final class MediaRouter2Manager {
         try {
             int requestId = mNextRequestId.getAndIncrement();
             mMediaRouterService.selectRouteWithManager(
-                    getOrCreateClient(), requestId, sessionInfo.getId(), route);
+                    mClient, requestId, sessionInfo.getId(), route);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -804,7 +808,7 @@ public final class MediaRouter2Manager {
         try {
             int requestId = mNextRequestId.getAndIncrement();
             mMediaRouterService.deselectRouteWithManager(
-                    getOrCreateClient(), requestId, sessionInfo.getId(), route);
+                    mClient, requestId, sessionInfo.getId(), route);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -825,8 +829,7 @@ public final class MediaRouter2Manager {
 
         try {
             int requestId = mNextRequestId.getAndIncrement();
-            mMediaRouterService.releaseSessionWithManager(
-                    getOrCreateClient(), requestId, sessionInfo.getId());
+            mMediaRouterService.releaseSessionWithManager(mClient, requestId, sessionInfo.getId());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -843,7 +846,7 @@ public final class MediaRouter2Manager {
 
         try {
             mMediaRouterService.transferToRouteWithManager(
-                    getOrCreateClient(), requestId, session.getId(), route);
+                    mClient, requestId, session.getId(), route);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -860,7 +863,7 @@ public final class MediaRouter2Manager {
 
         try {
             mMediaRouterService.requestCreateSessionWithManager(
-                    getOrCreateClient(), requestId, oldSession, route);
+                    mClient, requestId, oldSession, route);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -904,22 +907,6 @@ public final class MediaRouter2Manager {
         return TextUtils.equals(volumeControlId, sessionInfo.getOriginalId())
                 && TextUtils.equals(mediaController.getPackageName(),
                 sessionInfo.getOwnerPackageName());
-    }
-
-    private Client getOrCreateClient() {
-        synchronized (sLock) {
-            if (mClient != null) {
-                return mClient;
-            }
-            Client client = new Client();
-            try {
-                mMediaRouterService.registerManager(client, mPackageName);
-                mClient = client;
-                return client;
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-        }
     }
 
     /**

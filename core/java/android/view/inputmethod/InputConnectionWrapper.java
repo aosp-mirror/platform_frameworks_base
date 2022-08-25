@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,6 +25,9 @@ import android.os.Handler;
 import android.view.KeyEvent;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * <p>Wrapper class for proxying calls to another InputConnection.  Subclass and have fun!
@@ -316,6 +320,17 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean performPrivateCommand(String action, Bundle data) {
         return mTarget.performPrivateCommand(action, data);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        mTarget.performHandwritingGesture(gesture, executor, consumer);
     }
 
     /**

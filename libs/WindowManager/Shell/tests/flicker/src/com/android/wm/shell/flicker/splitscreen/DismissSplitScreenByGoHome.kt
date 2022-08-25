@@ -96,12 +96,12 @@ class DismissSplitScreenByGoHome(
     @Presubmit
     @Test
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        primaryApp, splitLeftTop = false)
+        primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        secondaryApp, splitLeftTop = true)
+        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
 
     @Presubmit
     @Test

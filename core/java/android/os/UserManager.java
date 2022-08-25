@@ -1995,7 +1995,8 @@ public class UserManager {
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
-        mContext = context.getApplicationContext();
+        Context appContext = context.getApplicationContext();
+        mContext = (appContext == null ? context : appContext);
         mUserId = context.getUserId();
     }
 
@@ -2879,6 +2880,21 @@ public class UserManager {
     public boolean isUserVisible() {
         try {
             return mService.isUserVisible(mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the visible users (as defined by {@link #isUserVisible()}.
+     *
+     * @return visible users at the moment.
+     */
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.INTERACT_ACROSS_USERS})
+    public @NonNull List<UserHandle> getVisibleUsers() {
+        try {
+            return mService.getVisibleUsers();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

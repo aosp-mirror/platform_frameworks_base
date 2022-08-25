@@ -2083,7 +2083,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * activity releases the top state and reports back, message about acquiring top state will be
      * sent to the new top resumed activity.
      */
-    void updateTopResumedActivityIfNeeded() {
+    void updateTopResumedActivityIfNeeded(String reason) {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2118,6 +2118,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mTopResumedActivity.app.addToPendingTop();
             }
             mService.updateOomAdj();
+        }
+        // Update the last resumed activity and focused app when the top resumed activity changed
+        // because the new top resumed activity might be already resumed and thus won't have
+        // activity state change to update the records to AMS.
+        if (mTopResumedActivity != null) {
+            mService.setLastResumedActivityUncheckLocked(mTopResumedActivity, reason);
         }
         scheduleTopResumedActivityStateIfNeeded();
 

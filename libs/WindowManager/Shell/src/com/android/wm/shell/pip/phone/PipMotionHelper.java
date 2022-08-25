@@ -33,6 +33,7 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.SystemProperties;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
@@ -58,6 +59,8 @@ import kotlin.jvm.functions.Function0;
 public class PipMotionHelper implements PipAppOpsListener.Callback,
         FloatingContentCoordinator.FloatingContent {
 
+    public static final boolean ENABLE_FLING_TO_DISMISS_PIP =
+            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_pip", true);
     private static final String TAG = "PipMotionHelper";
     private static final boolean DEBUG = false;
 
@@ -704,6 +707,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     loc[1] = animatedPipBounds.top;
                 }
             };
+            mMagnetizedPip.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_PIP);
         }
 
         return mMagnetizedPip;

@@ -1771,8 +1771,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
             return;
         }
         Log.w(TAG, "Communication client died");
-        removeCommunicationRouteClient(client.getBinder(), true);
-        onUpdateCommunicationRouteClient("onCommunicationRouteClientDied");
+        setCommunicationRouteForClient(client.getBinder(), client.getPid(), null,
+                BtHelper.SCO_MODE_UNDEFINED, "onCommunicationRouteClientDied");
     }
 
     /**

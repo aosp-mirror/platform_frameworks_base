@@ -155,6 +155,7 @@ public class UserLifecycleTests {
     public void tearDown() throws Exception {
         setSystemProperty("debug.usercontroller.user_switch_timeout_ms", mUserSwitchTimeoutMs);
         mBroadcastWaiter.close();
+        mUserSwitchWaiter.close();
         for (int userId : mUsersToRemove) {
             try {
                 mUm.removeUser(userId);
@@ -207,10 +208,10 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
-            mRunner.resumeTiming();
-            Log.i(TAG, "Starting timer");
-
             runThenWaitForBroadcasts(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+
                 mIam.startUserInBackground(userId);
             }, Intent.ACTION_USER_STARTED);
 
@@ -360,10 +361,10 @@ public class UserLifecycleTests {
             }, Intent.ACTION_MEDIA_MOUNTED);
 
             mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(startUser, () -> {
-                mRunner.resumeTiming();
-                Log.i(TAG, "Starting timer");
-
                 runThenWaitForBroadcasts(userId, () -> {
+                    mRunner.resumeTiming();
+                    Log.i(TAG, "Starting timer");
+
                     mAm.switchUser(startUser);
                 }, Intent.ACTION_USER_STOPPED);
 
@@ -423,7 +424,7 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
             startUserInBackgroundAndWaitForUnlock(userId);
-            stopUser(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId, true);
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -478,7 +479,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
-            stopUser(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId, true);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
@@ -675,6 +676,19 @@ public class UserLifecycleTests {
         return success[0];
     }
 
+    /**
+     * Waits for broadcast idle before stopping a user, to prevent timeouts on stop user.
+     * Stopping a user heavily depends on broadcast queue, and that gets crowded after user creation
+     * or user switches, which leads to a timeout on stopping user and cause the tests to be flaky.
+     * Do not call this method while timing is on. i.e. between mRunner.resumeTiming() and
+     * mRunner.pauseTiming(). Otherwise it would cause the test results to be spiky.
+     */
+    private void stopUserAfterWaitingForBroadcastIdle(int userId, boolean force)
+            throws RemoteException {
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        stopUser(userId, force);
+    }
+
     private void stopUser(int userId, boolean force) throws RemoteException {
         final CountDownLatch latch = new CountDownLatch(1);
         mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
@@ -710,7 +724,7 @@ public class UserLifecycleTests {
         attestTrue("Didn't switch back to user, " + origUser, origUser == mAm.getCurrentUser());
 
         if (stopNewUser) {
-            stopUser(testUser, true);
+            stopUserAfterWaitingForBroadcastIdle(testUser, true);
             attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
         }
 

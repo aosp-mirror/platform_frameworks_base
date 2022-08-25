@@ -821,7 +821,7 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Description of current bubble state.
      */
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw) {
         pw.print("key: "); pw.println(mKey);
         pw.print("  showInShade:   "); pw.println(showInShade());
         pw.print("  showDot:       "); pw.println(showDot());
@@ -831,7 +831,7 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
         if (mExpandedView != null) {
-            mExpandedView.dump(pw, args);
+            mExpandedView.dump(pw);
         }
     }
 

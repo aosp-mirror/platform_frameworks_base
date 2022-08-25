@@ -94,12 +94,12 @@ class EnterSplitScreenByDragFromAllApps(
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, splitLeftTop = false)
+        primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        secondaryApp, splitLeftTop = true)
+        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
 
     @Presubmit
     @Test

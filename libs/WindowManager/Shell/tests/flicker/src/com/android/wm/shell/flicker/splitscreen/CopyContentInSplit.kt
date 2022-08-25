@@ -92,12 +92,12 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     @Presubmit
     @Test
     fun primaryAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
-        primaryApp, splitLeftTop = true)
+        primaryApp, landscapePosLeft = true, portraitPosTop = true)
 
     @Presubmit
     @Test
     fun textEditAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
-        textEditApp, splitLeftTop = false)
+        textEditApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test

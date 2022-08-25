@@ -729,8 +729,11 @@ public class SpatializerHelper {
     }
 
     private boolean isDeviceCompatibleWithSpatializationModes(@NonNull AudioDeviceAttributes ada) {
+        // modeForDevice will be neither transaural or binaural for devices that do not support
+        // spatial audio. For instance mono devices like earpiece, speaker safe or sco must
+        // not be included.
         final byte modeForDevice = (byte) SPAT_MODE_FOR_DEVICE_TYPE.get(ada.getType(),
-                /*default when type not found*/ SpatializationMode.SPATIALIZER_BINAURAL);
+                /*default when type not found*/ -1);
         if ((modeForDevice == SpatializationMode.SPATIALIZER_BINAURAL && mBinauralSupported)
                 || (modeForDevice == SpatializationMode.SPATIALIZER_TRANSAURAL
                         && mTransauralSupported)) {
@@ -1538,8 +1541,8 @@ public class SpatializerHelper {
 
         @Override
         public String toString() {
-            return "type:" + mDeviceType + " addr:" + mDeviceAddress + " enabled:" + mEnabled
-                    + " HT:" + mHasHeadTracker + " HTenabled:" + mHeadTrackerEnabled;
+            return "type: " + mDeviceType + " addr: " + mDeviceAddress + " enabled: " + mEnabled
+                    + " HT: " + mHasHeadTracker + " HTenabled: " + mHeadTrackerEnabled;
         }
 
         String toPersistableString() {

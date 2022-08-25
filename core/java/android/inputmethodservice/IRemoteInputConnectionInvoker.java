@@ -17,6 +17,7 @@
 package android.inputmethodservice;
 
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -24,9 +25,13 @@ import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
 
@@ -35,6 +40,8 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * A stateless wrapper of {@link com.android.internal.inputmethod.IRemoteInputConnection} to
@@ -588,6 +595,27 @@ final class IRemoteInputConnectionInvoker {
             return true;
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    @AnyThread
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        // TODO(b/210039666): implement resultReceiver
+        try {
+            if (gesture instanceof SelectGesture) {
+                mConnection.performHandwritingSelectGesture(
+                        createHeader(), (SelectGesture) gesture, null);
+            } else if (gesture instanceof InsertGesture) {
+                mConnection.performHandwritingInsertGesture(
+                        createHeader(), (InsertGesture) gesture, null);
+            } else if (gesture instanceof DeleteGesture) {
+                mConnection.performHandwritingDeleteGesture(
+                        createHeader(), (DeleteGesture) gesture, null);
+            }
+        } catch (RemoteException e) {
+            // TODO(b/210039666): return result
         }
     }
 

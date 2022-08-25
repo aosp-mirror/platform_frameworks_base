@@ -77,6 +77,7 @@ import javax.inject.Named
 class LargeScreenShadeHeaderController @Inject constructor(
     @Named(LARGE_SCREEN_SHADE_HEADER) private val header: View,
     private val statusBarIconController: StatusBarIconController,
+    private val tintedIconManagerFactory: StatusBarIconController.TintedIconManager.Factory,
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProvider: StatusBarContentInsetsProvider,
     private val configurationController: ConfigurationController,
@@ -259,7 +260,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         batteryMeterViewController.ignoreTunerUpdates()
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
-        iconManager = StatusBarIconController.TintedIconManager(iconContainer, featureFlags)
+        iconManager = tintedIconManagerFactory.create(iconContainer)
         iconManager.setTint(
             Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
         )

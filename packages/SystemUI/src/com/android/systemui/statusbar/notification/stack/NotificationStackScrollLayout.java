@@ -42,7 +42,6 @@ import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -4405,8 +4404,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * See {@link AmbientState#setDozing}.
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setDozing(boolean dozing, boolean animate,
-            @Nullable PointF touchWakeUpScreenLocation) {
+    public void setDozing(boolean dozing, boolean animate) {
         if (mAmbientState.isDozing() == dozing) {
             return;
         }

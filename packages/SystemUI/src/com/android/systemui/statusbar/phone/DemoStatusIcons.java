@@ -225,6 +225,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void addDemoWifiView(WifiIconState state) {
         Log.d(TAG, "addDemoWifiView: ");
+        // TODO(b/238425913): Migrate this view to {@code ModernStatusBarWifiView}.
         StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, state.slot);
 
         int viewIndex = getChildCount();

@@ -1051,13 +1051,13 @@ public class HdmiControlService extends SystemService {
 
                             // Address allocation completed for all devices. Notify each device.
                             if (allocatingDevices.size() == ++finished[0]) {
-                                mAddressAllocated = true;
                                 if (initiatedBy != INITIATED_BY_HOTPLUG) {
                                     // In case of the hotplug we don't call
                                     // onInitializeCecComplete()
                                     // since we reallocate the logical address only.
                                     onInitializeCecComplete(initiatedBy);
                                 }
+                                mAddressAllocated = true;
                                 notifyAddressAllocated(allocatedDevices, initiatedBy);
                                 // Reinvoke the saved display status callback once the local
                                 // device is ready.

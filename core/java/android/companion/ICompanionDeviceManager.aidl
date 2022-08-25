@@ -80,4 +80,6 @@ interface ICompanionDeviceManager {
     void attachSystemDataTransport(String packageName, int userId, int associationId, in ParcelFileDescriptor fd);
 
     void detachSystemDataTransport(String packageName, int userId, int associationId);
+
+    boolean isCompanionApplicationBound(String packageName, int userId);
 }

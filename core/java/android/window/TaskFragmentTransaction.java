@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -41,17 +42,29 @@ import java.util.List;
  */
 public final class TaskFragmentTransaction implements Parcelable {
 
+    /** Unique token to represent this transaction. */
+    private final IBinder mTransactionToken;
+
+    /** Changes in this transaction. */
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
-    public TaskFragmentTransaction() {}
+    public TaskFragmentTransaction() {
+        mTransactionToken = new Binder();
+    }
 
     private TaskFragmentTransaction(Parcel in) {
+        mTransactionToken = in.readStrongBinder();
         in.readTypedList(mChanges, Change.CREATOR);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeStrongBinder(mTransactionToken);
         dest.writeTypedList(mChanges);
+    }
+
+    public IBinder getTransactionToken() {
+        return mTransactionToken;
     }
 
     /** Adds a {@link Change} to this transaction. */
@@ -74,7 +87,9 @@ public final class TaskFragmentTransaction implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("TaskFragmentTransaction{changes=[");
+        sb.append("TaskFragmentTransaction{token=");
+        sb.append(mTransactionToken);
+        sb.append(" changes=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');

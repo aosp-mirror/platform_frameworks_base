@@ -1008,6 +1008,22 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Checks whether the calling companion application is currently bound.
+     *
+     * @return true if application is bound, false otherwise
+     * @hide
+     */
+    @UserHandleAware
+    public boolean isCompanionApplicationBound() {
+        try {
+            return mService.isCompanionApplicationBound(
+                    mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkFeaturePresent() {
         boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {

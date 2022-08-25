@@ -28,7 +28,7 @@ import java.util.Objects;
  *
  * <p>See the
  * <a href="https://www.w3.org/TR/css-text-3/#line-break-property" class="external">
- * line-break property</a> for more information.</p>
+ * line-break property</a> for more information.
  */
 public final class LineBreakConfig {
 
@@ -72,7 +72,7 @@ public final class LineBreakConfig {
      *
      * <p>Support for this line-break word style depends on locale. If the
      * current locale does not support phrase-based text wrapping, this setting
-     * has no effect.</p>
+     * has no effect.
      */
     public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1;
 
@@ -194,7 +194,7 @@ public final class LineBreakConfig {
      * Constructor with line-break parameters.
      *
      * <p>Use {@link LineBreakConfig.Builder} to create the
-     * {@code LineBreakConfig} instance.</p>
+     * {@code LineBreakConfig} instance.
      */
     private LineBreakConfig(@LineBreakStyle int lineBreakStyle,
             @LineBreakWordStyle int lineBreakWordStyle, boolean autoPhraseBreaking) {

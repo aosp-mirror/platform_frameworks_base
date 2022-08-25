@@ -21,13 +21,13 @@ package com.android.wm.shell.sysui;
  */
 public interface KeyguardChangeListener {
     /**
-     * Notifies the Shell that the keyguard is showing (and if so, whether it is occluded).
+     * Called when the keyguard is showing (and if so, whether it is occluded).
      */
     default void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
             boolean animatingDismiss) {}
 
     /**
-     * Notifies the Shell when the keyguard dismiss animation has finished.
+     * Called when the keyguard dismiss animation has finished.
      *
      * TODO(b/206741900) deprecate this path once we're able to animate the PiP window as part of
      * keyguard dismiss animation.
