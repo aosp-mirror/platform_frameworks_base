@@ -20,19 +20,20 @@ import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.DISABLE_ONGOING_CALL_CHIP;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
-import android.animation.ValueAnimator;
+import android.animation.Animator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.database.ContentObserver;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.SubscriptionManager;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,22 +71,22 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.CarrierConfigTracker;
+import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListener;
+import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
 import com.android.systemui.util.settings.SecureSettings;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import javax.inject.Inject;
-
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
  * and keyguard state. Also manages lifecycle to make sure the views it contains are being
  * updated by the StatusBarIconController and DarkIconManager while it is attached.
  */
+@SuppressLint("ValidFragment")
 public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks,
         StatusBarStateController.StateListener,
         SystemStatusAnimationCallback {
@@ -105,7 +106,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mClockView;
     private View mOngoingCallChip;
     private View mNotificationIconAreaInner;
-    private View mCenteredIconArea;
     private int mDisabled1;
     private int mDisabled2;
     private DarkIconManager mDarkIconManager;
@@ -120,6 +120,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
+    private final CarrierConfigTracker mCarrierConfigTracker;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
@@ -140,8 +141,31 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
     };
     private OperatorNameViewController mOperatorNameViewController;
+    private StatusBarSystemEventAnimator mSystemEventAnimator;
 
-    @Inject
+    private final CarrierConfigChangedListener mCarrierConfigCallback =
+            new CarrierConfigChangedListener() {
+                @Override
+                public void onCarrierConfigChanged() {
+                    if (mOperatorNameViewController == null) {
+                        initOperatorName();
+                    } else {
+                        // Already initialized, KeyguardUpdateMonitorCallback will handle the update
+                    }
+                }
+            };
+
+    private final DefaultDataSubscriptionChangedListener mDefaultDataListener =
+            new DefaultDataSubscriptionChangedListener() {
+                @Override
+                public void onDefaultSubscriptionChanged(int subId) {
+                    if (mOperatorNameViewController == null) {
+                        initOperatorName();
+                    }
+                }
+            };
+
+    @SuppressLint("ValidFragment")
     public CollapsedStatusBarFragment(
             StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             OngoingCallController ongoingCallController,
@@ -157,6 +181,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
+            CarrierConfigTracker carrierConfigTracker,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
@@ -176,6 +201,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mNetworkController = networkController;
         mStatusBarStateController = statusBarStateController;
         mCommandQueue = commandQueue;
+        mCarrierConfigTracker = carrierConfigTracker;
         mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
         mSecureSettings = secureSettings;
@@ -214,7 +240,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         initEmergencyCryptkeeperText();
         initOperatorName();
         initNotificationIconArea();
-        mAnimationScheduler.addCallback(this);
+        mSystemEventAnimator =
+                new StatusBarSystemEventAnimator(mSystemIconArea, getResources());
+        mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
+        mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
     }
 
     @VisibleForTesting
@@ -226,7 +255,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 R.array.config_collapsed_statusbar_icon_blocklist));
         String vibrateIconSlot = getString(com.android.internal.R.string.status_bar_volume);
         boolean showVibrateIcon =
-                mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0) == 0;
+                mSecureSettings.getIntForUser(
+                        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+                        0,
+                        UserHandle.USER_CURRENT) == 0;
 
         // Filter out vibrate icon from the blocklist if the setting is on
         for (int i = 0; i < blockList.size(); i++) {
@@ -261,11 +293,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCommandQueue.addCallback(this);
         mStatusBarStateController.addCallback(this);
         initOngoingCallChip();
+        mAnimationScheduler.addCallback(this);
 
-        mSecureSettings.registerContentObserver(
+        mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON),
                 false,
-                mVolumeSettingObserver);
+                mVolumeSettingObserver,
+                UserHandle.USER_ALL);
     }
 
     @Override
@@ -274,6 +308,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
         mOngoingCallController.removeCallback(mOngoingCallListener);
+        mAnimationScheduler.removeCallback(this);
         mSecureSettings.unregisterContentObserver(mVolumeSettingObserver);
     }
 
@@ -281,10 +316,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onDestroyView() {
         super.onDestroyView();
         mStatusBarIconController.removeIconGroup(mDarkIconManager);
-        mAnimationScheduler.removeCallback(this);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);
         }
+        mCarrierConfigTracker.removeCallback(mCarrierConfigCallback);
+        mCarrierConfigTracker.removeDataSubscriptionChangedListener(mDefaultDataListener);
     }
 
     /** Initializes views related to the notification icon area. */
@@ -297,14 +333,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .removeView(mNotificationIconAreaInner);
         }
         notificationIconArea.addView(mNotificationIconAreaInner);
-
-        ViewGroup statusBarCenteredIconArea = mStatusBar.findViewById(R.id.centered_icon_area);
-        mCenteredIconArea = mNotificationIconAreaController.getCenteredNotificationAreaView();
-        if (mCenteredIconArea.getParent() != null) {
-            ((ViewGroup) mCenteredIconArea.getParent())
-                    .removeView(mCenteredIconArea);
-        }
-        statusBarCenteredIconArea.addView(mCenteredIconArea);
 
         // #disable should have already been called, so use the disable values to set visibility.
         updateNotificationIconAreaAndCallChip(mDisabled1, false);
@@ -490,12 +518,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void hideNotificationIconArea(boolean animate) {
         animateHide(mNotificationIconAreaInner, animate);
-        animateHide(mCenteredIconArea, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
         animateShow(mNotificationIconAreaInner, animate);
-        animateShow(mCenteredIconArea, animate);
     }
 
     public void hideOperatorName(boolean animate) {
@@ -581,11 +607,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void initOperatorName() {
-        if (getResources().getBoolean(R.bool.config_showOperatorNameInStatusBar)) {
+        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (mCarrierConfigTracker.getShowOperatorNameInStatusBarConfig(subId)) {
             ViewStub stub = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameViewController =
                     mOperatorNameViewControllerFactory.create((OperatorNameView) stub.inflate());
             mOperatorNameViewController.init();
+            // This view should not be visible on lock-screen
+            if (mKeyguardStateController.isShowing()) {
+                hideOperatorName(false);
+            }
         }
     }
 
@@ -602,35 +633,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         disable(getContext().getDisplayId(), mDisabled1, mDisabled2, false /* animate */);
     }
 
+    @Nullable
     @Override
-    public void onSystemChromeAnimationStart() {
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_OUT
-                && !isSystemIconAreaDisabled()) {
-            mSystemIconArea.setVisibility(View.VISIBLE);
-            mSystemIconArea.setAlpha(0f);
-        }
+    public Animator onSystemEventAnimationBegin() {
+        return mSystemEventAnimator.onSystemEventAnimationBegin();
     }
 
+    @Nullable
     @Override
-    public void onSystemChromeAnimationEnd() {
-        // Make sure the system icons are out of the way
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_IN) {
-            mSystemIconArea.setVisibility(View.INVISIBLE);
-            mSystemIconArea.setAlpha(0f);
-        } else {
-            if (isSystemIconAreaDisabled()) {
-                // don't unhide
-                return;
-            }
-
-            mSystemIconArea.setAlpha(1f);
-            mSystemIconArea.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void onSystemChromeAnimationUpdate(@NotNull ValueAnimator animator) {
-        mSystemIconArea.setAlpha((float) animator.getAnimatedValue());
+    public Animator onSystemEventAnimationFinish(boolean hasPersistentDot) {
+        return mSystemEventAnimator.onSystemEventAnimationFinish(hasPersistentDot);
     }
 
     private boolean isSystemIconAreaDisabled() {

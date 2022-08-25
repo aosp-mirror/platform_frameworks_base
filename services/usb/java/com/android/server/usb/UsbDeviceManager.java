@@ -192,6 +192,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      */
     private static final int ACCESSORY_HANDSHAKE_TIMEOUT = 10 * 1000;
 
+    private static final int DUMPSYS_LOG_BUFFER = 200;
+
     private static final String BOOT_MODE_PROPERTY = "ro.bootmode";
 
     private static final String ADB_NOTIFICATION_CHANNEL_ID_TV = "usbdevicemanager.adb.tv";
@@ -210,6 +212,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     private static Set<Integer> sDenyInterfaces;
     private HashMap<Long, FileDescriptor> mControlFds;
+
+    private static UsbDeviceLogger sEventLogger;
 
     static {
         sDenyInterfaces = new HashSet<>();
@@ -233,15 +237,21 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         @Override
         public void onUEvent(UEventObserver.UEvent event) {
             if (DEBUG) Slog.v(TAG, "USB UEVENT: " + event.toString());
+            if (sEventLogger != null) {
+                sEventLogger.log(new UsbDeviceLogger.StringEvent("USB UEVENT: "
+                        + event.toString()));
+            } else {
+                if (DEBUG) Slog.d(TAG, "sEventLogger == null");
+            }
 
             String state = event.get("USB_STATE");
             String accessory = event.get("ACCESSORY");
+
             if (state != null) {
                 mHandler.updateState(state);
             } else if ("GETPROTOCOL".equals(accessory)) {
                 if (DEBUG) Slog.d(TAG, "got accessory get protocol");
-                long elapsedRealtime = SystemClock.elapsedRealtime();
-                mHandler.setAccessoryUEventTime(elapsedRealtime);
+                mHandler.setAccessoryUEventTime(SystemClock.elapsedRealtime());
                 resetAccessoryHandshakeTimeoutHandler();
             } else if ("SENDSTRING".equals(accessory)) {
                 if (DEBUG) Slog.d(TAG, "got accessory send string");
@@ -384,6 +394,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         mUEventObserver = new UsbUEventObserver();
         mUEventObserver.startObserving(USB_STATE_MATCH);
         mUEventObserver.startObserving(ACCESSORY_START_MATCH);
+
+        sEventLogger = new UsbDeviceLogger(DUMPSYS_LOG_BUFFER, "UsbDeviceManager activity");
     }
 
     UsbProfileGroupSettingsManager getCurrentSettings() {
@@ -466,6 +478,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
     }
 
+    //TODO It is not clear that this method serves any purpose (at least on Pixel devices)
+    // consider removing
     private static void initRndisAddress() {
         // configure RNDIS ethernet address based on our serial number using the same algorithm
         // we had been previously using in kernel board files
@@ -485,7 +499,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         try {
             FileUtils.stringToFile(RNDIS_ETH_ADDR_PATH, addrString);
         } catch (IOException e) {
-            Slog.e(TAG, "failed to write to " + RNDIS_ETH_ADDR_PATH);
+            Slog.i(TAG, "failed to write to " + RNDIS_ETH_ADDR_PATH);
         }
     }
 
@@ -494,6 +508,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         // current USB state
         private boolean mHostConnected;
         private boolean mUsbAccessoryConnected;
+        private boolean mInHostModeWithNoAccessoryConnected;
         private boolean mSourcePower;
         private boolean mSinkPower;
         private boolean mConfigured;
@@ -542,6 +557,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected boolean mCurrentUsbFunctionsReceived;
         protected int mUsbSpeed;
         protected int mCurrentGadgetHalVersion;
+        protected boolean mPendingBootAccessoryHandshakeBroadcast;
 
         /**
          * The persistent property which stores whether adb is enabled or not.
@@ -764,9 +780,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
 
         private void broadcastUsbAccessoryHandshake() {
-            long elapsedRealtime = SystemClock.elapsedRealtime();
-            long accessoryHandShakeEnd = elapsedRealtime;
-
             // send a sticky broadcast containing USB accessory handshake information
             Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_HANDSHAKE)
                     .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
@@ -778,7 +791,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     .putExtra(UsbManager.EXTRA_ACCESSORY_START,
                             mStartAccessory)
                     .putExtra(UsbManager.EXTRA_ACCESSORY_HANDSHAKE_END,
-                            accessoryHandShakeEnd);
+                            SystemClock.elapsedRealtime());
 
             if (DEBUG) {
                 Slog.d(TAG, "broadcasting " + intent + " extras: " + intent.getExtras());
@@ -786,7 +799,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
             sendStickyBroadcast(intent);
             resetUsbAccessoryHandshakeDebuggingInfo();
-            accessoryHandShakeEnd = 0L;
         }
 
         protected void updateUsbStateBroadcastIfNeeded(long functions) {
@@ -823,6 +835,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         protected void sendStickyBroadcast(Intent intent) {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            sEventLogger.log(new UsbDeviceLogger.StringEvent("USB intent: " + intent));
         }
 
         private void updateUsbFunctions() {
@@ -947,6 +960,17 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         mSupportsAllCombinations = false;
                     }
 
+                    if (mHostConnected) {
+                        if (!mUsbAccessoryConnected) {
+                            mInHostModeWithNoAccessoryConnected = true;
+                        } else {
+                            mInHostModeWithNoAccessoryConnected = false;
+                        }
+                    } else {
+                        // if not in host mode, reset value to false
+                        mInHostModeWithNoAccessoryConnected = false;
+                    }
+
                     mAudioAccessorySupported = port.isModeSupported(MODE_AUDIO_ACCESSORY);
 
                     args.recycle();
@@ -969,6 +993,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
                     if (DEBUG) {
                         Slog.i(TAG, "HOST_STATE connected:" + mUsbAccessoryConnected);
+                    }
+
+                    if (!devices.hasNext()) {
+                        mInHostModeWithNoAccessoryConnected = true;
+                    } else {
+                        mInHostModeWithNoAccessoryConnected = false;
                     }
 
                     mHideUsbNotification = false;
@@ -1102,7 +1132,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     if (DEBUG) {
                         Slog.v(TAG, "Accessory handshake timeout");
                     }
-                    broadcastUsbAccessoryHandshake();
+                    if (mBootCompleted) {
+                        broadcastUsbAccessoryHandshake();
+                    } else {
+                        if (DEBUG) Slog.v(TAG, "Pending broadcasting intent as "
+                                + "not boot completed yet.");
+                        mPendingBootAccessoryHandshakeBroadcast = true;
+                    }
                     break;
                 }
                 case MSG_INCREASE_SENDSTRING_COUNT: {
@@ -1126,8 +1162,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 if (mCurrentAccessory != null) {
                     mUsbDeviceManager.getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     broadcastUsbAccessoryHandshake();
+                } else if (mPendingBootAccessoryHandshakeBroadcast) {
+                    broadcastUsbAccessoryHandshake();
                 }
 
+                mPendingBootAccessoryHandshakeBroadcast = false;
                 updateUsbNotification(false);
                 updateAdbNotification(false);
                 updateUsbFunctions();
@@ -1171,7 +1210,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
             // Dont show the notification when connected to a USB peripheral
             // and the link does not support PR_SWAP and DR_SWAP
-            if (mHideUsbNotification && !mSupportsAllCombinations) {
+            if ((mHideUsbNotification || mInHostModeWithNoAccessoryConnected)
+                    && !mSupportsAllCombinations) {
                 if (mUsbNotificationId != 0) {
                     mNotificationManager.cancelAsUser(null, mUsbNotificationId,
                             UserHandle.ALL);
@@ -1942,14 +1982,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     }
                     break;
                 case MSG_GET_CURRENT_USB_FUNCTIONS:
-                    Slog.e(TAG, "prcessing MSG_GET_CURRENT_USB_FUNCTIONS");
+                    Slog.i(TAG, "processing MSG_GET_CURRENT_USB_FUNCTIONS");
                     mCurrentUsbFunctionsReceived = true;
 
                     if (mCurrentUsbFunctionsRequested) {
-                        Slog.e(TAG, "updating mCurrentFunctions");
+                        Slog.i(TAG, "updating mCurrentFunctions");
                         // Mask out adb, since it is stored in mAdbEnabled
                         mCurrentFunctions = ((Long) msg.obj) & ~UsbManager.FUNCTION_ADB;
-                        Slog.e(TAG,
+                        Slog.i(TAG,
                                 "mCurrentFunctions:" + mCurrentFunctions + "applied:" + msg.arg1);
                         mCurrentFunctionsApplied = msg.arg1 == 1;
                     }
@@ -2187,7 +2227,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      * @param uid Uid of the caller
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory,
-            UsbUserPermissionManager permissions, int uid) {
+            UsbUserPermissionManager permissions, int pid, int uid) {
         UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
         if (currentAccessory == null) {
             throw new IllegalArgumentException("no accessory attached");
@@ -2198,7 +2238,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        permissions.checkPermission(accessory, uid);
+        permissions.checkPermission(accessory, pid, uid);
         return nativeOpenAccessory();
     }
 
@@ -2295,6 +2335,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         if (mHandler != null) {
             mHandler.dump(dump, "handler", UsbDeviceManagerProto.HANDLER);
+            sEventLogger.dump(dump, UsbHandlerProto.UEVENT);
         }
 
         dump.end(token);

@@ -175,10 +175,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"حافظه ساعت پر است. برای آزادسازی فضا، چند فایل را حذف کنید."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"‏فضای ذخیره‌سازی دستگاه Android TV پر است. برخی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"فضای ذخیره‌سازی تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">مرجع صدور گواهی نصب شد</item>
-      <item quantity="other">مراجع صدور گواهی نصب شدند</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{مرجع صدور گواهی نصب شد}one{مرجع صدور گواهی نصب شد}other{مراجع صدور گواهی نصب شد}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"توسط یک شخص ثالث ناشناس"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"توسط سرپرست نمایه کاری شما"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"توسط <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -198,6 +195,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"سرویس اعلان حسگر"</string>
     <string name="twilight_service" msgid="8964898045693187224">"‏سرویس Twilight"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏سرویس به‌روزرسانی زمان GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"سرویس «مدیر خط‌مشی دستگاه»"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"سرویس مدیر تشخیص موسیقی"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"برنامه سرپرست سیستم را نمی‌توان استفاده کرد. دستگاه شما در این لحظه پاک می‌شود.\n\nاگر سؤالی دارید، با سرپرست سیستم سازمانتان تماس بگیرید."</string>
@@ -251,10 +249,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"گزارش کامل"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. نماگرفت دیگری نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر نماگرفت برای گزارش اشکال گرفته می‌شود.</item>
-      <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر نماگرفت برای گزارش اشکال گرفته می‌شود.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{تا # ثانیه دیگر نماگرفت مربوط به گزارش اشکال گرفته می‌شود.}one{تا # ثانیه دیگر نماگرفت مربوط به گزارش اشکال گرفته می‌شود.}other{تا # ثانیه دیگر نماگرفت مربوط به گزارش اشکال گرفته می‌شود.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"نماگرفت با گزارش اشکال گرفته شد"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"نماگرفت با گزارش اشکال گرفته نشد"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"حالت ساکت"</string>
@@ -305,8 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"دسترسی به تقویم شما"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"فایل‌ها و رسانه‌ها"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"دسترسی به عکس‌ها، رسانه‌ها و فایل‌های روی دستگاهتان"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"فایل‌ها"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"دسترسی به فایل‌های دستگاه"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی و صدا"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"دسترسی به موسیقی و صدا در دستگاه شما"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"عکس‌ها و ویدیوها"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"دسترسی به عکس‌ها و ویدیوها در دستگاه شما"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"میکروفن"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ضبط صدا"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"فعالیت فیزیکی"</string>
@@ -321,6 +320,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"برقراری و مدیریت تماس‌های تلفنی"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"حسگرهای بدن"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"دسترسی به داده‌های حسگر در رابطه با علائم حیاتی شما"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"اعلان‌ها"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"نمایش اعلان"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"محتوای پنجره را بازیابی کند"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"محتوای پنجره‌ای را که درحال تعامل با آن هستید بررسی می‌کند."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"فعال‌سازی کاوش لمسی"</string>
@@ -419,8 +420,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"‏به برنامه اجازه می‌دهد گزارش‌های تماس رایانهٔ لوحی شما، از جمله داده‌هایی درباره تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏به برنامه اجازه می‌دهد گزارش‌های تماس در دستگاه Android TV را تغییر دهد، ازجمله داده‌های مربوط به تماس‎های ورودی و خروجی. برنامه‌های مخرب می‌توانند از این مجوز برای پاک کردن یا تغییر دادن گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"دسترسی به حسگرهای بدن (مانند پایشگرهای ضربان قلب)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"به برنامه امکان می‌دهد به اطلاعات حسگرهایی که بر شرایط فیزیکی شما مانند ضربان قلبتان، نظارت دارند، دسترسی داشته باشد."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین استفاده"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"به برنامه اجازه می‌دهد تا زمانی که درحال استفاده است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین اجرا در پس‌زمینه"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"به برنامه اجازه می‌دهد تا زمانی که در پس‌زمینه درحال اجرا است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"خواندن رویدادها و جزئیات تقویم"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در رایانه لوحی شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏این برنامه می‌تواند همه رویدادهای تقویم را که در Android TV شما ذخیره‌شده بخواند، و داده‌های تقویم شما را هم‌رسانی یا ذخیره کند."</string>
@@ -548,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"درخواست پیچیدگی قفل صفحه"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"به برنامه اجازه می‌دهد سطح پیچیدگی قفل صفحه (بالا، متوسط، پایین، یا هیچ‌کدام) را بیاموزد که نشان‌دهنده بازه ممکن طول و نوع قفل صفحه است. همچنین برنامه می‌تواند به کاربران پیشنهاد دهد قفل صفحه را به سطح خاصی به‌روزرسانی کنند، اما کاربران می‌توانند آزادانه این پیشنهاد را نادیده بگیرند و به سطح دیگری بروند. توجه داشته باشید که قفل صفحه در قالب نوشتار ساده ذخیره نمی‌شود، بنابراین برنامه گذرواژه دقیق را نمی‌داند."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"نمایش اعلان"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"به این برنامه اجازه می‌دهد اعلان نمایش دهد"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"استفاده از سخت‌افزار بیومتریک"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"مدیریت سخت‌افزار اثر انگشت"</string>
@@ -575,10 +580,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطا هنگام اصالت‌سنجی"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"از قفل صفحه استفاده کنید"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"برای ادامه، قفل صفحه‌تان را وارد کنید"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"بخشی از اثر انگشت شناسایی شد"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"محکم روی حسگر فشار دهید"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"حسگر را پاک کنید"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"کمی بیشتر نگه دارید"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"حسگر اثر انگشت را تمیز و دوباره امتحان کنید"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"حسگر را تمیز و دوباره امتحان کنید"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"محکم روی حسگر فشار دهید"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"اثر انگشت دیگری را امتحان کنید"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"خیلی روشن است"</string>
@@ -586,6 +592,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"هربار موقعیت انگشتتان را کمی تغییر دهید"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"اثر انگشت تشخیص داده نشد"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"اثر انگشت تشخیص داده نشد"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
@@ -637,9 +645,9 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"بسیار شبیه قبلی است، لطفاً قیافه دیگری بگیرید."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی صاف کنید."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی کج بگیرید."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"هر چیزی که جلو صورت شما را می‌گیرد بردارید."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -672,6 +680,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"به یک برنامه اجازه می‌دهد وضعیت همگام‌سازی یک حساب را بخواند، از جمله سابقه رویدادهای همگام‌سازی و میزان داده‌های همگام‌سازی شده."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"خواندن محتوای فضای ذخیره‌سازی مشترک"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"به برنامه اجازه می‌دهد محتوای فضای ذخیره هم‌رسانی‌شده‌تان را بخواند."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"خواندن فایل‌های صوتی موجود در فضای ذخیره‌سازی هم‌رسانی‌شده"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"به برنامه اجازه می‌دهد فایل‌های صوتی موجود در فضای ذخیره‌سازی هم‌رسانی‌شده را بخواند."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"خواندن فایل‌های ویدیویی موجود در فضای ذخیره‌سازی هم‌رسانی‌شده"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"به برنامه اجازه می‌دهد فایل‌های ویدیویی موجود در فضای ذخیره‌سازی هم‌رسانی‌شده را بخواند."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"خواندن فایل‌های تصویری موجود در فضای ذخیره‌سازی مشترک"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"به برنامه اجازه می‌دهد فایل‌های تصویری موجود در فضای ذخیره‌سازی مشترک را بخواند."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تغییر یا حذف محتوای فضای ذخیره‌سازی مشترک"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"به برنامه اجازه می‌دهد محتوای فضای ذخیره‌سازی مشترکتان را بنویسد."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‏تماس گرفتن/دریافت تماس از طریق SIP"</string>
@@ -722,6 +736,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"شروع مشاهده استفاده از مجوز"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"به دارنده اجازه شروع استفاده از مجوز را برای برنامه می‌دهد. هرگز برای برنامه‌های معمول نیاز نیست."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"شروع مشاهده تصمیم‌های مربوط به اجازه‌ها"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"به دارنده امکان می‌دهد صفحه را برای مرور تصمیم‌های مربوط به اجازه‌ها شروع کند. هرگز نباید برای برنامه‌های عادی لازم باشد."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"مشاهده ویژگی‌های برنامه"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"به دارنده اجازه می‌دهد اطلاعات مربوط به ویژگی‌های برنامه را مشاهده کند."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"دسترسی به داده‌های حسگر با نرخ نمونه‌برداری بالا"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"به برنامه اجازه می‌دهد داده‌های حسگر را با نرخ بیش‌از ۲۰۰ هرتز نمونه‌برداری کند"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تنظیم قوانین گذرواژه"</string>
@@ -889,7 +907,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازکردن قفل یا انجام تماس اضطراری روی «منو» فشار دهید."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"برای بازگشایی قفل روی منو فشار دهید."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"الگو را بکشید تا قفل آن باز شود"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"تماس اضطراری"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"اضطراری"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"بازگشت به تماس"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح است!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوباره امتحان کنید"</string>
@@ -1028,7 +1046,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"شما اجازه بازکردن این صفحه را ندارید."</string>
     <string name="text_copied" msgid="2531420577879738860">"متن در بریده‌دان کپی شد."</string>
-    <string name="copied" msgid="4675902854553014676">"کپی شد"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> از <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> جای‌گذاری کرد"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"‫<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> محتوا را از بریده‌دان جای‌گذاری کرد"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نوشتاری را که کپی کردید جای‌گذاری کرد"</string>
@@ -1057,10 +1074,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> می‌خواهد «کاوش با لمس» را فعال کند. وقتی «کاوش با لمس» فعال است، می‌توانید توضیحاتی را برای آنچه که زیر انگشت شما است مشاهده کرده یا بشنوید یا برای استفاده از تلفن خود از حرکات استفاده کنید."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"۱ ماه قبل"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"قبل از ۱ ماه گذشته"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# روز گذشته}one{# روز گذشته}other{# روز گذشته}}"</string>
     <string name="last_month" msgid="1528906781083518683">"ماه گذشته"</string>
     <string name="older" msgid="1645159827884647400">"قدیمی‌تر"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"در <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1079,70 +1093,22 @@
     <string name="year" msgid="5182610307741238982">"سال"</string>
     <string name="years" msgid="5797714729103773425">"سال"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"اکنون"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>دقیقه</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>دقیقه</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ساعت</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ساعت</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>روز</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>روز</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>سال</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>سال</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g>دقیقه</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g>دقیقه</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g>ساعت</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g>ساعت</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g>روز</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g>روز</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g>سال</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g>سال</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> دقیقه پیش</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دقیقه پیش</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ساعت پیش</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ساعت پیش</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> روز پیش</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز پیش</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> سال پیش</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال پیش</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> دقیقه</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> دقیقه</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> ساعت</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> ساعت</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> روز</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> روز</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
-      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> دقیقه"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> ساعت"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> روز"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> سال"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"تا <xliff:g id="COUNT">%d</xliff:g> دقیقه دیگر"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"تا <xliff:g id="COUNT">%d</xliff:g> ساعت دیگر"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"تا <xliff:g id="COUNT">%d</xliff:g> روز دیگر"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"تا <xliff:g id="COUNT">%d</xliff:g> سال دیگر"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# دقیقه قبل}one{# دقیقه قبل}other{# دقیقه قبل}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ساعت قبل}one{# ساعت قبل}other{# ساعت قبل}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# روز قبل}one{# روز قبل}other{# روز قبل}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# سال قبل}one{# سال قبل}other{# سال قبل}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# دقیقه}one{# دقیقه}other{# دقیقه}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ساعت}one{# ساعت}other{# ساعت}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# روز}one{# روز}other{# روز}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# سال}one{# سال}other{# سال}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدئو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدئو ممکن نیست."</string>
@@ -1172,6 +1138,8 @@
     <string name="deleteText" msgid="4200807474529938112">"حذف"</string>
     <string name="inputMethod" msgid="1784759500516314751">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"کنش‌های متنی"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشت"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تغییر روش ورودی"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"فضای ذخیره‌سازی درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
@@ -1189,6 +1157,7 @@
     <string name="not_checked" msgid="7972320087569023342">"بدون علامت"</string>
     <string name="selected" msgid="6614607926197755875">"انتخاب شده"</string>
     <string name="not_selected" msgid="410652016565864475">"انتخاب نشده"</string>
+    <string name="in_progress" msgid="2149208189184319441">"درحال انجام"</string>
     <string name="whichApplication" msgid="5432266899591255759">"تکمیل کنش بااستفاده از"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏تکمیل کنش بااستفاده از %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"تکمیل عملکرد"</string>
@@ -1267,10 +1236,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"صفحه‌نمایش خاموش شود؟"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"هنگام راه‌اندازی اثر انگشتتان، دکمه روشن/ خاموش را فشار دادید.\n\nاین کار معمولاً صفحه‌نمایش را خاموش می‌کند."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"خاموش شود"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"لغو شود"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ادامه راه‌اندازی؟"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"خاموش کردن صفحه"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ادامه راه‌اندازی"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشت به بازی، ضربه بزنید"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"انتخاب بازی"</string>
@@ -1387,6 +1360,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"برای غیرفعال کردن «حالت مجموعه داده‌های تست»، بازنشانی کارخانه‌ای کنید."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‏عملکرد تحت‌تأثیر قرار گرفته است. برای غیرفعال کردن، bootloader را بررسی کنید."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"‏MTE آزمایشی فعال شد"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، راه‌اندازی مجدد کنید. اگر بااستفاده ازarm64.memtag.bootctl فعال شده است، پیش‌از راه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏مایعات یا خاکروبه در درگاه USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏درگاه USB به‌طور خودکار غیرفعال شده است. برای اطلاعات بیشتر، ضربه بزنید."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏می‌توان از درگاه USB استفاده کرد"</string>
@@ -1521,10 +1496,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"رد شدن"</string>
     <string name="no_matches" msgid="6472699895759164599">"مورد منطبقی موجود نیست"</string>
     <string name="find_on_page" msgid="5400537367077438198">"یافتن در صفحه"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> از <xliff:g id="TOTAL">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# مورد منطبق}one{# از {total}}other{# از {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"تمام"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"درحال پاک کردن فضای ذخیره‌سازی هم‌رسانی‌شده…"</string>
     <string name="share" msgid="4157615043345227321">"هم‌رسانی"</string>
@@ -1654,10 +1626,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"الگوی اشتباه"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"گذرواژه اشتباه"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"پین اشتباه"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید.</item>
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"الگوی خود را رسم کنید"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"پین سیم کارت را وارد کنید"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"پین را وارد کنید"</string>
@@ -1739,6 +1707,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"در حال خروج از سیستم <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"مالک"</string>
+    <string name="guest_name" msgid="8502103277839834324">"مهمان"</string>
     <string name="error_message_title" msgid="4082495589294631966">"خطا"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"سرپرست سیستم شما این تغییر را مجاز نمی‌داند"</string>
     <string name="app_not_found" msgid="3429506115332341800">"برنامه‌ای برای انجام این عملکرد موجود نیست"</string>
@@ -1853,10 +1822,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"یک پین برای تغییر محدودیت‌ها ایجاد کنید"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"پین‌ها مطابقت ندارند. دوباره امتحان کنید."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"پین بیش از حد کوتاه است. باید حداقل ۴ رقم باشد."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ثانیه دیگر دوباره امتحان کنید</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"بعداً دوباره امتحان کنید"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"مشاهده در حالت تمام صفحه"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"برای خروج، انگشتتان را از بالای صفحه به پایین بکشید."</string>
@@ -1884,38 +1849,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">‏برای %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏برای %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">‏%1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏%1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">‏برای %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏برای %1$d ساعت (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">‏به مدت %d دقیقه</item>
-      <item quantity="other">‏به مدت %d دقیقه</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">‏برای %d دقیقه</item>
-      <item quantity="other">‏برای %d دقیقه</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">‏%d ساعت</item>
-      <item quantity="other">‏%d ساعت</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">‏برای %d ساعت</item>
-      <item quantity="other">‏برای %d ساعت</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{به‌مدت یک دقیقه (تا {formattedTime})}one{به‌مدت # دقیقه (تا {formattedTime})}other{به‌مدت # دقیقه (تا {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{به‌مدت یک دقیقه (تا {formattedTime})}one{به‌مدت # دقیقه (تا {formattedTime})}other{به‌مدت # دقیقه (تا {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{به‌مدت یک ساعت (تا {formattedTime})}one{به‌مدت # ساعت (تا {formattedTime})}other{به‌مدت # ساعت (تا {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{به‌مدت یک ساعت (تا {formattedTime})}one{به‌مدت # ساعت (تا {formattedTime})}other{به‌مدت # ساعت (تا {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{به‌مدت یک دقیقه}one{به‌مدت # دقیقه}other{به‌مدت # دقیقه}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{به‌مدت یک دقیقه}one{به‌مدت # دقیقه}other{به‌مدت # دقیقه}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{به‌مدت یک ساعت}one{به‌مدت # ساعت}other{به‌مدت # ساعت}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{به‌مدت یک ساعت}one{به‌مدت # ساعت}other{به‌مدت # ساعت}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (زنگ بعدی)"</string>
@@ -1962,16 +1903,13 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"تماس ورودی"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"تماس درحال انجام"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"درحال غربال کردن تماس ورودی"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
-      <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"دسته‌بندی‌نشده"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"به دلیل افراد درگیر مهم است."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"اعلان برنامه سفارشی"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"به<xliff:g id="APP">%1$s</xliff:g> اجازه می‌دهید با <xliff:g id="ACCOUNT">%2$s</xliff:g> (کاربری با این حساب درحال‌حاضر وجود دارد) کاربری جدید ایجاد کند؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"به <xliff:g id="APP">%1$s</xliff:g> اجازه می‌دهید با <xliff:g id="ACCOUNT">%2$s</xliff:g> کاربری جدید ایجاد کند؟"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"افزودن کاربر تحت نظارت"</string>
     <string name="language_selection_title" msgid="52674936078683285">"افزودن زبان"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
@@ -1988,6 +1926,23 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> دردسترس نیست"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"اجازه لازم است"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"دوربین دردسترس نیست"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ادامه دادن در تلفن"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"میکروفون دردسترس نیست"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"‏تنظیمات Android TV دردسترس نیست"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"تنظیمات رایانه لوحی دردسترس نیست"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"تنظیمات تلفن دردسترس نیست"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"‏نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> به این برنامه دسترسی داشت. دسترسی به آن را در دستگاه Android TV امتحان کنید."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> به این برنامه دسترسی داشت. دسترسی به آن را در رایانه لوحی‌تان امتحان کنید."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> به این برنامه دسترسی داشت. دسترسی به آن را در تلفنتان امتحان کنید."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"‏درحال‌حاضر نمی‌توانید در <xliff:g id="DEVICE">%1$s</xliff:g> به این برنامه دسترسی داشت. دسترسی به آن را در دستگاه Android TV امتحان کنید."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"درحال‌حاضر نمی‌توانید در <xliff:g id="DEVICE">%1$s</xliff:g> به این برنامه دسترسی داشت. دسترسی به آن را در رایانه لوحی‌تان امتحان کنید."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"درحال‌حاضر نمی‌توانید در <xliff:g id="DEVICE">%1$s</xliff:g> به این برنامه دسترسی داشت. دسترسی به آن را در تلفنتان امتحان کنید."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏این برنامه درخواست امنیت اضافی دارد. دسترسی به آن را در دستگاه Android TV امتحان کنید."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"این برنامه درخواست امنیت اضافی دارد. دسترسی به آن را در رایانه لوحی‌تان امتحان کنید."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"این برنامه درخواست امنیت اضافی دارد. دسترسی به آن را در تلفنتان امتحان کنید."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏این برنامه برای نسخه قدیمی‌تری از Android ساخته شده است و ممکن است درست کار نکند. وجود به‌روزرسانی را بررسی کنید یا با برنامه‌نویس تماس بگیرید."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"بررسی وجود به‌روزرسانی"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"پیام‌های جدیدی دارید"</string>
@@ -2030,10 +1985,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ذخیره کردن برای تکمیل خودکار"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"تکمیل خودکار محتوا ممکن نیست"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"هیچ پیشنهاد تکمیل خودکاری نیست"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> پیشنهاد تکمیل خودکار</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> پیشنهاد تکمیل خودکار</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{یک پیشنهاد تکمیل خودکار}one{# پیشنهاد تکمیل خودکار}other{# پیشنهاد تکمیل خودکار}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"در "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ذخیره شود؟"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> در "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ذخیره شود؟"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> و <xliff:g id="TYPE_1">%2$s</xliff:g> در "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ذخیره شود؟"</string>
@@ -2080,6 +2032,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"حذف نصب"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"درهرصورت باز شود"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"برنامه مضر شناسایی شد"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"به <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> اجازه می‌دهید به همه گزارش‌های دستگاه دسترسی داشته باشد؟"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"مجاز کردن دسترسی یک‌باره"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازه ندادن"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"گزارش‌های دستگاه آنچه را در دستگاهتان رخ می‌دهد ثبت می‌کند. برنامه‌ها می‌توانند از این گزارش‌ها برای پیدا کردن مشکلات و رفع آن‌ها استفاده کنند.\n\nبرخی‌از گزارش‌ها ممکن است حاوی اطلاعات حساس باشند، بنابراین فقط به برنامه‌های مورداعتمادتان اجازه دسترسی به همه گزارش‌های دستگاه را بدهید. \n\nاگر به این برنامه اجازه ندهید به همه گزارش‌های دستگاه دسترسی داشته باشد، همچنان می‌تواند به گزارش‌های خودش دسترسی داشته باشد. سازنده دستگاه نیز ممکن است همچنان بتواند به برخی‌از گزارش‌ها یا اطلاعات دستگاهتان دسترسی داشته باشد. بیشتر بدانید"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوباره نشان داده نشود"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> می‌خواهد تکه‌های <xliff:g id="APP_2">%2$s</xliff:g> را نشان دهد"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ویرایش"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"دستگاهتان برای تماس‌ها و اعلان‌ها می‌لرزد"</string>
@@ -2090,6 +2047,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"برای اطلاعات بیشتر و تغییر دادن، ضربه بزنید."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«مزاحم نشوید» تغییر کرده است"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"برای بررسی موارد مسدودشده ضربه بزنید."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"مرور تنظیمات اعلان"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏از Android نسخه ۱۳ به بعد، برنامه‌هایی که نصب می‌کنید برای ارسال اعلان به اجازه شما نیاز دارند. برای تغییر دادن این اجازه در برنامه‌های موجود، ضربه بزنید."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعداً یادآوری شود"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"رد شدن"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سیستم"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"تنظیمات"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"دوربین"</string>
@@ -2134,10 +2095,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ارائه"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"بلوتوث درطول حالت هواپیما روشن خواهد بود"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"درحال بارگیری"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> فایل</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> فایل</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # فایل}one{{file_name} + # فایل}other{{file_name} + # فایل}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"هیچ فردی توصیه نشده است که با او هم‌رسانی کنید"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"فهرست برنامه‌ها"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏مجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
@@ -2149,10 +2107,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"کادر گفتگوی روشن/خاموش"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"صفحه قفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"نماگرفت"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"قلاب هدست"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"میان‌بر دسترس‌پذیری روی صفحه"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"انتخاب‌گر میان‌بر دسترس‌پذیری روی صفحه"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"میان‌بر دسترسی‌پذیری"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"رد کردن کشوی اعلانات"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"پد کنترل بالا"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"پد کنترل پایین"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"پد کنترل چپ"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"پد کنترل راست"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"پد کنترل وسط"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2173,8 +2137,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"برای روشن کردن، ضربه بزنید"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"در <xliff:g id="APP">%s</xliff:g> در نمایه شخصی باز شود؟"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"در <xliff:g id="APP">%s</xliff:g> در نمایه کاری باز شود؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> در نمایه شخصی باز شود؟"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> در نمایه کاری باز شود؟"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استفاده از مرورگر شخصی"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استفاده از مرورگر کاری"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"پین باز کردن قفل شبکه سیم‌کارت"</string>
@@ -2304,4 +2268,13 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> می‌تواند صفحه‌نمایش شما را مشاهده و کنترل کند. برای مرور، ضربه بزنید."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ترجمه شد."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"پیام از <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> به <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ترجمه شد."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"فعالیت در پس‌زمینه"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"برنامه‌ای شارژ باتری را خالی می‌کند"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"یکی از برنامه‌ها همچنان فعال است"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> در پس‌زمینه درحال اجرا است. برای مدیریت مصرف باتری ضربه بزنید."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ممکن است بر عمر باتری تأثیر بگذارد. برای مرور برنامه‌های فعال، ضربه بزنید."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"بررسی برنامه‌های فعال"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین تلفن دسترسی داشت"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین رایانه لوحی دسترسی داشت"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"پیش‌فرض سیستم"</string>
 </resources>

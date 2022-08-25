@@ -265,6 +265,7 @@ public class SmartReplyView extends ViewGroup {
             if (maxNumActions != -1 // -1 means 'no limit'
                     && lp.mButtonType == SmartButtonType.ACTION
                     && numShownActions >= maxNumActions) {
+                lp.mNoShowReason = "max-actions-shown";
                 // We've reached the maximum number of actions, don't add another one!
                 continue;
             }
@@ -278,8 +279,15 @@ public class SmartReplyView extends ViewGroup {
             coveredSuggestions.add(child);
 
             final int lineCount = ((Button) child).getLineCount();
-            if (lineCount < 1 || lineCount > 2) {
-                // If smart reply has no text, or more than two lines, then don't show it.
+            if (lineCount < 1) {
+                // If smart reply has no text, then don't show it.
+                lp.mNoShowReason = "line-count-0";
+                continue;
+
+            }
+            if (lineCount > 2) {
+                // If smart reply has more than two lines, then don't show it.
+                lp.mNoShowReason = "line-count-3+";
                 continue;
             }
 
@@ -328,6 +336,7 @@ public class SmartReplyView extends ViewGroup {
                     markButtonsWithPendingSqueezeStatusAs(
                             LayoutParams.SQUEEZE_STATUS_FAILED, coveredSuggestions);
 
+                    lp.mNoShowReason = "overflow";
                     // The current button doesn't fit, keep on adding lower-priority buttons in case
                     // any of those fit.
                     continue;
@@ -340,6 +349,7 @@ public class SmartReplyView extends ViewGroup {
             }
 
             lp.show = true;
+            lp.mNoShowReason = "n/a";
             displayedChildCount++;
             if (lp.mButtonType == SmartButtonType.ACTION) {
                 numShownActions++;
@@ -353,6 +363,7 @@ public class SmartReplyView extends ViewGroup {
                 for (View smartReplyButton : smartReplies) {
                     final LayoutParams lp = (LayoutParams) smartReplyButton.getLayoutParams();
                     lp.show = false;
+                    lp.mNoShowReason = "not-enough-system-replies";
                 }
                 // Reset our measures back to when we had only added actions (before adding
                 // replies).
@@ -431,6 +442,8 @@ public class SmartReplyView extends ViewGroup {
             pw.print(lp.squeezeStatus);
             pw.print(" show=");
             pw.print(lp.show);
+            pw.print(" noShowReason=");
+            pw.print(lp.mNoShowReason);
             pw.print(" view=");
             pw.println(child);
         }
@@ -502,6 +515,7 @@ public class SmartReplyView extends ViewGroup {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             lp.show = false;
             lp.squeezeStatus = LayoutParams.SQUEEZE_STATUS_NONE;
+            lp.mNoShowReason = "reset";
         }
     }
 
@@ -779,6 +793,7 @@ public class SmartReplyView extends ViewGroup {
         private boolean show = false;
         private int squeezeStatus = SQUEEZE_STATUS_NONE;
         SmartButtonType mButtonType = SmartButtonType.REPLY;
+        String mNoShowReason = "new";
 
         private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

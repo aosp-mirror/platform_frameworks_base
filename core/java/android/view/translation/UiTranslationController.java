@@ -16,6 +16,7 @@
 
 package android.view.translation;
 
+import static android.view.translation.Helper.ANIMATION_DURATION_MILLIS;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_FINISHED;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_PAUSED;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_RESUMED;
@@ -26,11 +27,13 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.assist.ActivityId;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Dumpable;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -60,11 +63,15 @@ import java.util.function.BiConsumer;
  *
  * @hide
  */
-public class UiTranslationController {
+public class UiTranslationController implements Dumpable {
 
     public static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
 
+    /** @hide */
+    public static final String DUMPABLE_NAME = "UiTranslationController";
+
     private static final String TAG = "UiTranslationController";
+
     @NonNull
     private final Activity mActivity;
     @NonNull
@@ -102,6 +109,7 @@ public class UiTranslationController {
                         Process.THREAD_PRIORITY_FOREGROUND);
         mWorkerThread.start();
         mWorkerHandler = mWorkerThread.getThreadHandler();
+        activity.addDumpable(this);
     }
 
     /**
@@ -150,12 +158,7 @@ public class UiTranslationController {
             case STATE_UI_TRANSLATION_FINISHED:
                 destroyTranslators();
                 runForEachView((view, callback) -> {
-                    callback.onClearTranslation(view);
-                    view.clearViewTranslationResponse();
-                    if (view.hasTranslationTransientState()) {
-                        view.setHasTransientState(false);
-                        view.setHasTranslationTransientState(false);
-                    }
+                    view.clearTranslationState();
                 });
                 notifyTranslationFinished(/* activityDestroyed= */ false);
                 synchronized (mLock) {
@@ -204,10 +207,14 @@ public class UiTranslationController {
         mLastRequestAutofillIds.addAll(views);
     }
 
-    /**
-     * Called to dump the translation information for Activity.
-     */
-    public void dump(String outerPrefix, PrintWriter pw) {
+    @Override
+    public String getDumpableName() {
+        return DUMPABLE_NAME;
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
+        String outerPrefix = "";
         pw.print(outerPrefix); pw.println("UiTranslationController:");
         final String pfx = outerPrefix + "  ";
         pw.print(pfx); pw.print("activity: "); pw.print(mActivity);
@@ -475,9 +482,6 @@ public class UiTranslationController {
         }
     }
 
-    // TODO: Use a device config value.
-    private static final int ANIMATION_DURATION_MILLIS = 250;
-
     /**
      * Creates a Translator for the given source and target translation specs and start the ui
      * translation when the Translator is created successfully.
@@ -627,7 +631,7 @@ public class UiTranslationController {
 
     private void addViewIfNeeded(IntArray sourceViewIds, View view) {
         final AutofillId autofillId = view.getAutofillId();
-        if ((sourceViewIds.indexOf(autofillId.getViewId()) >= 0)
+        if (autofillId != null && (sourceViewIds.indexOf(autofillId.getViewId()) >= 0)
                 && !mViews.containsKey(autofillId)) {
             mViews.put(autofillId, new WeakReference<>(view));
         }
@@ -667,8 +671,13 @@ public class UiTranslationController {
             Log.e(TAG, "Can not find TranslationManager when trying to create translator.");
             return null;
         }
-        final TranslationContext translationContext = new TranslationContext(sourceSpec,
-                targetSpec, /* translationFlags= */ 0);
+        final TranslationContext translationContext =
+                new TranslationContext.Builder(sourceSpec, targetSpec)
+                        .setActivityId(
+                                new ActivityId(
+                                        mActivity.getTaskId(),
+                                        mActivity.getShareableActivityToken()))
+                        .build();
         final Translator translator = tm.createTranslator(translationContext);
         if (translator != null) {
             final Pair<TranslationSpec, TranslationSpec> specs = new Pair<>(sourceSpec, targetSpec);
@@ -732,7 +741,21 @@ public class UiTranslationController {
             msg.append("text=").append(value.getText() == null
                     ? "null"
                     : "string[" + value.getText().length() + "], ");
-            //TODO: append dictionary results.
+            final Bundle definitions =
+                    (Bundle) value.getExtras().get(TranslationResponseValue.EXTRA_DEFINITIONS);
+            if (definitions != null) {
+                msg.append("definitions={");
+                for (String partOfSpeech : definitions.keySet()) {
+                    msg.append(partOfSpeech).append(":[");
+                    for (CharSequence definition : definitions.getCharSequenceArray(partOfSpeech)) {
+                        msg.append(definition == null
+                                ? "null, "
+                                : "string[" + definition.length() + "], ");
+                    }
+                    msg.append("], ");
+                }
+                msg.append("}");
+            }
             msg.append("transliteration=").append(value.getTransliteration() == null
                     ? "null"
                     : "string[" + value.getTransliteration().length() + "]}, ");

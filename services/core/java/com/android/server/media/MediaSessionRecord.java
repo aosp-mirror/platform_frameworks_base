@@ -52,7 +52,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -644,22 +643,23 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     }
 
     private void pushQueueUpdate() {
-        ParceledListSlice<QueueItem> parcelableQueue;
+        ArrayList<QueueItem> toSend;
         synchronized (mLock) {
             if (mDestroyed) {
                 return;
             }
-            if (mQueue == null) {
-                parcelableQueue = null;
-            } else {
-                parcelableQueue = new ParceledListSlice<>(mQueue);
+            toSend = mQueue == null ? null : new ArrayList<>(mQueue);
+        }
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            ParceledListSlice<QueueItem> parcelableQueue = null;
+            if (toSend != null) {
+                parcelableQueue = new ParceledListSlice<>(toSend);
                 // Limit the size of initial Parcel to prevent binder buffer overflow
                 // as onQueueChanged is an async binder call.
                 parcelableQueue.setInlineCountLimit(1);
             }
-        }
-        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
-        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+
             try {
                 holder.mCallback.onQueueChanged(parcelableQueue);
             } catch (DeadObjectException e) {

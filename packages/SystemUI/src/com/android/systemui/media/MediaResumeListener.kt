@@ -36,7 +36,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
@@ -65,6 +64,11 @@ class MediaResumeListener @Inject constructor(
     private lateinit var mediaDataManager: MediaDataManager
 
     private var mediaBrowser: ResumeMediaBrowser? = null
+        set(value) {
+            // Always disconnect the old browser -- see b/225403871.
+            field?.disconnect()
+            field = value
+        }
     private var currentUserId: Int = context.userId
 
     @VisibleForTesting
@@ -190,7 +194,6 @@ class MediaResumeListener @Inject constructor(
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
             if (!key.equals(oldKey)) {
-                mediaBrowser?.disconnect()
                 mediaBrowser = null
             }
             // If we don't have a resume action, check if we haven't already
@@ -224,7 +227,6 @@ class MediaResumeListener @Inject constructor(
         Log.d(TAG, "Testing if we can connect to $componentName")
         // Set null action to prevent additional attempts to connect
         mediaDataManager.setResumeAction(key, null)
-        mediaBrowser?.disconnect()
         mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
@@ -293,7 +295,7 @@ class MediaResumeListener @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
             println("resumeComponents: $resumeComponents")
         }

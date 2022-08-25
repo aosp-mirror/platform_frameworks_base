@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -55,7 +55,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = true) {
             transitions {
                 pipApp.doubleClickPipWindow(wmHelper)
@@ -69,8 +69,8 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -81,8 +81,8 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -111,7 +111,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     /**
      * Checks that the visible region of [pipApp] always expands during the animation
      */
-    @Presubmit
+    @FlakyTest(bugId = 228012337)
     @Test
     fun pipLayerExpands() {
         val layerName = pipApp.component.toLayerName()
@@ -119,6 +119,18 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
             val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.coversAtLeast(previous.visibleRegion.region)
+            }
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun pipSameAspectRatio() {
+        val layerName = pipApp.component.toLayerName()
+        testSpec.assertLayers {
+            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.isSameAspectRatio(previous.visibleRegion)
             }
         }
     }
@@ -148,13 +160,17 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     /**
      * Checks that the focus doesn't change between windows during the transition
      */
-    @FlakyTest
+    @FlakyTest(bugId = 216306753)
     @Test
     fun focusDoesNotChange() {
         testSpec.assertEventLog {
             this.focusDoesNotChange()
         }
     }
+
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     companion object {
         /**
@@ -168,7 +184,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 5)
+                            repetitions = 3)
         }
     }
 }

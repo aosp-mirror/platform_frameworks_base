@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.UserManagerService;
 
 import java.io.PrintWriter;
@@ -227,6 +228,86 @@ public abstract class SystemService {
     }
 
     /**
+     * Class representing the types of "onUser" events that we are being informed about as having
+     * finished.
+     *
+     * @hide
+     */
+    public static final class UserCompletedEventType {
+        /**
+         * Flag representing the {@link #onUserStarting} event.
+         * @hide
+         */
+        public static final int EVENT_TYPE_USER_STARTING = 1 << 0;
+        /**
+         * Flag representing the {@link #onUserUnlocked} event.
+         * @hide
+         */
+        public static final int EVENT_TYPE_USER_UNLOCKED = 1 << 1;
+        /**
+         * Flag representing the {@link #onUserSwitching} event.
+         * @hide
+         */
+        public static final int EVENT_TYPE_USER_SWITCHING = 1 << 2;
+
+        /**
+         * @hide
+         */
+        @IntDef(flag = true, prefix = "EVENT_TYPE_USER_", value = {
+                EVENT_TYPE_USER_STARTING,
+                EVENT_TYPE_USER_UNLOCKED,
+                EVENT_TYPE_USER_SWITCHING
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface EventTypesFlag {
+        }
+
+        private final @EventTypesFlag int mEventType;
+
+        /** @hide */
+        UserCompletedEventType(@EventTypesFlag int eventType) {
+            mEventType = eventType;
+        }
+
+        /**
+         * Creates a new instance of {@link UserCompletedEventType}.
+         * @hide
+         */
+        @VisibleForTesting
+        public static UserCompletedEventType newUserCompletedEventTypeForTest(
+                @EventTypesFlag int eventType) {
+            return new UserCompletedEventType(eventType);
+        }
+
+        /** Returns whether one of the events is {@link #onUserStarting}. */
+        public boolean includesOnUserStarting() {
+            return (mEventType & EVENT_TYPE_USER_STARTING) != 0;
+        }
+
+        /** Returns whether one of the events is {@link #onUserUnlocked}. */
+        public boolean includesOnUserUnlocked() {
+            return (mEventType & EVENT_TYPE_USER_UNLOCKED) != 0;
+        }
+
+        /** Returns whether one of the events is {@link #onUserSwitching}. */
+        public boolean includesOnUserSwitching() {
+            return (mEventType & EVENT_TYPE_USER_SWITCHING) != 0;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("{");
+            // List each in reverse order (to line up with binary better).
+            if (includesOnUserSwitching()) sb.append("|Switching");
+            if (includesOnUserUnlocked()) sb.append("|Unlocked");
+            if (includesOnUserStarting()) sb.append("|Starting");
+            if (sb.length() > 1) sb.append("|");
+            sb.append("}");
+            return sb.toString();
+        }
+    }
+
+    /**
      * Initializes the system service.
      * <p>
      * Subclasses must define a single argument constructor that accepts the context
@@ -301,17 +382,20 @@ public abstract class SystemService {
     protected void dumpSupportedUsers(@NonNull PrintWriter pw, @NonNull String prefix) {
         final List<UserInfo> allUsers = UserManager.get(mContext).getUsers();
         final List<Integer> supportedUsers = new ArrayList<>(allUsers.size());
-        for (UserInfo user : allUsers) {
-            supportedUsers.add(user.id);
+        for (int i = 0; i < allUsers.size(); i++) {
+            final UserInfo user = allUsers.get(i);
+            if (isUserSupported(new TargetUser(user))) {
+                supportedUsers.add(user.id);
+            }
         }
-        if (allUsers.isEmpty()) {
+        if (supportedUsers.isEmpty()) {
             pw.print(prefix); pw.println("No supported users");
-        } else {
-            final int size = supportedUsers.size();
-            pw.print(prefix); pw.print(size); pw.print(" supported user");
-            if (size > 1) pw.print("s");
-            pw.print(": "); pw.println(supportedUsers);
+            return;
         }
+        final int size = supportedUsers.size();
+        pw.print(prefix); pw.print(size); pw.print(" supported user");
+        if (size > 1) pw.print("s");
+        pw.print(": "); pw.println(supportedUsers);
     }
 
     /**
@@ -401,6 +485,33 @@ public abstract class SystemService {
      * @param user target user
      */
     public void onUserStopped(@NonNull TargetUser user) {
+    }
+
+    /**
+     * Called some time <i>after</i> an onUser... event has completed, for the events delineated in
+     * {@link UserCompletedEventType}. May include more than one event.
+     *
+     * <p>
+     * This can be useful for processing tasks that must run after such an event but are non-urgent.
+     *
+     * There are no strict guarantees about how long after the event this will be called, only that
+     * it will be called if applicable. There is no guarantee about the order in which each service
+     * is informed, and these calls may be made in parallel using a thread pool.
+     *
+     * <p>Note that if the event is no longer applicable (for example, we switched to user 10, but
+     * before this method was called, we switched to user 11), the event will not be included in the
+     * {@code eventType} (i.e. user 10 won't mention the switch - even though it happened, it is no
+     * longer applicable).
+     *
+     * <p>This method is only called when the service {@link #isUserSupported(TargetUser) supports}
+     * this user.
+     *
+     * @param user target user completing the event (e.g. user being switched to)
+     * @param eventType the types of onUser event applicable (e.g. user starting and being unlocked)
+     *
+     * @hide
+     */
+    public void onUserCompletedEvent(@NonNull TargetUser user, UserCompletedEventType eventType) {
     }
 
     /**

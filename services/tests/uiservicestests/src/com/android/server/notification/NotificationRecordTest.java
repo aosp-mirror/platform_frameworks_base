@@ -816,8 +816,10 @@ public class NotificationRecordTest extends UiServiceTestCase {
         when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
                 anyInt(), anyInt())).thenThrow(new SecurityException());
 
-        Notification n = mock(Notification.class);
-        when(n.getChannelId()).thenReturn(channel.getId());
+        channel.setSound(null, null);
+        Notification n = new Notification.Builder(mContext, channel.getId())
+                .setSmallIcon(Icon.createWithContentUri(Uri.parse("content://something")))
+                .build();
         StatusBarNotification sbn =
                 new StatusBarNotification(PKG_P, PKG_P, id1, tag1, uid, uid, n, mUser, null, uid);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
@@ -830,6 +832,27 @@ public class NotificationRecordTest extends UiServiceTestCase {
         } catch (SecurityException e) {
             // expected
         }
+    }
+
+    @Test
+    public void testCalculateGrantableUris_PappProvided_invalidSound() {
+        IActivityManager am = mock(IActivityManager.class);
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
+                anyInt(), anyInt())).thenThrow(new SecurityException());
+
+        channel.setSound(Uri.parse("content://something"), mock(AudioAttributes.class));
+
+        Notification n = mock(Notification.class);
+        when(n.getChannelId()).thenReturn(channel.getId());
+        StatusBarNotification sbn =
+                new StatusBarNotification(PKG_P, PKG_P, id1, tag1, uid, uid, n, mUser, null, uid);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.mAm = am;
+        record.mUgmInternal = ugm;
+
+        record.calculateGrantableUris();
+        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, record.getSound());
     }
 
     @Test
@@ -1018,14 +1041,14 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testIgnoreImportanceAdjustmentsForOemLockedChannels() {
+    public void testIgnoreImportanceAdjustmentsForFixedRecords() {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByOEM(true);
 
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setImportanceFixed(true);
 
         assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
 
@@ -1042,33 +1065,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testIgnoreImportanceAdjustmentsForDefaultAppLockedChannels() {
+    public void testApplyImportanceAdjustments() {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByCriticalDeviceFunction(true);
-
-        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
-                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /* defaultLights */, groupId /* group */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-
-        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
-        Adjustment adjustment = new Adjustment(
-                PKG_O, record.getKey(), bundle, "", record.getUserId());
-
-        record.addAdjustment(adjustment);
-        record.applyAdjustments();
-        record.calculateImportance();
-
-        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
-    }
-
-    @Test
-    public void testApplyImportanceAdjustmentsForNonOemDefaultAppLockedChannels() {
-        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByOEM(false);
 
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,

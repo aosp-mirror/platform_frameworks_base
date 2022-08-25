@@ -113,19 +113,22 @@ public final class NativeTombstoneManager {
             return;
         }
 
-        if (filename.endsWith(".pb")) {
-            handleProtoTombstone(path);
-            BootReceiver.addTombstoneToDropBox(mContext, path, true);
-        } else {
-            BootReceiver.addTombstoneToDropBox(mContext, path, false);
+        String processName = "UNKNOWN";
+        final boolean isProtoFile = filename.endsWith(".pb");
+        File protoPath = isProtoFile ? path : new File(path.getAbsolutePath() + ".pb");
+
+        Optional<TombstoneFile> parsedTombstone = handleProtoTombstone(protoPath, isProtoFile);
+        if (parsedTombstone.isPresent()) {
+            processName = parsedTombstone.get().getProcessName();
         }
+        BootReceiver.addTombstoneToDropBox(mContext, path, isProtoFile, processName);
     }
 
-    private void handleProtoTombstone(File path) {
+    private Optional<TombstoneFile> handleProtoTombstone(File path, boolean addToList) {
         final String filename = path.getName();
         if (!filename.endsWith(".pb")) {
             Slog.w(TAG, "unexpected tombstone name: " + path);
-            return;
+            return Optional.empty();
         }
 
         final String suffix = filename.substring("tombstone_".length());
@@ -136,11 +139,11 @@ public final class NativeTombstoneManager {
             number = Integer.parseInt(numberStr);
             if (number < 0 || number > 99) {
                 Slog.w(TAG, "unexpected tombstone name: " + path);
-                return;
+                return Optional.empty();
             }
         } catch (NumberFormatException ex) {
             Slog.w(TAG, "unexpected tombstone name: " + path);
-            return;
+            return Optional.empty();
         }
 
         ParcelFileDescriptor pfd;
@@ -148,23 +151,27 @@ public final class NativeTombstoneManager {
             pfd = ParcelFileDescriptor.open(path, MODE_READ_WRITE);
         } catch (FileNotFoundException ex) {
             Slog.w(TAG, "failed to open " + path, ex);
-            return;
+            return Optional.empty();
         }
 
         final Optional<TombstoneFile> parsedTombstone = TombstoneFile.parse(pfd);
         if (!parsedTombstone.isPresent()) {
             IoUtils.closeQuietly(pfd);
-            return;
+            return Optional.empty();
         }
 
-        synchronized (mLock) {
-            TombstoneFile previous = mTombstones.get(number);
-            if (previous != null) {
-                previous.dispose();
+        if (addToList) {
+            synchronized (mLock) {
+                TombstoneFile previous = mTombstones.get(number);
+                if (previous != null) {
+                    previous.dispose();
+                }
+
+                mTombstones.put(number, parsedTombstone.get());
             }
-
-            mTombstones.put(number, parsedTombstone.get());
         }
+
+        return parsedTombstone;
     }
 
     /**
@@ -361,6 +368,10 @@ public final class NativeTombstoneManager {
             }
 
             return true;
+        }
+
+        public String getProcessName() {
+            return mProcessName;
         }
 
         public void dispose() {

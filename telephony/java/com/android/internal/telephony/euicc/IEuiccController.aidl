@@ -55,4 +55,6 @@ interface IEuiccController {
     List<String> getSupportedCountries(boolean isSupported);
     boolean isSupportedCountry(String countryIso);
     boolean isSimPortAvailable(int cardId, int portIndex, String callingPackage);
+    boolean hasCarrierPrivilegesForPackageOnAnyPhone(String callingPackage);
+    boolean isCompatChangeEnabled(String callingPackage, long changeId);
 }

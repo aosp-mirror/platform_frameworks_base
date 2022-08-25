@@ -104,11 +104,15 @@ class EnsureActivitiesVisibleHelper {
         for (int i = mTaskFragment.mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mTaskFragment.mChildren.get(i);
             final TaskFragment childTaskFragment = child.asTaskFragment();
-            if (childTaskFragment != null && childTaskFragment.topRunningActivity() != null) {
+            if (childTaskFragment != null
+                    && childTaskFragment.getTopNonFinishingActivity() != null) {
                 childTaskFragment.updateActivityVisibilities(starting, configChanges,
                         preserveWindows, notifyClients);
+                // The TaskFragment should fully occlude the activities below if the bounds
+                // equals to its parent task, unless it is translucent.
                 mBehindFullyOccludedContainer |=
-                        childTaskFragment.getBounds().equals(mTaskFragment.getBounds());
+                        (childTaskFragment.getBounds().equals(mTaskFragment.getBounds())
+                                && !childTaskFragment.isTranslucent(starting));
                 if (mAboveTop && mTop.getTaskFragment() == childTaskFragment) {
                     mAboveTop = false;
                 }
@@ -138,9 +142,6 @@ class EnsureActivitiesVisibleHelper {
             } else if (child.asActivityRecord() != null) {
                 setActivityVisibilityState(child.asActivityRecord(), starting, resumeTopActivity);
             }
-        }
-        if (mTaskFragment.mTransitionController.isShellTransitionsEnabled()) {
-            mTaskFragment.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
         }
     }
 
@@ -243,7 +244,7 @@ class EnsureActivitiesVisibleHelper {
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (!isTop && r.mVisibleRequested) {
+        if (!isTop && r.mVisibleRequested && !r.isState(INITIALIZING)) {
             return;
         }
 

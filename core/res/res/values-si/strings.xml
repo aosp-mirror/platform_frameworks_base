@@ -175,10 +175,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"ඔරලෝසුවේ ආචනයනය පිරී ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV උපාංගය උපාංග ගබඩාව පිරී ඇත ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"දුරකථන ආචයනය පිරී ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">සහතික අධිකාරි ස්ථාපනය කරන ලදී</item>
-      <item quantity="other">සහතික අධිකාරි ස්ථාපනය කරන ලදී</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{සහතික අධිකාරිය ස්ථාපනය කරන ලදී}one{සහතික අධිකාරි ස්ථාපනය කරන ලදී}other{සහතික අධිකාරි ස්ථාපනය කරන ලදී}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"නොදන්නා තෙවෙනි පාර්ශවයකින්"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"ඔබේ කාර්යාල පැතිකඩ පරිපාලක මඟින්"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> වෙතින්"</string>
@@ -198,6 +195,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"සංවේදක දැනුම් දීමේ සේවාව"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ඇඳිරි සේවාව"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS වේලා යාවත්කාලීන සේවාව"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"උපාංග ප්‍රතිපත්ති කළමනාකරු සේවය"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"සංගීත හැඳුනුම් කළමනාකරු සේවාව"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"පරිපාලක යෙදුම භාවිතා කළ නොහැකිය. ඔබේ උපාංගය දැන් මකා දමනු ඇත.\n\nඔබට ප්‍රශ්න තිබේ නම්, ඔබේ සංවිධානයේ පරිපාලකට අමතන්න."</string>
@@ -251,10 +249,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"බොහොමයක් වාතාවරණ යටතේ මෙය භාවිත කරන්න. එය ඔබට වාර්තාවේ ප්‍රගතිය හඹා යාමට, ගැටලුව පිළිබඳ වැඩි විස්තර ඇතුළත් කිරීමට, සහ තිර රූ ගැනීමට ඉඩ දෙයි. එය වාර්තා කිරීමට දිගු වේලාවක් ගන්නා සමහර අඩුවෙන්-භාවිත වන කොටස් මග හැරීමට හැකිය."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"සම්පූර්ණ වාර්තාව"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"ඔබේ උපාංගය ප්‍රතිචාර නොදක්වන විට හෝ ඉතා මන්දගාමි විට, හෝ ඔබට සියලු වාර්තා කොටස් අවශ්‍ය විට අවම පද්ධති බාධාව සඳහා මෙම විකල්පය භාවිත කරන්න. ඔබට වැඩි විස්තර ඇතුළත් කිරීමට හෝ අමතර තිර රූ ගැනීමට ඉඩ නොදේ."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">තත්පර <xliff:g id="NUMBER_1">%d</xliff:g>කින් දෝෂ වාර්තාව සඳහා තිර රුවක් ලබා ගනිමින්</item>
-      <item quantity="other">තත්පර <xliff:g id="NUMBER_1">%d</xliff:g>කින් දෝෂ වාර්තාව සඳහා තිර රුවක් ලබා ගනිමින්</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{තත්පර #කින් දෝෂ වාර්තාව සඳහා තිර රුව ලබා ගනිමින්.}one{තත්පර #කින් දෝෂ වාර්තාව සඳහා තිර රුව ලබා ගනිමින්.}other{තත්පර #කින් දෝෂ වාර්තාව සඳහා තිර රුව ලබා ගනිමින්.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"දෝෂ වාර්තාව සමගින් ගත් තිර රුව"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"දෝෂ වාර්තාව සමගින් තිර රුව ගැනීමට අසමත් විය"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"නිහඬ ආකාරය"</string>
@@ -305,8 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"කෙටි පණිවිඩ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ගොනු සහ මාධ්‍ය"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"ඔබේ උපාංගයේ ඇති ඡායාරූප, මාධ්‍ය සහ ගොනුවලට පිවිසීම"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ගොනු"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ඔබගේ උපාංගයේ ගොනු වෙත ප්‍රවේශය"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"සංගීතය සහ ශ්‍රව්‍ය"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ඔබගේ උපාංගයේ සංගීතය සහ ශ්‍රව්‍ය වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ඡායාරූප සහ වීඩියෝ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ඔබගේ උපාංගයේ ඡායාරූප සහ වීඩියෝ වෙත ප්‍රවේශ වන්න"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"මයික්‍රොෆෝනය"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ශ්‍රව්‍ය පටිගත කරන්න"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ශාරීරික ක්‍රියාකාරකම"</string>
@@ -321,6 +320,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ශරීර සංවේදක"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ඔබේ ජෛව ලක්ෂණ පිළිබඳ සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"දැනුම්දීම්"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"දැනුම්දීම් පෙන්වන්න"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"කවුළු අන්න්තර්ගතය ලබාගන්න"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ඔබ අන්තර්ක්‍රියාකාරී වන කවුළුවේ අන්තර්ගතය පරීක්ෂා කරන්න."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"ස්පර්ශයෙන් ගවේෂණය සක්‍රිය කරන්න"</string>
@@ -419,8 +420,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ Android TV උපාංගයෙහි ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැකිය."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"භාවිතයේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"යෙදුම භාවිතයේ පවතින අතරතුර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"පසුබිමේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"යෙදුම පසුබිමේ ඇති අතර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
@@ -548,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"තිර අඟුලු සංකීර්ණතාව ඉල්ලන්න"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"යෙදුමට තිර අගුලෙහි තිබිය හැකි දිගෙහි පරාසය සහ වර්ගය පිළිබිඹු කරන, තිර අඟුලු සංකීර්ණතා මට්ටම (ඉහළ, මධ්‍යම, අඩු හෝ රහිත) දැන ගැනීමට ඉඩ දෙයි. යෙදුම පරිශීලකයින්ට තිර අඟුල නිශ්චිත මට්ටමකට යාවත්කාලීන කිරීමට යෝජනා කළ හැකි නමුත් ඔවුන්ට නිදහසේ නොසලකා හැර ඉවතට සංචලන කළ හැක. තිර අඟුල සරල පෙළින් ගබඩා කර නැති බැවින් යෙදුම නිවැරදි මුරපදය නොදන්නා බව සලකන්න."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"දැනුම්දීම් පෙන්වන්න"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"දැනුම්දීම් පෙන්වීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ජීවමිතික දෘඪාංග භාවිත කරන්න"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"සත්‍යාපනය සඳහා ජීවමිතික දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ඇඟිලි සලකුණු දෘඩාංග කළමනාකරණය කිරීම."</string>
@@ -575,10 +580,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"සත්‍යාපනය කිරීමේ දෝෂයකි"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"තිර අගුල භාවිත කරන්න"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"සංවේදකය මත තදින් ඔබන්න"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"සංවේදකය පිරිසිදු කරන්න"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"තව ටිකක් වැඩිපුර අල්ලාගෙන සිටින්න"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ඇඟිලි සලකුණු සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"සංවේදකය මත තදින් ඔබන්න"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
@@ -586,6 +592,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"එක් එක් අවස්ථාවේ ඔබගේ ඇඟිල්ලේ පිහිටීම මදක් වෙනස් කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ඇඟිලි සලකුණ හඳුනා නොගන්නා ලදි"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ඇඟිලි සලකුණ හඳුනා නොගන්නා ලදි"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"මුහුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
@@ -672,6 +680,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"සමමුහුර්ත කිරීමේ සිදුවීම් ඉතිහාසය සහ කෙතරම් දත්ත සමමුහුර්ත වී ඇතිදැයි ඇතුලත් ගිණුම සඳහා සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත කියවන්න"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"යෙදුමට ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත කියවීමට ඉඩ දෙයි."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"බෙදා ගත් ගබඩාවෙන් ශ්‍රව්‍ය ගොනු කියවන්න"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"ඔබගේ බෙදා ගත් ගබඩාවෙන් ශ්‍රව්‍ය ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"බෙදා ගත් ගබඩාවෙන් වීඩියෝ ගොනු කියවන්න"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ඔබගේ බෙදා ගත් ගබඩාවෙන් වීඩියෝ ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවන්න"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ඔබගේ බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත වෙනස් කරන්න නැතහොත් මකන්න"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"යෙදුමට ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත කියවීමට ඉඩ දෙයි."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>
@@ -722,6 +736,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"නව අවසර තීරණ ආරම්භ කරන්න"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"අවසර තීරණ සමාලෝචනය කිරීමට තිරය ආරම්භ කිරීමට දරන්නාට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"යෙදුම බලන්න විශේෂාංග ආරම්භ කරන්න"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"යෙදුමක් සඳහා විශේෂාංග තොරතුරු බැලීම ආරම්භ කිරීමට දරන්නාට ඉඩ දෙන්න."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>
@@ -889,7 +907,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"අගුළු හැරීමට මෙනුව ඔබන්න හෝ හදිසි ඇමතුම ලබාගන්න."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"අගුළු හැරීමට මෙනු ඔබන්න."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"අගුළු ඇරීමට රටාව අඳින්න"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"හදිසි ඇමතුම"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"හදිසි"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ඇමතුම වෙත නැවත යන්න"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"නිවැරදියි!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"නැවත උත්සාහ කරන්න"</string>
@@ -1028,7 +1046,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"කවදාවත් නොවේ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"මෙම පිටුව විවෘත කිරීමට ඔබට අවසර නැත."</string>
     <string name="text_copied" msgid="2531420577879738860">"පෙළ පසුරු පුවරුවට පිටපත් කරන ලදි."</string>
-    <string name="copied" msgid="4675902854553014676">"පිටපත් කළා"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> වෙතින් අලවන ලදි"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"ඔබගේ පසුරු පුවරුව වෙතින් <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> පිටපත් කරන ලදි"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ඔබ පිටපත් කළ පෙළ ඇලවීය"</string>
@@ -1057,10 +1074,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"ස්පර්ශය වෙතින් ගවේෂණය සක්‍රිය කිරීමට <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ට අවශ්‍යයි. ස්පර්ශය වෙතින් ගවේෂණය සක්‍රිය විට, ඔබගේ ඇඟිලිවලට පහළ විස්තර ඇසිය හෝ බැලිය හැක හෝ දුරකථනය සමග අන්තර් ක්‍රියාකාරී වීමට ඉංගිති සිදු කළ හැක."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"මාස 1 කට පෙර"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"මාස 1 කට පෙර"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">අවසන් දින <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="other">අවසන් දින <xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{අවසාන දින #}one{අවසාන දින #}other{අවසාන දින #}}"</string>
     <string name="last_month" msgid="1528906781083518683">"අවසාන මාසය"</string>
     <string name="older" msgid="1645159827884647400">"පරණ"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> වන දා"</string>
@@ -1079,70 +1093,22 @@
     <string name="year" msgid="5182610307741238982">"අවුරුද්ද"</string>
     <string name="years" msgid="5797714729103773425">"අවුරුදු"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"දැන්"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one">මි<xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="other">මි<xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one">පැ<xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="other">පැ<xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one">දි <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="other">දි<xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one">ව <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="other">ව <xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one">මි<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-      <item quantity="other">මි<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one">පැ<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-      <item quantity="other">පැ<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one">දි<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-      <item quantity="other">දි<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one">ව<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-      <item quantity="other">ව<xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-      <item quantity="other">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one">පැය <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-      <item quantity="other">පැය <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one">දින <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-      <item quantity="other">දින <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one">වසර <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-      <item quantity="other">වසර <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-      <item quantity="other">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">පැය <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-      <item quantity="other">පැය <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">දින <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-      <item quantity="other">දින <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">වසර <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-      <item quantity="other">වසර <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"මි<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"පැ<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"දි<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"ව<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"මි<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"පැ<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"දි<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"ව<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{මිනිත්තු #කට පෙර}one{මිනිත්තු #කට පෙර}other{මිනිත්තු #කට පෙර}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{පැය #කට පෙර}one{පැය #කට පෙර}other{පැය #කට පෙර}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{දින #කට පෙර}one{දින #කට පෙර}other{දින #කට පෙර}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{වසර #කට පෙර}one{වසර #කට පෙර}other{වසර #කට පෙර}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{මිනිත්තු #ක්}one{මිනිත්තු #ක්}other{මිනිත්තු #ක්}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{පැය #ක්}one{පැය #ක්}other{පැය #ක්}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{දින #ක්}one{දින #ක්}other{දින #ක්}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{වසර #ක්}one{වසර #ක්}other{වසර #ක්}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"වීඩියෝ ගැටලුව"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"මේ වීඩියෝව මෙම උපාංගයට ප්‍රවාහනය සඳහා වලංගු නැත."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"මෙම වීඩියෝව ධාවනය කළ නොහැක."</string>
@@ -1172,6 +1138,8 @@
     <string name="deleteText" msgid="4200807474529938112">"මකන්න"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ආදාන ක්‍රමය"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"පෙළ ක්‍රියාවන්"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ආපසු"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ආදාන ක්‍රමය මාරු කිරීම"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ආචයනය ඉඩ ප්‍රමාණය අඩු වී ඇත"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"සමහර පද්ධති කාර්යයන් ක්‍රියා නොකරනු ඇත"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"පද්ධතිය සඳහා ප්‍රමාණවත් ඉඩ නොමැත. ඔබට 250MB නිදහස් ඉඩක් තිබෙන ඔබට තිබෙන බව සහතික කරගෙන නැවත උත්සාහ කරන්න."</string>
@@ -1189,6 +1157,7 @@
     <string name="not_checked" msgid="7972320087569023342">"පරීක්ෂා කර නැත"</string>
     <string name="selected" msgid="6614607926197755875">"තෝරන ලදි"</string>
     <string name="not_selected" msgid="410652016565864475">"තෝරා නොමැත"</string>
+    <string name="in_progress" msgid="2149208189184319441">"සිදු වෙමින් පවතී"</string>
     <string name="whichApplication" msgid="5432266899591255759">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ක්‍රියාව සම්පූර්ණ කරන්න"</string>
@@ -1267,10 +1236,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> සූදානම් කරමින්."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ඇරඹුම අවසාන කරමින්."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"තිරය ක්‍රියාවිරහිත කරන්නද?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"ඔබගේ ඇඟිලි සලකුණ පිහිටුවන අතරතුර ඔබ බල බොත්තම එබුවේය.\n\nමෙය සාමාන්‍යයෙන් ඔබගේ තිරය ක්‍රියාවිරහිත කරයි."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"ක්‍රියාවිරහිත කරන්න"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"අවලංගු කරන්න"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"පිහිටුවීම දිගටම කරන්නද?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ඔබ බල බොත්තම එබුවේය — සාමාන්‍යයෙන් මෙය තිරය ක්‍රියාවිරහිත කරයි.\n\nඔබගේ ඇඟිලි සලකුණ පිහිටුවන අතරතුර සැහැල්ලුවෙන් තට්ටු කිරීමට උත්සාහ කරන්න."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"තිරය අක්‍රිය කරන්න"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"පිහිටුවීම දිගටම කර."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ඔබගේ ඇඟිලි සලකුණ සත්‍යාපනය දිගටම කරන්නද?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ඔබ බල බොත්තම එබුවේය — සාමාන්‍යයෙන් මෙය තිරය ක්‍රියාවිරහිත කරයි.\n\nඔබගේ ඇඟිලි සලකුණ සත්‍යාපනය කිරීමට සැහැල්ලුවෙන් තට්ටු කිරීමට උත්සාහ කරන්න."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"තිරය අක්‍රිය කරන්න"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ඉදිරියට යන්න"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ධාවනය වෙමින්"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"ක්‍රීඩාව වෙත ආපසු යාමට තට්ටු කරන්න"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"ක්‍රීඩාව තෝරන්න"</string>
@@ -1387,6 +1360,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"පුරක පරීක්‍ෂා ප්‍රකාරය අබල කිරීමට කර්මාන්තශාලා යළි සැකසීමක් ඉටු කරන්න."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"අනුක්‍රමික කොන්සෝලය සබලයි"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"කාර්ය සාධනය බලපෑමට ලක් වී ඇත. අබල කිරීමට, ආරම්භකය පරීක්ෂා කරන්න."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"අත්හදා බැලීමේ MTE සබලයි"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"කාර්ය සාධනය සහ ස්ථාවරත්වය බලපෑමට ලක් විය හැකිය. අබල කිරීමට නැවත පණ ගන්වන්න. arm64.memtag.bootctl භාවිතයෙන් සබල කළහොත්, එය පෙර කිසිවකට නොසකසන්න."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB තොට තුළ ද්‍රව හෝ කුණු"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB තොට ස්වයංක්‍රීයව අබල කෙරේ. තවත් දැන ගැනීමට තට්ටු කරන්න."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB තොට භාවිත කළාට කමක් නැත"</string>
@@ -1521,10 +1496,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"මඟ හරින්න"</string>
     <string name="no_matches" msgid="6472699895759164599">"ගැලපීම් නැත"</string>
     <string name="find_on_page" msgid="5400537367077438198">"පිටුවෙහි සෙවීම"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
-      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
-    </plurals>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{ගැළපීම් #}one{{total}කින් #}other{{total}කින් #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"හරි"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"බෙදා ගත් ගබඩාව මකා දමමින්…"</string>
     <string name="share" msgid="4157615043345227321">"බෙදාගන්න"</string>
@@ -1654,10 +1626,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"වැරදි රටාවකි"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"වැරදි මුරපදය"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN එක වැරදියි"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one">තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න.</item>
-      <item quantity="other">තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"ඔබගේ රටාව අඳින්න"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN ඇතුලු කරන්න"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN එක ඇතුළු කරන්න"</string>
@@ -1739,6 +1707,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> වෙත මාරු කරමින්…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> වරමින්…"</string>
     <string name="owner_name" msgid="8713560351570795743">"හිමිකරු"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ආගන්තුක"</string>
     <string name="error_message_title" msgid="4082495589294631966">"දෝෂය"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ඔබගේ පරිපාලක විසින් මෙම වෙනස් කිරීමට ඉඩ නොදේ"</string>
     <string name="app_not_found" msgid="3429506115332341800">"මෙම ක්‍රියාව හසුරුවීමට යෙදුමක් සොයාගත්තේ නැත"</string>
@@ -1853,10 +1822,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"සිමා වැඩිදියුණු කිරීමට PIN සාදන්න"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN නොගැළපෙයි. නැවත උත්සහ කරන්න."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN කුඩා වැඩිය. ඉලක්කම් 4 වත් විය යුතුය."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
-      <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"මුළු තිරය බලමින්"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ඉවත් වීමට, ඉහළ සිට පහළට ස්වයිප් කරන්න"</string>
@@ -1884,38 +1849,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ක්‍රියාත්මක කරන්න"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">පැය 1ක් සඳහාr (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">පැය 1ක් සඳහාr (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-      <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">මිනිත්තු %d ක් සඳහා</item>
-      <item quantity="other">මිනිත්තු %d ක් සඳහා</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">විනාඩි %d ක් සඳහා</item>
-      <item quantity="other">විනාඩි %d ක් සඳහා</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">පැය %dක් සඳහා</item>
-      <item quantity="other">පැය %dක් සඳහා</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">පැය %d ක් සඳහා</item>
-      <item quantity="other">පැය %d ක් සඳහා</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{මිනිත්තු එකක් සඳහා ({formattedTime} තෙක්)}one{මිනිත්තු #ක් සඳහා ({formattedTime} තෙක්)}other{මිනිත්තු #ක් සඳහා ({formattedTime} තෙක්)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{මිනි 1ක් සඳහා ({formattedTime} තෙක්)}one{මිනි #ක් සඳහා ({formattedTime} තෙක්)}other{මිනි #ක් සඳහා ({formattedTime} තෙක්)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{පැය 1ක් සඳහා ({formattedTime} තෙක්)}one{පැය #ක් සඳහා ({formattedTime} තෙක්)}other{පැය #ක් සඳහා ({formattedTime} තෙක්)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{පැ 1ක් සඳහා ({formattedTime} තෙක්)}one{පැ #ක් සඳහා ({formattedTime} තෙක්)}other{පැ #ක් සඳහා ({formattedTime} තෙක්)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{මිනිත්තු එකක් සඳහා}one{මිනිත්තු #ක් සඳහා}other{මිනිත්තු #ක් සඳහා}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{මිනි 1ක් සඳහා}one{මිනි #ක් සඳහා}other{මිනි #ක් සඳහා}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{පැය 1ක් සඳහා}one{පැය #ක් සඳහා}other{පැය #ක් සඳහා}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{පැය 1ක් සඳහා}one{පැය #ක් සඳහා}other{පැය #ක් සඳහා}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> දක්වා"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක් (ඊළඟ එලාමය)"</string>
@@ -1962,16 +1903,13 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"එන ඇමතුම"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"කරගෙන යන ඇමතුම"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"එන ඇමතුමක් පරීක්ෂා කරන්න"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"වර්ගීකරණය නොකළ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ඔබ මෙම දැනුම්දීම්වල වැදගත්කම සකසා ඇත."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"සම්බන්ධ වූ පුද්ගලයන් නිසා මෙය වැදගත් වේ."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"අභිරුචි යෙදුම් දැනුම් දීම"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද ?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"අධීක්ෂණය කළ පරිශීලක එක් කරන්න"</string>
     <string name="language_selection_title" msgid="52674936078683285">"භාෂාවක් එක් කරන්න"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ප්‍රදේශ මනාපය"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"භාෂා නම ටයිප් කරන්න"</string>
@@ -1988,6 +1926,23 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"අවසරය අවශ්‍යයි"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"කැමරාව ලබා ගත නොහැකිය"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"දුරකථනයෙන් දිගටම කර ගෙන යන්න"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"මයික්‍රෆෝනය ලබා ගත නොහැකිය"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV සැකසීම් ලබා ගත නොහැකිය"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ටැබ්ලට් සැකසීම් ලබා ගත නොහැකිය"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"දුරකථන සැකසීම් ලබා ගත නොහැකිය"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හිදී ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හිදී ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හිදී ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හිදී ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හිදී ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හිදී ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"මෙම යෙදුම අමතර ආරක්ෂාවක් ඉල්ලා සිටී. ඒ වෙනුවට ඔබගේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"මෙම යෙදුම අමතර ආරක්ෂාවක් ඉල්ලා සිටී. ඒ වෙනුවට ඔබගේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"මෙම යෙදුම අමතර ආරක්ෂාවක් ඉල්ලා සිටී. ඒ වෙනුවට ඔබගේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"මෙම යෙදුම Android හි පැරණි අනුවාදයක් සඳහා තනා ඇති අතර නිසියාකාරව ක්‍රියා නොකරනු ඇත. යාවත්කාලීන සඳහා පරික්ෂා කිරීම උත්සාහ කරන්න, නැතහොත් සංවර්ධක අමතන්න."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"යාවත්කාලීන සඳහා පරික්ෂා කරන්න"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ඔබට නව පණිවිඩ තිබේ"</string>
@@ -2030,10 +1985,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ස්වයං පිරවුම සඳහා සුරකින්න"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"අන්තර්ගතය ස්වයං පිරවුම් කළ නොහැකිය"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"ස්වයං පිරවුම් යෝජනා නැත"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one">ස්වයං පිරවුම් යෝජනා <xliff:g id="COUNT">%1$s</xliff:g></item>
-      <item quantity="other">ස්වයං පිරවුම් යෝජනා <xliff:g id="COUNT">%1$s</xliff:g></item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{ස්වයං පිරවුම් යෝජනා එකක්}one{ස්වයං පිරවුම් යෝජනා #ක්}other{ස්වයං පිරවුම් යෝජනා #ක්}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" වෙත සුරකින්නද?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" වෙත <xliff:g id="TYPE">%1$s</xliff:g> සුරකින්නද?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" වෙත <xliff:g id="TYPE_0">%1$s</xliff:g> සහ <xliff:g id="TYPE_1">%2$s</xliff:g> සුරකින්නද?"</string>
@@ -2080,6 +2032,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"අස්ථාපනය කරන්න"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"කෙසේ වුවත් විවෘත කරන්න"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"හානිකර යෙදුමක් අනාවරණය කර ගන්නා ලදී"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> හට සියලු උපාංග ලොග ප්‍රවේශ වීමට ඉඩ දෙන්නද?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"එක් වරක් ප්‍රවේශය ඉඩ දෙන්න"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ඉඩ නොදෙන්න"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"උපාංග ලොග ඔබගේ උපාංගයේ සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ විසඳීමට යෙදුම්වලට මෙම ලොග භාවිත කළ හැකිය.\n\nසමහර ලොගවල සංවේදී තොරතුරු අඩංගු විය හැකිය, එබැවින් ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැකිය. ඔබගේ උපාංග නිෂ්පාදකයාට තවමත් ඔබගේ උපාංගයේ සමහර ලොග හෝ තොරතුරු වෙත ප්‍රවේශ විය හැකිය. තව දැන ගන්න"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"නැවත නොපෙන්වන්න"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"සංස්කරණය"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ඇමතුම් සහ දැනුම්දීම් කම්පනය වනු ඇත"</string>
@@ -2090,6 +2047,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"තව දැන ගැනීමට සහ වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"දැනුම්දීම් සැකසීම් සමාලෝචනය කරන්න"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 හි සිට ආරම්භ වෙමින්, ඔබ ස්ථාපනය කරන යෙදුම්වලට දැනුම්දීම් යැවීමට ඔබගේ අවසරය අවශ්‍ය වේ. තිබෙන යෙදුම් සඳහා මෙම අවසරය වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"මට පසුව මතක් කරන්න"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ඉවත ලන්න"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"පද්ධතිය"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"සැකසීම්"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"කැමරාව"</string>
@@ -2134,10 +2095,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ඉදිරිපත් කිරීම"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"බ්ලූටූත් ගුවන් යානා ප්‍රකාරය තුළ ක්‍රියාත්මකව පවතිනු ඇත"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"පූරණය කරමින්"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one">ගොනු<xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
-      <item quantity="other">ගොනු<xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + ගොනු #}one{{file_name} + ගොනු #}other{{file_name} + ගොනු #}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"බෙදා ගැනීමට නිර්දේශිත පුද්ගලයන් නැත"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"යෙදුම් ලැයිස්තුව"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"මෙම යෙදුමට පටිගත කිරීම් අවසරයක් ලබා දී නොමැති නමුත් මෙම USB උපාංගය හරහා ශ්‍රව්‍ය ග්‍රහණය කර ගත හැකිය."</string>
@@ -2149,10 +2107,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"බල සංවාදය"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"අගුලු තිරය"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"තිර රුව"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"හෙඩ්සෙට් කොක්ක"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමග"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමං තෝරනය"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ප්‍රවේශ්‍යතා කෙටිමඟ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"දැනුම්දීම් සෙවන ඉවත ලන්න"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ඉහළ"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad පහළ"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad වම"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad දකුණ"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad මැද"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> හි සිරස්තල තීරුව."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> අවහිර කළ බාල්දියට දමා ඇත"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2173,8 +2137,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ක්‍රියාත්මක කිරීමට තට්ටු කරන්න"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"කාර්යාල යෙදුම් නැත"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"පුද්ගලික යෙදුම් නැත"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"<xliff:g id="APP">%s</xliff:g> පුද්ගලික පැතිකඩ තුළ විවෘත කරන්නද?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"<xliff:g id="APP">%s</xliff:g> කාර්යාල පැතිකඩ තුළ විවෘත කරන්නද?"</string>
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> ඔබගේ පුද්ගලික පැතිකඩ තුළ විවෘත කරන්නද?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> ඔබගේ කාර්යාල පැතිකඩ තුළ විවෘත කරන්නද?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"පුද්ගලික බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"කාර්යාල බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ජාල අගුලු හැරීමේ PIN"</string>
@@ -2304,4 +2268,13 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> හට ඔබගේ තිරය බැලීමට සහ පාලනය කිරීමට හැකිය. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> පරිවර්තනය කරන ලදි."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"පණිවිඩය <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> සිට <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> භාෂාවට පරිවර්තනය කරන ලදි."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"පසුබිම් ක්‍රියාකාරකම"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"යෙදුමක් බැටරිය බැස යාමට හේතු වේ"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"යෙදුමක් තවම සක්‍රියයි"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> පසුබිමින් ධාවනය වෙමින් පවතී. බැටරි භාවිතය කළමනාකරණය කිරීමට තට්ටු කරන්න."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> බැටරි ආයු කාලය සඳහා බලපෑමට ඉඩ ඇත. සක්‍රිය යෙදුම් සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"සක්‍රිය යෙදුම් පරීක්ෂා කරන්න"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් දුරකථනයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් ටැබ්ලටයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"පද්ධති පෙරනිමිය"</string>
 </resources>

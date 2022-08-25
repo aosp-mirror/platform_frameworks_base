@@ -129,6 +129,10 @@ public class UidObserverController {
         return mValidateUids;
     }
 
+    Runnable getDispatchRunnableForTest() {
+        return mDispatchRunnable;
+    }
+
     @VisibleForTesting
     static int mergeWithPendingChange(int currentChange, int pendingChange) {
         // If there is no change in idle or active state, then keep whatever was pending.
@@ -149,6 +153,12 @@ public class UidObserverController {
         }
         if ((pendingChange & UidRecord.CHANGE_CAPABILITY) != 0) {
             currentChange |= UidRecord.CHANGE_CAPABILITY;
+        }
+        if ((pendingChange & UidRecord.CHANGE_PROCSTATE) != 0) {
+            currentChange |= UidRecord.CHANGE_PROCSTATE;
+        }
+        if ((pendingChange & UidRecord.CHANGE_PROCADJ) != 0) {
+            currentChange |= UidRecord.CHANGE_PROCADJ;
         }
         return currentChange;
     }
@@ -240,6 +250,7 @@ public class UidObserverController {
         try {
             for (int j = 0; j < changesSize; j++) {
                 final ChangeRecord item = mActiveUidChanges[j];
+                final long start = SystemClock.uptimeMillis();
                 final int change = item.change;
                 if (change == UidRecord.CHANGE_PROCSTATE
                         && (reg.mWhich & ActivityManager.UID_OBSERVER_PROCSTATE) == 0) {
@@ -247,7 +258,12 @@ public class UidObserverController {
                     // interested in all proc state changes.
                     continue;
                 }
-                final long start = SystemClock.uptimeMillis();
+                if (change == UidRecord.CHANGE_PROCADJ
+                        && (reg.mWhich & ActivityManager.UID_OBSERVER_PROC_OOM_ADJ) == 0) {
+                    // No-op common case: no significant change, the observer is not
+                    // interested in proc adj changes.
+                    continue;
+                }
                 if ((change & UidRecord.CHANGE_IDLE) != 0) {
                     if ((reg.mWhich & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                         if (DEBUG_UID_OBSERVERS) {
@@ -314,7 +330,12 @@ public class UidObserverController {
                             reg.mLastProcStates.put(item.uid, item.procState);
                         }
                         observer.onUidStateChanged(item.uid, item.procState,
-                                item.procStateSeq, item.capability);
+                                item.procStateSeq,
+                                item.capability);
+                    }
+                    if ((reg.mWhich & ActivityManager.UID_OBSERVER_PROC_OOM_ADJ) != 0
+                            && (change & UidRecord.CHANGE_PROCADJ) != 0) {
+                        observer.onUidProcAdjChanged(item.uid);
                     }
                 }
                 final int duration = (int) (SystemClock.uptimeMillis() - start);
@@ -435,6 +456,7 @@ public class UidObserverController {
                 ActivityManager.UID_OBSERVER_GONE,
                 ActivityManager.UID_OBSERVER_PROCSTATE,
                 ActivityManager.UID_OBSERVER_CAPABILITY,
+                ActivityManager.UID_OBSERVER_PROC_OOM_ADJ,
         };
         private static final int[] PROTO_ENUMS = new int[]{
                 ActivityManagerProto.UID_OBSERVER_FLAG_IDLE,
@@ -442,6 +464,7 @@ public class UidObserverController {
                 ActivityManagerProto.UID_OBSERVER_FLAG_GONE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_PROCSTATE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_CAPABILITY,
+                ActivityManagerProto.UID_OBSERVER_FLAG_PROC_OOM_ADJ,
         };
 
         UidObserverRegistration(int uid, @NonNull String pkg, int which, int cutpoint) {

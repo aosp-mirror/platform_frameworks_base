@@ -218,8 +218,8 @@ public class ActivityStartController {
                     vers = ri.activityInfo.applicationInfo.metaData.getString(
                             Intent.METADATA_SETUP_VERSION);
                 }
-                String lastVers = Settings.Secure.getString(
-                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
+                String lastVers = Settings.Secure.getStringForUser(
+                        resolver, Settings.Secure.LAST_SETUP_SHOWN, resolver.getUserId());
                 if (vers != null && !vers.equals(lastVers)) {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
@@ -455,6 +455,10 @@ public class ActivityStartController {
             // Lock the loop to ensure the activities launched in a sequence.
             synchronized (mService.mGlobalLock) {
                 mService.deferWindowLayout();
+                // To avoid creating multiple starting window when creating starting multiples
+                // activities, we defer the creation of the starting window once all start request
+                // are processed
+                mService.mWindowManager.mStartingSurfaceController.beginDeferAddStartingWindow();
                 try {
                     for (int i = 0; i < starters.length; i++) {
                         final int startResult = starters[i].setResultTo(resultTo)
@@ -470,7 +474,7 @@ public class ActivityStartController {
                         if (started != null && started.getUid() == filterCallingUid) {
                             // Only the started activity which has the same uid as the source caller
                             // can be the caller of next activity.
-                            resultTo = started.appToken;
+                            resultTo = started.token;
                         } else {
                             resultTo = sourceResultTo;
                             // Different apps not adjacent to the caller are forced to be new task.
@@ -480,6 +484,8 @@ public class ActivityStartController {
                         }
                     }
                 } finally {
+                    mService.mWindowManager.mStartingSurfaceController.endDeferAddStartingWindow(
+                            options != null ? options.getOriginalOptions() : null);
                     mService.continueWindowLayout();
                 }
             }
@@ -502,7 +508,8 @@ public class ActivityStartController {
      */
     int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
             @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
-            @Nullable IBinder resultTo, int callingUid, int callingPid) {
+            @Nullable IBinder resultTo, int callingUid, int callingPid,
+            @Nullable IBinder errorCallbackToken) {
         final ActivityRecord caller =
                 resultTo != null ? ActivityRecord.forTokenLocked(resultTo) : null;
         return obtainStarter(activityIntent, "startActivityInTaskFragment")
@@ -512,7 +519,10 @@ public class ActivityStartController {
                 .setRequestCode(-1)
                 .setCallingUid(callingUid)
                 .setCallingPid(callingPid)
+                .setRealCallingUid(callingUid)
+                .setRealCallingPid(callingPid)
                 .setUserId(caller != null ? caller.mUserId : mService.getCurrentUserId())
+                .setErrorCallbackToken(errorCallbackToken)
                 .execute();
     }
 
@@ -538,10 +548,8 @@ public class ActivityStartController {
 
         if (mLastHomeActivityStartRecord != null && (!dumpPackagePresent
                 || dumpPackage.equals(mLastHomeActivityStartRecord.packageName))) {
-            if (!dumped) {
-                dumped = true;
-                dumpLastHomeActivityStartResult(pw, prefix);
-            }
+            dumped = true;
+            dumpLastHomeActivityStartResult(pw, prefix);
             pw.print(prefix);
             pw.println("mLastHomeActivityStartRecord:");
             mLastHomeActivityStartRecord.dump(pw, prefix + "  ", true /* dumpAll */);
@@ -559,6 +567,7 @@ public class ActivityStartController {
                     dumpLastHomeActivityStartResult(pw, prefix);
                 }
                 pw.print(prefix);
+                pw.println("mLastStarter:");
                 mLastStarter.dump(pw, prefix + "  ");
 
                 if (dumpPackagePresent) {

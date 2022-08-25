@@ -72,6 +72,7 @@ oneway interface IApplicationThread {
     @UnsupportedAppUsage
     void scheduleStopService(IBinder token);
     void bindApplication(in String packageName, in ApplicationInfo info,
+            in String sdkSandboxClientAppVolumeUuid, in String sdkSandboxClientAppPackage,
             in ProviderInfoList providerList, in ComponentName testName,
             in ProfilerInfo profilerInfo, in Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
@@ -80,7 +81,8 @@ oneway interface IApplicationThread {
             in CompatibilityInfo compatInfo, in Map services,
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
             in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges,
-            in SharedMemory serializedSystemFontMap);
+            in SharedMemory serializedSystemFontMap,
+            long startRequestedElapsedTime, long startRequestedUptime);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);
@@ -112,6 +114,7 @@ oneway interface IApplicationThread {
             in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
             in String[] args);
+    void dumpResources(in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void clearDnsCache();
     void updateHttpProxy();
     void setCoreSettings(in Bundle coreSettings);

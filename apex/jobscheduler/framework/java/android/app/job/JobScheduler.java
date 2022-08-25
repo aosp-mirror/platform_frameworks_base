@@ -131,7 +131,7 @@ public abstract class JobScheduler {
      * job.  If a job with the same ID is already scheduled, it will be replaced with the
      * new {@link JobInfo}, but any previously enqueued work will remain and be dispatched the
      * next time it runs.  If a job with the same ID is already running, the new work will be
-     * enqueued for it.
+     * enqueued for it without stopping the job.
      *
      * <p>The work you enqueue is later retrieved through
      * {@link JobParameters#dequeueWork() JobParameters.dequeueWork}.  Be sure to see there

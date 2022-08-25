@@ -42,17 +42,18 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
+import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -75,10 +76,12 @@ import java.util.Optional;
 @TestableLooper.RunWithLooper
 public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
+    @Mock private NotifStackController mStackController;
     @Spy private FakeListContainer mListContainer = new FakeListContainer();
 
     // Dependency mocks:
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManagerLegacy mGroupManager;
@@ -105,8 +108,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         when(mVisualStabilityManager.areGroupChangesAllowed()).thenReturn(true);
         when(mVisualStabilityManager.isReorderingAllowed()).thenReturn(true);
 
-        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
-        when(mFeatureFlags.checkLegacyPipelineEnabled()).thenReturn(true);
+        when(mNotifPipelineFlags.checkLegacyPipelineEnabled()).thenReturn(true);
+        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
 
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
 
@@ -117,13 +120,13 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(KeyguardBypassController.class),
                 Optional.of(mock(Bubbles.class)),
                 mock(DynamicPrivacyController.class),
-                mock(ForegroundServiceSectionController.class),
                 mock(DynamicChildBindController.class),
                 mock(LowPriorityInflationHelper.class),
                 mock(AssistantFeedbackController.class),
+                mNotifPipelineFlags,
                 mock(KeyguardUpdateMonitor.class),
                 mock(KeyguardStateController.class));
-        mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
+        mViewHierarchyManager.setUpWithPresenter(mPresenter, mStackController, mListContainer);
     }
 
     private NotificationEntry createEntry() throws Exception {

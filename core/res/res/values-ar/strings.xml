@@ -179,14 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"مساحة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"‏مساحة تخزين جهاز Android TV ممتلئة. يُرجى حذف بعض الملفات لتوفير مساحة."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"مساحة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="zero">تم تثبيت شهادة المرجع المصدق</item>
-      <item quantity="two">تم تثبيت شهادتي المرجع المصدق</item>
-      <item quantity="few">تم تثبيت شهادات المرجع المصدق</item>
-      <item quantity="many">تم تثبيت شهادات المرجع المصدق</item>
-      <item quantity="other">تم تثبيت شهادات المرجع المصدق</item>
-      <item quantity="one">تم تثبيت شهادة المرجع المصدق</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{تم تثبيت مرجع التصديق.}zero{تم تثبيت مراجع التصديق.}two{تم تثبيت مرجعَي التصديق.}few{تم تثبيت مراجع التصديق.}many{تم تثبيت مراجع التصديق.}other{تم تثبيت مراجع التصديق.}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"بواسطة جهة خارجية غير معلومة"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"بواسطة مشرف الملف الشخصي للعمل"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"بواسطة <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -206,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"خدمة إشعارات جهاز الاستشعار"</string>
     <string name="twilight_service" msgid="8964898045693187224">"خدمة الغسق"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏خدمة تعديل وقت GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"خدمة مدير سياسات الجهاز"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"خدمة إدارة التعرّف على الموسيقى"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
@@ -259,14 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"يمكنك استخدام هذا الخيار في معظم الأحيان، حيث يتيح لك إمكانية تتبع مستوى تقدم التقرير والحصول على مزيد من المعلومات حول المشكلة وتسجيل لقطات شاشة. وقد يتم إغفال بعض الأقسام الأقل استخدامًا والتي تستغرق وقتًا طويلاً أثناء إعداد التقرير."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"تقرير كامل"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"يمكنك استخدام هذا الخيار للحصول على حد أدنى من تدخل النظام عند توقف استجابة الجهاز أو عند بطئها الشديد أو عند الحاجة إلى جميع أقسام التقرير. ولا يسمح لك هذا الخيار بالحصول على مزيد من التفاصيل أو تسجيل لقطات شاشة إضافية."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="zero">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
-      <item quantity="two">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال ثانيتين (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
-      <item quantity="few">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثوانٍ.</item>
-      <item quantity="many">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
-      <item quantity="other">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
-      <item quantity="one">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_0">%d</xliff:g> ثانية.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{سيتم التقاط لقطة شاشة لتقرير الخطأ خلال ثانية واحدة.}zero{سيتم التقاط لقطة شاشة لتقرير الخطأ خلال # ثانية.}two{سيتم التقاط لقطة شاشة لتقرير الخطأ خلال ثانيتين.}few{سيتم التقاط لقطة شاشة لتقرير الخطأ خلال # ثوانٍ.}many{سيتم التقاط لقطة شاشة لتقرير الخطأ خلال # ثانية.}other{سيتم التقاط لقطة شاشة لتقرير الخطأ خلال # ثانية.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"تم التقاط لقطة شاشة من خلال تقرير خطأ."</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"تعذّر التقاط لقطة شاشة من خلال تقرير خطأ."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"وضع صامت"</string>
@@ -317,8 +304,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"الملفات والوسائط"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"الملفات"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"الوصول إلى الملفات على جهازك"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"الموسيقى والمقاطع الصوتية"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الموسيقى والمقاطع الصوتية على جهازك."</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"الصور والفيديوهات"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الصور والفيديوهات على جهازك."</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"تسجيل الصوت"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"النشاط البدني"</string>
@@ -333,6 +324,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"إجراء مكالمات هاتفية وإدارتها"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"أجهزة استشعار الجسم"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"الإشعارات"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"عرض الإشعارات"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"استرداد محتوى النافذة:"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"فحص محتوى نافذة يتم التفاعل معها."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"تفعيل الاستكشاف باللمس:"</string>
@@ -431,8 +424,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"للسماح للتطبيق بتعديل سجل مكالمات الجهاز اللوحي، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏للسماح للتطبيق بتعديل سجلّ مكالمات جهاز Android TV، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وقد تستخدم التطبيقات الضارة هذا الإعداد لمحو سجلّ المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"الوصول إلى أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"للسماح للتطبيق بالدخول إلى البيانات من أجهزة الاستشعار التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"الوصول إلى بيانات استشعار الجسم، مثل معدّل نبضات القلب، أثناء استخدام التطبيق"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"يتيح هذا الإذن للتطبيق بالوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عندما يكون التطبيق قيد الاستخدام."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"الوصول في الخلفية إلى بيانات استشعار الجسم، مثل معدّل نبضات القلب"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"يتيح هذا الإذن للتطبيق الوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عند استخدام التطبيق في الخلفية."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"قراءة أحداث التقويم والتفاصيل"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على الجهاز اللوحي ومشاركة بيانات التقويم أو حفظها."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على جهاز Android TV ومشاركة بيانات التقويم أو حفظها."</string>
@@ -560,6 +555,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"للسماح للتطبيق بإيقاف تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استقبال مكالمة هاتفية واردة، ثم يعيد تفعيل تأمين المفاتيح عند انتهاء المكالمة."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"طلب معرفة مستوى صعوبة قفل الشاشة"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"للسماح للتطبيق بمعرفة مستوى صعوبة قفل الشاشة (عالي أو متوسط أو منخفض الصعوبة أو بدون)، والذي يحدّد النطاق المحتمل لطول ونوع قفل الشاشة. ويمكن أن يقترح التطبيق للمستخدمين أيضًا تعديل قفل الشاشة إلى مستوى معيّن، ولهم مطلق الحرية في تجاهل هذا الاقتراح ورفضه. وتجدر الإشارة إلى أنه لا يتم حفظ قفل الشاشة في نص عادي، لذا لا يعرف التطبيق كلمة المرور تحديدًا."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"عرض الإشعارات"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"السماح للتطبيق بعرض إشعارات"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"استخدام الأجهزة البيومترية"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"للسماح للتطبيق باستخدام الأجهزة البيومترية للمصادقة"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"لإدارة أجهزة بصمة الإصبع"</string>
@@ -587,10 +584,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"استخدام قفل الشاشة"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"أدخِل قفل الشاشة للمتابعة"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"تم اكتشاف بصمة إصبع جزئية."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"عليك تنظيف جهاز الاستشعار."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ثبِّت إصبعك أطول من ذلك قليلاً."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"يُرجى تنظيف مستشعر بصمات الإصبع ثم إعادة المحاولة."</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"تنظيف المستشعر ثم إعادة المحاولة"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
@@ -598,6 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"لم يتمّ التعرّف على البصمة."</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"لم يتمّ التعرّف على بصمة الإصبع."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"تم مصادقة بصمة الإصبع"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"تمّت مصادقة الوجه"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"تمّت مصادقة الوجه، يُرجى الضغط على \"تأكيد\"."</string>
@@ -684,6 +684,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"للسماح للتطبيق بقراءة إحصاءات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"قراءة محتوى مساحة التخزين المشتركة"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"للسماح للتطبيق بقراءة محتوى مساحة التخزين المشتركة."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"قراءة الملفات الصوتية من مساحة التخزين المشتركة"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"يسمح للتطبيق بقراءة الملفات الصوتية من مساحة التخزين المشتركة."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"قراءة ملفات الفيديو من مساحة التخزين المشتركة"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"يسمح للتطبيق بقراءة ملفات الفيديو من مساحة التخزين المشتركة."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"قراءة ملفات الصور من مساحة التخزين المشتركة"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"يسمح هذا الإذن للتطبيق بقراءة ملفات الصور من مساحة التخزين المشتركة."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تعديل محتوى مساحة التخزين المشتركة أو حذفه"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"للسماح للتطبيق بالكتابة إلى محتوى مساحة التخزين المشتركة."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‏إجراء/تلقي مكالمات SIP"</string>
@@ -734,6 +740,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة إعداد \"عدم الإزعاج\" وكتابتها."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"بدء استخدام إذن العرض"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"بدء اتخاذ القرارات المتعلقة بالإذن بعرض البيانات"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"يمكنك السماح للمالك ببدء الشاشة لمراجعة القرارات المتعلقة بالأذونات. لا حاجة لذلك مع التطبيقات العادية."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"بدء عرض ميزات التطبيق"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"للسماح للمالك ببدء عرض معلومات عن ميزات التطبيق."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"الوصول إلى بيانات جهاز الاستشعار بمعدّل مرتفع للبيانات في الملف الصوتي"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"يسمح هذا الأذن للتطبيق بزيادة بيانات جهاز الاستشعار بمعدّل بيانات في الملف الصوتي أكبر من 200 هرتز."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>
@@ -901,7 +911,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"اضغط على \"القائمة\" لإلغاء التأمين أو إجراء اتصال بالطوارئ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"رسم نقش لإلغاء التأمين"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"مكالمة طوارئ"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"الطوارئ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"العودة إلى الاتصال"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحيح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"أعد المحاولة"</string>
@@ -1040,7 +1050,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"مطلقًا"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ليس لديك إذن بفتح هذه الصفحة."</string>
     <string name="text_copied" msgid="2531420577879738860">"تم نسخ النص إلى الحافظة."</string>
-    <string name="copied" msgid="4675902854553014676">"تم النسخ."</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"تم لصق محتوى في <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> من <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"لصَق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> محتوىً من الحافظة."</string>
     <string name="pasted_text" msgid="4298871641549173733">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> النص الذي نسخته."</string>
@@ -1069,14 +1078,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تفعيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"قبل شهر واحد"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"قبل شهر واحد"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="zero">آخر <xliff:g id="COUNT_1">%d</xliff:g> من الأيام</item>
-      <item quantity="two">آخر يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">آخر <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many">آخر <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other">آخر <xliff:g id="COUNT_1">%d</xliff:g> من الأيام</item>
-      <item quantity="one">آخر <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{آخر يوم}zero{آخر # يوم}two{آخر يومين}few{آخر # أيام}many{آخر # يومًا}other{آخر # يوم}}"</string>
     <string name="last_month" msgid="1528906781083518683">"الشهر الماضي"</string>
     <string name="older" msgid="1645159827884647400">"أقدم"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"في <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1095,134 +1097,22 @@
     <string name="year" msgid="5182610307741238982">"سنة"</string>
     <string name="years" msgid="5797714729103773425">"أعوام"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"الآن"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g>  دقيقة</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="two">ساعتان (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
-      <item quantity="two">يومان <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>يوم</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> عام</item>
-      <item quantity="two">عامان <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>عام</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>عام</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="two">في دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
-      <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="two">في ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
-      <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g>ساعة</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
-      <item quantity="two">في يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many">في<xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
-      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> عام</item>
-      <item quantity="two">في عامين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
-      <item quantity="many">في<xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
-      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g>عام</item>
-      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> عام</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="two">قبل دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
-      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="two">قبل ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
-      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="two">قبل يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
-      <item quantity="two">قبل سنتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنوات</item>
-      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
-      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
-      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> سنة</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="two">خلال دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
-      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="two">خلال ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
-      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="two">خلال يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
-      <item quantity="two">خلال سنتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنوات</item>
-      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
-      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
-      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> سنة</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> دقيقة"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> يوم"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> سنة"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"خلال <xliff:g id="COUNT">%d</xliff:g> دقيقة"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"خلال <xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"خلال <xliff:g id="COUNT">%d</xliff:g> يوم"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"خلال <xliff:g id="COUNT">%d</xliff:g> سنة"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{قبل دقيقة واحدة}zero{قبل # دقيقة}two{قبل دقيقتين}few{قبل # دقائق}many{قبل # دقيقة}other{قبل # دقيقة}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{قبل ساعة واحدة}zero{قبل # ساعة}two{قبل ساعتين}few{قبل # ساعات}many{قبل # ساعة}other{قبل # ساعة}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{قبل يوم واحد}zero{قبل # يوم}two{قبل يومين}few{قبل # أيام}many{قبل # يومًا}other{قبل # يوم}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{قبل سنة واحدة}zero{قبل # سنة}two{قبل سنتين}few{قبل # سنوات}many{قبل # سنة}other{قبل # سنة}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{دقيقة واحدة}zero{# دقيقة}two{دقيقتان}few{# دقائق}many{# دقيقة}other{# دقيقة}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{ساعة واحدة}zero{# ساعة}two{ساعتان}few{# ساعات}many{# ساعة}other{# ساعة}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{يوم واحد}zero{# يوم}two{يومان}few{# أيام}many{# يومًا}other{# يوم}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{سنة واحدة}zero{# سنة}two{سنتان}few{# سنوات}many{# سنة}other{# سنة}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"مشكلة في الفيديو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"عذرًا، هذا الفيديو غير صالح للبث على هذا الجهاز."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"لا يمكنك تشغيل هذا الفيديو."</string>
@@ -1252,6 +1142,8 @@
     <string name="deleteText" msgid="4200807474529938112">"حذف"</string>
     <string name="inputMethod" msgid="1784759500516314751">"طريقة الإرسال"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"إجراءات النص"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"رجوع"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تبديل أسلوب الإدخال"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
@@ -1269,6 +1161,7 @@
     <string name="not_checked" msgid="7972320087569023342">"لم يتم وضع علامة"</string>
     <string name="selected" msgid="6614607926197755875">"محدّد"</string>
     <string name="not_selected" msgid="410652016565864475">"غير محدّد"</string>
+    <string name="in_progress" msgid="2149208189184319441">"قيد التقدّم"</string>
     <string name="whichApplication" msgid="5432266899591255759">"إكمال الإجراء باستخدام"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏إكمال الإجراء باستخدام %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"إكمال الإجراء"</string>
@@ -1347,10 +1240,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"هل تريد إيقاف الشاشة؟"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"أثناء إعداد بصمة الإصبع، ضغطت على زر التشغيل.\n\nيؤدي هذا الإجراء عادةً إلى إيقاف الشاشة."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"إيقاف"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"إلغاء"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"هل تريد مواصلة عملية الإعداد؟"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة أثناء إعداد بصمتك."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"إيقاف الشاشة"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"مواصلة عملية الإعداد"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"هل تريد مواصلة تأكيد بصمة إصبعك؟"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة لتأكيد بصمة إصبعك."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"إيقاف الشاشة"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"متابعة"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"انقر للعودة إلى اللعبة"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"اختيار اللعبة"</string>
@@ -1467,6 +1364,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على الإعدادات الأصلية لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"وحدة التحكّم التسلسلية مفعّلة"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"الأداء متأثر. لإيقاف وحدة التحكّم، تحقّق من برنامج الإقلاع."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"‏الميزة التجريبية إضافة وضع علامات الذاكرة (MTE) مفعّلة"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏قد تؤثر إضافة وضع علامات الذاكرة (MTE) على الأداء والثبات. يمكنك إعادة تشغيل النظام لإيقاف هذه الإضافة. إذا كانت مفعّلة باستخدام arm64.memtag.bootctl، يمكنك ضبطها على \"بدون\" بشكل مُسبق."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏السوائل أو الشوائب في منفذ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏تمّ إيقاف منفذ USB تلقائيًا. انقُر لمعرفة المزيد من المعلومات."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏مسموح باستخدام منفذ USB"</string>
@@ -1601,14 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"التخطي"</string>
     <string name="no_matches" msgid="6472699895759164599">"ليس هناك أي مطابقات"</string>
     <string name="find_on_page" msgid="5400537367077438198">"بحث في الصفحة"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="zero"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="two"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">مباراة واحدة</item>
-    </plurals>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{مطابقة واحدة}zero{# من إجمالي {total}}two{# من إجمالي {total}}few{# من إجمالي {total}}many{# من إجمالي {total}}other{# من إجمالي {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"تم"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"جارٍ محو بيانات مساحة التخزين المشتركة…"</string>
     <string name="share" msgid="4157615043345227321">"مشاركة"</string>
@@ -1738,14 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"النقش غير صحيح."</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"كلمة مرور خاطئة"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"رقم تعريف شخصي خاطئ"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="zero">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية.</item>
-      <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="NUMBER">%d</xliff:g>).</item>
-      <item quantity="few">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثوانٍ.</item>
-      <item quantity="many">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية.</item>
-      <item quantity="other">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية.</item>
-      <item quantity="one">حاول مرة أخرى خلال ثانية واحدة.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"ارسم نقشك"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"‏أدخل رمز PIN لبطاقة SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"‏أدخل رمز PIN"</string>
@@ -1827,6 +1711,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"جارٍ التبديل إلى <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"جارٍ الخروج <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"المالك"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ضيف"</string>
     <string name="error_message_title" msgid="4082495589294631966">"خطأ"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"لا يسمح المشرف بإجراء هذا التغيير"</string>
     <string name="app_not_found" msgid="3429506115332341800">"لم يتم العثور على تطبيق يمكنه التعامل مع هذا الإجراء."</string>
@@ -1941,14 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"إنشاء رقم تعريف شخصي لتعديل القيود"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"أرقام التعريف الشخصية لا تتطابق، أعد المحاولة."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"رقم التعريف الشخصي أقصر مما يلزم، يجب ألا يقل عن ٤ أرقام. "</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="zero">حاول مرة أخرى خلال أقل من ثانية <xliff:g id="COUNT">%d</xliff:g></item>
-      <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="COUNT">%d</xliff:g>)</item>
-      <item quantity="few">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> ثوانٍ</item>
-      <item quantity="many">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> ثانية</item>
-      <item quantity="other">حاول مرة أخرى خلال <xliff:g id="COUNT">%d</xliff:g> من الثواني</item>
-      <item quantity="one">حاول مرة أخرى خلال ثانية واحدة</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"أعد المحاولة لاحقًا"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"جارٍ العرض بملء الشاشة"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
@@ -1976,70 +1853,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل ميزة \"توفير البيانات\"؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="two">‏لمدة دقيقتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">‏لمدة %1$d دقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">لمدة دقيقة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="zero">لمدة أقل من دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="two">لمدة دقيقتين (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">‏لمدة %1$d دقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">‏لمدة %1$d دقيقة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏لمدة %1$d من الدقائق (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">لمدة دقيقة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="zero">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="two">‏لمدة ساعتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">‏لمدة %1$d ساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">لمدة ساعة واحدة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="zero">لمدة أقل من ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="two">لمدة ساعتين (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">‏لمدة %1$d ساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">‏لمدة %1$d ساعة (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">‏لمدة %1$d من الساعات (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">لمدة ساعة (حتى <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="zero">‏لمدة أقل من دقيقة (%d)</item>
-      <item quantity="two">‏لمدة دقيقتين (%d)</item>
-      <item quantity="few">‏لمدة %d دقائق</item>
-      <item quantity="many">‏لمدة %d دقيقة</item>
-      <item quantity="other">‏لمدة %d من الدقائق</item>
-      <item quantity="one">لمدة دقيقة واحدة</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="zero">لمدة أقل من دقيقة</item>
-      <item quantity="two">لمدة دقيقتين</item>
-      <item quantity="few">‏لمدة %d دقائق</item>
-      <item quantity="many">‏لمدة %d دقيقة</item>
-      <item quantity="other">‏لمدة %d من الدقائق</item>
-      <item quantity="one">لمدة دقيقة</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="zero">‏لمدة %d ساعة</item>
-      <item quantity="two">‏لمدة ساعتين (%d)</item>
-      <item quantity="few">‏لمدة %d ساعات</item>
-      <item quantity="many">‏لمدة %d ساعة</item>
-      <item quantity="other">‏لمدة %d ساعة</item>
-      <item quantity="one">لمدة ساعة واحدة</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="zero">لمدة أقل من ساعة</item>
-      <item quantity="two">لمدة ساعتين</item>
-      <item quantity="few">‏لمدة %d ساعات</item>
-      <item quantity="many">‏لمدة %d ساعة</item>
-      <item quantity="other">‏لمدة %d من الساعات</item>
-      <item quantity="one">لمدة ساعة</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{لمدة دقيقة واحدة (حتى {formattedTime})}zero{لمدة # دقيقة (حتى {formattedTime})}two{لمدة دقيقتين (حتى {formattedTime})}few{لمدة # دقائق (حتى {formattedTime})}many{لمدة # دقيقة (حتى {formattedTime})}other{لمدة # دقيقة (حتى {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{لمدة دقيقة واحدة (حتى {formattedTime})}zero{لمدة # دقيقة (حتى {formattedTime})}two{لمدة دقيقتين (حتى {formattedTime})}few{لمدة # دقائق (حتى {formattedTime})}many{لمدة # دقيقة (حتى {formattedTime})}other{لمدة # دقيقة (حتى {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{لمدة ساعة واحدة (حتى {formattedTime})}zero{لمدة # ساعة (حتى {formattedTime})}two{لمدة ساعتين (حتى {formattedTime})}few{لمدة # ساعات (حتى {formattedTime})}many{لمدة # ساعة (حتى {formattedTime})}other{لمدة # ساعة (حتى {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{لمدة ساعة واحدة (حتى {formattedTime})}zero{لمدة # ساعة (حتى {formattedTime})}two{لمدة ساعتين (حتى {formattedTime})}few{لمدة # ساعات (حتى {formattedTime})}many{لمدة # ساعة (حتى {formattedTime})}other{لمدة # ساعة (حتى {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{لمدة دقيقة واحدة}zero{لمدة # دقيقة}two{لمدة دقيقتين}few{لمدة # دقائق}many{لمدة # دقيقة}other{لمدة # دقيقة}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{لمدة دقيقة واحدة}zero{لمدة # دقيقة}two{لمدة دقيقتين}few{لمدة # دقائق}many{لمدة # دقيقة}other{لمدة # دقيقة}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{لمدة ساعة واحدة}zero{لمدة # ساعة}two{لمدة ساعتين}few{لمدة # ساعات}many{لمدة # ساعة}other{لمدة # ساعة}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{لمدة ساعة واحدة}zero{لمدة # ساعة}two{لمدة ساعتين}few{لمدة # ساعات}many{لمدة # ساعة}other{لمدة # ساعة}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (التنبيه التالي)"</string>
@@ -2086,20 +1907,13 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"مكالمة واردة"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"مكالمة جارية"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"يتم فحص المكالمة الواردة"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="zero">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
-      <item quantity="two">تم اختيار عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
-      <item quantity="few">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
-      <item quantity="many">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
-      <item quantity="other">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
-      <item quantity="one">تم اختيار عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"لقد عيَّنت أهمية هذه الإشعارات."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"إشعار تطبيق مخصّص"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> ؟"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"إضافة مستخدم تحت الإشراف"</string>
     <string name="language_selection_title" msgid="52674936078683285">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>
@@ -2116,6 +1930,23 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تفعيل"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"مطلوب منح الإذن"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"الكاميرا غير متاحة"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"الاستمرار على الهاتف"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"الميكروفون غير متاح"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"‏إعدادات Android TV غير متاحة"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"إعدادات الجهاز اللوحي غير متاحة"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"إعدادات الهاتف غير متاحة"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"‏لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"‏لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
@@ -2158,14 +1989,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"حفظ المعلومات للملء التلقائي لاحقًا"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"يتعذر إجراء ملء تلقائي للمحتويات"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"لا توجد اقتراحات للملء التلقائي"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="zero"><xliff:g id="COUNT">%1$s</xliff:g> اقتراح للملء التلقائي</item>
-      <item quantity="two">اقتراحان (<xliff:g id="COUNT">%1$s</xliff:g>) للملء التلقائي</item>
-      <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> اقتراحات للملء التلقائي</item>
-      <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> اقتراحًا للملء التلقائي</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> اقتراح للملء التلقائي</item>
-      <item quantity="one">اقتراح واحد للملء التلقائي</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{اقتراح واحد للملء التلقائي}zero{# اقتراح للملء التلقائي}two{اقتراحان للملء التلقائي}few{# اقتراحات للملء التلقائي}many{# اقتراحًا للملء التلقائي}other{# اقتراح للملء التلقائي}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"هل تريد الحفظ في "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"هل تريد حفظ <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
@@ -2212,6 +2036,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"إلغاء التثبيت"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"الفتح على أي حال"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"تم العثور على تطبيق ضار"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"هل تريد السماح لتطبيق <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> بالوصول إلى جميع سجلّات الجهاز؟"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك. مزيد من المعلومات"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"سيهتز الهاتف عند تلقّي المكالمات والإشعارات."</string>
@@ -2222,6 +2051,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"انقر لمعرفة مزيد من المعلومات وإجراء التغيير."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير ميزة \"عدم الإزعاج\""</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"انقر للاطّلاع على ما تم حظره."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"مراجعة إعدادات الإشعارات"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏بدءً من نظام التشغيل Android 13، يجب أن تحصل التطبيقات التي تُثبِّتها على إذن لإرسال الإشعارات. انقر لتغيير هذا الإذن للتطبيقات الحالية."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"تذكيري لاحقًا"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"إغلاق"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"النظام"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"الإعدادات"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"كاميرا"</string>
@@ -2266,14 +2099,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"عرض تقديمي: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطيران\"."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"جارٍ التحميل"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="zero"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>
-      <item quantity="two"><xliff:g id="FILE_NAME_2">%s</xliff:g> وملفان (<xliff:g id="COUNT_3">%d</xliff:g>)</item>
-      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملفات</item>
-      <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملفًا</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> وملف (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + ملف واحد}zero{{file_name} + # ملف}two{{file_name} + ملفان}few{{file_name} + # ملفات}many{{file_name} + # ملفًا}other{{file_name} + # ملف}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ما مِن أشخاص مقترحين للمشاركة معهم."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"قائمة التطبيقات"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
@@ -2285,10 +2111,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"مربّع حوار الطاقة"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"شاشة القفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"لقطة شاشة"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"خطّاف تعليق سمّاعة الرأس"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"اختصار أدوات تمكين الوصول على الشاشة"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"أداة اختيار اختصارات أدوات تمكين الوصول على الشاشة"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"اختصارات أدوات تمكين الوصول"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"إغلاق مركز الإشعارات"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"زرّ الاتجاه للأعلى"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"زرّ الاتجاه للأسفل"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"زرّ الاتجاه لليسار"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"زرّ الاتجاه لليمين"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"الزرّ المركزي"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"شريط الشرح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"تم وضع <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> في الحزمة \"محظورة\"."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2309,8 +2141,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"انقر لتفعيل الميزة"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ما مِن تطبيقات عمل."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"هل تريد فتح المحتوى في <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي؟"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"هل تريد فتح المحتوى في <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي للعمل؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"هل تريد فتح <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي؟"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"هل تريد فتح <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي للعمل؟"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استخدام المتصفّح الشخصي"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استخدام متصفّح العمل"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏رقم التعريف الشخصي لإلغاء قفل شبكة شريحة SIM"</string>
@@ -2440,4 +2272,13 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"يمكن لخدمة <xliff:g id="SERVICE_NAME">%s</xliff:g> الاطّلاع على شاشتك والتحكّم فيها. انقر لمراجعة الإعدادات."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (مُترجَم)."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"الرسالة مُترجَمة من <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> إلى <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"النشاط في الخلفية"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"تطبيق يستنزف طاقة البطارية"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ثمة تطبيق لا يزال نشطًا"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"التطبيق <xliff:g id="APP">%1$s</xliff:g> قيد التشغيل في الخلفية. انقر لإدارة استخدام البطارية."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"قد يؤثر استخدام التطبيق <xliff:g id="APP">%1$s</xliff:g> على عمر البطارية. انقر للاطّلاع على التطبيقات النشطة."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"التحقّق من التطبيقات النشطة"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"يتعذّر الوصول إلى كاميرا الهاتف من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
+    <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
 </resources>

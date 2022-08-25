@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
 
+import androidx.annotation.Nullable;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -198,7 +199,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     }
 
     /** */
-    public void setQs(QSFragment qsFragment) {
+    public void setQs(@Nullable QSFragment qsFragment) {
         mView.setQs(qsFragment);
     }
 

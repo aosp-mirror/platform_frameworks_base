@@ -19,10 +19,12 @@ package com.android.systemui.wmshell;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
+import android.os.UserManager;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -34,6 +36,10 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.onehanded.OneHandedController;
+
+import java.util.Optional;
 
 /**
  * Testable BubbleController subclass that immediately synchronizes surfaces.
@@ -48,19 +54,24 @@ public class TestableBubbleController extends BubbleController {
             IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
             TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer shellTaskOrganizer,
             BubblePositioner positioner,
             DisplayController displayController,
+            Optional<OneHandedController> oneHandedOptional,
+            DragAndDropController dragAndDropController,
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
+            TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         super(context, data, Runnable::run, floatingContentCoordinator, dataRepository,
-                statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                bubbleLogger, taskStackListener, shellTaskOrganizer, positioner, displayController,
-                shellMainExecutor, shellMainHandler, syncQueue);
+                statusBarService, windowManager, windowManagerShellWrapper, userManager,
+                launcherApps, bubbleLogger, taskStackListener, shellTaskOrganizer, positioner,
+                displayController, oneHandedOptional, dragAndDropController, shellMainExecutor,
+                shellMainHandler, new SyncExecutor(), taskViewTransitions, syncQueue);
         setInflateSynchronously(true);
         initialize();
     }

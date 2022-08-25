@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Nu se poate scana pentru rețele"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA / WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2 / WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Fără / OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Niciuna"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA / WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA / WPA2 / WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA / WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2 / WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2 / WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Fără / Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise pe 192 biți"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Salvată"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Deconectat"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Dezactivată"</string>
@@ -82,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activ"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activ, numai stânga"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activ, numai dreapta"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activ, stânga și dreapta"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Conținut media audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Apeluri telefonice"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfer de fișiere"</string>
@@ -95,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparate auditive"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectat la aparatul auditiv"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Conectat la LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Conectat la LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectat la profilul pentru conținut media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Conectat la componenta audio a telefonului"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Conectat la serverul de transfer de fișiere"</string>
@@ -131,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Căști"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Dispozitiv periferic de intrare"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Se asociază aparatul auditiv stâng…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Se asociază aparatul auditiv drept…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Stânga – baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Dreapta – baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi dezactivat."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi deconectat."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Semnal Wi-Fi: o bară."</string>
@@ -153,13 +179,12 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Tethering"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Tethering și hotspot portabil"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Toate aplicațiile de serviciu"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Invitat"</string>
     <string name="unknown" msgid="3544487229740637809">"Necunoscut"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Utilizator: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Unele valori prestabilite sunt configurate"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nu este configurată nicio valoare prestabilită"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setări redare vocală a textului"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Transformarea textului în vorbire"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Rezultatul redării vocale a textului"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Ritmul vorbirii"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Viteza cu care este vorbit textul"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Înălțime"</string>
@@ -255,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Înregistrare prin Wi-Fi de volume mari de date"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitare căutare de rețele Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Randomizarea adresei MAC nepersistente pentru Wi-Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Randomizarea adresei MAC nepersistente pentru Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accelerare hardware pentru tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afișați dispozitivele Bluetooth fără nume"</string>
@@ -287,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce descărcarea bateriei și îmbunătățește performanța rețelei"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Când acest mod este activat, adresa MAC a dispozitivului se poate schimba de fiecare dată când se conectează la o rețea care are activată randomizarea MAC."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Când acest mod este activat, adresa MAC a dispozitivului se poate schimba de fiecare dată când se conectează la o rețea care are activată randomizarea MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Contorizată"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Necontorizată"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensiunile memoriei temporare a jurnalului"</string>
@@ -423,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (roșu-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (albastru-galben)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corecția culorii"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Ajustați modul în care se afișează culorile pe dispozitiv. Acest lucru poate fi util când doriți să:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;vedeți culorile mai bine;&lt;/li&gt; &lt;li&gt;&amp;nbsp; eliminați culorile pentru a vă ajuta să vă concentrați.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Corecția culorii poate fi utilă dacă doriți:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;să vedeți mai precis culorile;&lt;/li&gt; &lt;li&gt;&amp;nbsp;să eliminați culorile pentru a vă concentra mai bine.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valoare înlocuită de <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Timp aproximativ rămas: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -460,7 +485,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nu se încarcă"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectat, nu se încarcă"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Încărcată"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Complet încărcată"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlată de administrator"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlată de setarea restricționată"</string>
     <string name="disabled" msgid="8017887509554714950">"Dezactivată"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Permise"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nepermise"</string>
@@ -493,15 +520,12 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Neînregistrat"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponibilă"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC este aleatoriu"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="few">%1$d dispozitive conectate</item>
-      <item quantity="other">%1$d de dispozitive conectate</item>
-      <item quantity="one">%1$d dispozitiv conectat</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Niciun dispozitiv conectat}=1{Un dispozitiv conectat}few{# dispozitive conectate}other{# de dispozitive conectate}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mai mult timp."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mai puțin timp."</string>
     <string name="cancel" msgid="5665114069455378395">"Anulați"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="done" msgid="381184316122520313">"Gata"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permiteți setarea pentru alarme și mementouri"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarme și mementouri"</string>
@@ -520,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Întreabă de fiecare dată"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Până când dezactivați"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Chiar acum"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Difuzorul telefonului"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Acest telefon"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Această tabletă"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Acest telefon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problemă la conectare. Opriți și reporniți dispozitivul."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispozitiv audio cu fir"</string>
@@ -560,18 +585,26 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurați blocarea"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Treceți la <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Se creează un utilizator nou…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Se creează un invitat nou…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Nu s-a creat noul utilizator"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Nu s-a putut crea un invitat nou"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudonim"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Adăugați un utilizator"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adăugați un invitat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ștergeți invitatul"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Resetați sesiunea pentru invitați"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Invitat"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetați invitatul?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excludeți invitatul?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetați"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eliminați"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Faceți o fotografie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Alegeți o imagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selectați fotografia"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Prea multe încercări incorecte. Datele de pe acest dispozitiv vor fi șterse."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Prea multe încercări incorecte. Acest utilizator va fi șters."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Prea multe încercări incorecte. Acest profil de serviciu și datele sale vor fi șterse."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Respingeți"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Prestabilit pentru dispozitiv"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Dezactivat"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activat"</string>
@@ -606,11 +639,24 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet deconectat."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Apelarea nu este disponibilă."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanați codul QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pentru a începe să ascultați, centrați codul QR de mai jos"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Codul QR nu are un format valid"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Oră"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Dată"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Meteo"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Calitatea aerului"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Informații artiști"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Alegeți o fotografie de profil"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Pictograma prestabilită a utilizatorului"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"Tastatură fizică"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Alegeți aspectul tastaturii"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Prestabilit"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activați ecranul"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permiteți activarea ecranului"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permiteți unei aplicații să activeze ecranul. Dacă acordați permisiunea, aplicația poate să activeze oricând ecranul, fără intenția dvs. explicită."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Opriți difuzarea <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Dacă difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbați rezultatul, difuzarea actuală se va opri"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Schimbați rezultatul"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animații pentru gestul înapoi predictiv"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activați animațiile de sistem pentru gestul înapoi predictiv."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Această setare activează animațiile de sistem pentru animația gesturilor predictive. Necesită setarea valorii true în cazul atributului enableOnBackInvokedCallback pentru fiecare aplicație în fișierul manifest."</string>
 </resources>

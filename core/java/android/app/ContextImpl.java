@@ -77,6 +77,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -113,6 +114,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -215,6 +217,12 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     private @Nullable ClassLoader mClassLoader;
 
+    /**
+     * The {@link com.android.server.wm.WindowToken} representing this instance if it is
+     * {@link #CONTEXT_TYPE_WINDOW_CONTEXT} or {@link #CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI}.
+     * If the type is {@link #CONTEXT_TYPE_ACTIVITY}, then represents the
+     * {@link android.window.WindowContainerToken} of the activity.
+     */
     private final @Nullable IBinder mToken;
 
     private final @NonNull UserHandle mUser;
@@ -1280,13 +1288,23 @@ class ContextImpl extends Context {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
+        String[] excludedPermissions = null;
+        if (options != null) {
+            String[] receiverPermissionsBundle = options.getStringArray(
+                    BroadcastOptions.KEY_REQUIRE_ALL_OF_PERMISSIONS);
+            if (receiverPermissionsBundle != null) {
+                receiverPermissions = receiverPermissionsBundle;
+            }
+            excludedPermissions = options.getStringArray(
+                    BroadcastOptions.KEY_REQUIRE_NONE_OF_PERMISSIONS);
+        }
         try {
             intent.prepareToLeaveProcess(this);
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, options, false,
-                    false, getUserId());
+                    excludedPermissions, null, AppOpsManager.OP_NONE, options, false, false,
+                    getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1789,6 +1807,12 @@ class ContextImpl extends Context {
             }
         }
         try {
+            ActivityThread thread = ActivityThread.currentActivityThread();
+            Instrumentation instrumentation = thread.getInstrumentation();
+            if (instrumentation.isInstrumenting()
+                    && ((flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
+                flags = flags | Context.RECEIVER_EXPORTED;
+            }
             final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
                     mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
                     AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,
@@ -1981,7 +2005,8 @@ class ContextImpl extends Context {
 
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
             String instanceName, Handler handler, Executor executor, UserHandle user) {
-        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser and
+        // ActivityManagerLocal.bindSdkSandboxService
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -2007,10 +2032,10 @@ class ContextImpl extends Context {
                 flags |= BIND_WAIVE_PRIORITY;
             }
             service.prepareToLeaveProcess(this);
-            int res = ActivityManager.getService().bindIsolatedService(
-                mMainThread.getApplicationThread(), getActivityToken(), service,
-                service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
+            int res = ActivityManager.getService().bindServiceInstance(
+                    mMainThread.getApplicationThread(), getActivityToken(), service,
+                    service.resolveTypeIfNeeded(getContentResolver()),
+                    sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);
@@ -2163,6 +2188,12 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
+        getSystemService(PermissionControllerManager.class).revokeSelfPermissionsOnKill(
+                getPackageName(), new ArrayList<String>(permissions));
+    }
+
+    @Override
     public int checkCallingPermission(String permission) {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");
@@ -2291,7 +2322,7 @@ class ContextImpl extends Context {
             int modeFlags) {
         try {
             return ActivityManager.getService().checkUriPermissions(uris, pid, uid, modeFlags,
-                    null);
+                    getUserId(), null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2878,6 +2909,14 @@ class ContextImpl extends Context {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getAssociatedDisplayId()  {
+        return isAssociatedWithDisplay() ? getDisplayId() : Display.INVALID_DISPLAY;
+    }
+
     @Override
     public Display getDisplayNoVerify() {
         if (mDisplay == null) {
@@ -3161,6 +3200,7 @@ class ContextImpl extends Context {
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
             mContentCaptureOptions = container.mContentCaptureOptions;
+            mAutofillOptions = container.mAutofillOptions;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();

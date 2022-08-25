@@ -69,6 +69,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Interface for communicating with the permission controller.
@@ -126,6 +127,51 @@ public final class PermissionControllerManager {
 
     /** Count and app even if it is a system app. */
     public static final int COUNT_WHEN_SYSTEM = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "HIBERNATION_ELIGIBILITY_"}, value = {
+            HIBERNATION_ELIGIBILITY_UNKNOWN,
+            HIBERNATION_ELIGIBILITY_ELIGIBLE,
+            HIBERNATION_ELIGIBILITY_EXEMPT_BY_SYSTEM,
+            HIBERNATION_ELIGIBILITY_EXEMPT_BY_USER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HibernationEligibilityFlag {}
+
+    /**
+     * Unknown whether package is eligible for hibernation.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HIBERNATION_ELIGIBILITY_UNKNOWN = -1;
+
+    /**
+     * Package is eligible for app hibernation and may be hibernated when the job runs.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HIBERNATION_ELIGIBILITY_ELIGIBLE = 0;
+
+    /**
+     * Package is not eligible for app hibernation because it is categorically exempt via the
+     * system.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HIBERNATION_ELIGIBILITY_EXEMPT_BY_SYSTEM = 1;
+
+    /**
+     * Package is not eligible for app hibernation because it has been exempt by the user's
+     * preferences. Note that this should not be set if the package is exempt from hibernation by
+     * the system as the user preference would have no effect.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HIBERNATION_ELIGIBILITY_EXEMPT_BY_USER = 2;
 
     /**
      * Callback for delivering the result of {@link #revokeRuntimePermissions}.
@@ -785,5 +831,106 @@ public final class PermissionControllerManager {
                 Binder.restoreCallingIdentity(token);
             }
         }, executor);
+    }
+
+    /**
+     * Get the number of unused, hibernating apps for the user.
+     *
+     * @param executor executor to run callback on
+     * @param callback callback for when result is generated
+     */
+    public void getUnusedAppCount(@NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer callback) {
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        mRemoteService.postAsync(service -> {
+            AndroidFuture<Integer> unusedAppCountResult = new AndroidFuture<>();
+            service.getUnusedAppCount(unusedAppCountResult);
+            return unusedAppCountResult;
+        }).whenCompleteAsync((count, err) -> {
+            if (err != null) {
+                Log.e(TAG, "Error getting unused app count", err);
+                callback.accept(0);
+            } else {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    callback.accept((int) count);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }, executor);
+    }
+
+    /**
+     * Get the hibernation eligibility of a package. See {@link HibernationEligibilityFlag}.
+     *
+     * @param packageName package name to check eligibility
+     * @param executor executor to run callback on
+     * @param callback callback for when result is generated
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_APP_HIBERNATION)
+    public void getHibernationEligibility(@NonNull String packageName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer callback) {
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        mRemoteService.postAsync(service -> {
+            AndroidFuture<Integer> eligibilityResult = new AndroidFuture<>();
+            service.getHibernationEligibility(packageName, eligibilityResult);
+            return eligibilityResult;
+        }).whenCompleteAsync((eligibility, err) -> {
+            if (err != null) {
+                Log.e(TAG, "Error getting hibernation eligibility", err);
+                callback.accept(HIBERNATION_ELIGIBILITY_UNKNOWN);
+            } else {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    callback.accept(eligibility);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }, executor);
+    }
+
+    /**
+     * Triggers the revocation of one or more permissions for a package, under the following
+     * conditions:
+     * <ul>
+     * <li>The package {@code packageName} must be under the same UID as the calling process
+     * (typically, the target package is the calling package).
+     * <li>Each permission in {@code permissions} must be granted to the package
+     * {@code packageName}.
+     * <li>Each permission in {@code permissions} must be a runtime permission.
+     * </ul>
+     * <p>
+     * Background permissions which have no corresponding foreground permission still granted once
+     * the revocation is effective will also be revoked.
+     * <p>
+     * This revocation happens asynchronously and kills all processes running in the same UID as
+     * {@code packageName}. It will be triggered once it is safe to do so.
+     *
+     * @param packageName The name of the package for which the permissions will be revoked.
+     * @param permissions List of permissions to be revoked.
+     *
+     * @see Context#revokeSelfPermissionsOnKill(java.util.Collection)
+     *
+     * @hide
+     */
+    public void revokeSelfPermissionsOnKill(@NonNull String packageName,
+            @NonNull List<String> permissions) {
+        mRemoteService.postAsync(service -> {
+            AndroidFuture<Void> callback = new AndroidFuture<>();
+            service.revokeSelfPermissionsOnKill(packageName, permissions, callback);
+            return callback;
+        }).whenComplete((result, err) -> {
+            if (err != null) {
+                Log.e(TAG, "Failed to self revoke " + String.join(",", permissions)
+                        + " for package " + packageName, err);
+            }
+        });
     }
 }

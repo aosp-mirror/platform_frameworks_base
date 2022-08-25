@@ -110,6 +110,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.intentresolver",
+    sub_dir: "permissions",
+    src: "com.android.intentresolver.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.launcher3",
     system_ext_specific: true,
     sub_dir: "permissions",

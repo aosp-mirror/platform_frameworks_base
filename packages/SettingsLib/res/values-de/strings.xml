@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Netzwerkscan nicht möglich"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Keine/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite B 192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Keine"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Keinse/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192 Bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Gespeichert"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Nicht verbunden"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Deaktiviert"</string>
@@ -82,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Akkustand L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, nur links"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, nur rechts"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, links und rechts"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medien-Audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonanrufe"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Dateiübertragung"</string>
@@ -95,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-Audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-Audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hörhilfen"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Mit Hörhilfen verbunden"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Verbinden mit LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Mit LE Audio verbunden"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Verbunden mit Medien-Audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Verbunden mit Telefon-Audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Mit Dateiübertragungsserver verbunden"</string>
@@ -131,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Kopfhörer"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Eingabeperipherie"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Linke Hörhilfe wird gekoppelt…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Rechte Hörhilfe wird gekoppelt…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Links, Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Rechts, Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"WLAN: aus"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"WLAN getrennt"</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"WLAN: ein Balken"</string>
@@ -153,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Tethering"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Tethering &amp; mobiler Hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Alle Arbeitsprofil-Apps"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Gast"</string>
     <string name="unknown" msgid="3544487229740637809">"Unbekannt"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Nutzer: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Einige Standardeinstellungen festgelegt"</string>
@@ -255,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Zertifizierung für kabellose Übertragung"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ausführliche WLAN-Protokollierung aktivieren"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Drosselung der WLAN-Suche"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Unbeständige MAC-Randomisierung für WLAN"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Nicht persistente, zufällige Generierung von MAC-Adressen für WLAN"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobile Datennutzung immer aktiviert"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwarebeschleunigung für Tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-Geräte ohne Namen anzeigen"</string>
@@ -287,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"WLAN-Protokollierungsebene erhöhen, in WLAN-Auswahl für jede SSID RSSI anzeigen"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wenn dieser Modus aktiviert ist, kann sich die MAC-Adresse dieses Geräts bei jeder Verbindung mit einem Netzwerk ändern, bei dem die MAC-Adressen randomisiert werden."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Wenn dieser Modus aktiviert ist, kann sich die MAC-Adresse dieses Geräts bei jeder Verbindung mit einem Netzwerk ändern, bei dem die MAC-Adressen zufällig generiert werden."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ohne Datenlimit"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-Puffergrößen"</string>
@@ -423,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farbkorrektur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Hier kannst du anpassen, wie Farben auf deinem Gerät dargestellt werden sollen. Das kann in folgenden Fällen hilfreich sein:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Wenn du Farben genauer erkennen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;Wenn du Farben entfernen möchtest, um dich besser konzentrieren zu können&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Noch etwa <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -460,7 +485,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Wird nicht geladen"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Verbunden, wird nicht geladen"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Aufgeladen"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Vollständig geladen"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Durch den Administrator verwaltet"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Gesteuert durch eingeschränkte Einstellung"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiviert"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Zugelassen"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nicht zugelassen"</string>
@@ -493,14 +520,12 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nicht registriert"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Nicht verfügbar"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC-Adresse wird zufällig festgelegt"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d Geräte verbunden</item>
-      <item quantity="one">%1$d Gerät verbunden</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 Geräte verbunden}=1{1 Gerät verbunden}other{# Geräte verbunden}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mehr Zeit."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Weniger Zeit."</string>
     <string name="cancel" msgid="5665114069455378395">"Abbrechen"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="done" msgid="381184316122520313">"Fertig"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wecker und Erinnerungen"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Erlauben, Wecker und Erinnerungen einzurichten"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wecker und Erinnerungen"</string>
@@ -519,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Bis zur Deaktivierung"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Gerade eben"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Smartphone-Lautsprecher"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Dieses Smartphone"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dieses Tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Dieses Smartphone"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
@@ -559,18 +585,26 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Sperre einrichten"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Zu <xliff:g id="USER_NAME">%s</xliff:g> wechseln"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Neuer Nutzer wird erstellt…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Neuer Gast wird erstellt…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Nutzer konnte nicht erstellt werden"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Fehler beim Erstellen eines neuen Gasts"</string>
     <string name="user_nickname" msgid="262624187455825083">"Alias"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Nutzer hinzufügen"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Gast hinzufügen"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Gast entfernen"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Gast zurücksetzen"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Gast"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Gast zurücksetzen?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Gast entfernen?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Zurücksetzen"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Entfernen"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Gast wird zurückgesetzt…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto machen"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Bild auswählen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto auswählen"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Zu viele Fehlversuche. Die Daten auf diesem Gerät werden gelöscht."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Zu viele Fehlversuche. Dieser Nutzer wird gelöscht."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Zu viele Fehlversuche. Dieses Arbeitsprofil und die zugehörigen Daten werden gelöscht."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Schließen"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Gerätestandard"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiviert"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiviert"</string>
@@ -605,11 +639,24 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet nicht verbunden"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Keine Anrufe."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-Code scannen"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Scanne zum Anhören den QR-Code unten"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Das Format des QR-Codes ist nicht gültig"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Uhrzeit"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Wetter"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Luftqualität"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Streaming-Info"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Profilbild auswählen"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Standardmäßiges Nutzersymbol"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"Physische Tastatur"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Tastaturlayout wählen"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standard"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Display aktivieren"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Aktivieren des Displays erlauben"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Einer App erlauben, das Display zu aktivieren. Wenn du diese Erlaubnis erteilst, kann die App jederzeit das Display aktivieren – auch ohne deine explizite Absicht."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> nicht mehr streamen?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Wenn du <xliff:g id="SWITCHAPP">%1$s</xliff:g> streamst oder die Ausgabe änderst, wird dein aktueller Stream beendet"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> streamen"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Ausgabe ändern"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animationen für intelligente „Zurück“-Touch-Geste"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Du kannst Systemanimationen für die intelligente „Zurück“-Touch-Geste aktivieren."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Diese Einstellung aktiviert Systemanimationen für intelligente Touch-Gesten. Dazu muss in der Manifestdatei enableOnBackInvokedCallback auf App-Ebene auf „true“ gesetzt werden."</string>
 </resources>

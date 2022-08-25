@@ -16,8 +16,11 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.MagnificationConfig;
+import android.annotation.NonNull;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -33,6 +36,8 @@ import java.util.List;
  */
 public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceConnection.Stub {
     public void setServiceInfo(AccessibilityServiceInfo info) {}
+
+    public void setAttributionTag(String attributionTag) {}
 
     public String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
             long accessibilityNodeId, int interactionId,
@@ -95,6 +100,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setOnKeyEventResult(boolean handled, int sequence) {}
 
+    public MagnificationConfig getMagnificationConfig(int displayId) {
+        return null;
+    }
+
     public float getMagnificationScale(int displayId) {
         return 0.0f;
     }
@@ -111,12 +120,20 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return null;
     }
 
+    public Region getCurrentMagnificationRegion(int displayId) {
+        return null;
+    }
+
     public boolean resetMagnification(int displayId, boolean animate) {
         return false;
     }
 
-    public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
-            float centerY, boolean animate) {
+    public boolean resetCurrentMagnification(int displayId, boolean animate) {
+        return false;
+    }
+
+    public boolean setMagnificationConfig(int displayId,
+            @NonNull MagnificationConfig config, boolean animate) {
         return false;
     }
 
@@ -134,6 +151,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public boolean switchToInputMethod(String imeId) {
         return false;
+    }
+
+    public int setInputMethodEnabled(String imeId, boolean enabled) {
+        return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
     }
 
     public boolean isAccessibilityButtonAvailable() {
@@ -158,15 +179,31 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void takeScreenshot(int displayId, RemoteCallback callback) {}
 
-    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
-
-    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
-
     public void setFocusAppearance(int strokeWidth, int color) {}
+
+    public void setCacheEnabled(boolean enabled) {}
 
     public void logTrace(long timestamp, String where, String callingParams, int processId,
             long threadId, int callingUid, Bundle callingStack) {}
 
+    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
+
+    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {}
+
+    public void requestTouchExploration(int displayId) {}
+
+    public void requestDragging(int displayId, int pointerId) {}
+
+    public void requestDelegating(int displayId) {}
+
+    public void onDoubleTap(int displayId) {}
+
+    public void onDoubleTapAndHold(int displayId) {}
+
     public void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
             int processId, long threadId, int callingUid, Bundle serializedCallingStackInBundle) {}
+
+    public void setAnimationScale(float scale) {}
 }

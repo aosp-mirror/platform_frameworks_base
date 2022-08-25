@@ -22,12 +22,13 @@ import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
-import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -35,7 +36,6 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
@@ -60,16 +60,23 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
+@Group1
 class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val taplInstrumentation = LauncherInstrumentation()
+
     private val testApp = SimpleAppHelper(instrumentation)
-    private val startDisplayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+
+    private val startDisplayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
+                test {
+                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
+                }
+
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
                     device.pressHome()
@@ -78,20 +85,10 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
                 }
             }
             transitions {
-                // Swipe right from bottom to quick switch back
-                // NOTE: We don't perform an edge-to-edge swipe but instead only swipe in the middle
-                // as to not accidentally trigger a swipe back or forward action which would result
-                // in the same behavior but not testing quick swap.
-                device.swipe(
-                        startDisplayBounds.bounds.right / 3,
-                        startDisplayBounds.bounds.bottom,
-                        2 * startDisplayBounds.bounds.right / 3,
-                        startDisplayBounds.bounds.bottom,
-                        50
-                )
-
+                taplInstrumentation.workspace.quickSwitchToPreviousApp()
                 wmHelper.waitForFullScreenApp(testApp.component)
                 wmHelper.waitForAppTransitionIdle()
+                wmHelper.waitForNavBarStatusBarVisible()
             }
 
             teardown {
@@ -262,7 +259,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
@@ -278,7 +275,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                     .then()
-                    .isVisible(FlickerComponentName.SNAPSHOT)
+                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isVisible(testApp.component)
         }
@@ -334,7 +331,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(
-                            repetitions = 5,
+                            repetitions = 3,
                             supportedNavigationModes = listOf(
                                     WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                             ),

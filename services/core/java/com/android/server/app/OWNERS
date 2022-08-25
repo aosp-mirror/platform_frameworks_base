@@ -1,1 +1,1 @@
-per-file GameManager* = file:/GAME_MANAGER_OWNERS
+per-file Game* = file:/GAME_MANAGER_OWNERS

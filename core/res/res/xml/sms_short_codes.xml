@@ -277,6 +277,6 @@
     <shortcode country="yt" pattern="\\d{1,5}" free="38600,36300,36303,959" />
 
     <!-- South Africa -->
-    <shortcode country="za" pattern="\d{1,5}" free="44136|30791|36056" />
+    <shortcode country="za" pattern="\\d{1,5}" free="44136|30791|36056" />
 
 </shortcodes>

@@ -22,8 +22,6 @@
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
 
-    <dimen name="circle_avatar_size">40dp</dimen>
-
     <!-- Height of a user icon view -->
     <dimen name="user_icon_view_height">24dp</dimen>
     <!-- User spinner -->
@@ -98,9 +96,36 @@
     <!-- Minimum width for the popup for updating a user's photo. -->
     <dimen name="update_user_photo_popup_min_width">300dp</dimen>
 
-    <!-- QR code picture size -->
-    <dimen name="qrcode_preview_size">360dp</dimen>
-    <dimen name="qrcode_preview_margin">40dp</dimen>
-    <dimen name="qrcode_preview_radius">30dp</dimen>
-    <dimen name="qrcode_icon_size">27dp</dimen>
+    <dimen name="add_a_photo_circled_padding">6dp</dimen>
+    <dimen name="user_photo_size_in_user_info_dialog">112dp</dimen>
+    <dimen name="add_a_photo_icon_size_in_user_info_dialog">32dp</dimen>
+    <dimen name="user_name_height_in_user_info_dialog">48sp</dimen>
+
+    <integer name="avatar_picker_columns">3</integer>
+    <dimen name="avatar_size_in_picker">96dp</dimen>
+    <dimen name="avatar_picker_padding">6dp</dimen>
+    <dimen name="avatar_picker_margin">2dp</dimen>
+
+    <dimen name="avatar_picker_icon_inset">25dp</dimen>
+
+    <!-- Minimum increment between density scales. -->
+    <fraction name="display_density_min_scale_interval">9%</fraction>
+    <!-- Maximum density scale. The actual scale used depends on the device. -->
+    <fraction name="display_density_max_scale">150%</fraction>
+    <!-- Minimum density scale. This is available on all devices. -->
+    <fraction name="display_density_min_scale">85%</fraction>
+
+    <!-- Broadcast dialog -->
+    <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
+    <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
+    <dimen name="broadcast_dialog_title_text_margin">16dp</dimen>
+    <dimen name="broadcast_dialog_title_text_margin_top">18dp</dimen>
+    <dimen name="broadcast_dialog_subtitle_text_size">14sp</dimen>
+    <dimen name="broadcast_dialog_icon_size">24dp</dimen>
+    <dimen name="broadcast_dialog_icon_margin_top">25dp</dimen>
+    <dimen name="broadcast_dialog_btn_radius">100dp</dimen>
+    <dimen name="broadcast_dialog_btn_margin_bottom">4dp</dimen>
+    <dimen name="broadcast_dialog_btn_text_size">16sp</dimen>
+    <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
+    <dimen name="broadcast_dialog_margin">16dp</dimen>
 </resources>

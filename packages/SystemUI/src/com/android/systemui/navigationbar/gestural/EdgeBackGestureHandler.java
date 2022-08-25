@@ -36,12 +36,12 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Choreographer;
-import android.view.Display;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InputDevice;
@@ -57,6 +57,7 @@ import android.view.WindowMetrics;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
+import com.android.internal.util.LatencyTracker;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -80,6 +81,7 @@ import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
+import com.android.wm.shell.back.BackAnimation;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -105,9 +107,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
     static final boolean DEBUG_MISSING_GESTURE = false;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
-
-    private static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -199,6 +198,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private final Rect mNavBarOverlayExcludedBounds = new Rect();
     private final Region mExcludeRegion = new Region();
     private final Region mUnrestrictedExcludeRegion = new Region();
+    private final LatencyTracker mLatencyTracker;
 
     // The left side edge width where touch down is allowed
     private int mEdgeWidthLeft;
@@ -235,6 +235,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
 
     private NavigationEdgeBackPlugin mEdgeBackPlugin;
+    private BackAnimation mBackAnimation;
     private int mLeftInset;
     private int mRightInset;
     private int mSysUiFlags;
@@ -263,11 +264,14 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     // Notify FalsingManager that an intentional gesture has occurred.
                     // TODO(b/186519446): use a different method than isFalseTouch
                     mFalsingManager.isFalseTouch(BACK_GESTURE);
-                    boolean sendDown = sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-                    boolean sendUp = sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-                    if (DEBUG_MISSING_GESTURE) {
-                        Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down=" + sendDown
-                                + ", up=" + sendUp);
+                    // Only inject back keycodes when ahead-of-time back dispatching is disabled.
+                    if (mBackAnimation == null) {
+                        boolean sendDown = sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                        boolean sendUp = sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+                        if (DEBUG_MISSING_GESTURE) {
+                            Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down="
+                                    + sendDown + ", up=" + sendUp);
+                        }
                     }
 
                     mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
@@ -299,7 +303,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             BroadcastDispatcher broadcastDispatcher, ProtoTracer protoTracer,
             NavigationModeController navigationModeController, ViewConfiguration viewConfiguration,
             WindowManager windowManager, IWindowManager windowManagerService,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager, LatencyTracker latencyTracker) {
         super(broadcastDispatcher);
         mContext = context;
         mDisplayId = context.getDisplayId();
@@ -313,13 +317,18 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         mWindowManager = windowManager;
         mWindowManagerService = windowManagerService;
         mFalsingManager = falsingManager;
+        mLatencyTracker = latencyTracker;
         ComponentName recentsComponentName = ComponentName.unflattenFromString(
                 context.getString(com.android.internal.R.string.config_recentsComponentName));
         if (recentsComponentName != null) {
             String recentsPackageName = recentsComponentName.getPackageName();
             PackageManager manager = context.getPackageManager();
             try {
-                Resources resources = manager.getResourcesForApplication(recentsPackageName);
+                Resources resources = manager.getResourcesForApplication(
+                        manager.getApplicationInfo(recentsPackageName,
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                        | PackageManager.MATCH_DISABLED_COMPONENTS
+                                        | PackageManager.GET_SHARED_LIBRARY_FILES));
                 int resId = resources.getIdentifier(
                         "gesture_blocking_activities", "array", recentsPackageName);
 
@@ -498,7 +507,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     Choreographer.getInstance(), this::onInputEvent);
 
             // Add a nav bar panel window
-            setEdgeBackPlugin(new NavigationBarEdgePanel(mContext));
+            setEdgeBackPlugin(
+                    new NavigationBarEdgePanel(mContext, mBackAnimation, mLatencyTracker));
             mPluginManager.addPluginListener(
                     this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
         }
@@ -513,7 +523,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
     @Override
     public void onPluginDisconnected(NavigationEdgeBackPlugin plugin) {
-        setEdgeBackPlugin(new NavigationBarEdgePanel(mContext));
+        setEdgeBackPlugin(new NavigationBarEdgePanel(mContext, mBackAnimation, mLatencyTracker));
     }
 
     private void setEdgeBackPlugin(NavigationEdgeBackPlugin edgeBackPlugin) {
@@ -561,16 +571,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private void onInputEvent(InputEvent ev) {
         if (!(ev instanceof MotionEvent)) return;
         MotionEvent event = (MotionEvent) ev;
-        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            final Display display = mContext.getDisplay();
-            int rotation = display.getRotation();
-            if (rotation != Surface.ROTATION_0) {
-                Point sz = new Point();
-                display.getRealSize(sz);
-                event = MotionEvent.obtain(event);
-                event.transform(MotionEvent.createRotateMatrix(rotation, sz.x, sz.y));
-            }
-        }
         onMotionEvent(event);
     }
 
@@ -590,7 +590,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mMLModelThreshold = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD, 0.9f);
             if (mBackGestureTfClassifierProvider.isActive()) {
+                Trace.beginSection("EdgeBackGestureHandler#loadVocab");
                 mVocab = mBackGestureTfClassifierProvider.loadVocab(mContext.getAssets());
+                Trace.endSection();
                 mUseMLModel = true;
                 return;
             }
@@ -944,6 +946,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
     }
 
+    public void setBackAnimation(BackAnimation backAnimation) {
+        mBackAnimation = backAnimation;
+        if (mEdgeBackPlugin != null && mEdgeBackPlugin instanceof NavigationBarEdgePanel) {
+            ((NavigationBarEdgePanel) mEdgeBackPlugin).setBackAnimation(backAnimation);
+        }
+    }
+
     /**
      * Injectable instance to create a new EdgeBackGestureHandler.
      *
@@ -962,6 +971,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         private final WindowManager mWindowManager;
         private final IWindowManager mWindowManagerService;
         private final FalsingManager mFalsingManager;
+        private final LatencyTracker mLatencyTracker;
 
         @Inject
         public Factory(OverviewProxyService overviewProxyService,
@@ -969,7 +979,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 BroadcastDispatcher broadcastDispatcher, ProtoTracer protoTracer,
                 NavigationModeController navigationModeController,
                 ViewConfiguration viewConfiguration, WindowManager windowManager,
-                IWindowManager windowManagerService, FalsingManager falsingManager) {
+                IWindowManager windowManagerService, FalsingManager falsingManager,
+                LatencyTracker latencyTracker) {
             mOverviewProxyService = overviewProxyService;
             mSysUiState = sysUiState;
             mPluginManager = pluginManager;
@@ -981,6 +992,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mWindowManager = windowManager;
             mWindowManagerService = windowManagerService;
             mFalsingManager = falsingManager;
+            mLatencyTracker = latencyTracker;
         }
 
         /** Construct a {@link EdgeBackGestureHandler}. */
@@ -988,7 +1000,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             return new EdgeBackGestureHandler(context, mOverviewProxyService, mSysUiState,
                     mPluginManager, mExecutor, mBroadcastDispatcher, mProtoTracer,
                     mNavigationModeController, mViewConfiguration, mWindowManager,
-                    mWindowManagerService, mFalsingManager);
+                    mWindowManagerService, mFalsingManager, mLatencyTracker);
         }
     }
 

@@ -38,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -361,7 +362,8 @@ public interface StatusBarIconController {
 
         private StatusBarMobileView onCreateStatusBarMobileView(String slot) {
             StatusBarMobileView view = StatusBarMobileView.fromContext(
-                            mContext, slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
+                            mContext, slot,
+                    mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS));
             return view;
         }
 

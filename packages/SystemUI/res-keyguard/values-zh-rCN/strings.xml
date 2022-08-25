@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM 卡无效。"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"已充满电"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在无线充电"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在基座上充电"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充电"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在快速充电"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在慢速充电"</string>
@@ -52,10 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"图案错误"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"密码错误"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN 码错误"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="other">请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。</item>
-      <item quantity="one">请在 1 秒后重试。</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{请在 # 秒后重试。}other{请在 # 秒后重试。}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"请输入 SIM 卡 PIN 码。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"请输入“<xliff:g id="CARRIER">%1$s</xliff:g>”的 SIM 卡 PIN 码。"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g>停用 eSIM 卡即可在没有移动服务的情况下使用设备。"</string>
@@ -91,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"需要输入密码以进一步确保安全"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"此设备已手动锁定"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"无法识别"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"无法识别"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"如需使用人脸解锁功能，请在“设置”&gt;“隐私权”中开启"<b>"摄像头使用权限"</b></string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

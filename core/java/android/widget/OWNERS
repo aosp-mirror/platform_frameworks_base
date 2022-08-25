@@ -11,3 +11,5 @@ njawad@google.com
 per-file TextView*,EditText.java,Editor.java,EditorTouchState.java = file:../text/OWNERS
 
 per-file SpellChecker.java = file:../view/inputmethod/OWNERS
+
+per-file RemoteViews* = file:../appwidget/OWNERS

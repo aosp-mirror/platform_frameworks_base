@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.annotation.UserIdInt;
+import android.app.Application;
 import android.app.ApplicationPackageManager;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
@@ -110,6 +111,7 @@ public class ApplicationsStateRoboTest {
     private ApplicationsState mApplicationsState;
     private Session mSession;
 
+    private Application mApplication;
 
     @Mock
     private Callbacks mCallbacks;
@@ -159,7 +161,7 @@ public class ApplicationsStateRoboTest {
         }
 
         public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
-                @PackageManager.ResolveInfoFlags int flags, @UserIdInt int userId) {
+                @PackageManager.ResolveInfoFlagsBits int flags, @UserIdInt int userId) {
             List<ResolveInfo> resolveInfos = new ArrayList<>();
             ResolveInfo resolveInfo = new ResolveInfo();
             resolveInfo.activityInfo = new ActivityInfo();
@@ -190,6 +192,7 @@ public class ApplicationsStateRoboTest {
         ShadowContextImpl shadowContext = Shadow.extract(
                 RuntimeEnvironment.application.getBaseContext());
         shadowContext.setSystemService(Context.STORAGE_STATS_SERVICE, mStorageStatsManager);
+        mApplication = spy(RuntimeEnvironment.application);
         StorageStats storageStats = new StorageStats();
         storageStats.codeBytes = 10;
         storageStats.cacheBytes = 30;
@@ -204,11 +207,10 @@ public class ApplicationsStateRoboTest {
         infos.add(createApplicationInfo("test.hidden.module.2"));
         infos.add(createApplicationInfo("test.package.3"));
         when(mPackageManagerService.getInstalledApplications(
-            anyInt() /* flags */, anyInt() /* userId */)).thenReturn(new ParceledListSlice(infos));
+            anyLong() /* flags */, anyInt() /* userId */)).thenReturn(new ParceledListSlice(infos));
 
         ApplicationsState.sInstance = null;
-        mApplicationsState =
-            ApplicationsState.getInstance(RuntimeEnvironment.application, mPackageManagerService);
+        mApplicationsState = ApplicationsState.getInstance(mApplication, mPackageManagerService);
         mApplicationsState.clearEntries();
 
         mSession = mApplicationsState.newSession(mCallbacks);
@@ -703,16 +705,33 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState, never()).clearEntries();
     }
 
+    @Test
+    public void testDefaultSession_enabledAppIconCache_shouldSkipPreloadIcon() {
+        when(mApplication.getPackageName()).thenReturn("com.android.settings");
+        mSession.onResume();
+
+        addApp(HOME_PACKAGE_NAME, 1);
+        addApp(LAUNCHABLE_PACKAGE_NAME, 2);
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        processAllMessages();
+        verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
+
+        List<AppEntry> appEntries = mAppEntriesCaptor.getValue();
+        for (AppEntry appEntry : appEntries) {
+            assertThat(appEntry.icon).isNull();
+        }
+    }
+
     private void setupDoResumeIfNeededLocked(ArrayList<ApplicationInfo> ownerApps,
             ArrayList<ApplicationInfo> profileApps)
             throws RemoteException {
 
         if (ownerApps != null) {
-            when(mApplicationsState.mIpm.getInstalledApplications(anyInt(), eq(0)))
+            when(mApplicationsState.mIpm.getInstalledApplications(anyLong(), eq(0)))
                 .thenReturn(new ParceledListSlice<>(ownerApps));
         }
         if (profileApps != null) {
-            when(mApplicationsState.mIpm.getInstalledApplications(anyInt(), eq(PROFILE_USERID)))
+            when(mApplicationsState.mIpm.getInstalledApplications(anyLong(), eq(PROFILE_USERID)))
                 .thenReturn(new ParceledListSlice<>(profileApps));
         }
         final InterestingConfigChanges configChanges = mock(InterestingConfigChanges.class);

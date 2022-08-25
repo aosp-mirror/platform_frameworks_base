@@ -182,7 +182,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true, false);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
@@ -193,7 +193,7 @@ public class CommandQueueTest extends SysuiTestCase {
         // First show in default display to update the "last updated ime display"
         testShowImeButton();
 
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true, false);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(null), eq(IME_INVISIBLE),
                 eq(BACK_DISPOSITION_DEFAULT), eq(false));
@@ -448,9 +448,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricAuthenticated() {
-        mCommandQueue.onBiometricAuthenticated();
+        final int id = 12;
+        mCommandQueue.onBiometricAuthenticated(id);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricAuthenticated();
+        verify(mCallbacks).onBiometricAuthenticated(eq(id));
     }
 
     @Test
@@ -474,9 +475,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHideAuthenticationDialog() {
-        mCommandQueue.hideAuthenticationDialog();
+        final long id = 4;
+        mCommandQueue.hideAuthenticationDialog(id);
         waitForIdleSync();
-        verify(mCallbacks).hideAuthenticationDialog();
+        verify(mCallbacks).hideAuthenticationDialog(eq(id));
     }
 
     @Test

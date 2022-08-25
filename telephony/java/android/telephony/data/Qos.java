@@ -136,8 +136,8 @@ public abstract class Qos {
 
     protected Qos(@NonNull Parcel source) {
         type = source.readInt();
-        downlink = source.readParcelable(QosBandwidth.class.getClassLoader());
-        uplink = source.readParcelable(QosBandwidth.class.getClassLoader());
+        downlink = source.readParcelable(QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
+        uplink = source.readParcelable(QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
     }
 
     /**

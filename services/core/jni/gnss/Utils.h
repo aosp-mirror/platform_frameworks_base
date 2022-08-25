@@ -37,10 +37,18 @@ namespace {
 
 // Must match the value from GnssMeasurement.java
 const uint32_t ADR_STATE_HALF_CYCLE_REPORTED = (1 << 4);
+extern jmethodID method_locationCtor;
 
 } // anonymous namespace
 
+extern jclass class_location;
 extern jobject mCallbacksObj;
+
+namespace gnss {
+void Utils_class_init_once(JNIEnv* env);
+} // namespace gnss
+
+jobject& getCallbacksObj();
 
 jboolean checkHidlReturn(hardware::Return<bool>& result, const char* errorMessage);
 
@@ -190,7 +198,34 @@ private:
     JNIEnv* mEnv = nullptr;
 };
 
+struct ScopedJniString {
+    ScopedJniString(JNIEnv* env, jstring javaString) : mEnv(env), mJavaString(javaString) {
+        mNativeString = mEnv->GetStringUTFChars(mJavaString, nullptr);
+    }
+
+    ~ScopedJniString() {
+        if (mNativeString != nullptr) {
+            mEnv->ReleaseStringUTFChars(mJavaString, mNativeString);
+        }
+    }
+
+    const char* c_str() const { return mNativeString; }
+
+    operator hardware::hidl_string() const { return hardware::hidl_string(mNativeString); }
+
+private:
+    ScopedJniString(const ScopedJniString&) = delete;
+    ScopedJniString& operator=(const ScopedJniString&) = delete;
+
+    JNIEnv* mEnv;
+    jstring mJavaString;
+    const char* mNativeString;
+};
+
 JNIEnv* getJniEnv();
+
+template <class T>
+jobject translateGnssLocation(JNIEnv* env, const T& location);
 
 } // namespace android
 

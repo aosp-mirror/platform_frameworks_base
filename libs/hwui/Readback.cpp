@@ -268,18 +268,14 @@ CopyResult Readback::copySurfaceIntoLegacy(ANativeWindow* window, const Rect& sr
             static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
     sk_sp<SkImage> image =
             SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
-    return copyImageInto(image, texTransform, srcRect, bitmap);
+    return copyImageInto(image, srcRect, bitmap);
 }
 
 CopyResult Readback::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
     LOG_ALWAYS_FATAL_IF(!hwBitmap->isHardware());
 
     Rect srcRect;
-    Matrix4 transform;
-    transform.loadScale(1, -1, 1);
-    transform.translate(0, -1);
-
-    return copyImageInto(hwBitmap->makeImage(), transform, srcRect, bitmap);
+    return copyImageInto(hwBitmap->makeImage(), srcRect, bitmap);
 }
 
 CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap* bitmap) {
@@ -304,14 +300,11 @@ CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap
 
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
     Rect srcRect;
-    Matrix4 transform;
-    transform.loadScale(1, -1, 1);
-    transform.translate(0, -1);
-    return copyImageInto(image, transform, srcRect, bitmap);
+    return copyImageInto(image, srcRect, bitmap);
 }
 
-CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTransform,
-                                   const Rect& srcRect, SkBitmap* bitmap) {
+CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, const Rect& srcRect,
+                                   SkBitmap* bitmap) {
     ATRACE_CALL();
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         mRenderThread.requireGlContext();
@@ -328,11 +321,6 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
     CopyResult copyResult = CopyResult::UnknownError;
 
     int displayedWidth = imgWidth, displayedHeight = imgHeight;
-    // If this is a 90 or 270 degree rotation we need to swap width/height to get the device
-    // size.
-    if (texTransform[Matrix4::kSkewX] >= 0.5f || texTransform[Matrix4::kSkewX] <= -0.5f) {
-        std::swap(displayedWidth, displayedHeight);
-    }
     SkRect skiaDestRect = SkRect::MakeWH(bitmap->width(), bitmap->height());
     SkRect skiaSrcRect = srcRect.toSkRect();
     if (skiaSrcRect.isEmpty()) {
@@ -345,7 +333,6 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
 
     Layer layer(mRenderThread.renderState(), nullptr, 255, SkBlendMode::kSrc);
     layer.setSize(displayedWidth, displayedHeight);
-    texTransform.copyTo(layer.getTexTransform());
     layer.setImage(image);
     // Scaling filter is not explicitly set here, because it is done inside copyLayerInfo
     // after checking the necessity based on the src/dest rect size and the transformation.

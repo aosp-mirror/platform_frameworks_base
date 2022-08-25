@@ -46,6 +46,10 @@
     <!-- Show PiP enter split icon, which allows apps to directly enter splitscreen from PiP. -->
     <bool name="config_pipEnableEnterSplitButton">false</bool>
 
+    <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
+         if a custom action is present before closing it. -->
+    <integer name="config_pipForceCloseDelay">1000</integer>
+
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
@@ -70,6 +74,32 @@
 
     <!-- Animation duration when exit starting window: reveal app -->
     <integer name="starting_window_app_reveal_anim_duration">266</integer>
+
+    <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
+         These values are in DPs and will be converted to pixel sizes internally. -->
+    <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">
+        16x16
+    </string>
+
+    <!-- The percentage of the screen width to use for the default width or height of
+         picture-in-picture windows. Regardless of the percent set here, calculated size will never
+         be smaller than @dimen/default_minimal_size_pip_resizable_task. -->
+    <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.23</item>
+
+    <!-- The default aspect ratio for picture-in-picture windows. -->
+    <item name="config_pictureInPictureDefaultAspectRatio" format="float" type="dimen">
+        1.777778
+    </item>
+
+    <!-- This is the limit for the max and min aspect ratio (1 / this value) at which the min size
+         will be used instead of an adaptive size based loosely on area. -->
+    <item name="config_pictureInPictureAspectRatioLimitForMinSize" format="float" type="dimen">
+        1.777778
+    </item>
+
+    <!-- The default gravity for the picture-in-picture window.
+         Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
+    <integer name="config_defaultPictureInPictureGravity">0x55</integer>
 
     <!-- Whether to dim a split-screen task when the other is the IME target -->
     <bool name="config_dimNonImeAttachedSide">true</bool>

@@ -31,6 +31,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -41,9 +42,11 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -67,7 +70,7 @@ import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
- *  atest WmTests:WindowManagerServiceTests
+ * atest WmTests:WindowManagerServiceTests
  */
 @SmallTest
 @Presubmit
@@ -153,6 +156,15 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
         verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
+    }
+
+    @Test
+    public void testDismissKeyguardCanWakeUp() {
+        doReturn(true).when(mWm).checkCallingPermission(anyString(), anyString());
+        doReturn(true).when(mWm.mAtmService.mKeyguardController).isShowingDream();
+        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+        mWm.dismissKeyguard(null, "test-dismiss-keyguard");
+        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
     }
 
     @Test
@@ -254,7 +266,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
         final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
             @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {}
+            public void onAnimatorScaleChanged(float v) throws RemoteException {
+            }
         });
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 TYPE_APPLICATION_ATTACHED_DIALOG);
@@ -272,5 +285,35 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testSetInTouchMode_instrumentedProcessGetPermissionToSwitchTouchMode() {
+        boolean currentTouchMode = mWm.getInTouchMode();
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        mWm.setInTouchMode(!currentTouchMode);
+
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true);
+    }
+
+    @Test
+    public void testSetInTouchMode_nonInstrumentedProcessDontGetPermissionToSwitchTouchMode() {
+        boolean currentTouchMode = mWm.getInTouchMode();
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(false);
+
+        mWm.setInTouchMode(!currentTouchMode);
+
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
     }
 }

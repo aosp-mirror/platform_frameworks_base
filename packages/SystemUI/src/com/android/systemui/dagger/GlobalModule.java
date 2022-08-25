@@ -16,18 +16,14 @@
 
 package com.android.systemui.dagger;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.view.Display;
 
-import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
-import com.android.systemui.dagger.qualifiers.TestHarness;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.plugins.PluginsModule;
 import com.android.systemui.unfold.UnfoldTransitionModule;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -48,31 +44,29 @@ import dagger.Provides;
  * Please use discretion when adding things to the global scope.
  */
 @Module(includes = {
+        AndroidInternalsModule.class,
         FrameworkServicesModule.class,
         GlobalConcurrencyModule.class,
         UnfoldTransitionModule.class,
         PluginsModule.class,
 })
 public class GlobalModule {
+    /**
+     * TODO(b/229228871): This should be the default. No undecorated context should be available.
+     */
+    @Provides
+    @Application
+    public Context provideApplicationContext(Context context) {
+        return context.getApplicationContext();
+    }
 
-    /** */
+    /**
+     * @deprecated Deprecdated because {@link Display#getMetrics} is deprecated.
+     */
     @Provides
     public DisplayMetrics provideDisplayMetrics(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         context.getDisplay().getMetrics(displayMetrics);
         return displayMetrics;
-    }
-
-    /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
-    @Provides
-    @Singleton
-    static UiEventLogger provideUiEventLogger() {
-        return new UiEventLoggerImpl();
-    }
-
-    @Provides
-    @TestHarness
-    static boolean provideIsTestHarness() {
-        return ActivityManager.isRunningInUserTestHarness();
     }
 }

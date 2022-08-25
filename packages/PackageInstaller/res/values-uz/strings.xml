@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bu ilovani o‘chirib tashlamoqchimisiz?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Ushbu ilova "<b>"barcha"</b>" foydalanuvchilar uchun o‘chirilsinmi? Ilova va uning axborotlari qurilmadagi "<b>"barcha"</b>" foydalanuvchilardan o‘chib ketadi."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Haqiqatdan ham <xliff:g id="USERNAME">%1$s</xliff:g> foydalanuvchi uchun ushbu ilovani olib tashlamoqchimisiz?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bu ilova ish profilidan olib tashlansinmi?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Bu ilova boshlang‘ich versiyasi bilan almashtirilsinmi? Barcha axborotlar o‘chirib tashlanadi."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Bu ilova boshlang‘ich versiyasi bilan almashtirilsinmi? Barcha axborotlar o‘chirib tashlanadi. Bu qurilmaning barcha foydalanuvchilariga, jumladan, ularning ishchi profillariga ham ta’sir qiladi."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> hajmdagi ilova axborotlari saqlab qolinsin"</string>

@@ -769,7 +769,7 @@ int doDump(Bundle* bundle)
     config.country[1] = 'S';
     config.orientation = ResTable_config::ORIENTATION_PORT;
     config.density = ResTable_config::DENSITY_MEDIUM;
-    config.sdkVersion = 10000; // Very high.
+    config.sdkVersion = SDK_CUR_DEVELOPMENT; // Very high.
     config.screenWidthDp = 320;
     config.screenHeightDp = 480;
     config.smallestScreenWidthDp = 320;
@@ -1028,7 +1028,6 @@ int doDump(Bundle* bundle)
             // These permissions are required by services implementing services
             // the system binds to (IME, Accessibility, PrintServices, etc.)
             bool hasBindDeviceAdminPermission = false;
-            bool hasBindInputMethodPermission = false;
             bool hasBindAccessibilityServicePermission = false;
             bool hasBindPrintServicePermission = false;
             bool hasBindNfcServicePermission = false;
@@ -1306,16 +1305,30 @@ int doDump(Bundle* bundle)
                                     splitName.string()).string());
                     }
 
+                    // For 'platformBuildVersionName', using both string and int type as a fallback
+                    // since it may be the code name of Android or the API level.
                     String8 platformBuildVersionName = AaptXml::getAttribute(tree, NULL,
                             "platformBuildVersionName");
+                    int32_t platformBuildVersionNameInt =
+                            AaptXml::getIntegerAttribute(tree, NULL, "platformBuildVersionName", 0,
+                                                         NULL);
                     if (platformBuildVersionName != "") {
                         printf(" platformBuildVersionName='%s'", platformBuildVersionName.string());
+                    } else if (platformBuildVersionNameInt > 0) {
+                        printf(" platformBuildVersionName='%d'", platformBuildVersionNameInt);
                     }
 
+                    // For 'platformBuildVersionCode', using both string and int type as a fallback
+                    // since it may be the code name of Android or the API level.
                     String8 platformBuildVersionCode = AaptXml::getAttribute(tree, NULL,
                             "platformBuildVersionCode");
+                    int32_t platformBuildVersionCodeInt =
+                            AaptXml::getIntegerAttribute(tree, NULL, "platformBuildVersionCode", 0,
+                                                         NULL);
                     if (platformBuildVersionCode != "") {
                         printf(" platformBuildVersionCode='%s'", platformBuildVersionCode.string());
+                    } else if (platformBuildVersionCodeInt > 0) {
+                        printf(" platformBuildVersionCode='%d'", platformBuildVersionCodeInt);
                     }
 
                     int32_t compileSdkVersion = AaptXml::getIntegerAttribute(tree,
@@ -1490,7 +1503,7 @@ int doDump(Bundle* bundle)
                                         error.string());
                                 goto bail;
                             }
-                            if (name == "Donut") targetSdk = 4;
+                            if (name == "Donut") targetSdk = SDK_DONUT;
                             printf("sdkVersion:'%s'\n",
                                     ResTable::normalizeForOutput(name.string()).string());
                         } else if (code != -1) {
@@ -1512,7 +1525,12 @@ int doDump(Bundle* bundle)
                                         error.string());
                                 goto bail;
                             }
-                            if (name == "Donut" && targetSdk < 4) targetSdk = 4;
+                            if (name == "Donut" && targetSdk < SDK_DONUT) {
+                                targetSdk = SDK_DONUT;
+                            } else if (name != "" && targetSdk == 0) {
+                                // Bump to current development version
+                                targetSdk = SDK_CUR_DEVELOPMENT;
+                            }
                             printf("targetSdkVersion:'%s'\n",
                                     ResTable::normalizeForOutput(name.string()).string());
                         } else if (code != -1) {
@@ -1738,7 +1756,6 @@ int doDump(Bundle* bundle)
                     hasMetaHostPaymentCategory = false;
                     hasMetaOffHostPaymentCategory = false;
                     hasBindDeviceAdminPermission = false;
-                    hasBindInputMethodPermission = false;
                     hasBindAccessibilityServicePermission = false;
                     hasBindPrintServicePermission = false;
                     hasBindNfcServicePermission = false;
@@ -1852,9 +1869,7 @@ int doDump(Bundle* bundle)
                             String8 permission = AaptXml::getAttribute(tree, PERMISSION_ATTR,
                                     &error);
                             if (error == "") {
-                                if (permission == "android.permission.BIND_INPUT_METHOD") {
-                                    hasBindInputMethodPermission = true;
-                                } else if (permission ==
+                                if (permission ==
                                         "android.permission.BIND_ACCESSIBILITY_SERVICE") {
                                     hasBindAccessibilityServicePermission = true;
                                 } else if (permission ==
@@ -2122,7 +2137,7 @@ int doDump(Bundle* bundle)
             }
 
             // Pre-1.6 implicitly granted permission compatibility logic
-            if (targetSdk < 4) {
+            if (targetSdk < SDK_DONUT) {
                 if (!hasWriteExternalStoragePermission) {
                     printUsesPermission(String8("android.permission.WRITE_EXTERNAL_STORAGE"));
                     printUsesImpliedPermission(String8("android.permission.WRITE_EXTERNAL_STORAGE"),
@@ -2149,7 +2164,7 @@ int doDump(Bundle* bundle)
             }
 
             // Pre-JellyBean call log permission compatibility.
-            if (targetSdk < 16) {
+            if (targetSdk < SDK_JELLY_BEAN) {
                 if (!hasReadCallLogPermission && hasReadContactsPermission) {
                     printUsesPermission(String8("android.permission.READ_CALL_LOG"));
                     printUsesImpliedPermission(String8("android.permission.READ_CALL_LOG"),
@@ -2291,21 +2306,23 @@ int doDump(Bundle* bundle)
             // the screen size support was introduced, so all default to
             // enabled.
             if (smallScreen > 0) {
-                smallScreen = targetSdk >= 4 ? -1 : 0;
+                smallScreen = targetSdk >= SDK_DONUT ? -1 : 0;
             }
             if (normalScreen > 0) {
                 normalScreen = -1;
             }
             if (largeScreen > 0) {
-                largeScreen = targetSdk >= 4 ? -1 : 0;
+                largeScreen = targetSdk >= SDK_DONUT ? -1 : 0;
             }
             if (xlargeScreen > 0) {
                 // Introduced in Gingerbread.
-                xlargeScreen = targetSdk >= 9 ? -1 : 0;
+                xlargeScreen = targetSdk >= SDK_GINGERBREAD ? -1 : 0;
             }
             if (anyDensity > 0) {
-                anyDensity = (targetSdk >= 4 || requiresSmallestWidthDp > 0
-                        || compatibleWidthLimitDp > 0) ? -1 : 0;
+                anyDensity = (targetSdk >= SDK_DONUT || requiresSmallestWidthDp > 0 ||
+                              compatibleWidthLimitDp > 0)
+                        ? -1
+                        : 0;
             }
             printf("supports-screens:");
             if (smallScreen != 0) {

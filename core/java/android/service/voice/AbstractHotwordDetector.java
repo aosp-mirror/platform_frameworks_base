@@ -18,6 +18,7 @@ package android.service.voice;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -34,6 +35,9 @@ import android.util.Slog;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
 /** Base implementation of {@link HotwordDetector}. */
 abstract class AbstractHotwordDetector implements HotwordDetector {
     private static final String TAG = AbstractHotwordDetector.class.getSimpleName();
@@ -45,6 +49,8 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     private final Handler mHandler;
     private final HotwordDetector.Callback mCallback;
     private final int mDetectorType;
+    private Consumer<AbstractHotwordDetector> mOnDestroyListener;
+    private final AtomicBoolean mIsDetectorActive;
 
     AbstractHotwordDetector(
             IVoiceInteractionManagerService managerService,
@@ -55,6 +61,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         mHandler = new Handler(Looper.getMainLooper());
         mCallback = callback;
         mDetectorType = detectorType;
+        mIsDetectorActive = new AtomicBoolean(true);
     }
 
     /**
@@ -70,6 +77,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#recognizeHotword");
         }
+        throwIfDetectorIsNoLongerActive();
 
         // TODO: consider closing existing session.
 
@@ -106,6 +114,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         if (DEBUG) {
             Slog.d(TAG, "updateState()");
         }
+        throwIfDetectorIsNoLongerActive();
         synchronized (mLock) {
             updateStateLocked(options, sharedMemory, null /* callback */, mDetectorType);
         }
@@ -123,6 +132,35 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
             mManagerService.updateState(identity, options, sharedMemory, callback, detectorType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void registerOnDestroyListener(Consumer<AbstractHotwordDetector> onDestroyListener) {
+        synchronized (mLock) {
+            if (mOnDestroyListener != null) {
+                throw new IllegalStateException("only one destroy listener can be registered");
+            }
+            mOnDestroyListener = onDestroyListener;
+        }
+    }
+
+    @CallSuper
+    @Override
+    public void destroy() {
+        if (!mIsDetectorActive.get()) {
+            return;
+        }
+        mIsDetectorActive.set(false);
+        synchronized (mLock) {
+            mOnDestroyListener.accept(this);
+        }
+    }
+
+    protected void throwIfDetectorIsNoLongerActive() {
+        if (!mIsDetectorActive.get()) {
+            Slog.e(TAG, "attempting to use a destroyed detector which is no longer active");
+            throw new IllegalStateException(
+                    "attempting to use a destroyed detector which is no longer active");
         }
     }
 
@@ -146,7 +184,30 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
             mHandler.sendMessage(obtainMessage(
                     HotwordDetector.Callback::onDetected,
                     mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload(audioFormat, hotwordDetectedResult)));
+                    new AlwaysOnHotwordDetector.EventPayload.Builder()
+                            .setCaptureAudioFormat(audioFormat)
+                            .setHotwordDetectedResult(hotwordDetectedResult)
+                            .build()));
+        }
+
+        /** Called when the detection fails due to an error. */
+        @Override
+        public void onError() {
+            Slog.v(TAG, "BinderCallback#onError");
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onError,
+                    mCallback));
+        }
+
+        @Override
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+            if (result == null) {
+                result = new HotwordRejectedResult.Builder().build();
+            }
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onRejected,
+                    mCallback,
+                    result));
         }
     }
 }

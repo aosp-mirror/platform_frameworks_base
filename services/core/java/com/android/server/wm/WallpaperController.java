@@ -97,12 +97,6 @@ class WallpaperController {
     // Time we wait after a timeout before trying to wait again.
     private static final long WALLPAPER_TIMEOUT_RECOVERY = 10000;
 
-    // Set to the wallpaper window we would like to hide once the transition animations are done.
-    // This is useful in cases where we don't want the wallpaper to be hidden when the close app
-    // is a wallpaper target and is done animating out, but the opening app isn't a wallpaper
-    // target and isn't done animating in.
-    WindowState mDeferredHideWallpaper = null;
-
     // We give a wallpaper up to 500ms to finish drawing before playing app transitions.
     private static final long WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION = 500;
     private static final int WALLPAPER_DRAW_NORMAL = 0;
@@ -138,7 +132,12 @@ class WallpaperController {
                 return false;
             }
         } else {
-            if (w.mActivityRecord != null && !w.mActivityRecord.isVisibleRequested()) {
+            final ActivityRecord ar = w.mActivityRecord;
+            final TransitionController tc = w.mTransitionController;
+            // The animating window can still be visible on screen if it is in transition, so we
+            // should check whether this window can be wallpaper target even when visibleRequested
+            // is false.
+            if (ar != null && !ar.isVisibleRequested() && !tc.inTransition(ar)) {
                 // An activity that is not going to remain visible shouldn't be the target.
                 return false;
             }
@@ -163,14 +162,17 @@ class WallpaperController {
                 & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 
         boolean needsShowWhenLockedWallpaper = false;
-        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                && mService.mPolicy.isKeyguardLocked()
-                && (mService.mPolicy.isKeyguardOccluded()
-                || mService.mPolicy.isKeyguardUnoccluding())) {
-            // The lowest show when locked window decides whether we need to put the wallpaper
-            // behind.
-            needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                    || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && mService.mPolicy.isKeyguardLocked()) {
+            final TransitionController tc = w.mTransitionController;
+            final boolean isInTransition = tc.isShellTransitionsEnabled()
+                    && tc.inTransition(w);
+            if (mService.mPolicy.isKeyguardOccluded() || mService.mPolicy.isKeyguardUnoccluding()
+                    || isInTransition) {
+                // The lowest show when locked window decides whether we need to put the wallpaper
+                // behind.
+                needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+            }
         }
 
         if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
@@ -294,6 +296,11 @@ class WallpaperController {
                 && (mWallpaperTarget != winGoingAway || mPrevWallpaperTarget != null)) {
             return;
         }
+        if (mFindResults.useTopWallpaperAsTarget) {
+            // wallpaper target is going away but there has request to use top wallpaper
+            // Keep wallpaper visible.
+            return;
+        }
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.setVisibility(false);
@@ -307,9 +314,9 @@ class WallpaperController {
     }
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, boolean sync) {
-        final Rect parentFrame = wallpaperWin.getParentFrame();
-        final int dw = parentFrame.width();
-        final int dh = parentFrame.height();
+        final Rect bounds = wallpaperWin.getLastReportedBounds();
+        final int dw = bounds.width();
+        final int dh = bounds.height();
 
         int xOffset = 0;
         int yOffset = 0;
@@ -457,6 +464,13 @@ class WallpaperController {
 
     private void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         WindowState target = mWallpaperTarget;
+        if (target == null && changingTarget.mToken.isVisible()
+                && changingTarget.mTransitionController.inTransition()) {
+            // If the wallpaper target was cleared during transition, still allows the visible
+            // window which may have been requested to be invisible to update the offset, e.g.
+            // zoom effect from home.
+            target = changingTarget;
+        }
         if (target != null) {
             if (target.mWallpaperX >= 0) {
                 mLastWallpaperX = target.mWallpaperX;
@@ -620,8 +634,9 @@ class WallpaperController {
     private void updateWallpaperTokens(boolean visible) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible);
-            token.getDisplayContent().assignWindowLayers(false);
+            if (token.updateWallpaperWindows(visible)) {
+                token.mDisplayContent.assignWindowLayers(false /* setLayoutNeeded */);
+            }
         }
     }
 

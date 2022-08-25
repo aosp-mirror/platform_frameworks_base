@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.EnrollmentStageConfig;
 import android.hardware.biometrics.face.Error;
 import android.hardware.biometrics.face.IFace;
@@ -187,6 +188,29 @@ public class TestHal extends IFace.Stub {
             public void close() throws RemoteException {
                 Slog.w(TAG, "close");
                 cb.onSessionClosed();
+            }
+
+            @Override
+            public ICancellationSignal authenticateWithContext(
+                    long operationId, OperationContext context) {
+                return authenticate(operationId);
+            }
+
+            @Override
+            public ICancellationSignal enrollWithContext(
+                    HardwareAuthToken hat, byte enrollmentType, byte[] features,
+                    NativeHandle previewSurface, OperationContext context) {
+                return enroll(hat, enrollmentType, features, previewSurface);
+            }
+
+            @Override
+            public ICancellationSignal detectInteractionWithContext(OperationContext context) {
+                return detectInteraction();
+            }
+
+            @Override
+            public void onContextChanged(OperationContext context) {
+                Slog.w(TAG, "onContextChanged");
             }
         };
     }

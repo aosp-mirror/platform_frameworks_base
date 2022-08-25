@@ -72,6 +72,7 @@ import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationRequest;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.R;
 
@@ -2603,7 +2604,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * It's the responsibility of the caller to recycle it once they're finished with it.
      * @param event The event to transform.
      * @param child The view whose coordinate space is to be used.
-     * @return A copy of the the given MotionEvent, transformed into the given View's coordinate
+     * @return A copy of the given MotionEvent, transformed into the given View's coordinate
      *         space.
      */
     private MotionEvent getTransformedMotionEvent(MotionEvent event, View child) {
@@ -2723,7 +2724,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                     continue;
                                 }
                                 childWithAccessibilityFocus = null;
-                                i = childrenCount - 1;
+                                i = childrenCount;
                             }
 
                             if (!child.canReceivePointerEvents()
@@ -4266,7 +4267,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int transientIndex = transientCount != 0 ? 0 : -1;
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
-        final ArrayList<View> preorderedList = isHardwareAccelerated()
+        final ArrayList<View> preorderedList = drawsWithRenderNode(canvas)
                 ? null : buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();
@@ -9295,5 +9296,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.dispatchCreateViewTranslationRequest(viewIds, supportedFormats, capability,
                     requests);
         }
+    }
+
+    /**
+     * Walk up the View hierarchy to find the nearest {@link OnBackInvokedDispatcher}.
+     *
+     * @return The {@link OnBackInvokedDispatcher} from this or the nearest
+     * ancestor, or null if the view is both not attached and have no ancestor providing an
+     * {@link OnBackInvokedDispatcher}.
+     *
+     * @param child The direct child of this view for which to find a dispatcher.
+     * @param requester The requester that will use the dispatcher. Can be the same as child.
+     */
+    @Nullable
+    @Override
+    public OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(@NonNull View child,
+            @NonNull View requester) {
+        ViewParent parent = getParent();
+        if (parent != null) {
+            return parent.findOnBackInvokedDispatcherForChild(this, requester);
+        }
+        return null;
     }
 }

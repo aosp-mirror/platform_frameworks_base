@@ -19,10 +19,12 @@ import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
+import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.IWindowToken;
 import android.app.ResourcesManager;
 import android.content.Context;
@@ -33,14 +35,15 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.ref.WeakReference;
 
@@ -68,13 +71,14 @@ public class WindowTokenClient extends IWindowToken.Stub {
 
     private IWindowManager mWms;
 
+    @GuardedBy("itself")
     private final Configuration mConfiguration = new Configuration();
 
     private boolean mShouldDumpConfigForIme;
 
     private boolean mAttachToWindowContainer;
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler = ActivityThread.currentActivityThread().getHandler();
 
     /**
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
@@ -91,7 +95,6 @@ public class WindowTokenClient extends IWindowToken.Stub {
             throw new IllegalStateException("Context is already attached.");
         }
         mContextRef = new WeakReference<>(context);
-        mConfiguration.setTo(context.getResources().getConfiguration());
         mShouldDumpConfigForIme = Build.IS_DEBUGGABLE
                 && context instanceof AbstractInputMethodService;
     }
@@ -137,8 +140,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
             if (configuration == null) {
                 return false;
             }
-            mHandler.post(() -> onConfigurationChanged(configuration, displayId,
-                    false /* shouldReportConfigChange */));
+            onConfigurationChanged(configuration, displayId, false /* shouldReportConfigChange */);
             mAttachToWindowContainer = true;
             return true;
         } catch (RemoteException e) {
@@ -188,8 +190,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
     @BinderThread
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
-        mHandler.post(() -> onConfigurationChanged(newConfig, newDisplayId,
-                true /* shouldReportConfigChange */));
+        mHandler.post(PooledLambda.obtainRunnable(this::onConfigurationChanged, newConfig,
+                newDisplayId, true /* shouldReportConfigChange */).recycleOnUse());
     }
 
     // TODO(b/192048581): rewrite this method based on WindowContext and WindowProviderService
@@ -199,8 +201,19 @@ public class WindowTokenClient extends IWindowToken.Stub {
      *
      * Similar to {@link #onConfigurationChanged(Configuration, int)}, but adds a flag to control
      * whether to dispatch configuration update or not.
+     * <p>
+     * Note that this method must be executed on the main thread if
+     * {@code shouldReportConfigChange} is {@code true}, which is usually from
+     * {@link IWindowToken#onConfigurationChanged(Configuration, int)}
+     * directly, while this method could be run on any thread if it is used to initialize
+     * Context's {@code Configuration} via {@link #attachToDisplayArea(int, int, Bundle)}
+     * or {@link #attachToDisplayContent(int)}.
+     *
+     * @param shouldReportConfigChange {@code true} to indicate that the {@code Configuration}
+     *                                 should be dispatched to listeners.
+     *
      */
-    @MainThread
+    @AnyThread
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId,
             boolean shouldReportConfigChange) {
@@ -208,18 +221,29 @@ public class WindowTokenClient extends IWindowToken.Stub {
         if (context == null) {
             return;
         }
-        final boolean displayChanged = isDifferentDisplay(context.getDisplayId(), newDisplayId);
-        final boolean shouldUpdateResources = shouldUpdateResources(this, mConfiguration,
-                newConfig, newConfig /* overrideConfig */, displayChanged,
-                null /* configChanged */);
+        final boolean displayChanged;
+        final boolean shouldUpdateResources;
+        final int diff;
+        final Configuration currentConfig;
+
+        synchronized (mConfiguration) {
+            displayChanged = isDifferentDisplay(context.getDisplayId(), newDisplayId);
+            shouldUpdateResources = shouldUpdateResources(this, mConfiguration,
+                    newConfig, newConfig /* overrideConfig */, displayChanged,
+                    null /* configChanged */);
+            diff = mConfiguration.diffPublicOnly(newConfig);
+            currentConfig = mShouldDumpConfigForIme ? new Configuration(mConfiguration) : null;
+            if (shouldUpdateResources) {
+                mConfiguration.setTo(newConfig);
+            }
+        }
 
         if (!shouldUpdateResources && mShouldDumpConfigForIme) {
             Log.d(TAG, "Configuration not dispatch to IME because configuration is up"
                     + " to date. Current config=" + context.getResources().getConfiguration()
-                    + ", reported config=" + mConfiguration
+                    + ", reported config=" + currentConfig
                     + ", updated config=" + newConfig);
         }
-
         if (shouldUpdateResources) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
             mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
@@ -229,7 +253,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
                 windowContext.dispatchConfigurationChanged(newConfig);
             }
 
-            final int diff = mConfiguration.diffPublicOnly(newConfig);
+
             if (shouldReportConfigChange && diff != 0
                     && context instanceof WindowProviderService) {
                 final WindowProviderService windowProviderService = (WindowProviderService) context;
@@ -244,11 +268,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
                     Log.d(TAG, "Configuration not dispatch to IME because configuration has no "
                             + " public difference with updated config. "
                             + " Current config=" + context.getResources().getConfiguration()
-                            + ", reported config=" + mConfiguration
+                            + ", reported config=" + currentConfig
                             + ", updated config=" + newConfig);
                 }
             }
-            mConfiguration.setTo(newConfig);
         }
         if (displayChanged) {
             context.updateDisplay(newDisplayId);
@@ -258,12 +281,16 @@ public class WindowTokenClient extends IWindowToken.Stub {
     @BinderThread
     @Override
     public void onWindowTokenRemoved() {
-        mHandler.post(() -> {
-            final Context context = mContextRef.get();
-            if (context != null) {
-                context.destroy();
-                mContextRef.clear();
-            }
-        });
+        mHandler.post(PooledLambda.obtainRunnable(
+                WindowTokenClient::onWindowTokenRemovedInner, this).recycleOnUse());
+    }
+
+    @MainThread
+    private void onWindowTokenRemovedInner() {
+        final Context context = mContextRef.get();
+        if (context != null) {
+            context.destroy();
+            mContextRef.clear();
+        }
     }
 }

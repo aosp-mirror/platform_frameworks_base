@@ -59,4 +59,5 @@ message AccessibilityTraceProto {
 
     optional AccessibilityDumpProto accessibility_service = 10;
     optional com.android.server.wm.WindowManagerServiceDumpProto window_manager_service = 11;
+    optional string cpu_stats = 12;
 }

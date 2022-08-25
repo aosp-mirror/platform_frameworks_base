@@ -151,20 +151,14 @@ public final class DeviceStateManagerGlobal {
      * Cancels a {@link DeviceStateRequest request} previously submitted with a call to
      * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      *
-     * @see DeviceStateManager#cancelRequest(DeviceStateRequest)
+     * @see DeviceStateManager#cancelStateRequest
      */
-    public void cancelRequest(@NonNull DeviceStateRequest request) {
+    public void cancelStateRequest() {
         synchronized (mLock) {
             registerCallbackIfNeededLocked();
 
-            final IBinder token = findRequestTokenLocked(request);
-            if (token == null) {
-                // This request has not been submitted.
-                return;
-            }
-
             try {
-                mDeviceStateManager.cancelRequest(token);
+                mDeviceStateManager.cancelStateRequest();
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -299,20 +293,6 @@ public final class DeviceStateManagerGlobal {
 
     /**
      * Handles a call from the server that a request for the supplied {@code token} has become
-     * suspended.
-     */
-    private void handleRequestSuspended(IBinder token) {
-        DeviceStateRequestWrapper request;
-        synchronized (mLock) {
-            request = mRequests.get(token);
-        }
-        if (request != null) {
-            request.notifyRequestSuspended();
-        }
-    }
-
-    /**
-     * Handles a call from the server that a request for the supplied {@code token} has become
      * canceled.
      */
     private void handleRequestCanceled(IBinder token) {
@@ -334,11 +314,6 @@ public final class DeviceStateManagerGlobal {
         @Override
         public void onRequestActive(IBinder token) {
             handleRequestActive(token);
-        }
-
-        @Override
-        public void onRequestSuspended(IBinder token) {
-            handleRequestSuspended(token);
         }
 
         @Override
@@ -393,14 +368,6 @@ public final class DeviceStateManagerGlobal {
             }
 
             mExecutor.execute(() -> mCallback.onRequestActivated(mRequest));
-        }
-
-        void notifyRequestSuspended() {
-            if (mCallback == null) {
-                return;
-            }
-
-            mExecutor.execute(() -> mCallback.onRequestSuspended(mRequest));
         }
 
         void notifyRequestCanceled() {

@@ -20,6 +20,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
+import android.media.tv.AdRequest;
+import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
@@ -64,6 +66,7 @@ interface ITvInputManager {
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
     int getClientPid(in String sessionId);
+    int getClientPriority(int useCase, in String sessionId);
 
     void setMainSession(in IBinder sessionToken, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
@@ -73,6 +76,8 @@ interface ITvInputManager {
     void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
+
+    void setInteractiveAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
 
     void sendAppPrivateCommand(in IBinder sessionToken, in String action, in Bundle data,
             int userId);
@@ -98,6 +103,13 @@ interface ITvInputManager {
     void stopRecording(in IBinder sessionToken, int userId);
     void pauseRecording(in IBinder sessionToken, in Bundle params, int userId);
     void resumeRecording(in IBinder sessionToken, in Bundle params, int userId);
+
+    // For broadcast info
+    void requestBroadcastInfo(in IBinder sessionToken, in BroadcastInfoRequest request, int userId);
+    void removeBroadcastInfo(in IBinder sessionToken, int id, int userId);
+
+    // For ad request
+    void requestAd(in IBinder sessionToken, in AdRequest request, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

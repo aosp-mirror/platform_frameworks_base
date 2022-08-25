@@ -29,6 +29,7 @@ import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -40,7 +41,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -91,6 +92,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private OperatorNameViewController mOperatorNameViewController;
     private SecureSettings mSecureSettings;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private final CarrierConfigTracker mCarrierConfigTracker = mock(CarrierConfigTracker.class);
 
     @Mock
     private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
@@ -102,6 +104,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     @Mock
     private NotificationPanelViewController mNotificationPanelViewController;
+    @Mock
+    private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -328,7 +332,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         String str = mContext.getString(com.android.internal.R.string.status_bar_volume);
 
         // GIVEN the setting is ON
-        when(mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0))
+        when(mSecureSettings.getIntForUser(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0,
+                UserHandle.USER_CURRENT))
                 .thenReturn(1);
 
         // WHEN CollapsedStatusBarFragment builds the blocklist
@@ -366,15 +371,15 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 new PanelExpansionStateManager(),
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
-                new StatusBarHideIconsForBouncerManager(
-                        mCommandQueue, new FakeExecutor(new FakeSystemClock()), new DumpManager()),
+                mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
                 mNotificationPanelViewController,
                 mNetworkController,
                 mStatusBarStateController,
                 mCommandQueue,
+                mCarrierConfigTracker,
                 new CollapsedStatusBarFragmentLogger(
-                        new LogBuffer("TEST", 1, 1, mock(LogcatEchoTracker.class)),
+                        new LogBuffer("TEST", 1, mock(LogcatEchoTracker.class)),
                         new DisableFlagsLogger()
                         ),
                 mOperatorNameViewControllerFactory,
@@ -393,17 +398,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mMockNotificationAreaController = mock(NotificationIconAreaController.class);
 
         mNotificationAreaInner = mock(View.class);
-        View centeredNotificationAreaView = mock(View.class);
 
         when(mNotificationAreaInner.getLayoutParams()).thenReturn(
                 new FrameLayout.LayoutParams(100, 100));
-        when(centeredNotificationAreaView.getLayoutParams()).thenReturn(
-               new FrameLayout.LayoutParams(100, 100));
         when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
-        when(centeredNotificationAreaView.animate()).thenReturn(mock(ViewPropertyAnimator.class));
 
-        when(mMockNotificationAreaController.getCenteredNotificationAreaView()).thenReturn(
-                centeredNotificationAreaView);
         when(mMockNotificationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);
     }
