@@ -305,7 +305,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
+            DisplayControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         @Override
@@ -460,7 +460,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate,
                 long presentationDeadlineNanos, int state) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = SurfaceControl.createDisplay(mName, mFlags.mSecure);
+                IBinder displayToken = DisplayControl.createDisplay(mName, mFlags.mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName, mModes, mActiveMode,
                         DEFAULT_MODE_INDEX, refreshRate, presentationDeadlineNanos,
                         mFlags, state, surfaceTexture, mNumber) {

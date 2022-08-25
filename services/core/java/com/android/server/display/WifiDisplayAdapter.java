@@ -388,7 +388,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         String name = display.getFriendlyDisplayName();
         String address = display.getDeviceAddress();
-        IBinder displayToken = SurfaceControl.createDisplay(name, secure);
+        IBinder displayToken = DisplayControl.createDisplay(name, secure);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, address, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
@@ -621,7 +621,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
+            DisplayControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         public void setNameLocked(String name) {
