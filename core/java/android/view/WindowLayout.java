@@ -118,11 +118,11 @@ public class WindowLayout {
             }
             if (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
                 if (displayFrame.width() < displayFrame.height()) {
-                    displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.top = MIN_Y;
+                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 } else {
-                    displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
-                    displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.left = MIN_X;
+                    displayCutoutSafeExceptMaybeBars.right = MAX_X;
                 }
             }
             final boolean layoutInsetDecor = (attrs.flags & FLAG_LAYOUT_INSET_DECOR) != 0;
@@ -132,23 +132,23 @@ public class WindowLayout {
                 final Insets systemBarsInsets = state.calculateInsets(
                         displayFrame, WindowInsets.Type.systemBars(), requestedVisibilities);
                 if (systemBarsInsets.left > 0) {
-                    displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
+                    displayCutoutSafeExceptMaybeBars.left = MIN_X;
                 }
                 if (systemBarsInsets.top > 0) {
-                    displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
+                    displayCutoutSafeExceptMaybeBars.top = MIN_Y;
                 }
                 if (systemBarsInsets.right > 0) {
-                    displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.right = MAX_X;
                 }
                 if (systemBarsInsets.bottom > 0) {
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 }
             }
             if (type == TYPE_INPUT_METHOD) {
                 final InsetsSource navSource = state.peekSource(ITYPE_NAVIGATION_BAR);
                 if (navSource != null && navSource.calculateInsets(displayFrame, true).bottom > 0) {
                     // The IME can always extend under the bottom cutout if the navbar is there.
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 }
             }
             final boolean attachedInParent = attachedWindowFrame != null && !layoutInScreen;
