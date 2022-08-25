@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Kunci dibuka dengan wajah. Tekan untuk membuka."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Wajah dikenali. Tekan untuk membuka."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Wajah dikenali. Tekan ikon buka kunci untuk membuka."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Kunci dibuka dengan wajah"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Wajah dikenali"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Pindah ke kiri"</item>
     <item msgid="5558598599408514296">"Pindah ke bawah"</item>
@@ -337,10 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi daya • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi daya dengan cepat • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi daya dengan lambat • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi Daya dengan Dok • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi daya • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Beralih pengguna"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
-    <skip />
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu pulldown"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data dalam sesi ini akan dihapus."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Selamat datang kembali, tamu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Lanjutkan sesi Anda?"</string>
@@ -567,7 +568,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Hapus lampiran"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistem"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Layar Utama"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Layar utama"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Terbaru"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Kembali"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifikasi"</string>
@@ -912,7 +913,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi tidak akan otomatis terhubung untuk saat ini"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Lihat semua"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Untuk beralih jaringan, lepaskan kabel ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Agar pengalaman perangkat menjadi lebih baik, aplikasi dan layanan tetap dapat memindai jaringan Wi-Fi kapan saja, bahkan saat Wi-Fi nonaktif. Anda dapat mengubahnya di setelan pemindaian Wi-Fi. "<annotation id="link">"Ubah"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Untuk meningkatkan fungsi perangkat, aplikasi dan layanan tetap dapat memindai jaringan Wi-Fi kapan saja, bahkan saat Wi-Fi nonaktif. Anda dapat mengubahnya di setelan pemindaian Wi-Fi. "<annotation id="link">"Ubah"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Nonaktifkan mode pesawat"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ingin menambahkan kartu berikut ke Setelan Cepat"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tambahkan kartu"</string>

@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"මුහුණ මගින් අගුලු හරින ලදි. විවෘත කිරීමට ඔබන්න."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"මුහුණ හඳුනා ගන්නා ලදි. විවෘත කිරීමට ඔබන්න."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"මුහුණ හඳුනා ගන්නා ලදි. විවෘත කිරීමට අගුලු හැරීමේ නිරූපකය ඔබන්න."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"මුහුණ මගින් අගුලු හරින ලදි"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"මුහුණ හඳුනා ගන්නා ලදි"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"වමට ගෙන යන්න"</item>
     <item msgid="5558598599408514296">"පහළට ගෙන යන්න"</item>
@@ -337,10 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ආරෝපණය වෙමින් • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>කින් සම්පූර්ණ වේ"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින් • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>කින් සම්පූර්ණ වේ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • සෙමින් ආරෝපණය වෙමින් • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>කින් සම්පූර්ණ වේ"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ආරෝපණ ඩොකය • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>කින් සම්පූර්ණ වේ"</string>
-    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"පරිශීලක මාරුව"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
     <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"පරිශීලක මාරුව"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"නිපතන මෙනුව"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"මෙම සැසියේ සියළුම යෙදුම් සහ දත්ත මකාවී."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"නැවත සාදරයෙන් පිළිගනිමු, අමුත්තා!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ඔබගේ සැසිය දිගටම කරගෙන යෑමට ඔබට අවශ්‍යද?"</string>
