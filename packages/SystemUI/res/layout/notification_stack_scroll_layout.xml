@@ -14,15 +14,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<com.android.systemui.dreams.complication.DoubleShadowTextClock
+
+<!-- This XML is served to be overridden by other OEMs/device types. -->
+<com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/time_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:fontFamily="@font/clock"
-    android:textColor="@android:color/white"
-    android:format12Hour="@string/dream_time_complication_12_hr_time_format"
-    android:format24Hour="@string/dream_time_complication_24_hr_time_format"
-    android:fontFeatureSettings="pnum, lnum"
-    android:letterSpacing="0.02"
-    android:textSize="@dimen/dream_overlay_complication_clock_time_text_size"/>
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/notification_stack_scroller"
+    android:layout_marginTop="@dimen/notification_panel_margin_top"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_marginHorizontal="@dimen/notification_panel_margin_horizontal"
+    android:layout_marginBottom="@dimen/notification_panel_margin_bottom"
+    android:importantForAccessibility="no"
+    systemui:layout_constraintStart_toStartOf="parent"
+    systemui:layout_constraintEnd_toEndOf="parent"
+/>
