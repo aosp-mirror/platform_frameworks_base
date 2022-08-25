@@ -564,7 +564,7 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"အသုံးပြုသူအသစ် ပြုလုပ်နေသည်…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"အသုံးပြုသူအသစ် ပြုလုပ်၍မရပါ"</string>
     <string name="user_nickname" msgid="262624187455825083">"နာမည်ပြောင်"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"ဧည့်သည့် ထည့်ရန်"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"ဧည့်သည် ထည့်ရန်"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ဧည့်သည်ကို ပြင်ဆင်သတ်မှတ်ရန်"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ဧည့်သည်"</string>
