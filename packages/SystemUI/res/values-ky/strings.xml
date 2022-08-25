@@ -232,7 +232,7 @@
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батареянын деңгээли <xliff:g id="PERCENTAGE">%1$s</xliff:g> пайыз, колдонгонуңузга караганда болжол менен <xliff:g id="TIME">%2$s</xliff:g> калды"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Батарея кубатталууда, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
-    <string name="accessibility_settings_button" msgid="2197034218538913880">"Система тууралоолору."</string>
+    <string name="accessibility_settings_button" msgid="2197034218538913880">"Параметрлер."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Билдирмелер"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Бардык билдирмелерди көрүү"</string>
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Эскертмелерди тазалоо."</string>
@@ -661,7 +661,7 @@
     <string name="quick_settings" msgid="6211774484997470203">"Ыкчам жөндөөлөр"</string>
     <string name="status_bar" msgid="4357390266055077437">"Абал тилкеси"</string>
     <string name="overview" msgid="3522318590458536816">"Назар"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Тутум интерфейсинин демо режими"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Системанын интерфейсинин демо режими"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Демо режимин иштетүү"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>

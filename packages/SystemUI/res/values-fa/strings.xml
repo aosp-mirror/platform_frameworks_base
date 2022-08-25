@@ -1023,10 +1023,10 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"پیمایش سیستم به‌روزرسانی شد. برای انجام تغییرات به «تنظیمات» بروید."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"برای به‌روزرسانی پیمایش سیستم، به «تنظیمات» بروید"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"آماده‌به‌کار"</string>
-    <string name="magnification_window_title" msgid="4863914360847258333">"پنجره بزرگ‌نمایی"</string>
-    <string name="magnification_controls_title" msgid="8421106606708891519">"کنترل‌های پنجره بزرگ‌نمایی"</string>
-    <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"بزرگ کردن"</string>
-    <string name="accessibility_control_zoom_out" msgid="69578832020304084">"کوچک کردن"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"پنجره درشت‌نمایی"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"کنترل‌های پنجره درشت‌نمایی"</string>
+    <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"زوم‌پیش کردن"</string>
+    <string name="accessibility_control_zoom_out" msgid="69578832020304084">"زوم‌پس کردن"</string>
     <string name="accessibility_control_move_up" msgid="6622825494014720136">"انتقال به بالا"</string>
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"انتقال به پایین"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"انتقال به راست"</string>

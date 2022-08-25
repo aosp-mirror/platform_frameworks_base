@@ -842,7 +842,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"애플리케이션"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"지원"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"브라우저"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"주소록"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"연락처"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"이메일"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"음악"</string>
