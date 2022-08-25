@@ -176,7 +176,9 @@ public class InsetsSourceConsumer {
 
                 // If we have a new leash, make sure visibility is up-to-date, even though we
                 // didn't want to run an animation above.
-                applyRequestedVisibilityToControl();
+                if (mController.getAnimationType(control.getType()) == ANIMATION_TYPE_NONE) {
+                    applyRequestedVisibilityToControl();
+                }
 
                 // Remove the surface that owned by last control when it lost.
                 if (!requestedVisible && lastControl == null) {

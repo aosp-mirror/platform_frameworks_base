@@ -119,6 +119,12 @@ public final class TransitionInfo implements Parcelable {
     /** The container is going to show IME on its task after the transition. */
     public static final int FLAG_WILL_IME_SHOWN = 1 << 11;
 
+    /** The container attaches owner profile thumbnail for cross profile animation. */
+    public static final int FLAG_CROSS_PROFILE_OWNER_THUMBNAIL = 1 << 12;
+
+    /** The container attaches work profile thumbnail for cross profile animation. */
+    public static final int FLAG_CROSS_PROFILE_WORK_THUMBNAIL = 1 << 13;
+
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
             FLAG_NONE,
@@ -506,6 +512,11 @@ public final class TransitionInfo implements Parcelable {
         /** @return the flags for this change. */
         public @ChangeFlags int getFlags() {
             return mFlags;
+        }
+
+        /** Whether the given change flags has included in this change. */
+        public boolean hasFlags(@ChangeFlags int flags) {
+            return (mFlags & flags) != 0;
         }
 
         /**
