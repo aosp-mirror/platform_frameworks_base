@@ -162,7 +162,7 @@ public class BroadcastDispatcher {
     }
 
     private final Object mLock;
-    private final BroadcastQueue mQueue;
+    private final BroadcastQueueImpl mQueue;
     private final BroadcastConstants mConstants;
     private final Handler mHandler;
     private AlarmManagerInternal mAlarm;
@@ -489,7 +489,7 @@ public class BroadcastDispatcher {
     /**
      * Constructed & sharing a lock with its associated BroadcastQueue instance
      */
-    public BroadcastDispatcher(BroadcastQueue queue, BroadcastConstants constants,
+    public BroadcastDispatcher(BroadcastQueueImpl queue, BroadcastConstants constants,
             Handler handler, Object lock) {
         mQueue = queue;
         mConstants = constants;
