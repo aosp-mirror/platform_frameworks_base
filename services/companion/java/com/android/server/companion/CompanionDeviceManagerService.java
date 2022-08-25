@@ -607,10 +607,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public void legacyDisassociate(String deviceMacAddress, String packageName, int userId) {
-            if (DEBUG) {
-                Log.i(TAG, "legacyDisassociate() pkg=u" + userId + "/" + packageName
-                        + ", macAddress=" + deviceMacAddress);
-            }
+            Log.i(TAG, "legacyDisassociate() pkg=u" + userId + "/" + packageName
+                    + ", macAddress=" + deviceMacAddress);
 
             requireNonNull(deviceMacAddress);
             requireNonNull(packageName);
@@ -622,7 +620,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public void disassociate(int associationId) {
-            if (DEBUG) Log.i(TAG, "disassociate() associationId=" + associationId);
+            Log.i(TAG, "disassociate() associationId=" + associationId);
 
             final AssociationInfo association =
                     getAssociationWithCallerChecks(associationId);
