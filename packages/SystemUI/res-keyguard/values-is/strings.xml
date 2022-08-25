@@ -26,11 +26,13 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ógilt kort."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Fullhlaðin"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í þráðlausri hleðslu"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleður í dokku"</string>
+    <!-- no translation found for keyguard_plugged_in_dock (2122073051904360987) -->
+    <skip />
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í hleðslu"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hröð hleðsla"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hæg hleðsla"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleðsla takmörkuð tímabundið"</string>
+    <!-- no translation found for keyguard_plugged_in_charging_limited (1709413803451065875) -->
+    <skip />
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Ýttu á valmyndarhnappinn til að taka úr lás."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Net læst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Ekkert SIM-kort"</string>
