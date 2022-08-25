@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिंग"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रीन मोड में जाएं"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेन्यू"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"पिक्चर में पिक्चर मेन्यू"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"पिक्चर में पिक्चर\" के अंदर है"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने के लिए टैप करें और उसे बंद करें ."</string>
     <string name="pip_play" msgid="3496151081459417097">"चलाएं"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"विभाजित स्क्रीन विभाजक"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"स्प्लिट स्क्रीन डिवाइडर"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"बाईं स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"बाईं स्क्रीन को 70% बनाएं"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"बाईं स्क्रीन को 50% बनाएं"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ठीक है"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ज़्यादा जानकारी के लिए बड़ा करें."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"बड़ा करें"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"विंडो छोटी करें"</string>
     <string name="close_button_text" msgid="2913281996024033299">"बंद करें"</string>
 </resources>
