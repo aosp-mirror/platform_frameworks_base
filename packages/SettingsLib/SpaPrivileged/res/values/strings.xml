@@ -21,4 +21,8 @@
     <string name="menu_show_system">Show system</string>
     <!-- [CHAR LIMIT=NONE] Menu for manage apps to control whether system processes are hidden -->
     <string name="menu_hide_system">Hide system</string>
+    <!-- Preference summary text for an app when it is allowed for a permission. [CHAR LIMIT=45] -->
+    <string name="app_permission_summary_allowed">Allowed</string>
+    <!-- Preference summary text for an app when it is disallowed for a permission. [CHAR LIMIT=45] -->
+    <string name="app_permission_summary_not_allowed">Not allowed</string>
 </resources>

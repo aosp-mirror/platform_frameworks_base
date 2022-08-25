@@ -73,7 +73,7 @@ private fun <T : AppRecord> AppListWidget(
         ) {
             items(count = list.size, key = { option to list[it].record.app.packageName }) {
                 val appEntry = list[it]
-                val summary = getSummary(listModel, option, appEntry.record)
+                val summary = listModel.getSummary(option, appEntry.record) ?: "".toState()
                 val itemModel = remember(appEntry) {
                     AppListItemModel(appEntry.record, appEntry.label, summary)
                 }
@@ -100,12 +100,3 @@ private fun <T : AppRecord> loadAppEntries(
 
     return viewModel.appListDataFlow.collectAsState(null, Dispatchers.Default)
 }
-
-@Composable
-private fun <T : AppRecord> getSummary(
-    listModel: AppListModel<T>,
-    option: Int,
-    record: T,
-): State<String> = remember(option) { listModel.getSummary(option, record) }
-    ?.collectAsState(stringResource(R.string.summary_placeholder), Dispatchers.Default)
-    ?: "".toState()
