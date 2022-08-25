@@ -26,6 +26,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
+import android.os.RemoteException;
 
 import java.util.Collections;
 import java.util.List;
@@ -206,4 +207,14 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
             int processId, long threadId, int callingUid, Bundle serializedCallingStackInBundle) {}
 
     public void setAnimationScale(float scale) {}
+
+    @Override
+    public void setInstalledAndEnabledServices(List<AccessibilityServiceInfo> infos)
+            throws RemoteException {
+    }
+
+    @Override
+    public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() throws RemoteException {
+        return null;
+    }
 }

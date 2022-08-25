@@ -146,4 +146,8 @@ interface IAccessibilityServiceConnection {
     void onDoubleTapAndHold(int displayId);
 
     void setAnimationScale(float scale);
+
+    void setInstalledAndEnabledServices(in List<AccessibilityServiceInfo> infos);
+
+    List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
 }
