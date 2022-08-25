@@ -41,6 +41,18 @@ class LogBufferTest : SysuiTestCase() {
     }
 
     @Test
+    fun log_shouldSaveLogToBufferWithException() {
+        val exception = createTestException("Some exception test message", "SomeExceptionTestClass")
+        buffer.log("Test", LogLevel.INFO, "Some test message", exception)
+
+        val dumpedString = dumpBuffer()
+
+        assertThat(dumpedString).contains("Some test message")
+        assertThat(dumpedString).contains("Some exception test message")
+        assertThat(dumpedString).contains("SomeExceptionTestClass")
+    }
+
+    @Test
     fun log_shouldRotateIfLogBufferIsFull() {
         buffer.log("Test", LogLevel.INFO, "This should be rotated")
         buffer.log("Test", LogLevel.INFO, "New test message")
