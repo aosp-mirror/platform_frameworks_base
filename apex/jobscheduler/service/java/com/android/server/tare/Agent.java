@@ -721,25 +721,28 @@ class Agent {
 
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
-        final List<InstalledPackageInfo> pkgs = mIrs.getInstalledPackages();
+        final SparseArrayMap<String, InstalledPackageInfo> pkgs = mIrs.getInstalledPackages();
 
         final long now = getCurrentTimeMillis();
-        for (int i = 0; i < pkgs.size(); ++i) {
-            final InstalledPackageInfo pkgInfo = pkgs.get(i);
-            if (!shouldGiveCredits(pkgInfo)) {
-                continue;
-            }
-            final int userId = UserHandle.getUserId(pkgInfo.uid);
-            final String pkgName = pkgInfo.packageName;
-            final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
-            final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
-            final double perc = batteryLevel / 100d;
-            // TODO: maybe don't give credits to bankrupt apps until battery level >= 50%
-            final long shortfall = minBalance - ledger.getCurrentBalance();
-            if (shortfall > 0) {
-                recordTransactionLocked(userId, pkgName, ledger,
-                        new Ledger.Transaction(now, now, REGULATION_BASIC_INCOME,
-                                null, (long) (perc * shortfall), 0), true);
+        for (int uIdx = pkgs.numMaps() - 1; uIdx >= 0; --uIdx) {
+            final int userId = pkgs.keyAt(uIdx);
+
+            for (int pIdx = pkgs.numElementsForKeyAt(uIdx) - 1; pIdx >= 0; --pIdx) {
+                final InstalledPackageInfo pkgInfo = pkgs.valueAt(uIdx, pIdx);
+                if (!shouldGiveCredits(pkgInfo)) {
+                    continue;
+                }
+                final String pkgName = pkgInfo.packageName;
+                final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+                final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
+                final double perc = batteryLevel / 100d;
+                // TODO: maybe don't give credits to bankrupt apps until battery level >= 50%
+                final long shortfall = minBalance - ledger.getCurrentBalance();
+                if (shortfall > 0) {
+                    recordTransactionLocked(userId, pkgName, ledger,
+                            new Ledger.Transaction(now, now, REGULATION_BASIC_INCOME,
+                                    null, (long) (perc * shortfall), 0), true);
+                }
             }
         }
     }

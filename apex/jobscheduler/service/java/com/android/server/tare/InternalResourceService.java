@@ -136,7 +136,7 @@ public class InternalResourceService extends SystemService {
 
     @NonNull
     @GuardedBy("mLock")
-    private final List<InstalledPackageInfo> mPkgCache = new ArrayList<>();
+    private final SparseArrayMap<String, InstalledPackageInfo> mPkgCache = new SparseArrayMap<>();
 
     /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
     @GuardedBy("mLock")
@@ -343,7 +343,7 @@ public class InternalResourceService extends SystemService {
     }
 
     @NonNull
-    List<InstalledPackageInfo> getInstalledPackages() {
+    SparseArrayMap<String, InstalledPackageInfo> getInstalledPackages() {
         synchronized (mLock) {
             return mPkgCache;
         }
@@ -354,11 +354,13 @@ public class InternalResourceService extends SystemService {
     List<InstalledPackageInfo> getInstalledPackages(final int userId) {
         final List<InstalledPackageInfo> userPkgs = new ArrayList<>();
         synchronized (mLock) {
-            for (int i = 0; i < mPkgCache.size(); ++i) {
-                final InstalledPackageInfo packageInfo = mPkgCache.get(i);
-                if (UserHandle.getUserId(packageInfo.uid) == userId) {
-                    userPkgs.add(packageInfo);
-                }
+            final int uIdx = mPkgCache.indexOfKey(userId);
+            if (uIdx < 0) {
+                return userPkgs;
+            }
+            for (int p = mPkgCache.numElementsForKeyAt(uIdx) - 1; p >= 0; --p) {
+                final InstalledPackageInfo packageInfo = mPkgCache.valueAt(uIdx, p);
+                userPkgs.add(packageInfo);
             }
         }
         return userPkgs;
@@ -511,7 +513,7 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            mPkgCache.add(new InstalledPackageInfo(packageInfo));
+            mPkgCache.add(userId, pkgName, new InstalledPackageInfo(packageInfo));
             mUidToPackageCache.add(uid, pkgName);
             // TODO: only do this when the user first launches the app (app leaves stopped state)
             mAgent.grantBirthrightLocked(userId, pkgName);
@@ -532,14 +534,7 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mUidToPackageCache.remove(uid, pkgName);
             mVipOverrides.delete(userId, pkgName);
-            for (int i = 0; i < mPkgCache.size(); ++i) {
-                final InstalledPackageInfo pkgInfo = mPkgCache.get(i);
-                if (UserHandle.getUserId(pkgInfo.uid) == userId
-                        && pkgName.equals(pkgInfo.packageName)) {
-                    mPkgCache.remove(i);
-                    break;
-                }
-            }
+            mPkgCache.delete(userId, pkgName);
             mAgent.onPackageRemovedLocked(userId, pkgName);
         }
     }
@@ -560,7 +555,8 @@ public class InternalResourceService extends SystemService {
             final List<PackageInfo> pkgs =
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
-                mPkgCache.add(new InstalledPackageInfo(pkgs.get(i)));
+                final InstalledPackageInfo ipo = new InstalledPackageInfo(pkgs.get(i));
+                mPkgCache.add(userId, ipo.packageName, ipo);
             }
             mAgent.grantBirthrightsLocked(userId);
         }
@@ -570,15 +566,15 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             mVipOverrides.delete(userId);
             ArrayList<String> removedPkgs = new ArrayList<>();
-            for (int i = mPkgCache.size() - 1; i >= 0; --i) {
-                final InstalledPackageInfo pkgInfo = mPkgCache.get(i);
-                if (UserHandle.getUserId(pkgInfo.uid) == userId) {
+            final int uIdx = mPkgCache.indexOfKey(userId);
+            if (uIdx >= 0) {
+                for (int p = mPkgCache.numElementsForKeyAt(uIdx) - 1; p >= 0; --p) {
+                    final InstalledPackageInfo pkgInfo = mPkgCache.valueAt(uIdx, p);
                     removedPkgs.add(pkgInfo.packageName);
                     mUidToPackageCache.remove(pkgInfo.uid);
-                    mPkgCache.remove(i);
-                    break;
                 }
             }
+            mPkgCache.delete(userId);
             mAgent.onUserRemovedLocked(userId, removedPkgs);
         }
     }
@@ -727,7 +723,8 @@ public class InternalResourceService extends SystemService {
             final List<PackageInfo> pkgs =
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
-                mPkgCache.add(new InstalledPackageInfo(pkgs.get(i)));
+                final InstalledPackageInfo ipo = new InstalledPackageInfo(pkgs.get(i));
+                mPkgCache.add(userId, ipo.packageName, ipo);
             }
         }
     }
@@ -1185,7 +1182,6 @@ public class InternalResourceService extends SystemService {
             // User setting should override DeviceConfig setting.
             // NOTE: There's currently no way for a user to reset the value (via UI), so if a user
             // manually toggles TARE via UI, we'll always defer to the user's current setting
-            // TODO: add a "reset" value if the user toggle is an issue
             final boolean isTareEnabledDC = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TARE,
                     KEY_DC_ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE == 1);
             final boolean isTareEnabled = Settings.Global.getInt(mContentResolver,
