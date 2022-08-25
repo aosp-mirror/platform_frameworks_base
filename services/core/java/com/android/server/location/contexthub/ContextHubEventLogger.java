@@ -17,6 +17,7 @@
 package com.android.server.location.contexthub;
 
 import android.hardware.location.NanoAppMessage;
+import android.util.Log;
 
 /**
  * A class to log events and useful metrics within the Context Hub service.
@@ -30,35 +31,226 @@ import android.hardware.location.NanoAppMessage;
  * @hide
  */
 public class ContextHubEventLogger {
+
+    /**
+     * The base class for all Context Hub events
+     */
+    public static class ContextHubEventBase {
+        /**
+         * the timestamp in milliseconds
+         */
+        public final long timeStampInMs;
+
+        /**
+         * the ID of the context hub
+         */
+        public final int contextHubId;
+
+        public ContextHubEventBase(long mTimeStampInMs, int mContextHubId) {
+            timeStampInMs = mTimeStampInMs;
+            contextHubId = mContextHubId;
+        }
+    }
+
+    /**
+     * A base class for nanoapp events
+     */
+    public static class NanoappEventBase extends ContextHubEventBase {
+        /**
+         * the ID of the nanoapp
+         */
+        public final long nanoappId;
+
+        /**
+         * whether the event was successful
+         */
+        public final boolean success;
+
+        public NanoappEventBase(long mTimeStampInMs, int mContextHubId,
+                                long mNanoappId, boolean mSuccess) {
+            super(mTimeStampInMs, mContextHubId);
+            nanoappId = mNanoappId;
+            success = mSuccess;
+        }
+    }
+
+    /**
+     * Represents a nanoapp load event
+     */
+    public static class NanoappLoadEvent extends NanoappEventBase {
+        /**
+         * the version of the nanoapp
+         */
+        public final int nanoappVersion;
+
+        /**
+         * the size in bytes of the nanoapp
+         */
+        public final long nanoappSize;
+
+        public NanoappLoadEvent(long mTimeStampInMs, int mContextHubId, long mNanoappId,
+                                int mNanoappVersion, long mNanoappSize, boolean mSuccess) {
+            super(mTimeStampInMs, mContextHubId, mNanoappId, mSuccess);
+            nanoappVersion = mNanoappVersion;
+            nanoappSize = mNanoappSize;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ContextHubServiceUtil.formatDateFromTimestamp(timeStampInMs));
+            sb.append(": NanoappLoadEvent[hubId = ");
+            sb.append(contextHubId);
+            sb.append(", appId = 0x");
+            sb.append(Long.toHexString(nanoappId));
+            sb.append(", appVersion = ");
+            sb.append(nanoappVersion);
+            sb.append(", appSize = ");
+            sb.append(nanoappSize);
+            sb.append(" bytes, success = ");
+            sb.append(success ? "true" : "false");
+            sb.append(']');
+            return sb.toString();
+        }
+    }
+
+    /**
+     * Represents a nanoapp unload event
+     */
+    public static class NanoappUnloadEvent extends NanoappEventBase {
+        public NanoappUnloadEvent(long mTimeStampInMs, int mContextHubId,
+                                  long mNanoappId, boolean mSuccess) {
+            super(mTimeStampInMs, mContextHubId, mNanoappId, mSuccess);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ContextHubServiceUtil.formatDateFromTimestamp(timeStampInMs));
+            sb.append(": NanoappUnloadEvent[hubId = ");
+            sb.append(contextHubId);
+            sb.append(", appId = 0x");
+            sb.append(Long.toHexString(nanoappId));
+            sb.append(", success = ");
+            sb.append(success ? "true" : "false");
+            sb.append(']');
+            return sb.toString();
+        }
+    }
+
+    /**
+     * Represents a nanoapp message event
+     */
+    public static class NanoappMessageEvent extends NanoappEventBase {
+        /**
+         * the message that was sent
+         */
+        public final NanoAppMessage message;
+
+        public NanoappMessageEvent(long mTimeStampInMs, int mContextHubId,
+                                   NanoAppMessage mMessage, boolean mSuccess) {
+            super(mTimeStampInMs, mContextHubId, 0, mSuccess);
+            message = mMessage;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ContextHubServiceUtil.formatDateFromTimestamp(timeStampInMs));
+            sb.append(": NanoappMessageEvent[hubId = ");
+            sb.append(contextHubId);
+            sb.append(", ");
+            sb.append(message.toString());
+            sb.append(", success = ");
+            sb.append(success ? "true" : "false");
+            sb.append(']');
+            return sb.toString();
+        }
+    }
+
+    /**
+     * Represents a context hub restart event
+     */
+    public static class ContextHubRestartEvent extends ContextHubEventBase {
+        public ContextHubRestartEvent(long mTimeStampInMs, int mContextHubId) {
+            super(mTimeStampInMs, mContextHubId);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ContextHubServiceUtil.formatDateFromTimestamp(timeStampInMs));
+            sb.append(": ContextHubRestartEvent[hubId = ");
+            sb.append(contextHubId);
+            sb.append(']');
+            return sb.toString();
+        }
+    }
+
+    public static final int NUM_EVENTS_TO_STORE = 20;
     private static final String TAG = "ContextHubEventLogger";
 
-    ContextHubEventLogger() {
-        throw new RuntimeException("Not implemented");
+    private final ConcurrentLinkedEvictingDeque<NanoappLoadEvent> mNanoappLoadEventQueue =
+            new ConcurrentLinkedEvictingDeque<>(NUM_EVENTS_TO_STORE);
+    private final ConcurrentLinkedEvictingDeque<NanoappUnloadEvent> mNanoappUnloadEventQueue =
+            new ConcurrentLinkedEvictingDeque<>(NUM_EVENTS_TO_STORE);
+    private final ConcurrentLinkedEvictingDeque<NanoappMessageEvent> mMessageFromNanoappQueue =
+            new ConcurrentLinkedEvictingDeque<>(NUM_EVENTS_TO_STORE);
+    private final ConcurrentLinkedEvictingDeque<NanoappMessageEvent> mMessageToNanoappQueue =
+            new ConcurrentLinkedEvictingDeque<>(NUM_EVENTS_TO_STORE);
+    private final ConcurrentLinkedEvictingDeque<ContextHubRestartEvent>
+            mContextHubRestartEventQueue = new ConcurrentLinkedEvictingDeque<>(NUM_EVENTS_TO_STORE);
+
+    // Make ContextHubEventLogger a singleton
+    private static ContextHubEventLogger sInstance = null;
+
+    private ContextHubEventLogger() {}
+
+    /**
+     * Gets the singleton instance for ContextHubEventLogger
+     */
+    public static synchronized ContextHubEventLogger getInstance() {
+        if (sInstance == null) {
+            sInstance = new ContextHubEventLogger();
+        }
+        return sInstance;
     }
 
     /**
      * Logs a nanoapp load event
      *
      * @param contextHubId      the ID of the context hub
-     * @param nanoAppId         the ID of the nanoapp
-     * @param nanoAppVersion    the version of the nanoapp
-     * @param nanoAppSize       the size in bytes of the nanoapp
+     * @param nanoappId         the ID of the nanoapp
+     * @param nanoappVersion    the version of the nanoapp
+     * @param nanoappSize       the size in bytes of the nanoapp
      * @param success           whether the load was successful
      */
-    public void logNanoAppLoad(int contextHubId, long nanoAppId, int nanoAppVersion,
-                               long nanoAppSize, boolean success) {
-        throw new RuntimeException("Not implemented");
+    public synchronized void logNanoappLoad(int contextHubId, long nanoappId, int nanoappVersion,
+                                            long nanoappSize, boolean success) {
+        long timeStampInMs = System.currentTimeMillis();
+        NanoappLoadEvent event = new NanoappLoadEvent(timeStampInMs, contextHubId, nanoappId,
+                                                      nanoappVersion, nanoappSize, success);
+        boolean status = mNanoappLoadEventQueue.add(event);
+        if (!status) {
+            Log.e(TAG, "Unable to add nanoapp load event to queue: " + event);
+        }
     }
 
     /**
      * Logs a nanoapp unload event
      *
      * @param contextHubId      the ID of the context hub
-     * @param nanoAppId         the ID of the nanoapp
+     * @param nanoappId         the ID of the nanoapp
      * @param success           whether the unload was successful
      */
-    public void logNanoAppUnload(int contextHubId, long nanoAppId, boolean success) {
-        throw new RuntimeException("Not implemented");
+    public synchronized void logNanoappUnload(int contextHubId, long nanoappId, boolean success) {
+        long timeStampInMs = System.currentTimeMillis();
+        NanoappUnloadEvent event = new NanoappUnloadEvent(timeStampInMs, contextHubId,
+                                                          nanoappId, success);
+        boolean status = mNanoappUnloadEventQueue.add(event);
+        if (!status) {
+            Log.e(TAG, "Unable to add nanoapp unload event to queue: " + event);
+        }
     }
 
     /**
@@ -66,9 +258,21 @@ public class ContextHubEventLogger {
      *
      * @param contextHubId      the ID of the context hub
      * @param message           the message that was sent
+     * @param success           whether the message was sent successfully
      */
-    public void logMessageFromNanoApp(int contextHubId, NanoAppMessage message) {
-        throw new RuntimeException("Not implemented");
+    public synchronized void logMessageFromNanoapp(int contextHubId, NanoAppMessage message,
+                                                   boolean success) {
+        if (message == null) {
+            return;
+        }
+
+        long timeStampInMs = System.currentTimeMillis();
+        NanoappMessageEvent event = new NanoappMessageEvent(timeStampInMs, contextHubId,
+                                                            message, success);
+        boolean status = mMessageFromNanoappQueue.add(event);
+        if (!status) {
+            Log.e(TAG, "Unable to add message from nanoapp event to queue: " + event);
+        }
     }
 
     /**
@@ -78,8 +282,19 @@ public class ContextHubEventLogger {
      * @param message           the message that was sent
      * @param success           whether the message was sent successfully
      */
-    public void logMessageToNanoApp(int contextHubId, NanoAppMessage message, boolean success) {
-        throw new RuntimeException("Not implemented");
+    public synchronized void logMessageToNanoapp(int contextHubId, NanoAppMessage message,
+                                                 boolean success) {
+        if (message == null) {
+            return;
+        }
+
+        long timeStampInMs = System.currentTimeMillis();
+        NanoappMessageEvent event = new NanoappMessageEvent(timeStampInMs, contextHubId,
+                                                            message, success);
+        boolean status = mMessageToNanoappQueue.add(event);
+        if (!status) {
+            Log.e(TAG, "Unable to add message to nanoapp event to queue: " + event);
+        }
     }
 
     /**
@@ -87,8 +302,13 @@ public class ContextHubEventLogger {
      *
      * @param contextHubId      the ID of the context hub
      */
-    public void logContextHubRestarts(int contextHubId) {
-        throw new RuntimeException("Not implemented");
+    public synchronized void logContextHubRestart(int contextHubId) {
+        long timeStampInMs = System.currentTimeMillis();
+        ContextHubRestartEvent event = new ContextHubRestartEvent(timeStampInMs, contextHubId);
+        boolean status = mContextHubRestartEventQueue.add(event);
+        if (!status) {
+            Log.e(TAG, "Unable to add Context Hub restart event to queue: " + event);
+        }
     }
 
     /**
@@ -96,8 +316,43 @@ public class ContextHubEventLogger {
      *
      * @return the dumped events
      */
-    public String dump() {
-        throw new RuntimeException("Not implemented");
+    public synchronized String dump() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Nanoapp Loads:");
+        sb.append(System.lineSeparator());
+        for (NanoappLoadEvent event : mNanoappLoadEventQueue) {
+            sb.append(event);
+            sb.append(System.lineSeparator());
+        }
+        sb.append(System.lineSeparator());
+        sb.append("Nanoapp Unloads:");
+        sb.append(System.lineSeparator());
+        for (NanoappUnloadEvent event : mNanoappUnloadEventQueue) {
+            sb.append(event);
+            sb.append(System.lineSeparator());
+        }
+        sb.append(System.lineSeparator());
+        sb.append("Messages from Nanoapps:");
+        sb.append(System.lineSeparator());
+        for (NanoappMessageEvent event : mMessageFromNanoappQueue) {
+            sb.append(event);
+            sb.append(System.lineSeparator());
+        }
+        sb.append(System.lineSeparator());
+        sb.append("Messages to Nanoapps:");
+        sb.append(System.lineSeparator());
+        for (NanoappMessageEvent event : mMessageToNanoappQueue) {
+            sb.append(event);
+            sb.append(System.lineSeparator());
+        }
+        sb.append(System.lineSeparator());
+        sb.append("Context Hub Restarts:");
+        sb.append(System.lineSeparator());
+        for (ContextHubRestartEvent event : mContextHubRestartEventQueue) {
+            sb.append(event);
+            sb.append(System.lineSeparator());
+        }
+        return sb.toString();
     }
 
     @Override

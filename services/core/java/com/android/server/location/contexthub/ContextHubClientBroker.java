@@ -470,6 +470,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                         + mAttachedContextHubInfo.getId() + ")", e);
                 result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
+
+            ContextHubEventLogger.getInstance().logMessageToNanoapp(
+                    mAttachedContextHubInfo.getId(),
+                    message,
+                    result == ContextHubTransaction.RESULT_SUCCESS);
         } else {
             Log.e(TAG, "Failed to send message to nanoapp: client connection is closed");
             result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
