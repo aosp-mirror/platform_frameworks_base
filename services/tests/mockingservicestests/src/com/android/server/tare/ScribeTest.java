@@ -68,7 +68,8 @@ public class ScribeTest {
     private MockitoSession mMockingSession;
     private Scribe mScribeUnderTest;
     private File mTestFileDir;
-    private final List<InstalledPackageInfo> mInstalledPackages = new ArrayList<>();
+    private final SparseArrayMap<String, InstalledPackageInfo> mInstalledPackages =
+            new SparseArrayMap<>();
     private final List<Analyst.Report> mReports = new ArrayList<>();
 
     @Mock
@@ -455,6 +456,6 @@ public class ScribeTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = UserHandle.getUid(userId, Math.abs(pkgName.hashCode()));
         pkgInfo.applicationInfo = applicationInfo;
-        mInstalledPackages.add(new InstalledPackageInfo(pkgInfo));
+        mInstalledPackages.add(userId, pkgName, new InstalledPackageInfo(pkgInfo));
     }
 }
