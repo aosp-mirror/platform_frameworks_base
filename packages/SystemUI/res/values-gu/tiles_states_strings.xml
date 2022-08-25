@@ -87,7 +87,7 @@
     <item msgid="2075645297847971154">"ચાલુ છે"</item>
   </string-array>
   <string-array name="tile_states_color_correction">
-    <item msgid="2840507878437297682">"અનુપલબ્ધ"</item>
+    <item msgid="2840507878437297682">"ઉપલબ્ધ નથી"</item>
     <item msgid="1909756493418256167">"બંધ છે"</item>
     <item msgid="4531508423703413340">"ચાલુ છે"</item>
   </string-array>
@@ -157,7 +157,7 @@
     <item msgid="6866424167599381915">"ચાલુ છે"</item>
   </string-array>
   <string-array name="tile_states_qr_code_scanner">
-    <item msgid="7435143266149257618">"અનુપલબ્ધ"</item>
+    <item msgid="7435143266149257618">"ઉપલબ્ધ નથી"</item>
     <item msgid="3301403109049256043">"બંધ છે"</item>
     <item msgid="8878684975184010135">"ચાલુ છે"</item>
   </string-array>
@@ -167,12 +167,12 @@
     <item msgid="7809470840976856149">"ચાલુ છે"</item>
   </string-array>
   <string-array name="tile_states_onehanded">
-    <item msgid="8189342855739930015">"અનુપલબ્ધ"</item>
+    <item msgid="8189342855739930015">"ઉપલબ્ધ નથી"</item>
     <item msgid="146088982397753810">"બંધ છે"</item>
     <item msgid="460891964396502657">"ચાલુ છે"</item>
   </string-array>
   <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"અનુપલબ્ધ"</item>
+    <item msgid="6184819793571079513">"ઉપલબ્ધ નથી"</item>
     <item msgid="8014986104355098744">"બંધ છે"</item>
     <item msgid="5966994759929723339">"ચાલુ છે"</item>
   </string-array>
