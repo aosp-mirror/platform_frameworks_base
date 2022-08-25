@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.pipeline.dagger
 
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileSubscriptionRepositoryImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
@@ -30,4 +34,12 @@ abstract class StatusBarPipelineModule {
 
     @Binds
     abstract fun wifiRepository(impl: WifiRepositoryImpl): WifiRepository
+
+    @Binds
+    abstract fun mobileSubscriptionRepository(
+        impl: MobileSubscriptionRepositoryImpl
+    ): MobileSubscriptionRepository
+
+    @Binds
+    abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
 }

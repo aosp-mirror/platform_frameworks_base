@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE;
+import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE_NEW;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI;
 
 import android.annotation.Nullable;
@@ -38,7 +39,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.BaseStatusBarWifiView;
+import com.android.systemui.statusbar.BaseStatusBarFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -48,6 +49,10 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorI
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
+import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconsBinder;
+import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel;
 import com.android.systemui.util.Assert;
@@ -83,6 +88,12 @@ public interface StatusBarIconController {
     /** */
     void setMobileIcons(String slot, List<MobileIconState> states);
 
+    /**
+     * This method completely replaces {@link #setMobileIcons} with the information from the new
+     * mobile data pipeline. Icons will automatically keep their state up to date, so we don't have
+     * to worry about funneling MobileIconState objects through anymore.
+     */
+    void setNewMobileIconSubIds(List<Integer> subIds);
     /**
      * Display the no calling & SMS icons.
      */
@@ -141,12 +152,14 @@ public interface StatusBarIconController {
                 StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
                 WifiViewModel wifiViewModel,
+                MobileUiAdapter mobileUiAdapter,
                 MobileContextProvider mobileContextProvider,
                 DarkIconDispatcher darkIconDispatcher) {
             super(linearLayout,
                     location,
                     statusBarPipelineFlags,
                     wifiViewModel,
+                    mobileUiAdapter,
                     mobileContextProvider);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
@@ -207,6 +220,7 @@ public interface StatusBarIconController {
             private final StatusBarPipelineFlags mStatusBarPipelineFlags;
             private final WifiViewModel mWifiViewModel;
             private final MobileContextProvider mMobileContextProvider;
+            private final MobileUiAdapter mMobileUiAdapter;
             private final DarkIconDispatcher mDarkIconDispatcher;
 
             @Inject
@@ -214,10 +228,12 @@ public interface StatusBarIconController {
                     StatusBarPipelineFlags statusBarPipelineFlags,
                     WifiViewModel wifiViewModel,
                     MobileContextProvider mobileContextProvider,
+                    MobileUiAdapter mobileUiAdapter,
                     DarkIconDispatcher darkIconDispatcher) {
                 mStatusBarPipelineFlags = statusBarPipelineFlags;
                 mWifiViewModel = wifiViewModel;
                 mMobileContextProvider = mobileContextProvider;
+                mMobileUiAdapter = mobileUiAdapter;
                 mDarkIconDispatcher = darkIconDispatcher;
             }
 
@@ -227,6 +243,7 @@ public interface StatusBarIconController {
                         location,
                         mStatusBarPipelineFlags,
                         mWifiViewModel,
+                        mMobileUiAdapter,
                         mMobileContextProvider,
                         mDarkIconDispatcher);
             }
@@ -244,11 +261,14 @@ public interface StatusBarIconController {
                 StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
                 WifiViewModel wifiViewModel,
-                MobileContextProvider mobileContextProvider) {
+                MobileUiAdapter mobileUiAdapter,
+                MobileContextProvider mobileContextProvider
+        ) {
             super(group,
                     location,
                     statusBarPipelineFlags,
                     wifiViewModel,
+                    mobileUiAdapter,
                     mobileContextProvider);
         }
 
@@ -284,14 +304,18 @@ public interface StatusBarIconController {
             private final StatusBarPipelineFlags mStatusBarPipelineFlags;
             private final WifiViewModel mWifiViewModel;
             private final MobileContextProvider mMobileContextProvider;
+            private final MobileUiAdapter mMobileUiAdapter;
 
             @Inject
             public Factory(
                     StatusBarPipelineFlags statusBarPipelineFlags,
                     WifiViewModel wifiViewModel,
-                    MobileContextProvider mobileContextProvider) {
+                    MobileUiAdapter mobileUiAdapter,
+                    MobileContextProvider mobileContextProvider
+            ) {
                 mStatusBarPipelineFlags = statusBarPipelineFlags;
                 mWifiViewModel = wifiViewModel;
+                mMobileUiAdapter = mobileUiAdapter;
                 mMobileContextProvider = mobileContextProvider;
             }
 
@@ -301,6 +325,7 @@ public interface StatusBarIconController {
                         location,
                         mStatusBarPipelineFlags,
                         mWifiViewModel,
+                        mMobileUiAdapter,
                         mMobileContextProvider);
             }
         }
@@ -315,6 +340,8 @@ public interface StatusBarIconController {
         private final StatusBarPipelineFlags mStatusBarPipelineFlags;
         private final WifiViewModel mWifiViewModel;
         private final MobileContextProvider mMobileContextProvider;
+        private final MobileIconsViewModel mMobileIconsViewModel;
+
         protected final Context mContext;
         protected final int mIconSize;
         // Whether or not these icons show up in dumpsys
@@ -333,7 +360,9 @@ public interface StatusBarIconController {
                 StatusBarLocation location,
                 StatusBarPipelineFlags statusBarPipelineFlags,
                 WifiViewModel wifiViewModel,
-                MobileContextProvider mobileContextProvider) {
+                MobileUiAdapter mobileUiAdapter,
+                MobileContextProvider mobileContextProvider
+        ) {
             mGroup = group;
             mLocation = location;
             mStatusBarPipelineFlags = statusBarPipelineFlags;
@@ -342,6 +371,14 @@ public interface StatusBarIconController {
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
+
+            if (statusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+                // This starts the flow for the new pipeline, and will notify us of changes
+                mMobileIconsViewModel = mobileUiAdapter.createMobileIconsViewModel();
+                MobileIconsBinder.bind(mGroup, mMobileIconsViewModel);
+            } else {
+                mMobileIconsViewModel = null;
+            }
         }
 
         public boolean isDemoable() {
@@ -394,6 +431,9 @@ public interface StatusBarIconController {
 
                 case TYPE_MOBILE:
                     return addMobileIcon(index, slot, holder.getMobileState());
+
+                case TYPE_MOBILE_NEW:
+                    return addNewMobileIcon(index, slot, holder.getTag());
             }
 
             return null;
@@ -410,7 +450,7 @@ public interface StatusBarIconController {
 
         @VisibleForTesting
         protected StatusIconDisplayable addWifiIcon(int index, String slot, WifiIconState state) {
-            final BaseStatusBarWifiView view;
+            final BaseStatusBarFrameLayout view;
             if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
                 view = onCreateModernStatusBarWifiView(slot);
                 // When [ModernStatusBarWifiView] is created, it will automatically apply the
@@ -429,17 +469,47 @@ public interface StatusBarIconController {
         }
 
         @VisibleForTesting
-        protected StatusBarMobileView addMobileIcon(int index, String slot, MobileIconState state) {
+        protected StatusIconDisplayable addMobileIcon(
+                int index,
+                String slot,
+                MobileIconState state
+        ) {
+            if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+                throw new IllegalStateException("Attempting to add a mobile icon while the new "
+                        + "pipeline is enabled is not supported");
+            }
+
             // Use the `subId` field as a key to query for the correct context
-            StatusBarMobileView view = onCreateStatusBarMobileView(state.subId, slot);
-            view.applyMobileState(state);
-            mGroup.addView(view, index, onCreateLayoutParams());
+            StatusBarMobileView mobileView = onCreateStatusBarMobileView(state.subId, slot);
+            mobileView.applyMobileState(state);
+            mGroup.addView(mobileView, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
                 Context mobileContext = mMobileContextProvider
                         .getMobileContextForSub(state.subId, mContext);
                 mDemoStatusIcons.addMobileView(state, mobileContext);
             }
+            return mobileView;
+        }
+
+        protected StatusIconDisplayable addNewMobileIcon(
+                int index,
+                String slot,
+                int subId
+        ) {
+            if (!mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+                throw new IllegalStateException("Attempting to add a mobile icon using the new"
+                        + "pipeline, but the enabled flag is false.");
+            }
+
+            BaseStatusBarFrameLayout view = onCreateModernStatusBarMobileView(slot, subId);
+            mGroup.addView(view, index, onCreateLayoutParams());
+
+            if (mIsInDemoMode) {
+                // TODO (b/249790009): demo mode should be handled at the data layer in the
+                //  new pipeline
+            }
+
             return view;
         }
 
@@ -462,6 +532,15 @@ public interface StatusBarIconController {
             StatusBarMobileView view = StatusBarMobileView
                     .fromContext(mobileContext, slot);
             return view;
+        }
+
+        private ModernStatusBarMobileView onCreateModernStatusBarMobileView(
+                String slot, int subId) {
+            return ModernStatusBarMobileView
+                    .constructAndBind(
+                            mContext,
+                            slot,
+                            mMobileIconsViewModel.viewModelForSub(subId));
         }
 
         protected LinearLayout.LayoutParams onCreateLayoutParams() {
@@ -519,6 +598,10 @@ public interface StatusBarIconController {
                     return;
                 case TYPE_MOBILE:
                     onSetMobileIcon(viewIndex, holder.getMobileState());
+                    return;
+                case TYPE_MOBILE_NEW:
+                    // Nothing, the icon updates itself now
+                    return;
                 default:
                     break;
             }
@@ -542,9 +625,13 @@ public interface StatusBarIconController {
         }
 
         public void onSetMobileIcon(int viewIndex, MobileIconState state) {
-            StatusBarMobileView view = (StatusBarMobileView) mGroup.getChildAt(viewIndex);
-            if (view != null) {
-                view.applyMobileState(state);
+            View view = mGroup.getChildAt(viewIndex);
+            if (view instanceof StatusBarMobileView) {
+                ((StatusBarMobileView) view).applyMobileState(state);
+            } else {
+                // ModernStatusBarMobileView automatically updates via the ViewModel
+                throw new IllegalStateException("Cannot update ModernStatusBarMobileView outside of"
+                        + "the new pipeline");
             }
 
             if (mIsInDemoMode) {

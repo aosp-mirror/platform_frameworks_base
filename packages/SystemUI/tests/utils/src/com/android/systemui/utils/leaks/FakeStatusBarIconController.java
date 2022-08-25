@@ -70,6 +70,10 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
     }
 
     @Override
+    public void setNewMobileIconSubIds(List<Integer> subIds) {
+    }
+
+    @Override
     public void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states) {
     }
 

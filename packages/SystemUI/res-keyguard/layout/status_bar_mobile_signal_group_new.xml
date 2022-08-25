@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2018, The Android Open Source Project
+** Copyright 2022, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<com.android.systemui.statusbar.StatusBarMobileView
+<com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mobile_combo"
     android:layout_width="wrap_content"
@@ -25,5 +25,5 @@
 
     <include layout="@layout/status_bar_mobile_signal_group_inner" />
 
-</com.android.systemui.statusbar.StatusBarMobileView>
+</com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView>
 

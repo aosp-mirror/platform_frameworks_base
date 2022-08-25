@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
@@ -66,8 +67,8 @@ public class StatusBarIconControllerImpl implements Tunable,
     private final StatusBarIconList mStatusBarIconList;
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconHideList = new ArraySet<>();
-
-    private Context mContext;
+    private final StatusBarPipelineFlags mStatusBarPipelineFlags;
+    private final Context mContext;
 
     /** */
     @Inject
@@ -78,9 +79,12 @@ public class StatusBarIconControllerImpl implements Tunable,
             ConfigurationController configurationController,
             TunerService tunerService,
             DumpManager dumpManager,
-            StatusBarIconList statusBarIconList) {
+            StatusBarIconList statusBarIconList,
+            StatusBarPipelineFlags statusBarPipelineFlags
+    ) {
         mStatusBarIconList = statusBarIconList;
         mContext = context;
+        mStatusBarPipelineFlags = statusBarPipelineFlags;
 
         configurationController.addCallback(this);
         commandQueue.addCallback(this);
@@ -220,6 +224,11 @@ public class StatusBarIconControllerImpl implements Tunable,
      */
     @Override
     public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
+        if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+            Log.d(TAG, "ignoring old pipeline callbacks, because the new "
+                    + "pipeline frontend is enabled");
+            return;
+        }
         Slot mobileSlot = mStatusBarIconList.getSlot(slot);
 
         // Reverse the sort order to show icons with left to right([Slot1][Slot2]..).
@@ -227,7 +236,6 @@ public class StatusBarIconControllerImpl implements Tunable,
         Collections.reverse(iconStates);
 
         for (MobileIconState state : iconStates) {
-
             StatusBarIconHolder holder = mobileSlot.getHolderForTag(state.subId);
             if (holder == null) {
                 holder = StatusBarIconHolder.fromMobileIconState(state);
@@ -235,6 +243,28 @@ public class StatusBarIconControllerImpl implements Tunable,
             } else {
                 holder.setMobileState(state);
                 handleSet(slot, holder);
+            }
+        }
+    }
+
+    @Override
+    public void setNewMobileIconSubIds(List<Integer> subIds) {
+        if (!mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+            Log.d(TAG, "ignoring new pipeline callback, "
+                    + "since the frontend is disabled");
+            return;
+        }
+        Slot mobileSlot = mStatusBarIconList.getSlot("mobile");
+
+        Collections.reverse(subIds);
+
+        for (Integer subId : subIds) {
+            StatusBarIconHolder holder = mobileSlot.getHolderForTag(subId);
+            if (holder == null) {
+                holder = StatusBarIconHolder.fromSubIdForModernMobileIcon(subId);
+                setIcon("mobile", holder);
+            } else {
+                // Don't have to do anything in the new world
             }
         }
     }
@@ -383,8 +413,6 @@ public class StatusBarIconControllerImpl implements Tunable,
             mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
         }
     }
-
-
 
     private void handleSet(String slotName, StatusBarIconHolder holder) {
         int viewIndex = mStatusBarIconList.getViewIndex(slotName, holder.getTag());

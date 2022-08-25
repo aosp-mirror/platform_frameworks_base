@@ -22,7 +22,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
 import com.android.systemui.R
-import com.android.systemui.statusbar.BaseStatusBarWifiView
+import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
@@ -37,7 +37,7 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 class ModernStatusBarWifiView(
     context: Context,
     attrs: AttributeSet?
-) : BaseStatusBarWifiView(context, attrs) {
+) : BaseStatusBarFrameLayout(context, attrs) {
 
     private lateinit var slot: String
     private lateinit var binding: WifiViewBinder.Binding
