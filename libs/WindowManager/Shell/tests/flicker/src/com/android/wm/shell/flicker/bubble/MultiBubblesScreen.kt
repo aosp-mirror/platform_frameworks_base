@@ -21,6 +21,7 @@ import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -58,26 +59,27 @@ open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
             setup {
                 test {
                     for (i in 1..3) {
-                        val addBubbleBtn = waitAndGetAddBubbleBtn()
-                        addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Add Bubble not found")
+                        val addBubbleBtn = waitAndGetAddBubbleBtn() ?: error("Add Bubble not found")
+                        addBubbleBtn.click()
+                        SystemClock.sleep(1000)
                     }
                     val showBubble = device.wait(
                         Until.findObject(
                             By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
                         ), FIND_OBJECT_TIMEOUT
-                    )
-                    showBubble?.run { showBubble.click() } ?: error("Show bubble not found")
+                    ) ?: error("Show bubble not found")
+                    showBubble.click()
                     SystemClock.sleep(1000)
                 }
             }
             transitions {
-                val bubbles = device.wait(
+                val bubbles: List<UiObject2> = device.wait(
                     Until.findObjects(
                         By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
                     ), FIND_OBJECT_TIMEOUT
                 ) ?: error("No bubbles found")
                 for (entry in bubbles) {
-                    entry?.run { entry.click() } ?: error("Bubble not found")
+                    entry.click()
                     SystemClock.sleep(1000)
                 }
             }
