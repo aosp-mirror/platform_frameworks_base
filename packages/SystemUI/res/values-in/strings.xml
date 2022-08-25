@@ -468,7 +468,7 @@
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ketuk untuk membuka"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Memperbarui"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
-    <string name="wallet_error_generic" msgid="257704570182963611">"Terjadi masalah saat mendapatkan kartu Anda, coba lagi nanti"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Terjadi error saat mendapatkan kartu Anda, coba lagi nanti"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Setelan layar kunci"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"Pindai kode QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
@@ -572,7 +572,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Hapus lampiran"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistem"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Layar Utama"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Layar utama"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Terbaru"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Kembali"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifikasi"</string>
@@ -895,7 +895,7 @@
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> mengirim gambar"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> memposting pembaruan status: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="person_available" msgid="2318599327472755472">"Online"</string>
-    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Terjadi masalah saat membaca indikator baterai"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Terjadi error saat membaca indikator baterai"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ketuk untuk informasi selengkapnya"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarm tidak disetel"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor sidik jari"</string>
@@ -919,7 +919,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi tidak akan otomatis terhubung untuk saat ini"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Lihat semua"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Untuk beralih jaringan, lepaskan kabel ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Agar pengalaman perangkat menjadi lebih baik, aplikasi dan layanan tetap dapat memindai jaringan Wi-Fi kapan saja, bahkan saat Wi-Fi nonaktif. Anda dapat mengubahnya di setelan pemindaian Wi-Fi. "<annotation id="link">"Ubah"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Untuk meningkatkan fungsi perangkat, aplikasi dan layanan tetap dapat memindai jaringan Wi-Fi kapan saja, bahkan saat Wi-Fi nonaktif. Anda dapat mengubahnya di setelan pemindaian Wi-Fi. "<annotation id="link">"Ubah"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Nonaktifkan mode pesawat"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ingin menambahkan kartu berikut ke Setelan Cepat"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tambahkan kartu"</string>
