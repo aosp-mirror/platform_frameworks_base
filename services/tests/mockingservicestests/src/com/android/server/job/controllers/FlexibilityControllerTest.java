@@ -33,6 +33,7 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NO
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_FLEXIBLE;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_IDLE;
+import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -390,7 +391,7 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testGetLifeCycleBeginningElapsedLocked_prefetch() {
+    public void testGetLifeCycleBeginningElapsedLocked_Prefetch() {
         // prefetch with lifecycle
         when(mPrefetchController.getLaunchTimeThresholdMs()).thenReturn(700L);
         JobInfo.Builder jb = createJob(0).setPrefetch(true);
@@ -417,7 +418,7 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testGetLifeCycleBeginningElapsedLocked_nonPrefetch() {
+    public void testGetLifeCycleBeginningElapsedLocked_NonPrefetch() {
         // delay
         long delay = 100;
         JobInfo.Builder jb = createJob(0).setMinimumLatency(delay);
@@ -432,7 +433,7 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testGetLifeCycleEndElapsedLocked_prefetch() {
+    public void testGetLifeCycleEndElapsedLocked_Prefetch() {
         // prefetch no estimate
         JobInfo.Builder jb = createJob(0).setPrefetch(true);
         JobStatus js = createJobStatus("time", jb);
@@ -444,8 +445,9 @@ public class FlexibilityControllerTest {
         when(mPrefetchController.getNextEstimatedLaunchTimeLocked(js)).thenReturn(1000L);
         assertEquals(1000L, mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
     }
+
     @Test
-    public void testGetLifeCycleEndElapsedLocked_nonPrefetch() {
+    public void testGetLifeCycleEndElapsedLocked_NonPrefetch() {
         // deadline
         JobInfo.Builder jb = createJob(0).setOverrideDeadline(1000L);
         JobStatus js = createJobStatus("time", jb);
@@ -456,6 +458,28 @@ public class FlexibilityControllerTest {
         js = createJobStatus("time", jb);
         assertEquals(100L + DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, 100L));
+    }
+
+    @Test
+    public void testGetLifeCycleEndElapsedLocked_Rescheduled() {
+        JobInfo.Builder jb = createJob(0).setOverrideDeadline(1000L);
+        JobStatus js = createJobStatus("time", jb);
+        js = new JobStatus(
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2, FROZEN_TIME, FROZEN_TIME);
+
+        assertEquals(mFcConfig.RESCHEDULED_JOB_DEADLINE_MS,
+                mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
+
+        js = new JobStatus(
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 3, FROZEN_TIME, FROZEN_TIME);
+
+        assertEquals(2 * mFcConfig.RESCHEDULED_JOB_DEADLINE_MS,
+                mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
+
+        js = new JobStatus(
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 10, FROZEN_TIME, FROZEN_TIME);
+        assertEquals(mFcConfig.MAX_RESCHEDULED_DEADLINE_MS,
+                mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
     }
 
     @Test
@@ -574,6 +598,15 @@ public class FlexibilityControllerTest {
         jb.setRequiresCharging(true);
         jb.setRequiresBatteryNotLow(true);
         JobStatus js = createJobStatus("testExceptions_NoFlexibleConstraints", jb);
+        assertFalse(js.hasFlexibilityConstraint());
+    }
+
+    @Test
+    public void testExceptions_RescheduledOnce() {
+        JobInfo.Builder jb = createJob(0);
+        JobStatus js = createJobStatus("time", jb);
+        js = new JobStatus(
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 1, FROZEN_TIME, FROZEN_TIME);
         assertFalse(js.hasFlexibilityConstraint());
     }
 
