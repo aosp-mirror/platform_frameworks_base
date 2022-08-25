@@ -17,7 +17,10 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
@@ -48,9 +51,11 @@ object SettingsPagerPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        SettingsScaffold(title = TITLE) {
-            SettingsPager(listOf("Personal", "Work")) {
-                PlaceholderTitle("Page $it")
+        SettingsScaffold(title = TITLE) { paddingValues ->
+            Box(Modifier.padding(paddingValues)) {
+                SettingsPager(listOf("Personal", "Work")) {
+                    PlaceholderTitle("Page $it")
+                }
             }
         }
     }
