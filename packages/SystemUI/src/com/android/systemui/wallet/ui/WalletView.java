@@ -215,6 +215,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         logoView.setImageDrawable(mContext.getDrawable(R.drawable.ic_qs_plus));
         mEmptyStateView.<TextView>requireViewById(R.id.empty_state_title).setText(label);
         mEmptyStateView.setOnClickListener(clickListener);
+        mAppButton.setOnClickListener(clickListener);
     }
 
     void showErrorMessage(@Nullable CharSequence message) {
@@ -253,6 +254,11 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
 
     Button getActionButton() {
         return mActionButton;
+    }
+
+    @VisibleForTesting
+    Button getAppButton() {
+        return mAppButton;
     }
 
     @VisibleForTesting

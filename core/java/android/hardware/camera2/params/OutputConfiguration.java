@@ -29,13 +29,14 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.MultiResolutionImageReader;
+import android.hardware.camera2.params.DynamicRangeProfiles;
+import android.hardware.camera2.params.DynamicRangeProfiles.Profile;
 import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.ImageReader;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -150,12 +151,165 @@ public final class OutputConfiguration implements Parcelable {
      */
     public static final int SURFACE_GROUP_ID_NONE = -1;
 
+    /**
+     * Default timestamp base.
+     *
+     * <p>The camera device decides the timestamp based on the properties of the
+     * output surface.</p>
+     *
+     * <li> For a SurfaceView output surface, the timestamp base is {@link
+     * #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED}. The timestamp is overridden with choreographer
+     * pulses from the display subsystem for smoother display of camera frames. The timestamp
+     * is roughly in the same time base as {@link android.os.SystemClock#uptimeMillis}.</li>
+     * <li> For an output surface of MediaRecorder, MediaCodec, or ImageReader with {@link
+     * android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE} usge flag, the timestamp base is
+     * {@link #TIMESTAMP_BASE_MONOTONIC}, which is roughly the same time base as
+     * {@link android.os.SystemClock#uptimeMillis}.</li>
+     * <li> For all other cases, the timestamp base is {@link #TIMESTAMP_BASE_SENSOR}, the same
+     * as what's specified by {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}.
+     * <ul><li> For a SurfaceTexture output surface, the camera system re-spaces the delivery
+     * of output frames based on image readout intervals, reducing viewfinder jitter. The timestamps
+     * of images remain to be {@link #TIMESTAMP_BASE_SENSOR}.</li></ul></li>
+     *
+     * <p>Note that the reduction of frame jitter for SurfaceView and SurfaceTexture comes with
+     * slight increase in photon-to-photon latency, which is the time from when photons hit the
+     * scene to when the corresponding pixels show up on the screen. If the photon-to-photon latency
+     * is more important than the smoothness of viewfinder, {@link #TIMESTAMP_BASE_SENSOR} should be
+     * used instead.</p>
+     *
+     * @see #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED
+     * @see #TIMESTAMP_BASE_MONOTONIC
+     * @see #TIMESTAMP_BASE_SENSOR
+     */
+    public static final int TIMESTAMP_BASE_DEFAULT = 0;
+
+    /**
+     * Timestamp base of {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}.
+     *
+     * <p>The timestamps of the output images are in the time base as specified by {@link
+     * CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}. The application can look up the
+     * corresponding result metadata for a particular output image using this timestamp.</p>
+     */
+    public static final int TIMESTAMP_BASE_SENSOR = 1;
+
+    /**
+     * Timestamp base roughly the same as {@link android.os.SystemClock#uptimeMillis}.
+     *
+     * <p>The timestamps of the output images are monotonically increasing, and are roughly in the
+     * same time base as {@link android.os.SystemClock#uptimeMillis}. The timestamps with this
+     * time base can be directly used for audio-video sync in video recording.</p>
+     *
+     * <p>If the camera device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is
+     * REALTIME, timestamps with this time base cannot directly match the timestamps in
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
+     * {@link android.hardware.camera2.CaptureResult}.</p>
+     */
+    public static final int TIMESTAMP_BASE_MONOTONIC = 2;
+
+    /**
+     * Timestamp base roughly the same as {@link android.os.SystemClock#elapsedRealtime}.
+     *
+     * <p>The timestamps of the output images are roughly in the
+     * same time base as {@link android.os.SystemClock#elapsedRealtime}. The timestamps with this
+     * time base cannot be directly used for audio-video sync in video recording.</p>
+     *
+     * <p>If the camera device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is
+     * UNKNOWN, timestamps with this time base cannot directly match the timestamps in
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
+     * {@link android.hardware.camera2.CaptureResult}.</p>
+     *
+     * <p>If using a REALTIME timestamp base on a device that supports only
+     * TIMESTAMP_SOURCE_UNKNOWN, the accuracy of timestamps is only what is guaranteed in the
+     * documentation for UNKNOWN. In particular, they have no guarantees about being accurate
+     * enough to use in fusing image data with the output of inertial sensors, for features such as
+     * image stabilization or augmented reality.</p>
+     */
+    public static final int TIMESTAMP_BASE_REALTIME = 3;
+
+    /**
+     * Timestamp is synchronized to choreographer.
+     *
+     * <p>The timestamp of the output images are overridden with choreographer pulses from the
+     * display subsystem for smoother display of camera frames. An output target of SurfaceView
+     * uses this time base by default.</p>
+     *
+     * <p>This timestamp base isn't applicable to SurfaceTexture targets. SurfaceTexture's
+     * {@link android.graphics.SurfaceTexture#updateTexImage updateTexImage} function always
+     * uses the latest image from the camera stream. In the case of a TextureView, the image is
+     * displayed right away.</p>
+     *
+     * <p>Timestamps with this time base cannot directly match the timestamps in
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
+     * {@link android.hardware.camera2.CaptureResult}. This timestamp base shouldn't be used if the
+     * timestamp needs to be used for audio-video synchronization.</p>
+     */
+    public static final int TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED = 4;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"TIMESTAMP_BASE_"}, value =
+        {TIMESTAMP_BASE_DEFAULT,
+         TIMESTAMP_BASE_SENSOR,
+         TIMESTAMP_BASE_MONOTONIC,
+         TIMESTAMP_BASE_REALTIME,
+         TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED})
+    public @interface TimestampBase {};
+
     /** @hide */
      @Retention(RetentionPolicy.SOURCE)
      @IntDef(prefix = {"SENSOR_PIXEL_MODE_"}, value =
          {CameraMetadata.SENSOR_PIXEL_MODE_DEFAULT,
           CameraMetadata.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION})
      public @interface SensorPixelMode {};
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"STREAM_USE_CASE_"}, value =
+        {CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL})
+    public @interface StreamUseCase {};
+
+    /**
+     * Automatic mirroring based on camera facing
+     *
+     * <p>This is the default mirroring mode for the camera device. With this mode,
+     * the camera output is mirrored horizontally for front-facing cameras. There is
+     * no mirroring for rear-facing and external cameras.</p>
+     */
+    public static final int MIRROR_MODE_AUTO = 0;
+
+    /**
+     * No mirror transform is applied
+     *
+     * <p>No mirroring is applied to the camera output regardless of the camera facing.</p>
+     */
+    public static final int MIRROR_MODE_NONE = 1;
+
+    /**
+     * Camera output is mirrored horizontally
+     *
+     * <p>The camera output is mirrored horizontally, the same behavior as in AUTO mode for
+     * front facing camera.</p>
+     */
+    public static final int MIRROR_MODE_H = 2;
+
+    /**
+     * Camera output is mirrored vertically
+     */
+    public static final int MIRROR_MODE_V = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MIRROR_MODE_"}, value =
+        {MIRROR_MODE_AUTO,
+          MIRROR_MODE_NONE,
+          MIRROR_MODE_H,
+          MIRROR_MODE_V})
+    public @interface MirrorMode {};
 
     /**
      * Create a new {@link OutputConfiguration} instance with a {@link Surface}.
@@ -258,6 +412,39 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Set a specific device supported dynamic range profile.
+     *
+     * <p>Clients can choose from any profile advertised as supported in
+     * CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES
+     * queried using {@link DynamicRangeProfiles#getSupportedProfiles()}.
+     * If this is not explicitly set, then the default profile will be
+     * {@link DynamicRangeProfiles#STANDARD}.</p>
+     *
+     * <p>Do note that invalid combinations between the registered output
+     * surface pixel format and the configured dynamic range profile will
+     * cause capture session initialization failure. Invalid combinations
+     * include any 10-bit dynamic range profile advertised in
+     * {@link DynamicRangeProfiles#getSupportedProfiles()} combined with
+     * an output Surface pixel format different from {@link ImageFormat#PRIVATE}
+     * (the default for Surfaces initialized by {@link android.view.SurfaceView},
+     * {@link android.view.TextureView}, {@link android.media.MediaRecorder},
+     * {@link android.media.MediaCodec} etc.)
+     * or {@link ImageFormat#YCBCR_P010}.</p>
+     */
+    public void setDynamicRangeProfile(@Profile long profile) {
+        mDynamicRangeProfile = profile;
+    }
+
+    /**
+     * Return current dynamic range profile.
+     *
+     * @return the currently set dynamic range profile
+     */
+    public @Profile long getDynamicRangeProfile() {
+        return mDynamicRangeProfile;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance.
      *
      * <p>This constructor takes an argument for desired camera rotation</p>
@@ -319,6 +506,10 @@ public final class OutputConfiguration implements Parcelable {
         mPhysicalCameraId = null;
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
+        mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
+        mTimestampBase = TIMESTAMP_BASE_DEFAULT;
+        mMirrorMode = MIRROR_MODE_AUTO;
     }
 
     /**
@@ -416,6 +607,8 @@ public final class OutputConfiguration implements Parcelable {
         mPhysicalCameraId = null;
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
+        mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
     }
 
     /**
@@ -693,6 +886,150 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Set stream use case for this OutputConfiguration
+     *
+     * <p>Stream use case is used to describe the purpose of the stream, whether it's for live
+     * preview, still image capture, video recording, or their combinations. This flag is useful
+     * for scenarios where the immediate consumer target isn't sufficient to indicate the stream's
+     * usage.</p>
+     *
+     * <p>The main difference beteween stream use case and capture intent is that the former
+     * enables the camera device to optimize camera hardware and software pipelines based on user
+     * scenarios for each stream, whereas the latter is mainly a hint to camera to decide
+     * optimal 3A strategy that's applicable to the whole session. The camera device carries out
+     * configurations such as selecting tuning parameters, choosing camera sensor mode, and
+     * constructing image processing pipeline based on the streams's use cases. Capture intents are
+     * then used to fine tune 3A behaviors such as adjusting AE/AF convergence speed, and capture
+     * intents may change during the lifetime of a session. For example, for a session with a
+     * PREVIEW_VIDEO_STILL use case stream and a STILL_CAPTURE use case stream, the capture intents
+     * may be PREVIEW with fast 3A convergence speed and flash metering with automatic control for
+     * live preview, STILL_CAPTURE with best 3A parameters for still photo capture, or VIDEO_RECORD
+     * with slower 3A convergence speed for better video playback experience.</p>
+     *
+     * <p>The supported stream use cases supported by a camera device can be queried by
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES}.</p>
+     *
+     * <p>The mandatory stream combinations involving stream use cases can be found at {@link
+     * android.hardware.camera2.CameraDevice#createCaptureSession}, as well as queried via
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination}. The application is
+     * strongly recommended to select one of the guaranteed stream combinations where all streams'
+     * use cases are set to non-DEFAULT values. If the application chooses a stream combination
+     * not in the mandatory list, the camera device may ignore some use case flags due to
+     * hardware constraints or implementation details.</p>
+     *
+     * <p>This function must be called before {@link CameraDevice#createCaptureSession} or {@link
+     * CameraDevice#createCaptureSessionByOutputConfigurations}. Calling this function after
+     * {@link CameraDevice#createCaptureSession} or
+     * {@link CameraDevice#createCaptureSessionByOutputConfigurations} has no effect to the camera
+     * session.</p>
+     *
+     * @param streamUseCase The stream use case to be set.
+     *
+     * @throws IllegalArgumentException If the streamUseCase isn't within the range of valid
+     *                                  values.
+     */
+    public void setStreamUseCase(@StreamUseCase long streamUseCase) {
+        // Verify that the value is in range
+        long maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+        if (streamUseCase > maxUseCaseValue &&
+                streamUseCase < CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VENDOR_START) {
+            throw new IllegalArgumentException("Not a valid stream use case value " +
+                    streamUseCase);
+        }
+
+        mStreamUseCase = streamUseCase;
+    }
+
+    /**
+     * Get the current stream use case
+     *
+     * <p>If no {@link #setStreamUseCase} is called first, this function returns
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT DEFAULT}.</p>
+     *
+     * @return the currently set stream use case
+     */
+    public long getStreamUseCase() {
+        return mStreamUseCase;
+    }
+
+    /**
+     * Set timestamp base for this output target
+     *
+     * <p>Timestamp base describes the time domain of images from this
+     * camera output and its relationship with {@link
+     * CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}.</p>
+     *
+     * <p>If this function is not called, the timestamp base for this output
+     * is {@link #TIMESTAMP_BASE_DEFAULT}, with which the camera device adjusts
+     * timestamps based on the output target.</p>
+     *
+     * <p>See {@link #TIMESTAMP_BASE_DEFAULT}, {@link #TIMESTAMP_BASE_SENSOR},
+     * and {@link #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED} for details of each timestamp base.</p>
+     *
+     * @param timestampBase The timestamp base to be set.
+     *
+     * @throws IllegalArgumentException If the timestamp base isn't within the range of valid
+     *                                  values.
+     */
+    public void setTimestampBase(@TimestampBase int timestampBase) {
+        // Verify that the value is in range
+        if (timestampBase < TIMESTAMP_BASE_DEFAULT ||
+                timestampBase > TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED) {
+            throw new IllegalArgumentException("Not a valid timestamp base value " +
+                    timestampBase);
+        }
+        mTimestampBase = timestampBase;
+    }
+
+    /**
+     * Get the current timestamp base
+     *
+     * <p>If no {@link #setTimestampBase} is called first, this function returns
+     * {@link #TIMESTAMP_BASE_DEFAULT}.</p>
+     *
+     * @return The currently set timestamp base
+     */
+    public @TimestampBase int getTimestampBase() {
+        return mTimestampBase;
+    }
+
+    /**
+     * Set the mirroring mode for this output target
+     *
+     * <p>If this function is not called, the mirroring mode for this output is
+     * {@link #MIRROR_MODE_AUTO}, with which the camera API will mirror the output images
+     * horizontally for front facing camera.</p>
+     *
+     * <p>For efficiency, the mirror effect is applied as a transform flag, so it is only effective
+     * in some outputs. It works automatically for SurfaceView and TextureView outputs. For manual
+     * use of SurfaceTexture, it is reflected in the value of
+     * {@link android.graphics.SurfaceTexture#getTransformMatrix}. For other end points, such as
+     * ImageReader, MediaRecorder, or MediaCodec, the mirror mode has no effect. If mirroring is
+     * needed for such outputs, the application needs to mirror the image buffers itself before
+     * passing them onward.</p>
+     */
+    public void setMirrorMode(@MirrorMode int mirrorMode) {
+        // Verify that the value is in range
+        if (mirrorMode < MIRROR_MODE_AUTO ||
+                mirrorMode > MIRROR_MODE_V) {
+            throw new IllegalArgumentException("Not a valid mirror mode " + mirrorMode);
+        }
+        mMirrorMode = mirrorMode;
+    }
+
+    /**
+     * Get the current mirroring mode
+     *
+     * <p>If no {@link #setMirrorMode} is called first, this function returns
+     * {@link #MIRROR_MODE_AUTO}.</p>
+     *
+     * @return The currently set mirroring mode
+     */
+    public @MirrorMode int getMirrorMode() {
+        return mMirrorMode;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
      * instance.
      *
@@ -718,6 +1055,10 @@ public final class OutputConfiguration implements Parcelable {
         this.mPhysicalCameraId = other.mPhysicalCameraId;
         this.mIsMultiResolution = other.mIsMultiResolution;
         this.mSensorPixelModesUsed = other.mSensorPixelModesUsed;
+        this.mDynamicRangeProfile = other.mDynamicRangeProfile;
+        this.mStreamUseCase = other.mStreamUseCase;
+        this.mTimestampBase = other.mTimestampBase;
+        this.mMirrorMode = other.mMirrorMode;
     }
 
     /**
@@ -736,7 +1077,14 @@ public final class OutputConfiguration implements Parcelable {
         String physicalCameraId = source.readString();
         boolean isMultiResolutionOutput = source.readInt() == 1;
         int[] sensorPixelModesUsed = source.createIntArray();
+        long streamUseCase = source.readLong();
+
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        long dynamicRangeProfile = source.readLong();
+        DynamicRangeProfiles.checkProfileValue(dynamicRangeProfile);
+
+        int timestampBase = source.readInt();
+        int mirrorMode = source.readInt();
 
         mSurfaceGroupId = surfaceSetId;
         mRotation = rotation;
@@ -760,6 +1108,10 @@ public final class OutputConfiguration implements Parcelable {
         mPhysicalCameraId = physicalCameraId;
         mIsMultiResolution = isMultiResolutionOutput;
         mSensorPixelModesUsed = convertIntArrayToIntegerList(sensorPixelModesUsed);
+        mDynamicRangeProfile = dynamicRangeProfile;
+        mStreamUseCase = streamUseCase;
+        mTimestampBase = timestampBase;
+        mMirrorMode = mirrorMode;
     }
 
     /**
@@ -875,6 +1227,10 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mIsMultiResolution ? 1 : 0);
         // writeList doesn't seem to work well with Integer list.
         dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
+        dest.writeLong(mDynamicRangeProfile);
+        dest.writeLong(mStreamUseCase);
+        dest.writeInt(mTimestampBase);
+        dest.writeInt(mMirrorMode);
     }
 
     /**
@@ -905,7 +1261,10 @@ public final class OutputConfiguration implements Parcelable {
                     mConfiguredDataspace != other.mConfiguredDataspace ||
                     mConfiguredGenerationId != other.mConfiguredGenerationId ||
                     !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId) ||
-                    mIsMultiResolution != other.mIsMultiResolution)
+                    mIsMultiResolution != other.mIsMultiResolution ||
+                    mStreamUseCase != other.mStreamUseCase ||
+                    mTimestampBase != other.mTimestampBase ||
+                    mMirrorMode != other.mMirrorMode)
                 return false;
             if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
                 return false;
@@ -919,6 +1278,9 @@ public final class OutputConfiguration implements Parcelable {
             for (int i = 0;  i < minLen; i++) {
                 if (mSurfaces.get(i) != other.mSurfaces.get(i))
                     return false;
+            }
+            if (mDynamicRangeProfile != other.mDynamicRangeProfile) {
+                return false;
             }
 
             return true;
@@ -939,7 +1301,8 @@ public final class OutputConfiguration implements Parcelable {
                     mRotation, mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace,
                     mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
-                    mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode());
+                    mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
+                    mDynamicRangeProfile, mStreamUseCase, mTimestampBase, mMirrorMode);
         }
 
         return HashCodeHelpers.hashCode(
@@ -947,7 +1310,9 @@ public final class OutputConfiguration implements Parcelable {
                 mConfiguredSize.hashCode(), mConfiguredFormat,
                 mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
-                mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode());
+                mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
+                mDynamicRangeProfile, mStreamUseCase, mTimestampBase,
+                mMirrorMode);
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -979,4 +1344,12 @@ public final class OutputConfiguration implements Parcelable {
     private boolean mIsMultiResolution;
     // The sensor pixel modes that this OutputConfiguration will use
     private ArrayList<Integer> mSensorPixelModesUsed;
+    // Dynamic range profile
+    private long mDynamicRangeProfile;
+    // Stream use case
+    private long mStreamUseCase;
+    // Timestamp base
+    private int mTimestampBase;
+    // Mirroring mode
+    private int mMirrorMode;
 }

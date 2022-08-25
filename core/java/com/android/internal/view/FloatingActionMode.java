@@ -33,7 +33,7 @@ import android.widget.PopupWindow;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 
 import java.util.Arrays;
 import java.util.Objects;

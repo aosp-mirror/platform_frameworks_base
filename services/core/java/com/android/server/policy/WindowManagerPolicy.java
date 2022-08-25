@@ -68,7 +68,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -78,7 +77,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.IApplicationToken;
 import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -158,6 +156,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     /** Layer for the screen off animation */
     int COLOR_FADE_LAYER = 0x40000001;
+    /** Layer for Input overlays for capturing inputs for gesture detection, etc. */
+    int INPUT_DISPLAY_OVERLAY_LAYER = 0x7f000000;
+    /** Layer for Screen Decoration: The top most visible layer just below input overlay layers */
+    int SCREEN_DECOR_DISPLAY_OVERLAY_LAYER = INPUT_DISPLAY_OVERLAY_LAYER - 1;
 
     /**
      * Register shortcuts for window manager to dispatch.
@@ -191,27 +193,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         String getOwningPackage();
 
         /**
-         * Retrieve the current LayoutParams of the window.
-         *
-         * @return WindowManager.LayoutParams The window's internal LayoutParams
-         *         instance.
-         */
-        public WindowManager.LayoutParams getAttrs();
-
-        /**
          * Retrieve the type of the top-level window.
          *
          * @return the base type of the parent window if attached or its own type otherwise
          */
         public int getBaseType();
-
-        /**
-         * Return the token for the application (actually activity) that owns
-         * this window.  May return null for system windows.
-         *
-         * @return An IApplicationToken identifying the owning activity.
-         */
-        public IApplicationToken getAppToken();
 
         /**
          * Return true if this window (or a window it is attached to, but not
@@ -229,21 +215,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
         /** @return true if the window can show over keyguard. */
         boolean canShowWhenLocked();
-    }
-
-    /**
-     * Holds the contents of a starting window. {@link #addSplashScreen} needs to wrap the
-     * contents of the starting window into an class implementing this interface, which then will be
-     * held by WM and released with {@link #remove} when no longer needed.
-     */
-    interface StartingSurface {
-
-        /**
-         * Removes the starting window surface. Do not hold the window manager lock when calling
-         * this method!
-         * @param animate Whether need to play the default exit animation for starting window.
-         */
-        void remove(boolean animate);
     }
 
     /**
@@ -547,43 +518,44 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             case TYPE_PHONE:
                 return  3;
             case TYPE_SEARCH_BAR:
-            case TYPE_VOICE_INTERACTION_STARTING:
                 return  4;
-            case TYPE_VOICE_INTERACTION:
-                // voice interaction layer is almost immediately above apps.
-                return  5;
             case TYPE_INPUT_CONSUMER:
-                return  6;
+                return  5;
             case TYPE_SYSTEM_DIALOG:
-                return  7;
+                return  6;
             case TYPE_TOAST:
                 // toasts and the plugged-in battery thing
-                return  8;
+                return  7;
             case TYPE_PRIORITY_PHONE:
                 // SIM errors and unlock.  Not sure if this really should be in a high layer.
-                return  9;
+                return  8;
             case TYPE_SYSTEM_ALERT:
                 // like the ANR / app crashed dialogs
                 // Type is deprecated for non-system apps. For system apps, this type should be
                 // in a higher layer than TYPE_APPLICATION_OVERLAY.
-                return  canAddInternalSystemWindow ? 13 : 10;
+                return  canAddInternalSystemWindow ? 12 : 9;
             case TYPE_APPLICATION_OVERLAY:
-                return  12;
+                return  11;
             case TYPE_INPUT_METHOD:
                 // on-screen keyboards and other such input method user interfaces go here.
-                return  15;
+                return  13;
             case TYPE_INPUT_METHOD_DIALOG:
                 // on-screen keyboards and other such input method user interfaces go here.
-                return  16;
+                return  14;
             case TYPE_STATUS_BAR:
-                return  17;
+                return  15;
             case TYPE_STATUS_BAR_ADDITIONAL:
-                return  18;
+                return  16;
             case TYPE_NOTIFICATION_SHADE:
-                return  19;
+                return  17;
             case TYPE_STATUS_BAR_SUB_PANEL:
-                return  20;
+                return  18;
             case TYPE_KEYGUARD_DIALOG:
+                return  19;
+            case TYPE_VOICE_INTERACTION_STARTING:
+                return  20;
+            case TYPE_VOICE_INTERACTION:
+                // voice interaction layer should show above the lock screen.
                 return  21;
             case TYPE_VOLUME_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
@@ -592,7 +564,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             case TYPE_SYSTEM_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
                 // changes the device volume
-                return  canAddInternalSystemWindow ? 23 : 11;
+                return  canAddInternalSystemWindow ? 23 : 10;
             case TYPE_NAVIGATION_BAR:
                 // the navigation bar, if available, shows atop most things
                 return  24;
@@ -605,7 +577,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  26;
             case TYPE_SYSTEM_ERROR:
                 // system-level error dialogs
-                return  canAddInternalSystemWindow ? 27 : 10;
+                return  canAddInternalSystemWindow ? 27 : 9;
             case TYPE_MAGNIFICATION_OVERLAY:
                 // used to highlight the magnified portion of a display
                 return  28;
@@ -679,53 +651,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * the StatusBar.
      */
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs);
-
-    /**
-     * @return whether {@param win} can be hidden by Keyguard
-     */
-    default boolean canBeHiddenByKeyguardLw(WindowState win) {
-        // Keyguard visibility of window from activities are determined over activity visibility.
-        if (win.getAppToken() != null) {
-            return false;
-        }
-        switch (win.getAttrs().type) {
-            case TYPE_NOTIFICATION_SHADE:
-            case TYPE_STATUS_BAR:
-            case TYPE_NAVIGATION_BAR:
-            case TYPE_WALLPAPER:
-                return false;
-            default:
-                // Hide only windows below the keyguard host window.
-                return getWindowLayerLw(win) < getWindowLayerFromTypeLw(TYPE_NOTIFICATION_SHADE);
-        }
-    }
-
-    /**
-     * Called when the system would like to show a UI to indicate that an
-     * application is starting.  You can use this to add a
-     * APPLICATION_STARTING_TYPE window with the given appToken to the window
-     * manager (using the normal window manager APIs) that will be shown until
-     * the application displays its own window.  This is called without the
-     * window manager locked so that you can call back into it.
-     *
-     * @param appToken Token of the application being started.
-     * @param packageName The name of the application package being started.
-     * @param theme Resource defining the application's overall visual theme.
-     * @param nonLocalizedLabel The default title label of the application if
-     *        no data is found in the resource.
-     * @param labelRes The resource ID the application would like to use as its name.
-     * @param icon The resource ID the application would like to use as its icon.
-     * @param windowFlags Window layout flags.
-     * @param overrideConfig override configuration to consider when generating
-     *        context to for resources.
-     * @param displayId Id of the display to show the splash screen at.
-     *
-     * @return The starting surface.
-     *
-     */
-    StartingSurface addSplashScreen(IBinder appToken, int userId, String packageName,
-            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId);
 
     /**
      * Create and return an animation to re-display a window that was force hidden by Keyguard.
@@ -850,6 +775,20 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
      */
     public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
+
+    /**
+     * Called when a particular PowerGroup has changed wakefulness.
+     *
+     * @param groupId The id of the PowerGroup.
+     * @param wakefulness One of PowerManagerInternal.WAKEFULNESS_* indicating the wake state for
+     * the group
+     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the reason this
+     * group is going to sleep.
+     * @param globalWakefulness The global wakefulness, which may or may not match that of this
+     * group. One of PowerManagerInternal.WAKEFULNESS_*
+     */
+    void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness);
 
     /**
      * Called when the display is about to turn on to show content.

@@ -22,15 +22,20 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * This class scans a directory containing overlay APKs and extracts information from the overlay
@@ -88,6 +93,14 @@ public class OverlayScanner {
      */
     private final ArrayMap<String, ParsedOverlayInfo> mParsedOverlayInfos = new ArrayMap<>();
 
+    /**
+     * A list of pair<packageName, apkFile> which is excluded from the system based on the
+     * system property condition.
+     *
+     * @see #isExcludedOverlayPackage(String, OverlayConfigParser.OverlayPartition)
+     */
+    private final List<Pair<String, File>> mExcludedOverlayPackages = new ArrayList<>();
+
     /** Retrieves information parsed from the overlay with the package name. */
     @Nullable
     public final ParsedOverlayInfo getParsedInfo(String packageName) {
@@ -98,6 +111,25 @@ public class OverlayScanner {
     @NonNull
     final Collection<ParsedOverlayInfo> getAllParsedInfos() {
         return mParsedOverlayInfos.values();
+    }
+
+    /**
+     * Returns {@code true} if the given package name on the given overlay partition is an
+     * excluded overlay package.
+     * <p>
+     * An excluded overlay package declares overlay attributes of required system property in its
+     * manifest that do not match the corresponding values on the device.
+     */
+    final boolean isExcludedOverlayPackage(@NonNull String packageName,
+            @NonNull OverlayConfigParser.OverlayPartition overlayPartition) {
+        for (int i = 0; i < mExcludedOverlayPackages.size(); i++) {
+            final Pair<String, File> pair = mExcludedOverlayPackages.get(i);
+            if (pair.first.equals(packageName)
+                    && overlayPartition.containsOverlay(pair.second)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -130,7 +162,7 @@ public class OverlayScanner {
                 continue;
             }
 
-            final ParsedOverlayInfo info = parseOverlayManifest(f);
+            final ParsedOverlayInfo info = parseOverlayManifest(f, mExcludedOverlayPackages);
             if (info == null) {
                 continue;
             }
@@ -139,20 +171,39 @@ public class OverlayScanner {
         }
     }
 
-    /** Extracts information about the overlay from its manifest. */
+    /**
+     * Extracts information about the overlay from its manifest. Adds the package name and apk file
+     * into the {@code outExcludedOverlayPackages} if the apk is excluded from the system based
+     * on the system property condition.
+     */
     @VisibleForTesting
-    public ParsedOverlayInfo parseOverlayManifest(File overlayApk) {
+    public ParsedOverlayInfo parseOverlayManifest(File overlayApk,
+            List<Pair<String, File>> outExcludedOverlayPackages) {
         final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
         final ParseResult<ApkLite> ret = ApkLiteParseUtils.parseApkLite(input.reset(),
-                overlayApk, /* flags */ 0);
+                overlayApk,
+                FrameworkParsingPackageUtils.PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY);
         if (ret.isError()) {
             Log.w(TAG, "Got exception loading overlay.", ret.getException());
             return null;
         }
         final ApkLite apkLite = ret.getResult();
-        return apkLite.getTargetPackageName() == null ? null :
-                new ParsedOverlayInfo(apkLite.getPackageName(), apkLite.getTargetPackageName(),
-                        apkLite.getTargetSdkVersion(), apkLite.isOverlayIsStatic(),
-                        apkLite.getOverlayPriority(), new File(apkLite.getPath()), null);
+        if (apkLite.getTargetPackageName() == null) {
+            // Not an overlay package
+            return null;
+        }
+        final String propName = apkLite.getRequiredSystemPropertyName();
+        final String propValue = apkLite.getRequiredSystemPropertyValue();
+        if ((!TextUtils.isEmpty(propName) || !TextUtils.isEmpty(propValue))
+                && !FrameworkParsingPackageUtils.checkRequiredSystemProperties(propName,
+                propValue)) {
+            // The overlay package should be excluded. Adds it into the outExcludedOverlayPackages
+            // for overlay configuration parser to ignore it.
+            outExcludedOverlayPackages.add(Pair.create(apkLite.getPackageName(), overlayApk));
+            return null;
+        }
+        return new ParsedOverlayInfo(apkLite.getPackageName(), apkLite.getTargetPackageName(),
+                apkLite.getTargetSdkVersion(), apkLite.isOverlayIsStatic(),
+                apkLite.getOverlayPriority(), new File(apkLite.getPath()), null);
     }
 }

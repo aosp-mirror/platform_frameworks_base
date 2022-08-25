@@ -41,6 +41,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Session used when notifying the Android system about events associated with views.
@@ -231,7 +232,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     // Used by ChildCOntentCaptureSession
     ContentCaptureSession(@NonNull ContentCaptureContext initialContext) {
         this();
-        mClientContext = Preconditions.checkNotNull(initialContext);
+        mClientContext = Objects.requireNonNull(initialContext);
     }
 
     /** @hide */
@@ -364,7 +365,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @param node node that has been added.
      */
     public final void notifyViewAppeared(@NonNull ViewStructure node) {
-        Preconditions.checkNotNull(node);
+        Objects.requireNonNull(node);
         if (!isContentCaptureEnabled()) return;
 
         if (!(node instanceof ViewNode.ViewStructureImpl)) {
@@ -385,7 +386,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @param id id of the node that has been removed.
      */
     public final void notifyViewDisappeared(@NonNull AutofillId id) {
-        Preconditions.checkNotNull(id);
+        Objects.requireNonNull(id);
         if (!isContentCaptureEnabled()) return;
 
         internalNotifyViewDisappeared(id);
@@ -426,7 +427,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @param text new text.
      */
     public final void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text) {
-        Preconditions.checkNotNull(id);
+        Objects.requireNonNull(id);
 
         if (!isContentCaptureEnabled()) return;
 
@@ -440,7 +441,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * Notifies the Intelligence Service that the insets of a view have changed.
      */
     public final void notifyViewInsetsChanged(@NonNull Insets viewInsets) {
-        Preconditions.checkNotNull(viewInsets);
+        Objects.requireNonNull(viewInsets);
 
         if (!isContentCaptureEnabled()) return;
 
@@ -536,7 +537,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @throws IllegalArgumentException if the {@code parentId} is a virtual child id.
      */
     public @NonNull AutofillId newAutofillId(@NonNull AutofillId hostId, long virtualChildId) {
-        Preconditions.checkNotNull(hostId);
+        Objects.requireNonNull(hostId);
         Preconditions.checkArgument(hostId.isNonVirtual(), "hostId cannot be virtual: %s", hostId);
         return new AutofillId(hostId, virtualChildId, mId);
     }

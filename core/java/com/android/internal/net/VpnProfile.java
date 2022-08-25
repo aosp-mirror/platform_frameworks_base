@@ -193,9 +193,9 @@ public final class VpnProfile implements Cloneable, Parcelable {
         ipsecCaCert = in.readString();
         ipsecServerCert = in.readString();
         saveLogin = in.readInt() != 0;
-        proxy = in.readParcelable(null);
+        proxy = in.readParcelable(null, android.net.ProxyInfo.class);
         mAllowedAlgorithms = new ArrayList<>();
-        in.readList(mAllowedAlgorithms, null);
+        in.readList(mAllowedAlgorithms, null, java.lang.String.class);
         isBypassable = in.readBoolean();
         isMetered = in.readBoolean();
         maxMtu = in.readInt();

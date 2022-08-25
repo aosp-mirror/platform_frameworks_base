@@ -301,6 +301,13 @@ public class RemoteViews implements Parcelable, Filter {
     public static final int FLAG_USE_LIGHT_BACKGROUND_LAYOUT = 4;
 
     /**
+     * This mask determines which flags are propagated to nested RemoteViews (either added by
+     * addView, or set as portrait/landscape/sized RemoteViews).
+     */
+    static final int FLAG_MASK_TO_PROPAGATE =
+            FLAG_WIDGET_IS_COLLECTION_CHILD | FLAG_USE_LIGHT_BACKGROUND_LAYOUT;
+
+    /**
      * A ReadWriteHelper which has the same behavior as ReadWriteHelper.DEFAULT, but which is
      * intentionally a different instance in order to trick Bundle reader so that it doesn't allow
      * lazy initialization.
@@ -467,6 +474,18 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void addFlags(@ApplyFlags int flags) {
         mApplyFlags = mApplyFlags | flags;
+
+        int flagsToPropagate = flags & FLAG_MASK_TO_PROPAGATE;
+        if (flagsToPropagate != 0) {
+            if (hasSizedRemoteViews()) {
+                for (RemoteViews remoteView : mSizedRemoteViews) {
+                    remoteView.addFlags(flagsToPropagate);
+                }
+            } else if (hasLandscapeAndPortraitLayouts()) {
+                mLandscape.addFlags(flagsToPropagate);
+                mPortrait.addFlags(flagsToPropagate);
+            }
+        }
     }
 
     /**
@@ -1489,7 +1508,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         SetRippleDrawableColor(Parcel parcel) {
             viewId = parcel.readInt();
-            mColorStateList = parcel.readParcelable(null);
+            mColorStateList = parcel.readParcelable(null, android.content.res.ColorStateList.class);
         }
 
         public void writeToParcel(Parcel dest, int flags) {
@@ -1517,6 +1536,12 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    /**
+     * @deprecated As RemoteViews may be reapplied frequently, it is preferable to call
+     * {@link #setDisplayedChild(int, int)} to ensure that the adapter index does not change
+     * unexpectedly.
+     */
+    @Deprecated
     private final class ViewContentNavigation extends Action {
         final boolean mNext;
 
@@ -1563,24 +1588,33 @@ public class RemoteViews implements Parcelable, Filter {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ArrayList<Bitmap> mBitmaps;
+        SparseIntArray mBitmapHashes;
         int mBitmapMemory = -1;
 
         public BitmapCache() {
             mBitmaps = new ArrayList<>();
+            mBitmapHashes = new SparseIntArray();
         }
 
         public BitmapCache(Parcel source) {
             mBitmaps = source.createTypedArrayList(Bitmap.CREATOR);
+            mBitmapHashes = source.readSparseIntArray();
         }
 
         public int getBitmapId(Bitmap b) {
             if (b == null) {
                 return -1;
             } else {
-                if (mBitmaps.contains(b)) {
-                    return mBitmaps.indexOf(b);
+                int hash = b.hashCode();
+                int hashId = mBitmapHashes.get(hash, -1);
+                if (hashId != -1) {
+                    return hashId;
                 } else {
+                    if (b.isMutable()) {
+                        b = b.asShared();
+                    }
                     mBitmaps.add(b);
+                    mBitmapHashes.put(mBitmaps.size() - 1, hash);
                     mBitmapMemory = -1;
                     return (mBitmaps.size() - 1);
                 }
@@ -1591,13 +1625,13 @@ public class RemoteViews implements Parcelable, Filter {
         public Bitmap getBitmapForId(int id) {
             if (id == -1 || id >= mBitmaps.size()) {
                 return null;
-            } else {
-                return mBitmaps.get(id);
             }
+            return mBitmaps.get(id);
         }
 
         public void writeBitmapsToParcel(Parcel dest, int flags) {
             dest.writeTypedList(mBitmaps, flags);
+            dest.writeSparseIntArray(mBitmapHashes);
         }
 
         public int getBitmapMemory() {
@@ -2401,6 +2435,10 @@ public class RemoteViews implements Parcelable, Filter {
             // will return -1.
             final int nextChild = getNextRecyclableChild(target);
             RemoteViews rvToApply = mNestedViews.getRemoteViewsToApply(context);
+
+            int flagsToPropagate = mApplyFlags & FLAG_MASK_TO_PROPAGATE;
+            if (flagsToPropagate != 0) rvToApply.addFlags(flagsToPropagate);
+
             if (nextChild >= 0 && mStableId != NO_ID) {
                 // At that point, the views starting at index nextChild are the ones recyclable but
                 // not yet recycled. All views added on that round of application are placed before.
@@ -2413,8 +2451,8 @@ public class RemoteViews implements Parcelable, Filter {
                             target.removeViews(nextChild, recycledViewIndex - nextChild);
                         }
                         setNextRecyclableChild(target, nextChild + 1, target.getChildCount());
-                        rvToApply.reapply(context, child, handler, null /* size */, colorResources,
-                                false /* topLevel */);
+                        rvToApply.reapplyNestedViews(context, child, rootParent, handler,
+                                null /* size */, colorResources);
                         return;
                     }
                     // If we cannot recycle the views, we still remove all views in between to
@@ -2425,8 +2463,8 @@ public class RemoteViews implements Parcelable, Filter {
             // If we cannot recycle, insert the new view before the next recyclable child.
 
             // Inflate nested views and add as children
-            View nestedView = rvToApply.apply(context, target, handler, null /* size */,
-                    colorResources);
+            View nestedView = rvToApply.applyNestedViews(context, target, rootParent, handler,
+                    null /* size */, colorResources);
             if (mStableId != NO_ID) {
                 setStableId(nestedView, mStableId);
             }
@@ -3774,7 +3812,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param parcel
      */
     public RemoteViews(Parcel parcel) {
-        this(parcel, /* rootParent= */ null, /* info= */ null, /* depth= */ 0);
+        this(parcel, /* rootData= */ null, /* info= */ null, /* depth= */ 0);
     }
 
     private RemoteViews(@NonNull Parcel parcel, @Nullable HierarchyRootData rootData,
@@ -4121,7 +4159,11 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link AdapterViewAnimator#showNext()}
      *
      * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showNext()}
+     * @deprecated As RemoteViews may be reapplied frequently, it is preferable to call
+     * {@link #setDisplayedChild(int, int)} to ensure that the adapter index does not change
+     * unexpectedly.
      */
+    @Deprecated
     public void showNext(@IdRes int viewId) {
         addAction(new ViewContentNavigation(viewId, true /* next */));
     }
@@ -4130,7 +4172,11 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link AdapterViewAnimator#showPrevious()}
      *
      * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showPrevious()}
+     * @deprecated As RemoteViews may be reapplied frequently, it is preferable to call
+     * {@link #setDisplayedChild(int, int)} to ensure that the adapter index does not change
+     * unexpectedly.
      */
+    @Deprecated
     public void showPrevious(@IdRes int viewId) {
         addAction(new ViewContentNavigation(viewId, false /* next */));
     }
@@ -5566,6 +5612,16 @@ public class RemoteViews implements Parcelable, Filter {
         return result;
     }
 
+    private View applyNestedViews(Context context, ViewGroup directParent,
+            ViewGroup rootParent, InteractionHandler handler, SizeF size,
+            ColorResources colorResources) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context, size);
+
+        View result = inflateView(context, rvToApply, directParent, 0, colorResources);
+        rvToApply.performApply(result, rootParent, handler, colorResources);
+        return result;
+    }
+
     private View inflateView(Context context, RemoteViews rv, ViewGroup parent) {
         return inflateView(context, rv, parent, 0, null);
     }
@@ -5879,6 +5935,12 @@ public class RemoteViews implements Parcelable, Filter {
         if (topLevel && v instanceof ViewGroup) {
             finalizeViewRecycling((ViewGroup) v);
         }
+    }
+
+    private void reapplyNestedViews(Context context, View v, ViewGroup rootParent,
+            InteractionHandler handler, SizeF size, ColorResources colorResources) {
+        RemoteViews rvToApply = getRemoteViewsToReapply(context, v, size);
+        rvToApply.performApply(v, rootParent, handler, colorResources);
     }
 
     /**
@@ -6627,6 +6689,13 @@ public class RemoteViews implements Parcelable, Filter {
             if (opts == null) {
                 opts = ActivityOptions.makeBasic();
                 opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            if (view.getDisplay() != null) {
+                opts.setLaunchDisplayId(view.getDisplay().getDisplayId());
+            } else {
+                // TODO(b/218409359): Remove once bug is fixed.
+                Log.w(LOG_TAG, "getLaunchOptions: view.getDisplay() is null!",
+                        new Exception());
             }
             return Pair.create(intent, opts);
         }

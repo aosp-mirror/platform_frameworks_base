@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
@@ -26,12 +27,14 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTAT
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 
+import static com.android.server.display.DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
+import static com.android.server.display.DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -233,7 +236,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private Display.Mode mMode;
         private boolean mIsDisplayOn;
         private int mDisplayIdToMirror;
-        private IBinder mWindowTokenClientToMirror;
+        private boolean mIsWindowManagerMirroring;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
@@ -256,7 +259,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mUniqueIndex = uniqueIndex;
             mIsDisplayOn = surface != null;
             mDisplayIdToMirror = virtualDisplayConfig.getDisplayIdToMirror();
-            mWindowTokenClientToMirror = virtualDisplayConfig.getWindowTokenClientToMirror();
+            mIsWindowManagerMirroring = virtualDisplayConfig.isWindowManagerMirroring();
         }
 
         @Override
@@ -287,22 +290,21 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        @Nullable
-        public IBinder getWindowTokenClientToMirrorLocked() {
-            return mWindowTokenClientToMirror;
+        public boolean isWindowManagerMirroringLocked() {
+            return mIsWindowManagerMirroring;
         }
 
         @Override
-        public void setWindowTokenClientToMirrorLocked(IBinder windowToken) {
-            if (mWindowTokenClientToMirror != windowToken) {
-                mWindowTokenClientToMirror = windowToken;
+        public void setWindowManagerMirroringLocked(boolean mirroring) {
+            if (mIsWindowManagerMirroring != mirroring) {
+                mIsWindowManagerMirroring = mirroring;
                 sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
                 sendTraversalRequestLocked();
             }
         }
 
         @Override
-        public Point getDisplaySurfaceDefaultSize() {
+        public Point getDisplaySurfaceDefaultSizeLocked() {
             if (mSurface == null) {
                 return null;
             }
@@ -389,7 +391,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             pw.println("mDisplayState=" + Display.stateToString(mDisplayState));
             pw.println("mStopped=" + mStopped);
             pw.println("mDisplayIdToMirror=" + mDisplayIdToMirror);
-            pw.println("mWindowTokenClientToMirror=" + mWindowTokenClientToMirror);
+            pw.println("mWindowManagerMirroring=" + mIsWindowManagerMirroring);
         }
 
 
@@ -452,6 +454,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
                     mInfo.flags |= FLAG_TRUSTED;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED) != 0
+                        && (mInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
+                    mInfo.flags |= FLAG_ALWAYS_UNLOCKED;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+                    mInfo.flags |= FLAG_TOUCH_FEEDBACK_DISABLED;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;

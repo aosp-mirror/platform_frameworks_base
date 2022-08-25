@@ -18,11 +18,15 @@ package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+
 import android.animation.RectEvaluator;
 import android.animation.TypeEvaluator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.view.InsetsSource;
@@ -33,6 +37,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
@@ -166,12 +171,13 @@ public class StageTaskUnfoldController implements UnfoldListener, OnInsetsChange
      * Called when split screen stage bounds changed
      * @param bounds new bounds for this stage
      */
-    public void onLayoutChanged(Rect bounds) {
+    public void onLayoutChanged(Rect bounds, @SplitPosition int splitPosition,
+            boolean isLandscape) {
         mStageBounds.set(bounds);
 
         for (int i = mAnimationContextByTaskId.size() - 1; i >= 0; i--) {
             final AnimationContext context = mAnimationContextByTaskId.valueAt(i);
-            context.update();
+            context.update(splitPosition, isLandscape);
         }
     }
 
@@ -200,20 +206,27 @@ public class StageTaskUnfoldController implements UnfoldListener, OnInsetsChange
         final Rect mEndCropRect = new Rect();
         final Rect mCurrentCropRect = new Rect();
 
+        private @SplitPosition int mSplitPosition = SPLIT_POSITION_UNDEFINED;
+        private boolean mIsLandscape = false;
+
         private AnimationContext(SurfaceControl leash) {
             this.mLeash = leash;
+            update();
+        }
+
+        private void update(@SplitPosition int splitPosition, boolean isLandscape) {
+            this.mSplitPosition = splitPosition;
+            this.mIsLandscape = isLandscape;
             update();
         }
 
         private void update() {
             mStartCropRect.set(mStageBounds);
 
-            if (mTaskbarInsetsSource != null) {
+            boolean taskbarExpanded = isTaskbarExpanded();
+            if (taskbarExpanded) {
                 // Only insets the cropping window with taskbar when taskbar is expanded
-                if (mTaskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
-                    mStartCropRect.inset(mTaskbarInsetsSource
-                            .calculateVisibleInsets(mStartCropRect));
-                }
+                mStartCropRect.inset(mTaskbarInsetsSource.calculateVisibleInsets(mStartCropRect));
             }
 
             // Offset to surface coordinates as layout bounds are in screen coordinates
@@ -223,7 +236,46 @@ public class StageTaskUnfoldController implements UnfoldListener, OnInsetsChange
 
             int maxSize = Math.max(mEndCropRect.width(), mEndCropRect.height());
             int margin = (int) (maxSize * CROPPING_START_MARGIN_FRACTION);
-            mStartCropRect.inset(margin, margin, margin, margin);
+
+            // Sides adjacent to split bar or task bar are not be animated.
+            Insets margins;
+            if (mIsLandscape) { // Left and right splits.
+                margins = getLandscapeMargins(margin, taskbarExpanded);
+            } else { // Top and bottom splits.
+                margins = getPortraitMargins(margin, taskbarExpanded);
+            }
+            mStartCropRect.inset(margins);
+        }
+
+        private Insets getLandscapeMargins(int margin, boolean taskbarExpanded) {
+            int left = margin;
+            int right = margin;
+            int bottom = taskbarExpanded ? 0 : margin; // Taskbar margin.
+            if (mSplitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
+                right = 0; // Divider margin.
+            } else {
+                left = 0; // Divider margin.
+            }
+            return Insets.of(left, /* top= */ margin, right, bottom);
+        }
+
+        private Insets getPortraitMargins(int margin, boolean taskbarExpanded) {
+            int bottom = margin;
+            int top = margin;
+            if (mSplitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
+                bottom = 0; // Divider margin.
+            } else { // Bottom split.
+                top = 0; // Divider margin.
+                if (taskbarExpanded) {
+                    bottom = 0; // Taskbar margin.
+                }
+            }
+            return Insets.of(/* left= */ margin, top, /* right= */ margin, bottom);
+        }
+
+        private boolean isTaskbarExpanded() {
+            return mTaskbarInsetsSource != null
+                    && mTaskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight;
         }
     }
 }

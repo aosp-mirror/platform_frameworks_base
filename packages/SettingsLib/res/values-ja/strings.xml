@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"ネットワークをスキャンできません"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"なし / OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"なし"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"なし / Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192 ビット"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"保存済み"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"未接続"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"無効"</string>
@@ -82,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>、R: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"有効"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"有効、左のみ"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"有効、右のみ"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"有効、左と右"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"メディアの音声"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"電話"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ファイル転送"</string>
@@ -95,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD オーディオ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD オーディオ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"補聴器"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"補聴器に接続"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO に接続"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE Audio に接続"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"メディアの音声に接続"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"携帯電話の音声に接続"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ファイル転送サーバーに接続"</string>
@@ -131,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ヘッドフォン"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"入力用周辺機器"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"左側の補聴器とペア設定しています…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"右側の補聴器とペア設定しています…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"左側 - 電池 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"右側 - 電池 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-FiはOFFです。"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fiが切断されました。"</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fiはレベル1です。"</string>
@@ -153,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"テザリング"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"テザリングとポータブルアクセスポイント"</string>
     <string name="managed_user_title" msgid="449081789742645723">"すべての仕事用アプリ"</string>
-    <string name="user_guest" msgid="6939192779649870792">"ゲスト"</string>
     <string name="unknown" msgid="3544487229740637809">"不明"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ユーザー: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"一部のリンクをデフォルトで開くよう設定済みです"</string>
@@ -255,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ワイヤレス ディスプレイ認証"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi 詳細ログの有効化"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi スキャン スロットリング"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi-Fi 非永続的 MAC ランダム化"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi-Fi 非永続的 MAC ランダム化"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"モバイルデータを常に ON にする"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"テザリング時のハードウェア アクセラレーション"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth デバイスを名前なしで表示"</string>
@@ -287,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ワイヤレス ディスプレイ認証のオプションを表示"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ログレベルを上げて、Wi-Fi 選択ツールで SSID RSSI ごとに表示します"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"電池の消耗が軽減され、ネットワーク パフォーマンスが改善されます"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ON にすると、MAC アドレスのランダム化が有効なネットワークに接続するたびに、このデバイスの MAC アドレスが変わる可能性があります。"</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"ON にすると、MAC アドレスのランダム化が有効なネットワークに接続するたびに、このデバイスの MAC アドレスが変わる可能性があります。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"従量制"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"定額制"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ログバッファのサイズ"</string>
@@ -423,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"第一色弱（赤緑）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"第三色弱（青黄）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色補正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"スマートフォンでの色表示を補正できます。この設定は以下の場合に役立ちます。&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;色をより正確に表示したい場合&lt;/li&gt; &lt;li&gt;&amp;nbsp;はっきり読み取れるよう色を取り除きたい場合&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"色補正は以下の場合に役立ちます。&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;色をより正確に表示したい場合&lt;/li&gt; &lt;li&gt;&amp;nbsp;はっきり読み取れるよう色を取り除きたい場合&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g>によって上書き済み"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"残り時間: 約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -460,7 +485,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"充電していません"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"接続済み、充電していません"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"充電が完了しました"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"充電完了"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"管理者により管理されています"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"制限付き設定によって管理されています"</string>
     <string name="disabled" msgid="8017887509554714950">"無効"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"許可"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"許可しない"</string>
@@ -493,14 +520,12 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"未登録"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"不明"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC はランダムに設定されます"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d 台のデバイスが接続されています</item>
-      <item quantity="one">%1$d 台のデバイスが接続されています</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{接続されているデバイスはありません}=1{1 台のデバイスが接続されています}other{# 台のデバイスが接続されています}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"長くします。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"短くします。"</string>
     <string name="cancel" msgid="5665114069455378395">"キャンセル"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="done" msgid="381184316122520313">"完了"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"アラームとリマインダー"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"アラームとリマインダーの設定を許可する"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"アラームとリマインダー"</string>
@@ -519,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"毎回確認"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"OFF にするまで"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"スマートフォンのスピーカー"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このスマートフォン"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"このタブレット"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
@@ -559,18 +585,26 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ロックを設定"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> に切り替え"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"新しいユーザーを作成しています…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"新しいゲストを作成中…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"新しいユーザーを作成できませんでした"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"新しいゲストを作成できませんでした"</string>
     <string name="user_nickname" msgid="262624187455825083">"ニックネーム"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"ユーザーを追加"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ゲストを追加"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ゲストを削除"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ゲストをリセット"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"ゲスト"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ゲストをリセットしますか？"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ゲストを削除しますか？"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"リセット"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"削除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ゲストをリセットしています…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"写真を撮る"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"画像を選択"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"写真を選択"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"間違えた回数が上限を超えました。このデバイスのデータが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"閉じる"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"デバイスのデフォルト"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"無効"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"有効"</string>
@@ -605,11 +639,24 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"イーサネット接続を解除しました。"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"イーサネット。"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"通話なし。"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR コードをスキャン"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"再生を開始するには、下の枠に QR コードを合わせてください"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR コードの形式が無効です"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"時刻"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"日付"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"天気"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"大気質"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"キャスト情報"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"プロフィール写真の選択"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"デフォルト ユーザー アイコン"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"物理キーボード"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"キーボード レイアウトの選択"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"デフォルト"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"画面をオンにする"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"画面をオンにすることを許可する"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"画面をオンにすることをアプリに許可します。許可すると、ユーザーからの明示的インテントを必要とせずに、アプリがいつでも画面をオンにできるようになります。"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> のブロードキャストを停止しますか？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャストしたり、出力を変更したりすると、現在のブロードキャストが停止します。"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"出力を変更"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"予測型「戻る」アニメーション"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"予測型「戻る」のシステム アニメーションを有効にする。"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"この設定は、予測型操作のシステム アニメーションを有効にします。アプリごとにマニフェスト ファイルで enableOnBackInvokedCallback を true に設定する必要があります。"</string>
 </resources>

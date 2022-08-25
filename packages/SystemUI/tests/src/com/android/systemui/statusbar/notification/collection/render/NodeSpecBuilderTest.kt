@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -31,18 +33,20 @@ import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 class NodeSpecBuilderTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var viewBarn: NotifViewBarn
+    private val mediaContainerController: MediaContainerController = mock()
+    private val sectionsFeatureManager: NotificationSectionsFeatureManager = mock()
+    private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider = mock()
+    private val viewBarn: NotifViewBarn = mock()
+    private val logger: NodeSpecBuilderLogger = mock()
 
     private var rootController: NodeController = buildFakeController("rootController")
     private var headerController0: NodeController = buildFakeController("header0")
@@ -58,6 +62,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     private val section1 = buildSection(1, section1Bucket, headerController1)
     private val section1NoHeader = buildSection(1, section1Bucket, null)
     private val section2 = buildSection(2, section2Bucket, headerController2)
+    private val section3 = buildSection(3, section2Bucket, headerController2)
 
     private val fakeViewBarn = FakeViewBarn()
 
@@ -65,17 +70,76 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        `when`(viewBarn.requireView(any())).thenAnswer {
+        whenever(mediaContainerController.mediaContainerView).thenReturn(mock())
+        whenever(viewBarn.requireNodeController(any())).thenAnswer {
             fakeViewBarn.getViewByEntry(it.getArgument(0))
         }
 
-        specBuilder = NodeSpecBuilder(viewBarn)
+        specBuilder = NodeSpecBuilder(mediaContainerController, sectionsFeatureManager,
+                sectionHeaderVisibilityProvider, viewBarn, logger)
+    }
+
+    @Test
+    fun testMultipleSectionsWithSameController() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
+        checkOutput(
+                listOf(
+                        notif(0, section0),
+                        notif(1, section2),
+                        notif(2, section3)
+                ),
+                tree(
+                        node(headerController0),
+                        notifNode(0),
+                        node(headerController2),
+                        notifNode(1),
+                        notifNode(2)
+                )
+        )
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testMultipleSectionsWithSameControllerNonConsecutive() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
+        checkOutput(
+                listOf(
+                        notif(0, section0),
+                        notif(1, section1),
+                        notif(2, section3),
+                        notif(3, section1)
+                ),
+                tree()
+        )
     }
 
     @Test
     fun testSimpleMapping() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
+        checkOutput(
+            // GIVEN a simple flat list of notifications all in the same headerless section
+            listOf(
+                notif(0, section0NoHeader),
+                notif(1, section0NoHeader),
+                notif(2, section0NoHeader),
+                notif(3, section0NoHeader)
+            ),
+
+            // THEN we output a similarly simple flag list of nodes
+            tree(
+                notifNode(0),
+                notifNode(1),
+                notifNode(2),
+                notifNode(3)
+            )
+        )
+    }
+
+    @Test
+    fun testSimpleMappingWithMedia() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
+        // WHEN media controls are enabled
+        whenever(sectionsFeatureManager.isMediaControlsEnabled()).thenReturn(true)
+
         checkOutput(
                 // GIVEN a simple flat list of notifications all in the same headerless section
                 listOf(
@@ -85,8 +149,9 @@ class NodeSpecBuilderTest : SysuiTestCase() {
                         notif(3, section0NoHeader)
                 ),
 
-                // THEN we output a similarly simple flag list of nodes
+                // THEN we output a similarly simple flag list of nodes, with media at the top
                 tree(
+                        node(mediaContainerController),
                         notifNode(0),
                         notifNode(1),
                         notifNode(2),
@@ -97,6 +162,8 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test
     fun testHeaderInjection() {
+        // WHEN section headers are supposed to be visible
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a flat list of notifications, spread across three sections
                 listOf(
@@ -120,7 +187,31 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testHeaderSuppression() {
+        // WHEN section headers are supposed to be hidden
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(false)
+        checkOutput(
+                // GIVEN a flat list of notifications, spread across three sections
+                listOf(
+                        notif(0, section0),
+                        notif(1, section0),
+                        notif(2, section1),
+                        notif(3, section2)
+                ),
+
+                // THEN each section has its header injected
+                tree(
+                        notifNode(0),
+                        notifNode(1),
+                        notifNode(2),
+                        notifNode(3)
+                )
+        )
+    }
+
+    @Test
     fun testGroups() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a mixed list of top-level notifications and groups
                 listOf(
@@ -161,6 +252,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test
     fun testSecondSectionWithNoHeader() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a middle section with no associated header view
                 listOf(
@@ -190,6 +282,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test(expected = RuntimeException::class)
     fun testRepeatedSectionsThrow() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a malformed list where sections are not contiguous
                 listOf(
@@ -301,7 +394,7 @@ private class FakeViewBarn {
 
 private fun buildFakeController(name: String): NodeController {
     val controller = Mockito.mock(NodeController::class.java)
-    `when`(controller.nodeLabel).thenReturn(name)
+    whenever(controller.nodeLabel).thenReturn(name)
     return controller
 }
 

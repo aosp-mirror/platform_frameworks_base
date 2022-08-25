@@ -50,6 +50,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IUserManager;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -74,9 +76,12 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -99,6 +104,22 @@ public class ClipboardService extends SystemService {
     private static final boolean IS_EMULATOR =
             SystemProperties.getBoolean("ro.boot.qemu", false);
 
+    @VisibleForTesting
+    public static final long DEFAULT_CLIPBOARD_TIMEOUT_MILLIS = 3600000;
+
+    /**
+     * Device config property for whether clipboard auto clear is enabled on the device
+     **/
+    public static final String PROPERTY_AUTO_CLEAR_ENABLED =
+            "auto_clear_enabled";
+
+    /**
+     * Device config property for time period in milliseconds after which clipboard is auto
+     * cleared
+     **/
+    public static final String PROPERTY_AUTO_CLEAR_TIMEOUT =
+            "auto_clear_timeout";
+
     // DeviceConfig properties
     private static final String PROPERTY_MAX_CLASSIFICATION_LENGTH = "max_classification_length";
     private static final int DEFAULT_MAX_CLASSIFICATION_LENGTH = 400;
@@ -107,6 +128,7 @@ public class ClipboardService extends SystemService {
     private final IUriGrantsManager mUgm;
     private final UriGrantsManagerInternal mUgmInternal;
     private final WindowManagerInternal mWm;
+    private final VirtualDeviceManagerInternal mVdm;
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
@@ -138,6 +160,8 @@ public class ClipboardService extends SystemService {
         mUgm = UriGrantsManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mWm = LocalServices.getService(WindowManagerInternal.class);
+        // Can be null; not all products have CDM + VirtualDeviceManager
+        mVdm = LocalServices.getService(VirtualDeviceManagerInternal.class);
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
@@ -312,6 +336,10 @@ public class ClipboardService extends SystemService {
      * 'intendingUserId' and the uid is called 'intendingUid'.
      */
     private class ClipboardImpl extends IClipboard.Stub {
+
+        private final Handler mClipboardClearHandler = new ClipboardClearHandler(
+                mWorkerHandler.getLooper());
+
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
@@ -352,8 +380,32 @@ public class ClipboardService extends SystemService {
             }
             checkDataOwner(clip, intendingUid);
             synchronized (mLock) {
+                scheduleAutoClear(userId, intendingUid);
                 setPrimaryClipInternalLocked(clip, intendingUid, sourcePackage);
             }
+        }
+
+        private void scheduleAutoClear(@UserIdInt int userId, int intendingUid) {
+            final long oldIdentity = Binder.clearCallingIdentity();
+            try {
+                if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
+                        PROPERTY_AUTO_CLEAR_ENABLED, true)) {
+                    mClipboardClearHandler.removeEqualMessages(ClipboardClearHandler.MSG_CLEAR,
+                            userId);
+                    Message clearMessage = Message.obtain(mClipboardClearHandler,
+                            ClipboardClearHandler.MSG_CLEAR, userId, intendingUid, userId);
+                    mClipboardClearHandler.sendMessageDelayed(clearMessage,
+                            getTimeoutForAutoClear());
+                }
+            } finally {
+                Binder.restoreCallingIdentity(oldIdentity);
+            }
+        }
+
+        private long getTimeoutForAutoClear() {
+            return DeviceConfig.getLong(DeviceConfig.NAMESPACE_CLIPBOARD,
+                    PROPERTY_AUTO_CLEAR_TIMEOUT,
+                    DEFAULT_CLIPBOARD_TIMEOUT_MILLIS);
         }
 
         @Override
@@ -365,6 +417,8 @@ public class ClipboardService extends SystemService {
                 return;
             }
             synchronized (mLock) {
+                mClipboardClearHandler.removeEqualMessages(ClipboardClearHandler.MSG_CLEAR,
+                        userId);
                 setPrimaryClipInternalLocked(null, intendingUid, callingPackage);
             }
         }
@@ -391,6 +445,9 @@ public class ClipboardService extends SystemService {
                 PerUserClipboard clipboard = getClipboardLocked(intendingUserId);
                 showAccessNotificationLocked(pkg, intendingUid, intendingUserId, clipboard);
                 notifyTextClassifierLocked(clipboard, pkg, intendingUid);
+                if (clipboard.primaryClip != null) {
+                    scheduleAutoClear(userId, intendingUid);
+                }
                 return clipboard.primaryClip;
             }
         }
@@ -482,6 +539,33 @@ public class ClipboardService extends SystemService {
                     return clipboard.mPrimaryClipPackage;
                 }
                 return null;
+            }
+        }
+
+        private class ClipboardClearHandler extends Handler {
+
+            public static final int MSG_CLEAR = 101;
+
+            ClipboardClearHandler(Looper looper) {
+                super(looper);
+            }
+
+            public void handleMessage(@NonNull Message msg) {
+                switch (msg.what) {
+                    case MSG_CLEAR:
+                        final int userId = msg.arg1;
+                        final int intendingUid = msg.arg2;
+                        synchronized (mLock) {
+                            if (getClipboardLocked(userId).primaryClip != null) {
+                                FrameworkStatsLog.write(FrameworkStatsLog.CLIPBOARD_CLEARED,
+                                        FrameworkStatsLog.CLIPBOARD_CLEARED__SOURCE__AUTO_CLEAR);
+                                setPrimaryClipInternalLocked(null, intendingUid, null);
+                            }
+                        }
+                        break;
+                    default:
+                        Slog.wtf(TAG, "ClipboardClearHandler received unknown message " + msg.what);
+                }
             }
         }
     };
@@ -894,6 +978,13 @@ public class ClipboardService extends SystemService {
         // First, verify package ownership to ensure use below is safe.
         mAppOps.checkPackage(uid, callingPackage);
 
+        // Nothing in a virtual session is permitted to touch clipboard contents
+        if (mVdm != null && mVdm.isAppRunningOnAnyVirtualDevice(uid)) {
+            Slog.w(TAG, "Clipboard access denied to " + uid + "/" + callingPackage
+                    + " within a virtual device session");
+            return false;
+        }
+
         // Shell can access the clipboard for testing purposes.
         if (mPm.checkPermission(android.Manifest.permission.READ_CLIPBOARD_IN_BACKGROUND,
                     callingPackage) == PackageManager.PERMISSION_GRANTED) {
@@ -998,6 +1089,10 @@ public class ClipboardService extends SystemService {
         }
         if (mAutofillInternal != null
                 && mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId)) {
+            return;
+        }
+        if (mPm.checkPermission(Manifest.permission.SUPPRESS_CLIPBOARD_ACCESS_NOTIFICATION,
+                callingPackage) == PackageManager.PERMISSION_GRANTED) {
             return;
         }
         // Don't notify if already notified for this uid and clip.

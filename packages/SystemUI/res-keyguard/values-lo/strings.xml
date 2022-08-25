@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ບັດບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ."</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳ​ລັງ​ສາກ​ໄຟໄຮ້​ສາຍ"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກໄຟຜ່ານດັອກ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບດ່ວນ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
@@ -52,10 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"ຮູບແບບບໍ່ຖືກຕ້ອງ"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="other">ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ.</item>
-      <item quantity="one">ລອງໃໝ່ໃນອີກ 1 ວິນາທີ.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{ກະລຸນາລອງໃໝ່ໃນ # ວິນາທີ.}other{ກະລຸນາລອງໃໝ່ໃນ # ວິນາທີ.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"ໃສ່ລະຫັດ PIN ຂອງຊິມ."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"ໃສ່ລະຫັດ PIN ຂອງຊິມສຳລັບ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ປິດການນຳໃຊ້ eSIM ເພື່ອໃຊ້ອຸປະກອນໂດຍບໍ່ຕ້ອງເຊື່ອມຕໍ່ເຄືອຂ່າຍ."</string>
@@ -91,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"ຈຳເປັນຕ້ອງມີລະຫັດຜ່ານເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ອຸປະກອນຖືກລັອກໂດຍຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ອຸປະກອນຖືກສັ່ງໃຫ້ລັອກ"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ເພື່ອໃຊ້ການປົດລັອກດ້ວຍໜ້າ, ກະລຸນາເປີດໃຊ້ "<b>"ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ"</b>" ໃນການຕັ້ງຄ່າ &gt; ຄວາມເປັນສ່ວນຕົວ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

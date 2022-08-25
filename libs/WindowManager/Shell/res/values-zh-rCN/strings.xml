@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已关闭对话泡。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"点按即可重启此应用并进入全屏模式。"</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相机有问题？\n点按即可整修"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"没有解决此问题？\n点按即可恢复"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相机没有问题？点按即可忽略。"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"某些应用在纵向模式下才能发挥最佳效果"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"这些选项都有助于您最大限度地利用屏幕空间，不妨从中择一试试"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"旋转设备即可进入全屏模式"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"在某个应用旁边连续点按两次，即可调整它的位置"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"知道了"</string>
 </resources>

@@ -62,7 +62,7 @@ import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
 import "packages/modules/Connectivity/framework/proto/netstats.proto";
-import "packages/modules/Permission/service/proto/com/android/role/roleservice.proto";
+import "packages/modules/Permission/service/proto/role_service.proto";
 
 package android.os;
 

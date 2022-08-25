@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"對話氣泡已關閉。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"輕按即可重新開啟此應用程式並放大至全螢幕。"</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相機有問題？\n輕按即可修正"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"未能修正問題？\n輕按即可還原"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相機冇問題？㩒一下就可以即可閂咗佢。"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"部分應用程式需要使用直向模式才能發揮最佳效果"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"請嘗試以下選項，充分運用螢幕的畫面空間"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"旋轉裝置方向即可進入全螢幕模式"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"在應用程式旁輕按兩下即可調整位置"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"知道了"</string>
 </resources>

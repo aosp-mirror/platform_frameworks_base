@@ -23,6 +23,7 @@ android_test {
     ],
 
     aidl: {
+        generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
 
@@ -55,7 +56,6 @@ android_test {
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
-        "AppSearchTestUtils",
     ],
 
     libs: [
@@ -92,33 +92,9 @@ android_test {
 java_genrule {
     name: "FrameworksCoreTests_apks_as_resources",
     srcs: [
-        ":FrameworksCoreTests_install",
-        ":FrameworksCoreTests_install_bad_dex",
-        ":FrameworksCoreTests_install_complete_package_info",
-        ":FrameworksCoreTests_install_decl_perm",
         ":FrameworksCoreTests_install_jni_lib_open_from_apk",
-        ":FrameworksCoreTests_install_loc_auto",
-        ":FrameworksCoreTests_install_loc_internal",
-        ":FrameworksCoreTests_install_loc_sdcard",
-        ":FrameworksCoreTests_install_loc_unspecified",
-        ":FrameworksCoreTests_install_use_perm_good",
-        ":FrameworksCoreTests_install_uses_feature",
         ":FrameworksCoreTests_install_verifier_bad",
         ":FrameworksCoreTests_install_verifier_good",
-        ":FrameworksCoreTests_keyset_permdef_sa_unone",
-        ":FrameworksCoreTests_keyset_permuse_sa_ua_ub",
-        ":FrameworksCoreTests_keyset_permuse_sb_ua_ub",
-        ":FrameworksCoreTests_keyset_sab_ua",
-        ":FrameworksCoreTests_keyset_sa_ua",
-        ":FrameworksCoreTests_keyset_sa_uab",
-        ":FrameworksCoreTests_keyset_sa_ua_ub",
-        ":FrameworksCoreTests_keyset_sa_ub",
-        ":FrameworksCoreTests_keyset_sa_unone",
-        ":FrameworksCoreTests_keyset_sau_ub",
-        ":FrameworksCoreTests_keyset_sb_ua",
-        ":FrameworksCoreTests_keyset_sb_ub",
-        ":FrameworksCoreTests_keyset_splata_api",
-        ":FrameworksCoreTests_keyset_splat_api",
         ":FrameworksCoreTests_locales",
         ":FrameworksCoreTests_overlay_config",
         ":FrameworksCoreTests_version_1",
@@ -136,4 +112,40 @@ java_genrule {
         "  x=$${i##*FrameworksCoreTests_}; echo $${x}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
         "done && " +
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
+}
+
+// In addition to running as part of FrameworksCoreTests, we run (a subclass of)
+// ChooserActivityTest against the unbundled ChooserActivity implementation in
+// //packages/modules/IntentResolver/. The following library provides the
+// minimum dependencies required to build that test in the unbundled package.
+android_library {
+    name: "ChooserActivityTestsLib",
+    visibility: ["//packages/modules/IntentResolver/java/tests:__pkg__"],
+
+    srcs: [
+        "src/com/android/internal/app/ChooserActivityLoggerFake.java",
+        "src/com/android/internal/app/ChooserActivityOverrideData.java",
+        "src/com/android/internal/app/ChooserActivityTest.java",
+        "src/com/android/internal/app/ChooserWrapperActivity.java",
+        "src/com/android/internal/app/IChooserWrapper.java",
+        "src/com/android/internal/app/MatcherUtils.java",
+        "src/com/android/internal/app/ResolverDataProvider.java",
+    ],
+
+    static_libs: [
+        "androidx.test.espresso.core",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "truth-prebuilt",
+    ],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "framework",
+        "framework-res",
+    ],
 }

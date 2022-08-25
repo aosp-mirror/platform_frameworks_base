@@ -77,7 +77,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-
+        throwIfDetectorIsNoLongerActive();
         maybeCloseExistingSession();
 
         try {
@@ -100,6 +100,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
+        throwIfDetectorIsNoLongerActive();
 
         try {
             mManagerService.stopListeningFromMic();
@@ -108,6 +109,19 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         }
 
         return true;
+    }
+
+    @Override
+    public void destroy() {
+        stopRecognition();
+        maybeCloseExistingSession();
+
+        try {
+            mManagerService.shutdownHotwordDetectionService();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+        super.destroy();
     }
 
     private void maybeCloseExistingSession() {
@@ -135,8 +149,31 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             mHandler.sendMessage(obtainMessage(
                     HotwordDetector.Callback::onDetected,
                     mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload(
-                            audioFormat, hotwordDetectedResult, audioStream)));
+                    new AlwaysOnHotwordDetector.EventPayload.Builder()
+                            .setCaptureAudioFormat(audioFormat)
+                            .setAudioStream(audioStream)
+                            .setHotwordDetectedResult(hotwordDetectedResult)
+                            .build()));
+        }
+
+        /** Called when the detection fails due to an error. */
+        @Override
+        public void onError() {
+            Slog.v(TAG, "BinderCallback#onError");
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onError,
+                    mCallback));
+        }
+
+        @Override
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+            if (result == null) {
+                result = new HotwordRejectedResult.Builder().build();
+            }
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onRejected,
+                    mCallback,
+                    result));
         }
     }
 

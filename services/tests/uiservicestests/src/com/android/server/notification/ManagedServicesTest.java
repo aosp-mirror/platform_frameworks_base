@@ -26,6 +26,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -809,7 +810,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     service.isComponentEnabledForCurrentProfiles(
                             unapprovedAdditionalComponent));
             verify(mIpm, never()).getServiceInfo(
-                    eq(unapprovedAdditionalComponent), anyInt(), anyInt());
+                    eq(unapprovedAdditionalComponent), anyLong(), anyInt());
         }
     }
 
@@ -953,7 +954,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     service.isComponentEnabledForCurrentProfiles(
                             unapprovedAdditionalComponent));
             verify(mIpm, never()).getServiceInfo(
-                    eq(unapprovedAdditionalComponent), anyInt(), anyInt());
+                    eq(unapprovedAdditionalComponent), anyLong(), anyInt());
         }
     }
 
@@ -1362,6 +1363,66 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetComponentState() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        service.registerSystemService(cn, 0);
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.registerSystemService(cn, mZero.id);
+
+        service.setComponentState(cn, mZero.id, false);
+        verify(context).unbindService(any());
+    }
+
+    @Test
+    public void testSetComponentState_workProfile() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        service.registerSystemService(cn, 0);
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.registerSystemService(cn, mZero.id);
+
+        service.setComponentState(cn, mTen.id, false);
+        verify(context, never()).unbindService(any());
+    }
+
+    @Test
     public void testOnPackagesChanged_nullValuesPassed_noNullPointers() {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
@@ -1642,14 +1703,14 @@ public class ManagedServicesTest extends UiServiceTestCase {
                             assertTrue(service.isComponentEnabledForCurrentProfiles(
                                     componentName));
                             verify(mIpm, times(1)).getServiceInfo(
-                                    eq(componentName), anyInt(), anyInt());
+                                    eq(componentName), anyLong(), anyInt());
                         }
                     } else {
                         ComponentName componentName =
                                 ComponentName.unflattenFromString(packageOrComponent);
                         assertTrue(service.isComponentEnabledForCurrentProfiles(componentName));
                         verify(mIpm, times(1)).getServiceInfo(
-                                eq(componentName), anyInt(), anyInt());
+                                eq(componentName), anyLong(), anyInt());
                     }
                 }
             }

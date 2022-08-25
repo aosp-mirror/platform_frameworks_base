@@ -354,13 +354,17 @@ public class TelecomManager {
             "android.telecom.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a boolean to indicate that the
-     * call has an externally generated ringer. Used by the HfpClientConnectionService when In Band
-     * Ringtone is enabled to prevent two ringers from being generated.
+     * Optional extra for {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} used to indicate
+     * that a call has an in-band ringtone associated with it.  This is used when the device is
+     * acting as an HFP headset and the Bluetooth stack has received an in-band ringtone from the
+     * the HFP host which must be played instead of any local ringtone the device would otherwise
+     * have generated.
+     *
      * @hide
      */
-    public static final String EXTRA_CALL_EXTERNAL_RINGER =
-            "android.telecom.extra.CALL_EXTERNAL_RINGER";
+    @SystemApi
+    public static final String EXTRA_CALL_HAS_IN_BAND_RINGTONE =
+            "android.telecom.extra.CALL_HAS_IN_BAND_RINGTONE";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
@@ -1288,7 +1292,8 @@ public class TelecomManager {
     }
 
     /**
-     * Returns a list of {@link PhoneAccountHandle}s for self-managed {@link ConnectionService}s.
+     * Returns a list of {@link PhoneAccountHandle}s for all self-managed
+     * {@link ConnectionService}s owned by the calling {@link UserHandle}.
      * <p>
      * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
      * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
@@ -1302,7 +1307,7 @@ public class TelecomManager {
      * @return A list of {@code PhoneAccountHandle} objects.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
+    public @NonNull List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
@@ -1313,6 +1318,34 @@ public class TelecomManager {
             }
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of {@link PhoneAccountHandle}s owned by the calling self-managed
+     * {@link ConnectionService}.
+     * <p>
+     * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
+     * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
+     * <p>
+     * Requires permission {@link android.Manifest.permission#MANAGE_OWN_CALLS}
+     * <p>
+     * A {@link SecurityException} will be thrown if a caller lacks the
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} permission.
+     *
+     * @return A list of {@code PhoneAccountHandle} objects.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_OWN_CALLS)
+    public @NonNull List<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts() {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.getOwnSelfManagedPhoneAccounts(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        throw new IllegalStateException("Telecom is not available");
     }
 
     /**
@@ -2447,7 +2480,8 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.isIncomingCallPermitted(phoneAccountHandle);
+                return service.isIncomingCallPermitted(phoneAccountHandle,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error isIncomingCallPermitted", e);
             }
@@ -2480,7 +2514,8 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.isOutgoingCallPermitted(phoneAccountHandle);
+                return service.isOutgoingCallPermitted(phoneAccountHandle,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error isOutgoingCallPermitted", e);
             }
@@ -2563,6 +2598,33 @@ public class TelecomManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Determines whether there are any ongoing {@link PhoneAccount#CAPABILITY_SELF_MANAGED}
+     * calls for a given {@code packageName} and {@code userHandle}.
+     *
+     * @param packageName the package name of the app to check calls for.
+     * @param userHandle the user handle on which to check for calls.
+     * @return {@code true} if there are ongoing calls, {@code false} otherwise.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isInSelfManagedCall(@NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.isInSelfManagedCall(packageName, userHandle,
+                        mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);
+                e.rethrowFromSystemServer();
+                return false;
+            }
+        } else {
+            throw new IllegalStateException("Telecom service is not present");
+        }
     }
 
     /**

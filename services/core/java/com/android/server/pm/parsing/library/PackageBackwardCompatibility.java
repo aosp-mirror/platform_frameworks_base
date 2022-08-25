@@ -21,7 +21,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_T
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
-import android.content.pm.PackageParser;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -88,7 +88,7 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
         boolean hasClass = false;
         String className = "android.content.pm.AndroidTestBaseUpdater";
         try {
-            Class clazz = (PackageParser.class.getClassLoader().loadClass(className));
+            Class clazz = ParsingPackage.class.getClassLoader().loadClass(className);
             hasClass = clazz != null;
             Log.i(TAG, "Loaded " + className);
         } catch (ClassNotFoundException e) {

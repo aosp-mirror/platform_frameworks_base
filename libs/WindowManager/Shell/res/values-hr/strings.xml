@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljanje"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblačić odbačen."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Dodirnite da biste ponovo pokrenuli tu aplikaciju i prikazali je na cijelom zaslonu."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemi s fotoaparatom?\nDodirnite za popravak"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problem nije riješen?\nDodirnite za vraćanje"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nemate problema s fotoaparatom? Dodirnite za odbacivanje."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Neke aplikacije najbolje funkcioniraju u portretnom usmjerenju"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Isprobajte jednu od ovih opcija da biste maksimalno iskoristili prostor"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Zakrenite uređaj radi prikaza na cijelom zaslonu"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Dvaput dodirnite pored aplikacije da biste joj promijenili položaj"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"Shvaćam"</string>
 </resources>

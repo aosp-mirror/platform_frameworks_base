@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"כרטיס לא חוקי."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"הסוללה טעונה"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה אלחוטית"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • אביזר העגינה בטעינה"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה מהירה"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה איטית"</string>
@@ -52,12 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"קו ביטול נעילה שגוי"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"סיסמה שגויה"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"קוד האימות שגוי"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="two">אפשר יהיה לנסות שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות.</item>
-      <item quantity="many">אפשר יהיה לנסות שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות.</item>
-      <item quantity="other">אפשר יהיה לנסות שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות.</item>
-      <item quantity="one">אפשר יהיה לנסות שוב בעוד שנייה אחת.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{אפשר לנסות שוב בעוד שנייה אחת.}two{אפשר לנסות שוב בעוד # שניות.}many{אפשר לנסות שוב בעוד # שניות.}other{אפשר לנסות שוב בעוד # שניות.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"‏יש להזין את קוד האימות של כרטיס ה-SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏יש להזין את קוד האימות של כרטיס ה-SIM של <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"‏<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> יש להשבית את כרטיס ה-eSIM כדי להשתמש במכשיר ללא שירות סלולרי."</string>
@@ -97,7 +93,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"יש להזין סיסמה כדי להגביר את רמת האבטחה"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"המנהל של המכשיר נהל אותו"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"המכשיר ננעל באופן ידני"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"לא זוהתה"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"לא זוהתה"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏כדי להשתמש בתכונה \'פתיחה ע\"י זיהוי הפנים\', יש להפעיל את ה"<b>"גישה למצלמה"</b>" בהגדרות &gt; פרטיות"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

@@ -158,4 +158,32 @@
 
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
     <string name="restart_button_description">Tap to restart this app and go full screen.</string>
+
+    <!-- Description of the camera compat button for applying stretched issues treatment in the hint for
+         compatibility control. [CHAR LIMIT=NONE] -->
+    <string name="camera_compat_treatment_suggested_button_description">Camera issues?\nTap to refit</string>
+
+    <!-- Description of the camera compat button for reverting stretched issues treatment in the hint for
+         compatibility control. [CHAR LIMIT=NONE] -->
+    <string name="camera_compat_treatment_applied_button_description">Didn\u2019t fix it?\nTap to revert</string>
+
+    <!-- Accessibillity description of the camera dismiss button for stretched issues in the hint for
+         compatibility control. [CHAR LIMIT=NONE] -->
+    <string name="camera_compat_dismiss_button_description">No camera issues? Tap to dismiss.</string>
+
+    <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_dialog_title">Some apps work best in portrait</string>
+
+    <!-- The subtext of the letterbox education dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_dialog_subtext">Try one of these options to make the most of your space</string>
+
+    <!-- Description of the rotate screen action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_screen_rotation_text">Rotate your device to go full screen</string>
+
+    <!-- Description of the reposition app action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_reposition_text">Double-tap next to an app to reposition it</string>
+
+    <!-- Button text for dismissing the letterbox education dialog. [CHAR LIMIT=20] -->
+    <string name="letterbox_education_got_it">Got it</string>
+
 </resources>

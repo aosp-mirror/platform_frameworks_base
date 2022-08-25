@@ -1,29 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 
 <resources>
     <style name="ContainerLayout">
-        <item name="android:orientation">vertical</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:elevation">16dp</item>
-        <item name="android:background">@drawable/dialog_background</item>
-        <item name="android:paddingTop">18dip</item>
-        <item name="android:paddingStart">20dip</item>
-        <item name="android:paddingEnd">16dip</item>
-        <item name="android:paddingBottom">16dip</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
         <item name="android:layout_gravity">center</item>
+        <item name="android:minWidth">340dp</item>
+        <item name="android:background">@drawable/dialog_background</item>
+    </style>
+
+    <style name="Description">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginTop">18dp</item>
+        <item name="android:layout_marginBottom">18dp</item>
+        <item name="android:layout_marginLeft">24dp</item>
+        <item name="android:layout_marginRight">24dp</item>
+    </style>
+
+    <style name="DescriptionTitle"
+           parent="@*android:style/TextAppearance.Widget.Toolbar.Title">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginLeft">14dp</item>
+        <item name="android:layout_marginRight">14dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="DescriptionSummary">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginTop">18dp</item>
+        <item name="android:layout_marginLeft">18dp</item>
+        <item name="android:layout_marginRight">18dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="VendorHelperBackButton"
+           parent="@android:style/Widget.Material.Button.Borderless.Colored">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@android:color/system_neutral1_900</item>
+        <item name="android:background">@drawable/helper_back_button</item>
+    </style>
+
+    <style name="PositiveButton"
+           parent="@android:style/Widget.Material.Button.Borderless.Colored">
+        <item name="android:layout_width">300dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/system_neutral1_900</item>
+        <item name="android:background">@drawable/btn_positive_bottom</item>
+    </style>
+
+    <style name="NegativeButton"
+           parent="@android:style/Widget.Material.Button.Borderless.Colored">
+        <item name="android:layout_width">300dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/system_neutral1_900</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:background">@drawable/btn_negative_top</item>
+    </style>
+
+    <style name="NegativeButtonMultipleDevices"
+           parent="@android:style/Widget.Material.Button.Colored">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/btn_negative_multiple_devices</item>
+    </style>
+
+    <style name="DeviceListBorder">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@android:color/system_accent1_300</item>
+    </style>
+
+    <style name="Spinner"
+           parent="@android:style/Widget.Material.Light.ProgressBar.Large">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:indeterminate">true</item>
+        <item name="android:layout_centerInParent">true</item>
+    </style>
+
+    <style name="ScrollViewStyle">
+        <item name="android:scrollbars">none</item>
+        <item name="android:fillViewport">true</item>
+        <item name="android:clipChildren">false</item>
     </style>
 </resources>

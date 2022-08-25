@@ -681,7 +681,13 @@ public final class TelephonyPermissions {
     private static boolean checkCarrierPrivilegeForAnySubId(Context context, int uid) {
         SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-        int[] activeSubIds = sm.getCompleteActiveSubscriptionIdList();
+        int[] activeSubIds;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            activeSubIds = sm.getCompleteActiveSubscriptionIdList();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         for (int activeSubId : activeSubIds) {
             if (getCarrierPrivilegeStatus(context, activeSubId, uid)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {

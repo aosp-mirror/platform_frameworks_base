@@ -29,6 +29,13 @@ LIBANDROID {
     AChoreographer_postFrameCallbackDelayed64; # introduced=29
     AChoreographer_registerRefreshRateCallback; # introduced=30
     AChoreographer_unregisterRefreshRateCallback; # introduced=30
+    AChoreographer_postVsyncCallback;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimeNanos;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelinesLength;  # introduced=33
+    AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineVsyncId;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentationTimeNanos;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos;  # introduced=33
     AConfiguration_copy;
     AConfiguration_delete;
     AConfiguration_diff;
@@ -84,6 +91,7 @@ LIBANDROID {
     AInputQueue_attachLooper;
     AInputQueue_detachLooper;
     AInputQueue_finishEvent;
+    AInputQueue_fromJava; # introduced=Tiramisu
     AInputQueue_getEvent;
     AInputQueue_hasEvents;
     AInputQueue_preDispatchEvent;
@@ -106,8 +114,10 @@ LIBANDROID {
     ALooper_removeFd;
     ALooper_wake;
     AMotionEvent_getAction;
+    AMotionEvent_getActionButton; # introduced=Tiramisu
     AMotionEvent_getAxisValue; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
     AMotionEvent_getButtonState; # introduced-arm=14 introduced-arm64=21 introduced-mips=14 introduced-mips64=21 introduced-x86=14 introduced-x86_64=21
+    AMotionEvent_getClassification; # introduced=Tiramisu
     AMotionEvent_getDownTime;
     AMotionEvent_getEdgeFlags;
     AMotionEvent_getEventTime;
@@ -197,6 +207,7 @@ LIBANDROID {
     ASensorManager_destroyEventQueue;
     ASensorManager_getDefaultSensor;
     ASensorManager_getDefaultSensorEx; # introduced=21
+    ASensorManager_getDynamicSensorList; # introduced=33
     ASensorManager_getInstance;
     ASensorManager_getInstanceForPackage; # introduced=26
     ASensorManager_getSensorList;
@@ -255,6 +266,7 @@ LIBANDROID {
     ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
+    ASurfaceTransaction_setFrameTimeline; # introduced=Tiramisu
     ASurfaceTransaction_setGeometry; # introduced=29
     ASurfaceTransaction_setHdrMetadata_cta861_3; # introduced=29
     ASurfaceTransaction_setHdrMetadata_smpte2086; # introduced=29
@@ -309,18 +321,18 @@ LIBANDROID {
     AThermal_registerThermalStatusListener; # introduced=30
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
+    APerformanceHint_getManager; # introduced=Tiramisu
+    APerformanceHint_createSession; # introduced=Tiramisu
+    APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
+    APerformanceHint_updateTargetWorkDuration; # introduced=Tiramisu
+    APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
+    APerformanceHint_closeSession; # introduced=Tiramisu
   local:
     *;
 };
 
 LIBANDROID_PLATFORM {
   global:
-    APerformanceHint_getManager;
-    APerformanceHint_createSession;
-    APerformanceHint_getPreferredUpdateRateNanos;
-    APerformanceHint_updateTargetWorkDuration;
-    APerformanceHint_reportActualWorkDuration;
-    APerformanceHint_closeSession;
     APerformanceHint_setIHintManagerForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;

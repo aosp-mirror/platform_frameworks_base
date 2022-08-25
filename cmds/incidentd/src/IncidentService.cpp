@@ -43,7 +43,7 @@ enum {
 
 #define DEFAULT_DELAY_NS (1000000000LL)
 
-#define DEFAULT_BYTES_SIZE_LIMIT (96 * 1024 * 1024)        // 96MB
+#define DEFAULT_BYTES_SIZE_LIMIT (400 * 1024 * 1024)        // 400MB
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
 // Skip these sections (for dumpstate only)

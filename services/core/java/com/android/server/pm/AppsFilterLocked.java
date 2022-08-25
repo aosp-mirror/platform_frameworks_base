@@ -1,0 +1,134 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.pm;
+
+import android.annotation.Nullable;
+
+import java.io.PrintWriter;
+
+/**
+ * Overrides the unlocked methods in {@link AppsFilterBase} and guards them with locks.
+ * These are used by {@link AppsFilterImpl} which contains modifications to the class members
+ */
+abstract class AppsFilterLocked extends AppsFilterBase {
+    /**
+     * The following locks guard the accesses for the list/set class members
+     */
+    protected final Object mForceQueryableLock = new Object();
+    protected final Object mQueriesViaPackageLock = new Object();
+    protected final Object mQueriesViaComponentLock = new Object();
+    /**
+     * This lock covers both {@link #mImplicitlyQueryable} and {@link #mRetainedImplicitlyQueryable}
+      */
+    protected final Object mImplicitlyQueryableLock = new Object();
+    protected final Object mQueryableViaUsesLibraryLock = new Object();
+    protected final Object mProtectedBroadcastsLock = new Object();
+
+    /**
+     * Guards the access for {@link AppsFilterBase#mShouldFilterCache};
+     */
+    protected final Object mCacheLock = new Object();
+
+    @Override
+    protected boolean isForceQueryable(int appId) {
+        synchronized (mForceQueryableLock) {
+            return super.isForceQueryable(appId);
+        }
+    }
+
+    @Override
+    protected boolean isQueryableViaPackage(int callingAppId, int targetAppId) {
+        synchronized (mQueriesViaPackageLock) {
+            return super.isQueryableViaPackage(callingAppId, targetAppId);
+        }
+    }
+
+    @Override
+    protected boolean isQueryableViaComponent(int callingAppId, int targetAppId) {
+        synchronized (mQueriesViaComponentLock) {
+            return super.isQueryableViaComponent(callingAppId, targetAppId);
+        }
+    }
+
+    @Override
+    protected boolean isImplicitlyQueryable(int callingAppId, int targetAppId) {
+        synchronized (mImplicitlyQueryableLock) {
+            return super.isImplicitlyQueryable(callingAppId, targetAppId);
+        }
+    }
+
+    @Override
+    protected boolean isRetainedImplicitlyQueryable(int callingAppId, int targetAppId) {
+        synchronized (mImplicitlyQueryableLock) {
+            return super.isRetainedImplicitlyQueryable(callingAppId, targetAppId);
+        }
+    }
+
+    @Override
+    protected boolean isQueryableViaUsesLibrary(int callingAppId, int targetAppId) {
+        synchronized (mQueryableViaUsesLibraryLock) {
+            return super.isQueryableViaUsesLibrary(callingAppId, targetAppId);
+        }
+    }
+
+    @Override
+    protected boolean shouldFilterApplicationUsingCache(int callingUid, int appId, int userId) {
+        synchronized (mCacheLock) {
+            return super.shouldFilterApplicationUsingCache(callingUid, appId, userId);
+        }
+    }
+
+    @Override
+    protected void dumpForceQueryable(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mForceQueryableLock) {
+            super.dumpForceQueryable(pw, filteringAppId, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaPackage(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mQueriesViaPackageLock) {
+            super.dumpQueriesViaPackage(pw, filteringAppId, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaComponent(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mQueriesViaComponentLock) {
+            super.dumpQueriesViaComponent(pw, filteringAppId, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaImplicitlyQueryable(PrintWriter pw,
+            @Nullable Integer filteringAppId, int[] users, ToString<Integer> expandPackages) {
+        synchronized (mImplicitlyQueryableLock) {
+            super.dumpQueriesViaImplicitlyQueryable(pw, filteringAppId, users, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaUsesLibrary(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mQueryableViaUsesLibraryLock) {
+            super.dumpQueriesViaUsesLibrary(pw, filteringAppId, expandPackages);
+        }
+    }
+}

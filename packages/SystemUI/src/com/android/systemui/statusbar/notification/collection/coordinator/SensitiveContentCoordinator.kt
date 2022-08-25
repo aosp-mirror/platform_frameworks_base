@@ -30,29 +30,24 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
+import javax.inject.Inject
+
+@Module(includes = [PrivateSensitiveContentCoordinatorModule::class])
+interface SensitiveContentCoordinatorModule
 
 @Module
-object SensitiveContentCoordinatorModule {
-    @Provides
-    @JvmStatic
-    @CoordinatorScope
-    fun provideCoordinator(
-        dynamicPrivacyController: DynamicPrivacyController,
-        lockscreenUserManager: NotificationLockscreenUserManager,
-        keyguardUpdateMonitor: KeyguardUpdateMonitor,
-        statusBarStateController: StatusBarStateController,
-        keyguardStateController: KeyguardStateController
-    ): SensitiveContentCoordinator =
-            SensitiveContentCoordinatorImpl(dynamicPrivacyController, lockscreenUserManager,
-            keyguardUpdateMonitor, statusBarStateController, keyguardStateController)
+private interface PrivateSensitiveContentCoordinatorModule {
+    @Binds
+    fun bindCoordinator(impl: SensitiveContentCoordinatorImpl): SensitiveContentCoordinator
 }
 
 /** Coordinates re-inflation and post-processing of sensitive notification content. */
 interface SensitiveContentCoordinator : Coordinator
 
-private class SensitiveContentCoordinatorImpl(
+@CoordinatorScope
+private class SensitiveContentCoordinatorImpl @Inject constructor(
     private val dynamicPrivacyController: DynamicPrivacyController,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,

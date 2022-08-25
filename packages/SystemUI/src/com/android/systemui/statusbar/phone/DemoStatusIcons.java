@@ -30,6 +30,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.R;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -255,7 +256,8 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     public void addMobileView(MobileIconState state) {
         Log.d(TAG, "addMobileView: ");
         StatusBarMobileView view = StatusBarMobileView.fromContext(
-                mContext, state.slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
+                mContext, state.slot,
+                mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS));
 
         view.applyMobileState(state);
         view.setStaticDrawableColor(mColor);
@@ -313,14 +315,14 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        setColor(DarkIconDispatcher.getTint(area, mStatusIcons, tint));
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        setColor(DarkIconDispatcher.getTint(areas, mStatusIcons, tint));
 
         if (mWifiView != null) {
-            mWifiView.onDarkChanged(area, darkIntensity, tint);
+            mWifiView.onDarkChanged(areas, darkIntensity, tint);
         }
         for (StatusBarMobileView view : mMobileViews) {
-            view.onDarkChanged(area, darkIntensity, tint);
+            view.onDarkChanged(areas, darkIntensity, tint);
         }
     }
 }

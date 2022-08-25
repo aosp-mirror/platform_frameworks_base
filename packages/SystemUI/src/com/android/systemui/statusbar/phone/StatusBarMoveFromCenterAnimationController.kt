@@ -18,11 +18,13 @@ package com.android.systemui.statusbar.phone
 import android.view.View
 import android.view.WindowManager
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator.AlphaProvider
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController.StatusBarViewsCenterProvider
 import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import javax.inject.Inject
+import kotlin.math.max
 
 @SysUIUnfoldScope
 class StatusBarMoveFromCenterAnimationController @Inject constructor(
@@ -31,8 +33,11 @@ class StatusBarMoveFromCenterAnimationController @Inject constructor(
 ) {
 
     private val transitionListener = TransitionListener()
-    private val moveFromCenterAnimator = UnfoldMoveFromCenterAnimator(windowManager,
-        viewCenterProvider = StatusBarViewsCenterProvider())
+    private val moveFromCenterAnimator = UnfoldMoveFromCenterAnimator(
+        windowManager,
+        viewCenterProvider = StatusBarViewsCenterProvider(),
+        alphaProvider = StatusBarIconsAlphaProvider()
+    )
 
     fun onViewsReady(viewsToAnimate: Array<View>) {
         moveFromCenterAnimator.updateDisplayProperties()
@@ -65,4 +70,15 @@ class StatusBarMoveFromCenterAnimationController @Inject constructor(
             moveFromCenterAnimator.onTransitionProgress(1f)
         }
     }
+
+    private class StatusBarIconsAlphaProvider : AlphaProvider {
+        override fun getAlpha(progress: Float): Float {
+            return max(
+                0f,
+                (progress - ICONS_START_APPEARING_PROGRESS) / (1 - ICONS_START_APPEARING_PROGRESS)
+            )
+        }
+    }
 }
+
+private const val ICONS_START_APPEARING_PROGRESS = 0.75F

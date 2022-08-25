@@ -20,10 +20,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputWindowHandle;
+import android.view.InputWindowHandle.InputConfigFlags;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import java.util.Objects;
 
@@ -31,8 +34,10 @@ import java.util.Objects;
  * The wrapper of {@link InputWindowHandle} with field change detection to reduce unnecessary
  * updates to surface, e.g. if there are no changes, then skip invocation of
  * {@link SurfaceControl.Transaction#setInputWindowInfo(SurfaceControl, InputWindowHandle)}.
+ * It also sets the {@link InputConfigFlags} values for the input window.
  */
 class InputWindowHandleWrapper {
+
     /** The wrapped handle should not be directly exposed to avoid untracked changes. */
     private final @NonNull InputWindowHandle mHandle;
 
@@ -65,7 +70,20 @@ class InputWindowHandleWrapper {
     }
 
     boolean isFocusable() {
-        return mHandle.focusable;
+        return (mHandle.inputConfig & InputConfig.NOT_FOCUSABLE) == 0;
+    }
+
+    boolean isPaused() {
+        return (mHandle.inputConfig & InputConfig.PAUSE_DISPATCHING) != 0;
+    }
+
+    boolean isTrustedOverlay() {
+        return (mHandle.inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
+    }
+
+    boolean hasWallpaper() {
+        return (mHandle.inputConfig & InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER)
+                != 0;
     }
 
     InputApplicationHandle getInputApplicationHandle() {
@@ -96,7 +114,7 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setLayoutParamsFlags(int flags) {
+    void setLayoutParamsFlags(@WindowManager.LayoutParams.Flags int flags) {
         if (mHandle.layoutParamsFlags == flags) {
             return;
         }
@@ -136,19 +154,11 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setVisible(boolean visible) {
-        if (mHandle.visible == visible) {
-            return;
-        }
-        mHandle.visible = visible;
-        mChanged = true;
-    }
-
     void setFocusable(boolean focusable) {
-        if (mHandle.focusable == focusable) {
+        if (isFocusable() == focusable) {
             return;
         }
-        mHandle.focusable = focusable;
+        mHandle.setInputConfig(InputConfig.NOT_FOCUSABLE, !focusable);
         mChanged = true;
     }
 
@@ -161,26 +171,27 @@ class InputWindowHandleWrapper {
     }
 
     void setHasWallpaper(boolean hasWallpaper) {
-        if (mHandle.hasWallpaper == hasWallpaper) {
+        if (this.hasWallpaper() == hasWallpaper) {
             return;
         }
-        mHandle.hasWallpaper = hasWallpaper;
+        mHandle.setInputConfig(InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER,
+                hasWallpaper);
         mChanged = true;
     }
 
     void setPaused(boolean paused) {
-        if (mHandle.paused == paused) {
+        if (isPaused() == paused) {
             return;
         }
-        mHandle.paused = paused;
+        mHandle.setInputConfig(InputConfig.PAUSE_DISPATCHING, paused);
         mChanged = true;
     }
 
     void setTrustedOverlay(boolean trustedOverlay) {
-        if (mHandle.trustedOverlay == trustedOverlay) {
+        if (isTrustedOverlay() == trustedOverlay) {
             return;
         }
-        mHandle.trustedOverlay = trustedOverlay;
+        mHandle.setInputConfig(InputConfig.TRUSTED_OVERLAY, trustedOverlay);
         mChanged = true;
     }
 
@@ -208,27 +219,11 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setInputFeatures(int features) {
-        if (mHandle.inputFeatures == features) {
-            return;
-        }
-        mHandle.inputFeatures = features;
-        mChanged = true;
-    }
-
     void setDisplayId(int displayId) {
         if (mHandle.displayId == displayId) {
             return;
         }
         mHandle.displayId = displayId;
-        mChanged = true;
-    }
-
-    void setPortalToDisplayId(int displayId) {
-        if (mHandle.portalToDisplayId == displayId) {
-            return;
-        }
-        mHandle.portalToDisplayId = displayId;
         mChanged = true;
     }
 
@@ -281,6 +276,16 @@ class InputWindowHandleWrapper {
             return;
         }
         mHandle.setWindowToken(windowToken);
+        mChanged = true;
+    }
+
+    void setInputConfigMasked(@InputConfigFlags int inputConfig, @InputConfigFlags int mask) {
+        final int inputConfigMasked = inputConfig & mask;
+        if (inputConfigMasked == (mHandle.inputConfig & mask)) {
+            return;
+        }
+        mHandle.inputConfig &= ~mask;
+        mHandle.inputConfig |= inputConfigMasked;
         mChanged = true;
     }
 

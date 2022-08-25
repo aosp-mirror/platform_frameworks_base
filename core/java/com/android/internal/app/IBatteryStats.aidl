@@ -21,7 +21,9 @@ import com.android.internal.os.BatteryStatsImpl;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.BluetoothBatteryStats;
 import android.os.ParcelFileDescriptor;
+import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.WifiActivityEnergyInfo;
@@ -111,7 +113,7 @@ interface IBatteryStats {
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);
-    void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType);
+    void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType, int nrFrequency);
     void notePhoneState(int phoneState);
     void noteWifiOn();
     void noteWifiOff();
@@ -143,6 +145,8 @@ interface IBatteryStats {
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 
+    void noteBluetoothOn(int uid, int reason, String packageName);
+    void noteBluetoothOff(int uid, int reason, String packageName);
     void noteBleScanStarted(in WorkSource ws, boolean isUnoptimized);
     void noteBleScanStopped(in WorkSource ws, boolean isUnoptimized);
     void noteBleScanReset();
@@ -156,6 +160,14 @@ interface IBatteryStats {
 
     /** {@hide} */
     GpsBatteryStats getGpsBatteryStats();
+
+    /** {@hide} */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.BATTERY_STATS)")
+    WakeLockStats getWakeLockStats();
+
+    /** {@hide} */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.BATTERY_STATS)")
+    BluetoothBatteryStats getBluetoothBatteryStats();
 
     HealthStatsParceler takeUidSnapshot(int uid);
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);

@@ -16,16 +16,16 @@
 
 package android.content.pm;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
-import android.view.inputmethod.InputMethodInfo;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+@Presubmit
 public class AppsQueryHelperTests extends AndroidTestCase {
 
     private AppsQueryHelper mAppsQueryHelper;

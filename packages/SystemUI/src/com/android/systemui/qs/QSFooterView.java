@@ -23,13 +23,11 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -46,8 +44,9 @@ import com.android.systemui.R;
 public class QSFooterView extends FrameLayout {
     private PageIndicator mPageIndicator;
     private TextView mBuildText;
-    private View mActionsContainer;
+    private View mEditButton;
 
+    @Nullable
     protected TouchAnimator mFooterAnimator;
 
     private boolean mQsDisabled;
@@ -56,6 +55,7 @@ public class QSFooterView extends FrameLayout {
 
     private boolean mShouldShowBuildText;
 
+    @Nullable
     private OnClickListener mExpandClickListener;
 
     private final ContentObserver mDeveloperSettingsObserver = new ContentObserver(
@@ -75,8 +75,8 @@ public class QSFooterView extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPageIndicator = findViewById(R.id.footer_page_indicator);
-        mActionsContainer = requireViewById(R.id.qs_footer_actions);
         mBuildText = findViewById(R.id.build);
+        mEditButton = findViewById(android.R.id.edit);
 
         updateResources();
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -101,10 +101,6 @@ public class QSFooterView extends FrameLayout {
         }
     }
 
-    void updateExpansion() {
-        setExpansion(mExpansionAmount);
-    }
-
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -125,9 +121,9 @@ public class QSFooterView extends FrameLayout {
     @Nullable
     private TouchAnimator createFooterAnimator() {
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mPageIndicator, "alpha", 0, 1)
                 .addFloat(mBuildText, "alpha", 0, 1)
+                .addFloat(mEditButton, "alpha", 0, 1)
                 .setStartDelay(0.9f);
         return builder.build();
     }
@@ -168,23 +164,6 @@ public class QSFooterView extends FrameLayout {
     public void onDetachedFromWindow() {
         mContext.getContentResolver().unregisterContentObserver(mDeveloperSettingsObserver);
         super.onDetachedFromWindow();
-    }
-
-    @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
-            if (mExpandClickListener != null) {
-                mExpandClickListener.onClick(null);
-                return true;
-            }
-        }
-        return super.performAccessibilityAction(action, arguments);
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
     void disable(int state2) {

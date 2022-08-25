@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,6 +25,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,16 +37,17 @@ import android.media.IAudioService;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
-import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -56,8 +61,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -81,7 +84,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Mock
     private NotificationManager mNotificationManager;
     @Mock
-    private Vibrator mVibrator;
+    private VibratorHelper mVibrator;
     @Mock
     private IAudioService mIAudioService;
     @Mock
@@ -90,6 +93,12 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private WakefulnessLifecycle mWakefullnessLifcycle;
+    @Mock
+    private CaptioningManager mCaptioningManager;
+    @Mock
+    private KeyguardManager mKeyguardManager;
+    @Mock
+    private ActivityManager mActivityManager;
 
 
     @Before
@@ -110,8 +119,9 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mThreadFactory.setLooper(TestableLooper.get(this).getLooper());
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
                 mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
-                mNotificationManager, Optional.of(mVibrator), mIAudioService, mAccessibilityManager,
-                mPackageManager, mWakefullnessLifcycle, mCallback);
+                mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
+                mPackageManager, mWakefullnessLifcycle, mCaptioningManager, mKeyguardManager,
+                mActivityManager, mCallback);
         mVolumeController.setEnableDialogs(true, true);
     }
 
@@ -128,7 +138,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_AWAKE);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
-        verify(mCallback, never()).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+        verify(mCallback, never()).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED, false,
+                LOCK_TASK_MODE_NONE);
     }
 
     @Test
@@ -137,7 +148,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_AWAKE);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
-        verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+        verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED, false,
+                LOCK_TASK_MODE_NONE);
     }
 
     @Test
@@ -150,7 +162,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mWakefullnessLifcycle.getWakefulness()).thenReturn(
                 WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
-        verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+        verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED, false,
+                LOCK_TASK_MODE_NONE);
     }
 
     @Test
@@ -181,15 +194,19 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 ThreadFactory theadFactory,
                 AudioManager audioManager,
                 NotificationManager notificationManager,
-                Optional<Vibrator> optionalVibrator,
+                VibratorHelper optionalVibrator,
                 IAudioService iAudioService,
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
+                CaptioningManager captioningManager,
+                KeyguardManager keyguardManager,
+                ActivityManager activityManager,
                 C callback) {
             super(context, broadcastDispatcher, ringerModeTracker, theadFactory, audioManager,
                     notificationManager, optionalVibrator, iAudioService, accessibilityManager,
-                    packageManager, wakefulnessLifecycle);
+                    packageManager, wakefulnessLifecycle, captioningManager, keyguardManager,
+                    activityManager);
             mCallbacks = callback;
 
             ArgumentCaptor<WakefulnessLifecycle.Observer> observerCaptor =

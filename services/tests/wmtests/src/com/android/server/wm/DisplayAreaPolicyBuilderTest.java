@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -30,7 +31,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
-import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
@@ -49,12 +49,14 @@ import static org.testng.Assert.assertThrows;
 
 import static java.util.stream.Collectors.toList;
 
+import android.app.ActivityOptions;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
+import android.window.WindowContainerToken;
 
 import com.google.android.collect.Lists;
 
@@ -81,11 +83,13 @@ import java.util.stream.Collectors;
  */
 @Presubmit
 public class DisplayAreaPolicyBuilderTest {
+    private static final String KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID =
+            "android.test.launchTaskDisplayAreaFeatureId";
 
     @Rule
     public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
 
-    private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy(null, null);
+    private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy();
     private WindowManagerService mWms;
     private RootDisplayArea mRoot;
     private DisplayArea.Tokens mImeContainer;
@@ -104,6 +108,7 @@ public class DisplayAreaPolicyBuilderTest {
         mImeContainer = new DisplayArea.Tokens(mWms, ABOVE_TASKS, "ImeContainer");
         mDisplayContent = mock(DisplayContent.class);
         doReturn(true).when(mDisplayContent).isTrusted();
+        doReturn(DEFAULT_DISPLAY).when(mDisplayContent).getDisplayId();
         mDisplayContent.isDefaultDisplay = true;
         mDefaultTaskDisplayArea = new TaskDisplayArea(mDisplayContent, mWms, "Tasks",
                 FEATURE_DEFAULT_TASK_CONTAINER);
@@ -193,25 +198,6 @@ public class DisplayAreaPolicyBuilderTest {
             }
 
             assertThat(hasOneHandedFeature).isTrue();
-        }
-    }
-
-    @Test
-    public void testBuilder_defaultPolicy_hasOneHandedBackgroundFeature() {
-        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
-                resourcesWithProvider(""));
-        final DisplayAreaPolicyBuilder.Result defaultPolicy =
-                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
-                        mRoot, mImeContainer);
-        if (mDisplayContent.isDefaultDisplay) {
-            final List<Feature> features = defaultPolicy.getFeatures();
-            boolean hasOneHandedBackgroundFeature = false;
-            for (Feature feature : features) {
-                hasOneHandedBackgroundFeature |=
-                        feature.getId() == FEATURE_ONE_HANDED_BACKGROUND_PANEL;
-            }
-
-            assertThat(hasOneHandedBackgroundFeature).isTrue();
         }
     }
 
@@ -729,6 +715,208 @@ public class DisplayAreaPolicyBuilderTest {
                 .all()
                 .except(TYPE_POINTER)
                 .build();
+    }
+
+    @Test
+    public void testGetTaskDisplayArea_DefaultFunction_NullOptions_ReturnsDefaultTda() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .build(mWms);
+
+        final TaskDisplayArea tda = policy.getTaskDisplayArea(null /* options */);
+
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+        assertThat(tda).isEqualTo(policy.getDefaultTaskDisplayArea());
+    }
+
+    @Test
+    public void testGetTaskDisplayArea_DefaultFunction_NotContainsLunchedTda_ReturnsDefaultTda() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .build(mWms);
+
+        final TaskDisplayArea tda = policy.getTaskDisplayArea(new Bundle());
+
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+        assertThat(tda).isEqualTo(policy.getDefaultTaskDisplayArea());
+    }
+
+    @Test
+    public void testGetTaskDisplayArea_DefaultFunction_InvalidTdaToken_ReturnsDefaultTda() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .build(mWms);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        final WindowContainerToken fakeToken = mRoot.mRemoteToken.toWindowContainerToken();
+        options.setLaunchTaskDisplayArea(fakeToken);
+
+        final TaskDisplayArea tda = policy.getTaskDisplayArea(options.toBundle());
+
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+        assertThat(tda).isEqualTo(policy.getDefaultTaskDisplayArea());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetTaskDisplayArea_DefaultFunction_TdaOnDifferentDisplay_ThrowException() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .build(mWms);
+        final TaskDisplayArea tdaOnSecondaryDisplay = mock(TaskDisplayArea.class);
+        doReturn(DEFAULT_DISPLAY + 1).when(tdaOnSecondaryDisplay).getDisplayId();
+        doReturn(tdaOnSecondaryDisplay).when(tdaOnSecondaryDisplay).asTaskDisplayArea();
+        tdaOnSecondaryDisplay.mRemoteToken = new WindowContainer.RemoteToken(tdaOnSecondaryDisplay);
+
+        final WindowContainerToken tdaToken = tdaOnSecondaryDisplay.mRemoteToken
+                .toWindowContainerToken();
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchTaskDisplayArea(tdaToken);
+        final TaskDisplayArea tda = policy.getTaskDisplayArea(options.toBundle());
+
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+        assertThat(tda).isEqualTo(policy.getDefaultTaskDisplayArea());
+    }
+
+    @Test
+    public void testGetTaskDisplayArea_DefaultFunction_ContainsTdaToken_ReturnsTda() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .build(mWms);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+
+        final WindowContainerToken defaultTdaToken = mDefaultTaskDisplayArea.mRemoteToken
+                .toWindowContainerToken();
+        options.setLaunchTaskDisplayArea(defaultTdaToken);
+        TaskDisplayArea tda = policy.getTaskDisplayArea(options.toBundle());
+
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+        assertThat(tda).isEqualTo(policy.getDefaultTaskDisplayArea());
+
+        final WindowContainerToken tda1Token = mTda1.mRemoteToken.toWindowContainerToken();
+        options.setLaunchTaskDisplayArea(tda1Token);
+        tda = policy.getTaskDisplayArea(options.toBundle());
+
+        assertThat(tda).isEqualTo(mTda1);
+
+        final WindowContainerToken tda2Token = mTda2.mRemoteToken.toWindowContainerToken();
+        options.setLaunchTaskDisplayArea(tda2Token);
+        tda = policy.getTaskDisplayArea(options.toBundle());
+
+        assertThat(tda).isEqualTo(mTda2);
+    }
+
+    @Test
+    public void testBuilder_getTaskDisplayArea_setSelectTaskDisplayAreaFunc() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .setSelectTaskDisplayAreaFunc((options) -> {
+                    if (options == null) {
+                        return mDefaultTaskDisplayArea;
+                    }
+                    final int tdaFeatureId =
+                            options.getInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID);
+                    if (tdaFeatureId == mTda1.mFeatureId) {
+                        return mTda1;
+                    }
+                    if (tdaFeatureId == mTda2.mFeatureId) {
+                        return mTda2;
+                    }
+                    return mDefaultTaskDisplayArea;
+                })
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .build(mWms);
+
+        TaskDisplayArea tda = policy.getTaskDisplayArea(null /* options */);
+
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+        assertThat(tda).isEqualTo(policy.getDefaultTaskDisplayArea());
+
+        final Bundle options = new Bundle();
+        options.putInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID, -1);
+        tda = policy.getTaskDisplayArea(options);
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+
+        options.putInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID, mDefaultTaskDisplayArea.mFeatureId);
+        tda = policy.getTaskDisplayArea(options);
+        assertThat(tda).isEqualTo(mDefaultTaskDisplayArea);
+
+        options.putInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID, mTda1.mFeatureId);
+        tda = policy.getTaskDisplayArea(options);
+        assertThat(tda).isEqualTo(mTda1);
+
+        options.putInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID, mTda2.mFeatureId);
+        tda = policy.getTaskDisplayArea(options);
+        assertThat(tda).isEqualTo(mTda2);
     }
 
     private static Resources resourcesWithProvider(String provider) {

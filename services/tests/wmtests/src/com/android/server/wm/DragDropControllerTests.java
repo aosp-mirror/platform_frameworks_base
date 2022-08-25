@@ -21,6 +21,7 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.DragEvent.ACTION_DRAG_ENDED;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 import static android.view.DragEvent.ACTION_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -145,7 +146,9 @@ public class DragDropControllerTests extends WindowTestsBase {
         final WindowState window = createWindow(
                 null, TYPE_BASE_APPLICATION, activity, name, ownerId, false, new TestIWindow());
         window.mInputChannel = new InputChannel();
+        window.mInputChannelToken = window.mInputChannel.getToken();
         window.mHasSurface = true;
+        mWm.mWindowMap.put(window.mClient.asBinder(), window);
         mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
         return window;
     }
@@ -259,7 +262,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     } finally {
                         mTarget.mDeferDragStateClosed = false;
                     }
-                    assertTrue(mTarget.dragSurfaceRelinquished());
+                    assertTrue(mTarget.dragSurfaceRelinquishedToDropTarget());
                 });
     }
 
@@ -455,6 +458,100 @@ public class DragDropControllerTests extends WindowTestsBase {
         } catch (IllegalArgumentException e) {
             // Expected failure
         }
+    }
+
+    @Test
+    public void testValidateFlags() {
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    TEST_UID);
+            fail("Expected failure without permission");
+        } catch (SecurityException e) {
+            // Expected failure
+        }
+    }
+
+    @Test
+    public void testValidateFlagsWithPermission() {
+        doReturn(PERMISSION_GRANTED).when(mWm.mContext)
+                .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    TEST_UID);
+            // Expected pass
+        } catch (SecurityException e) {
+            fail("Expected no failure with permission");
+        }
+    }
+
+    @Test
+    public void testRequestSurfaceForReturnAnimationFlag_dropSuccessful() {
+        WindowState otherWindow = createDropTargetWindow("App drag test window", 0);
+        TestIWindow otherIWindow = (TestIWindow) otherWindow.mClient;
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ
+                        | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                ClipData.newPlainText("label", "text"), () -> {
+                    assertTrue(dragEvents.get(0).getAction() == ACTION_DRAG_STARTED);
+
+                    // Verify after consuming that the drag surface is relinquished
+                    mTarget.reportDropWindow(otherWindow.mInputChannelToken, 0, 0);
+                    mTarget.handleMotionEvent(false, 0, 0);
+                    mToken = otherWindow.mClient.asBinder();
+                    mTarget.reportDropResult(otherIWindow, true);
+
+                    // Verify the DRAG_ENDED event does NOT include the drag surface
+                    final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                    assertTrue(dragEvents.get(dragEvents.size() - 1).getAction()
+                            == ACTION_DRAG_ENDED);
+                    assertTrue(dropEvent.getDragSurface() == null);
+                });
+    }
+
+    @Test
+    public void testRequestSurfaceForReturnAnimationFlag_dropUnsuccessful() {
+        WindowState otherWindow = createDropTargetWindow("App drag test window", 0);
+        TestIWindow otherIWindow = (TestIWindow) otherWindow.mClient;
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ
+                        | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                ClipData.newPlainText("label", "text"), () -> {
+                    assertTrue(dragEvents.get(0).getAction() == ACTION_DRAG_STARTED);
+
+                    // Verify after consuming that the drag surface is relinquished
+                    mTarget.reportDropWindow(otherWindow.mInputChannelToken, 0, 0);
+                    mTarget.handleMotionEvent(false, 0, 0);
+                    mToken = otherWindow.mClient.asBinder();
+                    mTarget.reportDropResult(otherIWindow, false);
+
+                    // Verify the DRAG_ENDED event includes the drag surface
+                    final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                    assertTrue(dragEvents.get(dragEvents.size() - 1).getAction()
+                            == ACTION_DRAG_ENDED);
+                    assertTrue(dropEvent.getDragSurface() != null);
+                });
     }
 
     private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {

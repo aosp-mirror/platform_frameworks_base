@@ -27,6 +27,7 @@ import android.app.INotificationManager;
 import android.app.ITransientNotificationCallback;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -37,7 +38,7 @@ import android.widget.ToastPresenter;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -49,7 +50,7 @@ import javax.inject.Inject;
  * Controls display of text toasts.
  */
 @SysUISingleton
-public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
+public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
     // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
     private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
     private static final int TOAST_SHORT_TIME = 2000; // 2 seconds
@@ -106,10 +107,15 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     @Override
     @MainThread
     public void showToast(int uid, String packageName, IBinder token, CharSequence text,
-            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
+            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback,
+            int displayId) {
         Runnable showToastRunnable = () -> {
             UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
             Context context = mContext.createContextAsUser(userHandle, 0);
+
+            DisplayManager mDisplayManager = mContext.getSystemService(DisplayManager.class);
+            Context displayContext = context.createDisplayContext(
+                    mDisplayManager.getDisplay(displayId));
             mToast = mToastFactory.createToast(mContext /* sysuiContext */, text, packageName,
                     userHandle.getIdentifier(), mOrientation);
 
@@ -118,7 +124,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
             }
 
             mCallback = callback;
-            mPresenter = new ToastPresenter(context, mIAccessibilityManager,
+            mPresenter = new ToastPresenter(displayContext, mIAccessibilityManager,
                     mNotificationManager, packageName);
             // Set as trusted overlay so touches can pass through toasts
             mPresenter.getLayoutParams().setTrustedOverlay();

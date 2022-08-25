@@ -736,10 +736,13 @@ public class ZygoteInit {
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             if (Zygote.nativeSupportsMemoryTagging()) {
-                /* The system server has ASYNC MTE by default, in order to allow
-                 * system services to specify their own MTE level later, as you
-                 * can't re-enable MTE once it's disabled. */
-                String mode = SystemProperties.get("arm64.memtag.process.system_server", "async");
+                String mode = SystemProperties.get("arm64.memtag.process.system_server", "");
+                if (mode.isEmpty()) {
+                  /* The system server has ASYNC MTE by default, in order to allow
+                   * system services to specify their own MTE level later, as you
+                   * can't re-enable MTE once it's disabled. */
+                  mode = SystemProperties.get("persist.arm64.memtag.default", "async");
+                }
                 if (mode.equals("async")) {
                     parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
                 } else if (mode.equals("sync")) {

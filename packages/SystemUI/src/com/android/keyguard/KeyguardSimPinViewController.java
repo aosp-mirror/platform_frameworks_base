@@ -103,7 +103,7 @@ public class KeyguardSimPinViewController
             showDefaultMessage();
         }
 
-        mView.setEsimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId));
+        mView.setEsimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId), mSubId);
     }
 
     @Override
@@ -131,10 +131,18 @@ public class KeyguardSimPinViewController
     }
 
     @Override
+    public void reloadColors() {
+        super.reloadColors();
+        mView.reloadColors();
+    }
+
+    @Override
     protected void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText();
 
-        if (entry.length() < 4) {
+        // A SIM PIN is 4 to 8 decimal digits according to 
+        // GSM 02.17 version 5.0.1, Section 5.6 PIN Management
+        if ((entry.length() < 4) || (entry.length() > 8)) {
             // otherwise, display a message to the user, and don't submit.
             mMessageAreaController.setMessage(
                     com.android.systemui.R.string.kg_invalid_sim_pin_hint);

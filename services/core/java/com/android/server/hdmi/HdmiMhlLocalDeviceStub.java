@@ -8,7 +8,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
  */
 final class HdmiMhlLocalDeviceStub {
 
-    private static final HdmiDeviceInfo INFO = new HdmiDeviceInfo(
+    private static final HdmiDeviceInfo INFO = HdmiDeviceInfo.mhlDevice(
             Constants.INVALID_PHYSICAL_ADDRESS, Constants.INVALID_PORT_ID, -1, -1);
     private final HdmiControlService mService;
     private final int mPortId;

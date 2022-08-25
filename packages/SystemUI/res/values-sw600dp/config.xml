@@ -23,19 +23,21 @@
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
+    <!-- Use collapsed layout for media player in landscape QQS -->
+    <bool name="config_quickSettingsMediaLandscapeCollapsed">false</bool>
+
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left;back,home,recent;right</string>
 
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">0</integer>
 
-    <!-- Max number of columns for quick controls area -->
-    <integer name="controls_max_columns">4</integer>
-
     <!-- How many lines to show in the security footer -->
     <integer name="qs_security_footer_maxLines">1</integer>
 
     <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
     <bool name="allow_force_nav_bar_handle_opaque">false</bool>
+
+    <bool name="config_use_large_screen_shade_header">true</bool>
 
 </resources>

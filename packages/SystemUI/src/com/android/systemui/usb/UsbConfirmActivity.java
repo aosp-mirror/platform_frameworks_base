@@ -16,183 +16,61 @@
 
 package com.android.systemui.usb;
 
-import android.app.AlertDialog;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.PermissionChecker;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.hardware.usb.IUsbManager;
-import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.ServiceManager;
-import android.os.UserHandle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.TextView;
 
-import com.android.internal.app.AlertActivity;
-import com.android.internal.app.AlertController;
-import com.android.systemui.R;
+import javax.inject.Inject;
 
-public class UsbConfirmActivity extends AlertActivity
-        implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener {
+/**
+ * Dialog shown to confirm the package to start when a USB device or accessory is attached and there
+ * is only one package that claims to handle this USB device or accessory.
+ */
+public class UsbConfirmActivity extends UsbDialogActivity {
 
-    private static final String TAG = "UsbConfirmActivity";
-
-    private CheckBox mAlwaysUse;
-    private TextView mClearDefaultHint;
-    private UsbDevice mDevice;
-    private UsbAccessory mAccessory;
-    private ResolveInfo mResolveInfo;
-    private boolean mPermissionGranted;
-    private UsbDisconnectedReceiver mDisconnectedReceiver;
     private UsbAudioWarningDialogMessage mUsbConfirmMessageHandler;
+
+    @Inject
+    public UsbConfirmActivity(UsbAudioWarningDialogMessage usbAudioWarningDialogMessage) {
+        mUsbConfirmMessageHandler = usbAudioWarningDialogMessage;
+    }
 
     @Override
     public void onCreate(Bundle icicle) {
-        getWindow().addSystemFlags(
-                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-
         super.onCreate(icicle);
-
-        Intent intent = getIntent();
-        mDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-        mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-        mResolveInfo = (ResolveInfo) intent.getParcelableExtra("rinfo");
-        String packageName = intent.getStringExtra(UsbManager.EXTRA_PACKAGE);
-        mUsbConfirmMessageHandler = new UsbAudioWarningDialogMessage(
-                getApplicationContext(), getIntent(),
-                UsbAudioWarningDialogMessage.TYPE_CONFIRM);
-        PackageManager packageManager = getPackageManager();
-        String appName = mResolveInfo.loadLabel(packageManager).toString();
-
-        final AlertController.AlertParams ap = mAlertParams;
-        ap.mTitle = appName;
-        boolean useRecordWarning = false;
-        if (mDevice == null) {
-            final int messageId = mUsbConfirmMessageHandler.getUsbAccessoryPromptId();
-            ap.mMessage = getString(messageId, appName, mAccessory.getDescription());
-            mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
-        } else {
-            int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-            boolean hasRecordPermission =
-                    PermissionChecker.checkPermissionForPreflight(
-                            this, android.Manifest.permission.RECORD_AUDIO, -1, uid,
-                            packageName)
-                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
-            boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
-            useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
-
-            final int messageId = mUsbConfirmMessageHandler.getMessageId();
-            final int titleId = mUsbConfirmMessageHandler.getPromptTitleId();
-            ap.mTitle = getString(titleId, appName, mDevice.getProductName());
-            ap.mMessage = (messageId != Resources.ID_NULL) ? getString(messageId, appName,
-                    mDevice.getProductName()) : null;
-            mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
-        }
-        ap.mPositiveButtonText = getString(android.R.string.ok);
-        ap.mNegativeButtonText = getString(android.R.string.cancel);
-        ap.mPositiveButtonListener = this;
-        ap.mNegativeButtonListener = this;
-
-        // add "always use" checkbox
-        if (!useRecordWarning) {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            ap.mView = inflater.inflate(com.android.internal.R.layout.always_use_checkbox, null);
-            mAlwaysUse = (CheckBox) ap.mView.findViewById(com.android.internal.R.id.alwaysUse);
-            if (mDevice == null) {
-                mAlwaysUse.setText(getString(R.string.always_use_accessory, appName,
-                        mAccessory.getDescription()));
-            } else {
-                mAlwaysUse.setText(getString(R.string.always_use_device, appName,
-                        mDevice.getProductName()));
-            }
-            mAlwaysUse.setOnCheckedChangeListener(this);
-            mClearDefaultHint = (TextView) ap.mView.findViewById(
-                    com.android.internal.R.id.clearDefaultHint);
-            mClearDefaultHint.setVisibility(View.GONE);
-        }
-        setupAlert();
-
+        mUsbConfirmMessageHandler.init(UsbAudioWarningDialogMessage.TYPE_CONFIRM, mDialogHelper);
     }
 
     @Override
-    protected void onDestroy() {
-        if (mDisconnectedReceiver != null) {
-            unregisterReceiver(mDisconnectedReceiver);
+    protected void onResume() {
+        super.onResume();
+        // Only show the "always use" checkbox if there is no USB/Record warning
+        final boolean useRecordWarning = mDialogHelper.isUsbDevice()
+                && (mDialogHelper.deviceHasAudioCapture()
+                && !mDialogHelper.packageHasAudioRecordingPermission());
+
+        final int titleId = mUsbConfirmMessageHandler.getPromptTitleId();
+        final String title = getString(titleId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription());
+        final int messageId = mUsbConfirmMessageHandler.getMessageId();
+        String message = (messageId != Resources.ID_NULL)
+                ? getString(messageId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription()) : null;
+        setAlertParams(title, message);
+        if (!useRecordWarning) {
+            addAlwaysUseCheckbox();
         }
-        super.onDestroy();
+        setupAlert();
     }
 
-    public void onClick(DialogInterface dialog, int which) {
-        if (which == AlertDialog.BUTTON_POSITIVE) {
-            try {
-                IBinder b = ServiceManager.getService(USB_SERVICE);
-                IUsbManager service = IUsbManager.Stub.asInterface(b);
-                final int uid = mResolveInfo.activityInfo.applicationInfo.uid;
-                final int userId = UserHandle.myUserId();
-                boolean alwaysUse = mAlwaysUse != null ? mAlwaysUse.isChecked() : false;
-                Intent intent = null;
-
-                if (mDevice != null) {
-                    intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-                    intent.putExtra(UsbManager.EXTRA_DEVICE, mDevice);
-
-                    // grant permission for the device
-                    service.grantDevicePermission(mDevice, uid);
-                    // set or clear default setting
-                    if (alwaysUse) {
-                        service.setDevicePackage(
-                                mDevice, mResolveInfo.activityInfo.packageName, userId);
-                    } else {
-                        service.setDevicePackage(mDevice, null, userId);
-                    }
-                } else if (mAccessory != null) {
-                    intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
-                    intent.putExtra(UsbManager.EXTRA_ACCESSORY, mAccessory);
-
-                    // grant permission for the accessory
-                    service.grantAccessoryPermission(mAccessory, uid);
-                    // set or clear default setting
-                    if (alwaysUse) {
-                        service.setAccessoryPackage(
-                                mAccessory, mResolveInfo.activityInfo.packageName, userId);
-                    } else {
-                        service.setAccessoryPackage(mAccessory, null, userId);
-                    }
-                }
-
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setComponent(
-                    new ComponentName(mResolveInfo.activityInfo.packageName,
-                            mResolveInfo.activityInfo.name));
-                startActivityAsUser(intent, new UserHandle(userId));
-            } catch (Exception e) {
-                Log.e(TAG, "Unable to start activity", e);
-            }
-        }
-        finish();
-    }
-
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (mClearDefaultHint == null) return;
-
-        if(isChecked) {
-            mClearDefaultHint.setVisibility(View.VISIBLE);
+    @Override
+    void onConfirm() {
+        mDialogHelper.grantUidAccessPermission();
+        if (isAlwaysUseChecked()) {
+            mDialogHelper.setDefaultPackage();
         } else {
-            mClearDefaultHint.setVisibility(View.GONE);
+            mDialogHelper.clearDefaultPackage();
         }
+        mDialogHelper.confirmDialogStartActivity();
+        finish();
     }
 }

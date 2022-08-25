@@ -39,16 +39,17 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.RemoteInputHistoryExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.LegacyRemoteInputLifetimeExtender.SmartReplyHistoryExtender;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import com.google.android.collect.Sets;
@@ -70,7 +71,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationRemoteInputManager.Callback mCallback;
     @Mock private RemoteInputController mController;
@@ -98,12 +99,13 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
-                mock(FeatureFlags.class),
+                mock(NotifPipelineFlags.class),
                 mLockscreenUserManager,
                 mSmartReplyController,
+                mVisibilityProvider,
                 mEntryManager,
                 mock(RemoteInputNotificationRebuilder.class),
-                () -> Optional.of(mock(StatusBar.class)),
+                () -> Optional.of(mock(CentralSurfaces.class)),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
@@ -188,12 +190,13 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         TestableNotificationRemoteInputManager(
                 Context context,
-                FeatureFlags featureFlags,
+                NotifPipelineFlags notifPipelineFlags,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
+                NotificationVisibilityProvider visibilityProvider,
                 NotificationEntryManager notificationEntryManager,
                 RemoteInputNotificationRebuilder rebuilder,
-                Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+                Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
                 RemoteInputUriController remoteInputUriController,
@@ -202,12 +205,13 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 DumpManager dumpManager) {
             super(
                     context,
-                    featureFlags,
+                    notifPipelineFlags,
                     lockscreenUserManager,
                     smartReplyController,
+                    visibilityProvider,
                     notificationEntryManager,
                     rebuilder,
-                    statusBarOptionalLazy,
+                    centralSurfacesOptionalLazy,
                     statusBarStateController,
                     mainHandler,
                     remoteInputUriController,

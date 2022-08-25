@@ -223,7 +223,7 @@ public final class ContentCaptureManagerService extends
     @Override // from AbstractMasterSystemService
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId, mHandler);
+        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
     }
 
     @Override // from SystemService
@@ -730,7 +730,7 @@ public final class ContentCaptureManagerService extends
                         String serviceName = mServiceNameResolver.getServiceName(userId);
                         ContentCaptureMetricsLogger.writeServiceEvent(
                                 EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST,
-                                serviceName, request.getPackageName());
+                                serviceName);
                         clientAdapter.error(
                                 ContentCaptureManager.DATA_SHARE_ERROR_CONCURRENT_REQUEST);
                     } catch (RemoteException e) {
@@ -1303,8 +1303,7 @@ public final class ContentCaptureManagerService extends
         private void logServiceEvent(int eventType) {
             int userId = UserHandle.getCallingUserId();
             String serviceName = mParentService.mServiceNameResolver.getServiceName(userId);
-            ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName,
-                    mDataShareRequest.getPackageName());
+            ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName);
         }
     }
 }

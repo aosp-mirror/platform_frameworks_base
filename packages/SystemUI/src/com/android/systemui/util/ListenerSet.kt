@@ -39,9 +39,17 @@ class ListenerSet<E> : Iterable<E> {
     fun remove(element: E): Boolean = listeners.remove(element)
 
     /**
+     * Determine if the listener set is empty
+     */
+    fun isEmpty(): Boolean = listeners.isEmpty()
+
+    /**
      * Returns an iterator over the listeners currently in the set.  Note that to ensure
      * [ConcurrentModificationException] is never thrown, this iterator will not reflect changes
      * made to the set after the iterator is constructed.
      */
     override fun iterator(): Iterator<E> = listeners.iterator()
 }
+
+/** Extension to match Collection which is implemented to only be (easily) accessible in kotlin */
+fun <T> ListenerSet<T>.isNotEmpty(): Boolean = !isEmpty()

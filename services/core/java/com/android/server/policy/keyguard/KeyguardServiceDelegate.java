@@ -415,6 +415,17 @@ public class KeyguardServiceDelegate {
         }
     }
 
+    public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+        if (mKeyguardService != null) {
+            mKeyguardService.dismissKeyguardToLaunch(intentToLaunch);
+        }
+    }
+    public void onSystemKeyPressed(int keycode) {
+        if (mKeyguardService != null) {
+            mKeyguardService.onSystemKeyPressed(keycode);
+        }
+    }
+
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(SHOWING, mKeyguardState.showing);

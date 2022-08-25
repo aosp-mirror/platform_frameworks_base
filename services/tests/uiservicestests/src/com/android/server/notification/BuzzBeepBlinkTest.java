@@ -422,7 +422,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     private void verifyNeverVibrate() {
         verify(mVibrator, never()).vibrate(anyInt(), anyString(), any(), anyString(),
-                any(AudioAttributes.class));
+                any(VibrationAttributes.class));
     }
 
     private void verifyVibrate() {
@@ -448,17 +448,18 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     private void verifyDelayedNeverVibrate() {
         verify(mVibrator, after(MAX_VIBRATION_DELAY).never()).vibrate(anyInt(), anyString(), any(),
-                anyString(), any(AudioAttributes.class));
+                anyString(), any(VibrationAttributes.class));
     }
 
     private void verifyVibrate(ArgumentMatcher<VibrationEffect> effectMatcher,
             VerificationMode verification) {
-        ArgumentCaptor<AudioAttributes> captor = ArgumentCaptor.forClass(AudioAttributes.class);
+        ArgumentCaptor<VibrationAttributes> captor =
+                ArgumentCaptor.forClass(VibrationAttributes.class);
         verify(mVibrator, verification).vibrate(eq(Process.SYSTEM_UID),
                 eq(PackageManagerService.PLATFORM_PACKAGE_NAME), argThat(effectMatcher),
                 anyString(), captor.capture());
-        assertEquals(0, (captor.getValue().getAllFlags()
-                & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
+        assertEquals(0, (captor.getValue().getFlags()
+                & VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
 
     private void verifyStopVibrate() {

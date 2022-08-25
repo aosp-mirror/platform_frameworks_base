@@ -28,7 +28,6 @@ import android.content.pm.ResolveInfo;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.BootCompleteCache;
-import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -37,7 +36,7 @@ import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,7 @@ public final class PhoneStateMonitor {
     };
 
     private final Context mContext;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final StatusBarStateController mStatusBarStateController;
 
     private boolean mLauncherShowing;
@@ -78,10 +77,12 @@ public final class PhoneStateMonitor {
 
     @Inject
     PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache) {
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            BootCompleteCache bootCompleteCache,
+            StatusBarStateController statusBarStateController) {
         mContext = context;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
-        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mStatusBarStateController = statusBarStateController;
 
         mDefaultHome = getCurrentDefaultHome();
         bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());
@@ -171,8 +172,8 @@ public final class PhoneStateMonitor {
         return mStatusBarStateController.isDozing();
     }
 
-    private boolean isLauncherShowing(ActivityManager.RunningTaskInfo runningTaskInfo) {
-        if (runningTaskInfo == null) {
+    private boolean isLauncherShowing(@Nullable ActivityManager.RunningTaskInfo runningTaskInfo) {
+        if (runningTaskInfo == null || runningTaskInfo.topActivity == null) {
             return false;
         } else {
             return runningTaskInfo.topActivity.equals(mDefaultHome);
@@ -180,7 +181,8 @@ public final class PhoneStateMonitor {
     }
 
     private boolean isBouncerShowing() {
-        return mStatusBarOptionalLazy.get().map(StatusBar::isBouncerShowing).orElse(false);
+        return mCentralSurfacesOptionalLazy.get()
+                .map(CentralSurfaces::isBouncerShowing).orElse(false);
     }
 
     private boolean isKeyguardLocked() {

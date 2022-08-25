@@ -133,6 +133,7 @@ int DrawFrameTask::drawFrame() {
 }
 
 void DrawFrameTask::postAndWait() {
+    ATRACE_CALL();
     AutoMutex _lock(mLock);
     mRenderThread->queue().post([this]() { run(); });
     mSignal.wait(mLock);
@@ -147,6 +148,8 @@ void DrawFrameTask::run() {
     bool canDrawThisFrame;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
+        info.forceDrawFrame = mForceDrawFrame;
+        mForceDrawFrame = false;
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
 
@@ -158,7 +161,8 @@ void DrawFrameTask::run() {
 
     // Grab a copy of everything we need
     CanvasContext* context = mContext;
-    std::function<void(int64_t)> frameCallback = std::move(mFrameCallback);
+    std::function<std::function<void(bool)>(int32_t, int64_t)> frameCallback =
+            std::move(mFrameCallback);
     std::function<void()> frameCompleteCallback = std::move(mFrameCompleteCallback);
     mFrameCallback = nullptr;
     mFrameCompleteCallback = nullptr;
@@ -173,8 +177,13 @@ void DrawFrameTask::run() {
 
     // Even if we aren't drawing this vsync pulse the next frame number will still be accurate
     if (CC_UNLIKELY(frameCallback)) {
-        context->enqueueFrameWork(
-                [frameCallback, frameNr = context->getFrameNumber()]() { frameCallback(frameNr); });
+        context->enqueueFrameWork([frameCallback, context, syncResult = mSyncResult,
+                                   frameNr = context->getFrameNumber()]() {
+            auto frameCommitCallback = std::move(frameCallback(syncResult, frameNr));
+            if (frameCommitCallback) {
+                context->addFrameCommitListener(std::move(frameCommitCallback));
+            }
+        });
     }
 
     nsecs_t dequeueBufferDuration = 0;

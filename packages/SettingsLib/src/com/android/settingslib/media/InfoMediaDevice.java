@@ -29,7 +29,6 @@ import android.media.MediaRouter2Manager;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
-import com.android.settingslib.bluetooth.BluetoothUtils;
 
 import java.util.List;
 
@@ -59,9 +58,7 @@ public class InfoMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        final Drawable drawable = getIconWithoutBackground();
-        setColorFilter(drawable);
-        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+        return getIconWithoutBackground();
     }
 
     @Override

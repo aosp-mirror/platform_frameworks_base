@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.apppairs
 
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
@@ -26,6 +25,7 @@ import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTrans
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.Assume.assumeFalse
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 abstract class RotateTwoLaunchedAppsTransition(
@@ -34,7 +34,7 @@ abstract class RotateTwoLaunchedAppsTransition(
     override val nonResizeableApp: SplitScreenHelper?
         get() = null
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
                 test {
@@ -62,13 +62,13 @@ abstract class RotateTwoLaunchedAppsTransition(
         super.setup()
     }
 
-    @FlakyTest
+    @Ignore
     @Test
     override fun navBarLayerIsVisible() {
         super.navBarLayerIsVisible()
     }
 
-    @FlakyTest
+    @Ignore
     @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()

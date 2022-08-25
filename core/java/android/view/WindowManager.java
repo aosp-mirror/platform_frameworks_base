@@ -97,6 +97,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -117,12 +118,15 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.TaskFpsCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -484,6 +488,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
+     * Transition flag: Keyguard is going away to the launcher, and it needs us to clear the task
+     * snapshot of the launcher because it has changed something in the Launcher window.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = 0x16;
+
+    /**
      * Transition flag: App is crashed.
      * @hide
      */
@@ -523,6 +534,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
             TRANSIT_FLAG_KEYGUARD_LOCKED,
@@ -708,6 +720,20 @@ public interface WindowManager extends ViewManager {
      * @see Display#getRealSize(Point)
      */
     default @NonNull WindowMetrics getMaximumWindowMetrics() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns a set of {@link WindowMetrics} for the given display. Each WindowMetrics instance
+     * is the maximum WindowMetrics for a device state. This is not guaranteed to include all
+     * possible device states.
+     *
+     * This API can only be used by Launcher.
+     *
+     * @param displayId the id of the logical display
+     * @hide
+     */
+    default @NonNull Set<WindowMetrics> getPossibleMaximumWindowMetrics(int displayId) {
         throw new UnsupportedOperationException();
     }
 
@@ -2125,6 +2151,7 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         @UnsupportedAppUsage
+        @TestApi
         public static final int FLAG_SLIPPERY = 0x20000000;
 
         /**
@@ -2363,6 +2390,16 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
+
+        /**
+         * Flag to indicate that the window frame should be the requested frame adding the display
+         * cutout frame. This will only be applied if a specific size smaller than the parent frame
+         * is given, and the window is covering the display cutout. The extended frame will not be
+         * larger than the parent frame.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT = 0x00002000;
 
         /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
@@ -2739,7 +2776,7 @@ public interface WindowManager extends ViewManager {
          *
          * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
          * is ignored unless there is a focused view that returns {@code true} from
-         * {@link View#isInEditMode()} when the window is focused.</p>
+         * {@link View#onCheckIsTextEditor()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_VISIBLE = 4;
 
@@ -2749,7 +2786,7 @@ public interface WindowManager extends ViewManager {
          *
          * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
          * is ignored unless there is a focused view that returns {@code true} from
-         * {@link View#isInEditMode()} when the window is focused.</p>
+         * {@link View#onCheckIsTextEditor()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 5;
 
@@ -3071,16 +3108,18 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The preferred refresh rate for the window.
-         *
+         * <p>
          * This must be one of the supported refresh rates obtained for the display(s) the window
          * is on. The selected refresh rate will be applied to the display's default mode.
-         *
+         * <p>
+         * This should be used in favor of {@link LayoutParams#preferredDisplayModeId} for
+         * applications that want to specify the refresh rate, but do not want to specify a
+         * preference for any other displayMode properties (e.g., resolution).
+         * <p>
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          *
          * @see Display#getSupportedRefreshRates()
-         * @deprecated use {@link #preferredDisplayModeId} instead
          */
-        @Deprecated
         public float preferredRefreshRate;
 
         /**
@@ -3325,21 +3364,12 @@ public interface WindowManager extends ViewManager {
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 3;
 
         /**
-         * When this window has focus, disable touch pad pointer gesture processing.
-         * The window will receive raw position updates from the touch pad instead
-         * of pointer movements and synthetic touch events.
-         *
-         * @hide
-         */
-        public static final int INPUT_FEATURE_DISABLE_POINTER_GESTURES = 0x00000001;
-
-        /**
          * Does not construct an input channel for this window.  The channel will therefore
          * be incapable of receiving input.
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 0x00000002;
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 1 << 0;
 
         /**
          * When this window has focus, does not call user activity for all input events so
@@ -3352,28 +3382,43 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 1 << 1;
+
+        /**
+         * An input spy window. This window will receive all pointer events within its touchable
+         * area, but will not stop events from being sent to other windows below it in z-order.
+         * An input event will be dispatched to all spy windows above the top non-spy window at the
+         * event's coordinates.
+         *
+         * @hide
+         */
+        @RequiresPermission(permission.MONITOR_INPUT)
+        public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
+         * NOTE: These are not the same as {@link android.os.InputConfig} flags.
+         *
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
-            INPUT_FEATURE_DISABLE_POINTER_GESTURES,
-            INPUT_FEATURE_NO_INPUT_CHANNEL,
-            INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+        @IntDef(flag = true, prefix = {"INPUT_FEATURE_"}, value = {
+                INPUT_FEATURE_NO_INPUT_CHANNEL,
+                INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+                INPUT_FEATURE_SPY,
         })
-        public @interface InputFeatureFlags {}
+        public @interface InputFeatureFlags {
+        }
 
         /**
-         * Control special features of the input subsystem.
+         * Control a set of features of the input subsystem that are exposed to the app process.
          *
-         * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
-         * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
-         * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
+         * WARNING: Do NOT use {@link android.os.InputConfig} flags! This must be set to flag values
+         * included in {@link InputFeatureFlags}.
+         *
          * @hide
+         * @see InputFeatureFlags
          */
         @InputFeatureFlags
         @UnsupportedAppUsage
@@ -3557,11 +3602,13 @@ public interface WindowManager extends ViewManager {
 
         /**
          * If specified, the insets provided by this window will be our window frame minus the
-         * insets specified by providedInternalInsets.
+         * insets specified by providedInternalInsets for each type. This should not be used
+         * together with {@link WindowState#mGivenContentInsets}. If both of them are set, both will
+         * be applied.
          *
          * @hide
          */
-        public Insets providedInternalInsets = Insets.NONE;
+        public Insets[] providedInternalInsets;
 
         /**
          * If specified, the insets provided by this window for the IME will be our window frame
@@ -3569,7 +3616,18 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public Insets providedInternalImeInsets = Insets.NONE;
+        public Insets[] providedInternalImeInsets;
+
+        /**
+         * If specified, the frame that used to calculate relative {@link RoundedCorner} will be
+         * the window frame of this window minus the insets that this window provides.
+         *
+         * Task bar will draw fake rounded corners above itself, so we need this insets to calculate
+         * correct rounded corners for this window.
+         *
+         * @hide
+         */
+        public boolean insetsRoundedCornerFrame = false;
 
         /**
          * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
@@ -3944,8 +4002,19 @@ public interface WindowManager extends ViewManager {
             } else {
                 out.writeInt(0);
             }
-            providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
-            providedInternalImeInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            if (providedInternalInsets != null) {
+                out.writeInt(providedInternalInsets.length);
+                out.writeTypedArray(providedInternalInsets, 0 /* parcelableFlags */);
+            } else {
+                out.writeInt(0);
+            }
+            if (providedInternalImeInsets != null) {
+                out.writeInt(providedInternalImeInsets.length);
+                out.writeTypedArray(providedInternalImeInsets, 0 /* parcelableFlags */);
+            } else {
+                out.writeInt(0);
+            }
+            out.writeBoolean(insetsRoundedCornerFrame);
             if (paramsForRotation != null) {
                 checkNonRecursiveParams();
                 out.writeInt(paramsForRotation.length);
@@ -4024,8 +4093,17 @@ public interface WindowManager extends ViewManager {
                 providesInsetsTypes = new int[insetsTypesLength];
                 in.readIntArray(providesInsetsTypes);
             }
-            providedInternalInsets = Insets.CREATOR.createFromParcel(in);
-            providedInternalImeInsets = Insets.CREATOR.createFromParcel(in);
+            int providedInternalInsetsLength = in.readInt();
+            if (providedInternalInsetsLength > 0) {
+                providedInternalInsets = new Insets[providedInternalInsetsLength];
+                in.readTypedArray(providedInternalInsets, Insets.CREATOR);
+            }
+            int providedInternalImeInsetsLength = in.readInt();
+            if (providedInternalImeInsetsLength > 0) {
+                providedInternalImeInsets = new Insets[providedInternalImeInsetsLength];
+                in.readTypedArray(providedInternalImeInsets, Insets.CREATOR);
+            }
+            insetsRoundedCornerFrame = in.readBoolean();
             int paramsForRotationLength = in.readInt();
             if (paramsForRotationLength > 0) {
                 paramsForRotation = new LayoutParams[paramsForRotationLength];
@@ -4327,13 +4405,18 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!providedInternalInsets.equals(o.providedInternalInsets)) {
+            if (!Arrays.equals(providedInternalInsets, o.providedInternalInsets)) {
                 providedInternalInsets = o.providedInternalInsets;
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!providedInternalImeInsets.equals(o.providedInternalImeInsets)) {
+            if (!Arrays.equals(providedInternalImeInsets, o.providedInternalImeInsets)) {
                 providedInternalImeInsets = o.providedInternalImeInsets;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (insetsRoundedCornerFrame != o.insetsRoundedCornerFrame) {
+                insetsRoundedCornerFrame = o.insetsRoundedCornerFrame;
                 changes |= LAYOUT_CHANGED;
             }
 
@@ -4458,7 +4541,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(hasSystemUiListeners);
             }
             if (inputFeatures != 0) {
-                sb.append(" if=").append(inputFeatureToString(inputFeatures));
+                sb.append(" if=").append(inputFeaturesToString(inputFeatures));
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
@@ -4538,13 +4621,25 @@ public interface WindowManager extends ViewManager {
                     sb.append(InsetsState.typeToString(providesInsetsTypes[i]));
                 }
             }
-            if (!providedInternalInsets.equals(Insets.NONE)) {
+            if (providedInternalInsets != null) {
+                sb.append(System.lineSeparator());
                 sb.append(" providedInternalInsets=");
-                sb.append(providedInternalInsets);
+                for (int i = 0; i < providedInternalInsets.length; ++i) {
+                    if (i > 0) sb.append(' ');
+                    sb.append((providedInternalInsets[i]));
+                }
             }
-            if (!providedInternalImeInsets.equals(Insets.NONE)) {
+            if (providedInternalImeInsets != null) {
+                sb.append(System.lineSeparator());
                 sb.append(" providedInternalImeInsets=");
-                sb.append(providedInternalImeInsets);
+                for (int i = 0; i < providedInternalImeInsets.length; ++i) {
+                    if (i > 0) sb.append(' ');
+                    sb.append((providedInternalImeInsets[i]));
+                }
+            }
+            if (insetsRoundedCornerFrame) {
+                sb.append(" insetsRoundedCornerFrame=");
+                sb.append(insetsRoundedCornerFrame);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());
@@ -4756,17 +4851,24 @@ public interface WindowManager extends ViewManager {
             }
         }
 
-        private static String inputFeatureToString(int inputFeature) {
-            switch (inputFeature) {
-                case INPUT_FEATURE_DISABLE_POINTER_GESTURES:
-                    return "DISABLE_POINTER_GESTURES";
-                case INPUT_FEATURE_NO_INPUT_CHANNEL:
-                    return "NO_INPUT_CHANNEL";
-                case INPUT_FEATURE_DISABLE_USER_ACTIVITY:
-                    return "DISABLE_USER_ACTIVITY";
-                default:
-                    return Integer.toString(inputFeature);
+        private static String inputFeaturesToString(int inputFeatures) {
+            final List<String> features = new ArrayList<>();
+            if ((inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_NO_INPUT_CHANNEL;
+                features.add("INPUT_FEATURE_NO_INPUT_CHANNEL");
             }
+            if ((inputFeatures & INPUT_FEATURE_DISABLE_USER_ACTIVITY) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+                features.add("INPUT_FEATURE_DISABLE_USER_ACTIVITY");
+            }
+            if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_SPY;
+                features.add("INPUT_FEATURE_SPY");
+            }
+            if (inputFeatures != 0) {
+                features.add(Integer.toHexString(inputFeatures));
+            }
+            return String.join(" | ", features);
         }
 
         /**
@@ -4799,5 +4901,52 @@ public interface WindowManager extends ViewManager {
     @TestApi
     default boolean isTaskSnapshotSupported() {
         return false;
+    }
+
+    /**
+     * Registers the frame rate per second count callback for one given task ID.
+     * Each callback can only register for receiving FPS callback for one task id until unregister
+     * is called. If there's no task associated with the given task id,
+     * {@link IllegalArgumentException} will be thrown. Registered callbacks should always be
+     * unregistered via {@link #unregisterTaskFpsCallback(TaskFpsCallback)}
+     * even when the task id has been destroyed.
+     *
+     * @param taskId task id of the task.
+     * @param executor Executor to execute the callback.
+     * @param callback callback to be registered.
+     *
+     * @hide
+     */
+    @SystemApi
+    default void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
+            @NonNull Executor executor,
+            @NonNull TaskFpsCallback callback) {}
+
+    /**
+     * Unregisters the frame rate per second count callback which was registered with
+     * {@link #registerTaskFpsCallback(Executor, int, TaskFpsCallback)}.
+     *
+     * @param callback callback to be unregistered.
+     *
+     * @hide
+     */
+    @SystemApi
+    default void unregisterTaskFpsCallback(@NonNull TaskFpsCallback callback) {}
+
+    /**
+     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
+     *
+     * @param taskId to take the snapshot of
+     *
+     * @return a bitmap of the screenshot or {@code null} if it was unable to screenshot. The
+     * screenshot can fail if the taskId is invalid or if there's no SurfaceControl associated with
+     * that task.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    default Bitmap snapshotTaskForRecents(@IntRange(from = 0) int taskId) {
+        return null;
     }
 }

@@ -781,10 +781,11 @@ public final class StreamConfigurationMap {
      * <li>The fpsMin and fpsMax will be a multiple 30fps.</li>
      * <li>The fpsMin will be no less than 30fps, the fpsMax will be no less than 120fps.</li>
      * <li>At least one range will be a fixed FPS range where fpsMin == fpsMax.</li>
-     * <li>For each fixed FPS range, there will be one corresponding variable FPS range [30,
-     * fps_max]. These kinds of FPS ranges are suitable for preview-only use cases where the
-     * application doesn't want the camera device always produce higher frame rate than the display
-     * refresh rate.</li>
+     * <li>For each fixed FPS range, there will be one corresponding variable FPS range
+     * [30, fps_max] or [60, fps_max]. These kinds of FPS ranges are suitable for preview-only
+     * use cases where the application doesn't want the camera device always produce higher frame
+     * rate than the display refresh rate. Both 30fps and 60fps preview rate will not be
+     * supported for the same recording rate.</li>
      * </p>
      *
      * @return an array of supported high speed video recording FPS ranges The upper bound of
@@ -1018,7 +1019,7 @@ public final class StreamConfigurationMap {
      * <p>The following formats will never have a stall duration:
      * <ul>
      * <li>{@link ImageFormat#YUV_420_888 YUV_420_888}
-     * <li>{@link #isOutputSupportedFor(Class) Implementation-Defined}
+     * <li>{@link ImageFormat#PRIVATE PRIVATE}
      * </ul></p>
      *
      * <p>

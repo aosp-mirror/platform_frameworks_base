@@ -1,4 +1,4 @@
-per-file Android.bp = file:platform/build/soong:/OWNERS
+per-file Android.bp = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
 
 # art-team@ manages the system server profile
 per-file art-profile* = calin@google.com, ngeoffray@google.com, vmarko@google.com

@@ -278,6 +278,12 @@ public class DozeTriggersTest extends SysuiTestCase {
         verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY), eq(major), eq(minor));
     }
 
+    @Test
+    public void testDestroy() {
+        mTriggers.destroy();
+        verify(mProximityCheck).destroy();
+    }
+
     private void waitForSensorManager() {
         mExecutor.runAllReady();
     }

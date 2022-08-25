@@ -185,9 +185,9 @@ public final class AvailableNetworkInfo implements Parcelable {
         mMccMncs = new ArrayList<>();
         in.readStringList(mMccMncs);
         mBands = new ArrayList<>();
-        in.readList(mBands, Integer.class.getClassLoader());
+        in.readList(mBands, Integer.class.getClassLoader(), java.lang.Integer.class);
         mRadioAccessSpecifiers = new ArrayList<>();
-        in.readList(mRadioAccessSpecifiers, RadioAccessSpecifier.class.getClassLoader());
+        in.readList(mRadioAccessSpecifiers, RadioAccessSpecifier.class.getClassLoader(), android.telephony.RadioAccessSpecifier.class);
     }
 
     public AvailableNetworkInfo(int subId, int priority, @NonNull List<String> mccMncs,

@@ -94,7 +94,7 @@ public class CutoutSpecification {
     private final Rect mTopBound;
     private final Rect mRightBound;
     private final Rect mBottomBound;
-    private final Insets mInsets;
+    private Insets mInsets;
 
     private CutoutSpecification(@NonNull Parser parser) {
         mPath = parser.mPath;
@@ -104,6 +104,8 @@ public class CutoutSpecification {
         mBottomBound = parser.mBottomBound;
         mInsets = parser.mInsets;
 
+        applyPhysicalPixelDisplaySizeRatio(parser.mPhysicalPixelDisplaySizeRatio);
+
         if (DEBUG) {
             Log.d(TAG, String.format(Locale.ENGLISH,
                     "left cutout = %s, top cutout = %s, right cutout = %s, bottom cutout = %s",
@@ -112,6 +114,38 @@ public class CutoutSpecification {
                     mRightBound != null ? mRightBound.toString() : "",
                     mBottomBound != null ? mBottomBound.toString() : ""));
         }
+    }
+
+    private void applyPhysicalPixelDisplaySizeRatio(float physicalPixelDisplaySizeRatio) {
+        if (physicalPixelDisplaySizeRatio == 1f) {
+            return;
+        }
+
+        if (mPath != null && !mPath.isEmpty()) {
+            final Matrix matrix = new Matrix();
+            matrix.postScale(physicalPixelDisplaySizeRatio, physicalPixelDisplaySizeRatio);
+            mPath.transform(matrix);
+        }
+
+        scaleBounds(mLeftBound, physicalPixelDisplaySizeRatio);
+        scaleBounds(mTopBound, physicalPixelDisplaySizeRatio);
+        scaleBounds(mRightBound, physicalPixelDisplaySizeRatio);
+        scaleBounds(mBottomBound, physicalPixelDisplaySizeRatio);
+        mInsets = scaleInsets(mInsets, physicalPixelDisplaySizeRatio);
+    }
+
+    private void scaleBounds(Rect r, float ratio) {
+        if (r != null && !r.isEmpty()) {
+            r.scale(ratio);
+        }
+    }
+
+    private Insets scaleInsets(Insets insets, float ratio) {
+        return Insets.of(
+                (int) (insets.left * ratio + 0.5f),
+                (int) (insets.top * ratio + 0.5f),
+                (int) (insets.right * ratio + 0.5f),
+                (int) (insets.bottom * ratio + 0.5f));
     }
 
     @VisibleForTesting(visibility = PACKAGE)
@@ -168,9 +202,10 @@ public class CutoutSpecification {
     @VisibleForTesting(visibility = PACKAGE)
     public static class Parser {
         private final boolean mIsShortEdgeOnTop;
-        private final float mDensity;
-        private final int mDisplayWidth;
-        private final int mDisplayHeight;
+        private final float mStableDensity;
+        private final int mPhysicalDisplayWidth;
+        private final int mPhysicalDisplayHeight;
+        private final float mPhysicalPixelDisplaySizeRatio;
         private final Matrix mMatrix;
         private Insets mInsets;
         private int mSafeInsetLeft;
@@ -202,19 +237,27 @@ public class CutoutSpecification {
         private boolean mIsTouchShortEdgeEnd;
         private boolean mIsCloserToStartSide;
 
+        @VisibleForTesting(visibility = PACKAGE)
+        public Parser(float stableDensity, int physicalDisplayWidth,
+                int physicalDisplayHeight) {
+            this(stableDensity, physicalDisplayWidth, physicalDisplayHeight, 1f);
+        }
+
         /**
          * The constructor of the CutoutSpecification parser to parse the specification of cutout.
-         * @param density the display density.
-         * @param displayWidth the display width.
-         * @param displayHeight the display height.
+         * @param stableDensity the display density.
+         * @param physicalDisplayWidth the display width.
+         * @param physicalDisplayHeight the display height.
+         * @param physicalPixelDisplaySizeRatio the display size ratio based on stable display size.
          */
-        @VisibleForTesting(visibility = PACKAGE)
-        public Parser(float density, int displayWidth, int displayHeight) {
-            mDensity = density;
-            mDisplayWidth = displayWidth;
-            mDisplayHeight = displayHeight;
+        Parser(float stableDensity, int physicalDisplayWidth, int physicalDisplayHeight,
+                float physicalPixelDisplaySizeRatio) {
+            mStableDensity = stableDensity;
+            mPhysicalDisplayWidth = physicalDisplayWidth;
+            mPhysicalDisplayHeight = physicalDisplayHeight;
+            mPhysicalPixelDisplaySizeRatio = physicalPixelDisplaySizeRatio;
             mMatrix = new Matrix();
-            mIsShortEdgeOnTop = mDisplayWidth < mDisplayHeight;
+            mIsShortEdgeOnTop = mPhysicalDisplayWidth < mPhysicalDisplayHeight;
         }
 
         private void computeBoundsRectAndAddToRegion(Path p, Region inoutRegion, Rect inoutRect) {
@@ -239,38 +282,38 @@ public class CutoutSpecification {
         private void translateMatrix() {
             final float offsetX;
             if (mPositionFromRight) {
-                offsetX = mDisplayWidth;
+                offsetX = mPhysicalDisplayWidth;
             } else if (mPositionFromLeft) {
                 offsetX = 0;
             } else {
-                offsetX = mDisplayWidth / 2f;
+                offsetX = mPhysicalDisplayWidth / 2f;
             }
 
             final float offsetY;
             if (mPositionFromBottom) {
-                offsetY = mDisplayHeight;
+                offsetY = mPhysicalDisplayHeight;
             } else if (mPositionFromCenterVertical) {
-                offsetY = mDisplayHeight / 2f;
+                offsetY = mPhysicalDisplayHeight / 2f;
             } else {
                 offsetY = 0;
             }
 
             mMatrix.reset();
             if (mInDp) {
-                mMatrix.postScale(mDensity, mDensity);
+                mMatrix.postScale(mStableDensity, mStableDensity);
             }
             mMatrix.postTranslate(offsetX, offsetY);
         }
 
         private int computeSafeInsets(int gravity, Rect rect) {
-            if (gravity == LEFT && rect.right > 0 && rect.right < mDisplayWidth) {
+            if (gravity == LEFT && rect.right > 0 && rect.right < mPhysicalDisplayWidth) {
                 return rect.right;
-            } else if (gravity == TOP && rect.bottom > 0 && rect.bottom < mDisplayHeight) {
+            } else if (gravity == TOP && rect.bottom > 0 && rect.bottom < mPhysicalDisplayHeight) {
                 return rect.bottom;
-            } else if (gravity == RIGHT && rect.left > 0 && rect.left < mDisplayWidth) {
-                return mDisplayWidth - rect.left;
-            } else if (gravity == BOTTOM && rect.top > 0 && rect.top < mDisplayHeight) {
-                return mDisplayHeight - rect.top;
+            } else if (gravity == RIGHT && rect.left > 0 && rect.left < mPhysicalDisplayWidth) {
+                return mPhysicalDisplayWidth - rect.left;
+            } else if (gravity == BOTTOM && rect.top > 0 && rect.top < mPhysicalDisplayHeight) {
+                return mPhysicalDisplayHeight - rect.top;
             }
             return 0;
         }
@@ -373,12 +416,12 @@ public class CutoutSpecification {
 
             if (mIsShortEdgeOnTop) {
                 mIsTouchShortEdgeStart = mTmpRect.top <= 0;
-                mIsTouchShortEdgeEnd = mTmpRect.bottom >= mDisplayHeight;
-                mIsCloserToStartSide = mTmpRect.centerY() < mDisplayHeight / 2;
+                mIsTouchShortEdgeEnd = mTmpRect.bottom >= mPhysicalDisplayHeight;
+                mIsCloserToStartSide = mTmpRect.centerY() < mPhysicalDisplayHeight / 2;
             } else {
                 mIsTouchShortEdgeStart = mTmpRect.left <= 0;
-                mIsTouchShortEdgeEnd = mTmpRect.right >= mDisplayWidth;
-                mIsCloserToStartSide = mTmpRect.centerX() < mDisplayWidth / 2;
+                mIsTouchShortEdgeEnd = mTmpRect.right >= mPhysicalDisplayWidth;
+                mIsCloserToStartSide = mTmpRect.centerX() < mPhysicalDisplayWidth / 2;
             }
 
             setEdgeCutout(newPath);
@@ -476,7 +519,6 @@ public class CutoutSpecification {
             }
 
             parseSpecWithoutDp(spec);
-
             mInsets = Insets.of(mSafeInsetLeft, mSafeInsetTop, mSafeInsetRight, mSafeInsetBottom);
             return new CutoutSpecification(this);
         }

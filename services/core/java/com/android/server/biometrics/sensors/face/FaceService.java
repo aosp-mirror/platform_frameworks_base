@@ -57,6 +57,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -645,7 +646,7 @@ public class FaceService extends SystemService {
                 try {
                     final SensorProps[] props = face.getSensorProps();
                     final FaceProvider provider = new FaceProvider(getContext(), props, instance,
-                            mLockoutResetDispatcher);
+                            mLockoutResetDispatcher, BiometricContext.getInstance(getContext()));
                     mServiceProviders.add(provider);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);

@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -330,6 +331,11 @@ class UiAutomationManager {
         @Override
         public boolean switchToInputMethod(String imeId) {
             return false;
+        }
+
+        @Override
+        public int setInputMethodEnabled(String imeId, boolean enabled) {
+            return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
         }
 
         @Override

@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
+import com.android.systemui.util.Compile
 import com.android.systemui.util.traceSection
 
 /**
@@ -32,42 +35,75 @@ import com.android.systemui.util.traceSection
  * need to present in the shade, notably the section headers.
  */
 class NodeSpecBuilder(
-    private val viewBarn: NotifViewBarn
+    private val mediaContainerController: MediaContainerController,
+    private val sectionsFeatureManager: NotificationSectionsFeatureManager,
+    private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
+    private val viewBarn: NotifViewBarn,
+    private val logger: NodeSpecBuilderLogger
 ) {
+    private var lastSections = setOf<NotifSection?>()
+
     fun buildNodeSpec(
         rootController: NodeController,
         notifList: List<ListEntry>
     ): NodeSpec = traceSection("NodeSpecBuilder.buildNodeSpec") {
         val root = NodeSpecImpl(null, rootController)
+
+        // The media container should be added as the first child of the root node
+        // TODO: Perhaps the node spec building process should be more of a pipeline of its own?
+        if (sectionsFeatureManager.isMediaControlsEnabled()) {
+            root.children.add(NodeSpecImpl(root, mediaContainerController))
+        }
+
         var currentSection: NotifSection? = null
         val prevSections = mutableSetOf<NotifSection?>()
+        val showHeaders = sectionHeaderVisibilityProvider.sectionHeadersVisible
+        val sectionOrder = mutableListOf<NotifSection?>()
+        val sectionHeaders = mutableMapOf<NotifSection?, NodeController?>()
+        val sectionCounts = mutableMapOf<NotifSection?, Int>()
 
         for (entry in notifList) {
             val section = entry.section!!
-
             if (prevSections.contains(section)) {
                 throw java.lang.RuntimeException("Section ${section.label} has been duplicated")
             }
 
             // If this notif begins a new section, first add the section's header view
             if (section != currentSection) {
-                section.headerController?.let { headerController ->
-                    root.children.add(NodeSpecImpl(root, headerController))
+                if (section.headerController != currentSection?.headerController && showHeaders) {
+                    section.headerController?.let { headerController ->
+                        root.children.add(NodeSpecImpl(root, headerController))
+                        if (Compile.IS_DEBUG) {
+                            sectionHeaders[section] = headerController
+                        }
+                    }
                 }
                 prevSections.add(currentSection)
                 currentSection = section
+                if (Compile.IS_DEBUG) {
+                    sectionOrder.add(section)
+                }
             }
 
             // Finally, add the actual notif node!
             root.children.add(buildNotifNode(root, entry))
+            if (Compile.IS_DEBUG) {
+                sectionCounts[section] = sectionCounts.getOrDefault(section, 0) + 1
+            }
         }
 
-        return root
+        if (Compile.IS_DEBUG) {
+            logger.logBuildNodeSpec(lastSections, sectionHeaders, sectionCounts, sectionOrder)
+            lastSections = sectionCounts.keys
+        }
+
+        return@traceSection root
     }
 
     private fun buildNotifNode(parent: NodeSpec, entry: ListEntry): NodeSpec = when (entry) {
-        is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireView(entry))
-        is GroupEntry -> NodeSpecImpl(parent, viewBarn.requireView(checkNotNull(entry.summary)))
+        is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireNodeController(entry))
+        is GroupEntry ->
+            NodeSpecImpl(parent, viewBarn.requireNodeController(checkNotNull(entry.summary)))
                 .apply { entry.children.forEach { children.add(buildNotifNode(this, it)) } }
         else -> throw RuntimeException("Unexpected entry: $entry")
     }

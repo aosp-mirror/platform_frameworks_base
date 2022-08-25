@@ -217,7 +217,8 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_CAPTION_BAR).setVisible(true);
 
         Insets visibleInsets = mState.calculateVisibleInsets(
-                new Rect(0, 0, 100, 400), SOFT_INPUT_ADJUST_NOTHING);
+                new Rect(0, 0, 100, 400), TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                SOFT_INPUT_ADJUST_NOTHING, 0 /* windowFlags */);
         assertEquals(Insets.of(0, 300, 0, 0), visibleInsets);
     }
 
@@ -227,7 +228,8 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_CAPTION_BAR).setVisible(true);
 
         Insets visibleInsets = mState.calculateVisibleInsets(
-                new Rect(0, 0, 150, 400), SOFT_INPUT_ADJUST_NOTHING);
+                new Rect(0, 0, 150, 400), TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                SOFT_INPUT_ADJUST_NOTHING, 0 /* windowFlags */);
         assertEquals(Insets.of(0, 300, 0, 0), visibleInsets);
     }
 
@@ -414,7 +416,8 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_BOTTOM_GESTURES).setFrame(new Rect(0, 100, 100, 300));
         mState.getSource(ITYPE_BOTTOM_GESTURES).setVisible(true);
         Insets visibleInsets = mState.calculateVisibleInsets(
-                new Rect(0, 0, 100, 300), SOFT_INPUT_ADJUST_PAN);
+                new Rect(0, 0, 100, 300), TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                SOFT_INPUT_ADJUST_PAN, 0 /* windowFlags */);
         assertEquals(Insets.of(0, 100, 0, 100), visibleInsets);
     }
 
@@ -429,8 +432,25 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_BOTTOM_GESTURES).setFrame(new Rect(0, 100, 100, 300));
         mState.getSource(ITYPE_BOTTOM_GESTURES).setVisible(true);
         Insets visibleInsets = mState.calculateVisibleInsets(
-                new Rect(0, 0, 100, 300), SOFT_INPUT_ADJUST_NOTHING);
+                new Rect(0, 0, 100, 300), TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                SOFT_INPUT_ADJUST_NOTHING, 0 /* windowFlags */);
         assertEquals(Insets.of(0, 100, 0, 0), visibleInsets);
+    }
+
+    @Test
+    public void testCalculateVisibleInsets_layoutNoLimits() {
+        mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+        mState.getSource(ITYPE_STATUS_BAR).setVisible(true);
+        mState.getSource(ITYPE_IME).setFrame(new Rect(0, 200, 100, 300));
+        mState.getSource(ITYPE_IME).setVisible(true);
+
+        // Make sure bottom gestures are ignored
+        mState.getSource(ITYPE_BOTTOM_GESTURES).setFrame(new Rect(0, 100, 100, 300));
+        mState.getSource(ITYPE_BOTTOM_GESTURES).setVisible(true);
+        Insets visibleInsets = mState.calculateVisibleInsets(
+                new Rect(0, 0, 100, 300), TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                SOFT_INPUT_ADJUST_PAN, FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(Insets.NONE, visibleInsets);
     }
 
     @Test

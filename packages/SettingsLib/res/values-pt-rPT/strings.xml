@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Não é possível verificar redes"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Nenhum/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Nenhuma"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Nenhum/Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise de 192 bits"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Guardada"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Desligada"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Desativado"</string>
@@ -82,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Ativo"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Ativo, apenas esquerdo"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Ativo, apenas direito"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Ativo, esquerdo e direito"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Áudio de multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Chamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferência do ficheiro"</string>
@@ -95,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparelhos auditivos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Ligado a aparelhos auditivos"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Ligado a LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ligado a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ligado ao áudio de multimédia"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Ligado ao áudio do telefone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Ligado ao servidor de transferência de ficheiros"</string>
@@ -131,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Auricular"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Periférico de entrada"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"A sincronizar aparelho auditivo do lado esquerdo…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"A sincronizar aparelho auditivo do lado direito…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Lado esquerdo – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Lado direito – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi desativado."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi desligado."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Uma barra de Wi-Fi."</string>
@@ -153,13 +179,12 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Ligação ponto a ponto"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Partilha de Internet"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Todas as apl. de trabalho"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Convidado"</string>
     <string name="unknown" msgid="3544487229740637809">"Desconhecido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Utilizador: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Algumas predefinições definidas"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nenhuma predefinição definida"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Definições de texto para voz"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de síntese de voz"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de conversão de texto em voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Taxa de voz"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidade a que o texto é falado"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tonalidade"</string>
@@ -169,12 +194,12 @@
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Idioma não selecionado"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Define a voz do idioma específico para o texto lido"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Ouvir um exemplo"</string>
-    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de síntese de voz"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de conversão de texto em voz"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalar dados de voz"</string>
-    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a síntese de voz"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a conversão de texto em voz"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Este motor de síntese de discurso pode permitir a recolha de todo o texto que será falado, incluindo dados pessoais, como palavras-passe e números de cartão de crédito. O serviço é fornecido com o motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Permitir a utilização deste motor de síntese de discurso?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de síntese de voz."</string>
-    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de síntese de voz."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de conversão de texto em voz."</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de conversão de texto em voz."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado do idioma predefinido"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> é totalmente suportado"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> necessita de ligação de rede"</string>
@@ -255,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificação de display sem fios"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ativar o registo verboso de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Controlo da procura de Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Seleção aleatória do MAC não persistente Wi-Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Seleção aleatória do MAC não persistente Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dados móveis sempre ativos"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware para ligação (à Internet) via telemóvel"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sem nomes"</string>
@@ -287,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo rápido da bateria e melhora o desempenho da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando este modo estiver ativado, o endereço MAC deste dispositivo pode mudar sempre que o mesmo estabelece ligação a uma rede que tenha a seleção aleatória do MAC ativada."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando este modo estiver ativado, o endereço MAC deste dispositivo pode mudar sempre que o mesmo estabelece ligação a uma rede que tenha a seleção aleatória do MAC ativada."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Acesso limitado"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Acesso ilimitado"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos da memória intermédia do registo"</string>
@@ -423,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalia (vermelho-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (azul-amarelo)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correção da cor"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Ajuste a visualização das cores no dispositivo. Isto pode ser útil quando pretender:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ver cores com maior precisão&lt;/li&gt; &lt;li&gt;&amp;nbsp;Remover cores para melhorar a sua concentração&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"A correção da cor pode ser útil quando quiser:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ver cores com maior precisão&lt;/li&gt; &lt;li&gt;&amp;nbsp;Remover cores para ajudar a concentrar-se&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Substituído por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Resta(m) cerca de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -460,7 +485,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está a carregar"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ligado, não está a carregar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Totalmente carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlado pelo gestor"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlado por uma definição restrita"</string>
     <string name="disabled" msgid="8017887509554714950">"Desativada"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorizada"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Não autorizada"</string>
@@ -493,14 +520,12 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registado"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é aleatório."</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d dispositivos ligados</item>
-      <item quantity="one">%1$d dispositivo ligado</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligados}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="done" msgid="381184316122520313">"Concluir"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir a definição de alarmes e lembretes"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes e lembretes"</string>
@@ -519,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Até desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altifalante do telemóvel"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telemóvel"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telemóvel"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema ao ligar. Desligue e volte a ligar o dispositivo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de áudio com fios"</string>
@@ -559,18 +585,26 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Definir bloqueio"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Mudar para <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"A criar novo utilizador…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"A criar novo convidado…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Falha ao criar um novo utilizador"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Falha ao criar um novo convidado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Alcunha"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Adicionar utilizador"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Repor convidado"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Convidado"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Pretende repor o convidado?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover o convidado?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Repor"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"A repor o convidado…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecionar foto"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Demasiadas tentativas incorretas. Os dados deste dispositivo vão ser eliminados."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Demasiadas tentativas incorretas. Este utilizador vai ser eliminado."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Demasiadas tentativas incorretas. Este perfil de trabalho e os respetivos dados vão ser eliminados."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Ignorar"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Predefinição do dispositivo"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desativada"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ativada"</string>
@@ -605,11 +639,24 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet desligada."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sem chamadas."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Leia o código QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centre o código QR abaixo"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não é um formato válido"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Hora"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Data"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Meteorologia"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Qualidade do ar"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Info. de transmissão"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Escolha uma imagem do perfil"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Ícone do utilizador predefinido"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Escolha um esquema de teclado"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predefinição"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ative o ecrã"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir a ativação do ecrã"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permita que uma app ative o ecrã. Se a autorização for concedida, a app pode ativar o ecrã em qualquer altura sem a sua intenção explícita."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se transmitir a app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou alterar a saída, a sua transmissão atual é interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmita a app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Altere a saída"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos para voltar preditivos"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ative as animações do sistema para gestos para voltar preditivos."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta definição ativa animações do sistema para a animação de gestos preditivos. Requer a definição do atributo enableOnBackInvokedCallback por app como verdadeiro no ficheiro de manifesto."</string>
 </resources>

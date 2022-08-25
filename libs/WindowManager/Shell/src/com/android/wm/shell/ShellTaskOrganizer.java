@@ -98,15 +98,21 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         default void onTaskInfoChanged(RunningTaskInfo taskInfo) {}
         default void onTaskVanished(RunningTaskInfo taskInfo) {}
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
-        /** Whether this task listener supports  compat UI. */
+        /** Whether this task listener supports compat UI. */
         default boolean supportCompatUI() {
             // All TaskListeners should support compat UI except PIP.
             return true;
         }
-        /** Attaches the a child window surface to the task surface. */
+        /** Attaches a child window surface to the task surface. */
         default void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
             throw new IllegalStateException(
                     "This task listener doesn't support child surface attachment.");
+        }
+        /** Reparents a child window surface to the task surface. */
+        default void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+                SurfaceControl.Transaction t) {
+            throw new IllegalStateException(
+                    "This task listener doesn't support child surface reparent.");
         }
         default void dump(@NonNull PrintWriter pw, String prefix) {};
     }
@@ -159,8 +165,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private StartingWindowController mStartingWindow;
 
     /**
-     * In charge of showing compat UI. Can be {@code null} if device doesn't support size
-     * compat.
+     * In charge of showing compat UI. Can be {@code null} if the device doesn't support size
+     * compat or if this isn't the main {@link ShellTaskOrganizer}.
+     *
+     * <p>NOTE: only the main {@link ShellTaskOrganizer} should have a {@link CompatUIController},
+     * and register itself as a {@link CompatUIController.CompatUICallback}. Subclasses should be
+     * initialized with a {@code null} {@link CompatUIController}.
      */
     @Nullable
     private final CompatUIController mCompatUI;
@@ -190,8 +200,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @VisibleForTesting
-    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable CompatUIController compatUI,
+    protected ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
+            ShellExecutor mainExecutor, Context context, @Nullable CompatUIController compatUI,
             Optional<RecentTasksController> recentTasks) {
         super(taskOrganizerController, mainExecutor);
         mCompatUI = compatUI;
@@ -458,7 +468,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 newListener.onTaskInfoChanged(taskInfo);
             }
             notifyLocusVisibilityIfNeeded(taskInfo);
-            if (updated || !taskInfo.equalsForSizeCompat(data.getTaskInfo())) {
+            if (updated || !taskInfo.equalsForCompatUi(data.getTaskInfo())) {
                 // Notify the compat UI if the listener or task info changed.
                 notifyCompatUI(taskInfo, newListener);
             }
@@ -607,6 +617,36 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
     }
 
+    @Override
+    public void onCameraControlStateUpdated(
+            int taskId, @TaskInfo.CameraCompatControlState int state) {
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        updateCameraCompatControlState(info.getTaskInfo().token, state);
+    }
+
+    /** Reparents a child window surface to the task surface. */
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        final TaskListener taskListener;
+        synchronized (mLock) {
+            taskListener = mTasks.contains(taskId)
+                    ? getTaskListener(mTasks.get(taskId).getTaskInfo())
+                    : null;
+        }
+        if (taskListener == null) {
+            ProtoLog.w(WM_SHELL_TASK_ORG, "Failed to find Task to reparent surface taskId=%d",
+                    taskId);
+            return;
+        }
+        taskListener.reparentChildSurfaceToTask(taskId, sc, t);
+    }
+
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
             int event) {
         ActivityInfo topActivityInfo = info.getTaskInfo().topActivityInfo;
@@ -633,14 +673,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // The task is vanished or doesn't support compat UI, notify to remove compat UI
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
-                || !taskInfo.topActivityInSizeCompat || !taskInfo.isVisible) {
-            mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                    null /* taskConfig */, null /* taskListener */);
+                || !taskInfo.hasCompatUI() || !taskInfo.isVisible) {
+            mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
             return;
         }
-
-        mCompatUI.onCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                taskInfo.configuration, taskListener);
+        mCompatUI.onCompatInfoChanged(taskInfo, taskListener);
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {

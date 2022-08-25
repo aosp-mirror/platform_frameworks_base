@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Kas soovite selle rakenduse desinstallida?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Kas soovite selle rakenduse "<b>"kõikide"</b>" kasutajate kontodelt desinstallida? Rakendus ja selle andmed eemaldatakse "<b>"kõikide"</b>" seadme kasutajate kontodelt."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Kas soovite selle rakenduse kasutaja <xliff:g id="USERNAME">%1$s</xliff:g> kontolt desinstallida?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Kas soovite selle rakenduse oma tööprofiililt desinstallida?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Kas asendada see rakendus tehaseversiooniga? Kõik andmed eemaldatakse."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Kas asendada see rakendus tehaseversiooniga? Kõik andmed eemaldatakse. See mõjutab kõiki seadme kasutajaid, sh neid, kellel on tööprofiilid."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Säilita rakenduse andmete hulk <xliff:g id="SIZE">%1$s</xliff:g>."</string>
