@@ -147,8 +147,9 @@ public class LocaleManagerService extends SystemService {
     private final class LocaleManagerBinderService extends ILocaleManager.Stub {
         @Override
         public void setApplicationLocales(@NonNull String appPackageName, @UserIdInt int userId,
-                @NonNull LocaleList locales) throws RemoteException {
-            LocaleManagerService.this.setApplicationLocales(appPackageName, userId, locales);
+                @NonNull LocaleList locales, boolean fromDelegate) throws RemoteException {
+            LocaleManagerService.this.setApplicationLocales(appPackageName, userId, locales,
+                    fromDelegate);
         }
 
         @Override
@@ -178,7 +179,8 @@ public class LocaleManagerService extends SystemService {
      * Sets the current UI locales for a specified app.
      */
     public void setApplicationLocales(@NonNull String appPackageName, @UserIdInt int userId,
-            @NonNull LocaleList locales) throws RemoteException, IllegalArgumentException {
+            @NonNull LocaleList locales, boolean fromDelegate)
+            throws RemoteException, IllegalArgumentException {
         AppLocaleChangedAtomRecord atomRecordForMetrics = new
                 AppLocaleChangedAtomRecord(Binder.getCallingUid());
         try {
@@ -203,6 +205,8 @@ public class LocaleManagerService extends SystemService {
                 enforceChangeConfigurationPermission(atomRecordForMetrics);
             }
 
+            mBackupHelper.persistLocalesModificationInfo(userId, appPackageName, fromDelegate,
+                    locales.isEmpty());
             final long token = Binder.clearCallingIdentity();
             try {
                 setApplicationLocalesUnchecked(appPackageName, userId, locales,

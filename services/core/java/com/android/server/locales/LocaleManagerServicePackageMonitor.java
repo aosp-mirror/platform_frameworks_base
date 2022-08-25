@@ -48,12 +48,12 @@ final class LocaleManagerServicePackageMonitor extends PackageMonitor {
 
     @Override
     public void onPackageDataCleared(String packageName, int uid) {
-        mBackupHelper.onPackageDataCleared();
+        mBackupHelper.onPackageDataCleared(packageName, uid);
     }
 
     @Override
     public void onPackageRemoved(String packageName, int uid) {
-        mBackupHelper.onPackageRemoved();
+        mBackupHelper.onPackageRemoved(packageName, uid);
     }
 
     @Override
