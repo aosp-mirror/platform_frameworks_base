@@ -30,9 +30,9 @@ final class RampOffVibratorStep extends AbstractVibratorStep {
 
     RampOffVibratorStep(VibrationStepConductor conductor, long startTime, float amplitudeTarget,
             float amplitudeDelta, VibratorController controller,
-            long previousStepVibratorOffTimeout) {
+            long pendingVibratorOffDeadline) {
         super(conductor, startTime, controller, /* effect= */ null, /* index= */ -1,
-                previousStepVibratorOffTimeout);
+                pendingVibratorOffDeadline);
         mAmplitudeTarget = amplitudeTarget;
         mAmplitudeDelta = amplitudeDelta;
     }
@@ -68,15 +68,17 @@ final class RampOffVibratorStep extends AbstractVibratorStep {
 
             float newAmplitudeTarget = mAmplitudeTarget - mAmplitudeDelta;
             if (newAmplitudeTarget < VibrationStepConductor.RAMP_OFF_AMPLITUDE_MIN) {
-                // Vibrator amplitude cannot go further down, just turn it off.
+                // Vibrator amplitude cannot go further down, just turn it off with the configured
+                // deadline that has been adjusted for the scenario when this was triggered by a
+                // cancelled vibration.
                 return Arrays.asList(new TurnOffVibratorStep(
-                        conductor, previousStepVibratorOffTimeout, controller));
+                        conductor, mPendingVibratorOffDeadline, controller));
             }
             return Arrays.asList(new RampOffVibratorStep(
                     conductor,
                     startTime + conductor.vibrationSettings.getRampStepDuration(),
                     newAmplitudeTarget, mAmplitudeDelta, controller,
-                    previousStepVibratorOffTimeout));
+                    mPendingVibratorOffDeadline));
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
