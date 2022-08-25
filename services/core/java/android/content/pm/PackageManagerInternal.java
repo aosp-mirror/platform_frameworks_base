@@ -578,6 +578,14 @@ public abstract class PackageManagerInternal {
             int filterCallingUid);
 
     /**
+     * Resolves an exported activity intent, allowing instant apps to be resolved.
+     */
+    public abstract ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags,
+            @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
+            int filterCallingUid);
+
+    /**
     * Resolves a service intent, allowing instant apps to be resolved.
     */
     public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
