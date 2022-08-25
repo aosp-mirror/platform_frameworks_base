@@ -17,4 +17,8 @@
 <resources>
     <!-- [CHAR LIMIT=25] Text shown when there are no applications to display. -->
     <string name="no_applications">No apps.</string>
+    <!-- [CHAR LIMIT=NONE] Menu for manage apps to control whether system processes are shown -->
+    <string name="menu_show_system">Show system</string>
+    <!-- [CHAR LIMIT=NONE] Menu for manage apps to control whether system processes are hidden -->
+    <string name="menu_hide_system">Hide system</string>
 </resources>
