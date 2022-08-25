@@ -92,7 +92,7 @@ open class AuthBiometricFingerprintIconController(
         STATE_ERROR -> true
         STATE_AUTHENTICATING_ANIMATING_IN,
         STATE_AUTHENTICATING -> oldState == STATE_ERROR || oldState == STATE_HELP
-        STATE_AUTHENTICATED -> false
+        STATE_AUTHENTICATED -> true
         else -> false
     }
 
@@ -114,7 +114,13 @@ open class AuthBiometricFingerprintIconController(
                     R.raw.fingerprint_dialogue_fingerprint_to_error_lottie
                 }
             }
-            STATE_AUTHENTICATED -> R.raw.fingerprint_dialogue_fingerprint_to_error_lottie
+            STATE_AUTHENTICATED -> {
+                if (oldState == STATE_ERROR || oldState == STATE_HELP) {
+                    R.raw.fingerprint_dialogue_error_to_success_lottie
+                } else {
+                    R.raw.fingerprint_dialogue_fingerprint_to_success_lottie
+                }
+            }
             else -> return null
         }
         return if (id != null) return id else null
