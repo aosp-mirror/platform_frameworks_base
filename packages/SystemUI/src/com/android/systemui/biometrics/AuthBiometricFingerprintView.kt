@@ -75,7 +75,7 @@ open class AuthBiometricFingerprintView(
         }
     }
 
-    override fun getDelayAfterAuthenticatedDurationMs() = 0
+    override fun getDelayAfterAuthenticatedDurationMs() = 500
 
     override fun getStateForAfterError() = STATE_AUTHENTICATING
 

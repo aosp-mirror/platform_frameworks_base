@@ -44,6 +44,8 @@ import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
+import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
+import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
@@ -903,11 +905,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
             TransitionInfo.AnimationOptions options, float cornerRadius) {
-        final boolean isTask = change.getTaskInfo() != null;
         final boolean isOpen = Transitions.isOpeningType(change.getMode());
         final boolean isClose = Transitions.isClosingType(change.getMode());
         if (isOpen) {
-            if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS && isTask) {
+            if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
                 attachCrossProfileThumbnailAnimation(animations, finishCallback, change,
                         cornerRadius);
             } else if (options.getType() == ANIM_THUMBNAIL_SCALE_UP) {
@@ -922,8 +923,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Runnable finishCallback, TransitionInfo.Change change, float cornerRadius) {
         final Rect bounds = change.getEndAbsBounds();
         // Show the right drawable depending on the user we're transitioning to.
-        final Drawable thumbnailDrawable = change.getTaskInfo().userId == mCurrentUserId
-                ? mContext.getDrawable(R.drawable.ic_account_circle) : mEnterpriseThumbnailDrawable;
+        final Drawable thumbnailDrawable = change.hasFlags(FLAG_CROSS_PROFILE_OWNER_THUMBNAIL)
+                        ? mContext.getDrawable(R.drawable.ic_account_circle)
+                        : change.hasFlags(FLAG_CROSS_PROFILE_WORK_THUMBNAIL)
+                                ? mEnterpriseThumbnailDrawable : null;
+        if (thumbnailDrawable == null) {
+            return;
+        }
         final HardwareBuffer thumbnail = mTransitionAnimation.createCrossProfileAppsThumbnail(
                 thumbnailDrawable, bounds);
         if (thumbnail == null) {
