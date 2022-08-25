@@ -149,11 +149,11 @@
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
     <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g> బ్యాకప్ కాలింగ్"</string>
-    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
+    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> సెకన్ల తర్వాత <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
-    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
+    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
+    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
     <string name="fcComplete" msgid="1080909484660507044">"లక్షణం కోడ్ పూర్తయింది."</string>
     <string name="fcError" msgid="5325116502080221346">"కనెక్షన్ సమస్య లేదా లక్షణం కోడ్ చెల్లదు."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"సరే"</string>
@@ -292,7 +292,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB కనెక్షన్"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"యాప్ అమలవుతోంది"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"బ్యాటరీని ఉపయోగిస్తున్న యాప్‌లు"</string>
-    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"మాగ్నిఫికేషన్"</string>
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"మ్యాగ్నిఫికేషన్"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"యాక్సెసిబిలిటీ వినియోగం"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> బ్యాటరీని ఉపయోగిస్తోంది"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> యాప్‌లు బ్యాటరీని ఉపయోగిస్తున్నాయి"</string>
@@ -332,7 +332,7 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"నొక్కిన అంశాలు బిగ్గరగా చదివి వినిపించబడతాయి మరియు సంజ్ఞలను ఉపయోగించి స్క్రీన్‌ను విశ్లేషించవచ్చు."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"మీరు టైప్ చేస్తున్న వచనాన్ని పరిశీలిస్తుంది"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"క్రెడిట్ కార్డు నంబర్‌లు మరియు పాస్‌వర్డ్‌ల వంటి వ్యక్తిగత డేటాను కలిగి ఉంటుంది."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"డిస్‌ప్లే మాగ్నిఫికేషన్‌ను నియంత్రించండి"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"డిస్‌ప్లే మ్యాగ్నిఫికేషన్‌ను నియంత్రించండి"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"డిస్‌ప్లే జూమ్ స్థాయి మరియు స్థానాన్ని నియంత్రిస్తుంది."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"సంజ్ఞలను చేయడం"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
@@ -903,7 +903,7 @@
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"ప్లే చేయి"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"ఆపివేయి"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"రివైండ్ చేయి"</string>
-    <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"వేగంగా ఫార్వార్డ్ చేయి"</string>
+    <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"వేగంగా ఫార్వర్డ్ చేయి"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"ఎమర్జెన్సీ కాల్స్ మాత్రమే"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"సిమ్ కార్డు PUK-లాక్ చేయబడింది."</string>
@@ -1728,7 +1728,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ఫీచర్ల మధ్య మారడానికి, యాక్సెసిబిలిటీ బటన్‌ను నొక్కి &amp; పట్టుకోండి."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ఫీచర్ల మధ్య మారడానికి, రెండు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ఫీచర్ల మధ్య మారడానికి, మూడు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మాగ్నిఫికేషన్"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మ్యాగ్నిఫికేషన్"</string>
     <string name="user_switched" msgid="7249833311585228097">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> యూజర్‌కు స్విచ్ అవుతోంది…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ని లాగ్ అవుట్ చేస్తోంది…"</string>
@@ -1835,7 +1835,7 @@
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"రద్దు చేయబడింది"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"కంటెంట్‌ను వ్రాయడంలో ఎర్రర్"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"తెలియదు"</string>
-    <string name="reason_service_unavailable" msgid="5288405248063804713">"ముద్రణ సేవ ప్రారంభించబడలేదు"</string>
+    <string name="reason_service_unavailable" msgid="5288405248063804713">"ప్రింట్ సర్వీసు ప్రారంభించబడలేదు"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> సేవ ఇన్‌స్టాల్ చేయబడింది"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"ప్రారంభించడానికి నొక్కండి"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"నిర్వాహకుల పిన్‌ను నమోదు చేయండి"</string>
@@ -2284,7 +2284,7 @@
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"కొత్త మ్యాగ్నిఫికేషన్ సెట్టింగ్‌లు"</string>
-    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"మీరు ఇప్పుడు మీ స్క్రీన్ కొంత భాగాన్ని మాగ్నిఫై చేయవచ్చు"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"మీరు ఇప్పుడు మీ స్క్రీన్ కొంత భాగాన్ని మ్యాగ్నిఫై చేయవచ్చు"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"సెట్టింగ్‌లలో ఆన్ చేయండి"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"విస్మరించు"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయండి"</string>

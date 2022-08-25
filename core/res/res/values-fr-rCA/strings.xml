@@ -308,7 +308,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accéder à la position de cet appareil"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"Messagerie texte"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"Messages texte"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et afficher des messages texte"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Fichiers et contenu multimédia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"accéder aux photos, aux contenus multimédias et aux fichiers sur votre appareil"</string>
@@ -1718,7 +1718,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversion des couleurs"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correction des couleurs"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode Une main"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Réduction supplémentaire de la luminosité"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Très sombre"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume maintenues enfoncées. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume maintenues enfoncées. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Maintenez les deux touches de volume enfoncées pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
