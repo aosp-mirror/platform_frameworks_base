@@ -2454,7 +2454,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             LatencyTracker.getInstance(mContext)
                     .onActionEnd(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
 
-            if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation && runner != null
+            if (runner != null
                     && finishedCallback != null) {
                 // Wrap finishedCallback to clean up the keyguard state once the animation is done.
                 IRemoteAnimationFinishedCallback callback =
@@ -2488,8 +2488,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             // When remaining on the shade, there's no need to do a fancy remote animation,
             // it will dismiss the panel in that case.
-            } else if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
-                    && !mStatusBarStateController.leaveOpenOnKeyguardHide()
+            } else if (!mStatusBarStateController.leaveOpenOnKeyguardHide()
                     && apps != null && apps.length > 0) {
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
                 mSurfaceBehindRemoteAnimationRunning = true;

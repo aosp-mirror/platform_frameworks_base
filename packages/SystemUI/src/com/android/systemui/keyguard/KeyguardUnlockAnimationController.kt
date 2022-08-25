@@ -484,8 +484,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
             // surface behind the keyguard to finish unlocking.
             if (keyguardStateController.isFlingingToDismissKeyguard) {
                 playCannedUnlockAnimation()
-            } else if (keyguardStateController.isDismissingFromSwipe
-                    && willUnlockWithInWindowLauncherAnimations) {
+            } else if (keyguardStateController.isDismissingFromSwipe &&
+                    willUnlockWithInWindowLauncherAnimations) {
                 // If we're swiping to unlock to the Launcher, and can play in-window animations,
                 // make the launcher surface fully visible and play the in-window unlock animation
                 // on the launcher icons. System UI will remain locked, using the swipe-to-unlock
@@ -622,10 +622,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     override fun onKeyguardDismissAmountChanged() {
-        if (!willHandleUnlockAnimation()) {
-            return
-        }
-
         if (keyguardViewController.isShowing && !playingCannedUnlockAnimation) {
             showOrHideSurfaceIfDismissAmountThresholdsReached()
 
@@ -685,8 +681,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     private fun finishKeyguardExitRemoteAnimationIfReachThreshold() {
         // no-op if keyguard is not showing or animation is not enabled.
-        if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation ||
-                !keyguardViewController.isShowing) {
+        if (!keyguardViewController.isShowing) {
             return
         }
 
@@ -727,8 +722,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // If we're dismissing via swipe to the Launcher, we'll play in-window scale animations, so
         // don't also scale the window.
-        if (keyguardStateController.isDismissingFromSwipe
-                && willUnlockWithInWindowLauncherAnimations) {
+        if (keyguardStateController.isDismissingFromSwipe &&
+                willUnlockWithInWindowLauncherAnimations) {
             scaleFactor = 1f
         }
 
@@ -917,17 +912,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun isUnlockingWithSmartSpaceTransition(): Boolean {
         return willUnlockWithSmartspaceTransition
-    }
-
-    /**
-     * Whether this animation controller will be handling the unlock. We require remote animations
-     * to be enabled to do this.
-     *
-     * If this is not true, nothing in this class is relevant, and the unlock will be handled in
-     * [KeyguardViewMediator].
-     */
-    fun willHandleUnlockAnimation(): Boolean {
-        return KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
     }
 
     /**
