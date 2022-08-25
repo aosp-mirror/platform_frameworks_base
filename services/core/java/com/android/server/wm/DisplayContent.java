@@ -3316,6 +3316,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mAsyncRotationController.keepAppearanceInPreviousRotation();
                 }
             } else if (isRotationChanging()) {
+                if (displayChange != null) {
+                    final boolean seamless = mDisplayRotation.shouldRotateSeamlessly(
+                            displayChange.getStartRotation(), displayChange.getEndRotation(),
+                            false /* forceUpdate */);
+                    if (seamless) {
+                        t.onSeamlessRotating(this);
+                    }
+                }
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));

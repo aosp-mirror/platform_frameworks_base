@@ -2671,6 +2671,12 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
+    "390947100": {
+      "message": "Screenshotting %s [%s]",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "397382873": {
       "message": "Moving to PAUSED: %s %s",
       "level": "VERBOSE",
@@ -4188,6 +4194,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/InputMonitor.java"
+    },
+    "2004282287": {
+      "message": "Override sync-method for %s because seamless rotating",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "2010476671": {
       "message": "Animation done in %s: reportedVisible=%b okToDisplay=%b okToAnimate=%b startingDisplayed=%b",

@@ -2583,7 +2583,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int maybeSyncSeqId;
                 if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility != View.GONE
                         && win.mSyncSeqId > lastSyncSeqId) {
-                    maybeSyncSeqId = win.mSyncSeqId;
+                    maybeSyncSeqId = win.shouldSyncWithBuffers() ? win.mSyncSeqId : -1;
                     win.markRedrawForSyncReported();
                 } else {
                     maybeSyncSeqId = -1;
