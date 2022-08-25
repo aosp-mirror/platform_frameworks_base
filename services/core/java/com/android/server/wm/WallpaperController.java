@@ -186,7 +186,7 @@ class WallpaperController {
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
-        if (isRecentsTransitionTarget(w)) {
+        if (isRecentsTransitionTarget(w) || isBackAnimationTarget(w)) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
@@ -225,6 +225,13 @@ class WallpaperController {
         final RecentsAnimationController controller = mService.getRecentsAnimationController();
         return controller != null && controller.isWallpaperVisible(w);
     }
+
+    private boolean isBackAnimationTarget(WindowState w) {
+        // The window is either the back activity or is in the task animating by the back gesture.
+        final BackNaviAnimationController bthController = mService.getBackNaviAnimationController();
+        return bthController != null && bthController.isWallpaperVisible(w);
+    }
+
 
     /**
      * @see #computeLastWallpaperZoomOut()
