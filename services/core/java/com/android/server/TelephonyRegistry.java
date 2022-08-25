@@ -339,7 +339,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mDataConnectionNetworkType;
 
-    private ArrayList<List<CellInfo>> mCellInfo = null;
+    private ArrayList<List<CellInfo>> mCellInfo;
 
     private Map<Integer, List<EmergencyNumber>> mEmergencyNumberList;
 
@@ -725,7 +725,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mMessageWaiting[i] = false;
                 mCallForwarding[i] = false;
                 mCellIdentity[i] = null;
-                mCellInfo.add(i, null);
+                mCellInfo.add(i, Collections.EMPTY_LIST);
                 mImsReasonInfo.add(i, null);
                 mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
                 mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
@@ -802,7 +802,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallNetworkType = new int[numPhones];
         mCallAttributes = new CallAttributes[numPhones];
         mPreciseDataConnectionStates = new ArrayList<>();
-        mCellInfo = new ArrayList<>();
+        mCellInfo = new ArrayList<>(numPhones);
         mImsReasonInfo = new ArrayList<>();
         mEmergencyNumberList = new HashMap<>();
         mOutgoingCallEmergencyNumber = new EmergencyNumber[numPhones];
@@ -832,7 +832,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mMessageWaiting[i] =  false;
             mCallForwarding[i] =  false;
             mCellIdentity[i] = null;
-            mCellInfo.add(i, null);
+            mCellInfo.add(i, Collections.EMPTY_LIST);
             mImsReasonInfo.add(i, null);
             mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
@@ -1794,10 +1794,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyCellInfoForSubscriber()")) {
             return;
         }
+
         if (VDBG) {
             log("notifyCellInfoForSubscriber: subId=" + subId
                 + " cellInfo=" + cellInfo);
         }
+
+        if (cellInfo == null) {
+            loge("notifyCellInfoForSubscriber() received a null list");
+            cellInfo = Collections.EMPTY_LIST;
+        }
+
         int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
