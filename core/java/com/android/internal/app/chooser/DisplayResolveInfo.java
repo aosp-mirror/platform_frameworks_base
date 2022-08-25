@@ -172,12 +172,14 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
 
     @Override
     public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
+        prepareIntentForCrossProfileLaunch(mResolvedIntent, userId);
         activity.startActivityAsCaller(mResolvedIntent, options, false, userId);
         return true;
     }
 
     @Override
     public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
+        prepareIntentForCrossProfileLaunch(mResolvedIntent, user.getIdentifier());
         activity.startActivityAsUser(mResolvedIntent, options, user);
         return false;
     }
@@ -221,6 +223,13 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
             return new DisplayResolveInfo[size];
         }
     };
+
+    private static void prepareIntentForCrossProfileLaunch(Intent intent, int targetUserId) {
+        final int currentUserId = UserHandle.myUserId();
+        if (targetUserId != currentUserId) {
+            intent.fixUris(currentUserId);
+        }
+    }
 
     private DisplayResolveInfo(Parcel in) {
         mDisplayLabel = in.readCharSequence();
