@@ -331,6 +331,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
             mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
             mNavBarWindow.mAttrs.setFitInsetsTypes(0);
+            mNavBarWindow.mAttrs.layoutInDisplayCutoutMode =
+                    LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            mNavBarWindow.mAttrs.privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
             for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
                 mNavBarWindow.mAttrs.paramsForRotation[rot] =
                         getNavBarLayoutParamsForRotation(rot);
@@ -381,6 +385,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
         lp.height = height;
         lp.gravity = gravity;
         lp.setFitInsetsTypes(0);
+        lp.privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return lp;
     }
 

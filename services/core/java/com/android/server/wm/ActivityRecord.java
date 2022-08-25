@@ -312,7 +312,6 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
-import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.InputApplicationHandle;
@@ -357,6 +356,7 @@ import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -9684,9 +9684,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
                 final int dw = rotated ? display.mBaseDisplayHeight : display.mBaseDisplayWidth;
                 final int dh = rotated ? display.mBaseDisplayWidth : display.mBaseDisplayHeight;
-                final DisplayCutout cutout = display.calculateDisplayCutoutForRotation(rotation)
-                        .getDisplayCutout();
-                policy.getNonDecorInsetsLw(rotation, cutout, mNonDecorInsets[rotation]);
+                final WmDisplayCutout cutout = display.calculateDisplayCutoutForRotation(rotation);
+                policy.getNonDecorInsetsLw(rotation, dw, dh, cutout, mNonDecorInsets[rotation]);
                 mStableInsets[rotation].set(mNonDecorInsets[rotation]);
                 policy.convertNonDecorInsetsToStableInsets(mStableInsets[rotation], rotation);
 

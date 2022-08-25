@@ -242,6 +242,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -1896,6 +1897,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mPolicyVisibility & POLICY_VISIBILITY_ALL) == POLICY_VISIBILITY_ALL;
     }
 
+    boolean providesNonDecorInsets() {
+        if (mProvidedInsetsSources == null) {
+            return false;
+        }
+        for (int i = mProvidedInsetsSources.size() - 1; i >= 0; i--) {
+            final int type = mProvidedInsetsSources.keyAt(i);
+            if ((InsetsState.toPublicType(type) & WindowInsets.Type.navigationBars()) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void clearPolicyVisibilityFlag(int policyVisibilityFlag) {
         mPolicyVisibility &= ~policyVisibilityFlag;
         mWmService.scheduleAnimationLocked();
@@ -2608,13 +2622,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             removeImmediately();
-            // Removing a visible window will effect the computed orientation
-            // So just update orientation if needed.
+            boolean sentNewConfig = false;
             if (wasVisible) {
+                // Removing a visible window will effect the computed orientation
+                // So just update orientation if needed.
                 final DisplayContent displayContent = getDisplayContent();
                 if (displayContent.updateOrientation()) {
                     displayContent.sendNewConfiguration();
+                    sentNewConfig = true;
                 }
+            }
+            if (!sentNewConfig && providesNonDecorInsets()) {
+                getDisplayContent().sendNewConfiguration();
             }
             mWmService.updateFocusedWindowLocked(isFocused()
                             ? UPDATE_FOCUS_REMOVING_FOCUS
