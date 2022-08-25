@@ -140,6 +140,45 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static final boolean SHOW_APP_STARTING_PREVIEW = true;
 
     /**
+     * An embedding check result of {@link #isAllowedToEmbedActivity(ActivityRecord)} or
+     * {@link ActivityStarter#canEmbedActivity(TaskFragment, ActivityRecord, Task)}:
+     * indicate that an Activity can be embedded successfully.
+     */
+    static final int EMBEDDING_ALLOWED = 0;
+    /**
+     * An embedding check result of {@link #isAllowedToEmbedActivity(ActivityRecord)} or
+     * {@link ActivityStarter#canEmbedActivity(TaskFragment, ActivityRecord, Task)}:
+     * indicate that an Activity can't be embedded because either the Activity does not allow
+     * untrusted embedding, and the embedding host app is not trusted.
+     */
+    static final int EMBEDDING_DISALLOWED_UNTRUSTED_HOST = 1;
+    /**
+     * An embedding check result of {@link #isAllowedToEmbedActivity(ActivityRecord)} or
+     * {@link ActivityStarter#canEmbedActivity(TaskFragment, ActivityRecord, Task)}:
+     * indicate that an Activity can't be embedded because this taskFragment's bounds are
+     * {@link #smallerThanMinDimension(ActivityRecord)}.
+     */
+    static final int EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION = 2;
+    /**
+     * An embedding check result of
+     * {@link ActivityStarter#canEmbedActivity(TaskFragment, ActivityRecord, Task)}:
+     * indicate that an Activity can't be embedded because the Activity is started on a new task.
+     */
+    static final int EMBEDDING_DISALLOWED_NEW_TASK = 3;
+
+    /**
+     * Embedding check results of {@link #isAllowedToEmbedActivity(ActivityRecord)} or
+     * {@link ActivityStarter#canEmbedActivity(TaskFragment, ActivityRecord, Task)}.
+     */
+    @IntDef(prefix = {"EMBEDDING_"}, value = {
+            EMBEDDING_ALLOWED,
+            EMBEDDING_DISALLOWED_UNTRUSTED_HOST,
+            EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION,
+            EMBEDDING_DISALLOWED_NEW_TASK,
+    })
+    @interface EmbeddingCheckResult {}
+
+    /**
      * Indicate that the minimal width/height should use the default value.
      *
      * @see #mMinWidth
@@ -520,20 +559,29 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return false;
     }
 
-    boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
+    @EmbeddingCheckResult
+    int isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
         return isAllowedToEmbedActivity(a, mTaskFragmentOrganizerUid);
     }
 
     /**
      * Checks if the organized task fragment is allowed to have the specified activity, which is
-     * allowed if an activity allows embedding in untrusted mode, or if the trusted mode can be
-     * enabled.
-     * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
+     * allowed if an activity allows embedding in untrusted mode, if the trusted mode can be
+     * enabled, or if the organized task fragment bounds are not
+     * {@link #smallerThanMinDimension(ActivityRecord)}.
+     *
      * @param uid   uid of the TaskFragment organizer.
+     * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
      */
-    boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a, int uid) {
-        return isAllowedToEmbedActivityInUntrustedMode(a)
-                || isAllowedToEmbedActivityInTrustedMode(a, uid);
+    @EmbeddingCheckResult
+    int isAllowedToEmbedActivity(@NonNull ActivityRecord a, int uid) {
+        if (!isAllowedToEmbedActivityInUntrustedMode(a)
+                && !isAllowedToEmbedActivityInTrustedMode(a, uid)) {
+            return EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
+        } else if (smallerThanMinDimension(a)) {
+            return EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
+        }
+        return EMBEDDING_ALLOWED;
     }
 
     boolean smallerThanMinDimension(@NonNull ActivityRecord activity) {
@@ -550,9 +598,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
         final int minWidth = minDimensions.x;
         final int minHeight = minDimensions.y;
-        final boolean smaller = taskFragBounds.width() < minWidth
+        return taskFragBounds.width() < minWidth
                 || taskFragBounds.height() < minHeight;
-        return smaller;
     }
 
     /**
@@ -609,7 +656,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // The system is trusted to embed other apps securely and for all users.
         return UserHandle.getAppId(uid) == SYSTEM_UID
                 // Activities from the same UID can be embedded freely by the host.
-                || uid == a.getUid();
+                || a.isUid(uid);
     }
 
     /**

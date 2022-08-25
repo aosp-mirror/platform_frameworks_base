@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"카메라"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"전화"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"음성 지원"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"지갑"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"월렛"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR 코드 스캐너"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"잠금 해제"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"기기 잠김"</string>
@@ -462,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"데모 모드 표시"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"이더넷"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"알람"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"월렛"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"설정하여 휴대전화로 더욱 빠르고 안전하게 구매하세요."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"탭하여 열기"</string>
@@ -919,7 +919,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"지금은 Wi-Fi가 자동으로 연결되지 않습니다."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"네트워크를 전환하려면 이더넷을 연결 해제하세요."</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"기기 환경을 개선하기 위해 Wi‑Fi가 꺼져 있을 때도 앱과 서비스에서 Wi‑Fi 네트워크를 검색할 수 있습니다. 이 설정은 Wi‑Fi 검색 설정에서 변경할 수 있습니다. "<annotation id="link">"변경"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"기기 환경을 개선하기 위해 앱과 서비스에서 언제든지 Wi‑Fi 네트워크를 검색할 수 있습니다(Wi‑Fi가 꺼져 있을 때 포함). 이 설정은 Wi‑Fi 검색 설정에서 변경할 수 있습니다. "<annotation id="link">"변경"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"비행기 모드 사용 중지"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g>에서 빠른 설정에 다음 타일을 추가하려고 합니다."</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"타일 추가"</string>
