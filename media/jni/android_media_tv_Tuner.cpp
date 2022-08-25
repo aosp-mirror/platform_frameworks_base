@@ -1238,7 +1238,8 @@ FrontendClientCallbackImpl::~FrontendClientCallbackImpl() {
 }
 
 /////////////// Tuner ///////////////////////
-sp<TunerClient> JTuner::mTunerClient;
+sp<TunerClient> JTuner::sTunerClient = nullptr;
+std::mutex JTuner::sTunerClientMutex;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz) : mClass(nullptr) {
     jclass clazz = env->GetObjectClass(thiz);
@@ -1246,10 +1247,15 @@ JTuner::JTuner(JNIEnv *env, jobject thiz) : mClass(nullptr) {
 
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
-    if (mTunerClient == nullptr) {
-        mTunerClient = new TunerClient();
+    {
+        std::scoped_lock<std::mutex> lock(sTunerClientMutex);
+        if (sTunerClient == nullptr) {
+            sTunerClient = new TunerClient();
+        } else {
+            sTunerClient->incStrong(this);
+        }
+        ALOGV("JTuner refs count: %d", sTunerClient->getStrongCount());
     }
-
     mSharedFeId = (int)Constant::INVALID_FRONTEND_ID;
 }
 
@@ -1271,18 +1277,28 @@ JTuner::~JTuner() {
     mFeClient = nullptr;
     mFeClientCb = nullptr;
     mDemuxClient = nullptr;
+    {
+        std::scoped_lock<std::mutex> lock(sTunerClientMutex);
+        int32_t refCnt = sTunerClient->getStrongCount();
+        ALOGV("~JTuner refs count: %d", refCnt);
+        if (refCnt == 1) {
+            sTunerClient = nullptr;
+        } else {
+            sTunerClient->decStrong(this);
+        }
+    }
     mClass = nullptr;
     mObject = nullptr;
 }
 
 jint JTuner::getTunerVersion() {
     ALOGV("JTuner::getTunerVersion()");
-    return (jint)mTunerClient->getHalTunerVersion();
+    return (jint)sTunerClient->getHalTunerVersion();
 }
 
 jobject JTuner::getFrontendIds() {
     ALOGV("JTuner::getFrontendIds()");
-    vector<int32_t> ids = mTunerClient->getFrontendIds();
+    vector<int32_t> ids = sTunerClient->getFrontendIds();
     if (ids.size() == 0) {
         ALOGW("Frontend isn't available");
         return nullptr;
@@ -1305,7 +1321,7 @@ jobject JTuner::getFrontendIds() {
 
 jobject JTuner::openFrontendByHandle(int feHandle) {
     // TODO: Handle reopening frontend with different handle
-    sp<FrontendClient> feClient = mTunerClient->openFrontend(feHandle);
+    sp<FrontendClient> feClient = sTunerClient->openFrontend(feHandle);
     if (feClient == nullptr) {
         ALOGE("Failed to open frontend");
         return nullptr;
@@ -1511,7 +1527,7 @@ jobject JTuner::getDtmbFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
 
 jobject JTuner::getFrontendInfo(int id) {
     shared_ptr<FrontendInfo> feInfo;
-    feInfo = mTunerClient->getFrontendInfo(id);
+    feInfo = sTunerClient->getFrontendInfo(id);
     if (feInfo == nullptr) {
         return nullptr;
     }
@@ -1605,21 +1621,21 @@ Result JTuner::getFrontendHardwareInfo(string &info) {
 }
 
 jint JTuner::setMaxNumberOfFrontends(int32_t type, int32_t maxNumber) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         ALOGE("tuner is not initialized");
         return (jint)Result::INVALID_STATE;
     }
 
-    return (jint)mTunerClient->setMaxNumberOfFrontends(static_cast<FrontendType>(type), maxNumber);
+    return (jint)sTunerClient->setMaxNumberOfFrontends(static_cast<FrontendType>(type), maxNumber);
 }
 
 int32_t JTuner::getMaxNumberOfFrontends(int32_t type) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         ALOGE("tuner is not initialized");
         return -1;
     }
 
-    return mTunerClient->getMaxNumberOfFrontends(static_cast<FrontendType>(type));
+    return sTunerClient->getMaxNumberOfFrontends(static_cast<FrontendType>(type));
 }
 
 jint JTuner::removeOutputPid(int32_t pid) {
@@ -1662,13 +1678,13 @@ jobjectArray JTuner::getFrontendStatusReadiness(jintArray types) {
 }
 
 jobject JTuner::openLnbByHandle(int handle) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return nullptr;
     }
 
     sp<LnbClient> lnbClient;
     sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
-    lnbClient = mTunerClient->openLnb(handle);
+    lnbClient = sTunerClient->openLnb(handle);
     if (lnbClient == nullptr) {
         ALOGD("Failed to open lnb, handle = %d", handle);
         return nullptr;
@@ -1692,7 +1708,7 @@ jobject JTuner::openLnbByHandle(int handle) {
 }
 
 jobject JTuner::openLnbByName(jstring name) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return nullptr;
     }
 
@@ -1700,7 +1716,7 @@ jobject JTuner::openLnbByName(jstring name) {
     std::string lnbName(env->GetStringUTFChars(name, nullptr));
     sp<LnbClient> lnbClient;
     sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
-    lnbClient = mTunerClient->openLnbByName(lnbName);
+    lnbClient = sTunerClient->openLnbByName(lnbName);
     if (lnbClient == nullptr) {
         ALOGD("Failed to open lnb by name, name = %s", lnbName.c_str());
         return nullptr;
@@ -1770,20 +1786,20 @@ int JTuner::setLnb(sp<LnbClient> lnbClient) {
 }
 
 int JTuner::setLna(bool enable) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return (int)Result::NOT_INITIALIZED;
     }
-    Result result = mTunerClient->setLna(enable);
+    Result result = sTunerClient->setLna(enable);
     return (int)result;
 }
 
 Result JTuner::openDemux(int handle) {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return Result::NOT_INITIALIZED;
     }
 
     if (mDemuxClient == nullptr) {
-        mDemuxClient = mTunerClient->openDemux(handle);
+        mDemuxClient = sTunerClient->openDemux(handle);
         if (mDemuxClient == nullptr) {
             ALOGE("Failed to open demux");
             return Result::UNKNOWN_ERROR;
@@ -1881,10 +1897,10 @@ int JTuner::unlinkCiCam(int id) {
 
 jobject JTuner::openDescrambler() {
     ALOGV("JTuner::openDescrambler");
-    if (mTunerClient == nullptr || mDemuxClient == nullptr) {
+    if (sTunerClient == nullptr || mDemuxClient == nullptr) {
         return nullptr;
     }
-    sp<DescramblerClient> descramblerClient = mTunerClient->openDescrambler(0/*unused*/);
+    sp<DescramblerClient> descramblerClient = sTunerClient->openDescrambler(0 /*unused*/);
 
     if (descramblerClient == nullptr) {
         ALOGD("Failed to open descrambler");
@@ -1995,12 +2011,12 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
 }
 
 jobject JTuner::getDemuxCaps() {
-    if (mTunerClient == nullptr) {
+    if (sTunerClient == nullptr) {
         return nullptr;
     }
 
     shared_ptr<DemuxCapabilities> caps;
-    caps = mTunerClient->getDemuxCaps();
+    caps = sTunerClient->getDemuxCaps();
     if (caps == nullptr) {
         return nullptr;
     }

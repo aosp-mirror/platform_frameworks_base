@@ -216,7 +216,8 @@ protected:
 private:
     jclass mClass;
     jweak mObject;
-    static sp<TunerClient> mTunerClient;
+    static sp<TunerClient> sTunerClient;
+    static std::mutex sTunerClientMutex;
     sp<FrontendClient> mFeClient;
     sp<FrontendClientCallbackImpl> mFeClientCb;
     int mFeId;

@@ -344,6 +344,16 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public Tuner(@NonNull Context context, @Nullable String tvInputSessionId,
             @TvInputService.PriorityHintUseCaseType int useCase) {
+        mContext = context;
+        mTunerResourceManager = mContext.getSystemService(TunerResourceManager.class);
+
+        // The Tuner Resource Manager is only started when the device has the tuner feature.
+        if (mTunerResourceManager == null) {
+            throw new IllegalStateException(
+                    "Tuner instance is created, but the device doesn't have tuner feature");
+        }
+
+        // This code will start tuner server if the device is running on the lazy tuner HAL.
         nativeSetup();
         sTunerVersion = nativeGetTunerVersion();
         if (sTunerVersion == TunerVersionChecker.TUNER_VERSION_UNKNOWN) {
@@ -353,9 +363,6 @@ public class Tuner implements AutoCloseable  {
                     + TunerVersionChecker.getMajorVersion(sTunerVersion) + "."
                     + TunerVersionChecker.getMinorVersion(sTunerVersion) + ".");
         }
-        mContext = context;
-        mTunerResourceManager = (TunerResourceManager)
-                context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
         if (mHandler == null) {
             mHandler = createEventHandler();
         }
