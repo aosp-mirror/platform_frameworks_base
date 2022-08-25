@@ -83,5 +83,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ຂະຫຍາຍເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ຂະຫຍາຍໃຫຍ່ສຸດ"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ຫຍໍ້ລົງ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ປິດ"</string>
 </resources>
