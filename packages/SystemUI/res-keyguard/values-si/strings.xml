@@ -26,11 +26,13 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"වලංගු නොවන කාඩ්පත."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"අරෝපිතයි"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • නොරැහැන්ව ආරෝපණ කෙරේ"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වන ඩොකය"</string>
+    <!-- no translation found for keyguard_plugged_in_dock (2122073051904360987) -->
+    <skip />
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය කිරීම තාවකාලිකව සීමා කර ඇත"</string>
+    <!-- no translation found for keyguard_plugged_in_charging_limited (1709413803451065875) -->
+    <skip />
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"අගුලු හැරීමට මෙනුව ඔබන්න."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ජාලය අගුළු දමා ඇත"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM පත නැත"</string>
