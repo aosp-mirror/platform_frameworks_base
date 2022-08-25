@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"កំពុងរៀបចំ <xliff:g id="APPNAME">%1$s</xliff:g>។"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"បន្ត​រៀបចំឬ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"អ្នកបានចុចប៊ូតុងថាមពល — ជាធម្មតាការធ្វើបែបនេះនឹងបិទអេក្រង់។\n\nសាកល្បងចុចថ្នមៗ ខណៈពេលកំពុងរៀបចំស្នាមម្រាមដៃរបស់អ្នក។"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"បិទ​អេក្រង់"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"បន្ត​រៀបចំ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"ចុច ដើម្បីបិទអេក្រង់"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"បិទ​អេក្រង់"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"បន្តផ្ទៀងផ្ទាត់ស្នាមម្រាមដៃរបស់អ្នកឬ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"អ្នកបានចុចប៊ូតុងថាមពល — ជាធម្មតាការធ្វើបែបនេះនឹងបិទអេក្រង់។\n\nសាកល្បងចុចថ្នមៗ ដើម្បីផ្ទៀងផ្ទាត់ស្នាមម្រាមដៃរបស់អ្នក។"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"បិទ​អេក្រង់"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ចុច​ដើម្បី​រៀបចំ"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"ជ្រើសរើសដើម្បីរៀបចំ"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ។ សូមចុច ដើម្បីដកចេញ។"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"សម្រាប់ផ្ទេររូបភាព និងមេឌៀ"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"សម្រាប់​រក្សា​ទុក​រូបថត វីដេអូ តន្ត្រី និង​អ្វីៗ​ជាច្រើន​ទៀត"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"រុករក​ឯកសារមេឌៀ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"មាន​បញ្ហា​ជាមួយ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ចុចដើម្បីកែបញ្ហា"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ខូចហើយ។ សូម​ជ្រើសរើស​ដើម្បី​ជួសជុល។"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ។ សូមចុច ដើម្បីដកចេញ។"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> មិនគាំទ្រ"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"បានរក​ឃើញ​<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ឧបករណ៍នេះមិនគាំទ្រ <xliff:g id="NAME">%s</xliff:g> នេះទេ។ ប៉ះដើម្បីកំណត់ទម្រង់ដែលគាំទ្រ។"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"ចុច​ដើម្បី​រៀបចំ។"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"ជ្រើសរើសដើម្បីរៀបចំ <xliff:g id="NAME">%s</xliff:g> ក្នុងទម្រង់ដែលអាចប្រើបាន។"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញដោយមិនបានរំពឹងទុក"</string>
@@ -1857,8 +1856,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"មុខងារ​សន្សំថ្មបើកទម្រង់រចនាងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ បែបផែនរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើកទម្រង់រចនាងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ បែបផែនរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ មុខងារសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ចំណូលចិត្តតំបន់"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"បាន​ណែនាំ"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"ភាសាទាំងអស់"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ស្វែងរក"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"អនុញ្ញាតឱ្យ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ឬ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"អនុញ្ញាតឱ្យចូលប្រើ​ម្ដង"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"មិនអនុញ្ញាត"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"កំណត់ហេតុឧបករណ៍កត់ត្រាអ្វីដែលកើតឡើងនៅលើឧបករណ៍របស់អ្នក។ កម្មវិធីអាចប្រើកំណត់ហេតុទាំងនេះដើម្បីស្វែងរក និងដោះស្រាយបញ្ហាបាន។\n\nកំណត់ហេតុមួយចំនួនអាចមានព័ត៌មានរសើប ដូច្នេះគួរអនុញ្ញាតឱ្យចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់សម្រាប់តែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ \n\nប្រសិនបើអ្នកមិនអនុញ្ញាតឱ្យកម្មវិធីនេះចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ទេ វានៅតែអាចចូលប្រើកំណត់ហេតុរបស់វាផ្ទាល់បាន។ ក្រុមហ៊ុន​ផលិត​ឧបករណ៍របស់អ្នក​ប្រហែលជា​នៅតែអាចចូលប្រើ​កំណត់ហេតុ ឬព័ត៌មានមួយចំនួន​នៅលើឧបករណ៍​របស់អ្នក​បានដដែល។ ស្វែងយល់បន្ថែម"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"កុំ​បង្ហាញ​ម្ដង​ទៀត"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"កែ"</string>
@@ -2290,5 +2292,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
 </resources>

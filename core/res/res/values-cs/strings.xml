@@ -1251,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Příprava aplikace <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Spouštění aplikací."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončování inicializace."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Pokračovat v nastavování?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Stiskli jste vypínač – tím se obvykle vypíná obrazovka.\n\nPři nastavování otisku prstu je třeba klepat lehce."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Vypnout obrazovku"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Pokračovat v nastavení"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Klepnutím vypnete obrazovku"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Vypnout obrazovku"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Pokračovat v ověřování otisku prstu?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Stiskli jste vypínač – tím se obvykle vypíná obrazovka.\n\nZkuste lehkým klepnutím ověřit svůj otisk prstu."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Vypnout obrazovku"</string>
@@ -1407,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Klepnutím médium nastavíte"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Vyberte, pokud chcete nastavit"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Zařízení možná bude nutné znovu naformátovat. Klepnutím ho vyjmete."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"K přenosu fotek a médií"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Pro ukládání fotek, videí, hudby a dalšího obsahu"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Procházet soubory na médiu"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problém s médiem <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Médium <xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Problém odstraníte klepnutím"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Úložiště <xliff:g id="NAME">%s</xliff:g> je poškozeno. Vyberte ho a zahajte opravu."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Zařízení možná bude nutné znovu naformátovat. Klepnutím ho vyjmete."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Úložiště <xliff:g id="NAME">%s</xliff:g> není podporováno"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Zjištěno zařízení <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Médium <xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno. Klepnutím zahájíte nastavení v podporovaném formátu."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Nastavíte klepnutím."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Vyberte, pokud chcete <xliff:g id="NAME">%s</xliff:g> nastavit v podporovaném formátu."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Zařízení možná bude nutné znovu naformátovat"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Úložiště <xliff:g id="NAME">%s</xliff:g> neočekávaně odpojeno"</string>
@@ -1929,6 +1928,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaná oblast"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Zadejte název jazyka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Všechny jazyky"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Všechny oblasti"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Vyhledávání"</string>
@@ -2051,7 +2052,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Povolit aplikaci <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> přístup ke všem protokolům zařízení?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Povolit jednorázový přístup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nepovolovat"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Do protokolů zařízení se zaznamenává, co se na zařízení děje. Aplikace tyto protokoly mohou používat k vyhledání a odstranění problémů.\n\nNěkteré protokoly mohou zahrnovat citlivé údaje. Přístup k protokolům zařízení proto povolte pouze aplikacím, kterým důvěřujete. \n\nPokud této aplikaci nepovolíte přístup ke všem protokolům zařízení, bude mít stále přístup ke svým vlastním protokolům. Výrobce zařízení může mít stále přístup k některým protokolům nebo informacím na vašem zařízení. Další informace"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Příště nezobrazovat"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikace <xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovat ukázky z aplikace <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Upravit"</string>
@@ -2292,5 +2294,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Zkontrolujte aktivní aplikace"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ze zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze získat přístup k fotoaparátu telefonu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ze zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze získat přístup k fotoaparátu tabletu"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Tento obsah při streamování nelze zobrazit. Zkuste to na telefonu."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Výchozí nastavení systému"</string>
 </resources>

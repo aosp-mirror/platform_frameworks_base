@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը պատրաստվում է:"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Շարունակե՞լ կարգավորումը"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը ավելացնելու համար թեթևակի հպեք կոճակին։"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Անջատել էկրանը"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Շարունակել գրանցումը"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Հպեք՝ էկրանն անջատելու համար"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Անջատել էկրանը"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Շարունակե՞լ մատնահետքի սկանավորումը"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը սկանավորելու համար թեթևակի հպեք կոճակին։"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Անջատել էկրանը"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Հպեք՝ կարգավորելու համար"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Ընտրեք՝ կարգավորելու համար"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Լուսանկարներ և մեդիա ֆայլեր տեղափոխելու համար"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Լուսանկարներ, տեսանյութեր, երգեր և այլ բովանդակություն պահելու համար"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Մեդիա ֆայլերի դիտում"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի հետ կապված խնդիր կա"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Հպեք՝ շտկելու համար"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>-ը վնասված է: Ընտրեք՝ շտկելու համար:"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Չապահովվող <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Հայտնաբերվել է <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Հպեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Հպեք կարգավորելու համար։"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Ընտրեք՝ կրիչը (<xliff:g id="NAME">%s</xliff:g>) աջակցվող ձևաչափով կարգավորելու համար։"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>-ը հեռացվել է առանց անջատելու"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Նախընտրելի տարածաշրջան"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Մուտքագրեք լեզուն"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Առաջարկվող"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Բոլոր լեզուները"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Բոլոր տարածաշրջանները"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Որոնում"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Հասանելի դարձնե՞լ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> հավելվածին սարքի բոլոր մատյանները"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Թույլատրել մեկանգամյա մուտքը"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Չթույլատրել"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։ Իմանալ ավելին"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Այլևս ցույց չտալ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
@@ -2290,5 +2292,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ստուգել ակտիվ հավելվածները"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Հնարավոր չէ օգտագործել հեռախոսի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Հնարավոր չէ օգտագործել պլանշետի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Կանխադրված"</string>
 </resources>

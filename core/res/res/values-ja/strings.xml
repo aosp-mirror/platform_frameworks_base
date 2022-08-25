@@ -289,7 +289,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"拡大"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ユーザー補助の使用"</string>
-    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
+    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」がバッテリーを使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップしてバッテリーやデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>をペア設定しています。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"アプリを起動しています。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ブートを終了しています。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"設定を続行しますか？"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"電源ボタンを押しました。通常、この操作で画面が OFF になります。\n\n指紋を設定する場合は電源ボタンに軽く触れてみましょう。"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"画面を OFF にする"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"設定を続行"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"タップして画面を OFF にする"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"画面を OFF にする"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"指紋の確認を続行しますか？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"電源ボタンを押しました。通常、この操作で画面が OFF になります。\n\n指紋を確認するには、電源ボタンに軽く触れてみましょう。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"画面を OFF にする"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"タップして設定してください"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"選択してセットアップしてください"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"写真などのメディア転送用"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"写真、動画、音楽などを保存できます"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"メディア ファイルをブラウジングできます"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>に関する問題"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"タップして修正してください"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>が破損しています。修正するには選択してください。"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g>検出"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"タップしてセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g>を選択して、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"デバイスの再フォーマットが必要になる場合があります"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地域設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"言語名を入力"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"言語の候補"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"すべての言語"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"すべての地域"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"検索"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"1 回限りのアクセスを許可"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"許可しない"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合でも、このアプリはアプリ独自のログにアクセスできます。また、デバイスの製造メーカーもデバイスの一部のログや情報にアクセスできる可能性があります。詳細"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"次回から表示しない"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
@@ -2285,10 +2287,11 @@
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"バックグラウンド アクティビティ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"アプリがバッテリーを消費しています"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"アプリがまだアクティブです"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用量を管理できます。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用状況を管理できます。"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、実行中のアプリをご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"実行中のアプリをチェック"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> からタブレットのカメラにアクセスできません"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"ストリーミング中はアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
     <string name="system_locale_title" msgid="711882686834677268">"システムのデフォルト"</string>
 </resources>
