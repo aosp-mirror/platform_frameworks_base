@@ -621,7 +621,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private boolean mDestroyed;
     private boolean mOnPreparedStylusHwCalled;
 
-    /** Stylus handwriting Ink window.  */
+    /** Stylus handwriting Ink window. */
     private InkWindow mInkWindow;
 
     /**
@@ -708,9 +708,6 @@ public class InputMethodService extends AbstractInputMethodService {
             mConfigTracker.onInitialize(params.configChanges);
             mPrivOps.set(params.privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(params.token, mPrivOps);
-            if (params.stylusHandWritingSupported) {
-                mInkWindow = new InkWindow(mWindow.getContext());
-            }
             mNavigationBarController.onNavButtonFlagsChanged(params.navigationBarFlags);
             attachToken(params.token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -744,9 +741,6 @@ public class InputMethodService extends AbstractInputMethodService {
             attachToWindowToken(token);
             mToken = token;
             mWindow.setToken(token);
-            if (mInkWindow != null) {
-                mInkWindow.setToken(token);
-            }
         }
 
         /**
@@ -785,7 +779,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mInputConnection = null;
             // free-up cached InkWindow surface on detaching from current client.
             if (mInkWindow != null) {
-                mInkWindow.hide(true /* remove */);
+                removeHandwritingInkWindow();
             }
         }
 
@@ -972,6 +966,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Log.d(TAG, "Input should have started before starting Stylus handwriting.");
                 return;
             }
+            maybeCreateInkWindow();
             if (!mOnPreparedStylusHwCalled) {
                 // prepare hasn't been called by Stylus HOVER.
                 onPrepareStylusHandwriting();
@@ -1031,9 +1026,21 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @Override
         public void initInkWindow() {
+            maybeCreateInkWindow();
             mInkWindow.initOnly();
             onPrepareStylusHandwriting();
             mOnPreparedStylusHwCalled = true;
+        }
+
+        /**
+         * Create and attach token to Ink window if it wasn't already created.
+         */
+        private void maybeCreateInkWindow() {
+            if (mInkWindow == null) {
+                mInkWindow = new InkWindow(mWindow.getContext());
+                mInkWindow.setToken(mToken);
+            }
+            // TODO(b/243571274): set an idle-timeout after which InkWindow is removed.
         }
 
         /**
@@ -1043,6 +1050,15 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void finishStylusHandwriting() {
             InputMethodService.this.finishStylusHandwriting();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void removeStylusHandwritingWindow() {
+            InputMethodService.this.removeStylusHandwritingWindow();
         }
 
         /**
@@ -2511,11 +2527,33 @@ public class InputMethodService extends AbstractInputMethodService {
 
         mHandwritingEventReceiver.dispose();
         mHandwritingEventReceiver = null;
+        // TODO(b/243571274): set an idle-timeout after which InkWindow is removed.
         mInkWindow.hide(false /* remove */);
 
         mPrivOps.resetStylusHandwriting(requestId);
         mOnPreparedStylusHwCalled = false;
         onFinishStylusHandwriting();
+    }
+
+    /**
+     * Remove Stylus handwriting window.
+     * Typically, this is called when {@link InkWindow} should no longer be holding a surface in
+     * memory.
+     */
+    private void removeStylusHandwritingWindow() {
+        if (mInkWindow != null) {
+            if (mHandwritingRequestId.isPresent()) {
+                // if handwriting session is still ongoing. This shouldn't happen.
+                finishStylusHandwriting();
+            }
+            removeHandwritingInkWindow();
+        }
+    }
+
+    private void removeHandwritingInkWindow() {
+        mInkWindow.hide(true /* remove */);
+        mInkWindow.destroy();
+        mInkWindow = null;
     }
 
     /**

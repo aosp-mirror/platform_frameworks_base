@@ -410,4 +410,11 @@ public interface InputMethod {
         // intentionally empty
     }
 
+    /**
+     * Remove stylus handwriting window.
+     * @hide
+     */
+    default void removeStylusHandwritingWindow() {
+        // intentionally empty
+    }
 }
