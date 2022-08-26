@@ -53,8 +53,8 @@ import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
+import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -488,7 +488,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             final String packageName = pkg.getPackageName();
             final String apkPath = pkg.getBaseApkPath();
             // TODO(b/143971007): Use a cross-user directory
-            File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
+            File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
             final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             if (pkg.isPrivileged() || pkg.isUseEmbeddedDex()
                     || pkg.isDefaultToDeviceProtectedStorage()) {
