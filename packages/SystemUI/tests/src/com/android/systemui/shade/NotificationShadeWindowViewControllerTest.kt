@@ -26,19 +26,18 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.lowlightclock.LowLightClockController
+import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
-import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Before
@@ -59,8 +58,6 @@ import org.mockito.MockitoAnnotations
 class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var view: NotificationShadeWindowView
-    @Mock
-    private lateinit var tunserService: TunerService
     @Mock
     private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock
@@ -91,6 +88,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock
     private lateinit var lowLightClockController: LowLightClockController
+    @Mock
+    private lateinit var pulsingGestureListener: PulsingGestureListener
 
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -105,7 +104,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         underTest = NotificationShadeWindowViewController(
             lockscreenShadeTransitionController,
             FalsingCollectorFake(),
-            tunserService,
             sysuiStatusBarStateController,
             dockManager,
             notificationShadeDepthController,
@@ -120,7 +118,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             centralSurfaces,
             notificationShadeWindowController,
             keyguardUnlockAnimationController,
-            ambientState
+            ambientState,
+            pulsingGestureListener
         )
         underTest.setupExpandedStatusBar()
 
