@@ -43,7 +43,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -59,9 +59,6 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
 
     @Mock
     private SmartSpaceComplication mComplication;
-
-    @Mock
-    private ComplicationViewModel mComplicationViewModel;
 
     @Mock
     private View mBcSmartspaceView;
@@ -125,12 +122,12 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
 
         // Test
         final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
-        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Collections.singletonList(target));
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
     }
 
     @Test
-    public void testOverlayActive_targetsEmpty_removesComplication() {
+    public void testOverlayActive_targetsEmpty_addsComplication() {
         final SmartSpaceComplication.Registrant registrant = getRegistrant();
         registrant.start();
 
@@ -145,13 +142,9 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(BcSmartspaceDataPlugin.SmartspaceTargetListener.class);
         verify(mSmartspaceController).addListener(listenerCaptor.capture());
 
-        final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
-        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
-        verify(mDreamOverlayStateController).addComplication(eq(mComplication));
-
         // Test
-        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList());
-        verify(mDreamOverlayStateController).removeComplication(eq(mComplication));
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Collections.emptyList());
+        verify(mDreamOverlayStateController).addComplication(eq(mComplication));
     }
 
     @Test
@@ -170,8 +163,7 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(BcSmartspaceDataPlugin.SmartspaceTargetListener.class);
         verify(mSmartspaceController).addListener(listenerCaptor.capture());
 
-        final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
-        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Collections.emptyList());
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
 
         // Test
