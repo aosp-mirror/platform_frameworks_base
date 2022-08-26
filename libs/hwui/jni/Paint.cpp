@@ -517,10 +517,12 @@ namespace PaintGlue {
         MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
                 advancesArray.get());
 
+        float result = minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
         if (advances) {
+            minikin::distributeAdvances(advancesArray.get(), buf, start, count);
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
         }
-        return minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
+        return result;
     }
 
     static jfloat getRunAdvance___CIIIIZI_F(JNIEnv *env, jclass, jlong paintHandle, jcharArray text,
