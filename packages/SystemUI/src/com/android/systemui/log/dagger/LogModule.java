@@ -305,15 +305,4 @@ public class LogModule {
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 200);
     }
-
-    /**
-     * Provides a {@link LogBuffer} for use by
-     * {@link com.android.systemui.keyguard.KeyguardViewMediator}.
-     */
-    @Provides
-    @SysUISingleton
-    @KeyguardViewMediatorLog
-    public static LogBuffer provideKeyguardViewMediatorLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardViewMediatorLog", 100);
-    }
 }
