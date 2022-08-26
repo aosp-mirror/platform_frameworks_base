@@ -55,7 +55,6 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -326,12 +325,12 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mNotificationPanelViewController.expand(true /* animate */);
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
-                mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
+                mMetricsLogger.count("panel_open", 1);
             } else if (!mNotificationPanelViewController.isInSettings()
                     && !mNotificationPanelViewController.isExpanding()) {
                 mNotificationPanelViewController.flingSettings(0 /* velocity */,
-                        NotificationPanelView.FLING_EXPAND);
-                mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
+                        NotificationPanelViewController.FLING_EXPAND);
+                mMetricsLogger.count("panel_open_qs", 1);
             }
         }
 
