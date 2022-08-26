@@ -95,6 +95,7 @@ import java.util.function.Function;
 @RunWith(WindowTestRunner.class)
 public class TransitionTests extends WindowTestsBase {
     final SurfaceControl.Transaction mMockT = mock(SurfaceControl.Transaction.class);
+    private BLASTSyncEngine mSyncEngine;
 
     private Transition createTestTransition(int transitType) {
         TransitionTracer tracer = mock(TransitionTracer.class);
@@ -102,8 +103,8 @@ public class TransitionTests extends WindowTestsBase {
                 mock(ActivityTaskManagerService.class), mock(TaskSnapshotController.class),
                 mock(TransitionTracer.class));
 
-        final BLASTSyncEngine sync = createTestBLASTSyncEngine();
-        final Transition t = new Transition(transitType, 0 /* flags */, controller, sync);
+        mSyncEngine = createTestBLASTSyncEngine();
+        final Transition t = new Transition(transitType, 0 /* flags */, controller, mSyncEngine);
         t.startCollecting(0 /* timeoutMs */);
         return t;
     }
@@ -1144,6 +1145,26 @@ public class TransitionTests extends WindowTestsBase {
         task.onRequestedOverrideConfigurationChanged(c);
         assertTrue(freezeCalls.contains(task));
         transition.abort();
+    }
+
+    @Test
+    public void testDeferTransitionReady_deferStartedTransition() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        transition.setAllReady();
+        transition.start();
+
+        assertTrue(mSyncEngine.isReady(transition.getSyncId()));
+
+        transition.deferTransitionReady();
+
+        // Both transition ready tracker and sync engine should be deferred.
+        assertFalse(transition.allReady());
+        assertFalse(mSyncEngine.isReady(transition.getSyncId()));
+
+        transition.continueTransitionReady();
+
+        assertTrue(transition.allReady());
+        assertTrue(mSyncEngine.isReady(transition.getSyncId()));
     }
 
     private static void makeTaskOrganized(Task... tasks) {

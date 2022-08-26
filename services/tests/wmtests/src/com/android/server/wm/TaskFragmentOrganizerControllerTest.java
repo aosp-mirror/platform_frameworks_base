@@ -1119,6 +1119,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final ArgumentCaptor<WindowContainerTransaction> wctCaptor =
                 ArgumentCaptor.forClass(WindowContainerTransaction.class);
         doReturn(true).when(mTransitionController).isCollecting();
+        doReturn(10).when(mTransitionController).getCollectingTransitionId();
 
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
