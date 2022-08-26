@@ -41,12 +41,12 @@ public abstract class BroadcastQueue {
     final String mQueueName;
 
     BroadcastQueue(ActivityManagerService service, Handler handler,
-            String name, BroadcastConstants constants) {
+            String name, BroadcastConstants constants, BroadcastSkipPolicy skipPolicy) {
         mService = service;
         mHandler = handler;
         mQueueName = name;
         mConstants = constants;
-        mSkipPolicy = new BroadcastSkipPolicy(service);
+        mSkipPolicy = skipPolicy;
     }
 
     void start(ContentResolver resolver) {

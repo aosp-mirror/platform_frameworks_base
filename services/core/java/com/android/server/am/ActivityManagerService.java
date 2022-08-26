@@ -2331,7 +2331,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, handlerThread);
 
         mIntentFirewall = null;
-        mProcessStats = null;
+        mProcessStats = new ProcessStatsService(this, mContext.getCacheDir());
         mCpHelper = new ContentProviderHelper(this, false);
         mServices = null;
         mSystemThread = null;
@@ -2994,6 +2994,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void setPackageScreenCompatMode(String packageName, int mode) {
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
+    }
+
+    public void setPackageStoppedState(String packageName, boolean stopped, int userId)
+            throws RemoteException {
+        AppGlobals.getPackageManager().setPackageStoppedState(packageName, stopped, userId);
     }
 
     private boolean hasUsageStatsPermission(String callingPackage, int callingUid, int callingPid) {
