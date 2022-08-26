@@ -25,7 +25,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.navBarLayerIsVisibleAtEnd
 import com.android.server.wm.flicker.navBarLayerPositionAtEnd
+import com.android.server.wm.flicker.navBarWindowIsVisibleAtEnd
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
@@ -100,8 +102,8 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     @Test
     @Postsubmit
     fun screenLockedStart() {
-        testSpec.assertLayersStart {
-            isEmpty()
+        testSpec.assertWmStart {
+            isKeyguardShowing()
         }
     }
 
@@ -118,11 +120,11 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
 
     /** {@inheritDoc} */
     @Test
-    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
     override fun navBarLayerPositionAtStartAndEnd() { }
 
     /**
-     * Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition
+     * Checks the position of the [ComponentNameMatcher.NAV_BAR] at the end of the transition
      */
     @Postsubmit
     @Test
@@ -137,7 +139,7 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     override fun statusBarLayerPositionAtStartAndEnd() { }
 
     /**
-     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the
+     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
      * transition
      */
     @Postsubmit
@@ -145,14 +147,24 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() =
+        super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
+    fun navBarLayerIsVisibleAtEnd() = testSpec.navBarLayerIsVisibleAtEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    @Postsubmit
+    @Test
+    fun navBarWindowIsVisibleAtEnd() = testSpec.navBarWindowIsVisibleAtEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
