@@ -17,10 +17,17 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+
+import static com.android.systemui.flags.Flags.A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS;
 
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.view.Display;
+import android.view.WindowManager;
 
 import androidx.annotation.MainThread;
 
@@ -31,6 +38,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver.AccessibilityButtonMode;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlags;
 
 import javax.inject.Inject;
 
@@ -46,6 +54,9 @@ public class AccessibilityFloatingMenuController implements
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private Context mContext;
+    private final WindowManager mWindowManager;
+    private final DisplayManager mDisplayManager;
+    private final FeatureFlags mFeatureFlags;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
@@ -83,13 +94,19 @@ public class AccessibilityFloatingMenuController implements
 
     @Inject
     public AccessibilityFloatingMenuController(Context context,
+            WindowManager windowManager,
+            DisplayManager displayManager,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            FeatureFlags featureFlags) {
         mContext = context;
+        mWindowManager = windowManager;
+        mDisplayManager = displayManager;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mFeatureFlags = featureFlags;
 
         mIsKeyguardVisible = false;
     }
@@ -159,7 +176,14 @@ public class AccessibilityFloatingMenuController implements
 
     private void showFloatingMenu() {
         if (mFloatingMenu == null) {
-            mFloatingMenu = new AccessibilityFloatingMenu(mContext);
+            if (mFeatureFlags.isEnabled(A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS)) {
+                final Display defaultDisplay = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+                mFloatingMenu = new MenuViewLayerController(
+                        mContext.createWindowContext(defaultDisplay,
+                                TYPE_NAVIGATION_BAR_PANEL, /* options= */ null), mWindowManager);
+            } else {
+                mFloatingMenu = new AccessibilityFloatingMenu(mContext);
+            }
         }
 
         mFloatingMenu.show();
