@@ -462,6 +462,14 @@ package android {
 
 }
 
+package android.accessibilityservice {
+
+  public class AccessibilityServiceInfo implements android.os.Parcelable {
+    method public void setAccessibilityTool(boolean);
+  }
+
+}
+
 package android.accounts {
 
   public class AccountManager {
