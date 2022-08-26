@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery.page
+package com.android.settingslib.spa.gallery.home
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
-import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
+import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
+import com.android.settingslib.spa.gallery.page.FooterPageProvider
+import com.android.settingslib.spa.gallery.page.PreferencePageProvider
+import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
+import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.page.SwitchPreferencePageProvider
+import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
 object HomePageProvider : SettingsPageProvider {
     override val name = "Home"
@@ -41,14 +42,7 @@ object HomePageProvider : SettingsPageProvider {
 
 @Composable
 private fun HomePage() {
-    Column {
-        Text(
-            text = stringResource(R.string.app_name),
-            modifier = Modifier.padding(SettingsDimension.itemPadding),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.headlineMedium,
-        )
-
+    HomeScaffold(title = stringResource(R.string.app_name)) {
         PreferencePageProvider.EntryItem()
         SwitchPreferencePageProvider.EntryItem()
         ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
