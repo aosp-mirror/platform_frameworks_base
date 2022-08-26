@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 The Android Open Source Project
+     Copyright (C) 2022 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,42 +14,48 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<!-- TODO(b/242040009): Remove this file. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
     android:layout_height="@dimen/qs_security_footer_single_line_height"
     android:layout_weight="1"
-    android:clickable="true"
     android:orientation="horizontal"
     android:paddingHorizontal="@dimen/qs_footer_padding"
     android:gravity="center_vertical"
-    android:layout_gravity="center_vertical|center_horizontal"
     android:layout_marginEnd="@dimen/qs_footer_action_inset"
     android:background="@drawable/qs_security_footer_background"
-    >
-
+    android:visibility="gone">
     <ImageView
-        android:id="@+id/primary_footer_icon"
+        android:id="@+id/icon"
         android:layout_width="@dimen/qs_footer_icon_size"
         android:layout_height="@dimen/qs_footer_icon_size"
         android:gravity="start"
         android:layout_marginEnd="12dp"
         android:contentDescription="@null"
+        android:src="@drawable/ic_info_outline"
         android:tint="?android:attr/textColorSecondary" />
 
     <TextView
-        android:id="@+id/footer_text"
+        android:id="@+id/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:singleLine="true"
+        android:maxLines="1"
         android:ellipsize="end"
         android:textAppearance="@style/TextAppearance.QS.SecurityFooter"
         android:textColor="?android:attr/textColorSecondary"/>
 
     <ImageView
-        android:id="@+id/footer_icon"
+        android:id="@+id/new_dot"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/fgs_dot"
+        android:contentDescription="@string/fgs_dot_content_description"
+        />
+
+    <ImageView
+        android:id="@+id/chevron_icon"
         android:layout_width="@dimen/qs_footer_icon_size"
         android:layout_height="@dimen/qs_footer_icon_size"
         android:layout_marginStart="8dp"
@@ -57,5 +63,4 @@
         android:src="@*android:drawable/ic_chevron_end"
         android:autoMirrored="true"
         android:tint="?android:attr/textColorSecondary" />
-
 </LinearLayout>

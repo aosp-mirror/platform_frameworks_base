@@ -41,6 +41,7 @@ import javax.inject.Named;
 /**
  * Footer entry point for the foreground service manager
  */
+// TODO(b/242040009): Remove this file.
 @QSScope
 public class QSFgsManagerFooter implements View.OnClickListener,
         FgsManagerController.OnDialogDismissedListener,

@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** A ViewModel for the footer actions. */
@@ -74,60 +75,65 @@ class FooterActionsViewModel(
 
     /** The model for the security button. */
     val security: Flow<FooterActionsSecurityButtonViewModel?> =
-        footerActionsInteractor.securityButtonConfig.map { config ->
-            val (icon, text, isClickable) = config ?: return@map null
-            FooterActionsSecurityButtonViewModel(
-                icon,
-                text,
-                if (isClickable) this::onSecurityButtonClicked else null,
-            )
-        }
+        footerActionsInteractor.securityButtonConfig
+            .map { config ->
+                val (icon, text, isClickable) = config ?: return@map null
+                FooterActionsSecurityButtonViewModel(
+                    icon,
+                    text,
+                    if (isClickable) this::onSecurityButtonClicked else null,
+                )
+            }
+            .distinctUntilChanged()
 
     /** The model for the foreground services button. */
     val foregroundServices: Flow<FooterActionsForegroundServicesButtonViewModel?> =
         combine(
-            footerActionsInteractor.foregroundServicesCount,
-            footerActionsInteractor.hasNewForegroundServices,
-            security,
-        ) { foregroundServicesCount, hasNewChanges, securityModel ->
-            if (foregroundServicesCount <= 0) {
-                return@combine null
-            }
+                footerActionsInteractor.foregroundServicesCount,
+                footerActionsInteractor.hasNewForegroundServices,
+                security,
+            ) { foregroundServicesCount, hasNewChanges, securityModel ->
+                if (foregroundServicesCount <= 0) {
+                    return@combine null
+                }
 
-            val text =
-                icuMessageFormat(
-                    context.resources,
-                    R.string.fgs_manager_footer_label,
+                val text =
+                    icuMessageFormat(
+                        context.resources,
+                        R.string.fgs_manager_footer_label,
+                        foregroundServicesCount,
+                    )
+                FooterActionsForegroundServicesButtonViewModel(
                     foregroundServicesCount,
+                    text = text,
+                    displayText = securityModel == null,
+                    hasNewChanges = hasNewChanges,
+                    this::onForegroundServiceButtonClicked,
                 )
-            FooterActionsForegroundServicesButtonViewModel(
-                foregroundServicesCount,
-                text = text,
-                displayText = securityModel == null,
-                hasNewChanges = hasNewChanges,
-                this::onForegroundServiceButtonClicked,
-            )
-        }
+            }
+            .distinctUntilChanged()
 
     /** The model for the user switcher button. */
     val userSwitcher: Flow<FooterActionsButtonViewModel?> =
-        footerActionsInteractor.userSwitcherStatus.map { userSwitcherStatus ->
-            when (userSwitcherStatus) {
-                UserSwitcherStatusModel.Disabled -> null
-                is UserSwitcherStatusModel.Enabled -> {
-                    if (userSwitcherStatus.currentUserImage == null) {
-                        Log.e(
-                            TAG,
-                            "Skipped the addition of user switcher button because " +
-                                "currentUserImage is missing",
-                        )
-                        return@map null
-                    }
+        footerActionsInteractor.userSwitcherStatus
+            .map { userSwitcherStatus ->
+                when (userSwitcherStatus) {
+                    UserSwitcherStatusModel.Disabled -> null
+                    is UserSwitcherStatusModel.Enabled -> {
+                        if (userSwitcherStatus.currentUserImage == null) {
+                            Log.e(
+                                TAG,
+                                "Skipped the addition of user switcher button because " +
+                                    "currentUserImage is missing",
+                            )
+                            return@map null
+                        }
 
-                    userSwitcherButton(userSwitcherStatus)
+                        userSwitcherButton(userSwitcherStatus)
+                    }
                 }
             }
-        }
+            .distinctUntilChanged()
 
     /** The model for the settings button. */
     val settings: FooterActionsButtonViewModel =

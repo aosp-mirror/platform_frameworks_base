@@ -40,6 +40,7 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 
 /** View Controller for {@link MultiUserSwitch}. */
+// TODO(b/242040009): Remove this file.
 public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     private final UserManager mUserManager;
     private final UserSwitcherController mUserSwitcherController;
