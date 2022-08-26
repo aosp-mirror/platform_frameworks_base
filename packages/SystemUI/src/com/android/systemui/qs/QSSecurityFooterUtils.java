@@ -174,11 +174,12 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
 
     @Inject
     QSSecurityFooterUtils(
-            @Application Context context, UserTracker userTracker, @Main Handler mainHandler,
-            ActivityStarter activityStarter, SecurityController securityController,
-            @Background Looper bgLooper, DialogLaunchAnimator dialogLaunchAnimator) {
+            @Application Context context, DevicePolicyManager devicePolicyManager,
+            UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
+            SecurityController securityController, @Background Looper bgLooper,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
-        mDpm = mContext.getSystemService(DevicePolicyManager.class);
+        mDpm = devicePolicyManager;
         mUserTracker = userTracker;
         mMainHandler = mainHandler;
         mActivityStarter = activityStarter;

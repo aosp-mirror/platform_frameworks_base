@@ -49,8 +49,12 @@ import com.android.systemui.navigationbar.NavigationBarComponent;
 import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
+import com.android.systemui.qs.FgsManagerController;
+import com.android.systemui.qs.FgsManagerControllerImpl;
+import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
+import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
@@ -122,6 +126,7 @@ import dagger.Provides;
             DemoModeModule.class,
             FalsingModule.class,
             FlagsModule.class,
+            FooterActionsModule.class,
             LogModule.class,
             MediaProjectionModule.class,
             PeopleHubModule.class,
@@ -132,6 +137,7 @@ import dagger.Provides;
             ScreenshotModule.class,
             SensorModule.class,
             MultiUserUtilsModule.class,
+            SecurityRepositoryModule.class,
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
@@ -258,4 +264,7 @@ public abstract class SystemUIModule {
             return Optional.empty();
         }
     }
+
+    @Binds
+    abstract FgsManagerController bindFgsManagerController(FgsManagerControllerImpl impl);
 }

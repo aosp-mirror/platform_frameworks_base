@@ -16,8 +16,6 @@
 
 package com.android.systemui.qs.footer.dagger
 
-import com.android.systemui.qs.FgsManagerController
-import com.android.systemui.qs.FgsManagerControllerImpl
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepository
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepositoryImpl
 import com.android.systemui.qs.footer.data.repository.UserSwitcherRepository
@@ -38,6 +36,4 @@ interface FooterActionsModule {
     ): ForegroundServicesRepository
 
     @Binds fun footerActionsInteractor(impl: FooterActionsInteractorImpl): FooterActionsInteractor
-
-    @Binds fun fgsManagerControllerImpl(impl: FgsManagerControllerImpl): FgsManagerController
 }
