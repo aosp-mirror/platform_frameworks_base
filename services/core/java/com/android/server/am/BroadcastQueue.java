@@ -75,14 +75,6 @@ public abstract class BroadcastQueue {
      */
     public abstract void enqueueBroadcastLocked(BroadcastRecord r);
 
-    public abstract void updateUidReadyForBootCompletedBroadcastLocked(int uid);
-
-    public abstract boolean sendPendingBroadcastsLocked(ProcessRecord app);
-
-    public abstract void skipPendingBroadcastLocked(int pid);
-
-    public abstract void skipCurrentReceiverLocked(ProcessRecord app);
-
     public abstract BroadcastRecord getMatchingOrderedReceiver(IBinder receiver);
 
     /**
@@ -97,7 +89,30 @@ public abstract class BroadcastQueue {
 
     public abstract void backgroundServicesFinishedLocked(int userId);
 
-    public abstract void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj);
+    /**
+     * Signal from OS internals that the given process has just been actively
+     * attached, and is ready to begin receiving broadcasts.
+     */
+    public abstract boolean onApplicationAttachedLocked(ProcessRecord app);
+
+    /**
+     * Signal from OS internals that the given process has timed out during
+     * an attempted start and attachment.
+     */
+    public abstract boolean onApplicationTimeoutLocked(ProcessRecord app);
+
+    /**
+     * Signal from OS internals that the given process, which had already been
+     * previously attached, has now encountered a problem such as crashing or
+     * not responding.
+     */
+    public abstract boolean onApplicationProblemLocked(ProcessRecord app);
+
+    /**
+     * Signal from OS internals that the given process has been killed, and is
+     * no longer actively running.
+     */
+    public abstract boolean onApplicationCleanupLocked(ProcessRecord app);
 
     /**
      * Signal from OS internals that the given package (or some subset of that
