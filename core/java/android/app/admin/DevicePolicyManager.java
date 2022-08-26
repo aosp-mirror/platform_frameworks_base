@@ -7394,6 +7394,9 @@ public class DevicePolicyManager {
      * The grantee app will receive the {@link android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED}
      * broadcast when access to a key is granted.
      *
+     * Starting from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} throws an
+     * {@link IllegalArgumentException} if {@code alias} doesn't correspond to an existing key.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate chooser.
      * @param alias The alias of the key to grant access to.
@@ -7460,6 +7463,9 @@ public class DevicePolicyManager {
      * The grantee app will receive the {@link android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED}
      * broadcast when access to a key is revoked.
      *
+     * Starting from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} throws an
+     * {@link IllegalArgumentException} if {@code alias} doesn't correspond to an existing key.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate chooser.
      * @param alias The alias of the key to revoke access from.
@@ -7490,6 +7496,9 @@ public class DevicePolicyManager {
      * pair for authentication to Wifi networks. The key can then be used in configurations passed
      * to {@link android.net.wifi.WifiManager#addNetwork}.
      *
+     * Starting from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} throws an
+     * {@link IllegalArgumentException} if {@code alias} doesn't correspond to an existing key.
+     *
      * @param alias The alias of the key pair.
      * @return {@code true} if the operation was set successfully, {@code false} otherwise.
      *
@@ -7512,6 +7521,9 @@ public class DevicePolicyManager {
      * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to deny using a KeyChain key
      * pair for authentication to Wifi networks. Configured networks using this key won't be able to
      * authenticate.
+     *
+     * Starting from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} throws an
+     * {@link IllegalArgumentException} if {@code alias} doesn't correspond to an existing key.
      *
      * @param alias The alias of the key pair.
      * @return {@code true} if the operation was set successfully, {@code false} otherwise.
