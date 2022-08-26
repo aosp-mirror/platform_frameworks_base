@@ -102,6 +102,10 @@ public class Flags {
      */
     public static final ReleasedFlag MODERN_BOUNCER = new ReleasedFlag(208);
 
+    /** Whether UserSwitcherActivity should use modern architecture. */
+    public static final UnreleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
+            new UnreleasedFlag(209, true);
+
     /***************************************/
     // 300 - power menu
     public static final ReleasedFlag POWER_MENU_LITE =
