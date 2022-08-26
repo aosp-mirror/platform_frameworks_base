@@ -5,6 +5,7 @@
 #include <android/graphics/jni_runtime.h>
 #include "core_jni_helpers.h"
 #include "jni.h"
+#include "unicode/locid.h"
 
 static JavaVM* javaVM;
 
@@ -109,5 +110,24 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     u_setDataDirectory(path);
     env->ReleaseStringUTFChars(stringPath, path);
 
+    // Set the default locale, which is required for e.g. SQLite's 'COLLATE UNICODE'.
+    auto stringLanguageTag =
+            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
+                                                 env->NewStringUTF("icu.languageTag"),
+                                                 env->NewStringUTF(""));
+    int languageTagLength = env->GetStringLength(stringLanguageTag);
+    const char* languageTag = env->GetStringUTFChars(stringLanguageTag, 0);
+    if (languageTagLength > 0) {
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(languageTag, status);
+        if (U_SUCCESS(status)) {
+            icu::Locale::setDefault(locale, status);
+        }
+        if (U_FAILURE(status)) {
+            fprintf(stderr, "Failed to set the ICU default locale to '%s' (error code %d)\n",
+                    languageTag, status);
+        }
+    }
+    env->ReleaseStringUTFChars(stringLanguageTag, languageTag);
     return JNI_VERSION_1_6;
 }
