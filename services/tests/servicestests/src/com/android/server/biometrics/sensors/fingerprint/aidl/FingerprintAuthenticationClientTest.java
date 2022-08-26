@@ -26,8 +26,8 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -96,6 +96,7 @@ public class FingerprintAuthenticationClientTest {
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
+
     @Mock
     private ISession mHal;
     @Mock
@@ -213,21 +214,41 @@ public class FingerprintAuthenticationClientTest {
     }
 
     @Test
-    public void luxProbeWhenFingerDown() throws RemoteException {
+    public void luxProbeWhenAwake() throws RemoteException {
+        when(mBiometricContext.isAwake()).thenReturn(false, true, false);
+        when(mBiometricContext.isAod()).thenReturn(false);
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
-        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
-        verify(mLuxProbe).enable();
+        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
+        OperationContext opContext = mOperationContextCaptor.getValue();
+        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
 
-        client.onAcquired(2, 0);
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe, never()).enable();
+
+        reset(mLuxProbe);
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe).enable();
         verify(mLuxProbe, never()).disable();
 
-        client.onPointerUp();
+        mContextInjector.getValue().accept(opContext);
         verify(mLuxProbe).disable();
+    }
 
-        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
-        verify(mLuxProbe, times(2)).enable();
+    @Test
+    public void luxProbeDisabledOnAod() throws RemoteException {
+        when(mBiometricContext.isAwake()).thenReturn(false);
+        when(mBiometricContext.isAod()).thenReturn(true);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+
+        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
+        OperationContext opContext = mOperationContextCaptor.getValue();
+        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe, never()).enable();
     }
 
     @Test

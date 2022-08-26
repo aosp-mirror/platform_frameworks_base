@@ -94,7 +94,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
 
-        mALSProbeCallback = getLogger().getAmbientLightProbe(false /* startWithClient */);
+        mALSProbeCallback = getLogger().getAmbientLightProbe(true /* startWithClient */);
 
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
@@ -216,7 +216,6 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
             mIsPointerDown = true;
-            mALSProbeCallback.getProbe().enable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
@@ -240,7 +239,6 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     public void onPointerUp() {
         try {
             mIsPointerDown = false;
-            mALSProbeCallback.getProbe().disable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
