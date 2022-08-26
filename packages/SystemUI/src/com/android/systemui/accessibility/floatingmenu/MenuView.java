@@ -77,8 +77,14 @@ class MenuView extends FrameLayout {
     }
 
     private void onEdgeChanged() {
+        final int[] insets = mMenuViewAppearance.getMenuInsets();
+        getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
+                insets[3]);
+
         final GradientDrawable gradientDrawable = getContainerViewGradient();
         gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
+        gradientDrawable.setStroke(mMenuViewAppearance.getMenuStrokeWidth(),
+                mMenuViewAppearance.getMenuStrokeColor());
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -104,7 +110,7 @@ class MenuView extends FrameLayout {
         mMenuViewModel.unregisterContentObservers();
     }
 
-    private void loadLayoutResources() {
+    void loadLayoutResources() {
         mMenuViewAppearance.update();
 
         setBackground(mMenuViewAppearance.getMenuBackground());

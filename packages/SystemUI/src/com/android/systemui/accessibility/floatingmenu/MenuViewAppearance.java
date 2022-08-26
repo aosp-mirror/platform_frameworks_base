@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.DimenRes;
+
 import com.android.systemui.R;
 
 /**
@@ -32,6 +34,9 @@ class MenuViewAppearance {
     private int mSmallIconSize;
     private int mSmallSingleRadius;
     private int mSmallMultipleRadius;
+    private int mStrokeWidth;
+    private int mStrokeColor;
+    private int mInset;
     private int mElevation;
     private float[] mRadii;
     private Drawable mBackgroundDrawable;
@@ -52,6 +57,9 @@ class MenuViewAppearance {
         mSmallMultipleRadius = mRes.getDimensionPixelSize(
                 R.dimen.accessibility_floating_menu_small_multiple_radius);
         mRadii = createRadii(getMenuRadius(mTargetFeaturesSize));
+        mStrokeWidth = mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_width);
+        mStrokeColor = mRes.getColor(R.color.accessibility_floating_menu_stroke_dark);
+        mInset = mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_inset);
         mElevation = mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_elevation);
         final Drawable drawable =
                 mRes.getDrawable(R.drawable.accessibility_floating_menu_background);
@@ -80,11 +88,28 @@ class MenuViewAppearance {
         return mSmallPadding;
     }
 
+    int[] getMenuInsets() {
+        return new int[]{mInset, 0, 0, 0};
+    }
+
+    int getMenuStrokeWidth() {
+        return mStrokeWidth;
+    }
+
+    int getMenuStrokeColor() {
+        return mStrokeColor;
+    }
+
     float[] getMenuRadii() {
         return mRadii;
     }
 
     private int getMenuRadius(int itemCount) {
+        return getSmallSize(itemCount);
+    }
+
+    @DimenRes
+    private int getSmallSize(int itemCount) {
         return itemCount > 1 ? mSmallMultipleRadius : mSmallSingleRadius;
     }
 
