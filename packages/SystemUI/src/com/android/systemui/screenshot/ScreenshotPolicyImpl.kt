@@ -29,9 +29,11 @@ import android.content.Intent
 import android.graphics.Rect
 import android.os.Process
 import android.os.RemoteException
+import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
+import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.infra.ServiceConnector
 import com.android.systemui.SystemUIService
 import com.android.systemui.dagger.SysUISingleton
@@ -45,20 +47,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
-internal class ScreenshotPolicyImpl @Inject constructor(
+internal open class ScreenshotPolicyImpl @Inject constructor(
     context: Context,
     private val userMgr: UserManager,
     private val atmService: IActivityTaskManager,
     @Background val bgDispatcher: CoroutineDispatcher,
 ) : ScreenshotPolicy {
-
-    private val systemUiContent =
-        DisplayContentInfo(
-            ComponentName(context, SystemUIService::class.java),
-            Rect(),
-            ActivityTaskManager.INVALID_TASK_ID,
-            Process.myUserHandle().identifier,
-        )
 
     private val proxyConnector: ServiceConnector<IScreenshotProxy> =
         ServiceConnector.Impl(
@@ -78,6 +72,9 @@ internal class ScreenshotPolicyImpl @Inject constructor(
     }
 
     private fun nonPipVisibleTask(info: RootTaskInfo): Boolean {
+        if (DEBUG) {
+            debugLogRootTaskInfo(info)
+        }
         return info.windowingMode != WindowConfiguration.WINDOWING_MODE_PINNED &&
             info.isVisible &&
             info.isRunning &&
@@ -99,58 +96,46 @@ internal class ScreenshotPolicyImpl @Inject constructor(
         }
 
         val taskInfoList = getAllRootTaskInfosOnDisplay(displayId)
-        if (DEBUG) {
-            debugLogRootTaskInfos(taskInfoList)
-        }
 
         // If no visible task is located, then report SystemUI as the foreground content
         val target = taskInfoList.firstOrNull(::nonPipVisibleTask) ?: return systemUiContent
-
-        val topActivity: ComponentName = target.topActivity ?: error("should not be null")
-        val topChildTask = target.childTaskIds.size - 1
-        val childTaskId = target.childTaskIds[topChildTask]
-        val childTaskUserId = target.childTaskUserIds[topChildTask]
-        val childTaskBounds = target.childTaskBounds[topChildTask]
-
-        return DisplayContentInfo(topActivity, childTaskBounds, childTaskId, childTaskUserId)
+        return target.toDisplayContentInfo()
     }
 
-    private fun debugLogRootTaskInfos(taskInfoList: List<RootTaskInfo>) {
-        for (info in taskInfoList) {
-            Log.d(
-                TAG,
-                "[root task info] " +
-                    "taskId=${info.taskId} " +
-                    "parentTaskId=${info.parentTaskId} " +
-                    "position=${info.position} " +
-                    "positionInParent=${info.positionInParent} " +
-                    "isVisible=${info.isVisible()} " +
-                    "visible=${info.visible} " +
-                    "isFocused=${info.isFocused} " +
-                    "isSleeping=${info.isSleeping} " +
-                    "isRunning=${info.isRunning} " +
-                    "windowMode=${windowingModeToString(info.windowingMode)} " +
-                    "activityType=${activityTypeToString(info.activityType)} " +
-                    "topActivity=${info.topActivity} " +
-                    "topActivityInfo=${info.topActivityInfo} " +
-                    "numActivities=${info.numActivities} " +
-                    "childTaskIds=${Arrays.toString(info.childTaskIds)} " +
-                    "childUserIds=${Arrays.toString(info.childTaskUserIds)} " +
-                    "childTaskBounds=${Arrays.toString(info.childTaskBounds)} " +
-                    "childTaskNames=${Arrays.toString(info.childTaskNames)}"
-            )
+    private fun debugLogRootTaskInfo(info: RootTaskInfo) {
+        Log.d(TAG, "RootTaskInfo={" +
+                "taskId=${info.taskId} " +
+                "parentTaskId=${info.parentTaskId} " +
+                "position=${info.position} " +
+                "positionInParent=${info.positionInParent} " +
+                "isVisible=${info.isVisible()} " +
+                "visible=${info.visible} " +
+                "isFocused=${info.isFocused} " +
+                "isSleeping=${info.isSleeping} " +
+                "isRunning=${info.isRunning} " +
+                "windowMode=${windowingModeToString(info.windowingMode)} " +
+                "activityType=${activityTypeToString(info.activityType)} " +
+                "topActivity=${info.topActivity} " +
+                "topActivityInfo=${info.topActivityInfo} " +
+                "numActivities=${info.numActivities} " +
+                "childTaskIds=${Arrays.toString(info.childTaskIds)} " +
+                "childUserIds=${Arrays.toString(info.childTaskUserIds)} " +
+                "childTaskBounds=${Arrays.toString(info.childTaskBounds)} " +
+                "childTaskNames=${Arrays.toString(info.childTaskNames)}" +
+                "}"
+        )
 
-            for (j in 0 until info.childTaskIds.size) {
-                Log.d(TAG, "    *** [$j] ******")
-                Log.d(TAG, "        ***  childTaskIds[$j]: ${info.childTaskIds[j]}")
-                Log.d(TAG, "        ***  childTaskUserIds[$j]: ${info.childTaskUserIds[j]}")
-                Log.d(TAG, "        ***  childTaskBounds[$j]: ${info.childTaskBounds[j]}")
-                Log.d(TAG, "        ***  childTaskNames[$j]: ${info.childTaskNames[j]}")
-            }
+        for (j in 0 until info.childTaskIds.size) {
+            Log.d(TAG, "    *** [$j] ******")
+            Log.d(TAG, "        ***  childTaskIds[$j]: ${info.childTaskIds[j]}")
+            Log.d(TAG, "        ***  childTaskUserIds[$j]: ${info.childTaskUserIds[j]}")
+            Log.d(TAG, "        ***  childTaskBounds[$j]: ${info.childTaskBounds[j]}")
+            Log.d(TAG, "        ***  childTaskNames[$j]: ${info.childTaskNames[j]}")
         }
     }
 
-    private suspend fun getAllRootTaskInfosOnDisplay(displayId: Int): List<RootTaskInfo> =
+    @VisibleForTesting
+    open suspend fun getAllRootTaskInfosOnDisplay(displayId: Int): List<RootTaskInfo> =
         withContext(bgDispatcher) {
             try {
                 atmService.getAllRootTaskInfosOnDisplay(displayId)
@@ -160,7 +145,8 @@ internal class ScreenshotPolicyImpl @Inject constructor(
             }
         }
 
-    private suspend fun isNotificationShadeExpanded(): Boolean = suspendCoroutine { k ->
+    @VisibleForTesting
+    open suspend fun isNotificationShadeExpanded(): Boolean = suspendCoroutine { k ->
         proxyConnector
             .postForResult { it.isNotificationShadeExpanded }
             .whenComplete { expanded, error ->
@@ -171,8 +157,30 @@ internal class ScreenshotPolicyImpl @Inject constructor(
             }
     }
 
-    companion object {
-        const val TAG: String = "ScreenshotPolicyImpl"
-        const val DEBUG: Boolean = false
-    }
+    @VisibleForTesting
+    internal val systemUiContent =
+        DisplayContentInfo(
+            ComponentName(context, SystemUIService::class.java),
+            Rect(),
+            Process.myUserHandle(),
+            ActivityTaskManager.INVALID_TASK_ID
+        )
+}
+
+private const val TAG: String = "ScreenshotPolicyImpl"
+private const val DEBUG: Boolean = false
+
+@VisibleForTesting
+internal fun RootTaskInfo.toDisplayContentInfo(): DisplayContentInfo {
+    val topActivity: ComponentName = topActivity ?: error("should not be null")
+    val topChildTask = childTaskIds.size - 1
+    val childTaskId = childTaskIds[topChildTask]
+    val childTaskUserId = childTaskUserIds[topChildTask]
+    val childTaskBounds = childTaskBounds[topChildTask]
+
+    return DisplayContentInfo(
+        topActivity,
+        childTaskBounds,
+        UserHandle.of(childTaskUserId),
+        childTaskId)
 }
