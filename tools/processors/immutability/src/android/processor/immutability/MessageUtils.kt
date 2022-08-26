@@ -20,6 +20,8 @@ object MessageUtils {
 
     fun classNotImmutableFailure(className: String) = "$className should be marked @Immutable"
 
+    fun classNotFinalFailure(className: String) = "$className should be marked final"
+
     fun memberNotMethodFailure() = "Member must be a method"
 
     fun nonInterfaceClassFailure() = "Class was not an interface"
