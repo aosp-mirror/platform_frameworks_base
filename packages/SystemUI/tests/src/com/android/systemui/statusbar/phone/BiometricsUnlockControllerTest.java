@@ -314,13 +314,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.startWakeAndUnlock(
                 BiometricUnlockController.MODE_UNLOCK_COLLAPSING);
 
-        // THEN we collpase the panels and notify authenticated
-        verify(mShadeController).animateCollapsePanels(
-                /* flags */ anyInt(),
-                /* force */ eq(true),
-                /* delayed */ eq(false),
-                /* speedUpFactor */ anyFloat()
-        );
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(
                 /* strongAuth */ eq(false));
     }
