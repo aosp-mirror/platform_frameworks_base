@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
@@ -127,7 +127,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
             ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
     private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
 
-    @Captor private ArgumentCaptor<PointF> mPointCaptor;
+    @Captor private ArgumentCaptor<Point> mPointCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -178,7 +178,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     @Test
     public void testUpdateFingerprintLocationOnInit() {
         // GIVEN fp sensor location is available pre-attached
-        Pair<Float, PointF> udfps = setupUdfps(); // first = radius, second = udfps location
+        Pair<Float, Point> udfps = setupUdfps(); // first = radius, second = udfps location
 
         // WHEN lock icon view controller is initialized and attached
         mLockIconViewController.init();
@@ -193,7 +193,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     @Test
     public void testUpdatePaddingBasedOnResolutionScale() {
         // GIVEN fp sensor location is available pre-attached & scaled resolution factor is 5
-        Pair<Float, PointF> udfps = setupUdfps(); // first = radius, second = udfps location
+        Pair<Float, Point> udfps = setupUdfps(); // first = radius, second = udfps location
         when(mAuthController.getScaleFactor()).thenReturn(5f);
 
         // WHEN lock icon view controller is initialized and attached
@@ -218,7 +218,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
         // GIVEN fp sensor location is available post-attached
         captureAuthControllerCallback();
-        Pair<Float, PointF> udfps = setupUdfps();
+        Pair<Float, Point> udfps = setupUdfps();
 
         // WHEN all authenticators are registered
         mAuthControllerCallback.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT);
@@ -241,7 +241,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
         // GIVEN fp sensor location is available post-attached
         captureAuthControllerCallback();
-        Pair<Float, PointF> udfps = setupUdfps();
+        Pair<Float, Point> udfps = setupUdfps();
 
         // WHEN udfps location changes
         mAuthControllerCallback.onUdfpsLocationChanged();
@@ -421,9 +421,9 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         verify(mLockIconView).setTranslationX(0);
 
     }
-    private Pair<Float, PointF> setupUdfps() {
+    private Pair<Float, Point> setupUdfps() {
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
-        final PointF udfpsLocation = new PointF(50, 75);
+        final Point udfpsLocation = new Point(50, 75);
         final float radius = 33f;
         when(mAuthController.getUdfpsLocation()).thenReturn(udfpsLocation);
         when(mAuthController.getUdfpsRadius()).thenReturn(radius);

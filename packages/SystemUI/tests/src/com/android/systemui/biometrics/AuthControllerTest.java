@@ -77,6 +77,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -726,13 +728,8 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSubscribesToOrientationChangesWhenShowingDialog() {
-        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
-
+    public void testSubscribesToOrientationChangesOnStart() {
         verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler), anyLong());
-
-        mAuthController.hideAuthenticationDialog(REQUEST_ID);
-        verify(mDisplayManager).unregisterDisplayListener(any());
     }
 
     @Test
@@ -798,7 +795,115 @@ public class AuthControllerTest extends SysuiTestCase {
         order.verifyNoMoreInteractions();
     }
 
-    // Helpers
+    @Test
+    public void testGetFingerprintSensorLocationChanges_differentRotations() {
+        // GIVEN fp default location and mocked device dimensions
+        // Rotation 0, where "o" is the location of the FP sensor, if x or y = 0, it's the edge of
+        // the screen which is why a 1x1 width and height is represented by a 2x2 grid below:
+        //   [* o]
+        //   [* *]
+        Point fpDefaultLocation = new Point(1, 0);
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 1;
+        displayInfo.logicalHeight = 1;
+
+        // WHEN the rotation is 0, THEN no rotation applied
+        displayInfo.rotation = Surface.ROTATION_0;
+        assertEquals(
+                fpDefaultLocation,
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 270, THEN rotation is applied
+        //   [* *]
+        //   [* o]
+        displayInfo.rotation = Surface.ROTATION_270;
+        assertEquals(
+                new Point(1, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 180, THEN rotation is applied
+        //   [* *]
+        //   [o *]
+        displayInfo.rotation = Surface.ROTATION_180;
+        assertEquals(
+                new Point(0, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 90, THEN rotation is applied
+        //   [o *]
+        //   [* *]
+        displayInfo.rotation = Surface.ROTATION_90;
+        assertEquals(
+                new Point(0, 0),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+    }
+
+    @Test
+    public void testGetFingerprintSensorLocationChanges_rotateRectangle() {
+        // GIVEN fp default location and mocked device dimensions
+        // Rotation 0, where "o" is the location of the FP sensor, if x or y = 0, it's the edge of
+        // the screen.
+        //   [* * o *]
+        //   [* * * *]
+        Point fpDefaultLocation = new Point(2, 0);
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 3;
+        displayInfo.logicalHeight = 1;
+
+        // WHEN the rotation is 0, THEN no rotation applied
+        displayInfo.rotation = Surface.ROTATION_0;
+        assertEquals(
+                fpDefaultLocation,
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 180, THEN rotation is applied
+        //   [* * * *]
+        //   [* o * *]
+        displayInfo.rotation = Surface.ROTATION_180;
+        assertEquals(
+                new Point(1, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // Rotation 270 & 90 have swapped logical width and heights
+        displayInfo.logicalWidth = 1;
+        displayInfo.logicalHeight = 3;
+
+        // WHEN the rotation is 270, THEN rotation is applied
+        //   [* *]
+        //   [* *]
+        //   [* o]
+        //   [* *]
+        displayInfo.rotation = Surface.ROTATION_270;
+        assertEquals(
+                new Point(1, 2),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+
+        // WHEN the rotation is 90, THEN rotation is applied
+        //   [* *]
+        //   [o *]
+        //   [* *]
+        //   [* *]
+        displayInfo.rotation = Surface.ROTATION_90;
+        assertEquals(
+                new Point(0, 1),
+                mAuthController.rotateToCurrentOrientation(
+                        new Point(fpDefaultLocation), displayInfo)
+        );
+    }
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
         mAuthController.showAuthenticationDialog(createTestPromptInfo(),
