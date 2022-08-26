@@ -28,6 +28,8 @@ import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.qs.FgsManagerController;
+import com.android.systemui.qs.FgsManagerControllerImpl;
 import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
@@ -194,4 +196,8 @@ public interface QSFragmentModule {
     ) {
         return layoutInflater.inflate(R.layout.fgs_footer, footerActionsView, false);
     }
+
+    /** */
+    @Binds
+    FgsManagerController bindFgsManagerController(FgsManagerControllerImpl impl);
 }

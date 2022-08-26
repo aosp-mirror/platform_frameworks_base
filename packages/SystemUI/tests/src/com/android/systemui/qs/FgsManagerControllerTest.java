@@ -188,9 +188,9 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     public void testChangesSinceLastDialog() throws RemoteException {
         setUserProfiles(0);
 
-        Assert.assertFalse(mFmc.getChangesSinceDialog());
+        Assert.assertFalse(mFmc.getNewChangesSinceDialogWasDismissed());
         mIForegroundServiceObserver.onForegroundStateChanged(new Binder(), "pkg", 0, true);
-        Assert.assertTrue(mFmc.getChangesSinceDialog());
+        Assert.assertTrue(mFmc.getNewChangesSinceDialogWasDismissed());
     }
 
     @Test
@@ -233,14 +233,14 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         final Binder binder = new Binder();
         setShowStopButtonForUserAllowlistedApps(true);
         mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
-        Assert.assertEquals(1, mFmc.getNumVisibleButtons());
+        Assert.assertEquals(1, mFmc.visibleButtonsCount());
 
         mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, false);
-        Assert.assertEquals(0, mFmc.getNumVisibleButtons());
+        Assert.assertEquals(0, mFmc.visibleButtonsCount());
 
         setShowStopButtonForUserAllowlistedApps(false);
         mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
-        Assert.assertEquals(0, mFmc.getNumVisibleButtons());
+        Assert.assertEquals(0, mFmc.visibleButtonsCount());
     }
 
     private void setShowStopButtonForUserAllowlistedApps(boolean enable) {
@@ -269,7 +269,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         ArgumentCaptor<BroadcastReceiver> showFgsManagerReceiverArgumentCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
-        FgsManagerController result = new FgsManagerController(
+        FgsManagerController result = new FgsManagerControllerImpl(
                 mContext,
                 mMainExecutor,
                 mBackgroundExecutor,
