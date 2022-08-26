@@ -551,6 +551,17 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
     }
 
+    public boolean finishReceiverLocked(IBinder receiver, int resultCode,
+            String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
+        final BroadcastRecord r = getMatchingOrderedReceiver(receiver);
+        if (r != null) {
+            return finishReceiverLocked(r, resultCode,
+                    resultData, resultExtras, resultAbort, waitForServices);
+        } else {
+            return false;
+        }
+    }
+
     public boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
         final int state = r.state;

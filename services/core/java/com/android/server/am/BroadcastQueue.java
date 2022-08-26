@@ -75,16 +75,17 @@ public abstract class BroadcastQueue {
      */
     public abstract void enqueueBroadcastLocked(BroadcastRecord r);
 
-    public abstract BroadcastRecord getMatchingOrderedReceiver(IBinder receiver);
-
     /**
      * Signal delivered back from a {@link BroadcastReceiver} to indicate that
      * it's finished processing the current broadcast being dispatched to it.
      * <p>
      * If this signal isn't delivered back in a timely fashion, we assume the
      * receiver has somehow wedged and we trigger an ANR.
+     *
+     * @param receiver the value to match against
+     *            {@link BroadcastRecord#receiver} to identify the caller.
      */
-    public abstract boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
+    public abstract boolean finishReceiverLocked(IBinder receiver, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices);
 
     public abstract void backgroundServicesFinishedLocked(int userId);

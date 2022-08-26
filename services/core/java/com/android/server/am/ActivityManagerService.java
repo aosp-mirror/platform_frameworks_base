@@ -670,25 +670,33 @@ public class ActivityManagerService extends IActivityManager.Stub
     TraceErrorLogger mTraceErrorLogger;
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
-        if (isOnFgOffloadQueue(intent.getFlags())) {
+        return broadcastQueueForFlags(intent.getFlags(), intent);
+    }
+
+    BroadcastQueue broadcastQueueForFlags(int flags) {
+        return broadcastQueueForFlags(flags, null);
+    }
+
+    BroadcastQueue broadcastQueueForFlags(int flags, Object cookie) {
+        if (isOnFgOffloadQueue(flags)) {
             if (DEBUG_BROADCAST_BACKGROUND) {
                 Slog.i(TAG_BROADCAST,
-                        "Broadcast intent " + intent + " on foreground offload queue");
+                        "Broadcast intent " + cookie + " on foreground offload queue");
             }
             return mFgOffloadBroadcastQueue;
         }
 
-        if (isOnBgOffloadQueue(intent.getFlags())) {
+        if (isOnBgOffloadQueue(flags)) {
             if (DEBUG_BROADCAST_BACKGROUND) {
                 Slog.i(TAG_BROADCAST,
-                        "Broadcast intent " + intent + " on background offload queue");
+                        "Broadcast intent " + cookie + " on background offload queue");
             }
             return mBgOffloadBroadcastQueue;
         }
 
-        final boolean isFg = (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
+        final boolean isFg = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
         if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
-                "Broadcast intent " + intent + " on "
+                "Broadcast intent " + cookie + " on "
                 + (isFg ? "foreground" : "background") + " queue");
         return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
     }
@@ -13328,20 +13336,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             boolean doTrim = false;
-
             synchronized(this) {
                 ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
                 if (rl != null) {
                     final BroadcastRecord r = rl.curBroadcast;
-                    if (r != null && r == r.queue.getMatchingOrderedReceiver(r)) {
+                    if (r != null) {
                         final boolean doNext = r.queue.finishReceiverLocked(
-                                r, r.resultCode, r.resultData, r.resultExtras,
+                                receiver.asBinder(), r.resultCode, r.resultData, r.resultExtras,
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
                         }
                     }
-
                     if (rl.app != null) {
                         rl.app.mReceivers.removeReceiver(rl);
                     }
@@ -14518,22 +14524,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean doNext = false;
             BroadcastRecord r;
             BroadcastQueue queue;
-
             synchronized(this) {
-                if (isOnFgOffloadQueue(flags)) {
-                    queue = mFgOffloadBroadcastQueue;
-                } else if (isOnBgOffloadQueue(flags)) {
-                    queue = mBgOffloadBroadcastQueue;
-                } else {
-                    queue = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0
-                            ? mFgBroadcastQueue : mBgBroadcastQueue;
-                }
-
-                r = queue.getMatchingOrderedReceiver(who);
-                if (r != null) {
-                    doNext = r.queue.finishReceiverLocked(r, resultCode,
+                queue = broadcastQueueForFlags(flags);
+                doNext = queue.finishReceiverLocked(who, resultCode,
                         resultData, resultExtras, resultAbort, true);
-                }
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
             }
