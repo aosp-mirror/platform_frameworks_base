@@ -583,13 +583,13 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Précédent"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifications"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Raccourcis clavier"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Changer la dispos. du clavier"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Changer la disposition du clavier"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Applications"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistance"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Navigateur"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacts"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Courriel"</string>
-    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"Message texte"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"Messages texte"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musique"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Agenda"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne pas déranger"</string>
