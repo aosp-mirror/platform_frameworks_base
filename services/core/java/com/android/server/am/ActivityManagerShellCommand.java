@@ -348,6 +348,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetBgAbusiveUids(pw);
                 case "list-bg-exemptions-config":
                     return runListBgExemptionsConfig(pw);
+                case "reset-dropbox-rate-limiter":
+                    return runResetDropboxRateLimiter();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3360,6 +3362,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             pw.println();
         }
+        return 0;
+    }
+
+    int runResetDropboxRateLimiter() throws RemoteException {
+        mInternal.resetDropboxRateLimiter();
         return 0;
     }
 
