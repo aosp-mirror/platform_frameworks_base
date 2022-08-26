@@ -17,12 +17,9 @@
 package com.android.systemui.shade;
 
 import android.app.StatusBarManager;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputDevice;
@@ -52,7 +49,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -66,7 +62,6 @@ import javax.inject.Inject;
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
-    private final TunerService mTunerService;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationShadeWindowView mView;
     private final NotificationShadeDepthController mDepthController;
@@ -77,6 +72,7 @@ public class NotificationShadeWindowViewController {
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final AmbientState mAmbientState;
+    private final PulsingGestureListener mPulsingGestureListener;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -88,8 +84,6 @@ public class NotificationShadeWindowViewController {
     private final CentralSurfaces mService;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
-    private boolean mDoubleTapEnabled;
-    private boolean mSingleTapEnabled;
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
@@ -102,7 +96,6 @@ public class NotificationShadeWindowViewController {
     public NotificationShadeWindowViewController(
             LockscreenShadeTransitionController transitionController,
             FalsingCollector falsingCollector,
-            TunerService tunerService,
             SysuiStatusBarStateController statusBarStateController,
             DockManager dockManager,
             NotificationShadeDepthController depthController,
@@ -117,10 +110,11 @@ public class NotificationShadeWindowViewController {
             CentralSurfaces centralSurfaces,
             NotificationShadeWindowController controller,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            AmbientState ambientState) {
+            AmbientState ambientState,
+            PulsingGestureListener pulsingGestureListener
+    ) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
-        mTunerService = tunerService;
         mStatusBarStateController = statusBarStateController;
         mView = notificationShadeWindowView;
         mDockManager = dockManager;
@@ -136,6 +130,7 @@ public class NotificationShadeWindowViewController {
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
+        mPulsingGestureListener = pulsingGestureListener;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -151,46 +146,7 @@ public class NotificationShadeWindowViewController {
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
-
-        TunerService.Tunable tunable = (key, newValue) -> {
-            AmbientDisplayConfiguration configuration =
-                    new AmbientDisplayConfiguration(mView.getContext());
-            switch (key) {
-                case Settings.Secure.DOZE_DOUBLE_TAP_GESTURE:
-                    mDoubleTapEnabled = configuration.doubleTapGestureEnabled(
-                            UserHandle.USER_CURRENT);
-                    break;
-                case Settings.Secure.DOZE_TAP_SCREEN_GESTURE:
-                    mSingleTapEnabled = configuration.tapGestureEnabled(UserHandle.USER_CURRENT);
-            }
-        };
-        mTunerService.addTunable(tunable,
-                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
-                Settings.Secure.DOZE_TAP_SCREEN_GESTURE);
-
-        GestureDetector.SimpleOnGestureListener gestureListener =
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        if (mSingleTapEnabled && !mDockManager.isDocked()) {
-                            mService.wakeUpIfDozing(
-                                    SystemClock.uptimeMillis(), mView, "SINGLE_TAP");
-                            return true;
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        if (mDoubleTapEnabled || mSingleTapEnabled) {
-                            mService.wakeUpIfDozing(
-                                    SystemClock.uptimeMillis(), mView, "DOUBLE_TAP");
-                            return true;
-                        }
-                        return false;
-                    }
-                };
-        mGestureDetector = new GestureDetector(mView.getContext(), gestureListener);
+        mGestureDetector = new GestureDetector(mView.getContext(), mPulsingGestureListener);
 
         mLowLightClockController.ifPresent(controller -> controller.attachLowLightClockView(mView));
 
