@@ -23,7 +23,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -114,8 +113,8 @@ public class InputDeviceLightsManagerTest {
         return new InputDevice(id, 0 /* generation */, 0 /* controllerNumber */, "name",
                 0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
                 0 /* sources */, 0 /* keyboardType */, null /* keyCharacterMap */,
-                false /* hasVibrator */, false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                false /* hasSensor */, false /* hasBattery */);
+                InputDeviceCountryCode.INVALID, false /* hasVibrator */, false /* hasMicrophone */,
+                false /* hasButtonUnderpad */, false /* hasSensor */, false /* hasBattery */);
     }
 
     private void mockLights(Light[] lights) throws Exception {
