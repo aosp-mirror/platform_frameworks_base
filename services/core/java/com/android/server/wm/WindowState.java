@@ -242,6 +242,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -390,7 +391,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     int mSyncSeqId = 0;
 
-    /** The last syncId associated with a prepareSync or 0 when no sync is active. */
+    /** The last syncId associated with a BLAST prepareSync or 0 when no BLAST sync is active. */
     int mPrepareSyncSeqId = 0;
 
     /**
@@ -1896,6 +1897,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mPolicyVisibility & POLICY_VISIBILITY_ALL) == POLICY_VISIBILITY_ALL;
     }
 
+    boolean providesNonDecorInsets() {
+        if (mProvidedInsetsSources == null) {
+            return false;
+        }
+        for (int i = mProvidedInsetsSources.size() - 1; i >= 0; i--) {
+            final int type = mProvidedInsetsSources.keyAt(i);
+            if ((InsetsState.toPublicType(type) & WindowInsets.Type.navigationBars()) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void clearPolicyVisibilityFlag(int policyVisibilityFlag) {
         mPolicyVisibility &= ~policyVisibilityFlag;
         mWmService.scheduleAnimationLocked();
@@ -2608,13 +2622,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             removeImmediately();
-            // Removing a visible window will effect the computed orientation
-            // So just update orientation if needed.
+            boolean sentNewConfig = false;
             if (wasVisible) {
+                // Removing a visible window will effect the computed orientation
+                // So just update orientation if needed.
                 final DisplayContent displayContent = getDisplayContent();
                 if (displayContent.updateOrientation()) {
                     displayContent.sendNewConfiguration();
+                    sentNewConfig = true;
                 }
+            }
+            if (!sentNewConfig && providesNonDecorInsets()) {
+                getDisplayContent().sendNewConfiguration();
             }
             mWmService.updateFocusedWindowLocked(isFocused()
                             ? UPDATE_FOCUS_REMOVING_FOCUS
@@ -3892,9 +3911,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
                 true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
+        final boolean syncWithBuffers = syncRedraw && shouldSyncWithBuffers();
         final boolean reportDraw = syncRedraw || drawPending;
         final boolean isDragResizeChanged = isDragResizeChanged();
-        final boolean forceRelayout = syncRedraw || isDragResizeChanged;
+        final boolean forceRelayout = syncWithBuffers || isDragResizeChanged;
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
                 displayContent.getDisplayPolicy().areSystemBarsForcedShownLw();
@@ -3920,7 +3940,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
                     getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
-                    mSyncSeqId, resizeMode);
+                    syncWithBuffers ? mSyncSeqId : -1, resizeMode);
             if (drawPending && prevRotation >= 0 && prevRotation != mLastReportedConfiguration
                     .getMergedConfiguration().windowConfiguration.getRotation()) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
@@ -5924,7 +5944,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mSyncSeqId++;
-        mPrepareSyncSeqId = mSyncSeqId;
+        if (getSyncMethod() == BLASTSyncEngine.METHOD_BLAST) {
+            mPrepareSyncSeqId = mSyncSeqId;
+        }
         requestRedrawForSync();
         return true;
     }
@@ -5997,6 +6019,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             postDrawTransaction = null;
             skipLayout = true;
         } else if (syncActive) {
+            // Currently in a Sync that is using BLAST.
             if (!syncStillPending) {
                 onSyncFinishedDrawing();
             }
@@ -6005,6 +6028,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // Consume the transaction because the sync group will merge it.
                 postDrawTransaction = null;
             }
+        } else if (useBLASTSync()) {
+            // Sync that is not using BLAST
+            onSyncFinishedDrawing();
         }
 
         final boolean layoutNeeded =
@@ -6061,6 +6087,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         return useBLASTSync();
+    }
+
+    int getSyncMethod() {
+        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
+        if (syncGroup == null) return BLASTSyncEngine.METHOD_NONE;
+        if (mSyncMethodOverride != BLASTSyncEngine.METHOD_UNDEFINED) return mSyncMethodOverride;
+        return syncGroup.mSyncMethod;
+    }
+
+    boolean shouldSyncWithBuffers() {
+        if (!mDrawHandlers.isEmpty()) return true;
+        return getSyncMethod() == BLASTSyncEngine.METHOD_BLAST;
     }
 
     void requestRedrawForSync() {

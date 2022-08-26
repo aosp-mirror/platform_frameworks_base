@@ -16,15 +16,8 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Footer
 
 @Composable
@@ -35,15 +28,7 @@ fun AppInfoPage(
     footerText: String,
     content: @Composable () -> Unit,
 ) {
-    // TODO: Replace with SettingsScaffold
-    Column(Modifier.verticalScroll(rememberScrollState())) {
-        Text(
-            text = title,
-            modifier = Modifier.padding(SettingsDimension.itemPadding),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.headlineMedium,
-        )
-
+    RegularScaffold(title = title) {
         AppInfo(packageName, userId)
 
         content()

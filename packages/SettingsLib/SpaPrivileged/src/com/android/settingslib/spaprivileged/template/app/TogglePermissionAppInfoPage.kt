@@ -17,6 +17,7 @@
 package com.android.settingslib.spaprivileged.template.app
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,21 +29,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
+import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
+import com.android.settingslib.spaprivileged.model.app.toRoute
 import kotlinx.coroutines.Dispatchers
 
+private const val NAME = "TogglePermissionAppInfoPage"
 private const val PERMISSION = "permission"
 private const val PACKAGE_NAME = "packageName"
 private const val USER_ID = "userId"
 
-open class TogglePermissionAppInfoPageProvider(
+internal class TogglePermissionAppInfoPageProvider(
     private val factory: TogglePermissionAppListModelFactory,
 ) : SettingsPageProvider {
-    override val name = "TogglePermissionAppInfoPage"
+    override val name = NAME
 
     override val arguments = listOf(
         navArgument(PERMISSION) { type = NavType.StringType },
@@ -60,8 +64,11 @@ open class TogglePermissionAppInfoPageProvider(
         TogglePermissionAppInfoPage(listModel, packageName, userId)
     }
 
-    fun getRoute(permissionType: String, packageName: String, userId: Int): String =
-        "$name/$permissionType/$packageName/$userId"
+    companion object {
+        @Composable
+        internal fun navigator(permissionType: String, app: ApplicationInfo) =
+            navigator(route = "$NAME/$permissionType/${app.toRoute()}")
+    }
 }
 
 @Composable

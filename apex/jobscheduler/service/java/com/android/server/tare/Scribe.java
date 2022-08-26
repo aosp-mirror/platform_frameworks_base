@@ -216,17 +216,21 @@ public class Scribe {
         mRemainingConsumableCakes = 0;
 
         final SparseArray<ArraySet<String>> installedPackagesPerUser = new SparseArray<>();
-        final List<InstalledPackageInfo> installedPackages = mIrs.getInstalledPackages();
-        for (int i = 0; i < installedPackages.size(); ++i) {
-            final InstalledPackageInfo packageInfo = installedPackages.get(i);
-            if (packageInfo.uid != InstalledPackageInfo.NO_UID) {
-                final int userId = UserHandle.getUserId(packageInfo.uid);
-                ArraySet<String> pkgsForUser = installedPackagesPerUser.get(userId);
-                if (pkgsForUser == null) {
-                    pkgsForUser = new ArraySet<>();
-                    installedPackagesPerUser.put(userId, pkgsForUser);
+        final SparseArrayMap<String, InstalledPackageInfo> installedPackages =
+                mIrs.getInstalledPackages();
+        for (int uIdx = installedPackages.numMaps() - 1; uIdx >= 0; --uIdx) {
+            final int userId = installedPackages.keyAt(uIdx);
+
+            for (int pIdx = installedPackages.numElementsForKeyAt(uIdx) - 1; pIdx >= 0; --pIdx) {
+                final InstalledPackageInfo packageInfo = installedPackages.valueAt(uIdx, pIdx);
+                if (packageInfo.uid != InstalledPackageInfo.NO_UID) {
+                    ArraySet<String> pkgsForUser = installedPackagesPerUser.get(userId);
+                    if (pkgsForUser == null) {
+                        pkgsForUser = new ArraySet<>();
+                        installedPackagesPerUser.put(userId, pkgsForUser);
+                    }
+                    pkgsForUser.add(packageInfo.packageName);
                 }
-                pkgsForUser.add(packageInfo.packageName);
             }
         }
 

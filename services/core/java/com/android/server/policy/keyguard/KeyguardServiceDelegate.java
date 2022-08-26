@@ -249,10 +249,10 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void setOccluded(boolean isOccluded, boolean animate, boolean notify) {
+    public void setOccluded(boolean isOccluded, boolean notify) {
         if (mKeyguardService != null && notify) {
-            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
-            mKeyguardService.setOccluded(isOccluded, animate);
+            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ")");
+            mKeyguardService.setOccluded(isOccluded, false /* animate */);
         }
         mKeyguardState.occluded = isOccluded;
     }
@@ -394,9 +394,9 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime) {
         if (mKeyguardService != null) {
-            mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
+            mKeyguardService.startKeyguardExitAnimation(startTime, 0);
         }
     }
 

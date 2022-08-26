@@ -66,7 +66,7 @@ struct OverlayData {
 
   struct Value {
     std::string resource_name;
-    std::variant<ResourceIdValue, TargetValue> value;
+    std::variant<ResourceIdValue, TargetValueWithConfig> value;
   };
 
   struct InlineStringPoolData {

@@ -2,6 +2,8 @@ package com.android.settingslib.spaprivileged.model.app
 
 import android.content.pm.ApplicationInfo
 import android.icu.text.CollationKey
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.Flow
 
 data class AppEntry<T : AppRecord>(
@@ -22,5 +24,6 @@ interface AppListModel<T : AppRecord> {
         { it.record.app.uid },
     )
 
-    fun getSummary(option: Int, record: T): Flow<String>?
+    @Composable
+    fun getSummary(option: Int, record: T): State<String>?
 }

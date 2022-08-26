@@ -214,6 +214,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -581,6 +582,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     @ChangeId
     @Disabled
     private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
+
+    /**
+     * Apps targeting Android U and above will need to export components in order to invoke them
+     * through implicit intents.
+     *
+     * If a component is not exported and invoked, it will be removed from the list of receivers.
+     * This applies specifically to activities and broadcasts.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS = 229362273;
 
     /**
      * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
@@ -10626,8 +10638,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
-                pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
-                        + queue.hasBroadcastsScheduled());
+                pw.println("  Queue " + queue.toString() + ": " + queue.describeState());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -12347,6 +12358,58 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Filters out non-exported components in a given list of broadcast filters
+     * @param intent the original intent
+     * @param callingUid the calling UID
+     * @param query the list of broadcast filters
+     * @param platformCompat the instance of platform compat
+     */
+    private static void filterNonExportedComponents(Intent intent, int callingUid,
+            List query, PlatformCompat platformCompat, String callerPackage) {
+        if (query == null
+                || intent.getPackage() != null
+                || intent.getComponent() != null
+                || ActivityManager.canAccessUnexportedComponents(callingUid)) {
+            return;
+        }
+        for (int i = query.size() - 1; i >= 0; i--) {
+            String componentInfo;
+            ResolveInfo resolveInfo;
+            BroadcastFilter broadcastFilter;
+            if (query.get(i) instanceof ResolveInfo) {
+                resolveInfo = (ResolveInfo) query.get(i);
+                if (resolveInfo.getComponentInfo().exported) {
+                    continue;
+                }
+                componentInfo = resolveInfo.getComponentInfo()
+                        .getComponentName().flattenToShortString();
+            } else if (query.get(i) instanceof BroadcastFilter) {
+                broadcastFilter = (BroadcastFilter) query.get(i);
+                if (broadcastFilter.exported) {
+                    continue;
+                }
+                componentInfo = broadcastFilter.packageName;
+            } else {
+                continue;
+            }
+            if (!platformCompat.isChangeEnabledByUid(
+                    IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS, callingUid)) {
+                Slog.w(TAG, "Non-exported component not filtered out "
+                        + "(will be filtered out once the app targets U+)- intent: "
+                        + intent.getAction() + ", component: "
+                        + componentInfo + ", sender: "
+                        + callerPackage);
+                return;
+            }
+            Slog.w(TAG, "Non-exported component filtered out - intent: "
+                    + intent.getAction() + ", component: "
+                    + componentInfo + ", sender: "
+                    + callerPackage);
+            query.remove(i);
+        }
+    }
+
+    /**
      * Main code for cleaning up a process when it has gone away.  This is
      * called both as a result of the process dying, or directly when stopping
      * a process when running in single process mode.
@@ -13082,17 +13145,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean isPendingBroadcastProcessLocked(int pid) {
-        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mFgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            BroadcastRecord r = queue.getPendingBroadcastLocked();
+            if (r != null && r.curApp.getPid() == pid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
-        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mBgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mFgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            BroadcastRecord r = queue.getPendingBroadcastLocked();
+            if (r != null && r.curApp == app) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void skipPendingBroadcastLocked(int pid) {
@@ -13114,7 +13183,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.updateUidReadyForBootCompletedBroadcastLocked(uid);
-            queue.scheduleBroadcastsLocked();
         }
     }
 
@@ -13364,8 +13432,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             receivers, null, 0, null, null, false, true, true, -1, false, null,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
                             null /* filterExtrasForReceiver */);
-                    queue.enqueueParallelBroadcastLocked(r);
-                    queue.scheduleBroadcastsLocked();
+                    queue.enqueueBroadcastLocked(r);
                 }
             }
 
@@ -14226,6 +14293,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        filterNonExportedComponents(intent, callingUid, registeredReceivers,
+                mPlatformCompat, callerPackage);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
         if (!ordered && NR > 0) {
             // If we are not serializing this broadcast, then send the
@@ -14243,13 +14312,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sticky, false, userId, allowBackgroundActivityStarts,
                     backgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
-            final boolean replaced = replacePending
-                    && (queue.replaceParallelBroadcastLocked(r) != null);
-            // Note: We assume resultTo is null for non-ordered broadcasts.
-            if (!replaced) {
-                queue.enqueueParallelBroadcastLocked(r);
-                queue.scheduleBroadcastsLocked();
-            }
+            queue.enqueueBroadcastLocked(r);
             registeredReceivers = null;
             NR = 0;
         }
@@ -14334,6 +14397,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
+            filterNonExportedComponents(intent, callingUid, receivers,
+                    mPlatformCompat, callerPackage);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
@@ -14342,31 +14407,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     backgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
-
-            final BroadcastRecord oldRecord =
-                    replacePending ? queue.replaceOrderedBroadcastLocked(r) : null;
-            if (oldRecord != null) {
-                // Replaced, fire the result-to receiver.
-                if (oldRecord.resultTo != null) {
-                    final BroadcastQueue oldQueue = broadcastQueueForIntent(oldRecord.intent);
-                    try {
-                        oldRecord.mIsReceiverAppRunning = true;
-                        oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
-                                oldRecord.intent,
-                                Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid,
-                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failure ["
-                                + queue.mQueueName + "] sending broadcast result of "
-                                + intent, e);
-
-                    }
-                }
-            } else {
-                queue.enqueueOrderedBroadcastLocked(r);
-                queue.scheduleBroadcastsLocked();
-            }
+            queue.enqueueBroadcastLocked(r);
         } else {
             // There was nobody interested in the broadcast, but we still want to record
             // that it happened.
@@ -17890,7 +17931,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             pw.flush();
                         }
                         Slog.v(TAG, msg);
-                        queue.cancelDeferrals();
+                        queue.flush();
                         idle = false;
                     }
                 }

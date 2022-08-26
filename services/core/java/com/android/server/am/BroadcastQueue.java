@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package com.android.server.am;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.FileDescriptor;
@@ -33,9 +32,12 @@ import java.util.Set;
  * Queue of broadcast intents and associated bookkeeping.
  */
 public abstract class BroadcastQueue {
+    public static final String TAG = "BroadcastQueue";
+
     final ActivityManagerService mService;
     final Handler mHandler;
     final BroadcastConstants mConstants;
+    final BroadcastSkipPolicy mSkipPolicy;
     final String mQueueName;
 
     BroadcastQueue(ActivityManagerService service, Handler handler,
@@ -44,6 +46,7 @@ public abstract class BroadcastQueue {
         mHandler = handler;
         mQueueName = name;
         mConstants = constants;
+        mSkipPolicy = new BroadcastSkipPolicy(service);
     }
 
     void start(ContentResolver resolver) {
@@ -57,23 +60,20 @@ public abstract class BroadcastQueue {
 
     public abstract boolean isDelayBehindServices();
 
-    public abstract boolean hasBroadcastsScheduled();
-
     public abstract BroadcastRecord getPendingBroadcastLocked();
 
     public abstract BroadcastRecord getActiveBroadcastLocked();
 
-    public abstract boolean isPendingBroadcastProcessLocked(int pid);
-
-    public abstract boolean isPendingBroadcastProcessLocked(ProcessRecord app);
-
-    public abstract void enqueueParallelBroadcastLocked(BroadcastRecord r);
-
-    public abstract void enqueueOrderedBroadcastLocked(BroadcastRecord r);
-
-    public abstract BroadcastRecord replaceParallelBroadcastLocked(BroadcastRecord r);
-
-    public abstract BroadcastRecord replaceOrderedBroadcastLocked(BroadcastRecord r);
+    /**
+     * Enqueue the given broadcast to be eventually dispatched.
+     * <p>
+     * Callers must populate {@link BroadcastRecord#receivers} with the relevant
+     * targets before invoking this method.
+     * <p>
+     * When {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} is set, this method
+     * internally handles replacement of any matching broadcasts.
+     */
+    public abstract void enqueueBroadcastLocked(BroadcastRecord r);
 
     public abstract void updateUidReadyForBootCompletedBroadcastLocked(int uid);
 
@@ -83,31 +83,50 @@ public abstract class BroadcastQueue {
 
     public abstract void skipCurrentReceiverLocked(ProcessRecord app);
 
-    public abstract void scheduleBroadcastsLocked();
-
     public abstract BroadcastRecord getMatchingOrderedReceiver(IBinder receiver);
 
+    /**
+     * Signal delivered back from a {@link BroadcastReceiver} to indicate that
+     * it's finished processing the current broadcast being dispatched to it.
+     * <p>
+     * If this signal isn't delivered back in a timely fashion, we assume the
+     * receiver has somehow wedged and we trigger an ANR.
+     */
     public abstract boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices);
 
     public abstract void backgroundServicesFinishedLocked(int userId);
 
-    public abstract void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
-            Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky, int sendingUser,
-            int receiverUid, int callingUid, long dispatchDelay,
-            long receiveDelay) throws RemoteException;
-
     public abstract void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj);
 
+    /**
+     * Signal from OS internals that the given package (or some subset of that
+     * package) has been disabled or uninstalled, and that any pending
+     * broadcasts should be cleaned up.
+     */
     public abstract boolean cleanupDisabledPackageReceiversLocked(
             String packageName, Set<String> filterByClasses, int userId, boolean doit);
 
+    /**
+     * Quickly determine if this queue has broadcasts that are still waiting to
+     * be delivered at some point in the future.
+     *
+     * @see #flush()
+     */
     public abstract boolean isIdle();
 
-    public abstract void cancelDeferrals();
-
+    /**
+     * Brief summary of internal state, useful for debugging purposes.
+     */
     public abstract String describeState();
+
+    /**
+     * Flush any broadcasts still waiting to be delivered, causing them to be
+     * delivered as soon as possible.
+     *
+     * @see #isIdle()
+     */
+    public abstract void flush();
 
     public abstract void dumpDebug(ProtoOutputStream proto, long fieldId);
 

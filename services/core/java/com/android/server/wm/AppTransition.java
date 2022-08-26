@@ -375,9 +375,6 @@ public class AppTransition implements Dump {
         final AnimationAdapter topOpeningAnim = wc != null ? wc.getAnimation() : null;
 
         int redoLayout = notifyAppTransitionStartingLocked(
-                AppTransition.isKeyguardGoingAwayTransitOld(transit),
-                AppTransition.isKeyguardOccludeTransitOld(transit),
-                topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
@@ -416,7 +413,7 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final boolean keyguardGoingAway = mNextAppTransitionRequests.contains(
+        final boolean keyguardGoingAwayCancelled = mNextAppTransitionRequests.contains(
                 TRANSIT_KEYGUARD_GOING_AWAY);
 
         // The RemoteAnimationControl didn't register AppTransitionListener and
@@ -429,7 +426,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionRequests.clear();
         clear();
         setReady();
-        notifyAppTransitionCancelledLocked(keyguardGoingAway);
+        notifyAppTransitionCancelledLocked(keyguardGoingAwayCancelled);
     }
 
     private void setAppTransitionState(int state) {
@@ -479,9 +476,9 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled) {
         for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAway);
+            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAwayCancelled);
         }
     }
 
@@ -491,14 +488,12 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway,
-            boolean keyguardOcclude, long duration, long statusBarAnimationStartTime,
+    private int notifyAppTransitionStartingLocked(long statusBarAnimationStartTime,
             long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
-            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
-                    keyguardOcclude, duration, statusBarAnimationStartTime,
-                    statusBarAnimationDuration);
+            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(
+                    statusBarAnimationStartTime, statusBarAnimationDuration);
         }
         return redoLayout;
     }

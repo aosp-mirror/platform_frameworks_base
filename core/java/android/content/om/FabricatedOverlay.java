@@ -112,6 +112,28 @@ public class FabricatedOverlay {
          * @param resourceName name of the target resource to overlay (in the form
          *                     [package]:type/entry)
          * @param dataType the data type of the new value
+         * @param value the unsigned 32 bit integer representing the new value
+         * @param configuration The string representation of the config this overlay is enabled for
+         *
+         * @see android.util.TypedValue#type
+         */
+        public Builder setResourceValue(@NonNull String resourceName, int dataType, int value,
+                String configuration) {
+            final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
+            entry.resourceName = resourceName;
+            entry.dataType = dataType;
+            entry.data = value;
+            entry.configuration = configuration;
+            mEntries.add(entry);
+            return this;
+        }
+
+        /**
+         * Sets the value of the fabricated overlay
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *                     [package]:type/entry)
+         * @param dataType the data type of the new value
          * @param value the string representing the new value
          *
          * @see android.util.TypedValue#type
@@ -121,6 +143,28 @@ public class FabricatedOverlay {
             entry.resourceName = resourceName;
             entry.dataType = dataType;
             entry.stringData = value;
+            mEntries.add(entry);
+            return this;
+        }
+
+        /**
+         * Sets the value of the fabricated overlay
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *                     [package]:type/entry)
+         * @param dataType the data type of the new value
+         * @param value the string representing the new value
+         * @param configuration The string representation of the config this overlay is enabled for
+         *
+         * @see android.util.TypedValue#type
+         */
+        public Builder setResourceValue(@NonNull String resourceName, int dataType, String value,
+                String configuration) {
+            final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
+            entry.resourceName = resourceName;
+            entry.dataType = dataType;
+            entry.stringData = value;
+            entry.configuration = configuration;
             mEntries.add(entry);
             return this;
         }

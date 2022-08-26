@@ -387,8 +387,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * An internal-only version of vibrate that allows the caller access to the {@link Vibration}.
      * The Vibration is only returned if it is ongoing after this method returns.
      */
-    @Nullable
     @VisibleForTesting
+    @Nullable
     Vibration vibrateInternal(int uid, String opPkg, @NonNull CombinedVibration effect,
             @Nullable VibrationAttributes attrs, String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
@@ -1844,6 +1844,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     attrs, commonOptions.description, deathBinder);
             if (vib != null && !commonOptions.background) {
                 try {
+                    // Waits for the client vibration to finish, but the VibrationThread may still
+                    // do cleanup after this.
                     vib.waitForEnd();
                 } catch (InterruptedException e) {
                 }
