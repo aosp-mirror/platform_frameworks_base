@@ -520,11 +520,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         final Rect insets = stableInsets != null ? stableInsets : getDisplayInsets(context);
 
         // Make split axis insets value same as the larger one to avoid bounds1 and bounds2
-        // have difference after split switching for solving issues on non-resizable app case.
-        if (isLandscape) {
-            final int largerInsets = Math.max(insets.left, insets.right);
-            insets.set(largerInsets, insets.top, largerInsets, insets.bottom);
-        } else {
+        // have difference for avoiding size-compat mode when switching unresizable apps in
+        // landscape while they are letterboxed.
+        if (!isLandscape) {
             final int largerInsets = Math.max(insets.top, insets.bottom);
             insets.set(insets.left, largerInsets, insets.right, largerInsets);
         }
