@@ -30,9 +30,10 @@ import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HO
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SYSTEM;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_TOP_ACTIVITY;
-import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE;
-import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE_OVER_QUOTA;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_JOB;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_PUSH_MESSAGE;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TYPE__UNKNOWN;
 
@@ -97,6 +98,7 @@ public final class HostingRecord {
     public static final String TRIGGER_TYPE_ALARM = "alarm";
     public static final String TRIGGER_TYPE_PUSH_MESSAGE = "push_message";
     public static final String TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA = "push_message_over_quota";
+    public static final String TRIGGER_TYPE_JOB = "job";
 
     @NonNull private final String mHostingType;
     private final String mHostingName;
@@ -126,10 +128,11 @@ public final class HostingRecord {
     }
 
     public HostingRecord(@NonNull String hostingType, ComponentName hostingName,
-            String definingPackageName, int definingUid, String definingProcessName) {
+            String definingPackageName, int definingUid, String definingProcessName,
+            String triggerType) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE, definingPackageName,
                 definingUid, false /* isTopApp */, definingProcessName, null /* action */,
-                TRIGGER_TYPE_UNKNOWN);
+                triggerType);
     }
 
     public HostingRecord(@NonNull String hostingType, ComponentName hostingName, boolean isTopApp) {
@@ -313,9 +316,11 @@ public final class HostingRecord {
             case TRIGGER_TYPE_ALARM:
                 return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
             case TRIGGER_TYPE_PUSH_MESSAGE:
-                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE;
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_PUSH_MESSAGE;
             case TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA:
-                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_PUSH_MESSAGE_OVER_QUOTA;
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+            case TRIGGER_TYPE_JOB:
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_JOB;
             default:
                 return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
         }
