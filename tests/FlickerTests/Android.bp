@@ -45,8 +45,6 @@ android_test {
         "truth-prebuilt",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
-        "systemui-tapl",
-        "systemui-helper",
         "platform-test-annotations",
         "wm-flicker-window-extensions",
     ],

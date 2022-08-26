@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -34,20 +33,16 @@ import org.junit.Test
 abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     OpenAppTransition(testSpec) {
 
-    protected val lockScreen = LockscreenController.get()
     /**
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.() -> Unit = {
         super.transition(this)
         setup {
-            test {
-                lockScreen.setUnlockSwipe()
-            }
             eachRun {
-                lockScreen.lockScreen()
+                device.sleep()
                 wmHelper.StateSyncBuilder()
-                    .withKeyguardShowing()
+                    .withoutTopVisibleAppWindows()
                     .waitForAndVerify()
             }
         }
@@ -96,8 +91,8 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun screenLockedStart() {
-        testSpec.assertWmStart {
-            isKeyguardShowing()
+        testSpec.assertLayersStart {
+            isEmpty()
         }
     }
 

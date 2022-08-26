@@ -45,8 +45,6 @@ android_test {
         "app-helpers-core",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
-        "systemui-tapl",
-        "systemui-helper",
         "wm-flicker-common-assertions",
         "wm-flicker-common-app-helpers",
         "platform-test-annotations",

@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
@@ -51,8 +50,6 @@ import org.junit.runners.Parameterized
 open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     OpenAppFromNotificationCold(testSpec) {
 
-    private val lockScreen = LockscreenController.get()
-
     override val openingNotificationsFromLockScreen = true
 
     override val transition: FlickerBuilder.() -> Unit
@@ -60,7 +57,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
             // Needs to run at start of transition,
             // so before the transition defined in super.transition
             transitions {
-                lockScreen.turnScreenOn()
+                device.wakeUp()
             }
 
             super.transition(this)
@@ -68,9 +65,9 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
                 eachRun {
-                    lockScreen.lockScreen()
+                    device.sleep()
                     wmHelper.StateSyncBuilder()
-                        .withKeyguardShowing()
+                        .withoutTopVisibleAppWindows()
                         .waitForAndVerify()
                 }
             }
