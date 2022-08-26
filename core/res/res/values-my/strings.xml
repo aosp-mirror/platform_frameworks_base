@@ -1435,7 +1435,7 @@
     <string name="ext_media_status_removed" msgid="241223931135751691">"ဖယ်ရှာပြီး"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"ဖယ်ထုတ်ပြီး၏"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"စစ်ဆေးနေပါသည်…"</string>
-    <string name="ext_media_status_mounted" msgid="3459448555811203459">"အသင့့်ဖြစ်နေ"</string>
+    <string name="ext_media_status_mounted" msgid="3459448555811203459">"အသင့်ဖြစ်ပြီ"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"ဖတ်ရန်အတွက်သာ"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"လုံခြုံမှုမရှိစွာ ဖယ်ရှားခဲ့၏"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"ပျက်စီးသွား၏"</string>

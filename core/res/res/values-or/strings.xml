@@ -1613,7 +1613,7 @@
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
-    <string name="default_audio_route_category_name" msgid="5241740395748134483">"ସିଷ୍ଟମ୍‌"</string>
+    <string name="default_audio_route_category_name" msgid="5241740395748134483">"ସିଷ୍ଟମ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ୱେୟାର୍‍ଲେସ୍‍ ଡିସ୍‍ପ୍ଲେ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"କାଷ୍ଟ କରନ୍ତୁ"</string>
@@ -2061,7 +2061,7 @@
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13ଠାରୁ, ଆପଣ ଇନଷ୍ଟଲ କରୁଥିବା ଆପ୍ସ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପଠାଇବା ପାଇଁ ଆପଣଙ୍କ ଅନୁମତି ଆବଶ୍ୟକ କରେ। ପୂର୍ବରୁ ଥିବା ଆପ୍ସ ପାଇଁ ଏହି ଅନୁମତିକୁ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ମୋତେ ପରେ ରିମାଇଣ୍ଡ କର"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ୍‌"</string>
+    <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ସେଟିଂସ୍"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"କ୍ୟାମେରା"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ମାଇକ୍ରୋଫୋନ"</string>

@@ -1069,7 +1069,7 @@
     <string name="menu_shift_shortcut_label" msgid="5443936876111232346">"Shift+"</string>
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
-    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"স্পেস"</string>
+    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"মুছুন"</string>
     <string name="search_go" msgid="2141477624421347086">"সার্চ"</string>
