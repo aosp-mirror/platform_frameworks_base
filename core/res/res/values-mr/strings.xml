@@ -973,7 +973,7 @@
     <string name="granularity_label_link" msgid="9007852307112046526">"लिंक"</string>
     <string name="granularity_label_line" msgid="376204904280620221">"रेखा"</string>
     <string name="factorytest_failed" msgid="3190979160945298006">"फॅक्टरी चाचणी अयशस्वी"</string>
-    <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST क्रिया फक्त /सिस्टम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी समर्थित आहे."</string>
+    <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
