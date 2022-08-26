@@ -9309,7 +9309,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         Selection.setSelection(getEditableText(), range[0], range[1]);
         mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
-        return 0;
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
@@ -9320,8 +9320,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         getEditableText().delete(range[0], range[1]);
         Selection.setSelection(getEditableText(), range[0]);
-        // TODO: Delete extra spaces.
-        return 0;
+        // TODO(b/243983058): Delete extra spaces.
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
@@ -9345,16 +9345,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         String textToInsert = gesture.getTextToInsert();
         getEditableText().insert(offset, textToInsert);
         Selection.setSelection(getEditableText(), offset + textToInsert.length());
-        // TODO: Insert extra spaces if necessary.
-        return 0;
+        // TODO(b/243980426): Insert extra spaces if necessary.
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     private int handleGestureFailure(HandwritingGesture gesture) {
         if (!TextUtils.isEmpty(gesture.getFallbackText())) {
             getEditableText()
                     .replace(getSelectionStart(), getSelectionEnd(), gesture.getFallbackText());
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FALLBACK;
         }
-        return 0;
+        return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
     }
 
     @Nullable
