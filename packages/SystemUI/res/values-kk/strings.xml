@@ -91,7 +91,7 @@
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Скриншотты өзгерту"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Тағы суретке түсіру"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Скриншотты жабу"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"Скриншотты алдын ала қарау"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Скриншотты алдын ала көру"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Жоғарғы шектік сызық: <xliff:g id="PERCENT">%1$d</xliff:g> пайыз"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Төменгі шектік сызық: <xliff:g id="PERCENT">%1$d</xliff:g> пайыз"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Сол жақ шектік сызық: <xliff:g id="PERCENT">%1$d</xliff:g> пайыз"</string>

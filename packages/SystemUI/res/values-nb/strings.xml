@@ -38,7 +38,7 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Slå på"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Slå på batterisparing"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Innstillinger"</string>
-    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Trådløse nettverk"</string>
+    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotér skjermen automatisk"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"DEMPET"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
@@ -219,7 +219,7 @@
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Kobler til."</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
-    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wifi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Uten SIM."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobildata"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobildata er slått på"</string>
@@ -365,7 +365,7 @@
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Meg"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Bruker"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Ny bruker"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wifi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internett"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tilgjengelige nettverk"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nettverk er utilgjengelige"</string>
@@ -653,7 +653,7 @@
     <string name="output_none_found" msgid="5488087293120982770">"Fant ingen enheter"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"Fant ingen enheter. Prøv å slå på <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
-    <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
+    <string name="output_service_wifi" msgid="9003667810868222134">"Wifi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth og Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Vis prosent for det innebygde batteriet"</string>

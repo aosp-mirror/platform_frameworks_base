@@ -1035,7 +1035,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstør hele skærmen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstør en del af skærmen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Skift"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Knappen Hjælpefunktioner har erstattet bevægelsen for hjælpefunktioner\n\n"<annotation id="link">"Se indstillinger"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Knappen til hjælpefunktioner har erstattet bevægelsen for hjælpefunktioner\n\n"<annotation id="link">"Se indstillinger"</annotation></string>
     <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Hvis du ikke vil bruge bevægelsen til hjælpefunktioner, kan du skifte til knappen\n\n"<annotation id="link">"Indstillinger"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flyt knappen til kanten for at skjule den midlertidigt"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Flyt op til venstre"</string>
