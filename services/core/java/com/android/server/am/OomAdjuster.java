@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL_IMPLICIT;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
@@ -2565,10 +2566,16 @@ public class OomAdjuster {
             case PROCESS_STATE_BOUND_TOP:
                 return PROCESS_CAPABILITY_NETWORK;
             case PROCESS_STATE_FOREGROUND_SERVICE:
-                // Capability from foreground service is conditional depending on
-                // foregroundServiceType in the manifest file and the
-                // mAllowWhileInUsePermissionInFgs flag.
-                return PROCESS_CAPABILITY_NETWORK;
+                if (psr.hasForegroundServices()) {
+                    // Capability from FGS are conditional depending on foreground service type in
+                    // manifest file and the mAllowWhileInUsePermissionInFgs flag.
+                    return PROCESS_CAPABILITY_NETWORK;
+                } else {
+                    // process has no FGS, the PROCESS_STATE_FOREGROUND_SERVICE is from client.
+                    // the implicit capability could be removed in the future, client should use
+                    // BIND_INCLUDE_CAPABILITY flag.
+                    return PROCESS_CAPABILITY_ALL_IMPLICIT | PROCESS_CAPABILITY_NETWORK;
+                }
             case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
                 return PROCESS_CAPABILITY_NETWORK;
             default:
