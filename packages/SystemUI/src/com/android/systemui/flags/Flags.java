@@ -250,6 +250,9 @@ public class Flags {
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
     public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
 
+    // 1400 - columbus, b/242800729
+    public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
