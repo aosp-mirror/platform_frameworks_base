@@ -230,6 +230,7 @@ android_library {
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
