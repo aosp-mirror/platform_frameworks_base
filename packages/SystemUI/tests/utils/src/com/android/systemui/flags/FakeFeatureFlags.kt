@@ -56,7 +56,6 @@ class FakeFeatureFlags : FeatureFlags {
         stringFlags.put(flag.id, value)
     }
 
-
     override fun isEnabled(flag: UnreleasedFlag): Boolean = requireBooleanValue(flag.id)
 
     override fun isEnabled(flag: ReleasedFlag): Boolean = requireBooleanValue(flag.id)

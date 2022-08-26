@@ -56,6 +56,7 @@ import javax.inject.Provider
  * determined by [buttonsVisibleState]
  */
 @QSScope
+// TODO(b/242040009): Remove this file.
 internal class FooterActionsController @Inject constructor(
     view: FooterActionsView,
     multiUserSwitchControllerFactory: MultiUserSwitchController.Factory,

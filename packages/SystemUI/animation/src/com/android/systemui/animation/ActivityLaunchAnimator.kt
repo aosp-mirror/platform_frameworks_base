@@ -311,8 +311,7 @@ class ActivityLaunchAnimator(
             @JvmStatic
             fun fromView(view: View, cujType: Int? = null): Controller? {
                 if (view.parent !is ViewGroup) {
-                    // TODO(b/192194319): Throw instead of just logging.
-                    Log.wtf(
+                    Log.e(
                         TAG,
                         "Skipping animation as view $view is not attached to a ViewGroup",
                         Exception()
