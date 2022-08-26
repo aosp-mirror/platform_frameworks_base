@@ -46,12 +46,15 @@ import android.view.View;
 import android.view.autofill.AutofillId;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -527,6 +530,72 @@ public class EditorInfo implements InputType, Parcelable {
      */
     @Nullable
     public String[] contentMimeTypes = null;
+
+    private @HandwritingGesture.GestureTypeFlags int mSupportedHandwritingGestureTypes;
+
+    /**
+     * Set the Handwriting gestures supported by the current {@code Editor}.
+     * For an editor that supports Stylus Handwriting
+     * {@link InputMethodManager#startStylusHandwriting}, it is also recommended that it declares
+     * supported gestures.
+     * <p> If editor doesn't support one of the declared types, IME will not send those Gestures
+     *  to the editor. Instead they will fallback to using normal text input. </p>
+     * @param gestures List of supported gesture classes including any of {@link SelectGesture},
+     * {@link InsertGesture}, {@link DeleteGesture}.
+     */
+    public void setSupportedHandwritingGestures(
+            @NonNull List<Class<? extends HandwritingGesture>> gestures) {
+        Objects.requireNonNull(gestures);
+        if (gestures.isEmpty()) {
+            mSupportedHandwritingGestureTypes = 0;
+            return;
+        }
+
+        int supportedTypes = 0;
+        for (Class<? extends HandwritingGesture> gesture : gestures) {
+            Objects.requireNonNull(gesture);
+            if (gesture.equals(SelectGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_SELECT;
+            } else if (gesture.equals(InsertGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_INSERT;
+            } else if (gesture.equals(DeleteGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_DELETE;
+            } else {
+                throw new IllegalArgumentException("Unknown gesture type: " + gesture);
+            }
+        }
+
+        mSupportedHandwritingGestureTypes = supportedTypes;
+    }
+
+    /**
+     * Returns the combination of Stylus handwriting gesture types
+     * supported by the current {@code Editor}.
+     * For an editor that supports Stylus Handwriting.
+     * {@link InputMethodManager#startStylusHandwriting}, it also declares supported gestures.
+     * @return List of supported gesture classes including any of {@link SelectGesture},
+     * {@link InsertGesture}, {@link DeleteGesture}.
+     */
+    @NonNull
+    public List<Class<? extends HandwritingGesture>> getSupportedHandwritingGestures() {
+        List<Class<? extends HandwritingGesture>> list  = new ArrayList<>();
+        if (mSupportedHandwritingGestureTypes == 0) {
+            return list;
+        }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_SELECT)
+                == HandwritingGesture.GESTURE_TYPE_SELECT) {
+            list.add(SelectGesture.class);
+        }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_INSERT)
+                == HandwritingGesture.GESTURE_TYPE_INSERT) {
+            list.add(InsertGesture.class);
+        }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_DELETE)
+                == HandwritingGesture.GESTURE_TYPE_DELETE) {
+            list.add(DeleteGesture.class);
+        }
+        return list;
+    }
 
     /**
      * If not {@code null}, this editor needs to talk to IMEs that run for the specified user, no
@@ -1018,6 +1087,9 @@ public class EditorInfo implements InputType, Parcelable {
             pw.println(prefix + "extras=" + extras);
         }
         pw.println(prefix + "hintLocales=" + hintLocales);
+        pw.println(prefix + "supportedHandwritingGestureTypes="
+                + InputMethodDebug.handwritingGestureTypeFlagsToString(
+                        mSupportedHandwritingGestureTypes));
         pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
         if (targetInputMethodUser != null) {
             pw.println(prefix + "targetInputMethodUserId=" + targetInputMethodUser.getIdentifier());
@@ -1052,6 +1124,7 @@ public class EditorInfo implements InputType, Parcelable {
         newEditorInfo.hintLocales = hintLocales;
         newEditorInfo.contentMimeTypes = ArrayUtils.cloneOrNull(contentMimeTypes);
         newEditorInfo.targetInputMethodUser = targetInputMethodUser;
+        newEditorInfo.mSupportedHandwritingGestureTypes = mSupportedHandwritingGestureTypes;
         return newEditorInfo;
     }
 
@@ -1079,6 +1152,7 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeInt(fieldId);
         dest.writeString(fieldName);
         dest.writeBundle(extras);
+        dest.writeInt(mSupportedHandwritingGestureTypes);
         dest.writeBoolean(mInitialSurroundingText != null);
         if (mInitialSurroundingText != null) {
             mInitialSurroundingText.writeToParcel(dest, flags);
@@ -1116,6 +1190,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();
+                    res.mSupportedHandwritingGestureTypes = source.readInt();
                     boolean hasInitialSurroundingText = source.readBoolean();
                     if (hasInitialSurroundingText) {
                         res.mInitialSurroundingText =
@@ -1158,6 +1233,7 @@ public class EditorInfo implements InputType, Parcelable {
                 && initialSelEnd == that.initialSelEnd
                 && initialCapsMode == that.initialCapsMode
                 && fieldId == that.fieldId
+                && mSupportedHandwritingGestureTypes == that.mSupportedHandwritingGestureTypes
                 && Objects.equals(autofillId, that.autofillId)
                 && Objects.equals(privateImeOptions, that.privateImeOptions)
                 && Objects.equals(packageName, that.packageName)

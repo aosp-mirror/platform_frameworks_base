@@ -20,6 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.inputmethod.HandwritingGesture;
 
 import java.util.StringJoiner;
 
@@ -253,6 +254,28 @@ public final class InputMethodDebug {
             default:
                 return "Unknown=" + reason;
         }
+    }
+
+    /**
+     * Converts {@link HandwritingGesture.GestureTypeFlags} to {@link String} for debug logging.
+     *
+     * @param gestureTypeFlags integer constant for {@link HandwritingGesture.GestureTypeFlags}.
+     * @return {@link String} message corresponds for the given {@code gestureTypeFlags}.
+     */
+    public static String handwritingGestureTypeFlagsToString(
+            @HandwritingGesture.GestureTypeFlags int gestureTypeFlags) {
+        final StringJoiner joiner = new StringJoiner("|");
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_SELECT) != 0) {
+            joiner.add("SELECT");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_INSERT) != 0) {
+            joiner.add("INSERT");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_DELETE) != 0) {
+            joiner.add("DELETE");
+        }
+
+        return joiner.setEmptyValue("(none)").toString();
     }
 
     /**

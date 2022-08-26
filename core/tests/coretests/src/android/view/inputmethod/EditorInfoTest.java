@@ -51,6 +51,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
 /**
  * Supplemental tests that cannot be covered by CTS (e.g. due to hidden API dependencies).
  */
@@ -497,6 +499,7 @@ public class EditorInfoTest {
                 + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
                 + "prefix: extras=null\n"
                 + "prefix: hintLocales=null\n"
+                + "prefix: supportedHandwritingGestureTypes=(none)\n"
                 + "prefix: contentMimeTypes=null\n");
     }
 
@@ -512,6 +515,7 @@ public class EditorInfoTest {
         info.hintText = "testHintText";
         info.label = "testLabel";
         info.setInitialToolType(MotionEvent.TOOL_TYPE_STYLUS);
+        info.setSupportedHandwritingGestures(Arrays.asList(SelectGesture.class));
         info.packageName = "android.view.inputmethod";
         info.autofillId = new AutofillId(123);
         info.fieldId = 456;
@@ -533,6 +537,7 @@ public class EditorInfoTest {
                         + " fieldId=456 fieldName=testField\n"
                         + "prefix2: extras=Bundle[{testKey=testValue}]\n"
                         + "prefix2: hintLocales=[en,es,zh]\n"
+                        + "prefix2: supportedHandwritingGestureTypes=SELECT\n"
                         + "prefix2: contentMimeTypes=[image/png]\n"
                         + "prefix2: targetInputMethodUserId=10\n");
     }
@@ -552,6 +557,7 @@ public class EditorInfoTest {
                         + "prefix: hintText=null label=null\n"
                         + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
                         + "prefix: hintLocales=null\n"
+                        + "prefix: supportedHandwritingGestureTypes=(none)\n"
                         + "prefix: contentMimeTypes=null\n");
     }
 

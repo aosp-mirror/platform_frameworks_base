@@ -3100,6 +3100,10 @@ package android.view.displayhash {
 
 package android.view.inputmethod {
 
+  public abstract class HandwritingGesture {
+    method public int getGestureType();
+  }
+
   public final class InlineSuggestion implements android.os.Parcelable {
     method @NonNull public static android.view.inputmethod.InlineSuggestion newInlineSuggestion(@NonNull android.view.inputmethod.InlineSuggestionInfo);
   }
