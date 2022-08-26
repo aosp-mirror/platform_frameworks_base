@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
@@ -26,6 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -49,7 +49,6 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     OpenAppFromLockNotificationCold(testSpec) {
     private val showWhenLockedApp: ShowWhenLockedAppHelper =
             ShowWhenLockedAppHelper(instrumentation)
-    private val lockScreen = LockscreenController.get()
 
     // Although we are technically still locked here, the overlay app means we should open the
     // notification shade as if we were unlocked.
@@ -61,7 +60,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
 
             setup {
                 eachRun {
-                    lockScreen.turnScreenOn()
+                    device.wakeUpAndGoToHomeScreen()
 
                     // Launch an activity that is shown when the device is locked
                     showWhenLockedApp.launchViaIntent(wmHelper)
@@ -69,9 +68,9 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
                         .withFullScreenApp(showWhenLockedApp)
                         .waitForAndVerify()
 
-                    lockScreen.lockScreen()
+                    device.sleep()
                     wmHelper.StateSyncBuilder()
-                        .withKeyguardShowing()
+                        .withoutTopVisibleAppWindows()
                         .waitForAndVerify()
                 }
             }

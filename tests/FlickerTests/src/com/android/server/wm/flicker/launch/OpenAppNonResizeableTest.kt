@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
@@ -68,17 +67,6 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     OpenAppFromLockTransition(testSpec) {
     override val testApp = NonResizeableAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.() -> Unit = {
-        super.transition(this)
-        setup {
-            eachRun {
-                lockScreen.turnScreenOff()
-                wmHelper.StateSyncBuilder()
-                    .withoutTopVisibleAppWindows()
-                    .waitForAndVerify()
-            }
-        }
-    }
     /**
      * Checks that the [ComponentMatcher.NAV_BAR] layer starts invisible, becomes visible during
      * unlocking animation and remains visible at the end
