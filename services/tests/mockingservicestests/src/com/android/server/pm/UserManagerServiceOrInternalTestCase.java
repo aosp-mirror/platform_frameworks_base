@@ -101,11 +101,6 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
      */
     protected static final int OTHER_SECONDARY_DISPLAY_ID = 108;
 
-    /**
-     * Id of another secondary display (i.e, not {@link android.view.Display.DEFAULT_DISPLAY}).
-     */
-    private static final int ANOTHER_SECONDARY_DISPLAY_ID = 108;
-
     private final Object mPackagesLock = new Object();
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
             .getTargetContext();
@@ -422,9 +417,8 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
         assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
 
         assertWithMessage("isUserVisibleOnDisplay(%s, %s)", USER_ID, SECONDARY_DISPLAY_ID)
-                .that(isUserVisibleOnDisplay(USER_ID, ANOTHER_SECONDARY_DISPLAY_ID)).isFalse();
+                .that(isUserVisibleOnDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID)).isFalse();
     }
-
 
     // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
     // isUserVisibleOnDisplay() for bg users relies only on the user / display assignments

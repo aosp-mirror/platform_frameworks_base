@@ -1375,8 +1375,9 @@ class UserController implements Handler.Callback {
         }
         final int profilesToStartSize = profilesToStart.size();
         int i = 0;
-        // TODO(b/239982558): pass displayId
         for (; i < profilesToStartSize && i < (getMaxRunningUsers() - 1); ++i) {
+            // NOTE: this method is setting the profiles of the current user - which is always
+            // assigned to the default display - so there's no need to pass PARENT_DISPLAY
             startUser(profilesToStart.get(i).id, /* foreground= */ false);
         }
         if (i < profilesToStartSize) {
@@ -1419,8 +1420,10 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        // TODO(b/239982558): pass proper displayId
-        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, /* foreground= */ false,
+        int displayId = mInjector.isUsersOnSecondaryDisplaysEnabled()
+                ? UserManagerInternal.PARENT_DISPLAY
+                : Display.DEFAULT_DISPLAY;
+        return startUserNoChecks(userId, displayId, /* foreground= */ false,
                 /* unlockListener= */ null);
     }
 
@@ -1472,8 +1475,7 @@ class UserController implements Handler.Callback {
 
     // TODO(b/239982558): add javadoc (need to wait until the intents / SystemService callbacks are
     // defined
-    boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId,
-            @Nullable IProgressListener unlockListener) {
+    boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId) {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
                 MANAGE_USERS, CREATE_USERS);
 
@@ -1482,7 +1484,8 @@ class UserController implements Handler.Callback {
                 "Cannot use DEFAULT_DISPLAY");
 
         try {
-            return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+            return startUserNoChecks(userId, displayId, /* foreground= */ false,
+                    /* unlockListener= */ null);
         } catch (RuntimeException e) {
             Slogf.w(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
             return false;
@@ -3483,6 +3486,10 @@ class UserController implements Handler.Callback {
                     mHandler.post(runnable);
                 }
             }, reason);
+        }
+
+        boolean isUsersOnSecondaryDisplaysEnabled() {
+            return UserManager.isUsersOnSecondaryDisplaysEnabled();
         }
     }
 }
