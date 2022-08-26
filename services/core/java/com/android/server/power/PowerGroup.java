@@ -74,8 +74,6 @@ public class PowerGroup {
     private long mLastPowerOnTime;
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
-    @PowerManager.UserActivityEvent
-    private int mLastUserActivityEvent;
     /** Timestamp (milliseconds since boot) of the last time the power group was awoken.*/
     private long mLastWakeTime;
     /** Timestamp (milliseconds since boot) of the last time the power group was put to sleep. */
@@ -246,7 +244,7 @@ public class PowerGroup {
         return true;
     }
 
-    boolean dozeLocked(long eventTime, int uid, @PowerManager.GoToSleepReason int reason) {
+    boolean dozeLocked(long eventTime, int uid, int reason) {
         if (eventTime < getLastWakeTimeLocked() || !isInteractive(mWakefulness)) {
             return false;
         }
@@ -255,14 +253,9 @@ public class PowerGroup {
         try {
             reason = Math.min(PowerManager.GO_TO_SLEEP_REASON_MAX,
                     Math.max(reason, PowerManager.GO_TO_SLEEP_REASON_MIN));
-            long millisSinceLastUserActivity = eventTime - Math.max(
-                    mLastUserActivityTimeNoChangeLights, mLastUserActivityTime);
             Slog.i(TAG, "Powering off display group due to "
-                    + PowerManager.sleepReasonToString(reason)
-                    + " (groupId= " + getGroupId() + ", uid= " + uid
-                    + ", millisSinceLastUserActivity=" + millisSinceLastUserActivity
-                    + ", lastUserActivityEvent=" + PowerManager.userActivityEventToString(
-                    mLastUserActivityEvent) + ")...");
+                    + PowerManager.sleepReasonToString(reason)  + " (groupId= " + getGroupId()
+                    + ", uid= " + uid + ")...");
 
             setSandmanSummonedLocked(/* isSandmanSummoned= */ true);
             setWakefulnessLocked(WAKEFULNESS_DOZING, eventTime, uid, reason, /* opUid= */ 0,
@@ -273,16 +266,14 @@ public class PowerGroup {
         return true;
     }
 
-    boolean sleepLocked(long eventTime, int uid, @PowerManager.GoToSleepReason int reason) {
+    boolean sleepLocked(long eventTime, int uid, int reason) {
         if (eventTime < mLastWakeTime || getWakefulnessLocked() == WAKEFULNESS_ASLEEP) {
             return false;
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "sleepPowerGroup");
         try {
-            Slog.i(TAG,
-                    "Sleeping power group (groupId=" + getGroupId() + ", uid=" + uid + ", reason="
-                            + PowerManager.sleepReasonToString(reason) + ")...");
+            Slog.i(TAG, "Sleeping power group (groupId=" + getGroupId() + ", uid=" + uid + ")...");
             setSandmanSummonedLocked(/* isSandmanSummoned= */ true);
             setWakefulnessLocked(WAKEFULNESS_ASLEEP, eventTime, uid, reason, /* opUid= */0,
                     /* opPackageName= */ null, /* details= */ null);
@@ -296,20 +287,16 @@ public class PowerGroup {
         return mLastUserActivityTime;
     }
 
-    void setLastUserActivityTimeLocked(long lastUserActivityTime,
-            @PowerManager.UserActivityEvent int event) {
+    void setLastUserActivityTimeLocked(long lastUserActivityTime) {
         mLastUserActivityTime = lastUserActivityTime;
-        mLastUserActivityEvent = event;
     }
 
     public long getLastUserActivityTimeNoChangeLightsLocked() {
         return mLastUserActivityTimeNoChangeLights;
     }
 
-    public void setLastUserActivityTimeNoChangeLightsLocked(long time,
-            @PowerManager.UserActivityEvent int event) {
+    public void setLastUserActivityTimeNoChangeLightsLocked(long time) {
         mLastUserActivityTimeNoChangeLights = time;
-        mLastUserActivityEvent = event;
     }
 
     public int getUserActivitySummaryLocked() {
