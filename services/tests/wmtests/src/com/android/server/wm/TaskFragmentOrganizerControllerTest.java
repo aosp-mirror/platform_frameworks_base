@@ -434,22 +434,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertApplyTransactionAllowed(mTransaction);
     }
 
-    @Test
-    public void testApplyTransaction_enforceHierarchyChange_reorder() throws RemoteException {
-        mOrganizer.applyTransaction(mTransaction);
-
-        // Throw exception if the transaction is trying to change a window that is not organized by
-        // the organizer.
-        mTransaction.reorder(mFragmentWindowToken, true /* onTop */);
-
-        assertApplyTransactionDisallowed(mTransaction);
-
-        // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
-                "Test:TaskFragmentOrganizer" /* processName */);
-
-        assertApplyTransactionAllowed(mTransaction);
-    }
 
     @Test
     public void testApplyTransaction_enforceHierarchyChange_deleteTaskFragment()
@@ -531,6 +515,112 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTransaction_enforceTaskFragmentOrganized_startActivityInTaskFragment() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord ownerActivity = createActivityRecord(task);
+        mController.registerOrganizer(mIOrganizer);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        mTransaction.startActivityInTaskFragment(
+                mFragmentToken, ownerActivity.token, new Intent(), null /* activityOptions */);
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Not allowed because TaskFragment is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        assertApplyTransactionAllowed(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceTaskFragmentOrganized_reparentActivityInTaskFragment() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        mController.registerOrganizer(mIOrganizer);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token);
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Not allowed because TaskFragment is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        assertApplyTransactionAllowed(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceTaskFragmentOrganized_setAdjacentTaskFragments() {
+        final Task task = createTask(mDisplayContent);
+        mController.registerOrganizer(mIOrganizer);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final IBinder fragmentToken2 = new Binder();
+        final TaskFragment taskFragment2 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(fragmentToken2)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(fragmentToken2, taskFragment2);
+        mTransaction.setAdjacentTaskFragments(mFragmentToken, fragmentToken2, null /* params */);
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Not allowed because TaskFragments are not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        // Not allowed because TaskFragment2 is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.onTaskFragmentOrganizerRemoved();
+        taskFragment2.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        // Not allowed because mTaskFragment is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        assertApplyTransactionAllowed(mTransaction);
+    }
+
+    @Test
+    public void testApplyTransaction_enforceTaskFragmentOrganized_requestFocusOnTaskFragment() {
+        final Task task = createTask(mDisplayContent);
+        mController.registerOrganizer(mIOrganizer);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        mTransaction.requestFocusOnTaskFragment(mFragmentToken);
+        mOrganizer.applyTransaction(mTransaction);
+
+        // Not allowed because TaskFragment is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        assertApplyTransactionAllowed(mTransaction);
+    }
+
+    @Test
     public void testApplyTransaction_createTaskFragment_failForDifferentUid()
             throws RemoteException {
         mController.registerOrganizer(mIOrganizer);
@@ -592,14 +682,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
             throws RemoteException {
         final Task task = createTask(mDisplayContent);
         final ActivityRecord activity = createActivityRecord(task);
+        // Skip manipulate the SurfaceControl.
+        doNothing().when(activity).setDropInputMode(anyInt());
         mOrganizer.applyTransaction(mTransaction);
         mController.registerOrganizer(mIOrganizer);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setFragmentToken(mFragmentToken)
+                .setOrganizer(mOrganizer)
                 .build();
-        mWindowOrganizerController.mLaunchTaskFragments
-                .put(mFragmentToken, mTaskFragment);
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token);
         doReturn(EMBEDDING_ALLOWED).when(mTaskFragment).isAllowedToEmbedActivity(activity);
         clearInvocations(mAtm.mRootWindowContainer);
