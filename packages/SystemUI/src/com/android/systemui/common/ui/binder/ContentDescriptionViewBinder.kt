@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.ui
+package com.android.systemui.common.ui.binder
 
 import android.view.View
 import com.android.systemui.common.shared.model.ContentDescription

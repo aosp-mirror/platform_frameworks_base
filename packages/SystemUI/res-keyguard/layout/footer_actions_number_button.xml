@@ -14,7 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
+<com.android.systemui.statusbar.AlphaOptimizedFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/qs_footer_action_button_size"
     android:layout_height="@dimen/qs_footer_action_button_size"
@@ -36,4 +36,4 @@
         android:layout_gravity="bottom|end"
         android:src="@drawable/fgs_dot"
         android:contentDescription="@string/fgs_dot_content_description" />
-</FrameLayout>
+</com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
