@@ -35,6 +35,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.ComponentActivity
 import androidx.constraintlayout.helper.widget.Flow
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.util.UserIcons
@@ -51,7 +52,6 @@ import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdap
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA
 import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord
-import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -68,7 +68,7 @@ class UserSwitcherActivity @Inject constructor(
     private val falsingManager: FalsingManager,
     private val userManager: UserManager,
     private val userTracker: UserTracker
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     private lateinit var parent: UserSwitcherRootView
     private lateinit var broadcastReceiver: BroadcastReceiver
