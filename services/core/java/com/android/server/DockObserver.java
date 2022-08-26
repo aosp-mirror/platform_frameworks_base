@@ -69,6 +69,7 @@ final class DockObserver extends SystemService {
 
     private boolean mUpdatesStopped;
 
+    private final boolean mKeepDreamingWhenUndocking;
     private final boolean mAllowTheaterModeWakeFromDock;
 
     private final List<ExtconStateConfig> mExtconStateConfigs;
@@ -164,6 +165,8 @@ final class DockObserver extends SystemService {
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mAllowTheaterModeWakeFromDock = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromDock);
+        mKeepDreamingWhenUndocking = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
 
         mExtconStateConfigs = loadExtconStateConfigs(context);
 
@@ -216,16 +219,23 @@ final class DockObserver extends SystemService {
         if (newState != mReportedDockState) {
             mReportedDockState = newState;
             if (mSystemReady) {
-                // Wake up immediately when docked or undocked except in theater mode.
-                if (mAllowTheaterModeWakeFromDock
-                        || Settings.Global.getInt(getContext().getContentResolver(),
-                            Settings.Global.THEATER_MODE_ON, 0) == 0) {
+                // Wake up immediately when docked or undocked unless prohibited from doing so.
+                if (allowWakeFromDock()) {
                     mPowerManager.wakeUp(SystemClock.uptimeMillis(),
                             "android.server:DOCK");
                 }
                 updateLocked();
             }
         }
+    }
+
+    private boolean allowWakeFromDock() {
+        if (mKeepDreamingWhenUndocking) {
+            return false;
+        }
+        return (mAllowTheaterModeWakeFromDock
+                || Settings.Global.getInt(getContext().getContentResolver(),
+                Settings.Global.THEATER_MODE_ON, 0) == 0);
     }
 
     private void updateLocked() {
