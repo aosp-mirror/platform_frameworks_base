@@ -11982,9 +11982,29 @@ package android.service.voice {
     method public int getStart();
   }
 
+  public final class HotwordAudioStream implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioFormat getAudioFormat();
+    method @NonNull public android.os.ParcelFileDescriptor getAudioStream();
+    method @NonNull public android.os.PersistableBundle getMetadata();
+    method @Nullable public android.media.AudioTimestamp getTimestamp();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordAudioStream> CREATOR;
+  }
+
+  public static final class HotwordAudioStream.Builder {
+    ctor public HotwordAudioStream.Builder(@NonNull android.media.AudioFormat, @NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.HotwordAudioStream build();
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setAudioStream(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setMetadata(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.service.voice.HotwordAudioStream.Builder setTimestamp(@NonNull android.media.AudioTimestamp);
+  }
+
   public final class HotwordDetectedResult implements android.os.Parcelable {
     method public int describeContents();
     method public int getAudioChannel();
+    method @NonNull public java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams();
     method public int getConfidenceLevel();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getHotwordDurationMillis();
@@ -12014,6 +12034,7 @@ package android.service.voice {
     ctor public HotwordDetectedResult.Builder();
     method @NonNull public android.service.voice.HotwordDetectedResult build();
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioStreams(@NonNull java.util.List<android.service.voice.HotwordAudioStream>);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDetectionPersonalized(boolean);
