@@ -31,8 +31,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
-import com.android.systemui.common.ui.ContentDescriptionViewBinder
-import com.android.systemui.common.ui.IconViewBinder
+import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
+import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
 import com.android.systemui.qs.FooterActionsView
