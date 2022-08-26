@@ -43,16 +43,26 @@ fun AppInfo(packageName: String, userId: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(
+                horizontal = SettingsDimension.itemPaddingStart,
+                vertical = SettingsDimension.itemPaddingVertical,
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         val packageInfo = remember { PackageManagers.getPackageInfoAsUser(packageName, userId) }
-        Box(modifier = Modifier.padding(8.dp)) {
+        Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
             AppIcon(app = packageInfo.applicationInfo, size = SettingsDimension.appIconInfoSize)
         }
         AppLabel(packageInfo.applicationInfo)
-        Spacer(modifier = Modifier.height(4.dp))
-        SettingsBody(packageInfo.versionName)
+        AppVersion(packageInfo.versionName)
     }
+}
+
+@Composable
+private fun AppVersion(versionName: String?) {
+    if (versionName == null) return
+    Spacer(modifier = Modifier.height(4.dp))
+    SettingsBody(versionName)
 }
 
 @Composable

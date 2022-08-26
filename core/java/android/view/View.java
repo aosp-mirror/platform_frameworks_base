@@ -3085,6 +3085,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int IMPORTANT_FOR_ACCESSIBILITY_DEFAULT = IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 
     /**
+     * Automatically determine whether the view should only allow interactions from
+     * {@link android.accessibilityservice.AccessibilityService}s with the
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
+     * set to true.
+     *
+     * <p>
+     * Accessibility interactions from services without {@code isAccessibilityTool} set to true are
+     * disallowed for any of the following conditions:
+     * <li>this view's window sets {@link WindowManager.LayoutParams#FLAG_SECURE}.</li>
+     * <li>this view sets {@link #getFilterTouchesWhenObscured()}.</li>
+     * <li>any parent of this view returns true from {@link #isAccessibilityDataPrivate()}.</li>
+     * </p>
+     */
+    public static final int ACCESSIBILITY_DATA_PRIVATE_AUTO = 0x00000000;
+
+    /**
+     * Only allow interactions from {@link android.accessibilityservice.AccessibilityService}s
+     * with the {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool}
+     * property set to true.
+     */
+    public static final int ACCESSIBILITY_DATA_PRIVATE_YES = 0x00000001;
+
+    /**
+     * Allow interactions from all {@link android.accessibilityservice.AccessibilityService}s,
+     * regardless of their
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property.
+     */
+    public static final int ACCESSIBILITY_DATA_PRIVATE_NO = 0x00000002;
+
+    /** @hide */
+    @IntDef(prefix = { "ACCESSIBILITY_DATA_PRIVATE_" }, value = {
+            ACCESSIBILITY_DATA_PRIVATE_AUTO,
+            ACCESSIBILITY_DATA_PRIVATE_YES,
+            ACCESSIBILITY_DATA_PRIVATE_NO,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AccessibilityDataPrivate {}
+
+    /**
      * Mask for obtaining the bits which specify how to determine
      * whether a view is important for accessibility.
      */
@@ -4527,6 +4566,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private CharSequence mAccessibilityPaneTitle;
 
     /**
+     * Describes whether this view should only allow interactions from
+     * {@link android.accessibilityservice.AccessibilityService}s with the
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
+     * set to true.
+     */
+    private int mExplicitAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
+    /** Used to calculate and cache {@link #isAccessibilityDataPrivate()}. */
+    private int mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
+
+    /**
      * Specifies the id of a view for which this view serves as a label for
      * accessibility purposes.
      */
@@ -5918,6 +5967,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_importantForAccessibility:
                     setImportantForAccessibility(a.getInt(attr,
                             IMPORTANT_FOR_ACCESSIBILITY_DEFAULT));
+                    break;
+                case R.styleable.View_accessibilityDataPrivate:
+                    setAccessibilityDataPrivate(a.getInt(attr,
+                            ACCESSIBILITY_DATA_PRIVATE_AUTO));
                     break;
                 case R.styleable.View_accessibilityLiveRegion:
                     setAccessibilityLiveRegion(a.getInt(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT));
@@ -8518,6 +8571,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * is responsible for handling this call.
      * </p>
      * <p>
+     * If this view sets {@link #isAccessibilityDataPrivate()} then this view should only append
+     * sensitive information to an event that also sets
+     * {@link AccessibilityEvent#isAccessibilityDataPrivate()}.
+     * </p>
+     * <p>
      * <em>Note:</em> Accessibility events of certain types are not dispatched for
      * populating the event text via this method. For details refer to {@link AccessibilityEvent}.
      * </p>
@@ -10419,7 +10477,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             if ((mAttachInfo.mAccessibilityFetchFlags
-                    & AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS) != 0
+                    & AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS) != 0
                     && Resources.resourceHasPackage(mID)) {
                 try {
                     String viewId = getResources().getResourceName(mID);
@@ -13200,6 +13258,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setFilterTouchesWhenObscured(boolean enabled) {
         setFlags(enabled ? FILTER_TOUCHES_WHEN_OBSCURED : 0,
                 FILTER_TOUCHES_WHEN_OBSCURED);
+        calculateAccessibilityDataPrivate();
     }
 
     /**
@@ -14402,11 +14461,77 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     public boolean includeForAccessibility() {
         if (mAttachInfo != null) {
+            if (!AccessibilityManager.getInstance(mContext).isRequestFromAccessibilityTool()
+                    && isAccessibilityDataPrivate()) {
+                return false;
+            }
+
             return (mAttachInfo.mAccessibilityFetchFlags
-                    & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
+                    & AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
                     || isImportantForAccessibility();
         }
         return false;
+    }
+
+    /**
+     * Whether this view should restrict accessibility service access only to services that have the
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
+     * set to true.
+     *
+     * <p>
+     * See default behavior provided by {@link #ACCESSIBILITY_DATA_PRIVATE_AUTO}. Otherwise,
+     * returns true for {@link #ACCESSIBILITY_DATA_PRIVATE_YES} or false for {@link
+     * #ACCESSIBILITY_DATA_PRIVATE_NO}.
+     * </p>
+     *
+     * @return True if this view should restrict accessibility service access to services that have
+     * the isAccessibilityTool property.
+     */
+    @ViewDebug.ExportedProperty(category = "accessibility")
+    public boolean isAccessibilityDataPrivate() {
+        if (mInferredAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_AUTO) {
+            calculateAccessibilityDataPrivate();
+        }
+        return mInferredAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_YES;
+    }
+
+    /**
+     * Calculate and cache the inferred value for {@link #isAccessibilityDataPrivate()}.
+     *
+     * <p>
+     * <strong>Note:</strong> This method needs to be called any time one of the below conditions
+     * changes, to recalculate the new value.
+     * </p>
+     */
+    void calculateAccessibilityDataPrivate() {
+        // Use the explicit value if set.
+        if (mExplicitAccessibilityDataPrivate != ACCESSIBILITY_DATA_PRIVATE_AUTO) {
+            mInferredAccessibilityDataPrivate = mExplicitAccessibilityDataPrivate;
+        } else if (mAttachInfo != null && mAttachInfo.mWindowSecure) {
+            // Views inside FLAG_SECURE windows default to accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+        } else if (getFilterTouchesWhenObscured()) {
+            // Views that set filterTouchesWhenObscured default to accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+        } else if (mParent instanceof View && ((View) mParent).isAccessibilityDataPrivate()) {
+            // Descendants of an accessibilityDataPrivate View are also accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+        } else {
+            // Otherwise, default to not accessibilityDataPrivate.
+            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_NO;
+        }
+    }
+
+    /**
+     * Specifies whether this view should only allow interactions from
+     * {@link android.accessibilityservice.AccessibilityService}s with the
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
+     * set to true.
+     */
+    public void setAccessibilityDataPrivate(
+            @AccessibilityDataPrivate int accessibilityDataPrivate) {
+        mExplicitAccessibilityDataPrivate = accessibilityDataPrivate;
+        calculateAccessibilityDataPrivate();
     }
 
     /**
@@ -30096,6 +30221,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int mWindowVisibility;
 
         /**
+         * Indicates whether the view's window sets {@link WindowManager.LayoutParams#FLAG_SECURE}.
+         */
+        boolean mWindowSecure;
+
+        /**
          * Indicates the time at which drawing started to occur.
          */
         @UnsupportedAppUsage
@@ -30272,8 +30402,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * Flags related to accessibility processing.
          *
-         * @see AccessibilityNodeInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-         * @see AccessibilityNodeInfo#FLAG_REPORT_VIEW_IDS
+         * @see AccessibilityNodeInfo#FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS
+         * @see AccessibilityNodeInfo#FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS
          */
         int mAccessibilityFetchFlags;
 

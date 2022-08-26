@@ -31,9 +31,9 @@ abstract class AbstractVibratorStep extends Step {
     public final VibratorController controller;
     public final VibrationEffect.Composed effect;
     public final int segmentIndex;
-    public final long previousStepVibratorOffTimeout;
 
     long mVibratorOnResult;
+    long mPendingVibratorOffDeadline;
     boolean mVibratorCompleteCallbackReceived;
 
     /**
@@ -43,19 +43,19 @@ abstract class AbstractVibratorStep extends Step {
      * @param controller         The vibrator that is playing the effect.
      * @param effect             The effect being played in this step.
      * @param index              The index of the next segment to be played by this step
-     * @param previousStepVibratorOffTimeout The time the vibrator is expected to complete any
+     * @param pendingVibratorOffDeadline The time the vibrator is expected to complete any
      *                           previous vibration and turn off. This is used to allow this step to
      *                           be triggered when the completion callback is received, and can
      *                           be used to play effects back-to-back.
      */
     AbstractVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
-            long previousStepVibratorOffTimeout) {
+            long pendingVibratorOffDeadline) {
         super(conductor, startTime);
         this.controller = controller;
         this.effect = effect;
         this.segmentIndex = index;
-        this.previousStepVibratorOffTimeout = previousStepVibratorOffTimeout;
+        mPendingVibratorOffDeadline = pendingVibratorOffDeadline;
     }
 
     public int getVibratorId() {
@@ -69,25 +69,55 @@ abstract class AbstractVibratorStep extends Step {
 
     @Override
     public boolean acceptVibratorCompleteCallback(int vibratorId) {
-        boolean isSameVibrator = controller.getVibratorInfo().getId() == vibratorId;
-        mVibratorCompleteCallbackReceived |= isSameVibrator;
+        if (getVibratorId() != vibratorId) {
+            return false;
+        }
+
         // Only activate this step if a timeout was set to wait for the vibration to complete,
         // otherwise we are waiting for the correct time to play the next step.
-        return isSameVibrator && (previousStepVibratorOffTimeout > SystemClock.uptimeMillis());
+        boolean shouldAcceptCallback = mPendingVibratorOffDeadline > SystemClock.uptimeMillis();
+        if (VibrationThread.DEBUG) {
+            Slog.d(VibrationThread.TAG,
+                    "Received completion callback from " + vibratorId
+                            + ", accepted = " + shouldAcceptCallback);
+        }
+
+        // The callback indicates this vibrator has stopped, reset the timeout.
+        mPendingVibratorOffDeadline = 0;
+        mVibratorCompleteCallbackReceived = true;
+        return shouldAcceptCallback;
     }
 
     @Override
     public List<Step> cancel() {
         return Arrays.asList(new CompleteEffectVibratorStep(conductor, SystemClock.uptimeMillis(),
-                /* cancelled= */ true, controller, previousStepVibratorOffTimeout));
+                /* cancelled= */ true, controller, mPendingVibratorOffDeadline));
     }
 
     @Override
     public void cancelImmediately() {
-        if (previousStepVibratorOffTimeout > SystemClock.uptimeMillis()) {
+        if (mPendingVibratorOffDeadline > SystemClock.uptimeMillis()) {
             // Vibrator might be running from previous steps, so turn it off while canceling.
             stopVibrating();
         }
+    }
+
+    protected long handleVibratorOnResult(long vibratorOnResult) {
+        mVibratorOnResult = vibratorOnResult;
+        if (VibrationThread.DEBUG) {
+            Slog.d(VibrationThread.TAG,
+                    "Turned on vibrator " + getVibratorId() + ", result = " + mVibratorOnResult);
+        }
+        if (mVibratorOnResult > 0) {
+            // Vibrator was turned on by this step, with vibratorOnResult as the duration.
+            // Set an extra timeout to wait for the vibrator completion callback.
+            mPendingVibratorOffDeadline = SystemClock.uptimeMillis() + mVibratorOnResult
+                    + VibrationStepConductor.CALLBACKS_EXTRA_TIMEOUT;
+        } else {
+            // Vibrator does not support the request or failed to turn on, reset callback deadline.
+            mPendingVibratorOffDeadline = 0;
+        }
+        return mVibratorOnResult;
     }
 
     protected void stopVibrating() {
@@ -97,6 +127,7 @@ abstract class AbstractVibratorStep extends Step {
         }
         controller.off();
         getVibration().stats().reportVibratorOff();
+        mPendingVibratorOffDeadline = 0;
     }
 
     protected void changeAmplitude(float amplitude) {
@@ -109,40 +140,29 @@ abstract class AbstractVibratorStep extends Step {
     }
 
     /**
-     * Return the {@link VibrationStepConductor#nextVibrateStep} with same timings, only jumping
-     * the segments.
-     */
-    protected List<Step> skipToNextSteps(int segmentsSkipped) {
-        return nextSteps(startTime, previousStepVibratorOffTimeout, segmentsSkipped);
-    }
-
-    /**
-     * Return the {@link VibrationStepConductor#nextVibrateStep} with same start and off timings
-     * calculated from {@link #getVibratorOnDuration()}, jumping all played segments.
-     *
-     * <p>This method has same behavior as {@link #skipToNextSteps(int)} when the vibrator
-     * result is non-positive, meaning the vibrator has either ignored or failed to turn on.
+     * Return the {@link VibrationStepConductor#nextVibrateStep} with start and off timings
+     * calculated from {@link #getVibratorOnDuration()} based on the current
+     * {@link SystemClock#uptimeMillis()} and jumping all played segments from the effect.
      */
     protected List<Step> nextSteps(int segmentsPlayed) {
-        if (mVibratorOnResult <= 0) {
-            // Vibration was not started, so just skip the played segments and keep timings.
-            return skipToNextSteps(segmentsPlayed);
+        // Schedule next steps to run right away.
+        long nextStartTime = SystemClock.uptimeMillis();
+        if (mVibratorOnResult > 0) {
+            // Vibrator was turned on by this step, with mVibratorOnResult as the duration.
+            // Schedule next steps for right after the vibration finishes.
+            nextStartTime += mVibratorOnResult;
         }
-        long nextStartTime = SystemClock.uptimeMillis() + mVibratorOnResult;
-        long nextVibratorOffTimeout =
-                nextStartTime + VibrationStepConductor.CALLBACKS_EXTRA_TIMEOUT;
-        return nextSteps(nextStartTime, nextVibratorOffTimeout, segmentsPlayed);
+        return nextSteps(nextStartTime, segmentsPlayed);
     }
 
     /**
-     * Return the {@link VibrationStepConductor#nextVibrateStep} with given start and off timings,
-     * which might be calculated independently, jumping all played segments.
+     * Return the {@link VibrationStepConductor#nextVibrateStep} with given start time,
+     * which might be calculated independently, and jumping all played segments from the effect.
      *
-     * <p>This should be used when the vibrator on/off state is not responsible for the steps
-     * execution timings, e.g. while playing the vibrator amplitudes.
+     * <p>This should be used when the vibrator on/off state is not responsible for the step
+     * execution timing, e.g. while playing the vibrator amplitudes.
      */
-    protected List<Step> nextSteps(long nextStartTime, long vibratorOffTimeout,
-            int segmentsPlayed) {
+    protected List<Step> nextSteps(long nextStartTime, int segmentsPlayed) {
         int nextSegmentIndex = segmentIndex + segmentsPlayed;
         int effectSize = effect.getSegments().size();
         int repeatIndex = effect.getRepeatIndex();
@@ -154,7 +174,7 @@ abstract class AbstractVibratorStep extends Step {
             nextSegmentIndex = repeatIndex + ((nextSegmentIndex - effectSize) % loopSize);
         }
         Step nextStep = conductor.nextVibrateStep(nextStartTime, controller, effect,
-                nextSegmentIndex, vibratorOffTimeout);
+                nextSegmentIndex, mPendingVibratorOffDeadline);
         return nextStep == null ? VibrationStepConductor.EMPTY_STEP_LIST : Arrays.asList(nextStep);
     }
 }

@@ -151,10 +151,13 @@ StreamManager::~StreamManager()
 
 int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
         int32_t soundID, float leftVolume, float rightVolume,
-        int32_t priority, int32_t loop, float rate)
+        int32_t priority, int32_t loop, float rate, int32_t playerIId)
 {
-    ALOGV("%s(sound=%p, soundID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f)",
-            __func__, sound.get(), soundID, leftVolume, rightVolume, priority, loop, rate);
+    ALOGV(
+        "%s(sound=%p, soundID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f,"
+        " playerIId=%d)", __func__, sound.get(), soundID, leftVolume, rightVolume, priority,
+        loop, rate, playerIId);
+
     bool launchThread = false;
     int32_t streamID = 0;
     std::vector<std::any> garbage;
@@ -244,7 +247,7 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
             removeFromQueues_l(newStream);
             mProcessingStreams.emplace(newStream);
             lock.unlock();
-            if (Stream* nextStream = newStream->playPairStream(garbage)) {
+            if (Stream* nextStream = newStream->playPairStream(garbage, playerIId)) {
                 lock.lock();
                 ALOGV("%s: starting streamID:%d", __func__, nextStream->getStreamID());
                 addToActiveQueue_l(nextStream);

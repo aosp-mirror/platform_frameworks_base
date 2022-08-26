@@ -81,6 +81,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_INIT_INK_WINDOW = 120;
     private static final int DO_FINISH_STYLUS_HANDWRITING = 130;
     private static final int DO_UPDATE_TOOL_TYPE = 140;
+    private static final int DO_REMOVE_STYLUS_HANDWRITING_WINDOW = 150;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -252,6 +253,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             case DO_FINISH_STYLUS_HANDWRITING: {
                 inputMethod.finishStylusHandwriting();
+                return;
+            }
+            case DO_REMOVE_STYLUS_HANDWRITING_WINDOW: {
+                inputMethod.removeStylusHandwritingWindow();
                 return;
             }
 
@@ -433,5 +438,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void finishStylusHandwriting() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_STYLUS_HANDWRITING));
+    }
+
+    @BinderThread
+    @Override
+    public void removeStylusHandwritingWindow() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_STYLUS_HANDWRITING_WINDOW));
     }
 }

@@ -247,7 +247,7 @@ class Ledger {
 
         boolean printedTransactionTitle = false;
         for (int t = 0; t < Math.min(MAX_TRANSACTION_COUNT, numRecentTransactions); ++t) {
-            final int idx = (mTransactionIndex - t + MAX_TRANSACTION_COUNT) % MAX_TRANSACTION_COUNT;
+            final int idx = (mTransactionIndex + t) % MAX_TRANSACTION_COUNT;
             final Transaction transaction = mTransactions[idx];
             if (transaction == null) {
                 continue;

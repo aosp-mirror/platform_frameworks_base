@@ -364,12 +364,19 @@ android_media_SoundPool_unload(JNIEnv *env, jobject thiz, jint sampleID) {
 static jint
 android_media_SoundPool_play(JNIEnv *env, jobject thiz, jint sampleID,
         jfloat leftVolume, jfloat rightVolume, jint priority, jint loop,
-        jfloat rate)
+        jfloat rate, jint playerIId)
 {
     ALOGV("android_media_SoundPool_play\n");
     auto soundPool = getSoundPool(env, thiz);
     if (soundPool == nullptr) return 0;
-    return (jint) soundPool->play(sampleID, leftVolume, rightVolume, priority, loop, rate);
+
+    return (jint) soundPool->play(sampleID,
+                                  leftVolume,
+                                  rightVolume,
+                                  priority,
+                                  loop,
+                                  rate,
+                                  playerIId);
 }
 
 static void
@@ -563,7 +570,7 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_SoundPool_unload
     },
     {   "_play",
-        "(IFFIIF)I",
+        "(IFFIIFI)I",
         (void *)android_media_SoundPool_play
     },
     {   "pause",

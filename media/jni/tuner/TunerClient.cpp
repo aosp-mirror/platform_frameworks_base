@@ -27,16 +27,13 @@ using ::aidl::android::hardware::tv::tuner::FrontendType;
 
 namespace android {
 
-shared_ptr<ITunerService> TunerClient::mTunerService;
 int32_t TunerClient::mTunerVersion;
 
 /////////////// TunerClient ///////////////////////
 
 TunerClient::TunerClient() {
-    if (mTunerService == nullptr) {
-        ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
-        mTunerService = ITunerService::fromBinder(binder);
-    }
+    ::ndk::SpAIBinder binder(AServiceManager_waitForService("media.tuner"));
+    mTunerService = ITunerService::fromBinder(binder);
     if (mTunerService == nullptr) {
         ALOGE("Failed to get tuner service");
     } else {

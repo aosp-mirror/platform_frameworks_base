@@ -57,6 +57,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -73,6 +74,7 @@ import android.window.RemoteTransition;
 import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -1115,6 +1117,36 @@ public class TransitionTests extends WindowTestsBase {
                 transition.mParticipants, transition.mChanges);
         assertTrue(targets.contains(embeddedTf));
         assertTrue(targets.contains(activity));
+    }
+
+    @Test
+    public void testTransitionVisibleChange() {
+        registerTestTransitionPlayer();
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final Transition transition = new Transition(TRANSIT_OPEN, 0 /* flags */,
+                app.mTransitionController, mWm.mSyncEngine);
+        app.mTransitionController.moveToCollecting(transition, BLASTSyncEngine.METHOD_NONE);
+        final ArrayList<WindowContainer> freezeCalls = new ArrayList<>();
+        transition.setContainerFreezer(new Transition.IContainerFreezer() {
+            @Override
+            public boolean freeze(@NonNull WindowContainer wc, @NonNull Rect bounds) {
+                freezeCalls.add(wc);
+                return true;
+            }
+
+            @Override
+            public void cleanUp(SurfaceControl.Transaction t) {
+            }
+        });
+        final Task task = app.getTask();
+        transition.collect(task);
+        final Rect bounds = new Rect(task.getBounds());
+        Configuration c = new Configuration(task.getRequestedOverrideConfiguration());
+        bounds.inset(10, 10);
+        c.windowConfiguration.setBounds(bounds);
+        task.onRequestedOverrideConfigurationChanged(c);
+        assertTrue(freezeCalls.contains(task));
+        transition.abort();
     }
 
     private static void makeTaskOrganized(Task... tasks) {

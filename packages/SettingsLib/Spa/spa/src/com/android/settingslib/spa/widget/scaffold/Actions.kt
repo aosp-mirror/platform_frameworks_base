@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -41,6 +42,18 @@ private fun BackAction(contentDescription: String, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Outlined.ArrowBack,
             contentDescription = contentDescription,
+        )
+    }
+}
+
+@Composable
+fun MoreOptionsAction(onClick: () -> Unit) {
+    IconButton(onClick) {
+        Icon(
+            imageVector = Icons.Outlined.MoreVert,
+            contentDescription = stringResource(
+                id = androidx.appcompat.R.string.abc_action_menu_overflow_description,
+            )
         )
     }
 }

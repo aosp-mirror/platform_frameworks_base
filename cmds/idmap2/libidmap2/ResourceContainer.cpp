@@ -226,8 +226,10 @@ Result<OverlayData> CreateResourceMapping(ResourceId id, const ZipAssetsProvider
           *target_resource, OverlayData::ResourceIdValue{overlay_resource->data, rewrite_id}});
     } else {
       overlay_data.pairs.emplace_back(
-          OverlayData::Value{*target_resource, TargetValue{.data_type = overlay_resource->dataType,
-                                                           .data_value = overlay_resource->data}});
+          OverlayData::Value{*target_resource, TargetValueWithConfig{
+              .config = std::string(),
+              .value = TargetValue{.data_type = overlay_resource->dataType,
+                                   .data_value = overlay_resource->data}}});
     }
   }
 

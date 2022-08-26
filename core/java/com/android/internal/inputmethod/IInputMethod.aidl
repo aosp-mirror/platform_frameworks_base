@@ -40,7 +40,6 @@ oneway interface IInputMethod {
         IBinder token;
         IInputMethodPrivilegedOperations privilegedOperations;
         int configChanges;
-        boolean stylusHandWritingSupported;
         int navigationBarFlags;
     }
 
@@ -86,4 +85,6 @@ oneway interface IInputMethod {
     void initInkWindow();
 
     void finishStylusHandwriting();
+
+    void removeStylusHandwritingWindow();
 }

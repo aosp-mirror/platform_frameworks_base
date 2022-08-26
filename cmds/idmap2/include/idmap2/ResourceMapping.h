@@ -69,7 +69,8 @@ class ResourceMapping {
   // If `allow_rewriting_` is true, then the overlay-to-target map will be populated if the target
   // resource id is mapped to an overlay resource id.
   Result<Unit> AddMapping(ResourceId target_resource,
-                          const std::variant<OverlayData::ResourceIdValue, TargetValue>& value);
+                          const std::variant<OverlayData::ResourceIdValue,
+                          TargetValueWithConfig>& value);
 
   TargetResourceMap target_map_;
   OverlayResourceMap overlay_map_;

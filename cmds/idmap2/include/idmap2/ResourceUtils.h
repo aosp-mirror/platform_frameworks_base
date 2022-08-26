@@ -43,6 +43,11 @@ struct TargetValue {
   std::string data_string_value;
 };
 
+struct TargetValueWithConfig {
+  TargetValue value;
+  std::string config;
+};
+
 namespace utils {
 
 // Returns whether the Res_value::data_type represents a dynamic or regular resource reference.

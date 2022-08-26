@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.IBiometricStateListener;
 import android.hardware.biometrics.SensorPropertiesInternal;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.util.Slog;
@@ -45,7 +46,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @param <P> internal property type
  */
 public class BiometricStateCallback<T extends BiometricServiceProvider<P>,
-        P extends SensorPropertiesInternal> implements ClientMonitorCallback {
+        P extends SensorPropertiesInternal>
+        implements ClientMonitorCallback, IBinder.DeathRecipient {
 
     private static final String TAG = "BiometricStateCallback";
 
@@ -161,6 +163,11 @@ public class BiometricStateCallback<T extends BiometricServiceProvider<P>,
             @NonNull IBiometricStateListener listener) {
         mBiometricStateListeners.add(listener);
         broadcastCurrentEnrollmentState(listener);
+        try {
+            listener.asBinder().linkToDeath(this, 0 /* flags */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to link to death", e);
+        }
     }
 
     private synchronized void broadcastCurrentEnrollmentState(
@@ -194,6 +201,21 @@ public class BiometricStateCallback<T extends BiometricServiceProvider<P>,
             listener.onEnrollmentsChanged(userId, sensorId, hasEnrollments);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
+        }
+    }
+
+    @Override
+    public void binderDied() {
+        // Do nothing, handled below
+    }
+
+    @Override
+    public void binderDied(IBinder who) {
+        Slog.w(TAG, "Callback binder died: " + who);
+        if (mBiometricStateListeners.removeIf(listener -> listener.asBinder().equals(who))) {
+            Slog.w(TAG, "Removed dead listener for " + who);
+        } else {
+            Slog.w(TAG, "No dead listeners found");
         }
     }
 }

@@ -20,14 +20,25 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.ui.res.stringResource
+import com.android.settingslib.spa.framework.api.SettingsPageProvider
+import com.android.settingslib.spa.framework.compose.rememberContext
+import com.android.settingslib.spa.framework.util.asyncMapItem
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
+import kotlinx.coroutines.flow.Flow
 
 interface TogglePermissionAppListModel<T : AppRecord> {
     val pageTitleResId: Int
     val switchTitleResId: Int
     val footerResId: Int
 
+    fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>): Flow<List<T>> =
+        appListFlow.asyncMapItem(::transformItem)
+
     fun transformItem(app: ApplicationInfo): T
+    fun filter(userIdFlow: Flow<Int>, recordListFlow: Flow<List<T>>): Flow<List<T>>
 
     @Composable
     fun isAllowed(record: T): State<Boolean?>
@@ -41,4 +52,24 @@ interface TogglePermissionAppListModelFactory {
         permission: String,
         context: Context,
     ): TogglePermissionAppListModel<out AppRecord>
+
+    fun createPageProviders(): List<SettingsPageProvider> = listOf(
+        TogglePermissionAppListPageProvider(this),
+        TogglePermissionAppInfoPageProvider(this),
+    )
+
+    @Composable
+    fun EntryItem(permissionType: String) {
+        val listModel = rememberModel(permissionType)
+        Preference(
+            object : PreferenceModel {
+                override val title = stringResource(listModel.pageTitleResId)
+                override val onClick = TogglePermissionAppListPageProvider.navigator(permissionType)
+            }
+        )
+    }
 }
+
+@Composable
+internal fun TogglePermissionAppListModelFactory.rememberModel(permission: String) =
+    rememberContext { context -> createModel(permission, context) }

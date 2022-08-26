@@ -18,6 +18,13 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
+import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -26,11 +33,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -43,6 +47,7 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.WindowInsets;
 
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
@@ -204,7 +209,26 @@ class TestDisplayContent extends DisplayContent {
                 doReturn(true).when(newDisplay).supportsSystemDecorations();
                 doReturn(true).when(displayPolicy).hasNavigationBar();
                 doReturn(NAV_BAR_BOTTOM).when(displayPolicy).navigationBarPosition(anyInt());
-                doReturn(20).when(displayPolicy).getNavigationBarHeight(anyInt());
+                doReturn(Insets.of(0, 0, 0, 20)).when(displayPolicy).getInsets(any(),
+                        eq(WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars()));
+                doReturn(Insets.of(0, 20, 0, 20)).when(displayPolicy).getInsets(any(),
+                        eq(WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars()
+                                | WindowInsets.Type.statusBars()));
+                final int[] nonDecorTypes = new int[]{
+                        ITYPE_TOP_DISPLAY_CUTOUT, ITYPE_RIGHT_DISPLAY_CUTOUT,
+                        ITYPE_BOTTOM_DISPLAY_CUTOUT, ITYPE_LEFT_DISPLAY_CUTOUT, ITYPE_NAVIGATION_BAR
+                };
+                doReturn(Insets.of(0, 0, 0, 20)).when(displayPolicy).getInsetsWithInternalTypes(
+                        any(),
+                        eq(nonDecorTypes));
+                final int[] stableTypes = new int[]{
+                        ITYPE_TOP_DISPLAY_CUTOUT, ITYPE_RIGHT_DISPLAY_CUTOUT,
+                        ITYPE_BOTTOM_DISPLAY_CUTOUT, ITYPE_LEFT_DISPLAY_CUTOUT,
+                        ITYPE_NAVIGATION_BAR, ITYPE_STATUS_BAR, ITYPE_CLIMATE_BAR
+                };
+                doReturn(Insets.of(0, 20, 0, 20)).when(displayPolicy).getInsetsWithInternalTypes(
+                        any(),
+                        eq(stableTypes));
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();

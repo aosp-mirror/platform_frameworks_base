@@ -150,10 +150,11 @@ public:
 
 private:
     /**
-     * An AIDL Tuner Service Singleton assigned at the first time the Tuner Client
-     * connects with the Tuner Service. Default null when the service does not exist.
+     * An AIDL Tuner Service assigned at the first time the Tuner Client connects with
+     * the Tuner Service. null when the service does not exist. The tuner client in JNI
+     * will be singleton, so this Tuner Service client will be singleton too.
      */
-    static shared_ptr<ITunerService> mTunerService;
+    shared_ptr<ITunerService> mTunerService;
 
     // An integer that carries the Tuner version. The high 16 bits are the major version number
     // while the low 16 bits are the minor version. Default value is unknown version 0.

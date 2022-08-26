@@ -468,6 +468,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 break;
 
             case STATE_AUTHENTICATED:
+                removePendingAnimations();
                 if (mSize != AuthDialog.SIZE_SMALL) {
                     mConfirmButton.setVisibility(View.GONE);
                     mNegativeButton.setVisibility(View.GONE);

@@ -2812,9 +2812,7 @@ public class AudioManager {
     }
 
     /**
-     * @param on set <var>true</var> to route A2DP audio to/from Bluetooth
-     *           headset; <var>false</var> disable A2DP audio
-     * @deprecated Do not use.
+     * @deprecated Use {@link MediaRouter#selectRoute} instead.
      */
     @Deprecated public void setBluetoothA2dpOn(boolean on){
     }

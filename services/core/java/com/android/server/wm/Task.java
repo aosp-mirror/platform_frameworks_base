@@ -1883,8 +1883,7 @@ class Task extends TaskFragment {
         }
 
         final int newWinMode = getWindowingMode();
-        if ((prevWinMode != newWinMode) && (mDisplayContent != null)
-                && shouldStartChangeTransition(prevWinMode, newWinMode)) {
+        if (shouldStartChangeTransition(prevWinMode, mTmpPrevBounds)) {
             initializeChangeTransition(mTmpPrevBounds);
         }
 
@@ -2135,9 +2134,15 @@ class Task extends TaskFragment {
         bounds.offset(horizontalDiff, verticalDiff);
     }
 
-    private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
+    private boolean shouldStartChangeTransition(int prevWinMode, @NonNull Rect prevBounds) {
         if (!isLeafTask() || !canStartChangeTransition()) {
             return false;
+        }
+        final int newWinMode = getWindowingMode();
+        if (mTransitionController.inTransition(this)) {
+            final Rect newBounds = getConfiguration().windowConfiguration.getBounds();
+            return prevWinMode != newWinMode || prevBounds.width() != newBounds.width()
+                    || prevBounds.height() != newBounds.height();
         }
         // Only do an animation into and out-of freeform mode for now. Other mode
         // transition animations are currently handled by system-ui.

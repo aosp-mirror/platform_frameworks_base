@@ -281,7 +281,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
 
         // Simulate the app transition finishing
-        mController.mAppTransitionListener.onAppTransitionStartingLocked(false, false, 0, 0, 0);
+        mController.mAppTransitionListener.onAppTransitionStartingLocked(0, 0);
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, false);
     }
 

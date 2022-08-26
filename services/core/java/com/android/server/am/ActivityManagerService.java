@@ -10626,8 +10626,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
-                pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
-                        + queue.hasBroadcastsScheduled());
+                pw.println("  Queue " + queue.toString() + ": " + queue.describeState());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -13082,17 +13081,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean isPendingBroadcastProcessLocked(int pid) {
-        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mFgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            BroadcastRecord r = queue.getPendingBroadcastLocked();
+            if (r != null && r.curApp.getPid() == pid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
-        return mFgBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mBgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app)
-                || mFgOffloadBroadcastQueue.isPendingBroadcastProcessLocked(app);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            BroadcastRecord r = queue.getPendingBroadcastLocked();
+            if (r != null && r.curApp == app) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void skipPendingBroadcastLocked(int pid) {
@@ -13114,7 +13119,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.updateUidReadyForBootCompletedBroadcastLocked(uid);
-            queue.scheduleBroadcastsLocked();
         }
     }
 
@@ -13364,8 +13368,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             receivers, null, 0, null, null, false, true, true, -1, false, null,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
                             null /* filterExtrasForReceiver */);
-                    queue.enqueueParallelBroadcastLocked(r);
-                    queue.scheduleBroadcastsLocked();
+                    queue.enqueueBroadcastLocked(r);
                 }
             }
 
@@ -14243,13 +14246,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sticky, false, userId, allowBackgroundActivityStarts,
                     backgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
-            final boolean replaced = replacePending
-                    && (queue.replaceParallelBroadcastLocked(r) != null);
-            // Note: We assume resultTo is null for non-ordered broadcasts.
-            if (!replaced) {
-                queue.enqueueParallelBroadcastLocked(r);
-                queue.scheduleBroadcastsLocked();
-            }
+            queue.enqueueBroadcastLocked(r);
             registeredReceivers = null;
             NR = 0;
         }
@@ -14342,31 +14339,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     backgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
-
-            final BroadcastRecord oldRecord =
-                    replacePending ? queue.replaceOrderedBroadcastLocked(r) : null;
-            if (oldRecord != null) {
-                // Replaced, fire the result-to receiver.
-                if (oldRecord.resultTo != null) {
-                    final BroadcastQueue oldQueue = broadcastQueueForIntent(oldRecord.intent);
-                    try {
-                        oldRecord.mIsReceiverAppRunning = true;
-                        oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
-                                oldRecord.intent,
-                                Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid,
-                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failure ["
-                                + queue.mQueueName + "] sending broadcast result of "
-                                + intent, e);
-
-                    }
-                }
-            } else {
-                queue.enqueueOrderedBroadcastLocked(r);
-                queue.scheduleBroadcastsLocked();
-            }
+            queue.enqueueBroadcastLocked(r);
         } else {
             // There was nobody interested in the broadcast, but we still want to record
             // that it happened.
@@ -17890,7 +17863,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             pw.flush();
                         }
                         Slog.v(TAG, msg);
-                        queue.cancelDeferrals();
+                        queue.flush();
                         idle = false;
                     }
                 }
