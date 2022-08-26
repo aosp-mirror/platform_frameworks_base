@@ -34,6 +34,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtEnd
 import com.android.server.wm.flicker.taskBarWindowIsVisibleAtEnd
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -235,26 +236,28 @@ open class OpenAppFromNotificationWarm(
     }
 
     /**
-     * Checks that the [ComponentMatcher.TASK_BAR] window is visible at the end of the transition
+     * Checks that the [ComponentNameMatcher.TASK_BAR] window is visible at the end of the
+     * transition
      *
      * Note: Large screen only
      */
     @Postsubmit
     @Test
     open fun taskBarWindowIsVisibleAtEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
+        Assume.assumeTrue(testSpec.isTablet)
         testSpec.taskBarWindowIsVisibleAtEnd()
     }
 
     /**
-     * Checks that the [ComponentMatcher.TASK_BAR] layer is visible at the end of the transition
+     * Checks that the [ComponentNameMatcher.TASK_BAR] layer is visible at the end of the
+     * transition
      *
      * Note: Large screen only
      */
     @Postsubmit
     @Test
     open fun taskBarLayerIsVisibleAtEnd() {
-        Assume.assumeFalse(testSpec.isTablet)
+        Assume.assumeTrue(testSpec.isTablet)
         testSpec.taskBarLayerIsVisibleAtEnd()
     }
 

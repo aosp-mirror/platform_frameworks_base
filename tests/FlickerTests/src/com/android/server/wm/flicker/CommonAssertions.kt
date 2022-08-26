@@ -20,10 +20,10 @@ package com.android.server.wm.flicker
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.common.IComponentMatcher
+import com.android.server.wm.traces.common.IComponentNameMatcher
 
 /**
- * Checks that [ComponentMatcher.STATUS_BAR] window is visible and above the app windows in
+ * Checks that [ComponentNameMatcher.STATUS_BAR] window is visible and above the app windows in
  * all WM trace entries
  */
 fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
@@ -33,7 +33,7 @@ fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
 }
 
 /**
- * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows in
+ * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows in
  * all WM trace entries
  */
 fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
@@ -43,20 +43,36 @@ fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
 }
 
 /**
- * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the start
+ * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at the start
  * and end of the WM trace
  */
 fun FlickerTestParameter.navBarWindowIsVisibleAtStartAndEnd() {
+    this.navBarWindowIsVisibleAtStart()
+    this.navBarWindowIsVisibleAtEnd()
+}
+
+/**
+ * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at the start
+ * of the WM trace
+ */
+fun FlickerTestParameter.navBarWindowIsVisibleAtStart() {
     assertWmStart {
         this.isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
     }
+}
+
+/**
+ * Checks that [ComponentNameMatcher.NAV_BAR] window is visible and above the app windows at the
+ * end of the WM trace
+ */
+fun FlickerTestParameter.navBarWindowIsVisibleAtEnd() {
     assertWmEnd {
         this.isAboveAppWindowVisible(ComponentNameMatcher.NAV_BAR)
     }
 }
 
 /**
- * Checks that [ComponentMatcher.TASK_BAR] window is visible and above the app windows in
+ * Checks that [ComponentNameMatcher.TASK_BAR] window is visible and above the app windows in
  * all WM trace entries
  */
 fun FlickerTestParameter.taskBarWindowIsAlwaysVisible() {
@@ -66,7 +82,7 @@ fun FlickerTestParameter.taskBarWindowIsAlwaysVisible() {
 }
 
 /**
- * Checks that [ComponentMatcher.TASK_BAR] window is visible and above the app windows in
+ * Checks that [ComponentNameMatcher.TASK_BAR] window is visible and above the app windows in
  * all WM trace entries
  */
 fun FlickerTestParameter.taskBarWindowIsVisibleAtEnd() {
@@ -109,20 +125,34 @@ fun FlickerTestParameter.entireScreenCovered(allStates: Boolean = true) {
 }
 
 /**
- * Checks that [ComponentMatcher.NAV_BAR] layer is visible at the start and end of the SF
- * trace
+ * Checks that [ComponentNameMatcher.NAV_BAR] layer is visible at the start of the SF trace
  */
-fun FlickerTestParameter.navBarLayerIsVisibleAtStartAndEnd() {
+fun FlickerTestParameter.navBarLayerIsVisibleAtStart() {
     assertLayersStart {
         this.isVisible(ComponentNameMatcher.NAV_BAR)
     }
+}
+
+/**
+ * Checks that [ComponentNameMatcher.NAV_BAR] layer is visible at the end of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerIsVisibleAtEnd() {
     assertLayersEnd {
         this.isVisible(ComponentNameMatcher.NAV_BAR)
     }
 }
 
 /**
- * Checks that [ComponentMatcher.TASK_BAR] layer is visible at the start and end of the SF
+ * Checks that [ComponentNameMatcher.NAV_BAR] layer is visible at the start and end of the SF
+ * trace
+ */
+fun FlickerTestParameter.navBarLayerIsVisibleAtStartAndEnd() {
+    this.navBarLayerIsVisibleAtStart()
+    this.navBarLayerIsVisibleAtEnd()
+}
+
+/**
+ * Checks that [ComponentNameMatcher.TASK_BAR] layer is visible at the start and end of the SF
  * trace
  */
 fun FlickerTestParameter.taskBarLayerIsVisibleAtStartAndEnd() {
@@ -131,7 +161,7 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtStartAndEnd() {
 }
 
 /**
- * Checks that [ComponentMatcher.TASK_BAR] layer is visible at the start of the SF
+ * Checks that [ComponentNameMatcher.TASK_BAR] layer is visible at the start of the SF
  * trace
  */
 fun FlickerTestParameter.taskBarLayerIsVisibleAtStart() {
@@ -141,7 +171,7 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtStart() {
 }
 
 /**
- * Checks that [ComponentMatcher.TASK_BAR] layer is visible at the end of the SF
+ * Checks that [ComponentNameMatcher.TASK_BAR] layer is visible at the end of the SF
  * trace
  */
 fun FlickerTestParameter.taskBarLayerIsVisibleAtEnd() {
@@ -151,7 +181,7 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtEnd() {
 }
 
 /**
- * Checks that [ComponentMatcher.STATUS_BAR] layer is visible at the start and end of the SF
+ * Checks that [ComponentNameMatcher.STATUS_BAR] layer is visible at the start and end of the SF
  * trace
  */
 fun FlickerTestParameter.statusBarLayerIsVisibleAtStartAndEnd() {
@@ -164,7 +194,7 @@ fun FlickerTestParameter.statusBarLayerIsVisibleAtStartAndEnd() {
 }
 
 /**
- * Asserts that the [ComponentMatcher.NAV_BAR] layer is at the correct position at the start
+ * Asserts that the [ComponentNameMatcher.NAV_BAR] layer is at the correct position at the start
  * of the SF trace
  */
 fun FlickerTestParameter.navBarLayerPositionAtStart() {
@@ -177,7 +207,7 @@ fun FlickerTestParameter.navBarLayerPositionAtStart() {
 }
 
 /**
- * Asserts that the [ComponentMatcher.NAV_BAR] layer is at the correct position at the end
+ * Asserts that the [ComponentNameMatcher.NAV_BAR] layer is at the correct position at the end
  * of the SF trace
  */
 fun FlickerTestParameter.navBarLayerPositionAtEnd() {
@@ -190,7 +220,7 @@ fun FlickerTestParameter.navBarLayerPositionAtEnd() {
 }
 
 /**
- * Asserts that the [ComponentMatcher.NAV_BAR] layer is at the correct position at the start
+ * Asserts that the [ComponentNameMatcher.NAV_BAR] layer is at the correct position at the start
  * and end of the SF trace
  */
 fun FlickerTestParameter.navBarLayerPositionAtStartAndEnd() {
@@ -199,7 +229,7 @@ fun FlickerTestParameter.navBarLayerPositionAtStartAndEnd() {
 }
 
 /**
- * Asserts that the [ComponentMatcher.STATUS_BAR] layer is at the correct position at the start
+ * Asserts that the [ComponentNameMatcher.STATUS_BAR] layer is at the correct position at the start
  * of the SF trace
  */
 fun FlickerTestParameter.statusBarLayerPositionAtStart() {
@@ -212,7 +242,7 @@ fun FlickerTestParameter.statusBarLayerPositionAtStart() {
 }
 
 /**
- * Asserts that the [ComponentMatcher.STATUS_BAR] layer is at the correct position at the end
+ * Asserts that the [ComponentNameMatcher.STATUS_BAR] layer is at the correct position at the end
  * of the SF trace
  */
 fun FlickerTestParameter.statusBarLayerPositionAtEnd() {
@@ -225,7 +255,7 @@ fun FlickerTestParameter.statusBarLayerPositionAtEnd() {
 }
 
 /**
- * Asserts that the [ComponentMatcher.STATUS_BAR] layer is at the correct position at the start
+ * Asserts that the [ComponentNameMatcher.STATUS_BAR] layer is at the correct position at the start
  * and end of the SF trace
  */
 fun FlickerTestParameter.statusBarLayerPositionAtStartAndEnd() {
@@ -234,11 +264,11 @@ fun FlickerTestParameter.statusBarLayerPositionAtStartAndEnd() {
 }
 
 /**
- * Asserts that the visibleRegion of the [ComponentMatcher.SNAPSHOT] layer can cover
+ * Asserts that the visibleRegion of the [ComponentNameMatcher.SNAPSHOT] layer can cover
  * the visibleRegion of the given app component exactly
  */
 fun FlickerTestParameter.snapshotStartingWindowLayerCoversExactlyOnApp(
-    component: IComponentMatcher
+    component: IComponentNameMatcher
 ) {
     assertLayers {
         invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
@@ -281,8 +311,8 @@ fun FlickerTestParameter.snapshotStartingWindowLayerCoversExactlyOnApp(
  *      otherwise we won't and the layer must appear immediately.
  */
 fun FlickerTestParameter.replacesLayer(
-    originalLayer: IComponentMatcher,
-    newLayer: IComponentMatcher,
+    originalLayer: IComponentNameMatcher,
+    newLayer: IComponentNameMatcher,
     ignoreEntriesWithRotationLayer: Boolean = false,
     ignoreSnapshot: Boolean = false,
     ignoreSplashscreen: Boolean = true
