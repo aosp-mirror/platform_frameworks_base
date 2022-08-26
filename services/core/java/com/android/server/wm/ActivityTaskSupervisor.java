@@ -1183,10 +1183,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         if (!displayContent.isPrivate()) {
-            // Anyone can launch on a public display.
-            ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: allow launch on public "
-                    + "display");
-            return true;
+            // Checks if the caller can be shown in the given public display.
+            int userId = UserHandle.getUserId(callingUid);
+            int displayId = display.getDisplayId();
+            boolean allowed = mWindowManager.mUmInternal.isUserVisible(userId, displayId);
+            ProtoLog.d(WM_DEBUG_TASKS,
+                    "Launch on display check: %s launch for userId=%d on displayId=%d",
+                    (allowed ? "allow" : "disallow"), userId, displayId);
+            return allowed;
         }
 
         // Check if the caller is the owner of the display.

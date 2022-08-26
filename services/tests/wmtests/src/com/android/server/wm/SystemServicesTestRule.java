@@ -39,6 +39,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
@@ -81,6 +82,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.input.InputManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
@@ -93,6 +95,7 @@ import org.junit.runners.model.Statement;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -283,6 +286,16 @@ public class SystemServicesTestRule implements TestRule {
         // StatusBarManagerInternal
         final StatusBarManagerInternal sbmi = mock(StatusBarManagerInternal.class);
         doReturn(sbmi).when(() -> LocalServices.getService(eq(StatusBarManagerInternal.class)));
+
+        // UserManagerInternal
+        final UserManagerInternal umi = mock(UserManagerInternal.class);
+        doReturn(umi).when(() -> LocalServices.getService(UserManagerInternal.class));
+        Answer<Boolean> isUserVisibleAnswer = invocation -> {
+            int userId = invocation.getArgument(0);
+            return userId == mWmService.mCurrentUserId;
+        };
+        when(umi.isUserVisible(anyInt())).thenAnswer(isUserVisibleAnswer);
+        when(umi.isUserVisible(anyInt(), anyInt())).thenAnswer(isUserVisibleAnswer);
     }
 
     private void setUpActivityTaskManagerService() {
@@ -403,6 +416,7 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
     }
 
     Description getDescription() {
