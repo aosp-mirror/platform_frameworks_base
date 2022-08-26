@@ -35,6 +35,7 @@ import static android.hardware.display.DisplayManagerGlobal.DisplayEvent;
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
+import static android.os.Process.ROOT_UID;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1170,6 +1171,10 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private boolean validatePackageName(int uid, String packageName) {
+        // Root doesn't have a package name.
+        if (uid == ROOT_UID) {
+            return true;
+        }
         if (packageName != null) {
             String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
             if (packageNames != null) {
