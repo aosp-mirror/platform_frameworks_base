@@ -20,14 +20,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Sistemaren interfazea"</string>
-    <string name="battery_low_title" msgid="5319680173344341779">"Bateria-aurrezlea aktibatu nahi duzu?"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"Bateriaren <xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen zaizu. Bateria-aurrezleak gai iluna aktibatzen du, atzeko planoko jarduerak murrizten, eta jakinarazpenak atzeratzen."</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"Bateria-aurrezleak gai iluna aktibatzen du, atzeko planoko jarduerak murrizten, eta jakinarazpenak atzeratzen."</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Bateria-aurreztailea aktibatu nahi duzu?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Bateriaren <xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen zaizu. Bateria-aurreztaileak gai iluna aktibatzen du, atzeko planoko jarduerak murrizten, eta jakinarazpenak atzeratzen."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Bateria-aurreztaileak gai iluna aktibatzen du, atzeko planoko jarduerak murrizten, eta jakinarazpenak atzeratzen."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Ezin da USB bidez kargatu"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Erabili gailuaren kargagailua"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Bateria-aurrezlea aktibatu nahi duzu?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Bateria-aurrezleari buruz"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Bateria-aurreztailea aktibatu nahi duzu?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Bateria-aurreztaileari buruz"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktibatu"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Aktibatu"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Ez, eskerrik asko"</string>
@@ -251,7 +251,7 @@
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Konektatzen…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Wifi-gunea"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Aktibatzen…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Datu-aurrezlea aktibatuta"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Datu-aurreztailea aktibatuta"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d gailu</item>
       <item quantity="one">%d gailu</item>
@@ -272,7 +272,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> arte"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Gai iluna"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Bateria-aurrezlea"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Bateria-aurreztailea"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ilunabarrean aktibatuko da"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Egunsentira arte"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -543,7 +543,7 @@
       <item quantity="other">%d minutu</item>
       <item quantity="one">%d minutu</item>
     </plurals>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Bateria-aurrezlea"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Bateria-aurreztailea"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> botoia"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Hasiera"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atzera"</string>
@@ -593,8 +593,8 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Ireki ezarpenak"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Entzungailuak konektatu dira"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Mikrofonodun entzungailua konektatu da"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Datu-aurrezlea"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Aktibatuta dago datu-aurrezlea"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Datu-aurreztailea"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Aktibatuta dago datu-aurreztailea"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Aktibatuta"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desaktibatuta"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Ez dago erabilgarri"</string>
@@ -721,8 +721,8 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Eman aplikazio guztien zatiak erakusteko baimena <xliff:g id="APP">%1$s</xliff:g> aplikazioari"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Eman baimena"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Ukatu"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurrezlea noiz aktibatu programatzeko"</string>
-    <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurrezlea bateria agortzeko arriskua dagoenean"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurreztailea noiz aktibatu programatzeko"</string>
+    <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurreztailea bateria agortzeko arriskua dagoenean"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez, eskerrik asko"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Erabiltzen ari da"</string>

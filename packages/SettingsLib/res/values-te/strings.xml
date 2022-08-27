@@ -585,7 +585,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>‌కు స్విచ్ చేయండి"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"కొత్త యూజర్‌ను క్రియేట్ చేస్తోంది…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"కొత్త అతిథిని క్రియేట్ చేస్తోంది…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"కొత్త గెస్ట్‌ను క్రియేట్ చేస్తోంది…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"కొత్త యూజర్‌ను క్రియేట్ చేయడం విఫలమైంది"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"కొత్త అతిథిని క్రియేట్ చేయడం విఫలమైంది"</string>
     <string name="user_nickname" msgid="262624187455825083">"మారుపేరు"</string>
