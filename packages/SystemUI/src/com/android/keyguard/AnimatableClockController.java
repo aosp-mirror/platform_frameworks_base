@@ -169,7 +169,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
         mStatusBarStateController.addCallback(mStatusBarStateListener);
 
-        refreshTime();
+        mView.onTimeZoneChanged(TimeZone.getDefault());
         initColors();
         mView.animateDoze(mIsDozing, false);
     }
