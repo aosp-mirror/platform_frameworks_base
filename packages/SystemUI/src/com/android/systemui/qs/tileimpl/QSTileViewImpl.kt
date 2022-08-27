@@ -44,6 +44,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.R
 import com.android.systemui.animation.LaunchableView
+import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.BooleanState
@@ -138,8 +139,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var lastStateDescription: CharSequence? = null
     private var tileState = false
     private var lastState = INVALID
-    private var blockVisibilityChanges = false
-    private var lastVisibility = View.VISIBLE
+    private val launchableViewDelegate = LaunchableViewDelegate(
+        this,
+        superSetVisibility = { super.setVisibility(it) },
+        superSetTransitionVisibility = { super.setTransitionVisibility(it) },
+    )
 
     private val locInScreen = IntArray(2)
 
@@ -343,33 +347,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun setShouldBlockVisibilityChanges(block: Boolean) {
-        blockVisibilityChanges = block
-
-        if (block) {
-            lastVisibility = visibility
-        } else {
-            visibility = lastVisibility
-        }
+        launchableViewDelegate.setShouldBlockVisibilityChanges(block)
     }
 
     override fun setVisibility(visibility: Int) {
-        if (blockVisibilityChanges) {
-            lastVisibility = visibility
-            return
-        }
-
-        super.setVisibility(visibility)
+        launchableViewDelegate.setVisibility(visibility)
     }
 
     override fun setTransitionVisibility(visibility: Int) {
-        if (blockVisibilityChanges) {
-            // View.setTransitionVisibility just sets the visibility flag, so we don't have to save
-            // the transition visibility separately from the normal visibility.
-            lastVisibility = visibility
-            return
-        }
-
-        super.setTransitionVisibility(visibility)
+        launchableViewDelegate.setTransitionVisibility(visibility)
     }
 
     // Accessibility

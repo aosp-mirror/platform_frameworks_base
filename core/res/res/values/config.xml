@@ -550,6 +550,9 @@
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
 
+    <!-- If this is true, then keep dreaming when undocking. -->
+    <bool name="config_keepDreamingWhenUndocking">false</bool>
+
     <!-- Auto-rotation behavior -->
 
     <!-- If true, enables auto-rotation features using the accelerometer.
@@ -1562,8 +1565,7 @@
     <bool name="config_enableIdleScreenBrightnessMode">false</bool>
 
     <!-- Array of desired screen brightness in nits corresponding to the lux values
-         in the config_autoBrightnessLevels array. As with config_screenBrightnessMinimumNits and
-         config_screenBrightnessMaximumNits, the display brightness is defined as the measured
+         in the config_autoBrightnessLevels array. The display brightness is defined as the measured
          brightness of an all-white image.
 
          If this is defined then:
@@ -1584,7 +1586,7 @@
     <array name="config_autoBrightnessDisplayValuesNitsIdle">
     </array>
 
-    <!-- Array of output values for button backlight corresponding to the luX values
+    <!-- Array of output values for button backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
@@ -3534,6 +3536,16 @@
     <!-- The time (in millis) the clickable toast dialog will last until
          automatically dismissing. This is currently used in SideFpsEventHandler -->
     <integer name="config_sideFpsToastTimeout">3000</integer>
+
+    <!-- This acquired message will cause the sidefpsKgPowerPress window to be skipped.
+         If this is set to BIOMETRIC_ACQUIRED_VENDOR, then the framework will skip on
+         config_sidefpsSkipWaitForPowerVendorAcquireMessage -->
+    <integer name="config_sidefpsSkipWaitForPowerAcquireMessage">6</integer>
+
+    <!-- This vendor acquired message that will cause the sidefpsKgPowerPress window to be skipped.
+         config_sidefpsSkipWaitForPowerOnFingerUp must be true and
+         config_sidefpsSkipWaitForPowerAcquireMessage must be BIOMETRIC_ACQUIRED_VENDOR == 6. -->
+    <integer name="config_sidefpsSkipWaitForPowerVendorAcquireMessage">2</integer>
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
          It declares the package name of VoiceInteractionService that should be started. -->
