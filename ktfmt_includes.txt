@@ -7,3 +7,11 @@ packages/SystemUI/src/com/android/systemui/keyguard/dagger
 packages/SystemUI/src/com/android/systemui/keyguard/domain
 packages/SystemUI/src/com/android/systemui/keyguard/shared
 packages/SystemUI/src/com/android/systemui/keyguard/ui
+packages/SystemUI/src/com/android/systemui/qs/footer
+packages/SystemUI/src/com/android/systemui/security
+packages/SystemUI/src/com/android/systemui/common/
+packages/SystemUI/tests/utils/src/com/android/systemui/qs/
+packages/SystemUI/tests/utils/src/com/android/systemui/statusbar/policy/FakeSecurityController.kt
+packages/SystemUI/tests/utils/src/com/android/systemui/statusbar/policy/FakeUserInfoController.kt
+packages/SystemUI/tests/utils/src/com/android/systemui/statusbar/policy/MockUserSwitcherControllerWrapper.kt
+packages/SystemUI/tests/src/com/android/systemui/qs/footer/

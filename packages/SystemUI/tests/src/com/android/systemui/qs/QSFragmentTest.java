@@ -45,12 +45,15 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -390,6 +393,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         setUpMedia();
         setUpOther();
 
+        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
+        featureFlags.set(Flags.NEW_FOOTER_ACTIONS, false);
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(
                         context, commandQueue, mock(ConfigurationController.class)),
@@ -402,7 +407,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mQsComponentFactory,
                 mock(QSFragmentDisableFlagsLogger.class),
                 mFalsingManager,
-                mock(DumpManager.class));
+                mock(DumpManager.class),
+                featureFlags,
+                mock(NewFooterActionsController.class),
+                mock(FooterActionsViewModel.Factory.class));
     }
 
     private void setUpOther() {
