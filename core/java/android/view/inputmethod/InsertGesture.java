@@ -39,12 +39,14 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
     private PointF mPoint;
 
     private InsertGesture(String text, PointF point, String fallbackText) {
+        mType = GESTURE_TYPE_INSERT;
         mPoint = point;
         mTextToInsert = text;
         mFallbackText = fallbackText;
     }
 
     private InsertGesture(final Parcel source) {
+        mType = GESTURE_TYPE_INSERT;
         mFallbackText = source.readString8();
         mTextToInsert = source.readString8();
         mPoint = source.readTypedObject(PointF.CREATOR);

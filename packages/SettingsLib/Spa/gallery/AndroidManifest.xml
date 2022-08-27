@@ -22,7 +22,7 @@
         android:label="@string/app_label"
         android:supportsRtl="true">
         <activity
-            android:name="com.android.settingslib.spa.gallery.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

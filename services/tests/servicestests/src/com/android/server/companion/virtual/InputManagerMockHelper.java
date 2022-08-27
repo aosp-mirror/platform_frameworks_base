@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
+import android.hardware.input.InputDeviceCountryCode;
 import android.hardware.input.InputManager;
 import android.os.RemoteException;
 import android.testing.TestableLooper;
@@ -84,7 +85,7 @@ class InputManagerMockHelper {
         final InputDevice device = new InputDevice(mDevices.size() /*id*/, 1 /*generation*/, 0,
                 inv.getArgument(0) /*name*/, inv.getArgument(1) /*vendorId*/,
                 inv.getArgument(2) /*productId*/, inv.getArgument(3) /*descriptor*/, true, 0, 0,
-                null, false, false, false, false, false);
+                null, InputDeviceCountryCode.INVALID, false, false, false, false, false);
         mDevices.add(device);
         try {
             mDevicesChangedListener.onInputDevicesChanged(

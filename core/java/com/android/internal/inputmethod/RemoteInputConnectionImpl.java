@@ -1001,15 +1001,30 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
             InputConnectionCommandHeader header,  T gesture, ResultReceiver resultReceiver) {
         dispatchWithTracing("performHandwritingGesture", () -> {
             if (header.mSessionId != mCurrentSessionId.get()) {
+                if (resultReceiver != null) {
+                    resultReceiver.send(
+                            InputConnection.HANDWRITING_GESTURE_RESULT_CANCELLED, null);
+                }
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
                 Log.w(TAG, "performHandwritingGesture on inactive InputConnection");
+                if (resultReceiver != null) {
+                    resultReceiver.send(
+                            InputConnection.HANDWRITING_GESTURE_RESULT_CANCELLED, null);
+                }
                 return;
             }
-            // TODO(b/210039666): implement resultReceiver
-            ic.performHandwritingGesture(gesture, null, null);
+
+            // TODO(210039666): implement Cleaner to return HANDWRITING_GESTURE_RESULT_UNKNOWN if
+            //  editor doesn't return any type.
+            ic.performHandwritingGesture(
+                    gesture,
+                    resultReceiver != null ? Runnable::run : null,
+                    resultReceiver != null
+                            ? (resultCode) -> resultReceiver.send(resultCode, null /* resultData */)
+                            : null);
         });
     }
 

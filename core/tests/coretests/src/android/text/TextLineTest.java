@@ -30,9 +30,9 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -97,6 +97,17 @@ public class TextLineTest {
     private static final Typeface TYPEFACE = Typeface.createFromAsset(
             InstrumentationRegistry.getInstrumentation().getTargetContext().getAssets(),
             "fonts/StaticLayoutLineBreakingTestFont.ttf");
+
+    // The test font has following coverage and width.
+    // U+0020: 1em
+    // U+0049 (I): 1em
+    // U+0066 (f): 0.5em
+    // U+0069 (i): 0.5em
+    // ligature fi: 2em
+    // U+10331 (\uD800\uDF31): 10em
+    private static final Typeface TYPEFACE_LIGATURE = Typeface.createFromAsset(
+            InstrumentationRegistry.getInstrumentation().getTargetContext().getAssets(),
+            "fonts/ligature.ttf");
 
     private TextLine getTextLine(CharSequence str, TextPaint paint, TabStops tabStops) {
         Layout layout =
@@ -265,6 +276,34 @@ public class TextLineTest {
         TextLine tl = getTextLine("I I", paint);
         assertMeasurements(tl, 3, false,
                 new float[]{0.0f, 10.0f, 120.0f, 130.0f});
+        assertMeasurements(tl, 3, true,
+                new float[]{0.0f, 10.0f, 120.0f, 130.0f});
+    }
+
+    @Test
+    public void testMeasure_surrogate() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("I\uD800\uDF31I", paint);
+        assertMeasurements(tl, 4, false,
+                new float[]{0.0f, 10.0f, 110.0f, 110.0f, 120.0f});
+        assertMeasurements(tl, 4, true,
+                new float[]{0.0f, 10.0f, 110.0f, 110.0f, 120.0f});
+    }
+
+    @Test
+    public void testMeasure_ligature() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE_LIGATURE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("IfiI", paint);
+        assertMeasurements(tl, 4, false,
+                new float[]{0.0f, 10.0f, 20.0f, 30.0f, 40.0f});
+        assertMeasurements(tl, 4, true,
+                new float[]{0.0f, 10.0f, 20.0f, 30.0f, 40.0f});
     }
 
     @Test

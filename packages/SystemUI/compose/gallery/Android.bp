@@ -54,6 +54,11 @@ android_library {
         "testables",
         "truth-prebuilt",
         "androidx.test.uiautomator",
+        "kotlinx_coroutines_test",
+    ],
+
+    libs: [
+        "android.test.mock",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

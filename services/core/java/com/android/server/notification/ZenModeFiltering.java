@@ -149,8 +149,13 @@ public class ZenModeFiltering {
      */
     public boolean shouldIntercept(int zen, NotificationManager.Policy policy,
             NotificationRecord record) {
-        // Zen mode is ignored for critical notifications.
-        if (zen == ZEN_MODE_OFF || isCritical(record)) {
+        if (zen == ZEN_MODE_OFF) {
+            return false;
+        }
+
+        if (isCritical(record)) {
+            // Zen mode is ignored for critical notifications.
+            ZenLog.traceNotIntercepted(record, "criticalNotification");
             return false;
         }
         // Make an exception to policy for the notification saying that policy has changed
@@ -168,6 +173,7 @@ public class ZenModeFiltering {
             case Global.ZEN_MODE_ALARMS:
                 if (isAlarm(record)) {
                     // Alarms only
+                    ZenLog.traceNotIntercepted(record, "alarm");
                     return false;
                 }
                 ZenLog.traceIntercepted(record, "alarmsOnly");
@@ -184,6 +190,7 @@ public class ZenModeFiltering {
                         ZenLog.traceIntercepted(record, "!allowAlarms");
                         return true;
                     }
+                    ZenLog.traceNotIntercepted(record, "allowedAlarm");
                     return false;
                 }
                 if (isEvent(record)) {
@@ -191,6 +198,7 @@ public class ZenModeFiltering {
                         ZenLog.traceIntercepted(record, "!allowEvents");
                         return true;
                     }
+                    ZenLog.traceNotIntercepted(record, "allowedEvent");
                     return false;
                 }
                 if (isReminder(record)) {
@@ -198,6 +206,7 @@ public class ZenModeFiltering {
                         ZenLog.traceIntercepted(record, "!allowReminders");
                         return true;
                     }
+                    ZenLog.traceNotIntercepted(record, "allowedReminder");
                     return false;
                 }
                 if (isMedia(record)) {
@@ -205,6 +214,7 @@ public class ZenModeFiltering {
                         ZenLog.traceIntercepted(record, "!allowMedia");
                         return true;
                     }
+                    ZenLog.traceNotIntercepted(record, "allowedMedia");
                     return false;
                 }
                 if (isSystem(record)) {
@@ -212,6 +222,7 @@ public class ZenModeFiltering {
                         ZenLog.traceIntercepted(record, "!allowSystem");
                         return true;
                     }
+                    ZenLog.traceNotIntercepted(record, "allowedSystem");
                     return false;
                 }
                 if (isConversation(record)) {
@@ -253,6 +264,7 @@ public class ZenModeFiltering {
                 ZenLog.traceIntercepted(record, "!priority");
                 return true;
             default:
+                ZenLog.traceNotIntercepted(record, "unknownZenMode");
                 return false;
         }
     }
@@ -271,10 +283,12 @@ public class ZenModeFiltering {
     }
 
     private static boolean shouldInterceptAudience(int source, NotificationRecord record) {
-        if (!audienceMatches(source, record.getContactAffinity())) {
-            ZenLog.traceIntercepted(record, "!audienceMatches");
+        float affinity = record.getContactAffinity();
+        if (!audienceMatches(source, affinity)) {
+            ZenLog.traceIntercepted(record, "!audienceMatches,affinity=" + affinity);
             return true;
         }
+        ZenLog.traceNotIntercepted(record, "affinity=" + affinity);
         return false;
     }
 

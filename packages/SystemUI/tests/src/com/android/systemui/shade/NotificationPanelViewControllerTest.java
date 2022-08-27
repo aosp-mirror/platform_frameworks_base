@@ -259,7 +259,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     @Mock
     private KeyguardClockSwitch mKeyguardClockSwitch;
-    private PanelViewController.TouchHandler mTouchHandler;
+    private NotificationPanelViewController.TouchHandler mTouchHandler;
     private ConfigurationController mConfigurationController;
     @Mock
     private MediaHierarchyManager mMediaHiearchyManager;
@@ -454,7 +454,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         doAnswer((Answer<Void>) invocation -> {
             mTouchHandler = invocation.getArgument(0);
             return null;
-        }).when(mView).setOnTouchListener(any(PanelViewController.TouchHandler.class));
+        }).when(mView).setOnTouchListener(any(NotificationPanelViewController.TouchHandler.class));
 
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
@@ -1407,7 +1407,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mQsFrame.getWidth()).thenReturn(1000);
         when(mQsHeader.getTop()).thenReturn(0);
         when(mQsHeader.getBottom()).thenReturn(1000);
-        PanelViewController.TouchHandler touchHandler =
+        NotificationPanelViewController.TouchHandler touchHandler =
                 mNotificationPanelViewController.createTouchHandler();
 
         mNotificationPanelViewController.setExpandedFraction(1f);
@@ -1427,7 +1427,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mQsFrame.getWidth()).thenReturn(1000);
         when(mQsHeader.getTop()).thenReturn(0);
         when(mQsHeader.getBottom()).thenReturn(1000);
-        PanelViewController.TouchHandler touchHandler =
+        NotificationPanelViewController.TouchHandler touchHandler =
                 mNotificationPanelViewController.createTouchHandler();
 
         mNotificationPanelViewController.setExpandedFraction(1f);

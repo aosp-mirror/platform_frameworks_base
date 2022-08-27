@@ -4600,6 +4600,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mCpHelper.cleanupAppInLaunchingProvidersLocked(app, true);
                 // Take care of any services that are waiting for the process.
                 mServices.processStartTimedOutLocked(app);
+                // Take care of any broadcasts waiting for the process.
+                for (BroadcastQueue queue : mBroadcastQueues) {
+                    queue.onApplicationTimeoutLocked(app);
+                }
                 if (!isKillTimeout) {
                     mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                     app.killLocked("start timeout",
@@ -4630,16 +4634,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 });
-            }
-            if (!isKillTimeout) {
-                if (isPendingBroadcastProcessLocked(pid)) {
-                    Slog.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
-                    skipPendingBroadcastLocked(pid);
-                }
-            } else {
-                if (isPendingBroadcastProcessLocked(app)) {
-                    skipCurrentReceiverLocked(app);
-                }
             }
         } else {
             Slog.w(TAG, "Spurious process start timeout - pid not known for " + app);
@@ -4960,15 +4954,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (!badApp) {
-            updateUidReadyForBootCompletedBroadcastLocked(app.uid);
-        }
-
         // Check if a next-broadcast receiver is in this process...
-        if (!badApp && isPendingBroadcastProcessLocked(pid)) {
+        if (!badApp) {
             try {
-                didSomething |= sendPendingBroadcastsLocked(app);
-                checkTime(startTime, "attachApplicationLocked: after sendPendingBroadcastsLocked");
+                for (BroadcastQueue queue : mBroadcastQueues) {
+                    didSomething |= queue.onApplicationAttachedLocked(app);
+                }
+                checkTime(startTime, "attachApplicationLocked: after dispatching broadcasts");
             } catch (Exception e) {
                 // If the app died trying to launch the receiver we declare it 'bad'
                 Slog.wtf(TAG, "Exception thrown dispatching broadcasts in " + app, e);
@@ -8352,12 +8344,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     void killAppAtUsersRequest(ProcessRecord app) {
         synchronized (this) {
             mAppErrors.killAppAtUserRequestLocked(app);
-        }
-    }
-
-    void skipCurrentReceiverLocked(ProcessRecord app) {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.skipCurrentReceiverLocked(app);
         }
     }
 
@@ -12373,7 +12359,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             mOomAdjuster.mCachedAppOptimizer.onCleanupApplicationRecordLocked(app);
         }
         mAppProfiler.onCleanupApplicationRecordLocked(app);
-        skipCurrentReceiverLocked(app);
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.onApplicationCleanupLocked(app);
+        }
         updateProcessForegroundLocked(app, false, 0, false);
         mServices.killServicesLocked(app, allowRestart);
         mPhantomProcessList.onAppDied(pid);
@@ -13080,48 +13068,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    boolean isPendingBroadcastProcessLocked(int pid) {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            BroadcastRecord r = queue.getPendingBroadcastLocked();
-            if (r != null && r.curApp.getPid() == pid) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    boolean isPendingBroadcastProcessLocked(ProcessRecord app) {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            BroadcastRecord r = queue.getPendingBroadcastLocked();
-            if (r != null && r.curApp == app) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void skipPendingBroadcastLocked(int pid) {
-            Slog.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
-            for (BroadcastQueue queue : mBroadcastQueues) {
-                queue.skipPendingBroadcastLocked(pid);
-            }
-    }
-
-    // The app just attached; send any pending broadcasts that it should receive
-    boolean sendPendingBroadcastsLocked(ProcessRecord app) {
-        boolean didSomething = false;
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            didSomething |= queue.sendPendingBroadcastsLocked(app);
-        }
-        return didSomething;
-    }
-
-    void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.updateUidReadyForBootCompletedBroadcastLocked(uid);
-        }
-    }
-
     /**
      * @deprecated Use {@link #registerReceiverWithFeature}
      */
@@ -13393,8 +13339,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
-                            r.queue.processNextBroadcastLocked(/* frommsg */ false,
-                                    /* skipOomAdj */ true);
                         }
                     }
 
@@ -14589,9 +14533,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (r != null) {
                     doNext = r.queue.finishReceiverLocked(r, resultCode,
                         resultData, resultExtras, resultAbort, true);
-                }
-                if (doNext) {
-                    r.queue.processNextBroadcastLocked(/*fromMsg=*/ false, /*skipOomAdj=*/ true);
                 }
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);

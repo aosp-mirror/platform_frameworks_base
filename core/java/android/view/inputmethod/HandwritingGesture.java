@@ -18,10 +18,13 @@ package android.view.inputmethod;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
 import android.view.MotionEvent;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -77,6 +80,63 @@ public abstract class HandwritingGesture {
      */
     @IntDef({GRANULARITY_CHARACTER, GRANULARITY_WORD})
     @interface Granularity {}
+
+    /** Undefined gesture type. */
+    public static final int GESTURE_TYPE_NONE = 0x0000;
+
+    /**
+     * Gesture of type {@link SelectGesture} to select an area of text.
+     */
+    public static final int GESTURE_TYPE_SELECT = 0x0001;
+
+    /**
+     * Gesture of type {@link InsertGesture} to insert text at a designated point.
+     */
+    public static final int GESTURE_TYPE_INSERT = 1 << 1;
+
+    /**
+     * Gesture of type {@link DeleteGesture} to delete an area of text.
+     */
+    public static final int GESTURE_TYPE_DELETE = 1 << 2;
+
+    /**
+     * Type of gesture like {@link #GESTURE_TYPE_SELECT}, {@link #GESTURE_TYPE_INSERT},
+     * or {@link #GESTURE_TYPE_DELETE}.
+     */
+    @IntDef(prefix = {"GESTURE_TYPE_"}, value = {
+                GESTURE_TYPE_NONE,
+                GESTURE_TYPE_SELECT,
+                GESTURE_TYPE_INSERT,
+                GESTURE_TYPE_DELETE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface GestureType{}
+
+    /**
+     * Flags which can be any combination of {@link #GESTURE_TYPE_SELECT},
+     * {@link #GESTURE_TYPE_INSERT}, or {@link #GESTURE_TYPE_DELETE}.
+     * {@link GestureTypeFlags} can be used by editors to declare what gestures are supported
+     *  and report them in {@link EditorInfo#setSupportedHandwritingGestureTypes(int)}.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = {"GESTURE_TYPE_"}, value = {
+            GESTURE_TYPE_SELECT,
+            GESTURE_TYPE_INSERT,
+            GESTURE_TYPE_DELETE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GestureTypeFlags{}
+
+    @GestureType int mType = GESTURE_TYPE_NONE;
+
+    /**
+     * Returns the gesture type {@link GestureType}.
+     * {@link GestureType} can be used by editors to declare what gestures are supported and report
+     * them in {@link EditorInfo#setSupportedHandwritingGestureTypes(int)}.
+     * @hide
+     */
+    @TestApi
+    public @GestureType int getGestureType() {
+        return mType;
+    }
 
     @Nullable
     String mFallbackText;

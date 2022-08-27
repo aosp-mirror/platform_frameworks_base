@@ -46,6 +46,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
 import android.hardware.input.IInputManager;
+import android.hardware.input.InputDeviceCountryCode;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
@@ -1814,7 +1815,8 @@ public class VibratorManagerServiceTest {
 
     private InputDevice createInputDeviceWithVibrator(int id) {
         return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, /* hasVibrator= */ true, false, false, false, false);
+                null, InputDeviceCountryCode.INVALID, /* hasVibrator= */ true, false, false, false,
+                false);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {

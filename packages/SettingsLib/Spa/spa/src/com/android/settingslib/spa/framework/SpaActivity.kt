@@ -36,24 +36,28 @@ open class SpaActivity(
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
+
         setContent {
-            MainContent()
+            SettingsTheme {
+                MainContent()
+            }
         }
     }
 
     @Composable
     private fun MainContent() {
-        SettingsTheme {
-            val navController = rememberNavController()
-            CompositionLocalProvider(navController.localNavController()) {
-                NavHost(navController, settingsPageRepository.startDestination) {
-                    for (page in settingsPageRepository.allPages) {
-                        composable(
-                            route = page.route,
-                            arguments = page.arguments,
-                        ) { navBackStackEntry ->
-                            page.Page(navBackStackEntry.arguments)
-                        }
+        val startDestination =
+            intent?.getStringExtra(KEY_START_DESTINATION) ?: settingsPageRepository.startDestination
+
+        val navController = rememberNavController()
+        CompositionLocalProvider(navController.localNavController()) {
+            NavHost(navController, startDestination) {
+                for (page in settingsPageRepository.allPages) {
+                    composable(
+                        route = page.route,
+                        arguments = page.arguments,
+                    ) { navBackStackEntry ->
+                        page.Page(navBackStackEntry.arguments)
                     }
                 }
             }
@@ -62,4 +66,8 @@ open class SpaActivity(
 
     private val SettingsPageProvider.route: String
         get() = name + arguments.joinToString("") { argument -> "/{${argument.name}}" }
+
+    companion object {
+        const val KEY_START_DESTINATION = "spa:SpaActivity:startDestination"
+    }
 }

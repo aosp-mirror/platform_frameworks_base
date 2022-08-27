@@ -152,7 +152,6 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
-import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -1875,11 +1874,9 @@ public class CentralSurfacesImpl extends CoreStartable implements
             return true;
         }
 
-        // If we are locked and have to dismiss the keyguard, only animate if remote unlock
-        // animations are enabled. We also don't animate non-activity launches as they can break the
-        // animation.
+        // We don't animate non-activity launches as they can break the animation.
         // TODO(b/184121838): Support non activity launches on the lockscreen.
-        return isActivityIntent && KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation;
+        return isActivityIntent;
     }
 
     /** Whether we should animate an activity launch. */

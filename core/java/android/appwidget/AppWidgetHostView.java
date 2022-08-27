@@ -66,7 +66,7 @@ import java.util.concurrent.Executor;
  * between updates, and will try recycling old views for each incoming
  * {@link RemoteViews}.
  */
-public class AppWidgetHostView extends FrameLayout {
+public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppWidgetHostListener {
 
     static final String TAG = "AppWidgetHostView";
     private static final String KEY_JAILED_ARRAY = "jail";
@@ -492,8 +492,11 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * Update the AppWidgetProviderInfo for this view, and reset it to the
      * initial layout.
+     *
+     * @hide
      */
-    void resetAppWidget(AppWidgetProviderInfo info) {
+    @Override
+    public void onUpdateProviderInfo(@Nullable AppWidgetProviderInfo info) {
         setAppWidget(mAppWidgetId, info);
         mViewMode = VIEW_MODE_NOINIT;
         updateAppWidget(null);
@@ -503,6 +506,7 @@ public class AppWidgetHostView extends FrameLayout {
      * Process a set of {@link RemoteViews} coming in as an update from the
      * AppWidget provider. Will animate into these new views as needed
      */
+    @Override
     public void updateAppWidget(RemoteViews remoteViews) {
         mLastInflatedRemoteViews = remoteViews;
         applyRemoteViews(remoteViews, true);
@@ -693,8 +697,11 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * Process data-changed notifications for the specified view in the specified
      * set of {@link RemoteViews} views.
+     *
+     * @hide
      */
-    void viewDataChanged(int viewId) {
+    @Override
+    public void onViewDataChanged(int viewId) {
         View v = findViewById(viewId);
         if ((v != null) && (v instanceof AdapterView<?>)) {
             AdapterView<?> adapterView = (AdapterView<?>) v;

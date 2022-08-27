@@ -851,13 +851,16 @@ public class AppsFilterImplTest {
     public void testActsOnTargetOfOverlay() throws Exception {
         final String actorName = "overlay://test/actorName";
 
-        ParsingPackage target = pkg("com.some.package.target")
-                .addOverlayable("overlayableName", actorName);
-        ParsingPackage overlay = pkg("com.some.package.overlay")
+        var target = pkg("com.some.package.target")
+                .addOverlayable("overlayableName", actorName)
+                .hideAsParsed();
+        var overlay = pkg("com.some.package.overlay")
                 .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
-                .setOverlayTargetOverlayableName("overlayableName");
-        ParsingPackage actor = pkg("com.some.package.actor");
+                .setOverlayTargetOverlayableName("overlayableName")
+                .hideAsParsed();
+        var actor = pkg("com.some.package.actor")
+                .hideAsParsed();
 
         final AppsFilterImpl appsFilter = new AppsFilterImpl(
                 mFeatureConfigMock,
@@ -935,14 +938,16 @@ public class AppsFilterImplTest {
 
         final String actorName = "overlay://test/actorName";
 
-        ParsingPackage target = pkg("com.some.package.target")
-                .addOverlayable("overlayableName", actorName);
-        ParsingPackage overlay = pkg("com.some.package.overlay")
+        var target = pkg("com.some.package.target")
+                .addOverlayable("overlayableName", actorName)
+                .hideAsParsed();
+        var overlay = pkg("com.some.package.overlay")
                 .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
-                .setOverlayTargetOverlayableName("overlayableName");
-        ParsingPackage actorOne = pkg("com.some.package.actor.one");
-        ParsingPackage actorTwo = pkg("com.some.package.actor.two");
+                .setOverlayTargetOverlayableName("overlayableName")
+                .hideAsParsed();
+        var actorOne = pkg("com.some.package.actor.one").hideAsParsed();
+        var actorTwo = pkg("com.some.package.actor.two").hideAsParsed();
         PackageSetting ps1 = getPackageSettingFromParsingPackage(actorOne, DUMMY_ACTOR_APPID,
                 null /*settingBuilder*/);
         PackageSetting ps2 = getPackageSettingFromParsingPackage(actorTwo, DUMMY_ACTOR_APPID,
@@ -1594,23 +1599,23 @@ public class AppsFilterImplTest {
         final Signature frameworkSignature = Mockito.mock(Signature.class);
         final SigningDetails frameworkSigningDetails =
                 new SigningDetails(new Signature[]{frameworkSignature}, 1);
-        final ParsingPackage android = pkg("android");
+        final ParsedPackage android = pkg("android").hideAsParsed();
         simulateAddPackage(appsFilter, android, 1000,
                 b -> b.setSigningDetails(frameworkSigningDetails));
     }
 
     private PackageSetting simulateAddPackage(AppsFilterImpl filter,
-            ParsingPackage newPkgBuilder, int appId) {
+            ParsedPackage newPkgBuilder, int appId) {
         return simulateAddPackage(filter, newPkgBuilder, appId, null /*settingBuilder*/);
     }
 
     private PackageSetting simulateAddPackage(AppsFilterImpl filter,
-            ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
+            ParsedPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
         return simulateAddPackage(filter, newPkgBuilder, appId, action, null /*sharedUserSetting*/);
     }
 
     private PackageSetting simulateAddPackage(AppsFilterImpl filter,
-            ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action,
+            ParsedPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action,
             @Nullable SharedUserSetting sharedUserSetting) {
         final PackageSetting setting =
                 getPackageSettingFromParsingPackage(newPkgBuilder, appId, action);
@@ -1618,9 +1623,28 @@ public class AppsFilterImplTest {
         return setting;
     }
 
-    private PackageSetting getPackageSettingFromParsingPackage(ParsingPackage newPkgBuilder,
+    private PackageSetting simulateAddPackage(AppsFilterImpl filter,
+            ParsingPackage newPkgBuilder, int appId) {
+        return simulateAddPackage(filter, newPkgBuilder.hideAsParsed(), appId,
+                null /*settingBuilder*/);
+    }
+
+    private PackageSetting simulateAddPackage(AppsFilterImpl filter,
+            ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
+        return simulateAddPackage(filter, newPkgBuilder.hideAsParsed(), appId, action,
+                null /*sharedUserSetting*/);
+    }
+
+    private PackageSetting simulateAddPackage(AppsFilterImpl filter,
+            ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action,
+            @Nullable SharedUserSetting sharedUserSetting) {
+        return simulateAddPackage(filter, newPkgBuilder.hideAsParsed(), appId, action,
+                sharedUserSetting);
+    }
+
+    private PackageSetting getPackageSettingFromParsingPackage(ParsedPackage newPkgBuilder,
             int appId, @Nullable WithSettingBuilder action) {
-        AndroidPackage newPkg = ((ParsedPackage) newPkgBuilder.hideAsParsed()).hideAsFinal();
+        AndroidPackage newPkg = newPkgBuilder.hideAsFinal();
         final PackageSettingBuilder settingBuilder = new PackageSettingBuilder()
                 .setPackage(newPkg)
                 .setAppId(appId)

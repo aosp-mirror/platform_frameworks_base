@@ -143,7 +143,6 @@ import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
@@ -905,7 +904,7 @@ public class ComputerEngine implements Computer {
                     a, flags, ps.getUserStateOrDefault(userId), userId, ps);
         }
         if (resolveComponentName().equals(component)) {
-            return PackageInfoWithoutStateUtils.generateDelegateActivityInfo(mResolveActivity,
+            return PackageInfoUtils.generateDelegateActivityInfo(mResolveActivity,
                     flags, PackageUserStateInternal.DEFAULT, userId);
         }
         return null;
@@ -1591,10 +1590,9 @@ public class ComputerEngine implements Computer {
             return result;
         }
         final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-        ephemeralInstaller.activityInfo =
-                PackageInfoWithoutStateUtils.generateDelegateActivityInfo(
-                        instantAppInstallerActivity(), 0 /*flags*/,
-                        ps.getUserStateOrDefault(userId), userId);
+        ephemeralInstaller.activityInfo = PackageInfoUtils.generateDelegateActivityInfo(
+                instantAppInstallerActivity(), 0 /*flags*/,
+                ps.getUserStateOrDefault(userId), userId);
         ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
         // add a non-generic filter
@@ -1681,7 +1679,7 @@ public class ComputerEngine implements Computer {
             ai.setVersionCode(ps.getVersionCode());
             ai.flags = ps.getFlags();
             ai.privateFlags = ps.getPrivateFlags();
-            pi.applicationInfo = PackageInfoWithoutStateUtils.generateDelegateApplicationInfo(
+            pi.applicationInfo = PackageInfoUtils.generateDelegateApplicationInfo(
                     ai, flags, state, userId);
 
             if (DEBUG_PACKAGE_INFO) {
