@@ -921,7 +921,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Presionar Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dibujar el patrón de desbloqueo"</string>
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergencia"</string>
-    <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regresar a llamada"</string>
+    <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regresar a la llamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Vuelve a intentarlo."</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Volver a intentarlo"</string>
@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalizando el inicio"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"¿Continuar con la configuración?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Presionaste el botón de encendido. Por lo general, esta acción apaga la pantalla.\n\nPresiona suavemente mientras configuras tu huella dactilar."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Apagar pantalla"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continuar config."</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Presiona para apagar la pantalla"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Apagar pantalla"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"¿Verificar huella dactilar?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Presionaste el botón de encendido. Por lo general, esta acción apaga la pantalla.\n\nPresiona suavemente para verificar tu huella dactilar."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apagar pantalla"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Presiona para configurar"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Selecciona para configurar"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Es posible que debas reformatear el dispositivo. Presiona para expulsar."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para transferir fotos y contenido multimedia"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Para almacenar fotos, videos, música y mucho más"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Explora archivos multimedia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema con <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>: no funciona"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Presiona para solucionar el problema"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> se dañó. Selecciona el medio para solucionar el problema."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Es posible que debas reformatear el dispositivo. Presiona para expulsar."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> no es compatible"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Se detectó <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>: no funciona"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositivo no es compatible con <xliff:g id="NAME">%s</xliff:g>. Presiona la pantalla para configurarlo en un formato compatible."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Presiona para configurar."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Selecciona para configurar <xliff:g id="NAME">%s</xliff:g> en un formato compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Es posible que debas reformatear el dispositivo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Se extrajo <xliff:g id="NAME">%s</xliff:g> de forma inesperada."</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferencia de región"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Nombre del idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Todos los idiomas"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Todas las regiones"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Búsqueda"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"¿Quieres permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acceso por única vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo permiten documentar lo que sucede en él. Las apps pueden usar estos registros para encontrar y solucionar problemas.\n\nEs posible que algunos registros del dispositivo contengan información sensible, por lo que solo debes permitir que accedan a todos los registros las apps que sean de tu confianza. \n\n Ten en cuenta que la app puede acceder a sus propios registros aun si no permites que acceda a todos los registros del dispositivo. También es posible que el fabricante del dispositivo acceda a algunos registros o información en tu dispositivo. Más información"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
@@ -2290,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consulta las apps activas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del dispositivo desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara de la tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"No se puede acceder a este contenido durante una transmisión. Inténtalo en tu teléfono."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
 </resources>

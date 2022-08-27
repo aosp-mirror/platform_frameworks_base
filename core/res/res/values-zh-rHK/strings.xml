@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"正在準備 <xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"啟動完成。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"要繼續設定嗎？"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"您已按下開關按鈕，這麼做通常會關閉螢幕。\n\n設定指紋時請嘗試輕按開關按鈕。"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"關閉螢幕"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"繼續設定"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"輕按即可關閉螢幕"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"關閉螢幕"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"要繼續驗證指紋嗎？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"您已按下開關按鈕，這麼做通常會關閉螢幕。\n\n嘗試輕按開關按鈕以驗證指紋。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"關閉螢幕"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"輕按即可設定"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"選取即可設定"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"您可能需要將裝置重新格式化。輕按即可退出。"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"用於轉移相片和媒體"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"用於儲存相片、影片、音樂等"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"瀏覽媒體檔案"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>發生問題"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"輕按即可修正問題"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>已損毀。選取即可修正。"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"您可能需要將裝置重新格式化。輕按即可退出。"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"不支援的 <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"已偵測到「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"此裝置並不支援此 <xliff:g id="NAME">%s</xliff:g>。輕按即可在支援的格式設定。"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"輕按即可設定。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"選取即可使用支援的格式設定 <xliff:g id="NAME">%s</xliff:g>。"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"您可能需要將裝置重新格式化"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>被意外移除"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有語言"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"所有國家/地區"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"搜尋"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"要允許「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」存取所有裝置記錄嗎？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允許存取一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允許"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"裝置記錄記下裝置上的活動。應用程式可使用這些記錄找出並修正問題。\n\n有些記錄可能包含敏感資料，因此建議您只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄。您的裝置製造商可能仍可存取裝置上的一些記錄或資料。瞭解詳情"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不要再顯示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」想顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編輯"</string>
@@ -2290,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的應用程式"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"串流播放時無法使用，請改用手機。"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
 </resources>

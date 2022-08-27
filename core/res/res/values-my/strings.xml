@@ -266,7 +266,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"ဆက်တင်များ"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"အကူအညီ"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"အသံ အကူအညီ"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"ချိတ်ပိတ်ရန်"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"လော့ခ်ဒေါင်း"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"၉၉၉+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"အကြောင်းကြားချက်အသစ်"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"ပကတိအသွင်ကီးဘုတ်"</string>
@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> အားပြင်ဆင်နေသည်။"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"အက်ပ်များကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ဆက်လက်၍ စနစ်ထည့်သွင်းလိုပါသလား။"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ဖွင့်ပိတ်ခလုတ်ကို သင်နှိပ်ခဲ့သည် — ၎င်းက ပုံမှန်အားဖြင့် စခရင်ကို ပိတ်စေသည်။\n\nသင့်လက်ဗွေကို ထည့်သွင်းသောအခါ ဖွဖွတို့ကြည့်ပါ။"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"စခရင် ပိတ်ရန်"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"စနစ်ဆက်ထည့်သွင်းရန်"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"ဖန်သားပြင်ပိတ်ရန် တို့ပါ"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"ဖန်သားပြင် ပိတ်ရန်"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"သင့်လက်ဗွေကို ဆက်၍ အတည်ပြုမလား။"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ဖွင့်ပိတ်ခလုတ်ကို သင်နှိပ်ခဲ့သည် — ၎င်းက ပုံမှန်အားဖြင့် စခရင်ကို ပိတ်စေသည်။\n\nသင့်လက်ဗွေကို အတည်ပြုရန် ဖွဖွတို့ကြည့်ပါ။"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"စခရင် ပိတ်ရန်"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"စနစ်ထည့်သွင်းရန် တို့ပါ"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"စနစ်ထည့်သွင်းရန် ရွေးပါ"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"စက်ကို ပြန်လည်ဖော်မက်လုပ်ရန် လိုအပ်နိုင်သည်။ ပယ်ရန် တို့ပါ။"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ဓာတ်ပုံနှင့် မီဒီယာများ လွှဲပြောင်းရန်အတွက်"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ဓာတ်ပုံ၊ ဗီဒီယို၊ သီချင်းစသည်တို့ သိမ်းရန်အတွက်"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"မီဒီယာဖိုင်များကို ရှာကြည့်ပါ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> တွင် ပြဿနာရှိနေသည်"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> အလုပ်မလုပ်ပါ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ပြင်ဆင်ရန်အတွက် ထိလိုက်ပါ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ပျက်နေပါသည်။ ပြင်ရန် ရွေးချယ်ပါ။"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"စက်ကို ပြန်လည်ဖော်မက်လုပ်ရန် လိုအပ်နိုင်သည်။ ပယ်ရန် တို့ပါ။"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ပံ့ပိုးထားခြင်း မရှိသော <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> တွေ့ပါသည်"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> အလုပ်မလုပ်ပါ"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကိုအသုံးပြု၍မရပါ။ အသုံးပြု၍ရသော စနစ်ပုံစံသို့သတ်မှတ်ရန် တို့ပါ။"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"စနစ်ထည့်သွင်းရန် တို့ပါ ။"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> ကို ပံ့ပိုးထားသောဖော်မက်ဖြင့် စနစ်ထည့်သွင်းရန် ရွေးပါ။"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"စက်ကို ပြန်လည်ဖော်မက်လုပ်ရန် လိုအပ်နိုင်သည်"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> မမျှော်လင့်ဘဲ ဖယ်ရှားခဲ့သည်"</string>
@@ -1438,7 +1437,7 @@
     <string name="ext_media_status_removed" msgid="241223931135751691">"ဖယ်ရှာပြီး"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"ဖယ်ထုတ်ပြီး၏"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"စစ်ဆေးနေပါသည်…"</string>
-    <string name="ext_media_status_mounted" msgid="3459448555811203459">"အသင့့်ဖြစ်နေ"</string>
+    <string name="ext_media_status_mounted" msgid="3459448555811203459">"အသင့်ဖြစ်ပြီ"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"ဖတ်ရန်အတွက်သာ"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"လုံခြုံမှုမရှိစွာ ဖယ်ရှားခဲ့၏"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"ပျက်စီးသွား၏"</string>
@@ -1857,8 +1856,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"‘ဘက်ထရီ အားထိန်း’ က ‘အမှောင်နောက်ခံ’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘အမှောင်နောက်ခံ’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ရန်"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ဘာသာစကားအမည် ထည့်ပါ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"အကြံပြုထားသည်"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"ဘာသာစကားအားလုံး"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ရှာဖွေရန်"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုမလား။"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"တစ်ခါသုံး ဝင်ခွင့်ပေးရန်"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ခွင့်မပြုပါ"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် စက်မှတ်တမ်းအားလုံးကို ယုံကြည်ရသည့် အက်ပ်များကိုသာ သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ၎င်း၏ကိုယ်ပိုင်မှတ်တမ်းကို သုံးနိုင်ဆဲဖြစ်သည်။ သင့်စက်ရှိ အချို့မှတ်တမ်းများ (သို့) အချက်အလက်များကို သင့်စက်ထုတ်လုပ်သူက သုံးနိုင်ပါသေးသည်။ ပိုမိုလေ့လာရန်"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"နောက်ထပ်မပြပါနှင့်"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> သည် <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များကို ပြသလိုသည်"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"တည်းဖြတ်ရန်"</string>
@@ -2290,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ပွင့်နေသည့်အက်ပ်များ စစ်ဆေးရန်"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ တက်ဘလက်ကင်မရာကို သုံး၍မရပါ"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"တိုက်ရိုက်လွှင့်နေစဉ် ၎င်းကို မသုံးနိုင်ပါ။ ၎င်းအစား ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
     <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
 </resources>

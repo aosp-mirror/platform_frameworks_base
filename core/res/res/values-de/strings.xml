@@ -1249,10 +1249,11 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Einrichtung fortsetzen?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Ausschalten"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Weiter einrichten"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (8997641910928785172) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (8351290204990805109) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ausschalten"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Zum Einrichten tippen"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Zum Einrichten auswählen"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Eventuell musst du das Gerät neu formatieren. Zum Auswerfen tippen."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Zum Übertragen von Fotos und Medien"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Zum Speichern von Fotos, Videos, Musik und mehr"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"In Mediendateien stöbern"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem mit <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tippen, um das Problem zu beheben"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ist beschädigt. Zur Problembehebung auswählen."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Eventuell musst du das Gerät neu formatieren. Zum Auswerfen tippen."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> nicht unterstützt"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"„<xliff:g id="NAME">%s</xliff:g>“ erkannt"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zum Einrichten in einem unterstützten Format tippen."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Zum Einrichten tippen"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Wähle <xliff:g id="NAME">%s</xliff:g> aus, um das Medium in einem unterstützten Format einzurichten."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Eventuell musst du das Gerät neu formatieren"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> wurde unerwartet entfernt"</string>
@@ -1858,7 +1859,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte sowie manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Auch werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1927,6 +1928,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Region auswählen"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sprache eingeben"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Vorschläge"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle Sprachen"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Alle Regionen"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Suche"</string>
@@ -2049,7 +2052,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> den Zugriff auf alle Geräteprotokolle erlauben?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Einmaligen Zugriff zulassen"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nicht zulassen"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können sie verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen, daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät. Weitere Informationen"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nicht mehr anzeigen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> möchte Teile von <xliff:g id="APP_2">%2$s</xliff:g> anzeigen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bearbeiten"</string>
@@ -2290,5 +2294,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
 </resources>
