@@ -612,8 +612,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dispozitivul nu are senzor de amprentă."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzorul este dezactivat temporar."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nu se poate folosi senzorul de amprentă. Vizitați un furnizor de servicii de reparații."</string>
-    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
-    <skip />
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"A fost apăsat butonul de pornire"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Folosiți amprenta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Folosiți amprenta sau blocarea ecranului"</string>
@@ -654,8 +653,10 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Priviți direct spre telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Eliminați orice vă ascunde chipul."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Curățați partea de sus a ecranului, inclusiv bara neagră"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Chipul trebuie să fie vizibil în totalitate"</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Chipul trebuie să fie vizibil în totalitate"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nu se poate crea modelul facial. Reîncercați."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"S-au detectat ochelari de culoare închisă. Chipul trebuie să fie vizibil în totalitate."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"S-a detectat un articol care acoperă chipul. Chipul trebuie să fie vizibil în totalitate."</string>
@@ -1167,6 +1168,8 @@
     <string name="not_checked" msgid="7972320087569023342">"nebifat"</string>
     <string name="selected" msgid="6614607926197755875">"selectat"</string>
     <string name="not_selected" msgid="410652016565864475">"neselectat"</string>
+    <!-- no translation found for rating_label (1837085249662154601) -->
+    <skip />
     <string name="in_progress" msgid="2149208189184319441">"în curs"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Finalizare acțiune utilizând"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Finalizați acțiunea utilizând %1$s"</string>
@@ -1246,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Se pregătește <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Se pornesc aplicațiile."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Se finalizează pornirea."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Continuați configurarea?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Ați apăsat butonul de pornire. De obicei, această acțiune dezactivează ecranul.\n\nAtingeți ușor când vă configurați amprenta."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Dezactivați ecranul"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continuați configurarea"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Atinge pentru a dezactiva ecranul"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Dezactivează ecranul"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuați cu verificarea amprentei?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Ați apăsat butonul de pornire. De obicei, această acțiune dezactivează ecranul.\n\nAtingeți ușor pentru verificarea amprentei."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Dezactivați ecranul"</string>
@@ -1364,7 +1366,7 @@
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Atingeți pentru a dezactiva."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selectați pentru a dezactiva remedierea erorilor prin USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Remedierea erorilor wireless este activă"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Atingeți pentru a dezactiva remedierea erorilor wireless"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Atinge pentru a dezactiva remedierea erorilor wireless"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selectați pentru a dezactiva remedierea erorilor wireless."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modul Set de testare este activat"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Reveniți la setările din fabrică pentru a dezactiva modul Set de testare."</string>
@@ -1402,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Atingeți pentru a configura"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Selectați pentru a configura"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Poate fi nevoie să reformatați dispozitivul. Atingeți pentru a-l scoate."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Pentru a transfera fotografii și fișiere media"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Pentru stocarea de fotografii, videoclipuri, muzică și altele"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Răsfoiți fișierele media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problemă cu <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nu funcționează"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Atingeți pentru a remedia"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> este corupt. Selectați pentru a remedia."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Poate fi nevoie să reformatați dispozitivul. Atingeți pentru a-l scoate."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> necompatibil"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"S-a detectat <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nu funcționează"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dispozitivul nu este compatibil cu acest <xliff:g id="NAME">%s</xliff:g>. Atingeți pentru configurare într-un format compatibil."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Atinge pentru a configura"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Selectați pentru a configura <xliff:g id="NAME">%s</xliff:g> într-un format acceptat."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Poate fi nevoie să reformatați dispozitivul"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> scos pe neașteptate"</string>
@@ -1924,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Regiunea preferată"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Numele limbii"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugerate"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Limbi sugerate"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Regiuni sugerate"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Toate limbile"</string>
@@ -1943,18 +1947,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Camera video nu este disponibilă"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuați pe telefon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfon indisponibil"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Aplicația Magazin Play nu este disponibilă"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Setările pentru Android TV sunt indisponibile"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Setările pentru tabletă sunt indisponibile"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Setările pentru telefon sunt indisponibile"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Aplicația nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încercați pe dispozitivul Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Aplicația nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încercați pe tabletă."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Aplicația nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încercați pe telefon."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe dispozitivul Android TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe tabletă."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe telefon."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe dispozitivul Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe tabletă."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe telefon."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aplicația necesită securitate suplimentară. Încercați pe dispozitivul Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aplicația necesită securitate suplimentară. Încercați pe tabletă."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aplicația necesită securitate suplimentară. Încercați pe telefon."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încearcă pe dispozitivul Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încearcă pe tabletă."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încearcă pe telefon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Această aplicație a fost creată pentru o versiune Android mai veche și este posibil să nu funcționeze corect. Încercați să căutați actualizări sau contactați dezvoltatorul."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Căutați actualizări"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Aveți mesaje noi"</string>
@@ -2047,7 +2052,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permiteți ca <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> să acceseze toate jurnalele dispozitivului?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permiteți accesul o dată"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nu permiteți"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Jurnalele dispozitivului înregistrează activitatea de pe dispozitivul dvs. Aplicațiile pot folosi aceste jurnale pentru a identifica și a remedia probleme.\n\nUnele jurnale pot să conțină informații sensibile, prin urmare permiteți accesul la toate jurnalele dispozitivului doar aplicațiilor în care aveți încredere. \n\nDacă nu permiteți accesul aplicației la toate jurnalele dispozitivului, aceasta poate în continuare să acceseze propriile jurnale. Este posibil ca producătorul dispozitivului să acceseze în continuare unele jurnale sau informații de pe dispozitiv. Aflați mai multe"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nu mai afișa"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vrea să afișeze porțiuni din <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editați"</string>
@@ -2288,6 +2294,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nu se poate accesa camera foto a telefonului de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nu se poate accesa camera foto a tabletei de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Nu se poate accesa în timpul streamingului. Încearcă pe telefon."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Prestabilit de sistem"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
