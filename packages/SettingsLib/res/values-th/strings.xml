@@ -288,8 +288,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"เปิดใช้ Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
-    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชัน MAP ของบลูทูธ"</string>
-    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชัน MAP ของบลูทูธ"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชันของบลูทูธ MAP"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชันของบลูทูธ MAP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"อัตราตัวอย่างเสียงบลูทูธ"</string>
