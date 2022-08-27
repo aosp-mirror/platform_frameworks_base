@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Paramètres"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Accéder à l\'écran partagé"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu \"Picture-in-picture\""</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> est en mode Picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si vous ne voulez pas que l\'application <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, appuyez ici pour ouvrir les paramètres et la désactiver."</string>
     <string name="pip_play" msgid="3496151081459417097">"Lecture"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"L\'application ne peut pas être lancée sur des écrans secondaires."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Séparateur d\'écran partagé"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"Séparateur d\'écran partagé"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Écran de gauche en plein écran"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Écran de gauche à 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Écran de gauche à 50 %"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Développez pour obtenir plus d\'informations"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Agrandir"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Réduire"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Fermer"</string>
 </resources>

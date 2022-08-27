@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ക്രമീകരണം"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"സ്ക്രീൻ വിഭജന മോഡിൽ പ്രവേശിക്കുക"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"മെനു"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ചിത്രത്തിനുള്ളിൽ ചിത്രം മെനു"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ചിത്രത്തിനുള്ളിൽ ചിത്രം രീതിയിലാണ്"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ഈ ഫീച്ചർ ഉപയോഗിക്കേണ്ടെങ്കിൽ, ടാപ്പ് ചെയ്‌ത് ക്രമീകരണം തുറന്ന് അത് ഓഫാക്കുക."</string>
     <string name="pip_play" msgid="3496151081459417097">"പ്ലേ ചെയ്യുക"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നതിനെ ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"സ്പ്ലിറ്റ്-സ്ക്രീൻ ഡിവൈഡർ"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"സ്‌ക്രീൻ വിഭജന മോഡ് ഡിവൈഡർ"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ഇടത് പൂർണ്ണ സ്ക്രീൻ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ഇടത് 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ഇടത് 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"മനസ്സിലായി"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"കൂടുതൽ വിവരങ്ങൾക്ക് വികസിപ്പിക്കുക."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"വലുതാക്കുക"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ചെറുതാക്കുക"</string>
     <string name="close_button_text" msgid="2913281996024033299">"അടയ്ക്കുക"</string>
 </resources>

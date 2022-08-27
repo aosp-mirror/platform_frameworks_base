@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"تنظیمات"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"ورود به حالت «صفحهٔ دونیمه»"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"منو"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"منو تصویر در تصویر"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> درحالت تصویر در تصویر است"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"اگر نمی‌خواهید <xliff:g id="NAME">%s</xliff:g> از این قابلیت استفاده کند، با ضربه زدن، تنظیمات را باز کنید و آن را خاموش کنید."</string>
     <string name="pip_play" msgid="3496151081459417097">"پخش"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ممکن است برنامه در نمایشگر ثانویه کار نکند."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"برنامه از راه‌اندازی در نمایشگرهای ثانویه پشتیبانی نمی‌کند."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"تقسیم‌کننده صفحه"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"تقسیم‌کننده صفحهٔ دونیمه"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"تمام‌صفحه چپ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"٪۷۰ چپ"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"٪۵۰ چپ"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"متوجه‌ام"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"برای اطلاعات بیشتر، گسترده کنید."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"بزرگ کردن"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"کوچک کردن"</string>
     <string name="close_button_text" msgid="2913281996024033299">"بستن"</string>
 </resources>

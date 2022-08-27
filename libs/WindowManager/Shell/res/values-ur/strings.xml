@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ترتیبات"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"اسپلٹ اسکرین تک رسائی"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"مینو"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"تصویر میں تصویر کا مینو"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> تصویر میں تصویر میں ہے"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کے لیے تھپتھپا کر اسے آف کرے۔"</string>
     <string name="pip_play" msgid="3496151081459417097">"چلائیں"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ممکن ہے ایپ ثانوی ڈسپلے پر کام نہ کرے۔"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ایپ ثانوی ڈسپلیز پر شروعات کا تعاون نہیں کرتی۔"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"سپلٹ اسکرین تقسیم کار"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"اسپلٹ اسکرین ڈیوائیڈر"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"بائیں فل اسکرین"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"بائیں %70"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"بائیں %50"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"سمجھ آ گئی"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"مزید معلومات کے لیے پھیلائیں۔"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"بڑا کریں"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"چھوٹا کریں"</string>
     <string name="close_button_text" msgid="2913281996024033299">"بند کریں"</string>
 </resources>
