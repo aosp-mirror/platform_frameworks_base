@@ -55,6 +55,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
+import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -207,8 +208,10 @@ public abstract class WMShellModule {
     @DynamicOverride
     static FreeformComponents provideFreeformComponents(
             FreeformTaskListener<?> taskListener,
-            FreeformTaskTransitionHandler transitionHandler) {
-        return new FreeformComponents(taskListener, Optional.of(transitionHandler));
+            FreeformTaskTransitionHandler transitionHandler,
+            FreeformTaskTransitionObserver transitionObserver) {
+        return new FreeformComponents(
+                taskListener, Optional.of(transitionHandler), Optional.of(transitionObserver));
     }
 
     @WMSingleton
@@ -230,19 +233,22 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static FreeformTaskTransitionHandler provideFreeformTaskTransitionHandler(
+            ShellInit shellInit,
+            Transitions transitions,
+            WindowDecorViewModel<?> windowDecorViewModel) {
+        return new FreeformTaskTransitionHandler(shellInit, transitions, windowDecorViewModel);
+    }
+
+    @WMSingleton
+    @Provides
+    static FreeformTaskTransitionObserver provideFreeformTaskTransitionObserver(
             Context context,
             ShellInit shellInit,
             Transitions transitions,
-            WindowDecorViewModel<?> windowDecorViewModel,
             FullscreenTaskListener<?> fullscreenTaskListener,
             FreeformTaskListener<?> freeformTaskListener) {
-        // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
-        //                    override for this controller from the base module
-        ShellInit init = FreeformComponents.isFreeformEnabled(context)
-                ? shellInit
-                : null;
-        return new FreeformTaskTransitionHandler(init, transitions,
-                windowDecorViewModel, fullscreenTaskListener, freeformTaskListener);
+        return new FreeformTaskTransitionObserver(
+                context, shellInit, transitions, fullscreenTaskListener, freeformTaskListener);
     }
 
     //
