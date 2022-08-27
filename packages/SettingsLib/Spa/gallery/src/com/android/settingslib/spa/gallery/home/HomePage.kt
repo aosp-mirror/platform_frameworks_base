@@ -29,6 +29,7 @@ import com.android.settingslib.spa.gallery.page.PreferencePageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.page.SwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
 object HomePageProvider : SettingsPageProvider {
@@ -48,6 +49,7 @@ private fun HomePage() {
         ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
 
         SliderPageProvider.EntryItem()
+        SpinnerPageProvider.EntryItem()
         SettingsPagerPageProvider.EntryItem()
         FooterPageProvider.EntryItem()
     }
