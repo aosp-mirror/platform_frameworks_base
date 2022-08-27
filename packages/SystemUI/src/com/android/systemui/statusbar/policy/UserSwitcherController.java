@@ -45,7 +45,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
 import android.text.TextUtils;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -285,10 +284,6 @@ public class UserSwitcherController implements Dumpable {
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         refreshUsers(UserHandle.USER_NULL);
-    }
-
-    private static boolean isEnableGuestModeUxChanges(Context context) {
-        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_GUEST_MODE_UX_CHANGES);
     }
 
     /**
@@ -549,17 +544,9 @@ public class UserSwitcherController implements Dumpable {
         }
 
         if (currUserInfo != null && currUserInfo.isGuest()) {
-            if (isEnableGuestModeUxChanges(mContext)) {
-                showExitGuestDialog(currUserId, currUserInfo.isEphemeral(),
-                        record.resolveId(), dialogShower);
-                return;
-            } else {
-                if (currUserInfo.isEphemeral()) {
-                    showExitGuestDialog(currUserId, currUserInfo.isEphemeral(),
-                            record.resolveId(), dialogShower);
-                    return;
-                }
-            }
+            showExitGuestDialog(currUserId, currUserInfo.isEphemeral(),
+                    record.resolveId(), dialogShower);
+            return;
         }
 
         if (dialogShower != null) {
@@ -1056,14 +1043,8 @@ public class UserSwitcherController implements Dumpable {
         public String getName(Context context, UserRecord item) {
             if (item.isGuest) {
                 if (item.isCurrent) {
-                    if (isEnableGuestModeUxChanges(context)) {
-                        return context.getString(
-                                com.android.settingslib.R.string.guest_exit_quick_settings_button);
-                    } else {
-                        return context.getString(mController.mGuestUserAutoCreated
-                            ? com.android.settingslib.R.string.guest_reset_guest
-                            : com.android.settingslib.R.string.guest_exit_guest);
-                    }
+                    return context.getString(
+                            com.android.settingslib.R.string.guest_exit_quick_settings_button);
                 } else {
                     if (item.info != null) {
                         return context.getString(com.android.internal.R.string.guest_name);
@@ -1080,13 +1061,8 @@ public class UserSwitcherController implements Dumpable {
                                             ? com.android.settingslib.R.string.guest_resetting
                                             : com.android.internal.R.string.guest_name);
                         } else {
-                            if (isEnableGuestModeUxChanges(context)) {
-                                // we always show "guest" as string, instead of "add guest"
-                                return context.getString(com.android.internal.R.string.guest_name);
-                            } else {
-                                return context.getString(
-                                        com.android.settingslib.R.string.guest_new_guest);
-                            }
+                            // we always show "guest" as string, instead of "add guest"
+                            return context.getString(com.android.internal.R.string.guest_name);
                         }
                     }
                 }
@@ -1108,11 +1084,7 @@ public class UserSwitcherController implements Dumpable {
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
             int iconRes;
             if (item.isAddUser) {
-                if (isEnableGuestModeUxChanges(context)) {
-                    iconRes = R.drawable.ic_add;
-                } else {
-                    iconRes = R.drawable.ic_account_circle_filled;
-                }
+                iconRes = R.drawable.ic_add;
             } else if (item.isGuest) {
                 iconRes = R.drawable.ic_account_circle;
             } else if (item.isAddSupervisedUser) {
@@ -1289,46 +1261,32 @@ public class UserSwitcherController implements Dumpable {
         ExitGuestDialog(Context context, int guestId, boolean isGuestEphemeral,
                     int targetId) {
             super(context);
-            if (isEnableGuestModeUxChanges(context)) {
-                if (isGuestEphemeral) {
-                    setTitle(context.getString(
-                                com.android.settingslib.R.string.guest_exit_dialog_title));
-                    setMessage(context.getString(
-                                com.android.settingslib.R.string.guest_exit_dialog_message));
-                    setButton(DialogInterface.BUTTON_NEUTRAL,
-                            context.getString(android.R.string.cancel), this);
-                    setButton(DialogInterface.BUTTON_POSITIVE,
-                            context.getString(
-                                com.android.settingslib.R.string.guest_exit_dialog_button), this);
-                } else {
-                    setTitle(context.getString(
-                                com.android.settingslib
-                                    .R.string.guest_exit_dialog_title_non_ephemeral));
-                    setMessage(context.getString(
-                                com.android.settingslib
-                                    .R.string.guest_exit_dialog_message_non_ephemeral));
-                    setButton(DialogInterface.BUTTON_NEUTRAL,
-                            context.getString(android.R.string.cancel), this);
-                    setButton(DialogInterface.BUTTON_NEGATIVE,
-                            context.getString(
-                                com.android.settingslib.R.string.guest_exit_clear_data_button),
-                            this);
-                    setButton(DialogInterface.BUTTON_POSITIVE,
-                            context.getString(
-                                com.android.settingslib.R.string.guest_exit_save_data_button),
-                            this);
-                }
-            } else {
-                setTitle(mGuestUserAutoCreated
-                        ? com.android.settingslib.R.string.guest_reset_guest_dialog_title
-                        : com.android.settingslib.R.string.guest_remove_guest_dialog_title);
-                setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
+            if (isGuestEphemeral) {
+                setTitle(context.getString(
+                            com.android.settingslib.R.string.guest_exit_dialog_title));
+                setMessage(context.getString(
+                            com.android.settingslib.R.string.guest_exit_dialog_message));
                 setButton(DialogInterface.BUTTON_NEUTRAL,
                         context.getString(android.R.string.cancel), this);
                 setButton(DialogInterface.BUTTON_POSITIVE,
-                        context.getString(mGuestUserAutoCreated
-                            ? com.android.settingslib.R.string.guest_reset_guest_confirm_button
-                            : com.android.settingslib.R.string.guest_remove_guest_confirm_button),
+                        context.getString(
+                            com.android.settingslib.R.string.guest_exit_dialog_button), this);
+            } else {
+                setTitle(context.getString(
+                            com.android.settingslib
+                                .R.string.guest_exit_dialog_title_non_ephemeral));
+                setMessage(context.getString(
+                            com.android.settingslib
+                                .R.string.guest_exit_dialog_message_non_ephemeral));
+                setButton(DialogInterface.BUTTON_NEUTRAL,
+                        context.getString(android.R.string.cancel), this);
+                setButton(DialogInterface.BUTTON_NEGATIVE,
+                        context.getString(
+                            com.android.settingslib.R.string.guest_exit_clear_data_button),
+                        this);
+                setButton(DialogInterface.BUTTON_POSITIVE,
+                        context.getString(
+                            com.android.settingslib.R.string.guest_exit_save_data_button),
                         this);
             }
             SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
@@ -1345,39 +1303,29 @@ public class UserSwitcherController implements Dumpable {
             if (mFalsingManager.isFalseTap(penalty)) {
                 return;
             }
-            if (isEnableGuestModeUxChanges(getContext())) {
-                if (mIsGuestEphemeral) {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        mDialogLaunchAnimator.dismissStack(this);
-                        // Ephemeral guest: exit guest, guest is removed by the system
-                        // on exit, since its marked ephemeral
-                        exitGuestUser(mGuestId, mTargetId, false);
-                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                        // Cancel clicked, do nothing
-                        cancel();
-                    }
-                } else {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        mDialogLaunchAnimator.dismissStack(this);
-                        // Non-ephemeral guest: exit guest, guest is not removed by the system
-                        // on exit, since its marked non-ephemeral
-                        exitGuestUser(mGuestId, mTargetId, false);
-                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                        mDialogLaunchAnimator.dismissStack(this);
-                        // Non-ephemeral guest: remove guest and then exit
-                        exitGuestUser(mGuestId, mTargetId, true);
-                    } else if (which == DialogInterface.BUTTON_NEUTRAL) {
-                        // Cancel clicked, do nothing
-                        cancel();
-                    }
+            if (mIsGuestEphemeral) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    mDialogLaunchAnimator.dismissStack(this);
+                    // Ephemeral guest: exit guest, guest is removed by the system
+                    // on exit, since its marked ephemeral
+                    exitGuestUser(mGuestId, mTargetId, false);
+                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                    // Cancel clicked, do nothing
+                    cancel();
                 }
             } else {
-                if (which == BUTTON_NEUTRAL) {
-                    cancel();
-                } else {
-                    mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
+                if (which == DialogInterface.BUTTON_POSITIVE) {
                     mDialogLaunchAnimator.dismissStack(this);
-                    removeGuestUser(mGuestId, mTargetId);
+                    // Non-ephemeral guest: exit guest, guest is not removed by the system
+                    // on exit, since its marked non-ephemeral
+                    exitGuestUser(mGuestId, mTargetId, false);
+                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                    mDialogLaunchAnimator.dismissStack(this);
+                    // Non-ephemeral guest: remove guest and then exit
+                    exitGuestUser(mGuestId, mTargetId, true);
+                } else if (which == DialogInterface.BUTTON_NEUTRAL) {
+                    // Cancel clicked, do nothing
+                    cancel();
                 }
             }
         }
