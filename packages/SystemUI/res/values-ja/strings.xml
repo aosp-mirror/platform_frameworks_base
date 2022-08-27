@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"顔でロック解除しました。押すと開きます。"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"顔を認識しました。押すと開きます。"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"顔を認識しました。ロック解除アイコンを押して開きます。"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"顔でロック解除しました"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"顔を認識しました"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"左に移動"</item>
     <item msgid="5558598599408514296">"下に移動"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 急速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ホルダーで充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • フル充電まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"おかえりなさい、ゲストさん"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"セッションを続行しますか？"</string>
@@ -748,6 +751,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"画面全体を拡大します"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"スイッチ"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"斜めスクロールを許可"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"サイズ変更"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"拡大の種類を変更"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"サイズ変更を終了"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"上ハンドル"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"左ハンドル"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"右ハンドル"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"下ハンドル"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"拡大鏡のサイズ"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"ズーム"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"中"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"小"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"大"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"閉じる"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"編集"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"拡大鏡ウィンドウの設定"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"タップしてユーザー補助機能を開きます。ボタンのカスタマイズや入れ替えを [設定] で行えます。\n\n"<annotation id="link">"設定を表示"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには、端に移動させてください"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"左上に移動"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"選択したデバイス: <xliff:g id="COUNT">%1$d</xliff:g> 台"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"（接続解除済み）"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"切り替えられません。タップしてやり直してください。"</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"デバイスを接続"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"このセッションをキャストするには、アプリを開いてください。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明なアプリ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"キャストを停止"</string>
@@ -916,11 +934,11 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> が以下のタイルをクイック設定に追加しようとしています"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーの選択"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーを選択"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 個のアプリがアクティブです}other{# 個のアプリがアクティブです}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ユーザーが使用していない状態でもアクティブで実行中のアプリの一覧です。機能面は向上しますが、バッテリー駆動時間に影響する可能性があります。"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ユーザーが使用していない状態でもアクティブで実行されているアプリの一覧です。機能性は向上しますが、バッテリー駆動時間に影響する可能性があります。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"停止中"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完了"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi-Fi を利用できません"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"優先順位モード"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"アラームを設定しました"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"カメラは OFF です"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"マイクは OFF です"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"カメラとマイクが OFF です"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 件の通知}other{# 件の通知}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>、<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> のブロードキャストを停止しますか？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャストしたり、出力を変更したりすると、現在のブロードキャストが停止します。"</string>

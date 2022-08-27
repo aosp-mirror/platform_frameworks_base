@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Opnað með andliti. Ýttu til að opna."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Andlitið var greint. Ýttu til að opna."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Andlitið var greint. Ýttu á opnunartáknið til að opna."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Opnað með andliti"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Andlitið var greint"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Færa til vinstri"</item>
     <item msgid="5558598599408514296">"Færa niður"</item>
@@ -337,8 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Í hleðslu • Full hleðsla eftir <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hraðhleðsla • Full hleðsla eftir <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hæg hleðsla • Full hleðsla eftir <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hleður í dokku • Full hleðsla eftir <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skipta um notanda"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"Fellivalmynd"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Öllum forritum og gögnum í þessari lotu verður eytt."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Velkominn aftur, gestur!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Viltu halda áfram með lotuna?"</string>
@@ -748,6 +752,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Stækka allan skjáinn"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Stækka hluta skjásins"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Rofi"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Leyfa skáflettingu"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"Breyta stærð"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Breyta gerð stækkunar"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Hætta að breyta stærð"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"Handfang efst"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Vinstra handfang"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Hægra handfang"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Handfang neðst"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Stærð stækkunarglers"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Stækka/minnka"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Miðlungs"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"Lítið"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Stórt"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Loka"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Breyta"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Stillingar stækkunarglugga"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Ýttu til að opna aðgengiseiginleika. Sérsníddu eða skiptu hnappinum út í stillingum.\n\n"<annotation id="link">"Skoða stillingar"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Færðu hnappinn að brúninni til að fela hann tímabundið"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Færa efst til vinstri"</string>
@@ -831,8 +851,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> tæki valin"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(aftengt)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Ekki er hægt að skipta. Ýttu til að reyna aftur."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Tengja tæki"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Opnaðu forritið til að senda þessa lotu út."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Óþekkt forrit"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stöðva útsendingu"</string>
@@ -944,14 +963,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WiFi ekki tiltækt"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Forgangsstilling"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Vekjari stilltur"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Slökkt er á myndavél"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Slökkt er á hljóðnema"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Slökkt á myndavél og hljóðnema"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# tilkynning}one{# tilkynning}other{# tilkynningar}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Útsending í gangi"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Hætta að senda út <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ef þú sendir út <xliff:g id="SWITCHAPP">%1$s</xliff:g> eða skiptir um úttak lýkur yfirstandandi útsendingu"</string>
