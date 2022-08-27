@@ -199,6 +199,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
         }
 
         private void handleEventForMove(MotionEvent e) {
+            if (mTaskOrganizer.getRunningTaskInfo(mTaskId).getWindowingMode()
+                    == WINDOWING_MODE_FULLSCREEN) {
+                return;
+            }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     mDragPointerId  = e.getPointerId(0);

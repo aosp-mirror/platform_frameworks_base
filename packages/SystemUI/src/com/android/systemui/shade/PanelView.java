@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelView.class.getSimpleName();
-    private PanelViewController.TouchHandler mTouchHandler;
+    private NotificationPanelViewController.TouchHandler mTouchHandler;
 
     protected CentralSurfaces mCentralSurfaces;
     protected HeadsUpManagerPhone mHeadsUpManager;
@@ -49,7 +49,7 @@ public abstract class PanelView extends FrameLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public void setOnTouchListener(PanelViewController.TouchHandler touchHandler) {
+    public void setOnTouchListener(NotificationPanelViewController.TouchHandler touchHandler) {
         super.setOnTouchListener(touchHandler);
         mTouchHandler = touchHandler;
     }

@@ -28,7 +28,6 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
 import android.util.Slog;
@@ -41,8 +40,10 @@ import java.util.Objects;
 class TunerSession extends ITuner.Stub {
     private static final String TAG = "BcRadio2Srv.session";
     private static final String kAudioDeviceName = "Radio tuner source";
+    private static final int TUNER_EVENT_LOGGER_QUEUE_SIZE = 25;
 
     private final Object mLock;
+    @NonNull private final RadioEventLogger mEventLogger;
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
@@ -61,15 +62,12 @@ class TunerSession extends ITuner.Stub {
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
         mLock = Objects.requireNonNull(lock);
-    }
-
-    private boolean isDebugEnabled() {
-        return Log.isLoggable(TAG, Log.DEBUG);
+        mEventLogger = new RadioEventLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
     @Override
     public void close() {
-        if (isDebugEnabled()) Slog.d(TAG, "Close");
+        mEventLogger.logRadioEvent("Close");
         close(null);
     }
 
@@ -81,7 +79,7 @@ class TunerSession extends ITuner.Stub {
      * @param error Optional error to send to client before session is closed.
      */
     public void close(@Nullable Integer error) {
-        if (isDebugEnabled()) Slog.d(TAG, "Close on error " + error);
+        mEventLogger.logRadioEvent("Close on error %d", error);
         synchronized (mLock) {
             if (mIsClosed) return;
             if (error != null) {
@@ -145,10 +143,8 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void step(boolean directionDown, boolean skipSubChannel) throws RemoteException {
-        if (isDebugEnabled()) {
-            Slog.d(TAG, "Step with directionDown " + directionDown
-                    + " skipSubChannel " + skipSubChannel);
-        }
+        mEventLogger.logRadioEvent("Step with direction %s, skipSubChannel?  %s",
+                directionDown ? "down" : "up", skipSubChannel ? "yes" : "no");
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.step(!directionDown);
@@ -158,10 +154,8 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void scan(boolean directionDown, boolean skipSubChannel) throws RemoteException {
-        if (isDebugEnabled()) {
-            Slog.d(TAG, "Scan with directionDown " + directionDown
-                    + " skipSubChannel " + skipSubChannel);
-        }
+        mEventLogger.logRadioEvent("Scan with direction %s, skipSubChannel? %s",
+                directionDown ? "down" : "up", skipSubChannel ? "yes" : "no");
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.scan(!directionDown, skipSubChannel);
@@ -171,7 +165,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void tune(ProgramSelector selector) throws RemoteException {
-        if (isDebugEnabled()) Slog.d(TAG, "Tune with selector " + selector);
+        mEventLogger.logRadioEvent("Tune with selector %s", selector);
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.tune(Convert.programSelectorToHal(selector));
@@ -195,7 +189,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public Bitmap getImage(int id) {
-        if (isDebugEnabled()) Slog.d(TAG, "Get image for " + id);
+        mEventLogger.logRadioEvent("Get image for %d", id);
         return mModule.getImage(id);
     }
 
@@ -208,7 +202,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void startProgramListUpdates(ProgramList.Filter filter) throws RemoteException {
-        if (isDebugEnabled()) Slog.d(TAG, "start programList updates " + filter);
+        mEventLogger.logRadioEvent("start programList updates %s", filter);
         // If the AIDL client provides a null filter, it wants all updates, so use the most broad
         // filter.
         if (filter == null) {
@@ -267,7 +261,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void stopProgramListUpdates() throws RemoteException {
-        if (isDebugEnabled()) Slog.d(TAG, "Stop programList updates");
+        mEventLogger.logRadioEvent("Stop programList updates");
         synchronized (mLock) {
             checkNotClosedLocked();
             mProgramInfoCache = null;
@@ -291,7 +285,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public boolean isConfigFlagSet(int flag) {
-        if (isDebugEnabled()) Slog.d(TAG, "Is ConfigFlagSet for " + ConfigFlag.toString(flag));
+        mEventLogger.logRadioEvent("Is ConfigFlagSet for %s", ConfigFlag.toString(flag));
         synchronized (mLock) {
             checkNotClosedLocked();
 
@@ -313,9 +307,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void setConfigFlag(int flag, boolean value) throws RemoteException {
-        if (isDebugEnabled()) {
-            Slog.d(TAG, "Set ConfigFlag " + ConfigFlag.toString(flag) + " = " + value);
-        }
+        mEventLogger.logRadioEvent("Set ConfigFlag  %s = %b", ConfigFlag.toString(flag), value);
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.setConfigFlag(flag, value);
@@ -351,6 +343,10 @@ class TunerSession extends ITuner.Stub {
             pw.printf("ProgramInfoCache: %s\n", mProgramInfoCache);
             pw.printf("Config: %s\n", mDummyConfig);
         }
+        pw.printf("Tuner session events:\n");
+        pw.increaseIndent();
+        mEventLogger.dump(pw);
+        pw.decreaseIndent();
         pw.decreaseIndent();
     }
 }

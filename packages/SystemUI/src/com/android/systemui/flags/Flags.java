@@ -103,6 +103,10 @@ public class Flags {
      */
     public static final ReleasedFlag MODERN_BOUNCER = new ReleasedFlag(208);
 
+    /** Whether UserSwitcherActivity should use modern architecture. */
+    public static final UnreleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
+            new UnreleasedFlag(209, true);
+
     /***************************************/
     // 300 - power menu
     public static final ReleasedFlag POWER_MENU_LITE =
@@ -146,6 +150,8 @@ public class Flags {
     public static final UnreleasedFlag NEW_HEADER = new UnreleasedFlag(505, true);
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
             new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
+
+    public static final UnreleasedFlag NEW_FOOTER_ACTIONS = new UnreleasedFlag(507, true);
 
     /***************************************/
     // 600- status bar
@@ -243,6 +249,9 @@ public class Flags {
 
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
     public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
+
+    // 1400 - columbus, b/242800729
+    public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

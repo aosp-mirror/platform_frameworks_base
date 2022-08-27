@@ -316,11 +316,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
                 true /* onTop */);
         wct.reorder(rootToken, mEnabled /* onTop */);
         mSyncQueue.queue(wct);
-        final SurfaceControl rootLeash = mLaunchRootLeash;
-        mSyncQueue.runInSync(t -> {
-            t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
-            t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
-        });
+        if (mEnabled) {
+            final SurfaceControl rootLeash = mLaunchRootLeash;
+            mSyncQueue.runInSync(t -> {
+                t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
+                t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
+            });
+        }
     }
 
     private Rect calculateBounds() {

@@ -1906,7 +1906,6 @@ public class AppOpsManager {
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
             OP_MANAGE_MEDIA,
-            OP_GET_USAGE_STATS,
     };
 
     /**
