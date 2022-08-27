@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Seaded"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Ava jagatud ekraanikuva"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menüü"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menüü Pilt pildis"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> on režiimis Pilt pildis"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Kui te ei soovi, et rakendus <xliff:g id="NAME">%s</xliff:g> seda funktsiooni kasutaks, puudutage seadete avamiseks ja lülitage see välja."</string>
     <string name="pip_play" msgid="3496151081459417097">"Esita"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Rakendus ei pruugi teisesel ekraanil töötada."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Rakendus ei toeta teisestel ekraanidel käivitamist."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Ekraanijagaja"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"Ekraanijagaja"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Vasak täisekraan"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Vasak: 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Vasak: 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Selge"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Laiendage lisateabe saamiseks."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimeeri"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimeeri"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Sule"</string>
 </resources>

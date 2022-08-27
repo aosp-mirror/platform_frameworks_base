@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"הגדרות"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"כניסה למסך המפוצל"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"תפריט"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"תפריט \'תמונה בתוך תמונה\'"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולהשבית את התכונה."</string>
     <string name="pip_play" msgid="3496151081459417097">"הפעלה"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"האפליקציה אינה תומכת בהפעלה במסכים משניים."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"מחלק מסך מפוצל"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"מחלק מסך מפוצל"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"מסך שמאלי מלא"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"שמאלה 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"שמאלה 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"הבנתי"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"מרחיבים כדי לקבל מידע נוסף."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"הגדלה"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"מזעור"</string>
     <string name="close_button_text" msgid="2913281996024033299">"סגירה"</string>
 </resources>

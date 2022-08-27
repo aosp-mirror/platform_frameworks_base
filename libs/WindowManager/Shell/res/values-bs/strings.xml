@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Postavke"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Otvori podijeljeni ekran"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meni"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Meni načina rada slike u slici"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> je u načinu priakza Slika u slici"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ako ne želite da <xliff:g id="NAME">%s</xliff:g> koristi ovu funkciju, dodirnite da otvorite postavke i isključite je."</string>
     <string name="pip_play" msgid="3496151081459417097">"Reproduciraj"</string>
@@ -37,9 +36,8 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikacija ne podržava dijeljenje ekrana."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija možda neće raditi na sekundarnom ekranu."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacija ne podržava pokretanje na sekundarnim ekranima."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Razdjelnik ekrana"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="accessibility_divider" msgid="703810061635792791">"Razdjelnik podijeljenog ekrana"</string>
+    <string name="divider_title" msgid="5482989479865361192">"Razdjelnik podijeljenog ekrana"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Lijevo cijeli ekran"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Lijevo 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Lijevo 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Razumijem"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Proširite za više informacija."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimiziranje"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimiziranje"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zatvaranje"</string>
 </resources>

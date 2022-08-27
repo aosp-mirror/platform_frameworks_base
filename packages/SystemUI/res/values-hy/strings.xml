@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ապակողպվել է դեմքով։ Սեղմեք բացելու համար։"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Դեմքը ճանաչվեց։ Սեղմեք բացելու համար։"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Դեմքը ճանաչվեց։ Բացելու համար սեղմեք ապակողպման պատկերակը։"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ապակողպվեց դեմքով"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Դեմքը ճանաչվեց"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Տեղափոխել ձախ"</item>
     <item msgid="5558598599408514296">"Տեղափոխել ներքև"</item>
@@ -337,8 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Արագ լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Դանդաղ լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում դոկ-կայանի միջոցով • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Անջատել օգտվողին"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"իջնող ընտրացանկ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
@@ -748,6 +752,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Խոշորացնել ամբողջ էկրանը"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Խոշորացնել էկրանի որոշակի հատվածը"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Փոխել"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Թույլատրել անկյունագծով ոլորումը"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"Փոխել չափը"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Փոխել խոշորացման տեսակը"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Ավարտել չափափոխումը"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"Վերևի բռնակ"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Ձախ բռնակ"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Աջ բռնակ"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Ներքևի բռնակ"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Խոշորացույցի չափսը"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Մասշտաբ"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Միջին"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"Փոքր"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Մեծ"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Փակել"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Փոփոխել"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Խոշորացույցի պատուհանի կարգավորումներ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Հատուկ գործառույթները բացելու համար հպեք։ Անհատականացրեք այս կոճակը կարգավորումներում։\n\n"<annotation id="link">"Կարգավորումներ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Կոճակը ժամանակավորապես թաքցնելու համար այն տեղափոխեք էկրանի եզր"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Տեղափոխել վերև՝ ձախ"</string>
@@ -831,8 +851,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Ընտրված է <xliff:g id="COUNT">%1$d</xliff:g> սարք"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(անջատված է)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Սխալ առաջացավ։ Հպեք՝ կրկնելու համար։"</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Միացնել սարք"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Այս աշխատաշրջանը հեռարձակելու համար բացեք հավելվածը"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Անհայտ հավելված"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Կանգնեցնել հեռարձակումը"</string>
@@ -944,14 +963,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi-ը հասանելի չէ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Առաջնահերթության ռեժիմ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Զարթուցիչը դրված է"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Տեսախցիկն անջատված է"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Խոսափողն անջատված է"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Տեսախցիկը և խոսափողն անջատված են"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ծանուցում}one{# ծանուցում}other{# ծանուցում}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Հեռարձակում"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Կանգնեցնել <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի հեռարձակումը"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Եթե հեռարձակեք <xliff:g id="SWITCHAPP">%1$s</xliff:g> հավելվածը կամ փոխեք աուդիո ելքը, ձեր ընթացիկ հեռարձակումը կկանգնեցվի։"</string>

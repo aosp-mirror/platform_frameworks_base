@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिङहरू"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रिन मोड प्रयोग गर्नुहोस्"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेनु"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"\"picture-in-picture\" मेनु"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> Picture-in-picture मा छ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले सुविधा प्रयोग नगरोस् भन्ने चाहनुहुन्छ भने ट्याप गरेर सेटिङहरू खोल्नुहोस् र यसलाई निष्क्रिय पार्नुहोस्।"</string>
     <string name="pip_play" msgid="3496151081459417097">"प्ले गर्नुहोस्"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"यो एपले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"विभाजित-स्क्रिन छुट्याउने"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"स्प्लिट स्क्रिन डिभाइडर"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"बायाँ भाग फुल स्क्रिन"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"बायाँ भाग ७०%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"बायाँ भाग ५०%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"बुझेँ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"थप जानकारी प्राप्त गर्न चाहनुहुन्छ भने एक्स्पान्ड गर्नुहोस्।"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ठुलो बनाउनुहोस्"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"मिनिमाइज गर्नुहोस्"</string>
     <string name="close_button_text" msgid="2913281996024033299">"बन्द गर्नुहोस्"</string>
 </resources>

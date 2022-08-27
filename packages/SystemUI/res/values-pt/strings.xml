@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Desbloqueado pelo rosto. Pressione para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Rosto reconhecido. Pressione para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Rosto reconhecido. Pressione o ícone de desbloq. para abrir."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Desbloqueado pelo rosto"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Rosto reconhecido"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Mais para a esquerda"</item>
     <item msgid="5558598599408514296">"Mais para baixo"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando na base • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Trocar usuário"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu suspenso"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Você voltou, visitante!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Quer continuar a sessão?"</string>
@@ -498,7 +501,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"O som e a vibração estão desativados, e o balão aparece na parte inferior da seção de conversa"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Podem vibrar ou tocar com base nas configurações do smartphone"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode vibrar ou tocar com base nas configurações do smartphone"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode vibrar ou tocar com base nas configurações do smartphone. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se a notificação resultará em som ou vibração"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; promovida a Padrão"</string>
@@ -748,6 +751,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar toda a tela"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte da tela"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Trocar"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir rolagem diagonal"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionar"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Mudar tipo de ampliação"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Encerrar redimensionamento"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"Alça de cima"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Alça esquerda"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Alça direita"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Alça de baixo"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Tamanho da lupa"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Médio"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"Pequeno"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grande"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Fechar"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Editar"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Configurações da janela de lupa"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toque para abrir os recursos de acessibilidade. Personalize ou substitua o botão nas Configurações.\n\n"<annotation id="link">"Ver configurações"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mova o botão para a borda para ocultá-lo temporariamente"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover para o canto superior esquerdo"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> dispositivos selecionados"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(sem conexão)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Não foi possível mudar. Toque para tentar novamente."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Conectar dispositivo"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Abra o app para transmitir esta sessão."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconhecido"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Parar transmissão"</string>
@@ -878,7 +896,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Amigos"</string>
     <string name="empty_status" msgid="5938893404951307749">"Vamos conversar hoje à noite."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"O conteúdo será exibido em breve"</string>
-    <string name="missed_call" msgid="4228016077700161689">"Chamada perdida"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Ligação perdida"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Veja mensagens recentes, chamadas perdidas e atualizações de status"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversa"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi-Fi indisponível"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo de prioridade"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarme definido"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"A câmera está desativada"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"O microfone está desativado"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"A câmera e o microfone estão desativados"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificação}one{# notificação}other{# notificações}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Transmitindo"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Interromper a transmissão do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Se você transmitir o app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou mudar a saída, a transmissão atual será interrompida"</string>

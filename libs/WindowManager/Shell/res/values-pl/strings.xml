@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Ustawienia"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Włącz podzielony ekran"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu funkcji Obraz w obrazie."</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"Aplikacja <xliff:g id="NAME">%s</xliff:g> działa w trybie obraz w obrazie"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i wyłącz ją."</string>
     <string name="pip_play" msgid="3496151081459417097">"Odtwórz"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacja może nie działać na dodatkowym ekranie."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacja nie obsługuje uruchamiania na dodatkowych ekranach."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Linia dzielenia ekranu"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"Linia dzielenia ekranu"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Lewa część ekranu na pełnym ekranie"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"70% lewej części ekranu"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"50% lewej części ekranu"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Rozwiń, aby wyświetlić więcej informacji."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksymalizuj"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimalizuj"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zamknij"</string>
 </resources>

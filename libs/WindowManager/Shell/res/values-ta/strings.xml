@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"அமைப்புகள்"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"திரைப் பிரிப்பு பயன்முறைக்குச் செல்"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"மெனு"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"பிக்ச்சர்-இன்-பிக்ச்சர் மெனு"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர்-இன்-பிக்ச்சரில் உள்ளது"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால் இங்கு தட்டி அமைப்புகளைத் திறந்து இதை முடக்கவும்."</string>
     <string name="pip_play" msgid="3496151081459417097">"இயக்கு"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"இரண்டாம்நிலைத் திரையில் ஆப்ஸ் வேலை செய்யாமல் போகக்கூடும்."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"இரண்டாம்நிலைத் திரைகளில் பயன்பாட்டைத் தொடங்க முடியாது."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"திரையைப் பிரிக்கும் பிரிப்பான்"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"திரைப் பிரிப்பான்"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"இடது புறம் முழுத் திரை"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"இடது புறம் 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"இடது புறம் 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"சரி"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"கூடுதல் தகவல்களுக்கு விரிவாக்கலாம்."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"பெரிதாக்கும்"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"சிறிதாக்கும்"</string>
     <string name="close_button_text" msgid="2913281996024033299">"மூடும்"</string>
 </resources>

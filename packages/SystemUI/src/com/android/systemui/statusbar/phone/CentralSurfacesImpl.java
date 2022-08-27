@@ -31,7 +31,8 @@ import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
-import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
+import static com.android.systemui.charging.WirelessChargingRippleControllerKt.DEFAULT_DURATION;
+import static com.android.systemui.charging.WirelessChargingRippleControllerKt.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
@@ -138,7 +139,8 @@ import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.charging.WiredChargingRippleController;
-import com.android.systemui.charging.WirelessChargingAnimation;
+import com.android.systemui.charging.WirelessChargingRippleController;
+import com.android.systemui.charging.WirelessChargingView;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
@@ -507,6 +509,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
     private final WallpaperManager mWallpaperManager;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
+    private WirelessChargingRippleController mWirelessChargingRippleController;
 
     // Flags for disabling the status bar
     // Two variables becaseu the first one evidently ran out of room for new flags.
@@ -732,6 +735,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             InteractionJankMonitor jankMonitor,
             DeviceStateManager deviceStateManager,
             WiredChargingRippleController wiredChargingRippleController,
+            WirelessChargingRippleController wirelessChargingRippleController,
             IDreamManager dreamManager) {
         super(context);
         mNotificationsController = notificationsController;
@@ -849,6 +853,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         deviceStateManager.registerCallback(mMainExecutor,
                 new FoldStateListener(mContext, this::onFoldedStateChanged));
         wiredChargingRippleController.registerCallbacks();
+        mWirelessChargingRippleController = wirelessChargingRippleController;
     }
 
     @Override
@@ -2162,9 +2167,11 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     protected void showChargingAnimation(int batteryLevel, int transmittingBatteryLevel,
             long animationDelay) {
-        WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                transmittingBatteryLevel, batteryLevel,
-                new WirelessChargingAnimation.Callback() {
+        WirelessChargingView wirelessChargingView = WirelessChargingView.create(mContext,
+                transmittingBatteryLevel, batteryLevel, /* isDozing= */ false,
+                RippleShape.CIRCLE, DEFAULT_DURATION);
+        mWirelessChargingRippleController.show(wirelessChargingView, animationDelay,
+                new WirelessChargingRippleController.Callback() {
                     @Override
                     public void onAnimationStarting() {
                         mNotificationShadeWindowController.setRequestTopUi(true, TAG);
@@ -2174,8 +2181,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     public void onAnimationEnded() {
                         mNotificationShadeWindowController.setRequestTopUi(false, TAG);
                     }
-                }, /* isDozing= */ false, RippleShape.CIRCLE,
-                sUiEventLogger).show(animationDelay);
+                });
     }
 
     @Override

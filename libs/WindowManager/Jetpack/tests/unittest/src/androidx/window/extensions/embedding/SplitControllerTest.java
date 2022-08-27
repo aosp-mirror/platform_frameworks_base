@@ -19,6 +19,13 @@ package androidx.window.extensions.embedding;
 import static android.app.ActivityManager.START_CANCELED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.SPLIT_RATIO;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
@@ -67,6 +74,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentOrganizer;
+import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -978,6 +987,98 @@ public class SplitControllerTest {
         verify(secondaryActivity1).finish();
         assertTrue(taskContainer.mContainers.isEmpty());
         assertTrue(taskContainer.mSplitContainers.isEmpty());
+    }
+
+    @Test
+    public void testOnTransactionReady_taskFragmentAppeared() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        transaction.addChange(new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_APPEARED)
+                .setTaskId(TASK_ID)
+                .setTaskFragmentToken(new Binder())
+                .setTaskFragmentInfo(info));
+        mSplitController.onTransactionReady(transaction);
+
+        verify(mSplitController).onTaskFragmentAppeared(any(), eq(info));
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+    }
+
+    @Test
+    public void testOnTransactionReady_taskFragmentInfoChanged() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        transaction.addChange(new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_INFO_CHANGED)
+                .setTaskId(TASK_ID)
+                .setTaskFragmentToken(new Binder())
+                .setTaskFragmentInfo(info));
+        mSplitController.onTransactionReady(transaction);
+
+        verify(mSplitController).onTaskFragmentInfoChanged(any(), eq(info));
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+    }
+
+    @Test
+    public void testOnTransactionReady_taskFragmentVanished() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        transaction.addChange(new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_VANISHED)
+                .setTaskId(TASK_ID)
+                .setTaskFragmentToken(new Binder())
+                .setTaskFragmentInfo(info));
+        mSplitController.onTransactionReady(transaction);
+
+        verify(mSplitController).onTaskFragmentVanished(any(), eq(info));
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+    }
+
+    @Test
+    public void testOnTransactionReady_taskFragmentParentInfoChanged() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        final Configuration taskConfig = new Configuration();
+        transaction.addChange(new TaskFragmentTransaction.Change(
+                TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED)
+                .setTaskId(TASK_ID)
+                .setTaskConfiguration(taskConfig));
+        mSplitController.onTransactionReady(transaction);
+
+        verify(mSplitController).onTaskFragmentParentInfoChanged(any(), eq(TASK_ID),
+                eq(taskConfig));
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+    }
+
+    @Test
+    public void testOnTransactionReady_taskFragmentParentError() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        final IBinder errorToken = new Binder();
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        final int opType = HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
+        final Exception exception = new SecurityException("test");
+        final Bundle errorBundle = TaskFragmentOrganizer.putErrorInfoInBundle(exception, info,
+                opType);
+        transaction.addChange(new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_ERROR)
+                .setErrorCallbackToken(errorToken)
+                .setErrorBundle(errorBundle));
+        mSplitController.onTransactionReady(transaction);
+
+        verify(mSplitController).onTaskFragmentError(any(), eq(errorToken), eq(info), eq(opType),
+                eq(exception));
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+    }
+
+    @Test
+    public void testOnTransactionReady_activityReparentedToTask() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        final Intent intent = mock(Intent.class);
+        final IBinder activityToken = new Binder();
+        transaction.addChange(new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENTED_TO_TASK)
+                .setTaskId(TASK_ID)
+                .setActivityIntent(intent)
+                .setActivityToken(activityToken));
+        mSplitController.onTransactionReady(transaction);
+
+        verify(mSplitController).onActivityReparentedToTask(any(), eq(TASK_ID), eq(intent),
+                eq(activityToken));
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
     }
 
     /** Creates a mock activity in the organizer process. */

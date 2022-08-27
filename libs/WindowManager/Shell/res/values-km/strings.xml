@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ការកំណត់"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"ចូលមុខងារ​បំបែកអេក្រង់"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ម៉ឺនុយ"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ម៉ឺនុយ​រូប​ក្នុងរូប"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបក្នុងរូប"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ សូមចុច​​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
     <string name="pip_play" msgid="3496151081459417097">"លេង"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"កម្មវិធីនេះ​ប្រហែល​ជាមិនដំណើរការ​នៅលើ​អេក្រង់បន្ទាប់បន្សំទេ។"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​នៅលើ​អេក្រង់បន្ទាប់បន្សំបានទេ។"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"កម្មវិធីចែកអេក្រង់បំបែក"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"បន្ទាត់ខណ្ឌចែកអេក្រង់បំបែក"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"អេក្រង់ពេញខាងឆ្វេង"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ឆ្វេង 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ឆ្វេង 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"យល់ហើយ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ពង្រីកដើម្បីទទួលបានព័ត៌មានបន្ថែម។"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ពង្រីក"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"បង្រួម"</string>
     <string name="close_button_text" msgid="2913281996024033299">"បិទ"</string>
 </resources>

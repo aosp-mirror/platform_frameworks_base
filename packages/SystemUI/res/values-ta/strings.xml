@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"முகம் மூலம் அன்லாக் செய்யப்பட்டது. திறக்க அழுத்தவும்."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"முகம் அங்கீகரிக்கப்பட்டது. திறக்க அழுத்தவும்."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"முகம் அங்கீகரிக்கப்பட்டது. திறக்க அன்லாக் ஐகானை அழுத்தவும்."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"முகத்தால் அன்லாக் செய்யப்பட்டது"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"முகம் அங்கீகரிக்கப்பட்டது"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"இடதுபுறம் நகர்த்துங்கள்"</item>
     <item msgid="5558598599408514296">"கீழே நகர்த்துங்கள்"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • வேகமாகச் சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • மெதுவாக சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • டாக் மூலம் சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுமையாகச் சார்ஜாகிவிடும்"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுவதும் சார்ஜாகும்"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"கீழ் இழுக்கும் மெனு"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
@@ -748,6 +751,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"முழுத்திரையைப் பெரிதாக்கும்"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"திரையின் ஒரு பகுதியைப் பெரிதாக்கும்"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ஸ்விட்ச்"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"குறுக்கே ஸ்க்ரோல் செய்வதை அனுமதி"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"அளவை மாற்று"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"பெரிதாக்கல் வகையை மாற்று"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"அளவை மாற்றுவதை நிறுத்து"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"மேற்புற ஹேண்டில்"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"இடது ஹேண்டில்"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"வலது ஹேண்டில்"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"கீழ்ப்புற ஹேண்டில்"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"பெரிதாக்கும் கருவியின் அளவு"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"அளவை மாற்று"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"நடுத்தரமானது"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"சிறியது"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"பெரியது"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"மூடுக"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"மாற்று"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"சாளரத்தைப் பெரிதாக்கும் கருவிக்கான அமைப்புகள்"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"அணுகல்தன்மை அம்சத்தை திறக்க தட்டவும். அமைப்பில் பட்டனை பிரத்தியேகமாக்கலாம்/மாற்றலாம்.\n\n"<annotation id="link">"அமைப்பில் காண்க"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"பட்டனைத் தற்காலிகமாக மறைக்க ஓரத்திற்கு நகர்த்தும்"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"மேலே இடதுபுறத்திற்கு நகர்த்து"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> சாதனங்கள் தேர்ந்தெடுக்கப்பட்டுள்ளன"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(துண்டிக்கப்பட்டது)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"இணைக்க முடியவில்லை. மீண்டும் முயல தட்டவும்."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"சாதனத்தை இணைத்தல்"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
@@ -920,7 +938,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ஆப்ஸ் செயலிலுள்ளது}other{# ஆப்ஸ் செயலிலுள்ளன}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"புதிய தகவல்கள்"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"செயலிலுள்ள ஆப்ஸ்"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"இந்த ஆப்ஸை நீங்கள் பயன்படுத்தாதபோதும் அவை செயலில் இருப்பதோடு இயங்கிக் கொண்டிருக்கும். இது அவற்றின் செயல்பாட்டை மேம்படுத்தும். ஆனால், அதே சமயம் பேட்டரி ஆயுளைக் குறைக்கக்கூடும்."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"இந்த ஆப்ஸை நீங்கள் பயன்படுத்தாதபோதும் அவை செயலில் இருப்பதோடு இயங்கிக் கொண்டிருக்கும். இது அவற்றின் செயல்பாட்டை மேம்படுத்தும். ஆனால், அதே சமயம் பேட்டரி அளவைக் குறைக்கக்கூடும்."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"நிறுத்து"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"இயங்கவில்லை"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"முடிந்தது"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"வைஃபை கிடைக்கவில்லை"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"முன்னுரிமைப் பயன்முறை"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"அலாரம் அமைக்கப்பட்டுள்ளது"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"கேமரா முடக்கப்பட்டுள்ளது"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"மைக் முடக்கப்பட்டுள்ளது"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"கேமராவும் மைக்கும் ஆஃப் செய்யப்பட்டுள்ளன"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# அறிவிப்பு}other{# அறிவிப்புகள்}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ஒலிபரப்புதல்"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் ஒலிபரப்பப்படுவதை நிறுத்தவா?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>
