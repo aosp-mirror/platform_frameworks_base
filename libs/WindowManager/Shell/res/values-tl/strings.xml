@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Mga Setting"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Pumasok sa split screen"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu ng Picture-in-Picture"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"Nasa picture-in-picture ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Kung ayaw mong magamit ni <xliff:g id="NAME">%s</xliff:g> ang feature na ito, i-tap upang buksan ang mga setting at i-off ito."</string>
     <string name="pip_play" msgid="3496151081459417097">"I-play"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Maaaring hindi gumana ang app sa pangalawang display."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Hindi sinusuportahan ng app ang paglulunsad sa mga pangalawang display."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Divider ng split-screen"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"Divider ng split-screen"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"I-full screen ang nasa kaliwa"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Gawing 70% ang nasa kaliwa"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Gawing 50% ang nasa kaliwa"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"I-expand para sa higit pang impormasyon."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"I-maximize"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"I-minimize"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Isara"</string>
 </resources>

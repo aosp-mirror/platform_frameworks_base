@@ -611,8 +611,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas digitales."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor está inhabilitado en estos momentos."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No se puede usar el sensor de huellas digitales. Visita un proveedor de reparaciones."</string>
-    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
-    <skip />
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Se ha pulsado el botón de encendido"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar huella digital o bloqueo de pantalla"</string>
@@ -653,8 +652,10 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpia la parte superior de la pantalla, incluida la barra de color negro"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Tu cara se debe poder ver por completo"</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Tu cara se debe poder ver por completo"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No se puede crear tu modelo. Inténtalo de nuevo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Gafas oscuras detectadas. Tu cara se debe poder ver por completo."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Mascarilla detectada. Tu cara se debe poder ver por completo."</string>
@@ -1166,6 +1167,8 @@
     <string name="not_checked" msgid="7972320087569023342">"no seleccionado"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionado"</string>
     <string name="not_selected" msgid="410652016565864475">"no seleccionado"</string>
+    <!-- no translation found for rating_label (1837085249662154601) -->
+    <skip />
     <string name="in_progress" msgid="2149208189184319441">"en curso"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completar acción utilizando"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completar acción con %1$s"</string>
@@ -1245,10 +1248,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalizando inicio..."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"¿Quieres seguir con la configuración?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Has pulsado el botón de encendido, lo que suele apagar la pantalla.\n\nPrueba a apoyar el dedo ligeramente para verificar tu huella digital."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Apagar pantalla"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Seguir configurando"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Toca para apagar la pantalla"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Apagar pantalla"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"¿Seguir verificando tu huella digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Has pulsado el botón de encendido, lo que suele apagar la pantalla.\n\nPrueba a apoyar el dedo ligeramente para verificar tu huella digital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apagar pantalla"</string>
@@ -1401,16 +1403,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toca para configurar"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Selecciona para configurar"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Es posible que tengas que reformatear el dispositivo. Toca para expulsar."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para transferir fotos y multimedia"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Para almacenar fotos, vídeos, música, y más"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Consulta los archivos del dispositivo"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema con <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toca para solucionar el problema"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> está dañada. Selecciónala para arreglarla."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Es posible que tengas que reformatear el dispositivo. Toca para expulsar."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Medio externo (<xliff:g id="NAME">%s</xliff:g>) no admitido"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Detectado: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositivo no admite este medio externo (<xliff:g id="NAME">%s</xliff:g>). Toca para configurarlo con un formato admitido."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Toca para configurar."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Selecciona para configurar <xliff:g id="NAME">%s</xliff:g> en un formato compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Es posible que tengas que reformatear el dispositivo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Extracción inesperada de <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1923,6 +1925,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferencia de región"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Nombre de idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Regiones sugeridas"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Todos los idiomas"</string>
@@ -1942,18 +1946,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Cámara no disponible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continúa en el teléfono"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Micrófono no disponible"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store no disponible"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Ajustes de Android TV no disponibles"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Ajustes del tablet no disponibles"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Ajustes del teléfono no disponibles"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Esta aplicación solicita seguridad adicional. Prueba en tu dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Esta aplicación solicita seguridad adicional. Prueba en tu tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Esta aplicación solicita seguridad adicional. Prueba en tu teléfono."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta aplicación se ha diseñado para una versión anterior de Android y es posible que no funcione correctamente. Busca actualizaciones o ponte en contacto con el desarrollador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualizaciones"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tienes mensajes nuevos"</string>
@@ -2046,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"¿Permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir el acceso una vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, podrá seguir accediendo a sus propios registros. Es posible que el fabricante del dispositivo pueda acceder a algunos registros o información de tu dispositivo. Más información"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
@@ -2287,6 +2293,8 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consultar aplicaciones activas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del teléfono desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara del tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARJETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

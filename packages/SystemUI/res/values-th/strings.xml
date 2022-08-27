@@ -241,7 +241,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ความสว่าง"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"การกลับสี"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"การแก้สี"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"การตั้งค่าของผู้ใช้"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"การตั้งค่าผู้ใช้"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"เสร็จสิ้น"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"ปิด"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"เชื่อมต่อ"</string>
@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ปลดล็อกด้วยใบหน้าแล้ว กดเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"จดจำใบหน้าได้ กดเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"จดจำใบหน้าได้ กดไอคอนปลดล็อกเพื่อเปิด"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ปลดล็อกด้วยใบหน้าแล้ว"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"จดจำใบหน้าได้"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"เลื่อนนิ้วไปทางซ้าย"</item>
     <item msgid="5558598599408514296">"เลื่อนนิ้วลง"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จอย่างเร็ว • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จอย่างช้าๆ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จบนแท่นชาร์จ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"เมนูแบบเลื่อนลง"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้ใช้ชั่วคราวกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
@@ -748,6 +751,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ขยายเป็นเต็มหน้าจอ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ขยายบางส่วนของหน้าจอ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"เปลี่ยน"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"อนุญาตการเลื่อนแบบทแยงมุม"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"ปรับขนาด"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"เปลี่ยนประเภทการขยาย"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"หยุดการปรับขนาด"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"แฮนเดิลบน"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"แฮนเดิลซ้าย"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"แฮนเดิลขวา"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"แฮนเดิลล่าง"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"ขนาดแว่นขยาย"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"ซูม"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"ปานกลาง"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"เล็ก"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"ใหญ่"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"ปิด"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"แก้ไข"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"การตั้งค่าหน้าต่างแว่นขยาย"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"แตะเพื่อเปิดฟีเจอร์การช่วยเหลือพิเศษ ปรับแต่งหรือแทนที่ปุ่มนี้ในการตั้งค่า\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ย้ายปุ่มไปที่ขอบเพื่อซ่อนชั่วคราว"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ย้ายไปด้านซ้ายบน"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"เลือกอุปกรณ์ไว้ <xliff:g id="COUNT">%1$d</xliff:g> รายการ"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ยกเลิกการเชื่อมต่อแล้ว)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"เปลี่ยนไม่ได้ แตะเพื่อลองอีกครั้ง"</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"เชื่อมต่ออุปกรณ์"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"โปรดเปิดแอปหากต้องการแคสต์เซสชันนี้"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"แอปที่ไม่รู้จัก"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"หยุดแคสต์"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ใช้ Wi‑Fi ไม่ได้"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"โหมดลำดับความสำคัญ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ตั้งปลุกแล้ว"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"กล้องปิดอยู่"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"ไมค์ปิดอยู่"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"กล้องและไมค์ปิดอยู่"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{การแจ้งเตือน # รายการ}other{การแจ้งเตือน # รายการ}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"กำลังออกอากาศ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"หยุดการออกอากาศ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"หากคุณออกอากาศ <xliff:g id="SWITCHAPP">%1$s</xliff:g> หรือเปลี่ยนแปลงเอาต์พุต การออกอากาศในปัจจุบันจะหยุดลง"</string>

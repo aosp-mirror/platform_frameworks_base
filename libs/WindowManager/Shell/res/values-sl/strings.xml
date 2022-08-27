@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Nastavitve"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Vklopi razdeljen zaslon"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meni"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Meni za sliko v sliki"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> je v načinu slika v sliki"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Če ne želite, da aplikacija <xliff:g id="NAME">%s</xliff:g> uporablja to funkcijo, se dotaknite, da odprete nastavitve, in funkcijo izklopite."</string>
     <string name="pip_play" msgid="3496151081459417097">"Predvajaj"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija morda ne bo delovala na sekundarnem zaslonu."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacija ne podpira zagona na sekundarnih zaslonih."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Razdelilnik zaslonov"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"Razdelilnik zaslonov"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Levi v celozaslonski način"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Levi 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Levi 50 %"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"V redu"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Razširitev za več informacij"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimiraj"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimiraj"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zapri"</string>
 </resources>

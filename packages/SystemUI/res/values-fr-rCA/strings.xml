@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Déverr. par reconnaissance faciale. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Visage reconnu. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Visage reconnu. Appuyez sur Déverrouiller pour ouvrir."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Déverrouillé avec le visage"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Visage reconnu"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Déplacer vers la gauche"</item>
     <item msgid="5558598599408514296">"Déplacer vers le bas"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"En recharge : <xliff:g id="PERCENTAGE">%2$s</xliff:g> • Terminée dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"En recharge rapide : <xliff:g id="PERCENTAGE">%2$s</xliff:g> • Terminée dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"En recharge lente : <xliff:g id="PERCENTAGE">%2$s</xliff:g> • Terminée <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Station de recharge • Recharge terminée dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge en cours… • Se terminera dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Changer d\'utilisateur"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu déroulant"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toutes les applications et les données de cette session seront supprimées."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bienvenue à nouveau dans la session Invité"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Voulez-vous poursuivre la session?"</string>
@@ -570,13 +573,13 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Précédent"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifications"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Raccourcis clavier"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Changer la dispos. du clavier"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Changer la disposition du clavier"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Applications"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistance"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Navigateur"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacts"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Courriel"</string>
-    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"Message texte"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"Messages texte"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musique"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Agenda"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne pas déranger"</string>
@@ -748,6 +751,38 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Agrandir la totalité de l\'écran"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Agrandir une partie de l\'écran"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Commutateur"</string>
+    <!-- no translation found for accessibility_allow_diagonal_scrolling (3258050349191496398) -->
+    <skip />
+    <!-- no translation found for accessibility_resize (5733759136600611551) -->
+    <skip />
+    <!-- no translation found for accessibility_change_magnification_type (666000085077432421) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_end_resizing (4881690585800302628) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_top_handle (2716851102182220718) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_left_handle (6694953733271752950) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_right_handle (9055988237319397605) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_bottom_handle (6531646968813821258) -->
+    <skip />
+    <!-- no translation found for accessibility_magnifier_size (3038755600030422334) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_zoom (4222088982642063979) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_medium (6994632616884562625) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_small (8144502090651099970) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_large (6602944330021308774) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_close (1099965835844673375) -->
+    <skip />
+    <!-- no translation found for accessibility_magnifier_edit (1522877239671820636) -->
+    <skip />
+    <!-- no translation found for accessibility_magnification_magnifier_window_settings (2834685072221468434) -->
+    <skip />
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Touchez pour ouvrir fonction. d\'access. Personnalisez ou remplacez bouton dans Param.\n\n"<annotation id="link">"Afficher param."</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Déplacez le bouton vers le bord pour le masquer temporairement"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Déplacer dans coin sup. gauche"</string>
@@ -831,8 +866,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> appareil sélectionné"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(déconnecté)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Changement impossible. Touchez pour réessayer."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Connecter un appareil"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Pour diffuser cette session, veuillez ouvrir l\'application."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Application inconnue"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Arrêter la diffusion"</string>
@@ -944,14 +978,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi-Fi non disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode priorité"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"L\'alarme a été réglée"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"L\'appareil photo est désactivé"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Le micro est désactivé"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"L\'appareil photo et le micro sont désactivés"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}one{# notification}other{# notifications}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Diffusion en cours…"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>

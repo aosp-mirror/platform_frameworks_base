@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"설정"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"화면 분할 모드로 전환"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"메뉴"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"PIP 모드 메뉴"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>에서 PIP 사용 중"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
     <string name="pip_play" msgid="3496151081459417097">"재생"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"앱이 보조 디스플레이에서 작동하지 않을 수도 있습니다."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"앱이 보조 디스플레이에서의 실행을 지원하지 않습니다."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"화면 분할기"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"화면 분할기"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"왼쪽 화면 전체화면"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"왼쪽 화면 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"왼쪽 화면 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"확인"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"추가 정보는 펼쳐서 확인하세요."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"최대화"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"최소화"</string>
     <string name="close_button_text" msgid="2913281996024033299">"닫기"</string>
 </resources>

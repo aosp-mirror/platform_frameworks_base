@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"S-a deblocat cu ajutorul feței. Apăsați pentru a deschide."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Chipul a fost recunoscut. Apăsați pentru a deschide."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Chip recunoscut. Apăsați pictograma de deblocare pentru a deschide"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"S-a deblocat folosind fața"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Chipul a fost recunoscut"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Deplasați spre stânga"</item>
     <item msgid="5558598599408514296">"Deplasați în jos"</item>
@@ -337,8 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Se încarcă • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Se încarcă rapid • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Se încarcă lent • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Suport de încărcare • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Se încarcă • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> până la încărcarea completă"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Comutați între utilizatori"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"meniu vertical"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bine ați revenit în sesiunea pentru invitați!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vreți să continuați sesiunea?"</string>
@@ -748,6 +751,22 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Măriți tot ecranul"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Măriți o parte a ecranului"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Comutator"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permite derularea pe diagonală"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionează"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Schimbă tipul de mărire"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Încheie redimensionarea"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"Ghidajul de sus"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Ghidajul din stânga"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Ghidajul din dreapta"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Ghidajul de jos"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensiunea lupei"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Mediu"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"Mic"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Mare"</string>
+    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Închide"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Editează"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Setările ferestrei de mărire"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Atingeți pentru a deschide funcțiile de accesibilitate. Personalizați sau înlocuiți butonul în Setări.\n\n"<annotation id="link">"Afișați setările"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mutați butonul spre margine pentru a-l ascunde temporar"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mutați în stânga sus"</string>
@@ -831,8 +850,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"S-au selectat <xliff:g id="COUNT">%1$d</xliff:g> dispozitive"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(deconectat)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nu se poate comuta. Atingeți pentru a încerca din nou."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Conectați un dispozitiv"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Pentru a proiecta această sesiune, deschideți aplicația."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplicație necunoscută"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Nu mai proiectați"</string>
@@ -944,14 +962,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi indisponibil"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modul Prioritate"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarmă setată"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Camera foto este dezactivată"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Microfonul este dezactivat"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera și microfonul sunt dezactivate"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificare}few{# notificări}other{# de notificări}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Se difuzează"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Opriți difuzarea <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Dacă difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbați rezultatul, difuzarea actuală se va opri"</string>

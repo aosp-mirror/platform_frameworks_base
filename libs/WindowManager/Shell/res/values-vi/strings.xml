@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Cài đặt"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Truy cập chế độ chia đôi màn hình"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Trình đơn hình trong hình."</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> đang ở chế độ ảnh trong ảnh"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Nếu bạn không muốn <xliff:g id="NAME">%s</xliff:g> sử dụng tính năng này, hãy nhấn để mở cài đặt và tắt tính năng này."</string>
     <string name="pip_play" msgid="3496151081459417097">"Phát"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Bộ chia chia đôi màn hình"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"Bộ chia màn hình"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Toàn màn hình bên trái"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Trái 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Trái 50%"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Mở rộng để xem thêm thông tin."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Phóng to"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Thu nhỏ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Đóng"</string>
 </resources>

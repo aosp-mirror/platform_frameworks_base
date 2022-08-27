@@ -22,8 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ছেটিং"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"বিভাজিত স্ক্ৰীন ম’ডলৈ যাওক"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
-    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
-    <skip />
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"চিত্ৰৰ ভিতৰৰ চিত্ৰ মেনু"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> চিত্ৰৰ ভিতৰৰ চিত্ৰত আছে"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"আপুনি যদি <xliff:g id="NAME">%s</xliff:g> সুবিধাটো ব্যৱহাৰ কৰিব নোখোজে, তেন্তে ছেটিং খুলিবলৈ টিপক আৰু তালৈ গৈ ইয়াক অফ কৰক।"</string>
     <string name="pip_play" msgid="3496151081459417097">"প্লে কৰক"</string>
@@ -38,8 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"গৌণ ডিছপ্লেত এপে সঠিকভাৱে কাম নকৰিব পাৰে।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"গৌণ ডিছপ্লেত এপ্ লঞ্চ কৰিব নোৱাৰি।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
-    <!-- no translation found for divider_title (5482989479865361192) -->
-    <skip />
+    <string name="divider_title" msgid="5482989479865361192">"বিভাজিত স্ক্ৰীনৰ বিভাজক"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"বাওঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীণখন ৭০% কৰক"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীণখন ৫০% কৰক"</string>
@@ -87,5 +85,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"বুজি পালোঁ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"অধিক তথ্যৰ বাবে বিস্তাৰ কৰক।"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"সৰ্বাধিক মাত্ৰালৈ বঢ়াওক"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"মিনিমাইজ কৰক"</string>
     <string name="close_button_text" msgid="2913281996024033299">"বন্ধ কৰক"</string>
 </resources>
