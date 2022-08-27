@@ -477,15 +477,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
-                    // If the keyguard unlock controller is going to handle the unlock animation, it
-                    // will fling the panel collapsed when it's ready.
-                    if (!mKeyguardUnlockAnimationController.willHandleUnlockAnimation()) {
-                        mShadeController.animateCollapsePanels(
-                                CommandQueue.FLAG_EXCLUDE_NONE,
-                                true /* force */,
-                                false /* delayed */,
-                                BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
-                    }
                     mPendingShowBouncer = false;
                     mKeyguardViewController.notifyKeyguardAuthenticated(
                             false /* strongAuth */);

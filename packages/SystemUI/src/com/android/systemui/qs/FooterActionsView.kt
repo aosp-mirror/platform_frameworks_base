@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.phone.MultiUserSwitch
  * in split shade mode visible also in collapsed state. May contain up to 5 buttons: settings,
  * edit tiles, power off and conditionally: user switch and tuner
  */
+// TODO(b/242040009): Remove this file.
 class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     private lateinit var settingsContainer: View
     private lateinit var multiUserSwitch: MultiUserSwitch

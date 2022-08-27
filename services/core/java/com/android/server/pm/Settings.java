@@ -116,7 +116,6 @@ import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -2687,8 +2686,8 @@ public final class Settings implements Watchable, Snappable {
             for (final PackageSetting pkg : mPackages.values()) {
                 // TODO(b/135203078): This doesn't handle multiple users
                 final String dataPath = pkg.getPkg() == null ? null :
-                        PackageInfoWithoutStateUtils.getDataDir(pkg.getPkg(),
-                                UserHandle.USER_SYSTEM).getAbsolutePath();
+                        PackageInfoUtils.getDataDir(pkg.getPkg(), UserHandle.USER_SYSTEM)
+                                .getAbsolutePath();
 
                 if (pkg.getPkg() == null || dataPath == null) {
                     if (!"android".equals(pkg.getPackageName())) {
@@ -4619,7 +4618,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.append(prefix).append("  queriesIntents=")
                         .println(ps.getPkg().getQueriesIntents());
             }
-            File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
+            File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
             pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;

@@ -490,11 +490,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private final Object mModeConfigLock = new Object();
         @GuardedBy("mModeConfigLock")
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs = new ArrayMap<>();
-        private boolean mPerfModeOptedIn;
-        private boolean mBatteryModeOptedIn;
-        private boolean mAllowDownscale;
-        private boolean mAllowAngle;
-        private boolean mAllowFpsOverride;
+        private boolean mPerfModeOptedIn = false;
+        private boolean mBatteryModeOptedIn = false;
+        private boolean mAllowDownscale = true;
+        private boolean mAllowAngle = true;
+        private boolean mAllowFpsOverride = true;
 
         GamePackageConfiguration(String packageName) {
             mPackageName = packageName;
@@ -502,22 +502,16 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         GamePackageConfiguration(PackageManager packageManager, String packageName, int userId) {
             mPackageName = packageName;
+
             try {
                 final ApplicationInfo ai = packageManager.getApplicationInfoAsUser(packageName,
                         PackageManager.GET_META_DATA, userId);
-                if (!parseInterventionFromXml(packageManager, ai, packageName)) {
-                    if (ai.metaData != null) {
-                        mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
-                        mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
-                        mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
-                        mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
-                    } else {
-                        mPerfModeOptedIn = false;
-                        mBatteryModeOptedIn = false;
-                        mAllowDownscale = true;
-                        mAllowAngle = true;
-                        mAllowFpsOverride = true;
-                    }
+                if (!parseInterventionFromXml(packageManager, ai, packageName)
+                            && ai.metaData != null) {
+                    mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
+                    mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
+                    mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
+                    mAllowAngle = ai.metaData.getBoolean(METADATA_ANGLE_ALLOW_ANGLE, true);
                 }
             } catch (NameNotFoundException e) {
                 // Not all packages are installed, hence ignore those that are not installed yet.
@@ -581,6 +575,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     }
                 }
             } catch (NameNotFoundException | XmlPullParserException | IOException ex) {
+                // set flag back to default values when parsing fails
+                mPerfModeOptedIn = false;
+                mBatteryModeOptedIn = false;
+                mAllowDownscale = true;
+                mAllowAngle = true;
+                mAllowFpsOverride = true;
                 Slog.e(TAG, "Error while parsing XML meta-data for "
                         + METADATA_GAME_MODE_CONFIG);
             }

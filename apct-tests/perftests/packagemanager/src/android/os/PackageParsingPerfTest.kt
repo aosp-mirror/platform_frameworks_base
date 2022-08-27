@@ -26,7 +26,7 @@ import android.perftests.utils.BenchmarkState
 import android.perftests.utils.PerfStatusReporter
 import androidx.test.filters.LargeTest
 import com.android.internal.util.ConcurrentUtils
-import com.android.server.pm.pkg.parsing.ParsingPackageImpl
+import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import libcore.io.IoUtils
 import org.junit.Rule
@@ -190,7 +190,7 @@ public class PackageParsingPerfTest {
     }
 
     class ParallelParser2(cacher: PackageCacher2? = null)
-        : ParallelParser<ParsingPackageImpl>(cacher) {
+        : ParallelParser<PackageImpl>(cacher) {
         val input = ThreadLocal.withInitial {
             // For testing, just disable enforcement to avoid hooking up to compat framework
             ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
@@ -208,17 +208,18 @@ public class PackageParsingPerfTest {
                     path: String,
                     manifestArray: TypedArray,
                     isCoreApp: Boolean
-                ) = ParsingPackageImpl(
+                ) = PackageImpl(
                     packageName,
                     baseApkPath,
                     path,
-                    manifestArray
+                    manifestArray,
+                    isCoreApp,
                 )
             })
 
         override fun parseImpl(file: File) =
                 parser.parsePackage(input.get()!!.reset(), file, 0, null).result
-                        as ParsingPackageImpl
+                        as PackageImpl
     }
 
     abstract class PackageCacher<PackageType : Parcelable>(private val cacheDir: File) {
@@ -274,8 +275,8 @@ public class PackageParsingPerfTest {
     /**
      * Re-implementation of the server side PackageCacher, as it's inaccessible here.
      */
-    class PackageCacher2(cacheDir: File) : PackageCacher<ParsingPackageImpl>(cacheDir) {
+    class PackageCacher2(cacheDir: File) : PackageCacher<PackageImpl>(cacheDir) {
         override fun fromParcel(parcel: Parcel) =
-            ParsingPackageImpl(parcel)
+            PackageImpl(parcel)
     }
 }

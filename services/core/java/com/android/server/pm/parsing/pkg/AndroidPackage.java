@@ -16,11 +16,7 @@
 
 package com.android.server.pm.parsing.pkg;
 
-import android.annotation.NonNull;
-
 import com.android.internal.content.om.OverlayConfig;
-import com.android.server.pm.pkg.parsing.ParsingPackageRead;
-
 import com.android.server.pm.pkg.AndroidPackageApi;
 
 /**
@@ -33,13 +29,6 @@ import com.android.server.pm.pkg.AndroidPackageApi;
  *
  * @hide
  */
-public interface AndroidPackage extends ParsingPackageRead, AndroidPackageApi,
-        OverlayConfig.PackageProvider.Package {
+public interface AndroidPackage extends AndroidPackageApi, OverlayConfig.PackageProvider.Package {
 
-    /**
-     * The package name as declared in the manifest, since the package can be renamed. For example,
-     * static shared libs use synthetic package names.
-     */
-    @NonNull
-    String getManifestPackageName();
 }

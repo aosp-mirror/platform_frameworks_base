@@ -29,6 +29,7 @@ import com.android.systemui.R;
 /**
  * Container for image of the multi user switcher (tappable).
  */
+// TODO(b/242040009): Remove this file.
 public class MultiUserSwitch extends FrameLayout {
     public MultiUserSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);

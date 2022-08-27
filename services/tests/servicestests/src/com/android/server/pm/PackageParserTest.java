@@ -17,6 +17,7 @@ package com.android.server.pm;
 
 import static com.android.server.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -66,7 +67,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
-import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedActivityImpl;
@@ -87,7 +87,6 @@ import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.component.ParsedServiceImpl;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.junit.Before;
@@ -101,7 +100,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -220,13 +218,13 @@ public class PackageParserTest {
         setKnownFields(pkg);
 
         Parcel p = Parcel.obtain();
-        ((Parcelable) pkg).writeToParcel(p, 0 /* flags */);
+        ((Parcelable) pkg.hideAsParsed().hideAsFinal()).writeToParcel(p, 0 /* flags */);
 
         p.setDataPosition(0);
-        ParsingPackage deserialized = new PackageImpl(p);
+        AndroidPackage deserialized = new PackageImpl(p);
 
         p.setDataPosition(0);
-        ParsingPackage deserialized2 = new PackageImpl(p);
+        AndroidPackage deserialized2 = new PackageImpl(p);
 
         assertSame(deserialized.getPackageName(), deserialized2.getPackageName());
         assertSame(deserialized.getPermission(),
@@ -257,6 +255,38 @@ public class PackageParserTest {
             Files.copy(inputStream, tmpFile.toPath(), REPLACE_EXISTING);
         }
         return tmpFile;
+    }
+
+    /**
+     * Extracts the asset file to $mTmpDir/$dirname/$filename.
+     */
+    private File extractFile(String filename, String dirname) throws Exception {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        File dir = new File(mTmpDir, dirname);
+        dir.mkdir();
+        final File tmpFile = new File(dir, filename);
+        try (InputStream inputStream = context.getAssets().openNonAsset(filename)) {
+            Files.copy(inputStream, tmpFile.toPath(), REPLACE_EXISTING);
+        }
+        return tmpFile;
+    }
+
+    /**
+     * Tests the path of cached ParsedPackage.
+     */
+    @Test
+    public void testCache_SameFileName() throws Exception {
+        // Prepare 2 package files with the same name but different paths
+        TestPackageParser2 parser = new TestPackageParser2(mTmpDir);
+        final File f1 = extractFile(TEST_APP1_APK, "dir1");
+        final File f2 = extractFile(TEST_APP1_APK, "dir2");
+        // Sleep for a while so that the cache file will be newer and valid
+        Thread.sleep(1000);
+        ParsedPackage pr1 = parser.parsePackage(f1, 0, true);
+        ParsedPackage pr2 = parser.parsePackage(f2, 0, true);
+        // Check the path of cached ParsedPackage
+        assertThat(pr1.getPath()).isEqualTo(f1.getAbsolutePath());
+        assertThat(pr2.getPath()).isEqualTo(f2.getAbsolutePath());
     }
 
     /**
@@ -604,27 +634,27 @@ public class PackageParserTest {
         final File testFile = extractFile(TEST_APP4_APK);
         try {
             final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
-            ApplicationInfo appInfo = PackageInfoWithoutStateUtils.generateApplicationInfo(pkg, 0,
-                    PackageUserState.DEFAULT, 0);
+            ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
+                    PackageUserStateInternal.DEFAULT, 0, null);
             for (ParsedActivity activity : pkg.getActivities()) {
                 assertNotNull(activity.getMetaData());
-                assertNull(PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(activity, 0,
-                        appInfo).metaData);
+                assertNull(PackageInfoUtils.generateActivityInfo(pkg, activity, 0,
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
             }
             for (ParsedProvider provider : pkg.getProviders()) {
                 assertNotNull(provider.getMetaData());
-                assertNull(PackageInfoWithoutStateUtils.generateProviderInfoUnchecked(provider, 0,
-                        appInfo).metaData);
+                assertNull(PackageInfoUtils.generateProviderInfo(pkg, provider, 0,
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
             }
             for (ParsedActivity receiver : pkg.getReceivers()) {
                 assertNotNull(receiver.getMetaData());
-                assertNull(PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(receiver, 0,
-                        appInfo).metaData);
+                assertNull(PackageInfoUtils.generateActivityInfo(pkg, receiver, 0,
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
             }
             for (ParsedService service : pkg.getServices()) {
                 assertNotNull(service.getMetaData());
-                assertNull(PackageInfoWithoutStateUtils.generateServiceInfoUnchecked(service, 0,
-                        appInfo).metaData);
+                assertNull(PackageInfoUtils.generateServiceInfo(pkg, service, 0,
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
             }
         } finally {
             testFile.delete();
@@ -632,8 +662,8 @@ public class PackageParserTest {
     }
 
     /**
-     * A trivial subclass of package parser that only caches the package name, and throws away
-     * all other information.
+     * A subclass of package parser that adds a "cache_" prefix to the package name for the cached
+     * results. This is used by tests to tell if a ParsedPackage is generated from the cache or not.
      */
     public static class CachePackageNameParser extends PackageParser2 {
 
@@ -657,15 +687,10 @@ public class PackageParserTest {
         void setCacheDir(@NonNull File cacheDir) {
             this.mCacher = new PackageCacher(cacheDir) {
                 @Override
-                public byte[] toCacheEntry(ParsedPackage pkg) {
-                    return ("cache_" + pkg.getPackageName()).getBytes(StandardCharsets.UTF_8);
-                }
-
-                @Override
                 public ParsedPackage fromCacheEntry(byte[] cacheEntry) {
-                    return ((ParsedPackage) PackageImpl.forTesting(
-                            new String(cacheEntry, StandardCharsets.UTF_8))
-                            .hideAsParsed());
+                    ParsedPackage parsed = super.fromCacheEntry(cacheEntry);
+                    parsed.setPackageName("cache_" + parsed.getPackageName());
+                    return parsed;
                 }
             };
         }

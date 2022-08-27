@@ -220,7 +220,7 @@ final class AmbientContextManagerPerUserService extends
             } else {
                 Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
                 sendStatusToCallback(clientStatusCallback,
-                        AmbientContextManager.STATUS_NOT_SUPPORTED);
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
             }
         }
     }

@@ -113,6 +113,19 @@ constructor(
             }
         val animateFrom = animatedParent?.dialogContentWithBackground ?: view
 
+        if (animatedParent == null && animateFrom !is LaunchableView) {
+            // Make sure the View we launch from implements LaunchableView to avoid visibility
+            // issues. Given that we don't own dialog decorViews so we can't enforce it for launches
+            // from a dialog.
+            // TODO(b/243636422): Throw instead of logging to enforce this.
+            Log.w(
+                TAG,
+                "A dialog was launched from a View that does not implement LaunchableView. This " +
+                    "can lead to subtle bugs where the visibility of the View we are " +
+                    "launching from is not what we expected."
+            )
+        }
+
         // Make sure we don't run the launch animation from the same view twice at the same time.
         if (animateFrom.getTag(TAG_LAUNCH_ANIMATION_RUNNING) != null) {
             Log.e(TAG, "Not running dialog launch animation as there is already one running")
@@ -156,9 +169,14 @@ constructor(
             openedDialogs.firstOrNull { it.dialog == animateFrom }?.dialogContentWithBackground
                 ?: throw IllegalStateException(
                     "The animateFrom dialog was not animated using " +
-                        "DialogLaunchAnimator.showFrom(View|Dialog)")
+                        "DialogLaunchAnimator.showFrom(View|Dialog)"
+                )
         showFromView(
-            dialog, view, animateBackgroundBoundsChange = animateBackgroundBoundsChange, cuj = cuj)
+            dialog,
+            view,
+            animateBackgroundBoundsChange = animateBackgroundBoundsChange,
+            cuj = cuj
+        )
     }
 
     /**
@@ -197,7 +215,7 @@ constructor(
         // bouncer.
         if (
             !dialog.isShowing ||
-            (!callback.isUnlocked() && !callback.isShowingAlternateAuthOnUnlock())
+                (!callback.isUnlocked() && !callback.isShowingAlternateAuthOnUnlock())
         ) {
             return null
         }
@@ -556,11 +574,12 @@ private class AnimatedDialog(
         window.setDecorFitsSystemWindows(false)
         val viewWithInsets = (dialogContentWithBackground.parent as ViewGroup)
         viewWithInsets.setOnApplyWindowInsetsListener { view, windowInsets ->
-            val type = if (wasFittingNavigationBars) {
-                WindowInsets.Type.displayCutout() or WindowInsets.Type.navigationBars()
-            } else {
-                WindowInsets.Type.displayCutout()
-            }
+            val type =
+                if (wasFittingNavigationBars) {
+                    WindowInsets.Type.displayCutout() or WindowInsets.Type.navigationBars()
+                } else {
+                    WindowInsets.Type.displayCutout()
+                }
 
             val insets = windowInsets.getInsets(type)
             view.setPadding(insets.left, insets.top, insets.right, insets.bottom)

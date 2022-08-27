@@ -89,6 +89,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private LowLightClockController mLowLightClockController;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private AmbientState mAmbientState;
+    @Mock private PulsingGestureListener mPulsingGestureListener;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -110,7 +111,6 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         mController = new NotificationShadeWindowViewController(
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
-                mTunerService,
                 mStatusBarStateController,
                 mDockManager,
                 mNotificationShadeDepthController,
@@ -125,7 +125,9 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mCentralSurfaces,
                 mNotificationShadeWindowController,
                 mKeyguardUnlockAnimationController,
-                mAmbientState);
+                mAmbientState,
+                mPulsingGestureListener
+        );
         mController.setupExpandedStatusBar();
         mController.setDragDownHelper(mDragDownHelper);
     }

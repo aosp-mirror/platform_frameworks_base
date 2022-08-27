@@ -37,12 +37,14 @@ public final class SelectGesture extends HandwritingGesture implements Parcelabl
     private RectF mArea;
 
     private SelectGesture(int granularity, RectF area, String fallbackText) {
+        mType = GESTURE_TYPE_SELECT;
         mArea = area;
         mGranularity = granularity;
         mFallbackText = fallbackText;
     }
 
     private SelectGesture(@NonNull Parcel source) {
+        mType = GESTURE_TYPE_SELECT;
         mFallbackText = source.readString8();
         mGranularity = source.readInt();
         mArea = source.readTypedObject(RectF.CREATOR);

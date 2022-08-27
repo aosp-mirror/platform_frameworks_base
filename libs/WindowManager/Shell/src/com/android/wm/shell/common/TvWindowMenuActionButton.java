@@ -73,8 +73,8 @@ public class TvWindowMenuActionButton extends RelativeLayout implements View.OnC
 
     @Override
     public void setOnClickListener(OnClickListener listener) {
-        // We do not want to set an OnClickListener to the TvPipMenuActionButton itself, but only to
-        // the ImageView. So let's "cash" the listener we've been passed here and set a "proxy"
+        // We do not want to set an OnClickListener to the TvWindowMenuActionButton itself, but only
+        // to the ImageView. So let's "cash" the listener we've been passed here and set a "proxy"
         // listener to the ImageView.
         mOnClickListener = listener;
         mButtonView.setOnClickListener(listener != null ? this : null);

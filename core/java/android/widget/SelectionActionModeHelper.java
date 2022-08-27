@@ -301,7 +301,7 @@ public final class SelectionActionModeHelper {
             final SelectionModifierCursorController controller = mEditor.getSelectionController();
             if (controller != null
                     && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
-                if (mEditor.showUIForFingerInput()) {
+                if (mEditor.showUIForTouchScreen()) {
                     controller.show();
                 } else {
                     controller.hide();

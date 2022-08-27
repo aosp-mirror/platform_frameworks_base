@@ -148,8 +148,8 @@ public class InputDeviceSensorManagerTest {
         InputDevice d = new InputDevice(id, 0 /* generation */, 0 /* controllerNumber */, "name",
                 0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
                 0 /* sources */, 0 /* keyboardType */, null /* keyCharacterMap */,
-                false /* hasVibrator */, false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                true /* hasSensor */, false /* hasBattery */);
+                InputDeviceCountryCode.INVALID, false /* hasVibrator */, false /* hasMicrophone */,
+                false /* hasButtonUnderpad */, true /* hasSensor */, false /* hasBattery */);
         assertTrue(d.hasSensor());
         return d;
     }

@@ -208,6 +208,8 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
+
+            waitForBroadcastIdle();
             runThenWaitForBroadcasts(userId, () -> {
                 mRunner.resumeTiming();
                 Log.i(TAG, "Starting timer");
@@ -335,6 +337,7 @@ public class UserLifecycleTests {
             final int startUser = mAm.getCurrentUser();
             final int userId = createUserNoFlags();
 
+            waitForBroadcastIdle();
             mUserSwitchWaiter.runThenWaitUntilBootCompleted(userId, () -> {
                 mRunner.resumeTiming();
                 Log.i(TAG, "Starting timer");
@@ -360,6 +363,7 @@ public class UserLifecycleTests {
                 switchUser(userId);
             }, Intent.ACTION_MEDIA_MOUNTED);
 
+            waitForBroadcastIdle();
             mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(startUser, () -> {
                 runThenWaitForBroadcasts(userId, () -> {
                     mRunner.resumeTiming();
@@ -685,7 +689,7 @@ public class UserLifecycleTests {
      */
     private void stopUserAfterWaitingForBroadcastIdle(int userId, boolean force)
             throws RemoteException {
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        waitForBroadcastIdle();
         stopUser(userId, force);
     }
 
@@ -893,5 +897,9 @@ public class UserLifecycleTests {
         final String oldValue = ShellHelper.runShellCommand("getprop " + name);
         assertEquals("", ShellHelper.runShellCommand("setprop " + name + " " + value));
         return oldValue;
+    }
+
+    private void waitForBroadcastIdle() {
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
     }
 }

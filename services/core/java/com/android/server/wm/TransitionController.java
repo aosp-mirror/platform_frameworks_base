@@ -227,6 +227,17 @@ class TransitionController {
     }
 
     /**
+     * @return the collecting transition sync Id. This should only be called when there is a
+     * collecting transition.
+     */
+    int getCollectingTransitionId() {
+        if (mCollectingTransition == null) {
+            throw new IllegalStateException("There is no collecting transition");
+        }
+        return mCollectingTransition.getSyncId();
+    }
+
+    /**
      * @return {@code true} if transition is actively collecting changes and `wc` is one of them.
      *                      This is {@code false} once a transition is playing.
      */
