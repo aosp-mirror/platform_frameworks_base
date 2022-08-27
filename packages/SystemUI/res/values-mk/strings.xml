@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Отклучено со лик. Притиснете за да отворите."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Лицето е препознаено. Притиснете за да отворите."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Лицето е препознаено. Притиснете ја иконата за отклучување за да отворите."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Отклучено со лице"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Лицето е препознаено"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Премести налево"</item>
     <item msgid="5558598599408514296">"Премести надолу"</item>
@@ -337,10 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни брзо • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни бавно • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни на док • Полн за <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
     <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"паѓачко мени"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>

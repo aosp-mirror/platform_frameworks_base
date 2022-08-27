@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי לפתוח."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"הפנים זוהו. יש ללחוץ כדי לפתוח."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"הפנים זוהו. יש ללחוץ על סמל ביטול הנעילה כדי לפתוח."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"הנעילה בוטלה באמצעות זיהוי הפנים"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"הפנים זוהו"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"הזזה שמאלה"</item>
     <item msgid="5558598599408514296">"הזזה למטה"</item>
@@ -337,10 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה מהירה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • אביזר העגינה בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
-    <skip />
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"האם ברצונך להמשיך בפעילות באתר?"</string>
@@ -362,7 +363,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"ניהול"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"היסטוריה"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"התראות חדשות"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"שקט"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"שקטות"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"התראות"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"שיחות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ניקוי כל ההתראות השקטות"</string>
