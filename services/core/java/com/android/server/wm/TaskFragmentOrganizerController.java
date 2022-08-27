@@ -138,12 +138,12 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 new SparseArray<>();
 
         /**
-         * List of {@link TaskFragmentTransaction#getTransactionToken()} that have been sent to the
-         * organizer. If the transaction is sent during a transition, the
-         * {@link TransitionController} will wait until the transaction is finished.
+         * Map from {@link TaskFragmentTransaction#getTransactionToken()} to the
+         * {@link Transition#getSyncId()} that has been deferred. {@link TransitionController} will
+         * wait until the organizer finished handling the {@link TaskFragmentTransaction}.
          * @see #onTransactionFinished(IBinder)
          */
-        private final List<IBinder> mRunningTransactions = new ArrayList<>();
+        private final ArrayMap<IBinder, Integer> mDeferredTransitions = new ArrayMap<>();
 
         TaskFragmentOrganizerState(ITaskFragmentOrganizer organizer, int pid, int uid) {
             mOrganizer = organizer;
@@ -190,9 +190,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 taskFragment.removeImmediately();
                 mOrganizedTaskFragments.remove(taskFragment);
             }
-            for (int i = mRunningTransactions.size() - 1; i >= 0; i--) {
+            for (int i = mDeferredTransitions.size() - 1; i >= 0; i--) {
                 // Cleanup any running transaction to unblock the current transition.
-                onTransactionFinished(mRunningTransactions.get(i));
+                onTransactionFinished(mDeferredTransitions.keyAt(i));
             }
             mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
         }
@@ -357,19 +357,34 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             if (!mWindowOrganizerController.getTransitionController().isCollecting()) {
                 return;
             }
+            final int transitionId = mWindowOrganizerController.getTransitionController()
+                    .getCollectingTransitionId();
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "Defer transition ready for TaskFragmentTransaction=%s", transactionToken);
-            mRunningTransactions.add(transactionToken);
+                    "Defer transition id=%d for TaskFragmentTransaction=%s", transitionId,
+                    transactionToken);
+            mDeferredTransitions.put(transactionToken, transitionId);
             mWindowOrganizerController.getTransitionController().deferTransitionReady();
         }
 
         /** Called when the transaction is finished. */
         void onTransactionFinished(@NonNull IBinder transactionToken) {
-            if (!mRunningTransactions.remove(transactionToken)) {
+            if (!mDeferredTransitions.containsKey(transactionToken)) {
+                return;
+            }
+            final int transitionId = mDeferredTransitions.remove(transactionToken);
+            if (!mWindowOrganizerController.getTransitionController().isCollecting()
+                    || mWindowOrganizerController.getTransitionController()
+                    .getCollectingTransitionId() != transitionId) {
+                // This can happen when the transition is timeout or abort.
+                ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Deferred transition id=%d has been continued before the"
+                                + " TaskFragmentTransaction=%s is finished",
+                        transitionId, transactionToken);
                 return;
             }
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "Continue transition ready for TaskFragmentTransaction=%s", transactionToken);
+                    "Continue transition id=%d for TaskFragmentTransaction=%s", transitionId,
+                    transactionToken);
             mWindowOrganizerController.getTransitionController().continueTransitionReady();
         }
     }

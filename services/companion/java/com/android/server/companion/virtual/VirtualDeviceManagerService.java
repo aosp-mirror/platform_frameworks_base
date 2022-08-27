@@ -56,6 +56,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -208,6 +209,10 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    VirtualDeviceManagerInternal getLocalServiceInstance() {
+        return mLocalService;
+    }
+
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
             VirtualDeviceImpl.PendingTrampolineCallback {
 
@@ -308,10 +313,11 @@ public class VirtualDeviceManagerService extends SystemService {
             final long tokenTwo = Binder.clearCallingIdentity();
             try {
                 virtualDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, displayId);
-                return displayId;
             } finally {
                 Binder.restoreCallingIdentity(tokenTwo);
             }
+            mLocalService.onVirtualDisplayCreated(displayId);
+            return displayId;
         }
 
         @Nullable
@@ -378,6 +384,10 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     private final class LocalService extends VirtualDeviceManagerInternal {
+        @GuardedBy("mVirtualDeviceManagerLock")
+        private final ArrayList<VirtualDeviceManagerInternal.VirtualDisplayListener>
+                mVirtualDisplayListeners = new ArrayList<>();
+
         @Override
         public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
             synchronized (mVirtualDeviceManagerLock) {
@@ -386,10 +396,30 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void onVirtualDisplayCreated(int displayId) {
+            final VirtualDisplayListener[] listeners;
+            synchronized (mVirtualDeviceManagerLock) {
+                listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
+            }
+            mHandler.post(() -> {
+                for (VirtualDisplayListener listener : listeners) {
+                    listener.onVirtualDisplayCreated(displayId);
+                }
+            });
+        }
+
+        @Override
         public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
+            final VirtualDisplayListener[] listeners;
             synchronized (mVirtualDeviceManagerLock) {
                 ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayRemovedLocked(displayId);
+                listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
             }
+            mHandler.post(() -> {
+                for (VirtualDisplayListener listener : listeners) {
+                    listener.onVirtualDisplayRemoved(displayId);
+                }
+            });
         }
 
         @Override
@@ -434,6 +464,22 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
             return false;
+        }
+
+        @Override
+        public void registerVirtualDisplayListener(
+                @NonNull VirtualDisplayListener listener) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mVirtualDisplayListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void unregisterVirtualDisplayListener(
+                @NonNull VirtualDisplayListener listener) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mVirtualDisplayListeners.remove(listener);
+            }
         }
     }
 
