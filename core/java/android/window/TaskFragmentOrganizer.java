@@ -45,11 +45,24 @@ import java.util.concurrent.Executor;
 public class TaskFragmentOrganizer extends WindowOrganizer {
 
     /**
-     * Key to the exception in {@link Bundle} in {@link ITaskFragmentOrganizer#onTaskFragmentError}.
+     * Key to the {@link Throwable} in {@link TaskFragmentTransaction.Change#getErrorBundle()}.
+     * @hide
      */
-    private static final String KEY_ERROR_CALLBACK_EXCEPTION = "fragment_exception";
-    private static final String KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO = "task_fragment_info";
-    private static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
+    public static final String KEY_ERROR_CALLBACK_THROWABLE = "fragment_throwable";
+
+    /**
+     * Key to the {@link TaskFragmentInfo} in
+     * {@link TaskFragmentTransaction.Change#getErrorBundle()}.
+     * @hide
+     */
+    public static final String KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO = "task_fragment_info";
+
+    /**
+     * Key to the {@link WindowContainerTransaction.HierarchyOp} in
+     * {@link TaskFragmentTransaction.Change#getErrorBundle()}.
+     * @hide
+     */
+    public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
 
     /**
      * Creates a {@link Bundle} with an exception, operation type and TaskFragmentInfo (if any)
@@ -59,7 +72,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public static @NonNull Bundle putErrorInfoInBundle(@NonNull Throwable exception,
             @Nullable TaskFragmentInfo info, int opType) {
         final Bundle errorBundle = new Bundle();
-        errorBundle.putSerializable(KEY_ERROR_CALLBACK_EXCEPTION, exception);
+        errorBundle.putSerializable(KEY_ERROR_CALLBACK_THROWABLE, exception);
         if (info != null) {
             errorBundle.putParcelable(KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, info);
         }
@@ -251,6 +264,9 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @hide
      */
     public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
+        // TODO(b/240519866): move to SplitController#onTransactionReady to make sure the whole
+        // transaction is handled in one sync block. Keep the implementation below to keep CTS
+        // compatibility. Remove in the next release.
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         for (TaskFragmentTransaction.Change change : changes) {
@@ -276,7 +292,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                             errorBundle.getParcelable(
                                     KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, TaskFragmentInfo.class),
                             errorBundle.getInt(KEY_ERROR_CALLBACK_OP_TYPE),
-                            errorBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION,
+                            errorBundle.getSerializable(KEY_ERROR_CALLBACK_THROWABLE,
                                     java.lang.Throwable.class));
                     break;
                 case TYPE_ACTIVITY_REPARENTED_TO_TASK:
