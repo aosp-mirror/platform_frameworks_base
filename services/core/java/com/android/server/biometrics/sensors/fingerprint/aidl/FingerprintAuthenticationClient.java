@@ -424,7 +424,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     public void onLockoutTimed(long durationMillis) {
-        super.onLockoutTimed(durationMillis);
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
@@ -448,7 +447,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     public void onLockoutPermanent() {
-        super.onLockoutPermanent();
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;

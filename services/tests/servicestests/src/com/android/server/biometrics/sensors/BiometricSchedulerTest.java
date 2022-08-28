@@ -91,8 +91,7 @@ public class BiometricSchedulerTest {
         mToken = new Binder();
         mScheduler = new BiometricScheduler(TAG, new Handler(TestableLooper.get(this).getLooper()),
                 BiometricScheduler.SENSOR_TYPE_UNKNOWN, null /* gestureAvailabilityTracker */,
-                mBiometricService, LOG_NUM_RECENT_OPERATIONS,
-                CoexCoordinator.getInstance());
+                mBiometricService, LOG_NUM_RECENT_OPERATIONS);
     }
 
     @Test

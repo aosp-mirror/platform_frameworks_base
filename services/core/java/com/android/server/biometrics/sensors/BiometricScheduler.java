@@ -54,7 +54,7 @@ import java.util.function.Consumer;
  * interactions with the HAL before finishing.
  *
  * We currently assume (and require) that each biometric sensor have its own instance of a
- * {@link BiometricScheduler}. See {@link CoexCoordinator}.
+ * {@link BiometricScheduler}.
  */
 @MainThread
 public class BiometricScheduler {
@@ -156,7 +156,6 @@ public class BiometricScheduler {
     private int mTotalOperationsHandled;
     private final int mRecentOperationsLimit;
     @NonNull private final List<Integer> mRecentOperations;
-    @NonNull private final CoexCoordinator mCoexCoordinator;
 
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
@@ -165,11 +164,6 @@ public class BiometricScheduler {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.d(getTag(), "[Started] " + clientMonitor);
-
-            if (clientMonitor instanceof AuthenticationClient) {
-                mCoexCoordinator.addAuthenticationClient(mSensorType,
-                        (AuthenticationClient<?>) clientMonitor);
-            }
         }
 
         @Override
@@ -189,10 +183,6 @@ public class BiometricScheduler {
                 }
 
                 Slog.d(getTag(), "[Finishing] " + clientMonitor + ", success: " + success);
-                if (clientMonitor instanceof AuthenticationClient) {
-                    mCoexCoordinator.removeAuthenticationClient(mSensorType,
-                            (AuthenticationClient<?>) clientMonitor);
-                }
 
                 if (mGestureAvailabilityDispatcher != null) {
                     mGestureAvailabilityDispatcher.markSensorActive(
@@ -216,8 +206,7 @@ public class BiometricScheduler {
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull IBiometricService biometricService,
-            int recentOperationsLimit,
-            @NonNull CoexCoordinator coexCoordinator) {
+            int recentOperationsLimit) {
         mBiometricTag = tag;
         mHandler = handler;
         mSensorType = sensorType;
@@ -227,7 +216,6 @@ public class BiometricScheduler {
         mCrashStates = new ArrayDeque<>();
         mRecentOperationsLimit = recentOperationsLimit;
         mRecentOperations = new ArrayList<>();
-        mCoexCoordinator = coexCoordinator;
     }
 
     /**
@@ -244,7 +232,7 @@ public class BiometricScheduler {
         this(tag, new Handler(Looper.getMainLooper()), sensorType, gestureAvailabilityDispatcher,
                 IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
-                LOG_NUM_RECENT_OPERATIONS, CoexCoordinator.getInstance());
+                LOG_NUM_RECENT_OPERATIONS);
     }
 
     @VisibleForTesting
