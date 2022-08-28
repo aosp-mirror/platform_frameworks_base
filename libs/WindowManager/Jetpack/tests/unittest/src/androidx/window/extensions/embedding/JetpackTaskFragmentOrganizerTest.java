@@ -36,6 +36,7 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -127,6 +128,14 @@ public class JetpackTaskFragmentOrganizerTest {
 
         verify(mTransaction).setWindowingMode(container.getInfo().getToken(),
                 WINDOWING_MODE_UNDEFINED);
+    }
+
+    @Test
+    public void testOnTransactionReady() {
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        mOrganizer.onTransactionReady(transaction);
+
+        verify(mCallback).onTransactionReady(transaction);
     }
 
     private TaskFragmentInfo createMockInfo(TaskFragmentContainer container) {
