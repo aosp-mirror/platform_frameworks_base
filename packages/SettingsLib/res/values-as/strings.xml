@@ -212,15 +212,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"কথনভংগী তীব্ৰতা ৰিছেট কৰক"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"পাঠ উচ্চাৰণৰ স্বৰ-তীব্ৰতা ৰিছেট কৰক যিটো ডিফ\'ল্ট হিচাপে ব্যৱহাৰ কৰা হ\'ব।"</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"অতি লেহেম"</item>
-    <item msgid="1815382991399815061">"লেহেমীয়া"</item>
-    <item msgid="3075292553049300105">"সাধাৰণ"</item>
-    <item msgid="1158955023692670059">"দ্ৰুত"</item>
-    <item msgid="5664310435707146591">"দ্ৰুত"</item>
-    <item msgid="5491266922147715962">"অতি দ্ৰুত"</item>
-    <item msgid="7659240015901486196">"দ্ৰুত"</item>
-    <item msgid="7147051179282410945">"অতি দ্ৰুত"</item>
-    <item msgid="581904787661470707">"দ্ৰুততম"</item>
+    <item msgid="4563475121751694801">"৬০%"</item>
+    <item msgid="6323184326270638754">"৮০%"</item>
+    <item msgid="2569200872125313769">"১০০%"</item>
+    <item msgid="9010794089704942570">"১৫০%"</item>
+    <item msgid="4634010129655810634">"২০০%"</item>
+    <item msgid="8929490998534497543">"২৫০%"</item>
+    <item msgid="8442352376763286772">"৩০০%"</item>
+    <item msgid="4446831566506165093">"৩৫০%"</item>
+    <item msgid="6946761421234586000">"৪০০%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"প্ৰ’ফাইল বাছনি কৰক"</string>
     <string name="category_personal" msgid="6236798763159385225">"ব্যক্তিগত"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"মেনিফেষ্টৰ মান যিয়েই নহওক, মাল্টি-ৱিণ্ডৰ বাবে আটাইবোৰ কাৰ্যকলাপৰ আকাৰ সলনি কৰিব পৰা কৰক।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্ৰিফৰ্ম ৱিণ্ড\'জ সক্ষম কৰক"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"পৰীক্ষামূলক ফ্ৰী-ফৰ্ম ৱিণ্ড’বোৰৰ বাবে সহায়তা সক্ষম কৰক৷"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ডেস্কটপ ম’ড"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ডেস্কটপ বেকআপ পাছৱৰ্ড"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ডেস্কটপৰ পূৰ্ণ বেকআপ এতিয়ালৈকে সংৰক্ষিত অৱস্থাত নাই"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ডেস্কটপ সম্পূৰ্ণ বেকআপৰ বাবে পাছৱৰ্ডটো সলনি কৰিবলৈ বা আঁতৰাবলৈ টিপক"</string>
@@ -476,13 +477,15 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • চাৰ্জ কৰাটো সাময়িকভাৱে সীমিত কৰা হৈছে"</string>
+    <!-- no translation found for power_charging_limited (6971664137170239141) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজ্ঞাত"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্ৰুততাৰে চাৰ্জ হৈছে"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"লাহে লাহে চাৰ্জ হৈছে"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"বেতাঁৰৰ মাধ্যমেৰে চাৰ্জ হৈ আছে"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"চাৰ্জিং ড’ক"</string>
+    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"চ্চাৰ্জ কৰা নাই"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"সংযোগ হৈ আছে, চাৰ্জ হৈ থকা নাই"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"চাৰ্জ হ’ল"</string>
@@ -655,14 +658,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ইথাৰনেট সংযোগ বিচ্ছিন্ন হৈছে।"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ইথাৰনেট।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"কল কৰা নহয়"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"সময়"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"তাৰিখ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"বতৰ"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"বায়ুৰ গুণগত মান"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"কাষ্টৰ তথ্য"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"গৃহ নিয়ন্ত্ৰণ"</string>
-    <!-- no translation found for dream_complication_title_smartspace (4197829945636051120) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"এখন প্ৰ’ফাইল চিত্ৰ বাছনি কৰক"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফ’ল্ট ব্যৱহাৰকাৰীৰ চিহ্ন"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"কায়িক কীব’ৰ্ড"</string>

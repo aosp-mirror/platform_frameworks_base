@@ -212,15 +212,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Restablecer el tono de voz"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Restablecer a predeterminado el tono en el que se lee el texto"</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Muy lenta"</item>
-    <item msgid="1815382991399815061">"Lenta"</item>
-    <item msgid="3075292553049300105">"Normal"</item>
-    <item msgid="1158955023692670059">"Rápida"</item>
-    <item msgid="5664310435707146591">"Más rápida"</item>
-    <item msgid="5491266922147715962">"Muy rápida"</item>
-    <item msgid="7659240015901486196">"Superrápida"</item>
-    <item msgid="7147051179282410945">"Hiperrápida"</item>
-    <item msgid="581904787661470707">"La más rápida"</item>
+    <item msgid="4563475121751694801">"60 %"</item>
+    <item msgid="6323184326270638754">"80 %"</item>
+    <item msgid="2569200872125313769">"100 %"</item>
+    <item msgid="9010794089704942570">"150 %"</item>
+    <item msgid="4634010129655810634">"200 %"</item>
+    <item msgid="8929490998534497543">"250 %"</item>
+    <item msgid="8442352376763286772">"300 %"</item>
+    <item msgid="4446831566506165093">"350 %"</item>
+    <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Seleccionar perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
@@ -234,7 +234,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Los ajustes del nombre del punto de acceso no están disponibles para este usuario"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Depuración por USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Activa el modo de depuración cuando el dispositivo esté conectado por USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración por USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Depuración inalámbrica"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Activa el modo de depuración cuando haya conexión Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Error"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permite que todas las actividades puedan cambiar de tamaño en multiventana independientemente de los valores de manifiesto"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Habilitar ventanas de forma libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Permite la compatibilidad con ventanas de forma libre experimentales"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Modo Escritorio"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contraseña para copias de ordenador"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Las copias de seguridad completas de ordenador no están protegidas"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Toca para cambiar o quitar la contraseña de las copias de seguridad completas del escritorio"</string>
@@ -476,13 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> hasta la carga completa"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> hasta la carga completa"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carga limitada temporalmente"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carga en pausa"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconocido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carga rápida"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carga lenta"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carga inalámbrica"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Base de carga"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Cargando"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No se está cargando"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectado pero sin cargar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
@@ -655,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Conexión Ethernet desconectada."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sin llamadas."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Hora"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Fecha"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Tiempo"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Calidad del aire"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Info. de emisión"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Domótica"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"De un vistazo"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Elige una imagen de perfil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Icono de usuario predeterminado"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>

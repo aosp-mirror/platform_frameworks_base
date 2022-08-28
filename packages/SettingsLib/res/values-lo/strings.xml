@@ -212,15 +212,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ຣີເຊັດລະດັບສຽງການເວົ້າ"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ຣີເຊັດລະດັບສຽງທີ່ເວົ້າຂໍ້ຄວາມອອກສຽງໃຫ້ເປັນຄ່າເລີ່ມຕົ້ນ."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"ຊ້າຫຼາຍ"</item>
-    <item msgid="1815382991399815061">"ຊ້າ"</item>
-    <item msgid="3075292553049300105">"ປົກ​ກ​ະ​ຕິ"</item>
-    <item msgid="1158955023692670059">"ໄວ"</item>
-    <item msgid="5664310435707146591">"ໄວກວ່າ"</item>
-    <item msgid="5491266922147715962">"ໄວຫຼາຍ"</item>
-    <item msgid="7659240015901486196">"ໄວ"</item>
-    <item msgid="7147051179282410945">"ໄວສຸດໆ"</item>
-    <item msgid="581904787661470707">"ໄວທີ່ສຸດ"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
     <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ເຮັດໃຫ້ທຸກການ​ເຄື່ອນ​ໄຫວສາມາດປັບຂະໜາດໄດ້ສຳລັບຫຼາຍໜ້າຈໍ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ເປີດໃຊ້ໜ້າຈໍຮູບແບບອິດສະຫຼະ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ເປີດໃຊ້ການຮອງຮັບໜ້າຈໍຮູບແບບອິດສະຫຼະແບບທົດລອງ."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ໂໝດເດັສທັອບ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນເດັສທັອບ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ການ​ສຳຮອງ​ຂໍ້ມູນ​ເຕັມຮູບແບບ​ໃນ​ເດັສທັອບ​ຍັງ​ບໍ່​ໄດ້​ຮັບ​ການ​ປ້ອງກັນ​ໃນ​ເວລາ​ນີ້"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ແຕະເພື່ອປ່ຽນ ຫຼື ລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັສທັອບ"</string>
@@ -476,13 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ຍັງເຫຼືອອີກ <xliff:g id="TIME">%1$s</xliff:g> ຈຶ່ງຈະສາກເຕັມ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"ຍັງເຫຼືອອີກ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈຶ່ງຈະສາກເຕັມ"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຈຳກັດການສາກໄຟຊົ່ວຄາວ"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - ການສາກໄຟຖືກຢຸດໄວ້ຊົ່ວຄາວ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ກຳລັງສາກໄຟ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ກຳລັງສາກໄຟດ່ວນ"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ກຳລັງສາກໄຟຊ້າໆ"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ກຳລັງສາກໄຟໄຮ້ສາຍ"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ກຳລັງສາກໄຟຜ່ານດັອກ"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ກຳລັງສາກໄຟ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ເຊື່ອມຕໍ່ແລ້ວ, ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ສາກເຕັມແລ້ວ"</string>
@@ -655,14 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ອີ​ເທີ​ເນັດ​ຕັດ​ເຊື່ອມ​ຕໍ່​ແລ້ວ."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ອີເທີເນັດ."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ບໍ່ສາມາດໂທສຽງໄດ້."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"ເວລາ"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"ວັນທີ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"ສະພາບອາກາດ"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"ຄຸນນະພາບ​ອາກາດ"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ຂໍ້ມູນການສົ່ງສັນຍານ"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"ການຄວບຄຸມເຮືອນ"</string>
-    <!-- no translation found for dream_complication_title_smartspace (4197829945636051120) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"ເລືອກຮູບໂປຣໄຟລ໌"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ໄອຄອນຜູ້ໃຊ້ເລີ່ມຕົ້ນ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ແປ້ນພິມພາຍນອກ"</string>
