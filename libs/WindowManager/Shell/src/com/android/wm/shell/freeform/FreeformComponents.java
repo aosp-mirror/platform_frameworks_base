@@ -33,16 +33,19 @@ import java.util.Optional;
  */
 public class FreeformComponents {
     public final ShellTaskOrganizer.TaskListener mTaskListener;
-    public final Optional<Transitions.TransitionHandler> mTaskTransitionHandler;
+    public final Optional<Transitions.TransitionHandler> mTransitionHandler;
+    public final Optional<Transitions.TransitionObserver> mTransitionObserver;
 
     /**
      * Creates an instance with the given components.
      */
     public FreeformComponents(
             ShellTaskOrganizer.TaskListener taskListener,
-            Optional<Transitions.TransitionHandler> taskTransitionHandler) {
+            Optional<Transitions.TransitionHandler> transitionHandler,
+            Optional<Transitions.TransitionObserver> transitionObserver) {
         mTaskListener = taskListener;
-        mTaskTransitionHandler = taskTransitionHandler;
+        mTransitionHandler = transitionHandler;
+        mTransitionObserver = transitionObserver;
     }
 
     /**

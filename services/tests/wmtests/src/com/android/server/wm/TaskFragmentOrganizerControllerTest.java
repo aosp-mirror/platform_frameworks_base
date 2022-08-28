@@ -18,10 +18,19 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
+import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
@@ -47,14 +56,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.NonNull;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -76,8 +86,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 /**
  * Build/Install/Run:
@@ -107,6 +120,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private TaskFragmentInfo mTaskFragmentInfo;
     @Mock
     private Task mTask;
+    @Captor
+    private ArgumentCaptor<TaskFragmentTransaction> mTransactionCaptor;
 
     @Before
     public void setup() throws RemoteException {
@@ -166,7 +181,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentAppeared(any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
 
         // Send callback when the TaskFragment is attached.
         setupMockParent(mTaskFragment, mTask);
@@ -174,7 +189,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentAppeared(any(), any());
+        assertTaskFragmentAppearedTransaction();
     }
 
     @Test
@@ -187,15 +202,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
 
         // Call onTaskFragmentAppeared first.
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentAppeared(any(), any());
+        verify(mOrganizer).onTransactionReady(any());
 
         // No callback if the info is not changed.
+        clearInvocations(mOrganizer);
         doReturn(true).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
         doReturn(new Configuration()).when(mTaskFragmentInfo).getConfiguration();
 
@@ -203,7 +219,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
 
         // Trigger callback if the info is changed.
         doReturn(false).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
@@ -212,7 +228,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentInfoChanged(any(), eq(mTaskFragmentInfo));
+        assertTaskFragmentInfoChangedTransaction();
     }
 
     @Test
@@ -223,7 +239,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentVanished(any(), any());
+        assertTaskFragmentVanishedTransaction();
     }
 
     @Test
@@ -236,10 +252,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentAppeared(any(), any());
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), anyInt(), any());
-        verify(mOrganizer).onTaskFragmentVanished(any(), eq(mTaskFragmentInfo));
+        assertTaskFragmentVanishedTransaction();
 
         // Not trigger onTaskFragmentInfoChanged.
         // Call onTaskFragmentAppeared before calling onTaskFragmentInfoChanged.
@@ -252,10 +265,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentAppeared(any(), any());
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), anyInt(), any());
-        verify(mOrganizer).onTaskFragmentVanished(any(), eq(mTaskFragmentInfo));
+        assertTaskFragmentVanishedTransaction();
     }
 
     @Test
@@ -268,24 +278,30 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(any(), eq(mTask.mTaskId), any());
+        assertTaskFragmentParentInfoChangedTransaction(mTask);
 
-        // No extra callback if the info is not changed.
+        // No extra parent info changed callback if the info is not changed.
         clearInvocations(mOrganizer);
 
         mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), anyInt(), any());
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertEquals(1, changes.size());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_TASK_FRAGMENT_INFO_CHANGED, change.getType());
 
         // Trigger callback if the size is changed.
+        clearInvocations(mOrganizer);
         mTask.getConfiguration().smallestScreenWidthDp = 100;
         mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(any(), eq(mTask.mTaskId), any());
+        assertTaskFragmentParentInfoChangedTransaction(mTask);
 
         // Trigger callback if the windowing mode is changed.
         clearInvocations(mOrganizer);
@@ -294,7 +310,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(any(), eq(mTask.mTaskId), any());
+        assertTaskFragmentParentInfoChangedTransaction(mTask);
     }
 
     @Test
@@ -303,11 +319,12 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         mController.registerOrganizer(mIOrganizer);
         mController.onTaskFragmentError(mTaskFragment.getTaskFragmentOrganizer(),
-                mErrorToken, null /* taskFragment */, -1 /* opType */, exception);
+                mErrorToken, null /* taskFragment */, HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
+                exception);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentError(any(), eq(mErrorToken), eq(null), eq(-1),
-                eq(exception));
+        assertTaskFragmentErrorTransaction(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
+                exception.getClass());
     }
 
     @Test
@@ -326,17 +343,17 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onActivityReparentedToTask(any(), anyInt(), any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
 
         // Notify organizer if it was embedded before entered Pip.
         activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onActivityReparentedToTask(any(), eq(task.mTaskId), eq(activity.intent),
-                eq(activity.token));
+        assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
 
         // Notify organizer if there is any embedded in the Task.
+        clearInvocations(mOrganizer);
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setOrganizer(mOrganizer)
@@ -348,9 +365,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, times(2))
-                .onActivityReparentedToTask(any(), eq(task.mTaskId), eq(activity.intent),
-                        eq(activity.token));
+        assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
     }
 
     @Test
@@ -370,25 +385,31 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         activity.info.applicationInfo.uid = uid;
         doReturn(pid + 1).when(activity).getPid();
         task.effectiveUid = uid;
-        final ArgumentCaptor<IBinder> token = ArgumentCaptor.forClass(IBinder.class);
 
         // Notify organizer if it was embedded before entered Pip.
         // Create a temporary token since the activity doesn't belong to the same process.
+        clearInvocations(mOrganizer);
         activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
         // Allow organizer to reparent activity in other process using the temporary token.
-        verify(mOrganizer).onActivityReparentedToTask(any(), eq(task.mTaskId), eq(activity.intent),
-                token.capture());
-        final IBinder temporaryToken = token.getValue();
-        assertNotEquals(activity.token, temporaryToken);
-        mTransaction.reparentActivityToTaskFragment(mFragmentToken, temporaryToken);
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_ACTIVITY_REPARENTED_TO_TASK, change.getType());
+        assertEquals(task.mTaskId, change.getTaskId());
+        assertEquals(activity.intent, change.getActivityIntent());
+        assertNotEquals(activity.token, change.getActivityToken());
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, change.getActivityToken());
         mWindowOrganizerController.applyTransaction(mTransaction);
 
         assertEquals(mTaskFragment, activity.getTaskFragment());
         // The temporary token can only be used once.
-        assertNull(mController.getReparentActivityFromTemporaryToken(mIOrganizer, temporaryToken));
+        assertNull(mController.getReparentActivityFromTemporaryToken(mIOrganizer,
+                change.getActivityToken()));
     }
 
     @Test
@@ -901,7 +922,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         // Verifies that event was not sent
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
     }
 
     @Test
@@ -927,7 +948,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         // Verifies that event was not sent
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
 
         // Mock the task becomes visible, and activity resumed
         doReturn(true).when(task).shouldBeVisible(any());
@@ -935,7 +956,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Verifies that event is sent.
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer).onTransactionReady(any());
     }
 
     /**
@@ -969,7 +990,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         clearInvocations(mOrganizer);
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer).onTransactionReady(any());
     }
 
     /**
@@ -996,21 +1017,21 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         taskFragment.mTaskFragmentAppearedSent = true;
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer).onTransactionReady(any());
 
         // Verify the info changed callback is not called when the task is invisible
         clearInvocations(mOrganizer);
         doReturn(false).when(task).shouldBeVisible(any());
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTransactionReady(any());
 
         // Finish the embedded activity, and verify the info changed callback is called because the
         // TaskFragment is becoming empty.
         embeddedActivity.finishing = true;
         mController.onTaskFragmentInfoChanged(mIOrganizer, taskFragment);
         mController.dispatchPendingEvents();
-        verify(mOrganizer).onTaskFragmentInfoChanged(any(), any());
+        verify(mOrganizer).onTransactionReady(any());
     }
 
     /**
@@ -1120,9 +1141,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        verify(mOrganizer).onTaskFragmentError(any(), eq(mErrorToken), any(),
-                eq(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT),
-                any(SecurityException.class));
+        assertTaskFragmentErrorTransaction(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT,
+                SecurityException.class);
     }
 
     @Test
@@ -1159,8 +1179,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        verify(mOrganizer).onTaskFragmentError(any(), eq(mErrorToken), any(),
-                eq(HIERARCHY_OP_TYPE_REPARENT_CHILDREN), any(SecurityException.class));
+        assertTaskFragmentErrorTransaction(HIERARCHY_OP_TYPE_REPARENT_CHILDREN,
+                SecurityException.class);
     }
 
     @Test
@@ -1262,6 +1282,87 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         } catch (RemoteException e) {
             fail();
         }
+    }
+
+    /** Asserts that there will be a transaction for TaskFragment appeared. */
+    private void assertTaskFragmentAppearedTransaction() {
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+
+        // Appeared will come with parent info changed.
+        final TaskFragmentTransaction.Change change = changes.get(changes.size() - 1);
+        assertEquals(TYPE_TASK_FRAGMENT_APPEARED, change.getType());
+        assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
+        assertEquals(mFragmentToken, change.getTaskFragmentToken());
+    }
+
+    /** Asserts that there will be a transaction for TaskFragment info changed. */
+    private void assertTaskFragmentInfoChangedTransaction() {
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+
+        // InfoChanged may come with parent info changed.
+        final TaskFragmentTransaction.Change change = changes.get(changes.size() - 1);
+        assertEquals(TYPE_TASK_FRAGMENT_INFO_CHANGED, change.getType());
+        assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
+        assertEquals(mFragmentToken, change.getTaskFragmentToken());
+    }
+
+    /** Asserts that there will be a transaction for TaskFragment vanished. */
+    private void assertTaskFragmentVanishedTransaction() {
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_TASK_FRAGMENT_VANISHED, change.getType());
+        assertEquals(mTaskFragmentInfo, change.getTaskFragmentInfo());
+        assertEquals(mFragmentToken, change.getTaskFragmentToken());
+    }
+
+    /** Asserts that there will be a transaction for TaskFragment vanished. */
+    private void assertTaskFragmentParentInfoChangedTransaction(@NonNull Task task) {
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED, change.getType());
+        assertEquals(task.mTaskId, change.getTaskId());
+        assertEquals(task.getConfiguration(), change.getTaskConfiguration());
+    }
+
+    /** Asserts that there will be a transaction for TaskFragment error. */
+    private void assertTaskFragmentErrorTransaction(int opType, @NonNull Class<?> exceptionClass) {
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_TASK_FRAGMENT_ERROR, change.getType());
+        assertEquals(mErrorToken, change.getErrorCallbackToken());
+        final Bundle errorBundle = change.getErrorBundle();
+        assertEquals(opType, errorBundle.getInt(KEY_ERROR_CALLBACK_OP_TYPE));
+        assertEquals(exceptionClass, errorBundle.getSerializable(
+                KEY_ERROR_CALLBACK_THROWABLE, Throwable.class).getClass());
+    }
+
+    /** Asserts that there will be a transaction for activity reparented to Task. */
+    private void assertActivityReparentedToTaskTransaction(int taskId, @NonNull Intent intent,
+            @NonNull IBinder activityToken) {
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_ACTIVITY_REPARENTED_TO_TASK, change.getType());
+        assertEquals(taskId, change.getTaskId());
+        assertEquals(intent, change.getActivityIntent());
+        assertEquals(activityToken, change.getActivityToken());
     }
 
     /** Setups an embedded TaskFragment in a PIP Task. */
