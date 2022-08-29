@@ -39,9 +39,11 @@ import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -116,6 +118,11 @@ public class GroupCoalescer implements Dumpable, PipelineDumpable {
 
     public void setNotificationHandler(BatchableNotificationHandler handler) {
         mHandler = handler;
+    }
+
+    /** @return the set of notification keys currently in the coalescer */
+    public Set<String> getCoalescedKeySet() {
+        return Collections.unmodifiableSet(mCoalescedEvents.keySet());
     }
 
     private final NotificationHandler mListener = new NotificationHandler() {
