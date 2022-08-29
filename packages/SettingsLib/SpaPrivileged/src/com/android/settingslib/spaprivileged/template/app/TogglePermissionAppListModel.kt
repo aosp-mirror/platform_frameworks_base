@@ -68,6 +68,14 @@ interface TogglePermissionAppListModelFactory {
             }
         )
     }
+
+    /**
+     * Gets the route to the toggle permission App List page.
+     *
+     * Expose route to enable enter from non-SPA pages.
+     */
+    fun getRoute(permissionType: String): String =
+        TogglePermissionAppListPageProvider.getRoute(permissionType)
 }
 
 @Composable

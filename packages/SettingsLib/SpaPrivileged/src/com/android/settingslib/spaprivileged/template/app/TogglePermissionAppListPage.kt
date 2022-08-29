@@ -75,8 +75,14 @@ internal class TogglePermissionAppListPageProvider(
     }
 
     companion object {
+        /**
+         * Gets the route to this page.
+         *
+         * Expose route to enable enter from non-SPA pages.
+         */
+        internal fun getRoute(permissionType: String) = "$NAME/$permissionType"
         @Composable
-        internal fun navigator(permissionType: String) = navigator(route = "$NAME/$permissionType")
+        internal fun navigator(permissionType: String) = navigator(route = getRoute(permissionType))
     }
 }
 

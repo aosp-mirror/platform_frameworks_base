@@ -21,6 +21,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -46,18 +48,27 @@ open class BrowseActivity(
 
     @Composable
     private fun MainContent() {
-        val startDestination =
-            intent?.getStringExtra(KEY_START_DESTINATION) ?: sppRepository.getDefaultStartPageName()
+        val destination = intent?.getStringExtra(KEY_DESTINATION)
 
         val navController = rememberNavController()
         CompositionLocalProvider(navController.localNavController()) {
-            NavHost(navController, startDestination) {
+            NavHost(navController, sppRepository.getDefaultStartPageName()) {
                 for (page in sppRepository.getAllProviders()) {
                     composable(
                         route = page.route,
                         arguments = page.arguments,
                     ) { navBackStackEntry ->
                         page.Page(navBackStackEntry.arguments)
+                    }
+                }
+            }
+
+            if (!destination.isNullOrEmpty()) {
+                LaunchedEffect(Unit) {
+                    navController.navigate(destination) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
                     }
                 }
             }
@@ -68,6 +79,6 @@ open class BrowseActivity(
         get() = name + arguments.joinToString("") { argument -> "/{${argument.name}}" }
 
     companion object {
-        const val KEY_START_DESTINATION = "spa:SpaActivity:startDestination"
+        const val KEY_DESTINATION = "spa:SpaActivity:destination"
     }
 }
