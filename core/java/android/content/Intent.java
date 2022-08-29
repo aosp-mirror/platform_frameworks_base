@@ -4092,6 +4092,45 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PROFILE_INACCESSIBLE";
 
     /**
+     * Broadcast sent to the parent user when an associated profile is removed.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile
+     * that was removed.
+     *
+     * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_REMOVED} but functions as a
+     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * It is sent in addition to the {@link #ACTION_MANAGED_PROFILE_REMOVED} broadcast when a
+     * managed user is removed.
+     *
+     * <p>Only applications (for example Launchers) that need to display merged content across both
+     * the parent user and its associated profiles need to worry about this broadcast.
+     * This is only sent to registered receivers created with {@link Context#registerReceiver}.
+     * It is not sent to manifest receivers.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PROFILE_REMOVED =
+            "android.intent.action.PROFILE_REMOVED";
+
+    /**
+     * Broadcast sent to the parent user when an associated profile is added (the profile was
+     * created and is ready to be used).
+     * Carries an extra {@link #EXTRA_USER} that specifies the  {@link UserHandle} of the profile
+     * that was added.
+     *
+     * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_ADDED} but functions as a
+     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * It is sent in addition to the {@link #ACTION_MANAGED_PROFILE_ADDED} broadcast when a
+     * managed user is added.
+     *
+     * <p>Only applications (for example Launchers) that need to display merged content across both
+     * the parent user and its associated profiles need to worry about this broadcast.
+     * This is only sent to registered receivers created with {@link Context#registerReceiver}.
+     * It is not sent to manifest receivers.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PROFILE_ADDED =
+            "android.intent.action.PROFILE_ADDED";
+
+    /**
      * Broadcast sent to the system user when the 'device locked' state changes for any user.
      * Carries an extra {@link #EXTRA_USER_HANDLE} that specifies the ID of the user for which
      * the device was locked or unlocked.
