@@ -83,5 +83,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Түшүндүм"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Толук маалымат алуу үчүн жайып көрүңүз."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Чоңойтуу"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Кичирейтүү"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Жабуу"</string>
 </resources>

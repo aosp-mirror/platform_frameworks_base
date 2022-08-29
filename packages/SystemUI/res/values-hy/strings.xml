@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ապակողպվել է դեմքով։ Սեղմեք բացելու համար։"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Դեմքը ճանաչվեց։ Սեղմեք բացելու համար։"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Դեմքը ճանաչվեց։ Բացելու համար սեղմեք ապակողպման պատկերակը։"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ապակողպվեց դեմքով"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Դեմքը ճանաչվեց"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Տեղափոխել ձախ"</item>
     <item msgid="5558598599408514296">"Տեղափոխել ներքև"</item>
@@ -337,10 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Արագ լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Դանդաղ լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում դոկ-կայանի միջոցով • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Անջատել օգտվողին"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
     <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Անջատել օգտվողին"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"իջնող ընտրացանկ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
@@ -833,7 +835,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Ընտրված է <xliff:g id="COUNT">%1$d</xliff:g> սարք"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(անջատված է)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Սխալ առաջացավ։ Հպեք՝ կրկնելու համար։"</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Միացրեք սարքը"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Միացնել սարք"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Այս աշխատաշրջանը հեռարձակելու համար բացեք հավելվածը"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Անհայտ հավելված"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Կանգնեցնել հեռարձակումը"</string>

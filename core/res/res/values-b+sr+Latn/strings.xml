@@ -1250,10 +1250,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Priprema se <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Završavanje pokretanja."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Želite li da nastavite sa podešavanjem?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete dok podešavate otisak prsta."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Isključi ekran"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Nastavi podešavanje"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Dodirnite da biste isključili ekran"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Isključi ekran"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Nastavljate verifikaciju otiska prsta?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete da biste verifikovali otisak prsta."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Isključi ekran"</string>
@@ -1406,16 +1405,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dodirnite da biste podesili"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Izaberite da biste podesili"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Možda morate da reformatirate uređaj. Dodirnite da biste izbacili."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prenos slika i medija"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Za čuvanje slika, video snimaka, muzike i drugog sadržaja"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Pregledajte medijske fajlove"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem sa: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ne radi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dodirnite da biste ispravili"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Medij <xliff:g id="NAME">%s</xliff:g> je oštećen. Izaberite da ga popravite."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Možda morate da reformatirate uređaj. Dodirnite da biste izbacili."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Uređaj <xliff:g id="NAME">%s</xliff:g> nije podržan"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Otkriveno: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ne radi"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ovaj uređaj ne podržava ovaj uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da biste podesili podržani format."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Dodirnite da biste podesili."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Izaberite da biste podesili uređaj <xliff:g id="NAME">%s</xliff:g> u podržanom formatu."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Možda morate da reformatirate uređaj"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Uređaj <xliff:g id="NAME">%s</xliff:g> je neočekivano uklonjen"</string>
@@ -1928,6 +1927,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Podešavanje regiona"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Unesite naziv jezika"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Predloženi"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Svi regioni"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Pretraži"</string>
@@ -2050,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Želite da dozvolite aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim evidencijama uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratan pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne dozvoli"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Evidencije uređaja registruju šta se dešava na uređaju. Aplikacije mogu da koriste te evidencije da bi pronašle i rešile probleme.\n\nNeke evidencije mogu da sadrže osetljive informacije, pa pristup svim evidencijama uređaja treba da dozvoljavate samo aplikacijama u koje imate poverenja. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim evidencijama uređaja, ona i dalje može da pristupa sopstvenim evidencijama. Proizvođač uređaja će možda i dalje moći da pristupa nekim evidencijama ili informacijama na uređaju. Saznajte više"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi da prikazuje isečke iz aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Izmeni"</string>
@@ -2291,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Proverite aktivne aplikacije"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ne može da se pristupi kameri telefona sa <xliff:g id="DEVICE">%1$s</xliff:g> uređaja"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ne može da se pristupi kameri tableta sa <xliff:g id="DEVICE">%1$s</xliff:g> uređaja"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Ovom ne možete da pristupate tokom strimovanja. Probajte na telefonu."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Podrazumevani sistemski"</string>
 </resources>

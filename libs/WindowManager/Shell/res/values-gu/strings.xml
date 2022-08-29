@@ -83,5 +83,6 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"સમજાઈ ગયું"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"વધુ માહિતી માટે મોટું કરો."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"મોટું કરો"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"નાનું કરો"</string>
     <string name="close_button_text" msgid="2913281996024033299">"બંધ કરો"</string>
 </resources>

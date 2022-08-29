@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"സജ്ജീകരണം തുടരണോ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കുമ്പോൾ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"സ്ക്രീൻ ഓഫാക്കുക"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"സജ്ജീകരണം തുടരുക"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"സ്ക്രീൻ ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"സ്ക്രീൻ ഓഫാക്കുക"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കൽ തുടരണോ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കാൻ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"സ്ക്രീൻ ഓഫാക്കുക"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"സജ്ജമാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"സജ്ജീകരിക്കാൻ തിരഞ്ഞെടുക്കുക"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ഫോട്ടോകളും വീഡിയോകളും സംഗീതവും മറ്റും സംഭരിക്കുന്നതിന്"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"മീഡിയാ ഫയലുകൾ ബ്രൗസ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>-ൽ പ്രശ്‌നം"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"പരിഹരിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> കേടായി. പരിഹരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> കണ്ടെത്തി"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ഈ ഉപകരണം <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നതല്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"സജ്ജീകരിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"പിന്തുണയ്‌ക്കുന്ന ഫോർമാറ്റിൽ <xliff:g id="NAME">%s</xliff:g> സജ്ജീകരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ഒറ്റത്തവണ ആക്‌സസ് അനുവദിക്കുക"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"അനുവദിക്കരുത്"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് ഉപകരണ ലോഗുകൾ റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകൾക്ക് മാത്രമേ എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ അനുമതി നൽകാവൂ. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ നിങ്ങൾ ഈ ആപ്പിനെ അനുവദിക്കുന്നില്ലെങ്കിൽ പോലും, ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും. നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിനും നിങ്ങളുടെ ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ തുടർന്നും ആക്‌സസ് ചെയ്യാനായേക്കും. കൂടുതലറിയുക"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"എഡിറ്റ് ചെയ്യുക"</string>
@@ -2290,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"സജീവമായ ആപ്പുകൾ പരിശോധിക്കുക"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഫോണിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"സ്ട്രീം ചെയ്യുമ്പോൾ ഇത് ആക്സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="system_locale_title" msgid="711882686834677268">"സിസ്‌റ്റം ഡിഫോൾട്ട്"</string>
 </resources>

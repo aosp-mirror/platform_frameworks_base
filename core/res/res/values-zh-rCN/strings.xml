@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"要继续设置吗？"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试在设置指纹时轻轻按一下。"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"关闭屏幕"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"继续设置"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"按一下即可关闭屏幕"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"关闭屏幕"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"要继续验证您的指纹吗？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试轻轻按一下来验证您的指纹。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"关闭屏幕"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"点按即可进行设置"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"选择即可设置"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"您可能需要重新格式化设备。点按即可弹出。"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"可用于传输照片和媒体文件"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"用于存储照片、视频和音乐等"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"浏览媒体文件"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>出现问题"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>无法使用"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"点按即可修正问题"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>已损坏。选择即可进行修正。"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"您可能需要重新格式化设备。点按即可弹出。"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g>不受支持"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"检测到<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>无法使用"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"该设备不支持此<xliff:g id="NAME">%s</xliff:g>。点按即可使用支持的格式进行设置。"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"点按即可设置。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"选择即可使用支持的格式设置<xliff:g id="NAME">%s</xliff:g>。"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"您可能需要重新格式化设备"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>已意外移除"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建议语言"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有语言"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"所有国家/地区"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"搜索"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允许访问一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问您设备上的部分日志或信息。了解详情"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>
@@ -2290,5 +2292,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"系统默认设置"</string>
 </resources>

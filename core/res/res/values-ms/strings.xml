@@ -301,7 +301,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"mengakses lokasi peranti ini"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalendar"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"menghantar dan melihat mesej SMS"</string>
@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyediakan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulakan apl."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"But akhir."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Teruskan persediaan?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Anda menekan butang kuasa — tindakan ini biasanya mematikan skrin.\n\nCuba ketik dengan perlahan semasa menetapkan cap jari anda."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Matikan skrin"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Teruskan persediaan"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Ketik untuk mematikan skrin"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Matikan skrin"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Terus mengesahkan cap jari anda?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Anda menekan butang kuasa — tindakan ini biasanya mematikan skrin.\n\nCuba ketik dengan perlahan untuk mengesahkan cap jari anda."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Matikan skrin"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ketik untuk menyediakan"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Pilih untuk penyediaan"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Anda mungkin perlu memformatkan semula peranti. Ketik untuk mengeluarkan media."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Untuk memindahkan foto dan media"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Untuk menyimpan foto, video, muzik dan banyak lagi"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Semak imbas fail media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Isu dengan <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Ketik untuk menyelesaikan masalah"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> rosak. Pilih untuk baiki."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Anda mungkin perlu memformatkan semula peranti. Ketik untuk mengeluarkan media."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> tidak disokong"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> dikesan"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Peranti ini tidak menyokong <xliff:g id="NAME">%s</xliff:g> ini. Ketik untuk menyediakannya dalam format yang disokong."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Ketik untuk membuat persediaan."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Pilih untuk menyediakan <xliff:g id="NAME">%s</xliff:g> dalam format yang disokong."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Anda mungkin perlu memformatkan semula peranti"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ditanggalkan tanpa dijangka"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Pilihan wilayah"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Taipkan nama bahasa"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Dicadangkan"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Semua bahasa"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Semua rantau"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Cari"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> mahu menunjukkan <xliff:g id="APP_2">%2$s</xliff:g> hirisan"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
@@ -2290,5 +2292,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Lalai sistem"</string>
 </resources>
