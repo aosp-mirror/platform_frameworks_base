@@ -123,7 +123,7 @@ class CloseImeAutoOpenWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTes
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 3,
+                .getConfigNonRotationTests(
                     // b/190352379 (IME doesn't show on app launch in 90 degrees)
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(

@@ -130,7 +130,7 @@ open class OpenAppFromOverviewTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 3)
+                .getConfigNonRotationTests()
         }
     }
 }
