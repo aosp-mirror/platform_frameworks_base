@@ -381,7 +381,7 @@ int AImageDecoder_setCrop(AImageDecoder* decoder, ARect crop) {
 
     SkIRect cropIRect;
     cropIRect.setLTRB(crop.left, crop.top, crop.right, crop.bottom);
-    SkIRect* cropPtr = cropIRect.isEmpty() ? nullptr : &cropIRect;
+    SkIRect* cropPtr = cropIRect == SkIRect::MakeEmpty() ? nullptr : &cropIRect;
     return imageDecoder->setCropRect(cropPtr)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_BAD_PARAMETER;
 }
