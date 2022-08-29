@@ -35,6 +35,7 @@ public class TestInjector implements Injector {
     private final FakeDeviceIdleHelper mDeviceIdleHelper;
     private final FakeEmergencyHelper mEmergencyHelper;
     private final LocationUsageLogger mLocationUsageLogger;
+    private final FakePackageResetHelper mPackageResetHelper;
 
     public TestInjector(Context context) {
         mUserInfoHelper = new FakeUserInfoHelper();
@@ -50,6 +51,7 @@ public class TestInjector implements Injector {
         mDeviceIdleHelper = new FakeDeviceIdleHelper();
         mEmergencyHelper = new FakeEmergencyHelper();
         mLocationUsageLogger = new LocationUsageLogger();
+        mPackageResetHelper = new FakePackageResetHelper();
     }
 
     @Override
@@ -115,5 +117,10 @@ public class TestInjector implements Injector {
     @Override
     public LocationUsageLogger getLocationUsageLogger() {
         return mLocationUsageLogger;
+    }
+
+    @Override
+    public FakePackageResetHelper getPackageResetHelper() {
+        return mPackageResetHelper;
     }
 }

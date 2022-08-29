@@ -1218,6 +1218,44 @@ public class LocationProviderManagerTest {
         assertThat(mProvider.getRequest().isActive()).isFalse();
     }
 
+    @Test
+    public void testQueryPackageReset() {
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+
+        ILocationListener listener1 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener1);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        ILocationListener listener2 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener2);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener1);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener2);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+    }
+
+    @Test
+    public void testPackageReset() {
+        ILocationListener listener1 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener1);
+        ILocationListener listener2 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener2);
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        mInjector.getPackageResetHelper().reset("mypackage");
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+    }
+
     private ILocationListener createMockLocationListener() {
         return spy(new ILocationListener.Stub() {
             @Override

@@ -39,6 +39,7 @@ import com.android.server.LocalServices;
 import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationPermissionsHelper;
+import com.android.server.location.injector.PackageResetHelper;
 import com.android.server.location.injector.SettingsHelper;
 import com.android.server.location.injector.UserInfoHelper;
 import com.android.server.location.injector.UserInfoHelper.UserListener;
@@ -193,6 +194,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     protected final LocationPermissionsHelper mLocationPermissionsHelper;
     protected final AppForegroundHelper mAppForegroundHelper;
     protected final LocationManagerInternal mLocationManagerInternal;
+    private final PackageResetHelper mPackageResetHelper;
 
     private final UserListener mUserChangedListener = this::onUserChanged;
     private final ProviderEnabledListener mProviderEnabledChangedListener =
@@ -218,12 +220,25 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             };
     private final AppForegroundHelper.AppForegroundListener mAppForegroundChangedListener =
             this::onAppForegroundChanged;
+    private final PackageResetHelper.Responder mPackageResetResponder =
+            new PackageResetHelper.Responder() {
+                @Override
+                public void onPackageReset(String packageName) {
+                    GnssListenerMultiplexer.this.onPackageReset(packageName);
+                }
+
+                @Override
+                public boolean isResetableForPackage(String packageName) {
+                    return GnssListenerMultiplexer.this.isResetableForPackage(packageName);
+                }
+            };
 
     protected GnssListenerMultiplexer(Injector injector) {
         mUserInfoHelper = injector.getUserInfoHelper();
         mSettingsHelper = injector.getSettingsHelper();
         mLocationPermissionsHelper = injector.getLocationPermissionsHelper();
         mAppForegroundHelper = injector.getAppForegroundHelper();
+        mPackageResetHelper = injector.getPackageResetHelper();
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
     }
@@ -357,6 +372,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 mLocationPackageBlacklistChangedListener);
         mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
         mAppForegroundHelper.addListener(mAppForegroundChangedListener);
+        mPackageResetHelper.register(mPackageResetResponder);
     }
 
     @Override
@@ -374,6 +390,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 mLocationPackageBlacklistChangedListener);
         mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
         mAppForegroundHelper.removeListener(mAppForegroundChangedListener);
+        mPackageResetHelper.unregister(mPackageResetResponder);
     }
 
     private void onUserChanged(int userId, int change) {
@@ -405,6 +422,27 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     private void onAppForegroundChanged(int uid, boolean foreground) {
         updateRegistrations(registration -> registration.onForegroundChanged(uid, foreground));
+    }
+
+    private void onPackageReset(String packageName) {
+        // invoked when a package is "force quit" - move off the main thread
+        FgThread.getExecutor().execute(
+                () ->
+                        updateRegistrations(
+                                registration -> {
+                                    if (registration.getIdentity().getPackageName().equals(
+                                            packageName)) {
+                                        registration.remove();
+                                    }
+
+                                    return false;
+                                }));
+    }
+
+    private boolean isResetableForPackage(String packageName) {
+        // invoked to find out if the given package has any state that can be "force quit"
+        return findRegistration(
+                registration -> registration.getIdentity().getPackageName().equals(packageName));
     }
 
     @Override
