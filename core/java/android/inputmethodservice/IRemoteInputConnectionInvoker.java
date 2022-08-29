@@ -775,4 +775,33 @@ final class IRemoteInputConnectionInvoker {
             return false;
         }
     }
+
+    /**
+     * Invokes {@link IRemoteInputConnection#replaceText(InputConnectionCommandHeader, int, int,
+     * CharSequence, TextAttribute)}.
+     *
+     * @param start the character index where the replacement should start.
+     * @param end the character index where the replacement should end.
+     * @param newCursorPosition the new cursor position around the text. If > 0, this is relative to
+     *     the end of the text - 1; if <= 0, this is relative to the start of the text. So a value
+     *     of 1 will always advance you to the position after the full text being inserted. Note
+     *     that this means you can't position the cursor within the text.
+     * @param text the text to replace. This may include styles.
+     * @param textAttribute The extra information about the text. This value may be null.
+     */
+    @AnyThread
+    public boolean replaceText(
+            int start,
+            int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        try {
+            mConnection.replaceText(
+                    createHeader(), start, end, text, newCursorPosition, textAttribute);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
 }

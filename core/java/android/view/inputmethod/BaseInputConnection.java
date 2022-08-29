@@ -897,8 +897,43 @@ public class BaseInputConnection implements InputConnection {
         }
     }
 
-    private void replaceText(CharSequence text, int newCursorPosition,
-            boolean composing) {
+    @Override
+    public boolean replaceText(
+            @IntRange(from = 0) int start,
+            @IntRange(from = 0) int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        Preconditions.checkArgumentNonnegative(start);
+        Preconditions.checkArgumentNonnegative(end);
+
+        if (DEBUG) {
+            Log.v(
+                    TAG,
+                    "replaceText " + start + ", " + end + ", " + text + ", " + newCursorPosition);
+        }
+
+        final Editable content = getEditable();
+        if (content == null) {
+            return false;
+        }
+        beginBatchEdit();
+        removeComposingSpans(content);
+
+        int len = content.length();
+        start = Math.min(start, len);
+        end = Math.min(end, len);
+        if (end < start) {
+            int tmp = start;
+            start = end;
+            end = tmp;
+        }
+        replaceTextInternal(start, end, text, newCursorPosition, /*composing=*/ false);
+        endBatchEdit();
+        return true;
+    }
+
+    private void replaceText(CharSequence text, int newCursorPosition, boolean composing) {
         final Editable content = getEditable();
         if (content == null) {
             return;
@@ -930,6 +965,16 @@ public class BaseInputConnection implements InputConnection {
                 a = b;
                 b = tmp;
             }
+        }
+        replaceTextInternal(a, b, text, newCursorPosition, composing);
+        endBatchEdit();
+    }
+
+    private void replaceTextInternal(
+            int a, int b, CharSequence text, int newCursorPosition, boolean composing) {
+        final Editable content = getEditable();
+        if (content == null) {
+            return;
         }
 
         if (composing) {
@@ -974,7 +1019,6 @@ public class BaseInputConnection implements InputConnection {
         if (newCursorPosition < 0) newCursorPosition = 0;
         if (newCursorPosition > content.length()) newCursorPosition = content.length();
         Selection.setSelection(content, newCursorPosition);
-
         content.replace(a, b, text);
 
         if (DEBUG) {
@@ -982,8 +1026,6 @@ public class BaseInputConnection implements InputConnection {
             lp.println("Final text:");
             TextUtils.dumpSpans(content, lp, "  ");
         }
-
-        endBatchEdit();
     }
 
     /**
