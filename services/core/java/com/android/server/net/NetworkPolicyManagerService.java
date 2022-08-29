@@ -123,6 +123,7 @@ import static android.telephony.CarrierConfigManager.KEY_DATA_RAPID_NOTIFICATION
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_NOTIFICATION_BOOL;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -3148,7 +3149,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * active merge set [A,B], we'd return a new template that primarily matches
      * A, but also matches B.
      */
-    private static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
+    @VisibleForTesting(visibility = PRIVATE)
+    static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
             @NonNull List<String[]> mergedList) {
         // Now there are several types of network which uses Subscriber Id to store network
         // information. For instance:
@@ -3158,6 +3160,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (template.getSubscriberIds().isEmpty()) return template;
 
         for (final String[] merged : mergedList) {
+            // In some rare cases (e.g. b/243015487), merged subscriberId list might contain
+            // duplicated items. Deduplication for better error handling.
+            final ArraySet mergedSet = new ArraySet(merged);
+            if (mergedSet.size() != merged.length) {
+                Log.wtf(TAG, "Duplicated merged list detected: " + Arrays.toString(merged));
+            }
             // TODO: Handle incompatible subscriberIds if that happens in practice.
             for (final String subscriberId : template.getSubscriberIds()) {
                 if (com.android.net.module.util.CollectionUtils.contains(merged, subscriberId)) {
@@ -3165,7 +3173,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // a template that matches all merged subscribers.
                     return new NetworkTemplate.Builder(template.getMatchRule())
                             .setWifiNetworkKeys(template.getWifiNetworkKeys())
-                            .setSubscriberIds(Set.of(merged))
+                            .setSubscriberIds(mergedSet)
                             .setMeteredness(template.getMeteredness())
                             .build();
                 }
