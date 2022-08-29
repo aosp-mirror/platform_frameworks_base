@@ -17,14 +17,15 @@
 package com.android.packageinstaller.television;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.VersionedPackage;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -40,8 +41,12 @@ import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
+import com.android.packageinstaller.EventResultPersister;
 import com.android.packageinstaller.PackageUtil;
 import com.android.packageinstaller.R;
+import com.android.packageinstaller.UninstallEventReceiver;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -53,10 +58,13 @@ import java.util.List;
  * by an intent with the intent's class name explicitly set to UninstallAppProgress and expects
  * the application object of the application to uninstall.
  */
-public class UninstallAppProgress extends Activity {
+public class UninstallAppProgress extends Activity implements
+        EventResultPersister.EventResultObserver {
     private static final String TAG = "UninstallAppProgress";
 
     private static final String FRAGMENT_TAG = "progress_fragment";
+    private static final String BROADCAST_ACTION =
+            "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
 
     private ApplicationInfo mAppInfo;
     private boolean mAllUsers;
@@ -272,7 +280,6 @@ public class UninstallAppProgress extends Activity {
             user = Process.myUserHandle();
         }
 
-        PackageDeleteObserver observer = new PackageDeleteObserver();
 
         // Make window transparent until initView is called. In many cases we can avoid showing the
         // UI at all as the app is uninstalled very quickly. If we show the UI and instantly remove
@@ -282,11 +289,29 @@ public class UninstallAppProgress extends Activity {
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
 
         try {
-            getPackageManager().deletePackageAsUser(mAppInfo.packageName, observer,
-                    mAllUsers ? PackageManager.DELETE_ALL_USERS : 0, user.getIdentifier());
+            int uninstallId = UninstallEventReceiver.addObserver(this,
+                    EventResultPersister.GENERATE_NEW_ID, this);
+
+            Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+            broadcastIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            broadcastIntent.putExtra(EventResultPersister.EXTRA_ID, uninstallId);
+            broadcastIntent.setPackage(getPackageName());
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, uninstallId,
+                    broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                            | PendingIntent.FLAG_MUTABLE);
+
+            createContextAsUser(user, 0).getPackageManager().getPackageInstaller().uninstall(
+                    new VersionedPackage(mAppInfo.packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    mAllUsers ? PackageManager.DELETE_ALL_USERS : 0,
+                    pendingIntent.getIntentSender());
         } catch (IllegalArgumentException e) {
             // Couldn't find the package, no need to call uninstall.
             Log.w(TAG, "Could not find package, not deleting " + mAppInfo.packageName, e);
+        } catch (EventResultPersister.OutOfIdsException e) {
+            Log.e(TAG, "Fails to start uninstall", e);
+            onResult(PackageInstaller.STATUS_FAILURE, PackageManager.DELETE_FAILED_INTERNAL_ERROR,
+                    null, 0);
         }
 
         mHandler.sendMessageDelayed(mHandler.obtainMessage(UNINSTALL_IS_SLOW),
@@ -297,13 +322,12 @@ public class UninstallAppProgress extends Activity {
         return mAppInfo;
     }
 
-    private class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
-        public void packageDeleted(String packageName, int returnCode) {
-            Message msg = mHandler.obtainMessage(UNINSTALL_COMPLETE);
-            msg.arg1 = returnCode;
-            msg.obj = packageName;
-            mHandler.sendMessage(msg);
-        }
+    @Override
+    public void onResult(int status, int legacyStatus, @Nullable String message, int serviceId) {
+        Message msg = mHandler.obtainMessage(UNINSTALL_COMPLETE);
+        msg.arg1 = legacyStatus;
+        msg.obj = mAppInfo.packageName;
+        mHandler.sendMessage(msg);
     }
 
     public void setResultAndFinish() {

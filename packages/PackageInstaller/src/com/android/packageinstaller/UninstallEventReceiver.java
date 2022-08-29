@@ -59,7 +59,7 @@ public class UninstallEventReceiver extends BroadcastReceiver {
      *
      * @return The id for this event
      */
-    static int addObserver(@NonNull Context context, int id,
+    public static int addObserver(@NonNull Context context, int id,
             @NonNull EventResultPersister.EventResultObserver observer)
             throws EventResultPersister.OutOfIdsException {
         return getReceiver(context).addObserver(id, observer);
