@@ -33,11 +33,12 @@ import kotlinx.coroutines.flow.map
  */
 @SysUISingleton
 class WifiInteractor @Inject constructor(
-        repository: WifiRepository,
+    repository: WifiRepository,
 ) {
     private val ssid: Flow<String?> = repository.wifiNetwork.map { info ->
         when (info) {
             is WifiNetworkModel.Inactive -> null
+            is WifiNetworkModel.CarrierMerged -> null
             is WifiNetworkModel.Active -> when {
                 info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
                     info.passpointProviderFriendlyName
@@ -47,6 +48,10 @@ class WifiInteractor @Inject constructor(
         }
     }
 
+    /** Our current wifi network. See [WifiNetworkModel]. */
+    val wifiNetwork: Flow<WifiNetworkModel> = repository.wifiNetwork
+
+    /** True if our wifi network has activity in (download), and false otherwise. */
     val hasActivityIn: Flow<Boolean> = combine(repository.wifiActivity, ssid) { activity, ssid ->
             activity.hasActivityIn && ssid != null
         }

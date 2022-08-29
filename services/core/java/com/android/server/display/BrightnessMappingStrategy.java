@@ -116,10 +116,8 @@ public abstract class BrightnessMappingStrategy {
             luxLevels = getLuxLevels(resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevelsIdle));
         } else {
-            brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
-                    com.android.internal.R.array.config_autoBrightnessDisplayValuesNits));
-            luxLevels = getLuxLevels(resources.getIntArray(
-                    com.android.internal.R.array.config_autoBrightnessLevels));
+            brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
+            luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
         }
 
         // Display independent, mode independent values

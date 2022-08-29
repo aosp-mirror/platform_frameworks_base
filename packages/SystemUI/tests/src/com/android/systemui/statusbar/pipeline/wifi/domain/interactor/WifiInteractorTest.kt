@@ -126,6 +126,38 @@ class WifiInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun hasActivityIn_inactiveNetwork_outputsFalse() = runBlocking(IMMEDIATE) {
+        repository.setWifiNetwork(WifiNetworkModel.Inactive)
+        repository.setWifiActivity(WifiActivityModel(hasActivityIn = true, hasActivityOut = true))
+
+        var latest: Boolean? = null
+        val job = underTest
+            .hasActivityIn
+            .onEach { latest = it }
+            .launchIn(this)
+
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun hasActivityIn_carrierMergedNetwork_outputsFalse() = runBlocking(IMMEDIATE) {
+        repository.setWifiNetwork(WifiNetworkModel.CarrierMerged)
+        repository.setWifiActivity(WifiActivityModel(hasActivityIn = true, hasActivityOut = true))
+
+        var latest: Boolean? = null
+        val job = underTest
+            .hasActivityIn
+            .onEach { latest = it }
+            .launchIn(this)
+
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
     fun hasActivityIn_multipleChanges_multipleOutputChanges() = runBlocking(IMMEDIATE) {
         repository.setWifiNetwork(VALID_WIFI_NETWORK_MODEL)
 
@@ -155,6 +187,28 @@ class WifiInteractorTest : SysuiTestCase() {
         repository.setWifiActivity(WifiActivityModel(hasActivityIn = false, hasActivityOut = false))
         yield()
         assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun wifiNetwork_matchesRepoWifiNetwork() = runBlocking(IMMEDIATE) {
+        val wifiNetwork = WifiNetworkModel.Active(
+            networkId = 45,
+            isValidated = true,
+            level = 3,
+            ssid = "AB",
+            passpointProviderFriendlyName = "friendly"
+        )
+        repository.setWifiNetwork(wifiNetwork)
+
+        var latest: WifiNetworkModel? = null
+        val job = underTest
+            .wifiNetwork
+            .onEach { latest = it }
+            .launchIn(this)
+
+        assertThat(latest).isEqualTo(wifiNetwork)
 
         job.cancel()
     }
