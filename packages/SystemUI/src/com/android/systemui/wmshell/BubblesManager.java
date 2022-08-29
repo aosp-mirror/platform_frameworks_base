@@ -62,7 +62,6 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.BubbleCoordinator;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
@@ -103,7 +102,6 @@ public class BubblesManager {
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationLockscreenUserManager mNotifUserManager;
-    private final NotificationGroupManagerLegacy mNotificationGroupManager;
     private final CommonNotifCollection mCommonNotifCollection;
     private final NotifPipeline mNotifPipeline;
     private final Executor mSysuiMainExecutor;
@@ -130,7 +128,6 @@ public class BubblesManager {
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManagerLegacy groupManager,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
@@ -148,7 +145,6 @@ public class BubblesManager {
                     interruptionStateProvider,
                     zenModeController,
                     notifUserManager,
-                    groupManager,
                     notifCollection,
                     notifPipeline,
                     sysUiState,
@@ -171,7 +167,6 @@ public class BubblesManager {
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManagerLegacy groupManager,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
@@ -185,7 +180,6 @@ public class BubblesManager {
         mVisibilityProvider = visibilityProvider;
         mNotificationInterruptStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
-        mNotificationGroupManager = groupManager;
         mCommonNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
         mSysuiMainExecutor = sysuiMainExecutor;
@@ -331,31 +325,11 @@ public class BubblesManager {
             }
 
             @Override
-            public void removeNotificationEntry(String key) {
-                sysuiMainExecutor.execute(() -> {
-                    final NotificationEntry entry = mCommonNotifCollection.getEntry(key);
-                    if (entry != null) {
-                        mNotificationGroupManager.onEntryRemoved(entry);
-                    }
-                });
-            }
-
-            @Override
             public void updateNotificationBubbleButton(String key) {
                 sysuiMainExecutor.execute(() -> {
                     final NotificationEntry entry = mCommonNotifCollection.getEntry(key);
                     if (entry != null && entry.getRow() != null) {
                         entry.getRow().updateBubbleButton();
-                    }
-                });
-            }
-
-            @Override
-            public void updateNotificationSuppression(String key) {
-                sysuiMainExecutor.execute(() -> {
-                    final NotificationEntry entry = mCommonNotifCollection.getEntry(key);
-                    if (entry != null) {
-                        mNotificationGroupManager.updateSuppression(entry);
                     }
                 });
             }
@@ -532,7 +506,10 @@ public class BubblesManager {
                                     REASON_GROUP_SUMMARY_CANCELED);
                         }
                     } else {
-                        mNotificationGroupManager.onEntryRemoved(entry);
+                        for (NotifCallback cb : mCallbacks) {
+                            cb.removeNotification(entry, getDismissedByUserStats(entry, true),
+                                    REASON_GROUP_SUMMARY_CANCELED);
+                        }
                     }
                 }, mSysuiMainExecutor);
     }
