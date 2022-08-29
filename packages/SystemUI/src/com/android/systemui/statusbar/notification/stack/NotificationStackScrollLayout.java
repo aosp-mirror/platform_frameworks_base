@@ -6116,9 +6116,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
             return row.canViewBeDismissed();
         }
-        if (v instanceof PeopleHubView) {
-            return ((PeopleHubView) v).getCanSwipe();
-        }
         return false;
     }
 
@@ -6129,9 +6126,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 return false;
             }
             return row.canViewBeCleared();
-        }
-        if (v instanceof PeopleHubView) {
-            return ((PeopleHubView) v).getCanSwipe();
         }
         return false;
     }
