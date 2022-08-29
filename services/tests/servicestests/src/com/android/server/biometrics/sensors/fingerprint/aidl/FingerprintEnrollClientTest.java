@@ -119,7 +119,7 @@ public class FingerprintEnrollClientTest {
 
     @Before
     public void setup() {
-        when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
+        when(mBiometricLogger.getAmbientLightProbe(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
