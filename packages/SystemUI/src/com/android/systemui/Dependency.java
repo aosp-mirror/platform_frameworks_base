@@ -87,7 +87,6 @@ import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -311,7 +310,6 @@ public class Dependency {
     @Inject Lazy<AccessibilityFloatingMenuController> mAccessibilityFloatingMenuController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationLockscreenUserManager> mNotificationLockscreenUserManager;
-    @Inject Lazy<NotificationGroupManagerLegacy> mNotificationGroupManager;
     @Inject Lazy<VisualStabilityManager> mVisualStabilityManager;
     @Inject Lazy<NotificationGutsManager> mNotificationGutsManager;
     @Inject Lazy<NotificationMediaManager> mNotificationMediaManager;
@@ -524,7 +522,6 @@ public class Dependency {
         mProviders.put(NotificationLockscreenUserManager.class,
                 mNotificationLockscreenUserManager::get);
         mProviders.put(VisualStabilityManager.class, mVisualStabilityManager::get);
-        mProviders.put(NotificationGroupManagerLegacy.class, mNotificationGroupManager::get);
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);
         mProviders.put(NotificationGutsManager.class, mNotificationGutsManager::get);
         mProviders.put(NotificationRemoteInputManager.class,
