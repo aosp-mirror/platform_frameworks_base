@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.api
+package com.android.settingslib.spa.framework.common
 
-data class SettingsPageRepository(
-    val allPages: List<SettingsPageProvider>,
-    val startDestination: String,
-)
+import android.os.Bundle
+import androidx.compose.runtime.Composable
+import androidx.navigation.NamedNavArgument
+
+/**
+ * An SettingsPageProvider represent a Settings page.
+ */
+interface SettingsPageProvider {
+
+    /** The page name without arguments. */
+    val name: String
+
+    /** The page arguments, default is no arguments. */
+    val arguments: List<NamedNavArgument>
+        get() = emptyList()
+
+    /** The [Composable] used to render this page. */
+    @Composable
+    fun Page(arguments: Bundle?)
+
+    // fun buildEntry( arguments: Bundle?) : List<entry>
+}

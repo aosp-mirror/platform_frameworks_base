@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spa.gallery
 
-import com.android.settingslib.spa.framework.api.SettingsPageRepository
+import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
@@ -25,8 +25,8 @@ import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.page.SwitchPreferencePageProvider
 
-val galleryPageRepository = SettingsPageRepository(
-    allPages = listOf(
+val galleryPageProviders = SettingsPageProviderRepository(
+    allPagesList = listOf(
         HomePageProvider,
         PreferencePageProvider,
         SwitchPreferencePageProvider,
@@ -35,5 +35,7 @@ val galleryPageRepository = SettingsPageRepository(
         SettingsPagerPageProvider,
         FooterPageProvider,
     ),
-    startDestination = HomePageProvider.name,
+    rootPages = listOf(HomePageProvider.name)
 )
+
+// TODO: add other environment setup here.
