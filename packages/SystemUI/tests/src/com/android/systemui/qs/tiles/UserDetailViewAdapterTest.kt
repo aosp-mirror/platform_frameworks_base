@@ -31,6 +31,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.user.data.source.UserRecord
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -39,8 +40,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -140,13 +141,14 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     }
 
     private fun createUserRecord(current: Boolean, guest: Boolean) =
-            UserSwitcherController.UserRecord(
-                    mUserInfo,
-                    mPicture,
-                    guest,
-                    current,
-                    false /* isAddUser */,
-                    false /* isRestricted */,
-                    true /* isSwitchToEnabled */,
-                    false /* isAddSupervisedUser */)
+        UserRecord(
+            mUserInfo,
+            mPicture,
+            guest,
+            current,
+            false /* isAddUser */,
+            false /* isRestricted */,
+            true /* isSwitchToEnabled */,
+            false /* isAddSupervisedUser */
+        )
 }
