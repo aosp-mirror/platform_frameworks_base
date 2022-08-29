@@ -252,6 +252,9 @@ public class Flags {
     // 1400 - columbus, b/242800729
     public static final UnreleasedFlag QUICK_TAP_IN_PCC = new UnreleasedFlag(1400);
 
+    // 1500 - chooser
+    public static final UnreleasedFlag CHOOSER_UNBUNDLED = new UnreleasedFlag(1500);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
