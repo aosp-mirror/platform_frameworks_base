@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ముఖం గుర్తించబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ముఖం గుర్తించబడింది. తెరవడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ముఖం గుర్తించబడింది"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"ఎడమవైపుగా జరపండి"</item>
     <item msgid="5558598599408514296">"కిందికి జరపండి"</item>
@@ -337,10 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తి ఛార్జ్"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తి ఛార్జ్"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జింగ్ డాక్ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
-    <skip />
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
@@ -556,7 +557,7 @@
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"తర్వాత"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"మునుపటి"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"రివైండ్ చేయి"</string>
-    <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"వేగంగా ఫార్వార్డ్ చేయి"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"వేగంగా ఫార్వర్డ్ చేయి"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
@@ -619,7 +620,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ఎడమ వైపు చిహ్నం"</string>
     <string name="right_icon" msgid="1103955040645237425">"కుడివైపు ఉన్న చిహ్నం"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"టైల్స్‌ను జోడించడానికి పట్టుకుని, లాగండి"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్స్‌ను వేరే క్రమంలో అమర్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"మీ వద్ద కనీసం <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> టైల్‌లు ఉండాలి"</string>
     <string name="qs_edit" msgid="5583565172803472437">"ఎడిట్ చేయండి"</string>

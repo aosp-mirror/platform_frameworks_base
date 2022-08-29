@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> дайындалуда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Реттеуді жалғастырасыз ба?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін реттеу үшін, оны жайлап түртіп көріңіз."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Экранды өшіру"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Реттеуді жалғастыру"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Экранды өшіру үшін түртіңіз"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Экранды өшіру"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Саусақ ізін растауды жалғастырасыз ба?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін растау үшін, оны жайлап түртіп көріңіз."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Экранды өшіру"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Реттеу үшін түртіңіз"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Реттеу үшін таңдаңыз."</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Құрылғыны қайта форматтау қажет болуы мүмкін. Шығару үшін түртіңіз."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Фотосуреттер мен медиа файлдарын тасымалдау үшін"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Фотосуреттерді, бейнелерді, музыка мен басқа мазмұнды сақтау үшін"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Медиа файлдарды таңдаңыз."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> ақаулы"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> жұмыс істемейді"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Түзету үшін түртіңіз"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> бүлінген. Түзету үшін оны түртіңіз."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Құрылғыны қайта форматтау қажет болуы мүмкін. Шығару үшін түртіңіз."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Қолданылмайтын <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> анықталды"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> жұмыс істемейді"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Бұл құрылғы <xliff:g id="NAME">%s</xliff:g> картасына қолдау көрсетеді. Қолдау көрсетілетін пішімде орнату үшін түртіңіз."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Реттеу үшін түртіңіз."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> құрылғысын қолдау көрсетілетін форматта реттеу үшін таңдаңыз."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Құрылғыны қайта форматтау қажет болуы мүмкін."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> кенеттен шығарылды"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Аймақ параметрі"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Тіл атауын теріңіз"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Ұсынылған"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"Барлық тілдер"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Барлық аймақтар"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Іздеу"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> қолданбасына барлық құрылғының журналын пайдалануға рұқсат берілсін бе?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Бір реттік пайдалану рұқсатын беру"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Рұқсат бермеу"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Журналдарға құрылғыда не болып жатқаны жазылады. Қолданбалар осы журналдарды қате тауып, түзету үшін пайдаланады.\n\nКейбір журналдарда құпия ақпарат болуы мүмкін. Сондықтан барлық құрылғының журналын пайдалану рұқсаты тек сенімді қолданбаларға берілуі керек. \n\nБұл қолданбаға барлық құрылғының журналын пайдалануға рұқсат бермесеңіз де, ол өзінің журналдарын пайдалана береді. Құрылғы өндірушісі де құрылғыдағы кейбір журналдарды немесе ақпаратты пайдалануы мүмкін. Толығырақ"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Қайта көрсетілмесін"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> қолданбасы <xliff:g id="APP_2">%2$s</xliff:g> қолданбасының үзінділерін көрсеткісі келеді"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Өзгерту"</string>
@@ -2290,5 +2292,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Белсенді қолданбаларды тексеру"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан телефон камерасын пайдалану мүмкін емес."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан планшет камерасын пайдалану мүмкін емес."</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Жүйенің әдепкі параметрі"</string>
 </resources>
