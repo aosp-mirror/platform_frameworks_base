@@ -659,7 +659,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final BroadcastQueue mFgOffloadBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
-    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[4];
+    final BroadcastQueue[] mBroadcastQueues;
 
     @GuardedBy("this")
     BroadcastStats mLastBroadcastStats;
@@ -2351,6 +2351,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
+        mBroadcastQueues = new BroadcastQueue[0];
         mFgBroadcastQueue = mBgBroadcastQueue = mBgOffloadBroadcastQueue =
                 mFgOffloadBroadcastQueue = null;
         mComponentAliasResolver = new ComponentAliasResolver(this);
@@ -2409,6 +2410,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
 
+        mBroadcastQueues = new BroadcastQueue[4];
         mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "foreground", foreConstants, false);
         mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,

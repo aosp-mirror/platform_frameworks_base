@@ -16,17 +16,18 @@
 
 package com.android.server.am;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.AppOpsManager;
@@ -39,11 +40,14 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.MessageQueue;
+import android.os.IBinder;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -67,8 +71,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Common tests for {@link BroadcastQueue} implementations.
@@ -165,12 +167,25 @@ public class BroadcastQueueTest {
         }
     }
 
-    private ProcessRecord makeActiveProcessRecord(String packageName) {
+    private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
         final ProcessRecord r = new ProcessRecord(mAms, makeApplicationInfo(packageName), null,
                 getUidForPackage(packageName));
         final IApplicationThread thread = mock(IApplicationThread.class);
+        final IBinder threadBinder = new Binder();
+        doReturn(threadBinder).when(thread).asBinder();
         r.makeActive(thread, mAms.mProcessStats);
-        when(mAms.getProcessRecordLocked(r.info.processName, r.info.uid)).thenReturn(r);
+
+        doReturn(r).when(mAms).getProcessRecordLocked(eq(r.info.processName), eq(r.info.uid));
+
+        doAnswer((invocation) -> {
+            Log.v(TAG, "Delivering finishReceiverLocked() for "
+                    + Arrays.toString(invocation.getArguments()));
+            mQueue.finishReceiverLocked(threadBinder, Activity.RESULT_OK,
+                    null, null, false, false);
+            return null;
+        }).when(thread).scheduleReceiver(any(), any(), any(), anyInt(), any(), any(), anyBoolean(),
+                anyInt(), anyInt());
+
         return r;
     }
 
@@ -191,6 +206,11 @@ public class BroadcastQueueTest {
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
+            List receivers) {
+        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(), receivers);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             BroadcastOptions options, List receivers) {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
@@ -208,18 +228,12 @@ public class BroadcastQueueTest {
         };
     }
 
-    private void waitForHandlerIdle() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final MessageQueue queue = mHandlerThread.getLooper().getQueue();
-        final MessageQueue.IdleHandler idler = () -> {
-            latch.countDown();
-            return false;
-        };
-        queue.addIdleHandler(idler);
-        if (queue.isIdle()) {
-            latch.countDown();
+    private void waitForIdle() throws Exception {
+        for (int i = 0; i < 100; i++) {
+            if (mQueue.isIdle()) break;
+            SystemClock.sleep(100);
         }
-        latch.await(5, TimeUnit.SECONDS);
+        assertTrue(mQueue.isIdle());
     }
 
     private static final String PACKAGE_RED = "com.example.red";
@@ -245,14 +259,40 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        final BroadcastRecord r = makeBroadcastRecord(intent, callerApp,
-                BroadcastOptions.makeBasic(),
-                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)));
-        mQueue.enqueueBroadcastLocked(r);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(intent, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
 
-        waitForHandlerIdle();
+        waitForIdle();
         verify(receiverApp.getThread()).scheduleReceiver(
                 argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
+                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    @Test
+    public void testSimple_Manifest_Warm_Multiple() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+
+        waitForIdle();
+        verify(receiverGreenApp.getThread()).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(timezone)), any(), any(), anyInt(), any(),
+                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+        verify(receiverBlueApp.getThread()).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(timezone)), any(), any(), anyInt(), any(),
+                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+        verify(receiverBlueApp.getThread()).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(), anyInt(), any(),
                 any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
     }
 

@@ -526,10 +526,17 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     public BroadcastRecord getMatchingOrderedReceiver(IBinder receiver) {
         BroadcastRecord br = mDispatcher.getActiveBroadcastLocked();
-        if (br != null && br.receiver == receiver) {
-            return br;
+        if (br == null) {
+            Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
+                    + "] no active broadcast");
+            return null;
         }
-        return null;
+        if (br.receiver != receiver) {
+            Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
+                    + "] active broadcast " + br.receiver + " doesn't match " + receiver);
+            return null;
+        }
+        return br;
     }
 
     // > 0 only, no worry about "eventual" recycling
