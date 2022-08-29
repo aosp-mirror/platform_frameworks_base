@@ -30,11 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.api.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.SettingsSlider
+import com.android.settingslib.spa.widget.SettingsSliderModel
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
-import com.android.settingslib.spa.widget.ui.SettingsSlider
-import com.android.settingslib.spa.widget.ui.SettingsSliderModel
 
 private const val TITLE = "Sample Slider"
 
