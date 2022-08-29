@@ -21,7 +21,6 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -416,7 +415,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
             if (!shouldApplyIndependently) {
                 // Although there is an active sync, we want to apply the transaction now.
-                if (!mTransitionController.isCollecting()) {
+                // TODO(b/232042367) Redesign the organizer update on activity callback so that we
+                // we will know about the transition explicitly.
+                final Transition transition = mTransitionController.getCollectingTransition();
+                if (transition == null) {
                     // This should rarely happen, and we should try to avoid using
                     // {@link #applySyncTransaction} with Shell transition.
                     // We still want to apply and merge the transaction to the active sync
@@ -426,8 +428,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                     + " because there is an ongoing sync for"
                                     + " applySyncTransaction().");
                 }
-                // TODO(b/207070762) make sure changes are all collected.
-                applyTransaction(wct, -1 /* syncId */, null /* transition */, caller);
+                applyTransaction(wct, -1 /* syncId */, transition, caller);
                 return;
             }
 
@@ -821,7 +822,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT: {
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
                         hop.getTaskFragmentCreationOptions();
-                createTaskFragment(taskFragmentCreationOptions, errorCallbackToken, caller);
+                createTaskFragment(taskFragmentCreationOptions, errorCallbackToken, caller,
+                        transition);
                 break;
             }
             case HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT: {
@@ -848,7 +850,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         break;
                     }
                 }
-                effects |= deleteTaskFragment(taskFragment, organizer, errorCallbackToken);
+                effects |= deleteTaskFragment(taskFragment, organizer, errorCallbackToken,
+                        transition);
                 break;
             }
             case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT: {
@@ -922,8 +925,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
 
-                prepareActivityEmbeddingTransitionForReparentActivityToTaskFragment(parent,
-                        activity);
+                if (transition != null) {
+                    transition.collect(activity);
+                    if (activity.getParent() != null) {
+                        // Collect the current parent. Its visibility may change as a result of
+                        // this reparenting.
+                        transition.collect(activity.getParent());
+                    }
+                    transition.collect(parent);
+                }
                 activity.reparent(parent, POSITION_TOP);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
@@ -1118,7 +1128,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 reparentTaskFragment(oldParent.asTaskFragment(), newParent, organizer,
-                        errorCallbackToken);
+                        errorCallbackToken, transition);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
@@ -1160,41 +1170,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         }
         return effects;
-    }
-
-    private void prepareActivityEmbeddingTransitionForReparentActivityToTaskFragment(
-            @NonNull TaskFragment taskFragment, @NonNull ActivityRecord activity) {
-        if (!taskFragment.canHaveEmbeddingActivityTransition(activity)) {
-            return;
-        }
-
-        // The reparent can happen in the following cases:
-        // 1. Reparent an existing activity to split when app launches new intent.
-        //    - This happens after app calls to start activity, but before the activity is actually
-        //      started, so we don't expect any collecting transition, but if it does, we can't
-        //      queue the WCT because the start activity won't wait.
-        // 2. Reparent an existing activity to split to launch placeholder when Task size changed.
-        //    - We expect to have a collecting transition for the Task resize, so just collect.
-        // 3. Reparent a new launching activity to an always-expand container.
-        // 4. Reparent a new launching activity to split to launch placeholder together.
-        // 5. Reparent a new launching activity to an existing split.
-        //    - The new launching activity should have start an OPEN transition, so just collect.
-        // 6. Reparent PiP activity back to the original Task.
-        //    - This should be part of the exiting PiP transition, so just collect.
-
-        if (!taskFragment.getBounds().equals(activity.getBounds()) && activity.isVisible()
-                && !mTransitionController.isCollecting()) {
-            // 1. Reparent an existing activity to split when app launches new intent.
-            mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE, activity);
-        }
-
-        // We expect the activity to be in the transition already, so just collect the TaskFragment.
-        if (mTransitionController.isCollecting(activity)) {
-            taskFragment.collectEmbeddedTaskFragmentIfNeeded();
-        } else {
-            ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Reparenting Activity"
-                    + " to embedded TaskFragment, but the Activity is not collected");
-        }
     }
 
     /** A helper method to send minimum dimension violation error to the client. */
@@ -1773,8 +1748,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams,
-            @Nullable IBinder errorCallbackToken, @NonNull CallerInfo caller) {
+    private void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams,
+            @Nullable IBinder errorCallbackToken, @NonNull CallerInfo caller,
+            @Nullable Transition transition) {
         final ActivityRecord ownerActivity =
                 ActivityRecord.forTokenLocked(creationParams.getOwnerToken());
         final ITaskFragmentOrganizer organizer = ITaskFragmentOrganizer.Stub.asInterface(
@@ -1829,11 +1805,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
+
+        if (transition != null) transition.collectExistenceChange(taskFragment);
     }
 
-    void reparentTaskFragment(@NonNull TaskFragment oldParent,
+    private void reparentTaskFragment(@NonNull TaskFragment oldParent,
             @Nullable WindowContainer<?> newParent, @Nullable ITaskFragmentOrganizer organizer,
-            @Nullable IBinder errorCallbackToken) {
+            @Nullable IBinder errorCallbackToken, @Nullable Transition transition) {
         final TaskFragment newParentTF;
         if (newParent == null) {
             // Use the old parent's parent if the caller doesn't specify the new parent.
@@ -1875,13 +1853,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     HIERARCHY_OP_TYPE_REPARENT_CHILDREN, exception);
             return;
         }
+        if (transition != null) {
+            // Collect the current parent. It's visibility may change as a result of this
+            // reparenting.
+            transition.collect(oldParent);
+            transition.collect(newParentTF);
+        }
         while (oldParent.hasChild()) {
-            oldParent.getChildAt(0).reparent(newParentTF, POSITION_TOP);
+            final WindowContainer child = oldParent.getChildAt(0);
+            if (transition != null) {
+                transition.collect(child);
+            }
+            child.reparent(newParentTF, POSITION_TOP);
         }
     }
 
     private int deleteTaskFragment(@NonNull TaskFragment taskFragment,
-            @Nullable ITaskFragmentOrganizer organizer, @Nullable IBinder errorCallbackToken) {
+            @Nullable ITaskFragmentOrganizer organizer, @Nullable IBinder errorCallbackToken,
+            @Nullable Transition transition) {
         final int index = mLaunchTaskFragments.indexOfValue(taskFragment);
         if (index < 0) {
             final Throwable exception =
@@ -1901,6 +1890,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT, exception);
             return 0;
         }
+
+        if (transition != null) transition.collectExistenceChange(taskFragment);
+
         mLaunchTaskFragments.removeAt(index);
         taskFragment.remove(true /* withTransition */, "deleteTaskFragment");
         return TRANSACT_EFFECTS_LIFECYCLE;

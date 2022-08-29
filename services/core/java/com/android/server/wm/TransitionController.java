@@ -227,6 +227,14 @@ class TransitionController {
     }
 
     /**
+     * @return the collecting transition. {@code null} if there is no collecting transition.
+     */
+    @Nullable
+    Transition getCollectingTransition() {
+        return mCollectingTransition;
+    }
+
+    /**
      * @return the collecting transition sync Id. This should only be called when there is a
      * collecting transition.
      */

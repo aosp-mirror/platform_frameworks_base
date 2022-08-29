@@ -2280,17 +2280,31 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         super.onConfigurationChanged(newParentConfig);
 
-        if (shouldStartChangeTransition(mTmpPrevBounds)) {
+        final boolean shouldStartChangeTransition = shouldStartChangeTransition(mTmpPrevBounds);
+        if (shouldStartChangeTransition) {
             initializeChangeTransition(mTmpPrevBounds);
-        } else if (mTaskFragmentOrganizer != null) {
-            // Update the surface here instead of in the organizer so that we can make sure
-            // it can be synced with the surface freezer.
-            final SurfaceControl.Transaction t = getSyncTransaction();
-            updateSurfacePosition(t);
-            updateOrganizedTaskFragmentSurfaceSize(t, false /* forceUpdate */);
+        }
+        if (mTaskFragmentOrganizer != null) {
+            if (mTransitionController.isShellTransitionsEnabled()
+                    && !mTransitionController.isCollecting(this)) {
+                // TaskFragmentOrganizer doesn't have access to the surface for security reasons, so
+                // update the surface here if it is not collected by Shell transition.
+                updateOrganizedTaskFragmentSurface();
+            } else if (!mTransitionController.isShellTransitionsEnabled()
+                    && !shouldStartChangeTransition) {
+                // Update the surface here instead of in the organizer so that we can make sure
+                // it can be synced with the surface freezer for legacy app transition.
+                updateOrganizedTaskFragmentSurface();
+            }
         }
 
         sendTaskFragmentInfoChanged();
+    }
+
+    private void updateOrganizedTaskFragmentSurface() {
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        updateSurfacePosition(t);
+        updateOrganizedTaskFragmentSurfaceSize(t, false /* forceUpdate */);
     }
 
     /** Updates the surface size so that the sub windows cannot be shown out of bounds. */
@@ -2347,33 +2361,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 || endBounds.height() != startBounds.height();
     }
 
-    boolean canHaveEmbeddingActivityTransition(@NonNull ActivityRecord child) {
-        if (!isOrganizedTaskFragment() || !mTransitionController.isShellTransitionsEnabled()) {
-            return false;
-        }
-        // The activity should request open transition when it is becoming visible.
-        return child.isVisibleRequested();
-    }
-
-    void collectEmbeddedTaskFragmentIfNeeded() {
-        if (!isOrganizedTaskFragment() || mTransitionController.isCollecting(this)) {
-            return;
-        }
-        if (getChildCount() == 0) {
-            // The TaskFragment is new created, and just becoming non-empty.
-            mTransitionController.collectExistenceChange(this);
-        } else {
-            mTransitionController.collect(this);
-        }
+    @Override
+    boolean isSyncFinished() {
+        return super.isSyncFinished() && isReadyToTransit();
     }
 
     @Override
     void setSurfaceControl(SurfaceControl sc) {
         super.setSurfaceControl(sc);
         if (mTaskFragmentOrganizer != null) {
-            final SurfaceControl.Transaction t = getSyncTransaction();
-            updateSurfacePosition(t);
-            updateOrganizedTaskFragmentSurfaceSize(t, false /* forceUpdate */);
+            updateOrganizedTaskFragmentSurface();
             // If the TaskFragmentOrganizer was set before we created the SurfaceControl, we need to
             // emit the callbacks now.
             sendTaskFragmentAppeared();

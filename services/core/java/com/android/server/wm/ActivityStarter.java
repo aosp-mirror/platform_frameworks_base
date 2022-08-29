@@ -3018,10 +3018,7 @@ class ActivityStarter {
                 newParent = candidateTf;
             }
         }
-        if (newParent.canHaveEmbeddingActivityTransition(mStartActivity)) {
-            // Make sure the embedded TaskFragment is included in the start activity transition.
-            newParent.collectEmbeddedTaskFragmentIfNeeded();
-        }
+        newParent.mTransitionController.collect(newParent);
         if (mStartActivity.getTaskFragment() == null
                 || mStartActivity.getTaskFragment() == newParent) {
             newParent.addChild(mStartActivity, POSITION_TOP);
