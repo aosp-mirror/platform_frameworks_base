@@ -1305,4 +1305,7 @@ public abstract class PackageManagerInternal {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS}.
      */
     public abstract @SignatureResult int checkUidSignaturesForAllUsers(int uid1, int uid2);
+
+    public abstract void setPackageStoppedState(@NonNull String packageName, boolean stopped,
+            @UserIdInt int userId);
 }

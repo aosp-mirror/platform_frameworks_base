@@ -2998,11 +2998,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
     }
 
-    public void setPackageStoppedState(String packageName, boolean stopped, int userId)
-            throws RemoteException {
-        AppGlobals.getPackageManager().setPackageStoppedState(packageName, stopped, userId);
-    }
-
     private boolean hasUsageStatsPermission(String callingPackage, int callingUid, int callingPid) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
                 callingUid, callingPackage, null, false, "", false).getOpMode();
@@ -6742,9 +6737,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // TODO: how set package stopped state should work for sdk sandboxes?
         if (!isSdkSandbox) {
             try {
-                AppGlobals.getPackageManager().setPackageStoppedState(
+                mPackageManagerInt.setPackageStoppedState(
                         info.packageName, false, UserHandle.getUserId(app.uid));
-            } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "
                         + info.packageName + ": " + e);
@@ -12860,9 +12854,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // !!! TODO: currently no check here that we're already bound
             // Backup agent is now in use, its package can't be stopped.
             try {
-                AppGlobals.getPackageManager().setPackageStoppedState(
+                mPackageManagerInt.setPackageStoppedState(
                         app.packageName, false, UserHandle.getUserId(app.uid));
-            } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "
                         + app.packageName + ": " + e);

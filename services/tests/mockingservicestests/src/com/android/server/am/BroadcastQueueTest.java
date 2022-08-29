@@ -122,6 +122,7 @@ public class BroadcastQueueTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
+        doNothing().when(mPackageManagerInt).setPackageStoppedState(any(), anyBoolean(), anyInt());
 
         final ActivityManagerService realAms = new ActivityManagerService(
                 new TestInjector(mContext), mServiceThreadRule.getThread());
@@ -130,7 +131,6 @@ public class BroadcastQueueTest {
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
         realAms.mPackageManagerInt = mPackageManagerInt;
         mAms = spy(realAms);
-        doNothing().when(mAms).setPackageStoppedState(any(), anyBoolean(), anyInt());
 
         final BroadcastConstants constants = new BroadcastConstants(
                 Settings.Global.BROADCAST_FG_CONSTANTS);

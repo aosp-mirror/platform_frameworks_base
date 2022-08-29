@@ -4236,9 +4236,8 @@ public final class ActiveServices {
 
         // Service is now being launched, its package can't be stopped.
         try {
-            AppGlobals.getPackageManager().setPackageStoppedState(
+            mAm.mPackageManagerInt.setPackageStoppedState(
                     r.packageName, false, r.userId);
-        } catch (RemoteException e) {
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + r.packageName + ": " + e);
