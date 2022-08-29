@@ -60,8 +60,8 @@ public class Flags {
     public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
             new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
-    public static final UnreleasedFlag REMOVE_UNRANKED_NOTIFICATIONS =
-            new UnreleasedFlag(109, true);
+    public static final ReleasedFlag REMOVE_UNRANKED_NOTIFICATIONS =
+            new ReleasedFlag(109);
 
     public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
             new UnreleasedFlag(110, true);
