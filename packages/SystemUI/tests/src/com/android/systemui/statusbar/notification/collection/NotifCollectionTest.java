@@ -1518,7 +1518,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener).onRankingApplied();
         verifyNoMoreInteractions(mCollectionListener);
         verify(mLogger).logMissingRankings(eq(List.of(entry1)), eq(1), any());
-        verify(mLogger, never()).logRecoveredRankings(any());
+        verify(mLogger, never()).logRecoveredRankings(any(), anyInt());
         clearInvocations(mCollectionListener, mLogger);
 
         // WHEN a ranking update includes key1 again
@@ -1530,7 +1530,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener).onRankingApplied();
         verifyNoMoreInteractions(mCollectionListener);
         verify(mLogger, never()).logMissingRankings(any(), anyInt(), any());
-        verify(mLogger).logRecoveredRankings(eq(List.of(key1)));
+        verify(mLogger).logRecoveredRankings(eq(List.of(key1)), eq(0));
     }
 
     @Test
@@ -1556,7 +1556,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener).onRankingApplied();
         verifyNoMoreInteractions(mCollectionListener);
         verify(mLogger).logMissingRankings(eq(List.of(entry1)), eq(1), any());
-        verify(mLogger, never()).logRecoveredRankings(any());
+        verify(mLogger, never()).logRecoveredRankings(any(), anyInt());
         clearInvocations(mCollectionListener, mLogger);
 
         // WHEN a ranking update includes key1 again
@@ -1568,7 +1568,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener).onRankingApplied();
         verifyNoMoreInteractions(mCollectionListener);
         verify(mLogger, never()).logMissingRankings(any(), anyInt(), any());
-        verify(mLogger).logRecoveredRankings(eq(List.of(key1)));
+        verify(mLogger).logRecoveredRankings(eq(List.of(key1)), eq(0));
     }
 
     @Test

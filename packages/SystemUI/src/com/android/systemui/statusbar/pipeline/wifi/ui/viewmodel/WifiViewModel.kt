@@ -17,20 +17,24 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
+import androidx.annotation.DrawableRes
+import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
+import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
+import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /**
  * Models the UI state for the status bar wifi icon.
- *
- * TODO(b/238425913): Hook this up to the real status bar wifi view using a view binder.
  */
 class WifiViewModel @Inject constructor(
     statusBarPipelineFlags: StatusBarPipelineFlags,
@@ -38,6 +42,23 @@ class WifiViewModel @Inject constructor(
     private val logger: ConnectivityPipelineLogger,
     private val interactor: WifiInteractor,
 ) {
+    /**
+     * The drawable resource ID to use for the wifi icon. Null if we shouldn't display any icon.
+     */
+    @DrawableRes
+    val wifiIconResId: Flow<Int?> = interactor.wifiNetwork.map {
+        when (it) {
+            is WifiNetworkModel.CarrierMerged -> null
+            is WifiNetworkModel.Inactive -> WIFI_NO_NETWORK
+            is WifiNetworkModel.Active ->
+                when {
+                    it.level == null -> null
+                    it.isValidated -> WIFI_FULL_ICONS[it.level]
+                    else -> WIFI_NO_INTERNET_ICONS[it.level]
+                }
+        }
+    }
+
     val isActivityInVisible: Flow<Boolean>
         get() =
             if (!constants.shouldShowActivityConfig) {
