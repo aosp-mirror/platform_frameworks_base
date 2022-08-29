@@ -250,14 +250,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             ShellTaskOrganizer taskOrganizer, DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
-            TransactionPool transactionPool, SplitscreenEventLogger logger,
+            TransactionPool transactionPool,
             IconProvider iconProvider, ShellExecutor mainExecutor,
             Optional<RecentTasksController> recentTasks) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
         mTaskOrganizer = taskOrganizer;
-        mLogger = logger;
+        mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
 
@@ -301,7 +301,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayController displayController, DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool,
-            SplitscreenEventLogger logger, ShellExecutor mainExecutor,
+            ShellExecutor mainExecutor,
             Optional<RecentTasksController> recentTasks) {
         mContext = context;
         mDisplayId = displayId;
@@ -316,7 +316,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitLayout = splitLayout;
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
                 this::onTransitionAnimationComplete, this);
-        mLogger = logger;
+        mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
         mDisplayController.addDisplayWindowListener(this);
