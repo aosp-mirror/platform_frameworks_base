@@ -105,8 +105,8 @@ public class FullscreenTaskListener<T extends AutoCloseable>
         state.mTaskInfo = taskInfo;
         mTasks.put(taskInfo.taskId, state);
 
-        updateRecentsForVisibleFullscreenTask(taskInfo);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
+        updateRecentsForVisibleFullscreenTask(taskInfo);
         if (shouldShowWindowDecor(taskInfo) && mWindowDecorViewModelOptional.isPresent()) {
             SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             state.mWindowDecoration =
@@ -135,8 +135,8 @@ public class FullscreenTaskListener<T extends AutoCloseable>
             mWindowDecorViewModelOptional.get().onTaskInfoChanged(
                     state.mTaskInfo, state.mWindowDecoration);
         }
-        updateRecentsForVisibleFullscreenTask(taskInfo);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
+        updateRecentsForVisibleFullscreenTask(taskInfo);
 
         final Point positionInParent = state.mTaskInfo.positionInParent;
         if (!oldPositionInParent.equals(state.mTaskInfo.positionInParent)) {
