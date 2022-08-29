@@ -71,12 +71,14 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Common tests for {@link BroadcastQueue} implementations.
  */
 @MediumTest
 @RunWith(Parameterized.class)
+@SuppressWarnings("GuardedBy")
 public class BroadcastQueueTest {
     private static final String TAG = "BroadcastQueueTest";
 
@@ -92,9 +94,12 @@ public class BroadcastQueueTest {
 
     private Context mContext;
     private HandlerThread mHandlerThread;
+    private AtomicInteger mNextPid;
 
     @Mock
     private AppOpsService mAppOpsService;
+    @Mock
+    private ProcessList mProcessList;
     @Mock
     private PackageManagerInternal mPackageManagerInt;
 
@@ -118,6 +123,7 @@ public class BroadcastQueueTest {
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
+        mNextPid = new AtomicInteger(100);
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
@@ -131,6 +137,18 @@ public class BroadcastQueueTest {
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
         realAms.mPackageManagerInt = mPackageManagerInt;
         mAms = spy(realAms);
+        doAnswer((invocation) -> {
+            Log.v(TAG, "Intercepting startProcessLocked() for "
+                    + Arrays.toString(invocation.getArguments()));
+            final String processName = invocation.getArgument(0);
+            final ApplicationInfo ai = invocation.getArgument(1);
+            final ProcessRecord res = makeActiveProcessRecord(ai, processName);
+            mHandlerThread.getThreadHandler().post(() -> {
+                mQueue.onApplicationAttachedLocked(res);
+            });
+            return res;
+        }).when(mAms).startProcessLocked(any(), any(), anyBoolean(), anyInt(),
+                any(), anyInt(), anyBoolean(), anyBoolean());
 
         final BroadcastConstants constants = new BroadcastConstants(
                 Settings.Global.BROADCAST_FG_CONSTANTS);
@@ -165,11 +183,23 @@ public class BroadcastQueueTest {
         public Handler getUiHandler(ActivityManagerService service) {
             return mHandlerThread.getThreadHandler();
         }
+
+        @Override
+        public ProcessList getProcessList(ActivityManagerService service) {
+            return mProcessList;
+        }
     }
 
     private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
-        final ProcessRecord r = new ProcessRecord(mAms, makeApplicationInfo(packageName), null,
-                getUidForPackage(packageName));
+        final ApplicationInfo ai = makeApplicationInfo(packageName);
+        return makeActiveProcessRecord(ai, ai.processName);
+    }
+
+    private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, String processName)
+            throws Exception {
+        final ProcessRecord r = new ProcessRecord(mAms, ai, processName, ai.uid);
+        r.setPid(mNextPid.getAndIncrement());
+
         final IApplicationThread thread = mock(IApplicationThread.class);
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
@@ -178,10 +208,12 @@ public class BroadcastQueueTest {
         doReturn(r).when(mAms).getProcessRecordLocked(eq(r.info.processName), eq(r.info.uid));
 
         doAnswer((invocation) -> {
-            Log.v(TAG, "Delivering finishReceiverLocked() for "
+            Log.v(TAG, "Intercepting finishReceiverLocked() for "
                     + Arrays.toString(invocation.getArguments()));
-            mQueue.finishReceiverLocked(threadBinder, Activity.RESULT_OK,
-                    null, null, false, false);
+            mHandlerThread.getThreadHandler().post(() -> {
+                mQueue.finishReceiverLocked(threadBinder, Activity.RESULT_OK,
+                        null, null, false, false);
+            });
             return null;
         }).when(thread).scheduleReceiver(any(), any(), any(), anyInt(), any(), any(), anyBoolean(),
                 anyInt(), anyInt());
@@ -192,6 +224,7 @@ public class BroadcastQueueTest {
     private ApplicationInfo makeApplicationInfo(String packageName) {
         final ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
+        ai.processName = packageName;
         ai.uid = getUidForPackage(packageName);
         return ai;
     }
@@ -200,6 +233,7 @@ public class BroadcastQueueTest {
         final ResolveInfo ri = new ResolveInfo();
         ri.activityInfo = new ActivityInfo();
         ri.activityInfo.packageName = packageName;
+        ri.activityInfo.processName = packageName;
         ri.activityInfo.name = name;
         ri.activityInfo.applicationInfo = makeApplicationInfo(packageName);
         return ri;
@@ -236,6 +270,12 @@ public class BroadcastQueueTest {
         assertTrue(mQueue.isIdle());
     }
 
+    private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {
+        verify(app.getThread()).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
+                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
     private static final String PACKAGE_RED = "com.example.red";
     private static final String PACKAGE_GREEN = "com.example.green";
     private static final String PACKAGE_BLUE = "com.example.blue";
@@ -253,6 +293,10 @@ public class BroadcastQueueTest {
         }
     }
 
+    /**
+     * Verify dispatch of simple broadcast to single manifest receiver in
+     * already-running warm app.
+     */
     @Test
     public void testSimple_Manifest_Warm() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
@@ -263,11 +307,13 @@ public class BroadcastQueueTest {
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
 
         waitForIdle();
-        verify(receiverApp.getThread()).scheduleReceiver(
-                argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
-                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+        verifyScheduleReceiver(receiverApp, intent);
     }
 
+    /**
+     * Verify dispatch of multiple broadcasts to multiple manifest receivers in
+     * already-running warm apps.
+     */
     @Test
     public void testSimple_Manifest_Warm_Multiple() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
@@ -285,19 +331,43 @@ public class BroadcastQueueTest {
                 List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
 
         waitForIdle();
-        verify(receiverGreenApp.getThread()).scheduleReceiver(
-                argThat(filterEqualsIgnoringComponent(timezone)), any(), any(), anyInt(), any(),
-                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
-        verify(receiverBlueApp.getThread()).scheduleReceiver(
-                argThat(filterEqualsIgnoringComponent(timezone)), any(), any(), anyInt(), any(),
-                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
-        verify(receiverBlueApp.getThread()).scheduleReceiver(
-                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(), anyInt(), any(),
-                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+        verifyScheduleReceiver(receiverGreenApp, timezone);
+        verifyScheduleReceiver(receiverBlueApp, timezone);
+        verifyScheduleReceiver(receiverBlueApp, airplane);
+    }
+
+    /**
+     * Verify dispatch of multiple broadcast to multiple manifest receivers in
+     * apps that require cold starts.
+     */
+    @Test
+    public void testSimple_Manifest_ColdThenWarm() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        // We purposefully dispatch into green twice; the first time cold and
+        // the second time it should already be running
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+
+        waitForIdle();
+        final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final ProcessRecord receiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        assertTrue(receiverBlueApp.getPid() > receiverGreenApp.getPid());
+        verifyScheduleReceiver(receiverGreenApp, timezone);
+        verifyScheduleReceiver(receiverGreenApp, airplane);
+        verifyScheduleReceiver(receiverBlueApp, timezone);
     }
 
     // TODO: verify registered receiver in warm app
-    // TODO: verify manifest receiver in cold app
 
     // TODO: verify mixing multiple manifest and registered receivers of same broadcast
     // TODO: verify delivery of 3 distinct broadcasts
