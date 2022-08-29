@@ -137,7 +137,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         mLockoutCache = lockoutCache;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mSensorProps = sensorProps;
-        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
+        mALSProbeCallback = getLogger().getAmbientLightProbe(false /* startWithClient */);
         mHandler = handler;
 
         mWaitForAuthKeyguard =
