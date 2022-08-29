@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Odblokowano rozpoznawaniem twarzy. Naciśnij, by otworzyć."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Twarz rozpoznana. Naciśnij, by otworzyć."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Twarz rozpoznana. Aby otworzyć, kliknij ikonę odblokowywania."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Odblokowano skanem twarzy"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Twarz rozpoznana"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Przenieś w lewo"</item>
     <item msgid="5558598599408514296">"Przenieś w dół"</item>
@@ -337,7 +339,8 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ładowanie • Pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Szybkie ładowanie • Pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wolne ładowanie • Pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ładowanie na stacji dokującej • Pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Przełącz użytkownika"</string>
     <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
     <skip />
@@ -921,7 +924,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikacja jest aktywna}few{# aplikacje są aktywne}many{# aplikacji jest aktywnych}other{# aplikacji jest aktywne}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nowa informacja"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktywne aplikacje"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Te aplikacje są aktywne i działają, nawet gdy ich nie używasz. Zwiększa to ich funkcjonalność, ale może również pogarszać żywotność baterii."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Te aplikacje są aktywne i działają, nawet gdy ich nie używasz. Zwiększa to ich funkcjonalność, ale może też wpływać na czas pracy na baterii."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zatrzymaj"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zatrzymano"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotowe"</string>

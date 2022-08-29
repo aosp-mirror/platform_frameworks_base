@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ierīce atbloķēta ar seju. Nospiediet, lai atvērtu."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Seja atpazīta. Nospiediet, lai atvērtu."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Seja atpazīta. Lai atvērtu, nospiediet atbloķēšanas ikonu."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ierīce atbloķēta pēc sejas"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Seja atpazīta"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Pārvietojiet pirkstu pa kreisi"</item>
     <item msgid="5558598599408514296">"Pārvietojiet pirkstu lejup"</item>
@@ -337,10 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Notiek uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ātrā uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lēnā uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Notiek uzlāde dokā • Līdz pilnai uzlādei atlicis: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mainīt lietotāju"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
     <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mainīt lietotāju"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"novelkamā izvēlne"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tiks dzēstas visas šīs sesijas lietotnes un dati."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Laipni lūdzam atpakaļ, viesi!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vai vēlaties turpināt savu sesiju?"</string>
@@ -833,7 +835,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Atlasītas vairākas ierīces (kopā <xliff:g id="COUNT">%1$d</xliff:g>)"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(savienojums pārtraukts)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nevar pārslēgt. Pieskarieties, lai mēģinātu vēlreiz."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Savienošana ar ierīci"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Savienot ar ierīci"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Lai apraidītu šo sesiju, lūdzu, atveriet lietotni."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nezināma lietotne"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Apturēt apraidi"</string>

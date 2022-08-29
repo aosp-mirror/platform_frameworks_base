@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तैयार हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट खत्म हो रहा है."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"सेट अप जारी रखना है?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपना फ़िंगरप्रिंट सेट अप करते समय, बटन को हल्के से टैप करके देखें."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"स्क्रीन बंद करें"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"सेट अप जारी रखें"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"स्क्रीन बंद करने के लिए टैप करें"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"स्क्रीन बंद करें"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फ़िंगरप्रिंट की पुष्टि करना जारी रखना है?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपने फ़िंगरप्रिंट की पुष्टि करने के लिए, बटन पर हल्के से टैप करके देखें."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"स्क्रीन बंद करें"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेटअप करने के लिए टैप करें"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"सेट अप करने के लिए चुनें"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है. निकालने के लिए टैप करें."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फ़ोटो और मीडिया ट्रांसफर करने के लिए"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"फ़ोटो, वीडियो, संगीत वगैरह सेव करने के लिए"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"मीडिया फ़ाइलों को ब्राउज़ करें"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> में गड़बड़ी है"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"समस्या ठीक करने के लिए टैप करें"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है. ठीक करने के लिए चुनें."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है. निकालने के लिए टैप करें."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"असमर्थित <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> का पता चला"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"यह डिवाइस इस <xliff:g id="NAME">%s</xliff:g> का समर्थन नहीं करता है. समर्थित प्रारूप में सेट करने के लिए टैप करें."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"सेट अप करने के लिए टैप करें."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> को काम करने वाले फ़ॉर्मैट में सेट अप करने के लिए चुनें."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूप से निकाला गया"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा का नाम लिखें"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"दिए गए सुझाव"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"सभी भाषाएं"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"सभी क्षेत्र"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"खोजें"</string>
@@ -1987,7 +1988,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"सुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करें"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"क्या <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग का ऐक्सेस देना है?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति न दें"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें सही करने के लिए करता है.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर अपने लॉग को ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी अब भी डिवाइस के कुछ लॉग या जानकारी को ऐक्सेस कर सकती है. ज़्यादा जानें"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फिर से न दिखाएं"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
@@ -2290,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से टैबलेट के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रीमिंग के दौरान, इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करके देखें."</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफ़ॉल्ट"</string>
 </resources>
