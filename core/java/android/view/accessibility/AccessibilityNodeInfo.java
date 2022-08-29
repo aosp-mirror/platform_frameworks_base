@@ -84,7 +84,7 @@ import java.util.Objects;
  * <p>
  * Once an accessibility node info is delivered to an accessibility service it is
  * made immutable and calling a state mutation method generates an error. See
- * {@link #makeQueryableFromAppProcess(View)} if you would like to inspect the
+ * {@link #enableQueryFromAppProcess(View)} if you would like to inspect the
  * node tree from the app process for testing or debugging tools.
  * </p>
  * <p>
@@ -1175,7 +1175,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child node.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #makeQueryableFromAppProcess(View)}.
+     *                               calling {@link #enableQueryFromAppProcess(View)}.
      */
     public AccessibilityNodeInfo getChild(int index) {
         return getChild(index, FLAG_PREFETCH_DESCENDANTS_HYBRID);
@@ -1190,7 +1190,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child node.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #makeQueryableFromAppProcess(View)}.
+     *                               calling {@link #enableQueryFromAppProcess(View)}.
      *
      * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
      */
@@ -1914,7 +1914,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The parent.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #makeQueryableFromAppProcess(View)}.
+     *                               calling {@link #enableQueryFromAppProcess(View)}.
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
@@ -1943,7 +1943,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The parent.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #makeQueryableFromAppProcess(View)}.
+     *                               calling {@link #enableQueryFromAppProcess(View)}.
      *
      * @see #FLAG_PREFETCH_ANCESTORS
      * @see #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
@@ -3669,29 +3669,39 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link AccessibilityNodeInfo} tree and perform accessibility actions on nodes.
      *
      * <p>
-     * This is intended for short-lived inspections from testing or debugging tools in the app
-     * process. After calling this method, all nodes linked to this node (children, ancestors, etc.)
-     * are also queryable. Operations on this node tree will only succeed as long as the associated
-     * view hierarchy remains attached to a window.
-     * </p>
-     *
-     * <p>
-     * Calling this method more than once on the same node is a no-op; if you wish to inspect a
-     * different view hierarchy then create a new node from any view in that hierarchy and call this
-     * method on that node.
-     * </p>
-     *
-     * <p>
      * Testing or debugging tools should create this {@link AccessibilityNodeInfo} node using
      * {@link View#createAccessibilityNodeInfo()} or {@link AccessibilityNodeProvider} and call this
      * method, then navigate and interact with the node tree by calling methods on the node.
+     * Calling this method more than once on the same node is a no-op. After calling this method,
+     * all nodes linked to this node (children, ancestors, etc.) are also queryable.
+     * </p>
+     *
+     * <p>
+     * Here "query" refers to the following node operations:
+     * <li>check properties of this node (example: {@link #isScrollable()})</li>
+     * <li>find and query children (example: {@link #getChild(int)})</li>
+     * <li>find and query the parent (example: {@link #getParent()})</li>
+     * <li>find focus (examples: {@link #findFocus(int)}, {@link #focusSearch(int)})</li>
+     * <li>find and query other nodes (example: {@link #findAccessibilityNodeInfosByText(String)},
+     * {@link #findAccessibilityNodeInfosByViewId(String)})</li>
+     * <li>perform actions (example: {@link #performAction(int)})</li>
+     * </p>
+     *
+     * <p>
+     * This is intended for short-lived inspections from testing or debugging tools in the app
+     * process, as operations on this node tree will only succeed as long as the associated
+     * view hierarchy remains attached to a window. Since {@link AccessibilityNodeInfo} objects can
+     * quickly become out of sync with their corresponding {@link View} objects there is
+     * intentionally no "disable" method: if you wish to inspect a changed or different view
+     * hierarchy then create a new node from any view in that hierarchy and call this method on that
+     * node.
      * </p>
      *
      * @param view The view that generated this node, or any view in the same view-root hierarchy.
      * @throws IllegalStateException If called from an {@link AccessibilityService}, or if provided
      *                               a {@link View} that is not attached to a window.
      */
-    public void makeQueryableFromAppProcess(@NonNull View view) {
+    public void enableQueryFromAppProcess(@NonNull View view) {
         enforceNotSealed();
         if (mConnectionId != UNDEFINED_CONNECTION_ID) {
             return;
