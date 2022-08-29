@@ -2214,6 +2214,7 @@ package android.provider {
     field public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE = "accessibility_shortcut_target_service";
     field public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
     field public static final String AUTOFILL_SERVICE = "autofill_service";
+    field public static final String BIOMETRIC_VIRTUAL_ENABLED = "biometric_virtual_enabled";
     field public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
     field public static final String DISABLED_PRINT_SERVICES = "disabled_print_services";
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
