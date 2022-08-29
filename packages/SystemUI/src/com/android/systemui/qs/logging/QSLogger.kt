@@ -129,6 +129,15 @@ class QSLogger @Inject constructor(
         })
     }
 
+    fun logInternetTileUpdate(lastType: Int, callback: String) {
+        log(VERBOSE, {
+            int1 = lastType
+            str1 = callback
+        }, {
+            "mLastTileState=$int1, Callback=$str1."
+        })
+    }
+
     fun logTileUpdated(tileSpec: String, state: QSTile.State) {
         log(VERBOSE, {
             str1 = tileSpec
