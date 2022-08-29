@@ -122,6 +122,7 @@ public class KeyguardIndicationController {
     private static final int MSG_HIDE_TRANSIENT = 1;
     private static final int MSG_SHOW_ACTION_TO_UNLOCK = 2;
     private static final int MSG_HIDE_BIOMETRIC_MESSAGE = 3;
+    private static final int MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON = 4;
     private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
     public static final long DEFAULT_HIDE_DELAY_MS =
             3500 + KeyguardIndicationTextView.Y_IN_DURATION;
@@ -188,9 +189,11 @@ public class KeyguardIndicationController {
                 }
             };
     private ScreenLifecycle mScreenLifecycle;
-    private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
+    private final ScreenLifecycle.Observer mScreenObserver =
+            new ScreenLifecycle.Observer() {
         @Override
         public void onScreenTurnedOn() {
+            mHandler.removeMessages(MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON);
             if (mBiometricErrorMessageToShowOnScreenOn != null) {
                 showBiometricMessage(mBiometricErrorMessageToShowOnScreenOn);
                 // We want to keep this message around in case the screen was off
@@ -259,6 +262,8 @@ public class KeyguardIndicationController {
                     showActionToUnlock();
                 } else if (msg.what == MSG_HIDE_BIOMETRIC_MESSAGE) {
                     hideBiometricMessage();
+                } else if (msg.what == MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON) {
+                    mBiometricErrorMessageToShowOnScreenOn = null;
                 }
             }
         };
@@ -1060,6 +1065,11 @@ public class KeyguardIndicationController {
             } else if (showActionToUnlock) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_ACTION_TO_UNLOCK),
                         TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
+            } else {
+                mBiometricErrorMessageToShowOnScreenOn = helpString;
+                mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON),
+                        1000);
             }
         }
 
