@@ -16,13 +16,24 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.systemBars;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import androidx.test.filters.SmallTest;
 
@@ -38,6 +49,7 @@ import org.mockito.junit.MockitoRule;
 
 /** Tests for {@link MenuViewLayerController}. */
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuViewLayerControllerTest extends SysuiTestCase {
     @Rule
@@ -46,10 +58,20 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
     @Mock
     private WindowManager mWindowManager;
 
+    @Mock
+    private WindowMetrics mWindowMetrics;
+
     private MenuViewLayerController mMenuViewLayerController;
 
     @Before
     public void setUp() throws Exception {
+        final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
+                mWindowManager).getMaximumWindowMetrics();
+        mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
+        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        when(mWindowMetrics.getBounds()).thenReturn(new Rect(0, 0, 1080, 2340));
+        when(mWindowMetrics.getWindowInsets()).thenReturn(stubDisplayInsets());
         mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager);
     }
 
@@ -67,5 +89,15 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
         mMenuViewLayerController.hide();
 
         verify(mWindowManager).removeView(any(View.class));
+    }
+
+    private WindowInsets stubDisplayInsets() {
+        final int stubStatusBarHeight = 118;
+        final int stubNavigationBarHeight = 125;
+        return new WindowInsets.Builder()
+                .setVisible(systemBars() | displayCutout(), true)
+                .setInsets(systemBars() | displayCutout(),
+                        Insets.of(0, stubStatusBarHeight, 0, stubNavigationBarHeight))
+                .build();
     }
 }

@@ -33,6 +33,7 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     private final MutableLiveData<List<AccessibilityTarget>> mTargetFeaturesData =
             new MutableLiveData<>();
     private final MutableLiveData<Integer> mSizeTypeData = new MutableLiveData<>();
+    private final MutableLiveData<Position> mPercentagePositionData = new MutableLiveData<>();
     private final MenuInfoRepository mInfoRepository;
 
     MenuViewModel(Context context) {
@@ -47,6 +48,11 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     @Override
     public void onSizeTypeChanged(int newSizeType) {
         mSizeTypeData.setValue(newSizeType);
+    }
+
+    LiveData<Position> getPercentagePositionData() {
+        mInfoRepository.loadMenuPosition(mPercentagePositionData::setValue);
+        return mPercentagePositionData;
     }
 
     LiveData<Integer> getSizeTypeData() {
