@@ -25,10 +25,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
@@ -50,10 +50,21 @@ object WifiViewBinder {
 
         view.isVisible = true
         iconView.isVisible = true
-        iconView.setImageDrawable(view.context.getDrawable(WIFI_FULL_ICONS[2]))
 
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.wifiIconResId.distinctUntilChanged().collect { iconResId ->
+                        iconView.setImageDrawable(
+                            if (iconResId != null && iconResId > 0) {
+                                iconView.context.getDrawable(iconResId)
+                            } else {
+                                null
+                            }
+                        )
+                    }
+                }
+
                 launch {
                     viewModel.tint.collect { tint ->
                         iconView.imageTintList = ColorStateList.valueOf(tint)
