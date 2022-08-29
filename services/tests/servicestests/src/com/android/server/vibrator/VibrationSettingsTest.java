@@ -161,13 +161,8 @@ public class VibrationSettingsTest {
             return null;
         }).when(mVirtualDeviceManagerInternalMock).registerAppsOnVirtualDeviceListener(any());
 
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
-        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
-        LocalServices.addService(VirtualDeviceManagerInternal.class,
-                mVirtualDeviceManagerInternalMock);
+        removeServicesForTest();
+        addServicesForTest();
 
         setDefaultIntensity(VIBRATION_INTENSITY_MEDIUM);
         mAudioManager = mContextSpy.getSystemService(AudioManager.class);
@@ -185,9 +180,34 @@ public class VibrationSettingsTest {
         mVibrationSettings.onSystemReady();
     }
 
+    private void removeServicesForTest() {
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+    }
+
+    private void addServicesForTest() {
+        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
+        LocalServices.addService(VirtualDeviceManagerInternal.class,
+                mVirtualDeviceManagerInternalMock);
+    }
+
     @After
     public void tearDown() throws Exception {
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        removeServicesForTest();
+    }
+
+    @Test
+    public void create_withOnlyRequiredSystemServices() {
+        // The only core services that we depend on are PowerManager and PackageManager
+        removeServicesForTest();
+        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
+
+        VibrationSettings minimalVibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
+        minimalVibrationSettings.onSystemReady();
     }
 
     @Test
