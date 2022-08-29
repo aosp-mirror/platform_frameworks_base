@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ஐத் தயார்செய்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ஆப்ஸ் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"துவக்குதலை முடிக்கிறது."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"அமைவைத் தொடரவா?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"நீங்கள் பவர் பட்டனை அழுத்தியுள்ளீர்கள் — வழக்கமாக இது திரையை ஆஃப் செய்யும்.\n\nஉங்கள் கைரேகையை அமைக்கும்போது மெதுவாகத் தொடுங்கள்."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"திரையை ஆஃப் செய்"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"அமைவைத் தொடர்க"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"திரையை அணைக்க தட்டவும்"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"திரையை அணை"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"கைரேகைச் சரிபார்ப்பைத் தொடரவா?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"நீங்கள் பவர் பட்டனை அழுத்தியுள்ளீர்கள் — வழக்கமாக இது திரையை ஆஃப் செய்யும்.\n\nஉங்கள் கைரேகையைச் சரிபார்க்க மெதுவாகத் தொடுங்கள்."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"திரையை ஆஃப் செய்"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"அமைக்க, தட்டவும்"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"அமைக்கத் தேர்ந்தெடுங்கள்"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"சாதனத்தை ரீஃபார்மேட் செய்ய வேண்டியிருக்கும். வெளியேற்ற தட்டவும்."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"படங்களையும் மீடியாவையும் மாற்றலாம்"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"படங்கள், வீடியோக்கள், இசை மற்றும் பலவற்றைச் சேமிப்பதற்கு"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"மீடியா ஃபைல்களை உலாவுக"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> இல் சிக்கல்"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> வேலை செய்யவில்லை"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"சரிசெய்ய, தட்டவும்"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தேர்ந்தெடுக்கவும்."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"சாதனத்தை ரீஃபார்மேட் செய்ய வேண்டியிருக்கும். வெளியேற்ற தட்டவும்."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> கண்டறியப்பட்டுள்ளது"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> வேலை செய்யவில்லை"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தட்டவும்."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"அமைக்க தட்டுங்கள்."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"ஆதரிக்கப்படும் வடிவத்தில் <xliff:g id="NAME">%s</xliff:g> ஐ அமைக்கத் தேர்ந்தெடுங்கள்."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"சாதனத்தை ரீஃபார்மேட் செய்ய வேண்டியிருக்கும்"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"மண்டல விருப்பம்"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"மொழி பெயரை உள்ளிடுக"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"பரிந்துரைகள்"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"எல்லா மொழிகளும்"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"எல்லா மண்டலங்களும்"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"தேடு"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"சாதனப் பதிவுகள் அனைத்தையும் <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> அணுக அனுமதிக்கவா?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ஒருமுறை அணுகலை அனுமதி"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"அனுமதிக்க வேண்டாம்"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸ் இந்தப் பதிவுகளைப் பயன்படுத்தலாம்.\n\nபாதுகாக்கப்பட வேண்டிய தகவல்கள் சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக நீங்கள் நம்பும் ஆப்ஸை மட்டும் அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளை அதனால் அணுக முடியும். சாதன உற்பத்தியாளர் உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ தொடர்ந்து அணுகக்கூடும். மேலும் அறிக"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"மீண்டும் காட்டாதே"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"திருத்து"</string>
@@ -2290,5 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"ஸ்ட்ரீமின்போது இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பார்க்கவும்."</string>
     <string name="system_locale_title" msgid="711882686834677268">"சிஸ்டத்தின் இயல்பு"</string>
 </resources>

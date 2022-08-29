@@ -22,7 +22,7 @@
     <string name="app_label" msgid="4811759950673118541">"系统界面"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"要开启省电模式吗？"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"您的电池还剩 <xliff:g id="PERCENTAGE">%s</xliff:g> 的电量。省电模式会开启深色主题、限制后台活动，并将通知延迟。"</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"省电模式会开启深色主题、限制后台活动，并将通知延迟。"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"省电模式会开启深色主题、限制后台活动，并延迟通知发送时间。"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"无法通过 USB 充电"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"使用设备随附的充电器"</string>
@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"已通过面孔识别解锁。点按即可打开。"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"识别出面孔。点按即可打开。"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"识别出面孔。按下解锁图标即可打开。"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"已用面孔解锁"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"已识别出面孔"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"左移"</item>
     <item msgid="5558598599408514296">"下移"</item>
@@ -337,10 +339,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在快速充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在慢速充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在基座上充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
-    <skip />
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉菜单"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"访客，欢迎回来！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"要继续您的会话吗？"</string>

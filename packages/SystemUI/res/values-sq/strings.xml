@@ -312,6 +312,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"U shkyç me fytyrë. Shtyp për ta hapur."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Fytyra u njoh. Shtyp për ta hapur."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Fytyra u njoh. Shtyp ikonën e shkyçjes për ta hapur."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"U shkyç me fytyrë"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Fytyra u njoh"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Lëvize majtas"</item>
     <item msgid="5558598599408514296">"Lëvize poshtë"</item>
@@ -337,10 +339,10 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet shpejt • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet ngadalë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet në stacion • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Ndërro përdorues"</string>
-    <!-- no translation found for accessibility_multi_user_list_switcher (8574105376229857407) -->
+    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
     <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Ndërro përdorues"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menyja me tërheqje poshtë"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Të gjitha aplikacionet dhe të dhënat në këtë sesion do të fshihen."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Mirë se erdhe, i ftuar!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>

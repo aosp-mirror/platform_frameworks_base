@@ -1249,10 +1249,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> તૈયાર કરી રહ્યું છે."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ઍપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"બૂટ સમાપ્ત કરી રહ્યાં છે."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"શું સેટઅપ કરવાનું ચાલુ રાખીએ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"તમે પાવર બટન દબાવ્યું છે — જેનાથી સામાન્ય રીતે સ્ક્રીન બંધ થઈ જાય છે.\n\nતમારી ફિંગરપ્રિન્ટનું સેટઅપ કરતી વખતે હળવેથી ટૅપ કરવાનો પ્રયાસ કરો."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"સ્ક્રીન બંધ કરો"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"સેટઅપ આગળ વધારો"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"સ્ક્રીન બંધ કરવા માટે ટૅપ કરો"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"સ્ક્રીન બંધ કરો"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"શું તમારી ફિંગરપ્રિન્ટની ચકાસણી કરીએ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"તમે પાવર બટન દબાવ્યું છે — જેનાથી સામાન્ય રીતે સ્ક્રીન બંધ થઈ જાય છે.\n\nતમારી ફિંગરપ્રિન્ટની ચકાસણી કરવા માટે, તેને હળવેથી ટૅપ કરવાનો પ્રયાસ કરો."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"સ્ક્રીન બંધ કરો"</string>
@@ -1405,16 +1404,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"સેટ કરવા માટે ટૅપ કરો"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"સેટઅપ કરવા માટે પસંદ કરો"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે. બહાર કાઢવા માટે ટૅપ કરો."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ફોટો અને મીડિયા ટ્રાન્સફર કરવા માટે"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ફોટા, વીડિયો, મ્યુઝિક અને બીજું ઘણું સ્ટોર કરવા માટે"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"મીડિયા ફાઇલો બ્રાઉઝ કરો"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>ની સમસ્યા"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ઠીક કરવા માટે ટૅપ કરો"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> દૂષિત છે. સુધારવા માટે પસંદ કરો."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે. બહાર કાઢવા માટે ટૅપ કરો."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"અસમર્થિત <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g>ની ભાળ મળી"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફોર્મેટમાં સેટ કરવા માટે ટૅપ કરો."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"સેટઅપ કરવા માટે ટૅપ કરો."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"સપોર્ટ કરતા હોય એવા ફૉર્મેટમાં <xliff:g id="NAME">%s</xliff:g>નું સેટઅપ કરવા માટે પસંદ કરો."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> અનપેક્ષિત રીતે દૂર કર્યું"</string>
@@ -1927,6 +1926,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ભાષાનું નામ ટાઇપ કરો"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"સૂચવેલી ભાષા"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"શોધ"</string>
@@ -2049,7 +2050,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"એક-વખતના ઍક્સેસની મંજૂરી આપો"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"મંજૂરી આપશો નહીં"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nતમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી નહીં આપી હોય, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજુ પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે. વધુ જાણો"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ફરીથી બતાવશો નહીં"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>એ <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવા માગે છે"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ફેરફાર કરો"</string>
@@ -2290,5 +2292,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ફોનના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ટૅબ્લેટના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"સિસ્ટમ ડિફૉલ્ટ"</string>
 </resources>

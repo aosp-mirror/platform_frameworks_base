@@ -1253,10 +1253,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"هل تريد مواصلة عملية الإعداد؟"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة أثناء إعداد بصمتك."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"إيقاف الشاشة"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"مواصلة عملية الإعداد"</string>
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"النقر لإيقاف الشاشة"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"إيقاف الشاشة"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"هل تريد مواصلة تأكيد بصمة إصبعك؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة لتأكيد بصمة إصبعك."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"إيقاف الشاشة"</string>
@@ -1409,16 +1408,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"انقر للإعداد."</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"اختيار الوسائط لإعدادها"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"قد تحتاج إلى إعادة تنسيق الجهاز. انقر على إخراج."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"لنقل الصور والوسائط"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"لتخزين الصور والفيديوهات والموسيقى وغير ذلك."</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"تصفّح ملفات الوسائط"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"هناك مشكلة في <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> لا يعمل."</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"انقر للإصلاح"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> تالف، ويمكنك اختيار إصلاحه."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"قد تحتاج إلى إعادة تنسيق الجهاز. انقر على إخراج."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> غير متوافق"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"تم رصد <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> لا يعمل."</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"هذا الجهاز غير متوافق مع <xliff:g id="NAME">%s</xliff:g> هذا. انقر للإعداد بتنسيق متوافق."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"انقر لبدء عملية إعداد الوسائط الخارجية."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"عليك الاختيار لإعداد \"<xliff:g id="NAME">%s</xliff:g>\" بتنسيق متوافق."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"قد تحتاج إلى إعادة تنسيق الجهاز."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"تمت إزالة <xliff:g id="NAME">%s</xliff:g> بشكل غير متوقع"</string>
@@ -1931,6 +1930,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"اللغات المقترَحة"</string>
+    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
+    <skip />
     <string name="language_picker_section_all" msgid="1985809075777564284">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"البحث"</string>
@@ -2053,7 +2054,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"هل تريد السماح لتطبيق <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> بالوصول إلى جميع سجلّات الجهاز؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك. مزيد من المعلومات"</string>
+    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>
@@ -2294,5 +2296,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"التحقّق من التطبيقات النشطة"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"يتعذّر الوصول إلى كاميرا الهاتف من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
+    <!-- no translation found for vdm_secure_window (161700398158812314) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
 </resources>
