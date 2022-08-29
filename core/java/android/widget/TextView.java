@@ -965,6 +965,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mDeviceProvisionedState = DEVICE_PROVISIONED_UNKNOWN;
 
     /**
+     * The last input source on this TextView.
+     */
+    private int mLastInputSource = InputDevice.SOURCE_UNKNOWN;
+
+    /**
      * The TextView does not auto-size text (default).
      */
     public static final int AUTO_SIZE_TEXT_TYPE_NONE = 0;
@@ -11480,6 +11485,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     MotionEvent.actionToString(event.getActionMasked()),
                     event.getX(), event.getY());
         }
+        mLastInputSource = event.getSource();
         final int action = event.getActionMasked();
         if (mEditor != null) {
             if (!isFromPrimePointer(event, false)) {
@@ -11566,6 +11572,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * Returns true when need to show UIs, e.g. floating toolbar, etc, for finger based interaction.
+     *
+     * @return true if UIs need to show for finger interaciton. false if UIs are not necessary.
+     * @hide
+     */
+    public final boolean showUIForTouchScreen() {
+        return (mLastInputSource & InputDevice.SOURCE_TOUCHSCREEN)
+                == InputDevice.SOURCE_TOUCHSCREEN;
     }
 
     /**
