@@ -263,8 +263,10 @@ final class VibrationSettings {
                     }
                 });
 
-        vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
-        vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
+        if (vdm != null){
+          vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
+          vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
+        }
 
         registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
         registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
