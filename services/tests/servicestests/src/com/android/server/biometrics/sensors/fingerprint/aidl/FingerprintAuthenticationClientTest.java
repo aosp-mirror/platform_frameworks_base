@@ -137,7 +137,7 @@ public class FingerprintAuthenticationClientTest {
     @Before
     public void setup() {
         mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
-        when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
+        when(mBiometricLogger.getAmbientLightProbe(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
