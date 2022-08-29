@@ -669,7 +669,6 @@ public final class WindowContainerTransaction implements Parcelable {
      * TaskFragment.
      * @param fragmentToken client assigned unique token to create TaskFragment with specified in
      *                      {@link TaskFragmentCreationParams#getFragmentToken()}.
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction requestFocusOnTaskFragment(@NonNull IBinder fragmentToken) {
