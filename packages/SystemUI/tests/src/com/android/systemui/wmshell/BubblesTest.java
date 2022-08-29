@@ -99,7 +99,6 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -161,8 +160,6 @@ import java.util.Optional;
 public class BubblesTest extends SysuiTestCase {
     @Mock
     private CommonNotifCollection mCommonNotifCollection;
-    @Mock
-    private NotificationGroupManagerLegacy mNotificationGroupManager;
     @Mock
     private BubblesManager.NotifCallback mNotifCallback;
     @Mock
@@ -389,7 +386,6 @@ public class BubblesTest extends SysuiTestCase {
                 interruptionStateProvider,
                 mZenModeController,
                 mLockscreenUserManager,
-                mNotificationGroupManager,
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
