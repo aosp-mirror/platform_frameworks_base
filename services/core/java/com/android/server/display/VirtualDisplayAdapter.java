@@ -51,6 +51,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayShape;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -511,6 +512,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;
+
+                mInfo.displayShape =
+                        DisplayShape.createDefaultDisplayShape(mInfo.width, mInfo.height, false);
             }
             return mInfo;
         }

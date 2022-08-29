@@ -23,6 +23,7 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
+import android.view.DisplayShape;
 import android.view.RoundedCorners;
 import android.view.Surface;
 
@@ -303,6 +304,11 @@ final class DisplayDeviceInfo {
     public RoundedCorners roundedCorners;
 
     /**
+     * The {@link RoundedCorners} if present or {@code null} otherwise.
+     */
+    public DisplayShape displayShape;
+
+    /**
      * The touch attachment, per {@link DisplayViewport#touch}.
      */
     public int touch;
@@ -438,7 +444,8 @@ final class DisplayDeviceInfo {
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
                 other.brightnessDefault)
                 || !Objects.equals(roundedCorners, other.roundedCorners)
-                || installOrientation != other.installOrientation) {
+                || installOrientation != other.installOrientation
+                || !Objects.equals(displayShape, other.displayShape)) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -484,6 +491,7 @@ final class DisplayDeviceInfo {
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
+        displayShape = other.displayShape;
     }
 
     // For debugging purposes
@@ -533,6 +541,9 @@ final class DisplayDeviceInfo {
         }
         sb.append(flagsToString(flags));
         sb.append(", installOrientation ").append(installOrientation);
+        if (displayShape != null) {
+            sb.append(", displayShape ").append(displayShape);
+        }
         sb.append("}");
         return sb.toString();
     }

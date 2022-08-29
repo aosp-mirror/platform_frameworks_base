@@ -58,6 +58,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
+import android.view.DisplayShape;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
@@ -321,7 +322,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         mImeWindow.mAboveInsetsState.set(state);
         mDisplayContent.mDisplayFrames = new DisplayFrames(
-                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
+                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds(),
+                DisplayShape.NONE);
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);

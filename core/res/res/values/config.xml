@@ -5977,4 +5977,35 @@
     <string-array translatable="false" name="config_fontManagerServiceCerts">
     </string-array>
 
+    <!-- A string config in svg path format for the main display shape.
+         (@see https://www.w3.org/TR/SVG/paths.html#PathData).
+
+         This config must be set unless:
+         1. {@link Configuration#isScreenRound} is true which means the display shape is circular
+            and the system will auto-generate a circular shape.
+         2. The display has no rounded corner and the system will auto-generate a rectangular shape.
+         (@see DisplayShape#createDefaultDisplayShape)
+
+         Note: If the display supports multiple resolutions, please define the path config based on
+         the highest resolution so that it can be scaled correctly in each resolution. -->
+    <string name="config_mainDisplayShape" translatable="false"></string>
+
+    <!-- A string config in svg path format for the secondary display shape.
+         (@see https://www.w3.org/TR/SVG/paths.html#PathData).
+
+         This config must be set unless:
+         1. {@link Configuration#isScreenRound} is true which means the display shape is circular
+            and the system will auto-generate a circular shape.
+         2. The display has no rounded corner and the system will auto-generate a rectangular shape.
+         (@see DisplayShape#createDefaultDisplayShape)
+
+         Note: If the display supports multiple resolutions, please define the path config based on
+         the highest resolution so that it can be scaled correctly in each resolution. -->
+    <string name="config_secondaryDisplayShape" translatable="false"></string>
+
+    <!-- The display shape config for each display in a multi-display device. -->
+    <string-array name="config_displayShapeArray" translatable="false">
+        <item>@string/config_mainDisplayShape</item>
+        <item>@string/config_secondaryDisplayShape</item>
+    </string-array>
 </resources>

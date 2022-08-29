@@ -133,8 +133,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final RoundedCorners roundedCorners = mHasRoundedCorners
                 ? mDisplayContent.calculateRoundedCornersForRotation(mRotation)
                 : RoundedCorners.NO_ROUNDED_CORNERS;
-        return new DisplayFrames(insetsState, info,
-                info.displayCutout, roundedCorners, new PrivacyIndicatorBounds());
+        return new DisplayFrames(insetsState, info, info.displayCutout, roundedCorners,
+                new PrivacyIndicatorBounds(), info.displayShape);
     }
 
     @Test
