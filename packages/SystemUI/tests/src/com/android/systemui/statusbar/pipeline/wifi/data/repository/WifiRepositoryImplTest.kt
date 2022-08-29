@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
@@ -39,11 +40,14 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -61,18 +65,26 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var wifiManager: WifiManager
     private lateinit var executor: Executor
+    private lateinit var scope: CoroutineScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         executor = FakeExecutor(FakeSystemClock())
+        scope = CoroutineScope(IMMEDIATE)
 
         underTest = WifiRepositoryImpl(
             connectivityManager,
-            wifiManager,
-            executor,
             logger,
+            executor,
+            scope,
+            wifiManager,
         )
+    }
+
+    @After
+    fun tearDown() {
+        scope.cancel()
     }
 
     @Test
@@ -110,6 +122,61 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         val latestActive = latest as WifiNetworkModel.Active
         assertThat(latestActive.networkId).isEqualTo(NETWORK_ID)
         assertThat(latestActive.ssid).isEqualTo(SSID)
+
+        job.cancel()
+    }
+
+    @Test
+    fun wifiNetwork_isCarrierMerged_flowHasCarrierMerged() = runBlocking(IMMEDIATE) {
+        var latest: WifiNetworkModel? = null
+        val job = underTest
+            .wifiNetwork
+            .onEach { latest = it }
+            .launchIn(this)
+
+        val wifiInfo = mock<WifiInfo>().apply {
+            whenever(this.ssid).thenReturn(SSID)
+            whenever(this.isPrimary).thenReturn(true)
+            whenever(this.isCarrierMerged).thenReturn(true)
+        }
+
+        getNetworkCallback().onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+
+        assertThat(latest is WifiNetworkModel.CarrierMerged).isTrue()
+
+        job.cancel()
+    }
+
+    @Test
+    fun wifiNetwork_notValidated_networkNotValidated() = runBlocking(IMMEDIATE) {
+        var latest: WifiNetworkModel? = null
+        val job = underTest
+            .wifiNetwork
+            .onEach { latest = it }
+            .launchIn(this)
+
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO, isValidated = false)
+        )
+
+        assertThat((latest as WifiNetworkModel.Active).isValidated).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun wifiNetwork_validated_networkValidated() = runBlocking(IMMEDIATE) {
+        var latest: WifiNetworkModel? = null
+        val job = underTest
+            .wifiNetwork
+            .onEach { latest = it }
+            .launchIn(this)
+
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO, isValidated = true)
+        )
+
+        assertThat((latest as WifiNetworkModel.Active).isValidated).isTrue()
 
         job.cancel()
     }
@@ -282,13 +349,14 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             .launchIn(this)
 
         val wifiInfo = mock<WifiInfo>().apply {
-        whenever(this.ssid).thenReturn(SSID)
-        whenever(this.isPrimary).thenReturn(true)
-    }
+            whenever(this.ssid).thenReturn(SSID)
+            whenever(this.isPrimary).thenReturn(true)
+        }
 
         // Start with the original network
-        getNetworkCallback()
-            .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(wifiInfo, isValidated = true)
+        )
 
         // WHEN we keep the same network ID but change the SSID
         val newSsid = "CD"
@@ -297,14 +365,16 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             whenever(this.isPrimary).thenReturn(true)
         }
 
-        getNetworkCallback()
-            .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(newWifiInfo))
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(newWifiInfo, isValidated = false)
+        )
 
         // THEN we've updated to the new SSID
         assertThat(latest is WifiNetworkModel.Active).isTrue()
         val latestActive = latest as WifiNetworkModel.Active
         assertThat(latestActive.networkId).isEqualTo(NETWORK_ID)
         assertThat(latestActive.ssid).isEqualTo(newSsid)
+        assertThat(latestActive.isValidated).isFalse()
 
         job.cancel()
     }
@@ -406,10 +476,11 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun wifiActivity_nullWifiManager_receivesDefault() = runBlocking(IMMEDIATE) {
         underTest = WifiRepositoryImpl(
-                connectivityManager,
-                wifiManager = null,
-                executor,
-                logger,
+            connectivityManager,
+            logger,
+            executor,
+            scope,
+            wifiManager = null,
         )
 
         var latest: WifiActivityModel? = null
@@ -501,11 +572,16 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         return callbackCaptor.value!!
     }
 
-    private fun createWifiNetworkCapabilities(wifiInfo: WifiInfo) =
-        mock<NetworkCapabilities>().apply {
-            whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-            whenever(this.transportInfo).thenReturn(wifiInfo)
+    private fun createWifiNetworkCapabilities(
+        wifiInfo: WifiInfo,
+        isValidated: Boolean = true,
+    ): NetworkCapabilities {
+        return mock<NetworkCapabilities>().also {
+            whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+            whenever(it.transportInfo).thenReturn(wifiInfo)
+            whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(isValidated)
         }
+    }
 
     private companion object {
         const val NETWORK_ID = 45

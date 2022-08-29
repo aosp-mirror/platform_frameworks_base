@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -31,6 +32,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
+import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_OFF;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -178,9 +180,12 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
     @Captor
     private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
     private KeyguardStateController.Callback mKeyguardStateControllerCallback;
     private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
     private StatusBarStateController.StateListener mStatusBarStateListener;
+    private ScreenLifecycle.Observer mScreenObserver;
     private BroadcastReceiver mBroadcastReceiver;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private TestableLooper mTestableLooper;
@@ -272,6 +277,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor).registerCallback(
                 mKeyguardUpdateMonitorCallbackCaptor.capture());
         mKeyguardUpdateMonitorCallback = mKeyguardUpdateMonitorCallbackCaptor.getValue();
+
+        verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
+        mScreenObserver = mScreenObserverCaptor.getValue();
 
         mExecutor.runAllReady();
         reset(mRotateTextViewController);
@@ -534,6 +542,31 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mStatusBarStateListener.onDozingChanged(true);
 
         assertThat(mTextView.getText()).isNotEqualTo(message);
+    }
+
+    @Test
+    public void transientIndication_visibleWhenWokenUp() {
+        createController();
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        final String message = "helpMsg";
+
+        // GIVEN screen is off
+        when(mScreenLifecycle.getScreenState()).thenReturn(SCREEN_OFF);
+
+        // WHEN fingeprint help message received
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message, BiometricSourceType.FINGERPRINT);
+
+        // THEN message isn't shown right away
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // WHEN the screen turns on
+        mScreenObserver.onScreenTurnedOn();
+        mTestableLooper.processAllMessages();
+
+        // THEN the message is shown
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
     }
 
     @Test
