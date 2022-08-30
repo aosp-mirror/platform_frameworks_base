@@ -246,8 +246,7 @@ class EnterPipToOtherOrientationTest(
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 3
+                    supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }
     }

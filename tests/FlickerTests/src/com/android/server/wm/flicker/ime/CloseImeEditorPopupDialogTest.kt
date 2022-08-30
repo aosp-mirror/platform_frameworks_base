@@ -141,7 +141,6 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 2,
                     supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY

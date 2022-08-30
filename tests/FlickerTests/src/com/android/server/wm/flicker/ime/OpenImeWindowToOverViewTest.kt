@@ -265,7 +265,6 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 1,
                     supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
                     supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
