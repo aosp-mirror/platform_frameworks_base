@@ -151,6 +151,7 @@ import android.view.displayhash.DisplayHashManager;
 import android.view.displayhash.DisplayHashResultCallback;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
@@ -31797,6 +31798,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean isAutoHandwritingEnabled() {
         return (mPrivateFlags4 & PFLAG4_AUTO_HANDWRITING_ENABLED)
                 == PFLAG4_AUTO_HANDWRITING_ENABLED;
+    }
+
+    /**
+     * Return whether the stylus handwriting is available for this View.
+     * @hide
+     */
+    public boolean isStylusHandwritingAvailable() {
+        return getContext().getSystemService(InputMethodManager.class)
+                .isStylusHandwritingAvailable();
     }
 
     /**

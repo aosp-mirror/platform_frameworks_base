@@ -116,9 +116,6 @@ public class HandwritingInitiator {
                     // The motion event is not from a stylus event, ignore it.
                     return false;
                 }
-                if (!mImm.isStylusHandwritingAvailable()) {
-                    return false;
-                }
                 mState = new State(motionEvent);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -280,6 +277,13 @@ public class HandwritingInitiator {
         mHandwritingAreasTracker.updateHandwritingAreaForView(view);
     }
 
+    private static boolean shouldTriggerStylusHandwritingForView(@NonNull View view) {
+        if (!view.isAutoHandwritingEnabled()) {
+            return false;
+        }
+        return view.isStylusHandwritingAvailable();
+    }
+
     /**
      * Given the location of the stylus event, return the best candidate view to initialize
      * handwriting mode.
@@ -296,9 +300,10 @@ public class HandwritingInitiator {
         // whether the connectedView's boundary contains the initial stylus position. If true,
         // directly return the connectedView.
         final View connectedView = getConnectedView();
-        if (connectedView != null && connectedView.isAutoHandwritingEnabled()) {
+        if (connectedView != null) {
             Rect handwritingArea = getViewHandwritingArea(connectedView);
-            if (isInHandwritingArea(handwritingArea, x, y, connectedView)) {
+            if (isInHandwritingArea(handwritingArea, x, y, connectedView)
+                    && shouldTriggerStylusHandwritingForView(connectedView)) {
                 final float distance = distance(handwritingArea, x, y);
                 if (distance == 0f) return connectedView;
 
@@ -313,10 +318,12 @@ public class HandwritingInitiator {
         for (HandwritableViewInfo viewInfo : handwritableViewInfos) {
             final View view = viewInfo.getView();
             final Rect handwritingArea = viewInfo.getHandwritingArea();
-            if (!isInHandwritingArea(handwritingArea, x, y, view)) continue;
+            if (!isInHandwritingArea(handwritingArea, x, y, view)
+                    || !shouldTriggerStylusHandwritingForView(view)) {
+                continue;
+            }
 
             final float distance = distance(handwritingArea, x, y);
-
             if (distance == 0f) return view;
             if (distance < minDistance) {
                 minDistance = distance;
