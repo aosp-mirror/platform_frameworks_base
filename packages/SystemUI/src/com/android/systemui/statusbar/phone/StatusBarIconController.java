@@ -33,7 +33,6 @@ import android.widget.LinearLayout.LayoutParams;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
@@ -137,11 +136,12 @@ public interface StatusBarIconController {
                 LinearLayout linearLayout,
                 FeatureFlags featureFlags,
                 StatusBarPipelineFlags statusBarPipelineFlags,
-                Provider<WifiViewModel> wifiViewModelProvider) {
+                Provider<WifiViewModel> wifiViewModelProvider,
+                DarkIconDispatcher darkIconDispatcher) {
             super(linearLayout, featureFlags, statusBarPipelineFlags, wifiViewModelProvider);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
-            mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
+            mDarkIconDispatcher = darkIconDispatcher;
         }
 
         @Override
@@ -198,20 +198,24 @@ public interface StatusBarIconController {
             private final FeatureFlags mFeatureFlags;
             private final StatusBarPipelineFlags mStatusBarPipelineFlags;
             private final Provider<WifiViewModel> mWifiViewModelProvider;
+            private final DarkIconDispatcher mDarkIconDispatcher;
 
             @Inject
             public Factory(
                     FeatureFlags featureFlags,
                     StatusBarPipelineFlags statusBarPipelineFlags,
-                    Provider<WifiViewModel> wifiViewModelProvider) {
+                    Provider<WifiViewModel> wifiViewModelProvider,
+                    DarkIconDispatcher darkIconDispatcher) {
                 mFeatureFlags = featureFlags;
                 mStatusBarPipelineFlags = statusBarPipelineFlags;
                 mWifiViewModelProvider = wifiViewModelProvider;
+                mDarkIconDispatcher = darkIconDispatcher;
             }
 
             public DarkIconManager create(LinearLayout group) {
                 return new DarkIconManager(
-                        group, mFeatureFlags, mStatusBarPipelineFlags, mWifiViewModelProvider);
+                        group, mFeatureFlags, mStatusBarPipelineFlags, mWifiViewModelProvider,
+                        mDarkIconDispatcher);
             }
         }
     }
