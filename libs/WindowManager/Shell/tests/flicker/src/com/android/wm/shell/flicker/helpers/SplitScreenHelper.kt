@@ -42,7 +42,6 @@ class SplitScreenHelper(
 ) : BaseAppHelper(instrumentation, activityLabel, componentInfo) {
 
     companion object {
-        const val TEST_REPETITIONS = 1
         const val TIMEOUT_MS = 3_000L
         const val DRAG_DURATION_MS = 1_000L
         const val NOTIFICATION_SCROLLER = "notification_stack_scroller"
