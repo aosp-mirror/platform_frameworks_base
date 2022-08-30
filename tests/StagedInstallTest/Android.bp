@@ -58,6 +58,7 @@ java_test_host {
         ":apex.apexd_test",
         ":com.android.apex.apkrollback.test_v1",
         ":com.android.apex.apkrollback.test_v2",
+        ":StagedInstallInternalTestApp",
         ":StagedInstallTestApexV2",
         ":StagedInstallTestApexV2_WrongSha",
         ":TestAppAv1",
