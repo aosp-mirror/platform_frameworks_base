@@ -2830,7 +2830,7 @@ public class UserBackupManagerService {
                                         + " includekeyvalue="
                                         + doKeyValue
                                         + " pkgs="
-                                        + pkgList));
+                                        + Arrays.toString(pkgList)));
             }
             Slog.i(TAG, addUserIdToLogMessage(mUserId, "Beginning adb backup..."));
 

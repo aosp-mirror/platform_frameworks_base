@@ -428,6 +428,15 @@ java_library {
     name: "framework-minus-apex-intdefs",
     defaults: ["framework-minus-apex-defaults"],
     plugins: ["intdef-annotation-processor"],
+
+    // Errorprone and android lint will already run on framework-minus-apex, don't rerun them on
+    // the intdefs version in order to speed up the build.
+    errorprone: {
+        enabled: false,
+    },
+    lint: {
+        enabled: false,
+    },
 }
 
 // This "framework" module is NOT installed to the device. It's

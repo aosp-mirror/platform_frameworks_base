@@ -5092,9 +5092,12 @@ public class MediaPlayer extends PlayerBase
             @Nullable Map<String, String> optionalParameters)
             throws NoDrmSchemeException
     {
-        Log.v(TAG, "getKeyRequest: " +
-                " keySetId: " + keySetId + " initData:" + initData + " mimeType: " + mimeType +
-                " keyType: " + keyType + " optionalParameters: " + optionalParameters);
+        Log.v(TAG, "getKeyRequest: "
+                + " keySetId: " + Arrays.toString(keySetId)
+                + " initData:" + Arrays.toString(initData)
+                + " mimeType: " + mimeType
+                + " keyType: " + keyType
+                + " optionalParameters: " + optionalParameters);
 
         synchronized (mDrmLock) {
             if (!mActiveDrmScheme) {
@@ -5153,7 +5156,8 @@ public class MediaPlayer extends PlayerBase
     public byte[] provideKeyResponse(@Nullable byte[] keySetId, @NonNull byte[] response)
             throws NoDrmSchemeException, DeniedByServerException
     {
-        Log.v(TAG, "provideKeyResponse: keySetId: " + keySetId + " response: " + response);
+        Log.v(TAG, "provideKeyResponse: keySetId: " + Arrays.toString(keySetId)
+                + " response: " + Arrays.toString(response));
 
         synchronized (mDrmLock) {
 
@@ -5169,8 +5173,9 @@ public class MediaPlayer extends PlayerBase
 
                 byte[] keySetResult = mDrmObj.provideKeyResponse(scope, response);
 
-                Log.v(TAG, "provideKeyResponse: keySetId: " + keySetId + " response: " + response +
-                        " --> " + keySetResult);
+                Log.v(TAG, "provideKeyResponse: keySetId: " + Arrays.toString(keySetId)
+                        + " response: " + Arrays.toString(response)
+                        + " --> " + Arrays.toString(keySetResult));
 
 
                 return keySetResult;
@@ -5197,7 +5202,7 @@ public class MediaPlayer extends PlayerBase
     public void restoreKeys(@NonNull byte[] keySetId)
             throws NoDrmSchemeException
     {
-        Log.v(TAG, "restoreKeys: keySetId: " + keySetId);
+        Log.v(TAG, "restoreKeys: keySetId: " + Arrays.toString(keySetId));
 
         synchronized (mDrmLock) {
 
@@ -5484,7 +5489,8 @@ public class MediaPlayer extends PlayerBase
         // at prepareDrm/openSession rather than getKeyRequest/provideKeyResponse
         try {
             mDrmSessionId = mDrmObj.openSession();
-            Log.v(TAG, "prepareDrm_openSessionStep: mDrmSessionId=" + mDrmSessionId);
+            Log.v(TAG, "prepareDrm_openSessionStep: mDrmSessionId="
+                    + Arrays.toString(mDrmSessionId));
 
             // Sending it down to native/mediaserver to create the crypto object
             // This call could simply fail due to bad player state, e.g., after start().
@@ -5547,7 +5553,7 @@ public class MediaPlayer extends PlayerBase
                     response = Streams.readFully(connection.getInputStream());
 
                     Log.v(TAG, "HandleProvisioninig: Thread run: response " +
-                            response.length + " " + response);
+                            response.length + " " + Arrays.toString(response));
                 } catch (Exception e) {
                     status = PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR;
                     Log.w(TAG, "HandleProvisioninig: Thread run: connect " + e + " url: " + url);
@@ -5631,8 +5637,9 @@ public class MediaPlayer extends PlayerBase
             return PREPARE_DRM_STATUS_PREPARATION_ERROR;
         }
 
-        Log.v(TAG, "HandleProvisioninig provReq " +
-                " data: " + provReq.getData() + " url: " + provReq.getDefaultUrl());
+        Log.v(TAG, "HandleProvisioninig provReq "
+                + " data: " + Arrays.toString(provReq.getData())
+                + " url: " + provReq.getDefaultUrl());
 
         // networking in a background thread
         mDrmProvisioningInProgress = true;
@@ -5715,7 +5722,8 @@ public class MediaPlayer extends PlayerBase
     private void cleanDrmObj()
     {
         // the caller holds mDrmLock
-        Log.v(TAG, "cleanDrmObj: mDrmObj=" + mDrmObj + " mDrmSessionId=" + mDrmSessionId);
+        Log.v(TAG, "cleanDrmObj: mDrmObj=" + mDrmObj
+                + " mDrmSessionId=" + Arrays.toString(mDrmSessionId));
 
         if (mDrmSessionId != null)    {
             mDrmObj.closeSession(mDrmSessionId);
