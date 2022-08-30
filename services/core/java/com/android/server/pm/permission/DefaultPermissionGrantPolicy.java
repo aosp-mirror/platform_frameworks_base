@@ -781,7 +781,7 @@ final class DefaultPermissionGrantPolicy {
             for (String voiceInteractPackageName : voiceInteractPackageNames) {
                 grantPermissionsToSystemPackage(pm, voiceInteractPackageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
-                        PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
+                        PHONE_PERMISSIONS, SMS_PERMISSIONS, COARSE_BACKGROUND_LOCATION_PERMISSIONS,
                         NEARBY_DEVICES_PERMISSIONS, NOTIFICATION_PERMISSIONS);
             }
         }
