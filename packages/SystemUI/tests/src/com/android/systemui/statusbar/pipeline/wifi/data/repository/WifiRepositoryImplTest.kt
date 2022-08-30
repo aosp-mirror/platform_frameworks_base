@@ -473,6 +473,40 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         job.cancel()
     }
 
+    /** Regression test for b/244173280. */
+    @Test
+    fun wifiNetwork_multipleSubscribers_newSubscribersGetCurrentValue() = runBlocking(IMMEDIATE) {
+        var latest1: WifiNetworkModel? = null
+        val job1 = underTest
+            .wifiNetwork
+            .onEach { latest1 = it }
+            .launchIn(this)
+
+        getNetworkCallback()
+            .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO))
+
+        assertThat(latest1 is WifiNetworkModel.Active).isTrue()
+        val latest1Active = latest1 as WifiNetworkModel.Active
+        assertThat(latest1Active.networkId).isEqualTo(NETWORK_ID)
+        assertThat(latest1Active.ssid).isEqualTo(SSID)
+
+        // WHEN we add a second subscriber after having already emitted a value
+        var latest2: WifiNetworkModel? = null
+        val job2 = underTest
+            .wifiNetwork
+            .onEach { latest2 = it }
+            .launchIn(this)
+
+        // THEN the second subscribe receives the already-emitted value
+        assertThat(latest2 is WifiNetworkModel.Active).isTrue()
+        val latest2Active = latest2 as WifiNetworkModel.Active
+        assertThat(latest2Active.networkId).isEqualTo(NETWORK_ID)
+        assertThat(latest2Active.ssid).isEqualTo(SSID)
+
+        job1.cancel()
+        job2.cancel()
+    }
+
     @Test
     fun wifiActivity_nullWifiManager_receivesDefault() = runBlocking(IMMEDIATE) {
         underTest = WifiRepositoryImpl(
