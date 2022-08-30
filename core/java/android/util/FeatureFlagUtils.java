@@ -58,6 +58,12 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_APP_LOCALE_OPT_IN_ENABLED =
             "settings_app_locale_opt_in_enabled";
 
+    /**
+     * Launch the Volume panel in SystemUI.
+     * @hide
+     */
+    public static final String SETTINGS_VOLUME_PANEL_IN_SYSTEMUI =
+            "settings_volume_panel_in_systemui";
 
     /** @hide */
     public static final String SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS =
@@ -105,6 +111,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
         DEFAULT_FLAGS.put("settings_search_always_expand", "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_LOCALE_OPT_IN_ENABLED, "true");
+        DEFAULT_FLAGS.put(SETTINGS_VOLUME_PANEL_IN_SYSTEMUI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
