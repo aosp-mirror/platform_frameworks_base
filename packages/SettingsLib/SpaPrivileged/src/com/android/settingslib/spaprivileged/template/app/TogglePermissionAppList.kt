@@ -47,20 +47,14 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     fun setAllowed(record: T, newAllowed: Boolean)
 }
 
-interface TogglePermissionAppListModelFactory {
-    fun createModel(
-        permission: String,
-        context: Context,
-    ): TogglePermissionAppListModel<out AppRecord>
+interface TogglePermissionAppListProvider {
+    val permissionType: String
 
-    fun createPageProviders(): List<SettingsPageProvider> = listOf(
-        TogglePermissionAppListPageProvider(this),
-        TogglePermissionAppInfoPageProvider(this),
-    )
+    fun createModel(context: Context): TogglePermissionAppListModel<out AppRecord>
 
     @Composable
-    fun EntryItem(permissionType: String) {
-        val listModel = rememberModel(permissionType)
+    fun EntryItem() {
+        val listModel = rememberContext(::createModel)
         Preference(
             object : PreferenceModel {
                 override val title = stringResource(listModel.pageTitleResId)
@@ -74,10 +68,22 @@ interface TogglePermissionAppListModelFactory {
      *
      * Expose route to enable enter from non-SPA pages.
      */
-    fun getRoute(permissionType: String): String =
+    fun getRoute(): String =
         TogglePermissionAppListPageProvider.getRoute(permissionType)
 }
 
-@Composable
-internal fun TogglePermissionAppListModelFactory.rememberModel(permission: String) =
-    rememberContext { context -> createModel(permission, context) }
+class TogglePermissionAppListTemplate(
+    allProviders: List<TogglePermissionAppListProvider>,
+) {
+    private val listModelProviderMap = allProviders.associateBy { it.permissionType }
+
+    fun createPageProviders(): List<SettingsPageProvider> = listOf(
+        TogglePermissionAppListPageProvider(this),
+        TogglePermissionAppInfoPageProvider(this),
+    )
+
+    @Composable
+    internal fun rememberModel(permissionType: String) = rememberContext { context ->
+        listModelProviderMap.getValue(permissionType).createModel(context)
+    }
+}
