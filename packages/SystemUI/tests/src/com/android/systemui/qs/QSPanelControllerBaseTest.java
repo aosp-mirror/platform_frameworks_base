@@ -44,6 +44,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaCarouselController;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -86,6 +87,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     private QSLogger mQSLogger;
     private DumpManager mDumpManager = new DumpManager();
+    private MediaCarouselController mMediaCarouselController;
     @Mock
     QSTileImpl mQSTile;
     @Mock
@@ -108,9 +110,9 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
                 QSCustomizerController qsCustomizerController, MediaHost mediaHost,
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-                DumpManager dumpManager) {
+                DumpManager dumpManager, MediaCarouselController mediaCarouselController) {
             super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
-                    qsLogger, dumpManager);
+                    qsLogger, dumpManager, mediaCarouselController);
         }
 
         @Override
@@ -144,7 +146,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
-                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mMediaCarouselController);
 
         mController.init();
         reset(mQSTileRevealController);
@@ -156,7 +158,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         QSPanelControllerBase<QSPanel> controller = new TestableQSPanelControllerBase(mQSPanel,
                 mQSTileHost, mQSCustomizerController, mMediaHost,
-                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager) {
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mMediaCarouselController) {
             @Override
             protected QSTileRevealController createTileRevealController() {
                 return mQSTileRevealController;
@@ -249,7 +251,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanelLandscape");
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
-                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mMediaCarouselController);
         mController.init();
 
         assertThat(mController.shouldUseHorizontalLayout()).isTrue();
@@ -258,7 +260,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanelPortrait");
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
-                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mMediaCarouselController);
         mController.init();
 
         assertThat(mController.shouldUseHorizontalLayout()).isFalse();
