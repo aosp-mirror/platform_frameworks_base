@@ -130,6 +130,10 @@ android_app {
 
         // Allow overlay to add resource
         "--auto-add-overlay",
+
+        // Framework resources benefit tremendously from enabling sparse encoding, saving tens
+        // of MBs in size and RAM use.
+        "--enable-sparse-encoding",
     ],
 
     resource_zips: [
