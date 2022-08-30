@@ -26,13 +26,13 @@ import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.framework.compose.LocalNavController
 
 @Composable
-internal fun NavigateUp() {
+internal fun NavigateBack() {
     val navController = LocalNavController.current
     val contentDescription = stringResource(
         id = androidx.appcompat.R.string.abc_action_bar_up_description,
     )
     BackAction(contentDescription) {
-        navController.navigateUp()
+        navController.navigateBack()
     }
 }
 
