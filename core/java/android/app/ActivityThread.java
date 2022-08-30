@@ -1177,7 +1177,14 @@ public final class ActivityThread extends ClientTransactionHandler
             data.mSerializedSystemFontMap = serializedSystemFontMap;
             data.startRequestedElapsedTime = startRequestedElapsedTime;
             data.startRequestedUptime = startRequestedUptime;
+            updateCompatOverrideScale(compatInfo);
+            CompatibilityInfo.applyOverrideScaleIfNeeded(config);
             sendMessage(H.BIND_APPLICATION, data);
+        }
+
+        private void updateCompatOverrideScale(CompatibilityInfo info) {
+            CompatibilityInfo.setOverrideInvertedScale(
+                    info.hasOverrideScaling() ? info.applicationInvertedScale : 1f);
         }
 
         public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
@@ -1756,6 +1763,7 @@ public final class ActivityThread extends ClientTransactionHandler
             UpdateCompatibilityData ucd = new UpdateCompatibilityData();
             ucd.pkg = pkg;
             ucd.info = info;
+            updateCompatOverrideScale(info);
             sendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
         }
 

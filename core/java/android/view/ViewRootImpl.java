@@ -1787,6 +1787,7 @@ public final class ViewRootImpl implements ViewParent,
 
         final ClientWindowFrames frames = (ClientWindowFrames) args.arg1;
         final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg2;
+        CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
         final boolean forceNextWindowRelayout = args.argi1 != 0;
         final int displayId = args.argi3;
         final int resizeMode = args.argi5;
@@ -8242,6 +8243,7 @@ public final class ViewRootImpl implements ViewParent,
                 mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
             }
             mInvSizeCompatScale = 1f / mTmpFrames.sizeCompatScale;
+            CompatibilityInfo.applyOverrideScaleIfNeeded(mPendingMergedConfiguration);
             mInsetsController.onStateChanged(mTempInsets);
             mInsetsController.onControlsChanged(mTempControls);
 
