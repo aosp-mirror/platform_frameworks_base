@@ -1509,6 +1509,13 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int TOOL_TYPE_PALM = 5;
 
+    /** @hide */
+    @Retention(SOURCE)
+    @IntDef(prefix = { "TOOL_TYPE_" }, value = {
+            TOOL_TYPE_UNKNOWN, TOOL_TYPE_FINGER, TOOL_TYPE_STYLUS, TOOL_TYPE_MOUSE,
+            TOOL_TYPE_ERASER, TOOL_TYPE_PALM})
+    public @interface ToolType {};
+
     // NOTE: If you add a new tool type here you must also add it to:
     //  native/include/android/input.h
 
@@ -2422,7 +2429,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #TOOL_TYPE_STYLUS
      * @see #TOOL_TYPE_MOUSE
      */
-    public final int getToolType(int pointerIndex) {
+    public @ToolType int getToolType(int pointerIndex) {
         return nativeGetToolType(mNativePtr, pointerIndex);
     }
 
@@ -3868,7 +3875,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @return The symbolic name of the specified tool type.
      * @hide
      */
-    public static String toolTypeToString(int toolType) {
+    public static String toolTypeToString(@ToolType int toolType) {
         String symbolicName = TOOL_TYPE_SYMBOLIC_NAMES.get(toolType);
         return symbolicName != null ? symbolicName : Integer.toString(toolType);
     }
@@ -4361,7 +4368,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
          *
          * @see MotionEvent#getToolType(int)
          */
-        public int toolType;
+        public @ToolType int toolType;
 
         /**
          * Resets the pointer properties to their initial values.

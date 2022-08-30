@@ -33,7 +33,7 @@ import libcore.util.NativeAllocationRegistry;
  * (based on the paint's Style), or it can be used for clipping or to draw
  * text on a path.
  */
-public class Path {
+public class Path implements Iterable<PathIterator.Segment> {
 
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
@@ -89,6 +89,17 @@ public class Path {
             return;
         }
         nSet(mNativePath, src.mNativePath);
+    }
+
+    /**
+     * Returns an iterator over the segments of this path.
+     *
+     * @return the Iterator object
+     */
+    @NonNull
+    @Override
+    public PathIterator iterator() {
+        return new PathIterator(this);
     }
 
     /**
@@ -380,6 +391,49 @@ public class Path {
      */
     public void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
         nRQuadTo(mNativePath, dx1, dy1, dx2, dy2);
+    }
+
+    /**
+     * Add a quadratic bezier from the last point, approaching control point
+     * (x1,y1), and ending at (x2,y2), weighted by <code>weight</code>. If no
+     * moveTo() call has been made for this contour, the first point is
+     * automatically set to (0,0).
+     *
+     * A weight of 1 is equivalent to calling {@link #quadTo(float, float, float, float)}.
+     * A weight of 0 is equivalent to calling {@link #lineTo(float, float)} to
+     * <code>(x1, y1)</code> followed by {@link #lineTo(float, float)} to <code>(x2, y2)</code>.
+     *
+     * @param x1 The x-coordinate of the control point on a conic curve
+     * @param y1 The y-coordinate of the control point on a conic curve
+     * @param x2 The x-coordinate of the end point on a conic curve
+     * @param y2 The y-coordinate of the end point on a conic curve
+     * @param weight The weight of the conic applied to the curve. A value of 1 is equivalent
+     *               to a quadratic with the given control and anchor points and a value of 0 is
+     *               equivalent to a line to the first and another line to the second point.
+     */
+    public void conicTo(float x1, float y1, float x2, float y2, float weight) {
+        nConicTo(mNativePath, x1, y1, x2, y2, weight);
+    }
+
+    /**
+     * Same as conicTo, but the coordinates are considered relative to the last
+     * point on this contour. If there is no previous point, then a moveTo(0,0)
+     * is inserted automatically.
+     *
+     * @param dx1 The amount to add to the x-coordinate of the last point on
+     *            this contour, for the control point of a conic curve
+     * @param dy1 The amount to add to the y-coordinate of the last point on
+     *            this contour, for the control point of a conic curve
+     * @param dx2 The amount to add to the x-coordinate of the last point on
+     *            this contour, for the end point of a conic curve
+     * @param dy2 The amount to add to the y-coordinate of the last point on
+     *            this contour, for the end point of a conic curve
+     * @param weight The weight of the conic applied to the curve. A value of 1 is equivalent
+     *               to a quadratic with the given control and anchor points and a value of 0 is
+     *               equivalent to a line to the first and another line to the second point.
+     */
+    public void rConicTo(float dx1, float dy1, float dx2, float dy2, float weight) {
+        nRConicTo(mNativePath, dx1, dy1, dx2, dy2, weight);
     }
 
     /**
@@ -736,6 +790,46 @@ public class Path {
         return nApproximate(mNativePath, acceptableError);
     }
 
+    /**
+     * Returns the generation ID of this path. The generation ID changes
+     * whenever the path is modified. This can be used as an efficient way to
+     * check if a path has changed.
+     *
+     * @return The current generation ID for this path
+     */
+    public int getGenerationId()  {
+        return nGetGenerationID(mNativePath);
+    }
+
+    /**
+     * Two paths can be interpolated, by calling {@link #interpolate(Path, float, Path)}, if they
+     * have exactly the same structure. That is, both paths must have the same
+     * operations, in the same order. If any of the operations are
+     * of type {@link PathIterator#VERB_CONIC}, then the weights of those conics must also match.
+     *
+     * @param otherPath The other <code>Path</code> being interpolated to from this one.
+     * @return true if interpolation is possible, false otherwise
+     */
+    public boolean isInterpolatable(@NonNull Path otherPath) {
+        return nIsInterpolatable(mNativePath, otherPath.mNativePath);
+    }
+
+    /**
+     * This method will linearly interpolate from this path to <code>otherPath</code> given
+     * the interpolation parameter <code>t</code>, returning the result in
+     * <code>interpolatedPath</code>. Interpolation will only succeed if the structures of the
+     * two paths match exactly, as discussed in {@link #isInterpolatable(Path)}.
+     *
+     * @param otherPath The other <code>Path</code> being interpolated to.
+     * @param t The interpolation parameter. A value of 0 results in a <code>Path</code>
+     *          equivalent to this path, a value of 1 results in one equivalent to
+     *          <code>otherPath</code>.
+     * @param interpolatedPath The interpolated results.
+     */
+    public boolean interpolate(@NonNull Path otherPath, float t, @NonNull Path interpolatedPath) {
+        return nInterpolate(mNativePath, otherPath.mNativePath, t, interpolatedPath.mNativePath);
+    }
+
     // ------------------ Regular JNI ------------------------
 
     private static native long nInit();
@@ -750,6 +844,10 @@ public class Path {
     private static native void nRLineTo(long nPath, float dx, float dy);
     private static native void nQuadTo(long nPath, float x1, float y1, float x2, float y2);
     private static native void nRQuadTo(long nPath, float dx1, float dy1, float dx2, float dy2);
+    private static native void nConicTo(long nPath, float x1, float y1, float x2, float y2,
+            float weight);
+    private static native void nRConicTo(long nPath, float dx1, float dy1, float dx2, float dy2,
+            float weight);
     private static native void nCubicTo(long nPath, float x1, float y1, float x2, float y2,
             float x3, float y3);
     private static native void nRCubicTo(long nPath, float x1, float y1, float x2, float y2,
@@ -777,6 +875,8 @@ public class Path {
     private static native void nTransform(long nPath, long matrix);
     private static native boolean nOp(long path1, long path2, int op, long result);
     private static native float[] nApproximate(long nPath, float error);
+    private static native boolean nInterpolate(long startPath, long endPath, float t,
+            long interpolatedPath);
 
     // ------------------ Fast JNI ------------------------
 
@@ -785,6 +885,10 @@ public class Path {
 
     // ------------------ Critical JNI ------------------------
 
+    @CriticalNative
+    private static native int nGetGenerationID(long nativePath);
+    @CriticalNative
+    private static native boolean nIsInterpolatable(long startPath, long endPath);
     @CriticalNative
     private static native void nReset(long nPath);
     @CriticalNative

@@ -146,6 +146,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
+    private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -324,6 +325,14 @@ final class ActivityManagerConstants extends ContentObserver {
      * Time in milliseconds; the allowed duration from a process is killed until it's really gone.
      */
     private static final String KEY_PROCESS_KILL_TIMEOUT = "process_kill_timeout";
+
+    /**
+     * {@code true} to send in-flight alarm broadcasts ahead of non-alarms; {@code false}
+     * to queue alarm broadcasts identically to non-alarms [i.e. the pre-U behavior]; or
+     * {@code null} or empty string in order to fall back to whatever the build-time default
+     * was for the device.
+     */
+    private static final String KEY_PRIORITIZE_ALARM_BROADCASTS = "prioritize_alarm_broadcasts";
 
     private static final String KEY_DEFER_BOOT_COMPLETED_BROADCAST =
             "defer_boot_completed_broadcast";
@@ -667,6 +676,12 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST;
 
     /**
+     * Whether alarm broadcasts are delivered immediately, or queued along with the rest
+     * of the pending ordered broadcasts.
+     */
+    volatile boolean mPrioritizeAlarmBroadcasts = DEFAULT_PRIORITIZE_ALARM_BROADCASTS;
+
+    /**
      * How long the Context.startForegroundService() grace period is to get around to
      * calling Service.startForeground() before we generate ANR.
      */
@@ -976,6 +991,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_PROCESS_KILL_TIMEOUT:
                                 updateProcessKillTimeout();
+                                break;
+                            case KEY_PRIORITIZE_ALARM_BROADCASTS:
+                                updatePrioritizeAlarmBroadcasts();
                                 break;
                             case KEY_DEFER_BOOT_COMPLETED_BROADCAST:
                                 updateDeferBootCompletedBroadcast();
@@ -1446,6 +1464,17 @@ final class ActivityManagerConstants extends ContentObserver {
         }
     }
 
+    private void updatePrioritizeAlarmBroadcasts() {
+        // Flag value can be something that evaluates to `true` or `false`,
+        // or empty/null.  If it's empty/null, the platform default is used.
+        final String flag = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PRIORITIZE_ALARM_BROADCASTS,
+                "");
+        mPrioritizeAlarmBroadcasts = TextUtils.isEmpty(flag)
+                ? DEFAULT_PRIORITIZE_ALARM_BROADCASTS
+                : Boolean.parseBoolean(flag);
+    }
     private void updateDeferBootCompletedBroadcast() {
         mDeferBootCompletedBroadcast = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1786,6 +1815,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mComponentAliasOverrides);
         pw.print("  "); pw.print(KEY_DEFER_BOOT_COMPLETED_BROADCAST);
         pw.print("="); pw.println(mDeferBootCompletedBroadcast);
+        pw.print("  "); pw.print(KEY_PRIORITIZE_ALARM_BROADCASTS);
+        pw.print("="); pw.println(mPrioritizeAlarmBroadcasts);
         pw.print("  "); pw.print(KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED);
         pw.print("="); pw.println(mNoKillCachedProcessesUntilBootCompleted);
         pw.print("  "); pw.print(KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS);

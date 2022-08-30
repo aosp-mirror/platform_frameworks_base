@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log.dagger;
+package com.android.settingslib.spa.framework.common
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import com.android.systemui.log.LogBuffer;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
+import android.os.Bundle
+import androidx.compose.runtime.Composable
+import androidx.navigation.NamedNavArgument
 
 /**
- * A {@link LogBuffer} for {@link com.android.systemui.charging}
+ * An SettingsPageProvider represent a Settings page.
  */
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface ChargingLog {
+interface SettingsPageProvider {
+
+    /** The page name without arguments. */
+    val name: String
+
+    /** The page arguments, default is no arguments. */
+    val arguments: List<NamedNavArgument>
+        get() = emptyList()
+
+    /** The [Composable] used to render this page. */
+    @Composable
+    fun Page(arguments: Bundle?)
+
+    // fun buildEntry( arguments: Bundle?) : List<entry>
 }

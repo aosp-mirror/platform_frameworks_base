@@ -15,17 +15,13 @@
  */
 package com.android.systemui.statusbar;
 
-import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_MEDIA_CONTROLS;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -42,9 +38,10 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -110,7 +107,6 @@ public class NotificationLockscreenUserManagerImpl implements
     private LockPatternUtils mLockPatternUtils;
     protected KeyguardManager mKeyguardManager;
     private int mState = StatusBarState.SHADE;
-    private List<KeyguardNotificationSuppressor> mKeyguardSuppressors = new ArrayList<>();
     private final ListenerSet<NotificationStateChangedListener> mNotifStateChangedListeners =
             new ListenerSet<>();
 
@@ -344,67 +340,6 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
-    /**
-     * Returns true if notifications are temporarily disabled for this user for security reasons,
-     * regardless of the normal settings for that user.
-     */
-    private boolean shouldTemporarilyHideNotifications(int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            userId = mCurrentUserId;
-        }
-        boolean inLockdown = Dependency.get(KeyguardUpdateMonitor.class).isUserInLockdown(userId);
-        mUsersInLockdownLatestResult.put(userId, inLockdown);
-        return inLockdown;
-    }
-
-    /**
-     * Returns true if we're on a secure lockscreen and the user wants to hide notification data.
-     * If so, notifications should be hidden.
-     */
-    public boolean shouldHideNotifications(int userId) {
-        boolean hide = isLockscreenPublicMode(userId) && !userAllowsNotificationsInPublic(userId)
-                || (userId != mCurrentUserId && shouldHideNotifications(mCurrentUserId))
-                || shouldTemporarilyHideNotifications(userId);
-        mShouldHideNotifsLatestResult.put(userId, hide);
-        return hide;
-    }
-
-    /**
-     * Returns true if we're on a secure lockscreen and the user wants to hide notifications via
-     * package-specific override.
-     */
-    public boolean shouldHideNotifications(String key) {
-        if (mCommonNotifCollectionLazy.get() == null) {
-            Log.wtf(TAG, "mCommonNotifCollectionLazy was null!", new Throwable());
-            return true;
-        }
-        NotificationEntry visibleEntry = mCommonNotifCollectionLazy.get().getEntry(key);
-        return isLockscreenPublicMode(mCurrentUserId) && visibleEntry != null
-                && visibleEntry.getRanking().getLockscreenVisibilityOverride() == VISIBILITY_SECRET;
-    }
-
-    public boolean shouldShowOnKeyguard(NotificationEntry entry) {
-        if (mCommonNotifCollectionLazy.get() == null) {
-            Log.wtf(TAG, "mCommonNotifCollectionLazy was null!", new Throwable());
-            return false;
-        }
-        for (int i = 0; i < mKeyguardSuppressors.size(); i++) {
-            if (mKeyguardSuppressors.get(i).shouldSuppressOnKeyguard(entry)) {
-                return false;
-            }
-        }
-        boolean exceedsPriorityThreshold;
-        if (mHideSilentNotificationsOnLockscreen) {
-            exceedsPriorityThreshold =
-                    entry.getBucket() == BUCKET_MEDIA_CONTROLS
-                            || (entry.getBucket() != BUCKET_SILENT
-                            && entry.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT);
-        } else {
-            exceedsPriorityThreshold = !entry.getRanking().isAmbient();
-        }
-        return mShowLockscreenNotifications && exceedsPriorityThreshold;
-    }
-
     private void setShowLockscreenNotifications(boolean show) {
         mShowLockscreenNotifications = show;
     }
@@ -491,7 +426,8 @@ public class NotificationLockscreenUserManagerImpl implements
     /**
      * Save the current "public" (locked and secure) state of the lockscreen.
      */
-    public void setLockscreenPublicMode(boolean publicMode, int userId) {
+    @VisibleForTesting
+    void setLockscreenPublicMode(boolean publicMode, int userId) {
         mLockscreenPublicMode.put(userId, publicMode);
     }
 
@@ -671,11 +607,6 @@ public class NotificationLockscreenUserManagerImpl implements
     @Override
     public void addUserChangedListener(UserChangedListener listener) {
         mListeners.add(listener);
-    }
-
-    @Override
-    public void addKeyguardNotificationSuppressor(KeyguardNotificationSuppressor suppressor) {
-        mKeyguardSuppressors.add(suppressor);
     }
 
     @Override

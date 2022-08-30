@@ -1387,9 +1387,6 @@ public class BubbleController implements ConfigurationChangeListener {
 
             if (update.selectionChanged && mStackView != null) {
                 mStackView.setSelectedBubble(update.selectedBubble);
-                if (update.selectedBubble != null) {
-                    mSysuiProxy.updateNotificationSuppression(update.selectedBubble.getKey());
-                }
             }
 
             // Expanding? Apply this last.
@@ -1448,7 +1445,6 @@ public class BubbleController implements ConfigurationChangeListener {
                     // in the shade, it is essentially removed.
                     Bubble bubbleChild = mBubbleData.getAnyBubbleWithkey(child.getKey());
                     if (bubbleChild != null) {
-                        mSysuiProxy.removeNotificationEntry(bubbleChild.getKey());
                         bubbleChild.setSuppressNotification(true);
                         bubbleChild.setShowDot(false /* show */);
                     }

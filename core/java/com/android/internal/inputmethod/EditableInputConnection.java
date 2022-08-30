@@ -22,6 +22,9 @@ import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_END;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_START;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Selection;
@@ -31,11 +34,18 @@ import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.SelectGesture;
 import android.widget.TextView;
+
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * Base class for an editable InputConnection instance. This is created by {@link TextView} or
@@ -254,6 +264,25 @@ public final class EditableInputConnection extends BaseInputConnection
         }
         mTextView.setImeConsumesInput(imeConsumesInput);
         return true;
+    }
+
+    @Override
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        int result;
+        if (gesture instanceof SelectGesture) {
+            result = mTextView.performHandwritingSelectGesture((SelectGesture) gesture);
+        } else if (gesture instanceof DeleteGesture) {
+            result = mTextView.performHandwritingDeleteGesture((DeleteGesture) gesture);
+        } else if (gesture instanceof InsertGesture) {
+            result = mTextView.performHandwritingInsertGesture((InsertGesture) gesture);
+        } else {
+            result = 0;
+        }
+        if (executor != null && consumer != null) {
+            executor.execute(() -> consumer.accept(result));
+        }
     }
 
     @Override

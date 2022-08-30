@@ -30,7 +30,6 @@ import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
-import com.android.keyguard.logging.KeyguardViewMediatorLogger;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -106,8 +105,7 @@ public class KeyguardModule {
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
-            Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
-            KeyguardViewMediatorLogger logger) {
+            Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
         return new KeyguardViewMediator(
                 context,
                 falsingCollector,
@@ -134,8 +132,7 @@ public class KeyguardModule {
                 interactionJankMonitor,
                 dreamOverlayStateController,
                 notificationShadeWindowController,
-                activityLaunchAnimator,
-                logger);
+                activityLaunchAnimator);
     }
 
     /** */

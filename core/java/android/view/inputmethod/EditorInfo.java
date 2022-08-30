@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 import android.view.MotionEvent;
+import android.view.MotionEvent.ToolType;
 import android.view.View;
 import android.view.autofill.AutofillId;
 
@@ -639,8 +640,7 @@ public class EditorInfo implements InputType, Parcelable {
      * Initial {@link MotionEvent#ACTION_UP} tool type {@link MotionEvent#getToolType(int)} that
      * was used to focus this editor.
      */
-    private int mInitialToolType = MotionEvent.TOOL_TYPE_UNKNOWN;
-
+    private @ToolType int mInitialToolType = MotionEvent.TOOL_TYPE_UNKNOWN;
 
     /**
      * Editors may use this method to provide initial input text to IMEs. As the surrounding text
@@ -1022,7 +1022,7 @@ public class EditorInfo implements InputType, Parcelable {
      * @see InputMethodService#onUpdateEditorToolType(int)
      * @return toolType {@link MotionEvent#getToolType(int)}.
      */
-    public int getInitialToolType() {
+    public @ToolType int getInitialToolType() {
         return mInitialToolType;
     }
 
@@ -1034,7 +1034,7 @@ public class EditorInfo implements InputType, Parcelable {
      * @see MotionEvent#getToolType(int)
      * @see InputMethodService#onUpdateEditorToolType(int)
      */
-    public void setInitialToolType(int toolType) {
+    public void setInitialToolType(@ToolType int toolType) {
         mInitialToolType = toolType;
     }
 

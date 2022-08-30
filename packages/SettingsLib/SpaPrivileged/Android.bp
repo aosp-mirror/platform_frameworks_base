@@ -33,3 +33,15 @@ android_library {
         "-Xopt-in=kotlin.RequiresOptIn",
     ],
 }
+
+java_defaults {
+    name: "SpaPrivilegedLib-defaults",
+    static_libs: [
+        "androidx.compose.runtime_runtime",
+        "SpaPrivilegedLib",
+    ],
+    kotlincflags: ["-Xjvm-default=all"],
+    javacflags: [
+        "-J-Xmx4G",
+    ],
+}
