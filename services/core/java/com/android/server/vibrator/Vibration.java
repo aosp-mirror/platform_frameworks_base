@@ -251,6 +251,20 @@ final class Vibration {
                 uid, vibrationType, attrs.getUsage(), mStatus, mStats, completionUptimeMillis);
     }
 
+    /**
+     * Returns true if this vibration can pipeline with the specified one.
+     *
+     * <p>Note that currently, repeating vibrations can't pipeline with following vibrations,
+     * because the cancel() call to stop the repetition will cancel a pending vibration too. This
+     * can be changed if we have a use-case to reason around behavior for. It may also be nice to
+     * pipeline very short vibrations together, regardless of the flag.
+     */
+    public boolean canPipelineWith(Vibration vib) {
+        return uid == vib.uid && attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
+                && vib.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
+                && !isRepeating();
+    }
+
     /** Immutable info passed as a signal to end a vibration. */
     static final class EndInfo {
         /** The {@link Status} to be set to the vibration when it ends with this info. */

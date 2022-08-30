@@ -419,7 +419,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Starting vibrate for vibration  " + vib.id);
+                    Slog.d(TAG, "Starting vibrate for vibration " + vib.id);
                 }
                 int ignoredByUid = -1;
                 int ignoredByUsage = -1;
@@ -450,13 +450,23 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     final long ident = Binder.clearCallingIdentity();
                     try {
                         if (mCurrentVibration != null) {
-                            vib.stats().reportInterruptedAnotherVibration(
-                                    mCurrentVibration.getVibration().attrs.getUsage());
-                            mCurrentVibration.notifyCancelled(
-                                    new Vibration.EndInfo(
-                                            Vibration.Status.CANCELLED_SUPERSEDED, vib.uid,
-                                            vib.attrs.getUsage()),
-                                    /* immediate= */ false);
+                            if (mCurrentVibration.getVibration().canPipelineWith(vib)) {
+                                // Don't cancel the current vibration if it's pipeline-able.
+                                // Note that if there is a pending next vibration that can't be
+                                // pipelined, it will have already cancelled the current one, so we
+                                // don't need to consider it here as well.
+                                if (DEBUG) {
+                                    Slog.d(TAG, "Pipelining vibration " + vib.id);
+                                }
+                            } else {
+                                vib.stats().reportInterruptedAnotherVibration(
+                                        mCurrentVibration.getVibration().attrs.getUsage());
+                                mCurrentVibration.notifyCancelled(
+                                        new Vibration.EndInfo(
+                                                Vibration.Status.CANCELLED_SUPERSEDED, vib.uid,
+                                                vib.attrs.getUsage()),
+                                        /* immediate= */ false);
+                            }
                         }
                         status = startVibrationLocked(vib);
                     } finally {
@@ -690,6 +700,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
             // If there's already a vibration queued (waiting for the previous one to finish
             // cancelling), end it cleanly and replace it with the new one.
+            // Note that we don't consider pipelining here, because new pipelined ones should
+            // replace pending non-executing pipelined ones anyway.
             clearNextVibrationLocked(
                     new Vibration.EndInfo(Vibration.Status.IGNORED_SUPERSEDED,
                             vib.uid, vib.attrs.getUsage()));
@@ -1594,6 +1606,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @GuardedBy("mLock")
     private void clearNextVibrationLocked(Vibration.EndInfo vibrationEndInfo) {
         if (mNextVibration != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Dropping pending vibration " + mNextVibration.getVibration().id
+                        + " with end info: " + vibrationEndInfo);
+            }
             // Clearing next vibration before playing it, end it and report metrics right away.
             endVibrationLocked(mNextVibration.getVibration(), vibrationEndInfo,
                     /* shouldWriteStats= */ true);
