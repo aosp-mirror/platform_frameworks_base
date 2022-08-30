@@ -31,6 +31,7 @@ import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -82,6 +83,7 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
             mSnapshot = (Computer) snapshot;
         }
 
+        @CallSuper
         @Override
         public void close() {
             mClosed = true;
@@ -100,6 +102,9 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
     private static class UnfilteredSnapshotImpl extends BaseSnapshotImpl implements
             UnfilteredSnapshot {
 
+        @Nullable
+        private Map<String, PackageState> mCachedUnmodifiablePackageStates;
+
         private UnfilteredSnapshotImpl(@NonNull PackageDataSnapshot snapshot) {
             super(snapshot);
         }
@@ -115,8 +120,17 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
         public Map<String, PackageState> getPackageStates() {
             checkClosed();
 
-            //noinspection unchecked, RedundantCast
-            return (Map<String, PackageState>) (Map<?, ?>) mSnapshot.getPackageStates();
+            if (mCachedUnmodifiablePackageStates == null) {
+                mCachedUnmodifiablePackageStates =
+                        Collections.unmodifiableMap(mSnapshot.getPackageStates());
+            }
+            return mCachedUnmodifiablePackageStates;
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            mCachedUnmodifiablePackageStates = null;
         }
     }
 
@@ -150,6 +164,12 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
             }
 
             super.checkClosed();
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            mFilteredPackageStates = null;
         }
 
         @Nullable
