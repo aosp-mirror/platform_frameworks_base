@@ -397,6 +397,8 @@ public final class TransitionInfo implements Parcelable {
         private @Surface.Rotation int mEndFixedRotation = ROTATION_UNDEFINED;
         private int mRotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
         private @ColorInt int mBackgroundColor;
+        private SurfaceControl mSnapshot = null;
+        private float mSnapshotLuma;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -420,6 +422,8 @@ public final class TransitionInfo implements Parcelable {
             mEndFixedRotation = in.readInt();
             mRotationAnimation = in.readInt();
             mBackgroundColor = in.readInt();
+            mSnapshot = in.readTypedObject(SurfaceControl.CREATOR);
+            mSnapshotLuma = in.readFloat();
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -487,6 +491,12 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the background color of this change's container. */
         public void setBackgroundColor(@ColorInt int backgroundColor) {
             mBackgroundColor = backgroundColor;
+        }
+
+        /** Sets a snapshot surface for the "start" state of the container. */
+        public void setSnapshot(@Nullable SurfaceControl snapshot, float luma) {
+            mSnapshot = snapshot;
+            mSnapshotLuma = luma;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -587,6 +597,17 @@ public final class TransitionInfo implements Parcelable {
             return mBackgroundColor;
         }
 
+        /** @return a snapshot surface (if applicable). */
+        @Nullable
+        public SurfaceControl getSnapshot() {
+            return mSnapshot;
+        }
+
+        /** @return the luma calculated for the snapshot surface (if applicable). */
+        public float getSnapshotLuma() {
+            return mSnapshotLuma;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -605,6 +626,8 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mEndFixedRotation);
             dest.writeInt(mRotationAnimation);
             dest.writeInt(mBackgroundColor);
+            dest.writeTypedObject(mSnapshot, flags);
+            dest.writeFloat(mSnapshotLuma);
         }
 
         @NonNull
@@ -629,11 +652,13 @@ public final class TransitionInfo implements Parcelable {
 
         @Override
         public String toString() {
-            return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
+            String out = "{" + mContainer + "(" + mParent + ") leash=" + mLeash
                     + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
                     + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
                     + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation
-                    + " endFixedRotation=" + mEndFixedRotation + "}";
+                    + " endFixedRotation=" + mEndFixedRotation;
+            if (mSnapshot != null) out += " snapshot=" + mSnapshot;
+            return out + "}";
         }
     }
 
