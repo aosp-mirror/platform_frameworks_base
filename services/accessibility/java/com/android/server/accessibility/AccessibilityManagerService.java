@@ -685,8 +685,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
                     mTraceManager.logTrace(LOG_TAG + ".PM.onHandleForceStop",
                             FLAGS_PACKAGE_BROADCAST_RECEIVER,
-                            "intent=" + intent + ";packages=" + packages + ";uid=" + uid
-                            + ";doit=" + doit);
+                            "intent=" + intent + ";packages=" + Arrays.toString(packages)
+                            + ";uid=" + uid + ";doit=" + doit);
                 }
                 synchronized (mLock) {
                     final int userId = getChangingUserId();

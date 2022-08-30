@@ -420,7 +420,7 @@ final class AccessibilityController {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
             mAccessibilityTracing.logTrace(TAG + ".onSomeWindowResizedOrMoved",
                     FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
-                    "displayIds={" + displayIds.toString() + "}", "".getBytes(), callingUid);
+                    "displayIds={" + Arrays.toString(displayIds) + "}", "".getBytes(), callingUid);
         }
         // Not relevant for the display magnifier.
         for (int i = 0; i < displayIds.length; i++) {
