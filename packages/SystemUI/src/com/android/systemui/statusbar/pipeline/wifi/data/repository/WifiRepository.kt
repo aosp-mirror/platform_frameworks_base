@@ -46,7 +46,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * Provides data related to the wifi state.
@@ -118,12 +118,19 @@ class WifiRepositoryImpl @Inject constructor(
             }
         }
 
-        trySend(WIFI_NETWORK_DEFAULT)
         connectivityManager.registerNetworkCallback(WIFI_NETWORK_CALLBACK_REQUEST, callback)
 
         awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
     }
-        .shareIn(scope, started = SharingStarted.WhileSubscribed())
+        // There will be multiple wifi icons in different places that will frequently
+        // subscribe/unsubscribe to flows as the views attach/detach. Using [stateIn] ensures that
+        // new subscribes will get the latest value immediately upon subscription. Otherwise, the
+        // views could show stale data. See b/244173280.
+        .stateIn(
+            scope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = WIFI_NETWORK_DEFAULT
+        )
 
     override val wifiActivity: Flow<WifiActivityModel> =
             if (wifiManager == null) {
