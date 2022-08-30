@@ -65,8 +65,6 @@ public class AudioSystem
 
     private static final String TAG = "AudioSystem";
 
-    private static final int SOURCE_CODEC_TYPE_OPUS = 6; // TODO remove in U
-
     // private constructor to prevent instantiating AudioSystem
     private AudioSystem() {
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
@@ -293,7 +291,7 @@ public class AudioSystem
             case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
             case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
             case AUDIO_FORMAT_LC3: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3;
-            case AUDIO_FORMAT_OPUS: return SOURCE_CODEC_TYPE_OPUS; // TODO update in U
+            case AUDIO_FORMAT_OPUS: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS;
             default:
                 Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
                         + " for conversion to BT codec");
@@ -336,7 +334,7 @@ public class AudioSystem
                 return AudioSystem.AUDIO_FORMAT_LDAC;
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
                 return AudioSystem.AUDIO_FORMAT_LC3;
-            case SOURCE_CODEC_TYPE_OPUS: // TODO update in U
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
                 return AudioSystem.AUDIO_FORMAT_OPUS;
             default:
                 Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
