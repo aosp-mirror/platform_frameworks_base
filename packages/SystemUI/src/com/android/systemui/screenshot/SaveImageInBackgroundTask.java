@@ -48,6 +48,8 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -71,6 +73,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
     private final Context mContext;
+    private FeatureFlags mFlags;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final ScreenshotController.SaveImageInBackgroundData mParams;
     private final ScreenshotController.SavedImageData mImageData;
@@ -84,7 +87,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final ImageExporter mImageExporter;
     private long mImageTime;
 
-    SaveImageInBackgroundTask(Context context, ImageExporter exporter,
+    SaveImageInBackgroundTask(
+            Context context,
+            FeatureFlags flags,
+            ImageExporter exporter,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotController.SaveImageInBackgroundData data,
             Supplier<ActionTransition> sharedElementTransition,
@@ -92,6 +98,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     screenshotNotificationSmartActionsProvider
     ) {
         mContext = context;
+        mFlags = flags;
         mScreenshotSmartActions = screenshotSmartActions;
         mImageData = new ScreenshotController.SavedImageData();
         mQuickShareData = new ScreenshotController.QuickShareData();
@@ -117,7 +124,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
         // TODO: move to constructor / from ScreenshotRequest
         final UUID requestId = UUID.randomUUID();
-        final UserHandle user = getUserHandleOfForegroundApplication(mContext);
+        final UserHandle user = mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
+                ? mParams.owner : getUserHandleOfForegroundApplication(mContext);
 
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
@@ -133,8 +141,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             // Call synchronously here since already on a background thread.
             ListenableFuture<ImageExporter.Result> future =
-                    mImageExporter.export(Runnable::run, requestId, image);
+                    mImageExporter.export(Runnable::run, requestId, image, mParams.owner);
             ImageExporter.Result result = future.get();
+            Log.d(TAG, "Saved screenshot: " + result);
             final Uri uri = result.uri;
             mImageTime = result.timestamp;
 
@@ -157,6 +166,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             }
 
             mImageData.uri = uri;
+            mImageData.owner = user;
             mImageData.smartActions = smartActions;
             mImageData.shareTransition = createShareAction(mContext, mContext.getResources(), uri);
             mImageData.editTransition = createEditAction(mContext, mContext.getResources(), uri);

@@ -30,6 +30,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -387,7 +388,9 @@ public class LongScreenshotActivity extends Activity {
 
         mOutputBitmap = renderBitmap(drawable, bounds);
         ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
-                mBackgroundExecutor, UUID.randomUUID(), mOutputBitmap, ZonedDateTime.now());
+                mBackgroundExecutor, UUID.randomUUID(), mOutputBitmap, ZonedDateTime.now(),
+                // TODO: Owner must match the owner of the captured window.
+                Process.myUserHandle());
         exportFuture.addListener(() -> onExportCompleted(action, exportFuture), mUiExecutor);
     }
 
