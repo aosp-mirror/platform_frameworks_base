@@ -119,7 +119,7 @@ final class MediaButtonReceiverHolder {
         ComponentName componentName = getComponentName(pendingIntent, componentType);
         if (componentName != null) {
             if (!TextUtils.equals(componentName.getPackageName(), sessionPackageName)) {
-                EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet Logging.
+                EventLog.writeEvent(0x534e4554, "238177121", -1, "");
                 throw new IllegalArgumentException("ComponentName does not belong to "
                         + "sessionPackageName. sessionPackageName = " + sessionPackageName
                         + ", ComponentName pkg = " + componentName.getPackageName());
