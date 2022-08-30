@@ -216,19 +216,31 @@ public abstract class BiometricServiceRegistry<T extends BiometricServiceProvide
             return null;
         }
 
-        if (mAllProps.size() > 1) {
-            Slog.e(TAG, "getSingleProvider() called but multiple sensors present: "
-                    + mAllProps.size());
-        }
+        // TODO(b/242837110): remove the try-catch once the bug is fixed.
+        try {
+            if (mAllProps.size() > 1) {
+                Slog.e(TAG, "getSingleProvider() called but multiple sensors present: "
+                        + mAllProps.size());
+            }
 
-        final int sensorId = mAllProps.get(0).sensorId;
-        final T provider = getProviderForSensor(sensorId);
-        if (provider != null) {
-            return new Pair<>(sensorId, provider);
-        }
+            final int sensorId = mAllProps.get(0).sensorId;
+            final T provider = getProviderForSensor(sensorId);
+            if (provider != null) {
+                return new Pair<>(sensorId, provider);
+            }
 
-        Slog.e(TAG, "Single sensor: " + sensorId + ", but provider not found");
-        return null;
+            Slog.e(TAG, "Single sensor: " + sensorId + ", but provider not found");
+            return null;
+        } catch (NullPointerException e) {
+            final String extra;
+            if (mAllProps == null) {
+                extra = "mAllProps: null";
+            } else {
+                extra = "mAllProps.size(): " + mAllProps.size();
+            }
+            Slog.e(TAG, "This shouldn't happen. " + extra, e);
+            throw e;
+        }
     }
 
     /**
