@@ -753,7 +753,7 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Returns the vibration pattern for notifications posted to this channel. Will be ignored if
-     * vibration is not enabled ({@link #shouldVibrate()}.
+     * vibration is not enabled ({@link #shouldVibrate()}).
      */
     public long[] getVibrationPattern() {
         return mVibration;
