@@ -36,7 +36,6 @@ import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.Log;
@@ -58,8 +57,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,10 +77,6 @@ import java.util.zip.ZipEntry;
 public class DexManager {
     private static final String TAG = "DexManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
-    private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
-            "pm.dexopt.priv-apps-oob-list";
 
     // System server cannot load executable code outside system partitions.
     // However it can load verification data - thus we pick the "verify" compiler filter.
@@ -907,45 +900,6 @@ public class DexManager {
     public void writePackageDexUsageNow() {
         mPackageDexUsage.writeNow();
         mDynamicCodeLogger.writeNow();
-    }
-
-    /**
-     * Returns whether the given package is in the list of privilaged apps that should run out of
-     * box. This only makes sense if the feature is enabled. Note that when the the OOB list is
-     * empty, all priv apps will run in OOB mode.
-     */
-    public static boolean isPackageSelectedToRunOob(String packageName) {
-        return isPackageSelectedToRunOob(Arrays.asList(packageName));
-    }
-
-    /**
-     * Returns whether any of the given packages are in the list of privilaged apps that should run
-     * out of box. This only makes sense if the feature is enabled. Note that when the the OOB list
-     * is empty, all priv apps will run in OOB mode.
-     */
-    public static boolean isPackageSelectedToRunOob(Collection<String> packageNamesInSameProcess) {
-        return isPackageSelectedToRunOobInternal(
-                SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false),
-                SystemProperties.get(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL"),
-                packageNamesInSameProcess);
-    }
-
-    @VisibleForTesting
-    /* package */ static boolean isPackageSelectedToRunOobInternal(boolean isEnabled,
-            String whitelist, Collection<String> packageNamesInSameProcess) {
-        if (!isEnabled) {
-            return false;
-        }
-
-        if ("ALL".equals(whitelist)) {
-            return true;
-        }
-        for (String oobPkgName : whitelist.split(",")) {
-            if (packageNamesInSameProcess.contains(oobPkgName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
