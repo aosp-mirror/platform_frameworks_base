@@ -501,6 +501,18 @@ class TaskFragmentContainer {
         return new Size(maxMinWidth, maxMinHeight);
     }
 
+    /** Whether the current TaskFragment is above the {@code other} TaskFragment. */
+    boolean isAbove(@NonNull TaskFragmentContainer other) {
+        if (mTaskContainer != other.mTaskContainer) {
+            throw new IllegalArgumentException(
+                    "Trying to compare two TaskFragments in different Task.");
+        }
+        if (this == other) {
+            throw new IllegalArgumentException("Trying to compare a TaskFragment with itself.");
+        }
+        return mTaskContainer.indexOf(this) > mTaskContainer.indexOf(other);
+    }
+
     @Override
     public String toString() {
         return toString(true /* includeContainersToFinishOnExit */);
