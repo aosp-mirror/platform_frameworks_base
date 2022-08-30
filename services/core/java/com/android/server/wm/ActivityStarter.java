@@ -2454,6 +2454,7 @@ class ActivityStarter {
 
         mInTask = null;
         mInTaskFragment = null;
+        mAddingToTaskFragment = null;
         mAddingToTask = false;
 
         mNewTaskInfo = null;
