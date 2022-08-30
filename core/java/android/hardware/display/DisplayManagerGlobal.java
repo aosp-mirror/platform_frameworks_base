@@ -32,6 +32,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
+import android.hardware.OverlayProperties;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
@@ -112,6 +113,7 @@ public final class DisplayManagerGlobal {
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<>();
     private final ColorSpace mWideColorSpace;
+    private final OverlayProperties mOverlayProperties = new OverlayProperties();
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
@@ -724,6 +726,11 @@ public final class DisplayManagerGlobal {
      */
     public ColorSpace getPreferredWideGamutColorSpace() {
         return mWideColorSpace;
+    }
+
+    /** @hide */
+    public OverlayProperties getOverlaySupport() {
+        return mOverlayProperties;
     }
 
     /**
