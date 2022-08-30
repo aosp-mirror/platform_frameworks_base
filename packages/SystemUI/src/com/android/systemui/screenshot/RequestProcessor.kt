@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot
 
 import android.graphics.Insets
+import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
@@ -61,8 +62,9 @@ class RequestProcessor @Inject constructor(
         ) {
 
             val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
+            Log.d(TAG, "findPrimaryContent: $info")
 
-            result = if (policy.isManagedProfile(info.userId)) {
+            result = if (policy.isManagedProfile(info.user.identifier)) {
                 val image = capture.captureTask(info.taskId)
                     ?: error("Task snapshot returned a null Bitmap!")
 
@@ -70,7 +72,7 @@ class RequestProcessor @Inject constructor(
                 ScreenshotRequest(
                     TAKE_SCREENSHOT_PROVIDED_IMAGE, request.source,
                     HardwareBitmapBundler.hardwareBitmapToBundle(image),
-                    info.bounds, Insets.NONE, info.taskId, info.userId, info.component
+                    info.bounds, Insets.NONE, info.taskId, info.user.identifier, info.component
                 )
             } else {
                 // Create a new request of the same type which includes the top component
