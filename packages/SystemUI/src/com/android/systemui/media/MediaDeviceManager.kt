@@ -265,7 +265,6 @@ class MediaDeviceManager @Inject constructor(
             updateCurrent()
         }
 
-
         override fun onBroadcastStarted(reason: Int, broadcastId: Int) {
             if (DEBUG) {
                 Log.d(TAG, "onBroadcastStarted(), reason = $reason , broadcastId = $broadcastId")
@@ -279,8 +278,10 @@ class MediaDeviceManager @Inject constructor(
             }
         }
 
-        override fun onBroadcastMetadataChanged(broadcastId: Int,
-                                                metadata: BluetoothLeBroadcastMetadata) {
+        override fun onBroadcastMetadataChanged(
+            broadcastId: Int,
+            metadata: BluetoothLeBroadcastMetadata
+        ) {
             if (DEBUG) {
                 Log.d(TAG, "onBroadcastMetadataChanged(), broadcastId = $broadcastId , " +
                         "metadata = $metadata")
@@ -291,7 +292,6 @@ class MediaDeviceManager @Inject constructor(
         override fun onBroadcastStopped(reason: Int, broadcastId: Int) {
             if (DEBUG) {
                 Log.d(TAG, "onBroadcastStopped(), reason = $reason , broadcastId = $broadcastId")
-
             }
             updateCurrent()
         }
@@ -344,7 +344,11 @@ class MediaDeviceManager @Inject constructor(
 
                 // If we have a controller but get a null route, then don't trust the device
                 val enabled = device != null && (controller == null || route != null)
-                val name = route?.name?.toString() ?: device?.name
+                val name = if (controller == null || route != null) {
+                    route?.name?.toString() ?: device?.name
+                } else {
+                    null
+                }
                 current = MediaDeviceData(enabled, device?.iconWithoutBackground, name,
                         id = device?.id, showBroadcastButton = false)
             }
