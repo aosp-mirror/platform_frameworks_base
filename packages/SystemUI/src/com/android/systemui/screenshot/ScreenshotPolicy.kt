@@ -19,6 +19,7 @@ package com.android.systemui.screenshot
 import android.annotation.UserIdInt
 import android.content.ComponentName
 import android.graphics.Rect
+import android.os.UserHandle
 import android.view.Display
 
 /**
@@ -42,7 +43,7 @@ interface ScreenshotPolicy {
     data class DisplayContentInfo(
         val component: ComponentName,
         val bounds: Rect,
-        @UserIdInt val userId: Int,
+        val user: UserHandle,
         val taskId: Int,
     )
 

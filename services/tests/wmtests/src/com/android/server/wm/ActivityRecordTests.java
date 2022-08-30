@@ -2871,6 +2871,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
         fragmentSetup.accept(taskFragment1, new Rect(0, 0, width / 2, height));
         task.addChild(taskFragment1, POSITION_TOP);
+        assertEquals(task, activity1.mStartingData.mAssociatedTask);
 
         final TaskFragment taskFragment2 = new TaskFragment(
                 mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
@@ -2892,7 +2893,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                 eq(task.mSurfaceControl));
         assertEquals(activity1.mStartingData, startingWindow.mStartingData);
         assertEquals(task.mSurfaceControl, startingWindow.getAnimationLeashParent());
-        assertEquals(task, activity1.mStartingData.mAssociatedTask);
         assertEquals(taskFragment1.getBounds(), activity1.getBounds());
         // The activity was resized by task fragment, but starting window must still cover the task.
         assertEquals(taskBounds, activity1.mStartingWindow.getBounds());
@@ -2900,7 +2900,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         // The starting window is only removed when all embedded activities are drawn.
         final WindowState activityWindow = mock(WindowState.class);
         activity1.onFirstWindowDrawn(activityWindow);
-        assertNotNull(activity1.mStartingWindow);
         activity2.onFirstWindowDrawn(activityWindow);
         assertNull(activity1.mStartingWindow);
     }

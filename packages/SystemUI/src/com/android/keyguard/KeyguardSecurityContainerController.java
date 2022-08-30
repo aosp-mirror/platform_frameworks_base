@@ -418,6 +418,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, state);
 
             getCurrentSecurityController().onResume(reason);
+            updateSideFpsVisibility();
         }
         mView.onResume(
                 mSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser()),

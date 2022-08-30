@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 
@@ -47,7 +46,7 @@ import java.util.List;
  * user. After an entry makes its way into the active state, we sort and filter the entire set to
  * repopulate the visible set.
  */
-public class NotificationEntryManager implements VisualStabilityManager.Callback {
+public class NotificationEntryManager {
 
     private final NotificationEntryManagerLogger mLogger;
 
@@ -83,11 +82,6 @@ public class NotificationEntryManager implements VisualStabilityManager.Callback
      */
     public void removeNotificationEntryListener(NotificationEntryListener listener) {
         mNotificationEntryListeners.remove(listener);
-    }
-
-    @Override
-    public void onChangeAllowed() {
-        updateNotifications("reordering is now allowed");
     }
 
     /**
