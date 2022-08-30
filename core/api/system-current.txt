@@ -6134,6 +6134,11 @@ package android.media {
     field public static final int ROLE_OUTPUT = 2; // 0x2
   }
 
+  public class AudioDeviceVolumeManager {
+    ctor public AudioDeviceVolumeManager(@NonNull android.content.Context);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
+  }
+
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAttributes();
@@ -6451,6 +6456,33 @@ package android.media {
 
   public static interface Spatializer.OnSpatializerOutputChangedListener {
     method public void onSpatializerOutputChanged(@NonNull android.media.Spatializer, @IntRange(from=0) int);
+  }
+
+  public final class VolumeInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.media.VolumeInfo getDefaultVolumeInfo();
+    method public int getMaxVolumeIndex();
+    method public int getMinVolumeIndex();
+    method public int getStreamType();
+    method @Nullable public android.media.audiopolicy.AudioVolumeGroup getVolumeGroup();
+    method public int getVolumeIndex();
+    method public boolean hasStreamType();
+    method public boolean hasVolumeGroup();
+    method public boolean isMuted();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.VolumeInfo> CREATOR;
+    field public static final int INDEX_NOT_SET = -100; // 0xffffff9c
+  }
+
+  public static final class VolumeInfo.Builder {
+    ctor public VolumeInfo.Builder(int);
+    ctor public VolumeInfo.Builder(@NonNull android.media.audiopolicy.AudioVolumeGroup);
+    ctor public VolumeInfo.Builder(@NonNull android.media.VolumeInfo);
+    method @NonNull public android.media.VolumeInfo build();
+    method @NonNull public android.media.VolumeInfo.Builder setMaxVolumeIndex(int);
+    method @NonNull public android.media.VolumeInfo.Builder setMinVolumeIndex(int);
+    method @NonNull public android.media.VolumeInfo.Builder setMuted(boolean);
+    method @NonNull public android.media.VolumeInfo.Builder setVolumeIndex(int);
   }
 
 }
