@@ -16,7 +16,7 @@
 <!-- Wrap in a frame layout so that we can update the margins on the inner layout. (Since this view
      is the root view of a window, we cannot change the root view's margins.) -->
 <!-- Alphas start as 0 because the view will be animated in. -->
-<FrameLayout
+<com.android.systemui.media.taptotransfer.sender.MediaTttChipRootView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/media_ttt_sender_chip"
@@ -97,4 +97,4 @@
             />
 
     </LinearLayout>
-</FrameLayout>
+</com.android.systemui.media.taptotransfer.sender.MediaTttChipRootView>

@@ -85,7 +85,6 @@
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
-    <uses-permission android:name="android.permission.NETWORK_STACK"/>
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -151,6 +150,9 @@
     <uses-permission android:name="android.permission.MANAGE_SLICE_PERMISSIONS" />
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
+
+    <!-- For auto-grant the access to the Settings' slice preferences, e.g. volume slices. -->
+    <uses-permission android:name="android.permission.READ_SEARCH_INDEXABLES" />
 
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
@@ -956,5 +958,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".volume.VolumePanelDialogReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.settings.panel.action.VOLUME" />
+                <action android:name="com.android.systemui.action.LAUNCH_VOLUME_PANEL_DIALOG" />
+                <action android:name="com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

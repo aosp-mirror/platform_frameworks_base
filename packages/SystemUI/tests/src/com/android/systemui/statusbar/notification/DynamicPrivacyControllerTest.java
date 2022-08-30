@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -128,8 +127,6 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
     @Test
     public void testNotNotifiedWithoutNotifications() {
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
-        when(mLockScreenUserManager.shouldHideNotifications(anyInt())).thenReturn(
-                true);
         mDynamicPrivacyController.onUnlockedChanged();
         verifyNoMoreInteractions(mListener);
     }

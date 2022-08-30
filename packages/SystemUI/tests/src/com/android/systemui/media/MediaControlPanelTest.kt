@@ -1051,6 +1051,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindDeviceWithNullName() {
+        val fallbackString = context.getResources().getString(R.string.media_seamless_other_device)
+        player.attachPlayer(viewHolder)
+        val state = mediaData.copy(device = device.copy(name = null))
+        player.bindPlayer(state, PACKAGE)
+        assertThat(seamless.isEnabled()).isTrue()
+        assertThat(seamlessText.getText()).isEqualTo(fallbackString)
+        assertThat(seamless.contentDescription).isEqualTo(fallbackString)
+    }
+
+    @Test
     fun bindDeviceResumptionPlayer() {
         player.attachPlayer(viewHolder)
         val state = mediaData.copy(resumption = true)

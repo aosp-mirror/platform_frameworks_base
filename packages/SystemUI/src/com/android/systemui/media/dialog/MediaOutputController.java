@@ -421,7 +421,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 device.getId());
         boolean isSelectedDeviceInGroup = getSelectedMediaDevice().size() > 1
                 && getSelectedMediaDevice().contains(device);
-        return (!hasAdjustVolumeUserRestriction() && isConnected && !isTransferring())
+        return (!hasAdjustVolumeUserRestriction() && isConnected && !isAnyDeviceTransferring())
                 || isSelectedDeviceInGroup;
     }
 
@@ -726,7 +726,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 UserHandle.of(UserHandle.myUserId()));
     }
 
-    boolean isTransferring() {
+    boolean isAnyDeviceTransferring() {
         synchronized (mMediaDevicesLock) {
             for (MediaDevice device : mMediaDevices) {
                 if (device.getState() == LocalMediaManager.MediaDeviceState.STATE_CONNECTING) {
