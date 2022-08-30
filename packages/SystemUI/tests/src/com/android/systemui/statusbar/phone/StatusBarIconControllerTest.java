@@ -58,7 +58,6 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     @Before
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
-        mDependency.injectMockDependency(DarkIconDispatcher.class);
     }
 
     @Test
@@ -75,7 +74,8 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                 layout,
                 mock(FeatureFlags.class),
                 mock(StatusBarPipelineFlags.class),
-                () -> mock(WifiViewModel.class));
+                () -> mock(WifiViewModel.class),
+                mock(DarkIconDispatcher.class));
         testCallOnAdd_forManager(manager);
     }
 
@@ -116,8 +116,10 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                 LinearLayout group,
                 FeatureFlags featureFlags,
                 StatusBarPipelineFlags statusBarPipelineFlags,
-                Provider<WifiViewModel> wifiViewModelProvider) {
-            super(group, featureFlags, statusBarPipelineFlags, wifiViewModelProvider);
+                Provider<WifiViewModel> wifiViewModelProvider,
+                DarkIconDispatcher darkIconDispatcher) {
+            super(group, featureFlags, statusBarPipelineFlags, wifiViewModelProvider,
+                    darkIconDispatcher);
         }
 
         @Override
