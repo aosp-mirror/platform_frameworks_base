@@ -23,6 +23,7 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.hardware.HardwareBuffer
 import android.os.Bundle
+import android.os.UserHandle
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
@@ -97,7 +98,7 @@ class RequestProcessorTest {
         policy.setManagedProfile(USER_ID, false)
         policy.setDisplayContentInfo(
             policy.getDefaultDisplayId(),
-            DisplayContentInfo(component, bounds, USER_ID, TASK_ID))
+            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
 
         val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
@@ -120,7 +121,7 @@ class RequestProcessorTest {
         // Indicate that the primary content belongs to a manged profile
         policy.setManagedProfile(USER_ID, true)
         policy.setDisplayContentInfo(policy.getDefaultDisplayId(),
-            DisplayContentInfo(component, bounds, USER_ID, TASK_ID))
+            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
 
         val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
@@ -160,7 +161,7 @@ class RequestProcessorTest {
 
         policy.setManagedProfile(USER_ID, false)
         policy.setDisplayContentInfo(policy.getDefaultDisplayId(),
-            DisplayContentInfo(component, bounds, USER_ID, TASK_ID))
+            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
 
         val processedRequest = processor.process(request)
 
@@ -183,7 +184,7 @@ class RequestProcessorTest {
         // Indicate that the primary content belongs to a manged profile
         policy.setManagedProfile(USER_ID, true)
         policy.setDisplayContentInfo(policy.getDefaultDisplayId(),
-            DisplayContentInfo(component, bounds, USER_ID, TASK_ID))
+            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
 
         val processedRequest = processor.process(request)
 
