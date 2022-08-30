@@ -5,10 +5,8 @@ package com.android.server.display.config {
     ctor public AutoBrightness();
     method public final java.math.BigInteger getBrighteningLightDebounceMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceMillis();
-    method public final com.android.server.display.config.DisplayBrightnessMapping getDisplayBrightnessMapping();
     method public final void setBrighteningLightDebounceMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceMillis(java.math.BigInteger);
-    method public final void setDisplayBrightnessMapping(com.android.server.display.config.DisplayBrightnessMapping);
   }
 
   public class BrightnessThresholds {
@@ -43,19 +41,6 @@ package com.android.server.display.config {
   public class DensityMapping {
     ctor public DensityMapping();
     method public java.util.List<com.android.server.display.config.Density> getDensity();
-  }
-
-  public class DisplayBrightnessMapping {
-    ctor public DisplayBrightnessMapping();
-    method public final java.util.List<com.android.server.display.config.DisplayBrightnessPoint> getDisplayBrightnessPoint();
-  }
-
-  public class DisplayBrightnessPoint {
-    ctor public DisplayBrightnessPoint();
-    method public final java.math.BigInteger getLux();
-    method public final java.math.BigInteger getNits();
-    method public final void setLux(java.math.BigInteger);
-    method public final void setNits(java.math.BigInteger);
   }
 
   public class DisplayConfiguration {
