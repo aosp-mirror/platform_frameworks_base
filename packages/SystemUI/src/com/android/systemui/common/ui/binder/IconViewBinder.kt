@@ -24,6 +24,7 @@ object IconViewBinder {
         icon: Icon,
         view: ImageView,
     ) {
+        ContentDescriptionViewBinder.bind(icon.contentDescription, view)
         when (icon) {
             is Icon.Loaded -> view.setImageDrawable(icon.drawable)
             is Icon.Resource -> view.setImageResource(icon.res)

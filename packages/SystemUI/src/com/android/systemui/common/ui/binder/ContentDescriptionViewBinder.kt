@@ -21,14 +21,16 @@ import com.android.systemui.common.shared.model.ContentDescription
 
 object ContentDescriptionViewBinder {
     fun bind(
-        contentDescription: ContentDescription,
+        contentDescription: ContentDescription?,
         view: View,
     ) {
-        when (contentDescription) {
-            is ContentDescription.Loaded -> view.contentDescription = contentDescription.description
-            is ContentDescription.Resource -> {
-                view.contentDescription = view.context.resources.getString(contentDescription.res)
+        view.contentDescription =
+            when (contentDescription) {
+                null -> null
+                is ContentDescription.Loaded -> contentDescription.description
+                is ContentDescription.Resource -> {
+                    view.context.resources.getString(contentDescription.res)
+                }
             }
-        }
     }
 }

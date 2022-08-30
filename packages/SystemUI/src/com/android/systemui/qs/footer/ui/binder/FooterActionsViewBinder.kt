@@ -31,7 +31,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
-import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
@@ -233,10 +232,8 @@ object FooterActionsViewBinder {
 
         val icon = model.icon
         val iconView = button.icon
-        val contentDescription = model.contentDescription
 
         IconViewBinder.bind(icon, iconView)
-        ContentDescriptionViewBinder.bind(contentDescription, iconView)
         if (model.iconTint != null) {
             iconView.setColorFilter(model.iconTint, PorterDuff.Mode.SRC_IN)
         } else {
