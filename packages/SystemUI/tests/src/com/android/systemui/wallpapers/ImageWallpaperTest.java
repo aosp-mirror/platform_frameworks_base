@@ -41,6 +41,7 @@ import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.wallpapers.gl.ImageWallpaperRenderer;
 
 import org.junit.Before;
@@ -72,6 +73,8 @@ public class ImageWallpaperTest extends SysuiTestCase {
     private Bitmap mWallpaperBitmap;
     @Mock
     private Handler mHandler;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     private CountDownLatch mEventCountdown;
 
@@ -100,7 +103,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
     }
 
     private ImageWallpaper createImageWallpaper() {
-        return new ImageWallpaper() {
+        return new ImageWallpaper(mFeatureFlags) {
             @Override
             public Engine onCreateEngine() {
                 return new GLEngine(mHandler) {
