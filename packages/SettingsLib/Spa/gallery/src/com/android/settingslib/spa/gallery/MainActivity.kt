@@ -16,6 +16,6 @@
 
 package com.android.settingslib.spa.gallery
 
-import com.android.settingslib.spa.framework.SpaActivity
+import com.android.settingslib.spa.framework.BrowseActivity
 
-class MainActivity : SpaActivity(galleryPageRepository)
+class MainActivity : BrowseActivity(galleryPageProviders)

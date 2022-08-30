@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -314,13 +316,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.startWakeAndUnlock(
                 BiometricUnlockController.MODE_UNLOCK_COLLAPSING);
 
-        // THEN we collpase the panels and notify authenticated
-        verify(mShadeController).animateCollapsePanels(
-                /* flags */ anyInt(),
-                /* force */ eq(true),
-                /* delayed */ eq(false),
-                /* speedUpFactor */ anyFloat()
-        );
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(
                 /* strongAuth */ eq(false));
     }
@@ -395,15 +390,19 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onUdfpsConsecutivelyFailedTwoTimes_showBouncer() {
+    public void onUdfpsConsecutivelyFailedThreeTimes_showBouncer() {
         // GIVEN UDFPS is supported
         when(mUpdateMonitor.isUdfpsSupported()).thenReturn(true);
 
-        // WHEN udfps fails once - then don't show the bouncer
+        // WHEN udfps fails once - then don't show the bouncer yet
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
         verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
 
-        // WHEN udfps fails the second time
+        // WHEN udfps fails the second time - then don't show the bouncer yet
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+        verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
+
+        // WHEN udpfs fails the third time
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
 
         // THEN show the bouncer
@@ -427,8 +426,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onFPFailureNoHaptics_notDeviceInteractive_showBouncer() {
-        // GIVEN no vibrator and the screen is off
+    public void onFPFailureNoHaptics_notInteractive_showLockScreen() {
+        // GIVEN no vibrator and device is dreaming
         when(mVibratorHelper.hasVibrator()).thenReturn(false);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(false);
         when(mUpdateMonitor.isDreaming()).thenReturn(false);
@@ -436,15 +435,12 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         // WHEN FP fails
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
 
-        // after device is finished waking up
-        mBiometricUnlockController.mWakefulnessObserver.onFinishedWakingUp();
-
-        // THEN show the bouncer
-        verify(mStatusBarKeyguardViewManager).showBouncer(true);
+        // THEN wakeup the device
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     @Test
-    public void onFPFailureNoHaptics_dreaming_showBouncer() {
+    public void onFPFailureNoHaptics_dreaming_showLockScreen() {
         // GIVEN no vibrator and device is dreaming
         when(mVibratorHelper.hasVibrator()).thenReturn(false);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
@@ -453,7 +449,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         // WHEN FP fails
         mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
 
-        // THEN show the bouncer
-        verify(mStatusBarKeyguardViewManager).showBouncer(true);
+        // THEN wakeup the device
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
     }
 }

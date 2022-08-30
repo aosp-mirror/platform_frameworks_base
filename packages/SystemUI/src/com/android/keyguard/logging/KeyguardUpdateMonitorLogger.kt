@@ -45,7 +45,7 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
 
     fun e(@CompileTimeConstant msg: String) = log(msg, ERROR)
 
-    fun v(@CompileTimeConstant msg: String) = log(msg, VERBOSE)
+    fun v(@CompileTimeConstant msg: String) = log(msg, ERROR)
 
     fun w(@CompileTimeConstant msg: String) = log(msg, WARNING)
 

@@ -107,6 +107,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.MotionEvent.ToolType;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
@@ -947,7 +948,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * @hide
          */
         @Override
-        public void updateEditorToolType(int toolType) {
+        public void updateEditorToolType(@ToolType int toolType) {
             onUpdateEditorToolType(toolType);
         }
 
@@ -3079,10 +3080,13 @@ public class InputMethodService extends AbstractInputMethodService {
      * {@link MotionEvent#getToolType(int)} was used to click the editor.
      * e.g. when toolType is {@link MotionEvent#TOOL_TYPE_STYLUS}, IME may choose to show a
      * companion widget instead of normal virtual keyboard.
+     * <p> This method is called after {@link #onStartInput(EditorInfo, boolean)} and before
+     * {@link #onStartInputView(EditorInfo, boolean)} when editor was clicked with a known tool
+     * type.</p>
      * <p> Default implementation does nothing. </p>
      * @param toolType what {@link MotionEvent#getToolType(int)} was used to click on editor.
      */
-    public void onUpdateEditorToolType(int toolType) {
+    public void onUpdateEditorToolType(@ToolType int toolType) {
         // Intentionally empty
     }
 

@@ -25,13 +25,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.settingslib.spa.R
-import com.android.settingslib.spa.framework.api.SettingsPageProvider
-import com.android.settingslib.spa.framework.api.SettingsPageRepository
+import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 
-open class SpaActivity(
-    private val settingsPageRepository: SettingsPageRepository,
+open class BrowseActivity(
+    private val sppRepository: SettingsPageProviderRepository,
 ) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
@@ -47,12 +47,12 @@ open class SpaActivity(
     @Composable
     private fun MainContent() {
         val startDestination =
-            intent?.getStringExtra(KEY_START_DESTINATION) ?: settingsPageRepository.startDestination
+            intent?.getStringExtra(KEY_START_DESTINATION) ?: sppRepository.getDefaultStartPageName()
 
         val navController = rememberNavController()
         CompositionLocalProvider(navController.localNavController()) {
             NavHost(navController, startDestination) {
-                for (page in settingsPageRepository.allPages) {
+                for (page in sppRepository.getAllProviders()) {
                     composable(
                         route = page.route,
                         arguments = page.arguments,

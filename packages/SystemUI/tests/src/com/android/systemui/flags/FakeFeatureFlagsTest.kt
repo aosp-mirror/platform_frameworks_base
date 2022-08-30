@@ -41,7 +41,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
      * specified. If not, an exception is thrown.
      */
     @Test
-    fun throwsIfUnspecifiedFlagIsAccessed() {
+    fun accessingUnspecifiedFlags_throwsException() {
         val flags: FeatureFlags = FakeFeatureFlags()
         try {
             assertThat(flags.isEnabled(Flags.TEAMFOOD)).isFalse()
@@ -88,7 +88,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun specifiedFlagsReturnCorrectValues() {
+    fun specifiedFlags_returnCorrectValues() {
         val flags = FakeFeatureFlags()
         flags.set(unreleasedFlag, false)
         flags.set(releasedFlag, false)
@@ -113,5 +113,126 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         assertThat(flags.isEnabled(resourceBooleanFlag)).isTrue()
         assertThat(flags.isEnabled(sysPropBooleanFlag)).isTrue()
         assertThat(flags.getString(resourceStringFlag)).isEqualTo("Android")
+    }
+
+    @Test
+    fun listenerForBooleanFlag_calledOnlyWhenFlagChanged() {
+        val flags = FakeFeatureFlags()
+        val listener = VerifyingListener()
+        flags.addListener(unreleasedFlag, listener)
+
+        flags.set(unreleasedFlag, true)
+        flags.set(unreleasedFlag, true)
+        flags.set(unreleasedFlag, false)
+        flags.set(unreleasedFlag, false)
+
+        listener.verifyInOrder(unreleasedFlag.id, unreleasedFlag.id)
+    }
+
+    @Test
+    fun listenerForStringFlag_calledOnlyWhenFlagChanged() {
+        val flags = FakeFeatureFlags()
+        val listener = VerifyingListener()
+        flags.addListener(stringFlag, listener)
+
+        flags.set(stringFlag, "Test")
+        flags.set(stringFlag, "Test")
+
+        listener.verifyInOrder(stringFlag.id)
+    }
+
+    @Test
+    fun listenerForBooleanFlag_notCalledAfterRemoved() {
+        val flags = FakeFeatureFlags()
+        val listener = VerifyingListener()
+        flags.addListener(unreleasedFlag, listener)
+        flags.set(unreleasedFlag, true)
+        flags.removeListener(listener)
+        flags.set(unreleasedFlag, false)
+
+        listener.verifyInOrder(unreleasedFlag.id)
+    }
+
+    @Test
+    fun listenerForStringFlag_notCalledAfterRemoved() {
+        val flags = FakeFeatureFlags()
+        val listener = VerifyingListener()
+
+        flags.addListener(stringFlag, listener)
+        flags.set(stringFlag, "Test")
+        flags.removeListener(listener)
+        flags.set(stringFlag, "Other")
+
+        listener.verifyInOrder(stringFlag.id)
+    }
+
+    @Test
+    fun listenerForMultipleFlags_calledWhenFlagsChange() {
+        val flags = FakeFeatureFlags()
+        val listener = VerifyingListener()
+        flags.addListener(unreleasedFlag, listener)
+        flags.addListener(releasedFlag, listener)
+
+        flags.set(releasedFlag, true)
+        flags.set(unreleasedFlag, true)
+
+        listener.verifyInOrder(releasedFlag.id, unreleasedFlag.id)
+    }
+
+    @Test
+    fun listenerForMultipleFlags_notCalledAfterRemoved() {
+        val flags = FakeFeatureFlags()
+        val listener = VerifyingListener()
+
+        flags.addListener(unreleasedFlag, listener)
+        flags.addListener(releasedFlag, listener)
+        flags.set(releasedFlag, true)
+        flags.set(unreleasedFlag, true)
+        flags.removeListener(listener)
+        flags.set(releasedFlag, false)
+        flags.set(unreleasedFlag, false)
+
+        listener.verifyInOrder(releasedFlag.id, unreleasedFlag.id)
+    }
+
+    @Test
+    fun multipleListenersForSingleFlag_allAreCalledWhenChanged() {
+        val flags = FakeFeatureFlags()
+        val listener1 = VerifyingListener()
+        val listener2 = VerifyingListener()
+        flags.addListener(releasedFlag, listener1)
+        flags.addListener(releasedFlag, listener2)
+
+        flags.set(releasedFlag, true)
+
+        listener1.verifyInOrder(releasedFlag.id)
+        listener2.verifyInOrder(releasedFlag.id)
+    }
+
+    @Test
+    fun multipleListenersForSingleFlag_removedListenerNotCalledAfterRemoval() {
+        val flags = FakeFeatureFlags()
+        val listener1 = VerifyingListener()
+        val listener2 = VerifyingListener()
+        flags.addListener(releasedFlag, listener1)
+        flags.addListener(releasedFlag, listener2)
+
+        flags.set(releasedFlag, true)
+        flags.removeListener(listener2)
+        flags.set(releasedFlag, false)
+
+        listener1.verifyInOrder(releasedFlag.id, releasedFlag.id)
+        listener2.verifyInOrder(releasedFlag.id)
+    }
+
+    class VerifyingListener : FlagListenable.Listener {
+        var flagEventIds = mutableListOf<Int>()
+        override fun onFlagChanged(event: FlagListenable.FlagEvent) {
+            flagEventIds.add(event.flagId)
+        }
+
+        fun verifyInOrder(vararg eventIds: Int) {
+            assertThat(flagEventIds).containsExactlyElementsIn(eventIds.asList())
+        }
     }
 }

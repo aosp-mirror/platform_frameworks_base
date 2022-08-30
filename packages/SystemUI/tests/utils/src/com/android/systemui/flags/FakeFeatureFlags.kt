@@ -16,14 +16,12 @@
 
 package com.android.systemui.flags
 
-import android.util.SparseArray
-import android.util.SparseBooleanArray
-import androidx.core.util.containsKey
-
 class FakeFeatureFlags : FeatureFlags {
-    private val booleanFlags = SparseBooleanArray()
-    private val stringFlags = SparseArray<String>()
+    private val booleanFlags = mutableMapOf<Int, Boolean>()
+    private val stringFlags = mutableMapOf<Int, String>()
     private val knownFlagNames = mutableMapOf<Int, String>()
+    private val flagListeners = mutableMapOf<Int, MutableSet<FlagListenable.Listener>>()
+    private val listenerFlagIds = mutableMapOf<FlagListenable.Listener, MutableSet<Int>>()
 
     init {
         Flags.getFlagFields().forEach { field ->
@@ -33,27 +31,52 @@ class FakeFeatureFlags : FeatureFlags {
     }
 
     fun set(flag: BooleanFlag, value: Boolean) {
-        booleanFlags.put(flag.id, value)
+        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+            notifyFlagChanged(flag)
+        }
     }
 
     fun set(flag: DeviceConfigBooleanFlag, value: Boolean) {
-        booleanFlags.put(flag.id, value)
+        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+            notifyFlagChanged(flag)
+        }
     }
 
     fun set(flag: ResourceBooleanFlag, value: Boolean) {
-        booleanFlags.put(flag.id, value)
+        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+            notifyFlagChanged(flag)
+        }
     }
 
     fun set(flag: SysPropBooleanFlag, value: Boolean) {
-        booleanFlags.put(flag.id, value)
+        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+            notifyFlagChanged(flag)
+        }
     }
 
     fun set(flag: StringFlag, value: String) {
-        stringFlags.put(flag.id, value)
+        if (stringFlags.put(flag.id, value)?.let { value != it } == null) {
+            notifyFlagChanged(flag)
+        }
     }
 
     fun set(flag: ResourceStringFlag, value: String) {
-        stringFlags.put(flag.id, value)
+        if (stringFlags.put(flag.id, value)?.let { value != it } == null) {
+            notifyFlagChanged(flag)
+        }
+    }
+
+    private fun notifyFlagChanged(flag: Flag<*>) {
+        flagListeners[flag.id]?.let { listeners ->
+            listeners.forEach { listener ->
+                listener.onFlagChanged(
+                    object : FlagListenable.FlagEvent {
+                        override val flagId = flag.id
+                        override fun requestNoRestart() {}
+                    }
+                )
+            }
+        }
     }
 
     override fun isEnabled(flag: UnreleasedFlag): Boolean = requireBooleanValue(flag.id)
@@ -70,25 +93,30 @@ class FakeFeatureFlags : FeatureFlags {
 
     override fun getString(flag: ResourceStringFlag): String = requireStringValue(flag.id)
 
-    override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {}
+    override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {
+        flagListeners.getOrPut(flag.id) { mutableSetOf() }.add(listener)
+        listenerFlagIds.getOrPut(listener) { mutableSetOf() }.add(flag.id)
+    }
 
-    override fun removeListener(listener: FlagListenable.Listener) {}
+    override fun removeListener(listener: FlagListenable.Listener) {
+        listenerFlagIds.remove(listener)?.let {
+                flagIds -> flagIds.forEach {
+                        id -> flagListeners[id]?.remove(listener)
+                }
+        }
+    }
 
     private fun flagName(flagId: Int): String {
         return knownFlagNames[flagId] ?: "UNKNOWN(id=$flagId)"
     }
 
     private fun requireBooleanValue(flagId: Int): Boolean {
-        if (!booleanFlags.containsKey(flagId)) {
-            throw IllegalStateException("Flag ${flagName(flagId)} was accessed but not specified.")
-        }
         return booleanFlags[flagId]
+            ?: error("Flag ${flagName(flagId)} was accessed but not specified.")
     }
 
     private fun requireStringValue(flagId: Int): String {
-        if (!stringFlags.containsKey(flagId)) {
-            throw IllegalStateException("Flag ${flagName(flagId)} was accessed but not specified.")
-        }
         return stringFlags[flagId]
+            ?: error("Flag ${flagName(flagId)} was accessed but not specified.")
     }
 }

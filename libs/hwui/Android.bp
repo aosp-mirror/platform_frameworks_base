@@ -345,6 +345,7 @@ cc_defaults {
         "jni/PaintFilter.cpp",
         "jni/Path.cpp",
         "jni/PathEffect.cpp",
+        "jni/PathIterator.cpp",
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
         "jni/Region.cpp",

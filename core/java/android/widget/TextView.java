@@ -72,6 +72,7 @@ import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -98,12 +99,14 @@ import android.text.BoringLayout;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
+import android.text.GraphemeClusterSegmentIterator;
 import android.text.GraphicsOperations;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.ParcelableSpan;
 import android.text.PrecomputedText;
+import android.text.SegmentIterator;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
@@ -117,6 +120,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
+import android.text.WordSegmentIterator;
 import android.text.method.AllCapsTransformationMethod;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
@@ -183,11 +187,15 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.SelectGesture;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
@@ -9280,6 +9288,83 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public boolean onPrivateIMECommand(String action, Bundle data) {
         return false;
+    }
+
+    /** @hide */
+    public int performHandwritingSelectGesture(@NonNull SelectGesture gesture) {
+        int[] range = getRangeForRect(gesture.getSelectionArea(), gesture.getGranularity());
+        if (range == null) {
+            return handleGestureFailure(gesture);
+        }
+        Selection.setSelection(getEditableText(), range[0], range[1]);
+        mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
+        return 0;
+    }
+
+    /** @hide */
+    public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
+        int[] range = getRangeForRect(gesture.getDeletionArea(), gesture.getGranularity());
+        if (range == null) {
+            return handleGestureFailure(gesture);
+        }
+        getEditableText().delete(range[0], range[1]);
+        Selection.setSelection(getEditableText(), range[0]);
+        // TODO: Delete extra spaces.
+        return 0;
+    }
+
+    /** @hide */
+    public int performHandwritingInsertGesture(@NonNull InsertGesture gesture) {
+        PointF point = gesture.getInsertionPoint();
+        // The coordinates provided are screen coordinates - transform to content coordinates.
+        int[] screenToViewport = getLocationOnScreen();
+        point.offset(
+                -(screenToViewport[0] + viewportToContentHorizontalOffset()),
+                -(screenToViewport[1] + viewportToContentVerticalOffset()));
+
+        int line = mLayout.getLineForVertical((int) point.y);
+        if (point.y < mLayout.getLineTop(line)
+                || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
+            return handleGestureFailure(gesture);
+        }
+        if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
+            return handleGestureFailure(gesture);
+        }
+        int offset = mLayout.getOffsetForHorizontal(line, point.x);
+        String textToInsert = gesture.getTextToInsert();
+        getEditableText().insert(offset, textToInsert);
+        Selection.setSelection(getEditableText(), offset + textToInsert.length());
+        // TODO: Insert extra spaces if necessary.
+        return 0;
+    }
+
+    private int handleGestureFailure(HandwritingGesture gesture) {
+        if (!TextUtils.isEmpty(gesture.getFallbackText())) {
+            getEditableText()
+                    .replace(getSelectionStart(), getSelectionEnd(), gesture.getFallbackText());
+        }
+        return 0;
+    }
+
+    @Nullable
+    private int[] getRangeForRect(@NonNull RectF area, int granularity) {
+        // The coordinates provided are screen coordinates - transform to content coordinates.
+        int[] screenToViewport = getLocationOnScreen();
+        area = new RectF(area);
+        area.offset(
+                -(screenToViewport[0] + viewportToContentHorizontalOffset()),
+                -(screenToViewport[1] + viewportToContentVerticalOffset()));
+
+        SegmentIterator segmentIterator;
+        if (granularity == HandwritingGesture.GRANULARITY_WORD) {
+            WordIterator wordIterator = getWordIterator();
+            wordIterator.setCharSequence(mText, 0, mText.length());
+            segmentIterator = new WordSegmentIterator(mText, wordIterator);
+        } else {
+            segmentIterator = new GraphemeClusterSegmentIterator(mText, mTextPaint);
+        }
+
+        return mLayout.getRangeForRect(area, segmentIterator);
     }
 
     /** @hide */
