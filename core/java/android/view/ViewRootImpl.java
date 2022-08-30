@@ -9575,7 +9575,7 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * Return the connection ID for the {@link AccessibilityInteractionController} of this instance.
-     * @see AccessibilityNodeInfo#enableQueryFromAppProcess(View)
+     * @see AccessibilityNodeInfo#setQueryFromAppProcessEnabled
      */
     public int getDirectAccessibilityConnectionId() {
         return mAccessibilityInteractionConnectionManager.ensureDirectConnection();
