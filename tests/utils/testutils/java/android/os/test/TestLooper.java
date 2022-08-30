@@ -48,14 +48,13 @@ public class TestLooper {
     private static final Method MESSAGE_MARK_IN_USE_METHOD;
     private static final String TAG = "TestLooper";
 
-    private final MessageQueue.Clock mClock;
+    private final Clock mClock;
 
     private AutoDispatchThread mAutoDispatchThread;
 
     static {
         try {
-            LOOPER_CONSTRUCTOR = Looper.class.getDeclaredConstructor(Boolean.TYPE,
-                    MessageQueue.Clock.class);
+            LOOPER_CONSTRUCTOR = Looper.class.getDeclaredConstructor(Boolean.TYPE);
             LOOPER_CONSTRUCTOR.setAccessible(true);
             THREAD_LOCAL_LOOPER_FIELD = Looper.class.getDeclaredField("sThreadLocal");
             THREAD_LOCAL_LOOPER_FIELD.setAccessible(true);
@@ -84,15 +83,15 @@ public class TestLooper {
      * thread.
      *
      * Messages are dispatched when their {@link Message#when} is before or at {@link
-     * MessageQueue.Clock#uptimeMillis()}.
+     * Clock#uptimeMillis()}.
      * Use a custom clock with care. When using an offsettable clock like {@link
      * com.android.server.testutils.OffsettableClock} be sure not to double offset messages by
      * offsetting the clock and calling {@link #moveTimeForward(long)}. Instead, offset the clock
      * and call {@link #dispatchAll()}.
      */
-    public TestLooper(MessageQueue.Clock clock) {
+    public TestLooper(Clock clock) {
         try {
-            mLooper = LOOPER_CONSTRUCTOR.newInstance(false, clock);
+            mLooper = LOOPER_CONSTRUCTOR.newInstance(false);
 
             ThreadLocal<Looper> threadLocalLooper = (ThreadLocal<Looper>) THREAD_LOCAL_LOOPER_FIELD
                     .get(null);
@@ -223,6 +222,10 @@ public class TestLooper {
             ++count;
         }
         return count;
+    }
+
+    public interface Clock {
+        long uptimeMillis();
     }
 
     /**
