@@ -15,21 +15,25 @@
  */
 package com.google.android.test.handwritingime;
 
+import android.R;
 import android.annotation.Nullable;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.HandwritingGesture;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.SelectGesture;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -39,19 +43,19 @@ public class HandwritingIme extends InputMethodService {
 
     public static final int HEIGHT_DP = 100;
 
-
     private static final int OP_NONE = 0;
     private static final int OP_SELECT = 1;
     private static final int OP_DELETE = 2;
-    private static final int OP_DELETE_SPACE = 3;
-    private static final int OP_INSERT = 4;
+    private static final int OP_INSERT = 3;
 
     private Window mInkWindow;
     private InkView mInk;
 
     static final String TAG = "HandwritingIme";
     private int mRichGestureMode = OP_NONE;
+    private int mRichGestureGranularity = -1;
     private Spinner mRichGestureModeSpinner;
+    private Spinner mRichGestureGranularitySpinner;
     private PointF mRichGestureStartPoint;
 
 
@@ -86,13 +90,45 @@ public class HandwritingIme extends InputMethodService {
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP: {
                 if (areRichGesturesEnabled()) {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("operation", mRichGestureMode);
-                    bundle.putFloat("left", mRichGestureStartPoint.x);
-                    bundle.putFloat("top", mRichGestureStartPoint.y);
-                    bundle.putFloat("right", event.getX());
-                    bundle.putFloat("bottom", event.getY());
-                    performPrivateCommand("android.widget.RichGesture", bundle);
+                    HandwritingGesture gesture = null;
+                    switch(mRichGestureMode) {
+                        case OP_SELECT:
+                            SelectGesture.Builder builder = new SelectGesture.Builder();
+                            builder.setGranularity(mRichGestureGranularity)
+                                    .setSelectionArea(new RectF(mRichGestureStartPoint.x,
+                                            mRichGestureStartPoint.y, event.getX(), event.getY()))
+                                    .setFallbackText("fallback text");
+                            gesture = builder.build();
+                            break;
+                        case OP_DELETE:
+                            DeleteGesture.Builder builder1 = new DeleteGesture.Builder();
+                            builder1.setGranularity(mRichGestureGranularity)
+                                    .setDeletionArea(new RectF(mRichGestureStartPoint.x,
+                                            mRichGestureStartPoint.y, event.getX(), event.getY()))
+                                    .setFallbackText("fallback text");
+                            gesture = builder1.build();
+                            break;
+                        case OP_INSERT:
+                            InsertGesture.Builder builder2 = new InsertGesture.Builder();
+                            builder2.setInsertionPoint(
+                                    new PointF(mRichGestureStartPoint.x, mRichGestureStartPoint.y))
+                                    .setTextToInsert(" ")
+                                    .setFallbackText("fallback text");
+                            gesture = builder2.build();
+
+                    }
+                    if (gesture == null) {
+                        // This shouldn't happen
+                        Log.e(TAG, "Unrecognized gesture mode: " + mRichGestureMode);
+                        return;
+                    }
+                    InputConnection ic = getCurrentInputConnection();
+                    if (getCurrentInputStarted() && ic != null) {
+                        ic.performHandwritingGesture(gesture, null, null);
+                    } else {
+                        // This shouldn't happen
+                        Log.e(TAG, "No active InputConnection");
+                    }
 
                     Log.d(TAG, "Sending RichGesture " + mRichGestureMode + " (Screen) Left: "
                             + mRichGestureStartPoint.x + ", Top: " + mRichGestureStartPoint.y
@@ -123,8 +159,15 @@ public class HandwritingIme extends InputMethodService {
         view.addView(inner, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, height));
 
-        view.addView(getRichGestureActionsSpinner());
-        inner.setBackgroundColor(getColor(R.color.abc_tint_spinner));
+        LinearLayout layout = new LinearLayout(this);
+        layout.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(getRichGestureActionsSpinner());
+        layout.addView(getRichGestureGranularitySpinner());
+
+        view.addView(layout);
+        inner.setBackgroundColor(getColor(R.color.holo_green_light));
 
         return view;
     }
@@ -133,14 +176,12 @@ public class HandwritingIme extends InputMethodService {
         if (mRichGestureModeSpinner != null) {
             return mRichGestureModeSpinner;
         }
-        //get the spinner from the xml.
         mRichGestureModeSpinner = new Spinner(this);
         mRichGestureModeSpinner.setPadding(100, 0, 100, 0);
         mRichGestureModeSpinner.setTooltipText("Handwriting IME mode");
         String[] items =
                 new String[] { "Handwriting IME - Rich gesture disabled", "Rich gesture SELECT",
-                        "Rich gesture DELETE", "Rich gesture DELETE SPACE",
-                        "Rich gesture INSERT" };
+                        "Rich gesture DELETE", "Rich gesture INSERT" };
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -149,15 +190,50 @@ public class HandwritingIme extends InputMethodService {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mRichGestureMode = position;
+                mRichGestureGranularitySpinner.setEnabled(
+                        mRichGestureMode != OP_INSERT && mRichGestureMode != OP_NONE);
                 Log.d(TAG, "Setting RichGesture Mode " + mRichGestureMode);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 mRichGestureMode = OP_NONE;
+                mRichGestureGranularitySpinner.setEnabled(false);
             }
         });
+        mRichGestureModeSpinner.setSelection(0); // default disabled
         return mRichGestureModeSpinner;
+    }
+
+    private View getRichGestureGranularitySpinner() {
+        if (mRichGestureGranularitySpinner != null) {
+            return mRichGestureGranularitySpinner;
+        }
+        mRichGestureGranularitySpinner = new Spinner(this);
+        mRichGestureGranularitySpinner.setPadding(100, 0, 100, 0);
+        mRichGestureGranularitySpinner.setTooltipText(" Granularity");
+        String[] items =
+                new String[] { "Granularity - UNDEFINED",
+                        "Granularity - WORD", "Granularity - CHARACTER"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mRichGestureGranularitySpinner.setAdapter(adapter);
+        mRichGestureGranularitySpinner.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mRichGestureGranularity = position;
+                Log.d(TAG, "Setting RichGesture Granularity " + mRichGestureGranularity);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mRichGestureGranularity = 0;
+            }
+        });
+        mRichGestureGranularitySpinner.setSelection(1);
+        return mRichGestureGranularitySpinner;
     }
 
     public void onPrepareStylusHandwriting() {
@@ -188,15 +264,6 @@ public class HandwritingIme extends InputMethodService {
     @Override
     public boolean onEvaluateFullscreenMode() {
         return false;
-    }
-
-    boolean performPrivateCommand(String action, Bundle bundle) {
-        if (!getCurrentInputStarted()) {
-            Log.e(TAG, "Input hasnt started, can't performPrivateCommand");
-            return false;
-        }
-
-        return getCurrentInputConnection().performPrivateCommand(action, bundle);
     }
 
     private boolean areRichGesturesEnabled() {
