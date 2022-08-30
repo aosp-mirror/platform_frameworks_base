@@ -930,7 +930,8 @@ public class SplitControllerTest {
 
     @Test
     public void testResolveActivityToContainer_inUnknownTaskFragment() {
-        doReturn(new Binder()).when(mSplitController).getInitialTaskFragmentToken(mActivity);
+        doReturn(new Binder()).when(mSplitController)
+                .getTaskFragmentTokenFromActivityClientRecord(mActivity);
 
         // No need to handle when the new launched activity is in an unknown TaskFragment.
         assertTrue(mSplitController.resolveActivityToContainer(mTransaction, mActivity,
