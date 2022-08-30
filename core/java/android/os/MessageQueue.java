@@ -19,7 +19,6 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.Printer;
@@ -30,7 +29,6 @@ import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * Low-level class holding the list of messages to be dispatched by a
@@ -56,7 +54,6 @@ public final class MessageQueue {
     Message mMessages;
     @UnsupportedAppUsage
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
-    private final Clock mClock;
     private SparseArray<FileDescriptorRecord> mFileDescriptorRecords;
     private IdleHandler[] mPendingIdleHandlers;
     private boolean mQuitting;
@@ -77,10 +74,9 @@ public final class MessageQueue {
     private native static boolean nativeIsPolling(long ptr);
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
-    MessageQueue(boolean quitAllowed, @NonNull Clock clock) {
+    MessageQueue(boolean quitAllowed) {
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
-        mClock = Objects.requireNonNull(clock);
     }
 
     @Override
@@ -110,7 +106,7 @@ public final class MessageQueue {
      */
     public boolean isIdle() {
         synchronized (this) {
-            final long now = mClock.uptimeMillis();
+            final long now = SystemClock.uptimeMillis();
             return mMessages == null || now < mMessages.when;
         }
     }
@@ -340,7 +336,7 @@ public final class MessageQueue {
 
             synchronized (this) {
                 // Try to retrieve the next message.  Return if found.
-                final long now = mClock.uptimeMillis();
+                final long now = SystemClock.uptimeMillis();
                 Message prevMsg = null;
                 Message msg = mMessages;
                 if (msg != null && msg.target == null) {
@@ -474,7 +470,7 @@ public final class MessageQueue {
     @UnsupportedAppUsage
     @TestApi
     public int postSyncBarrier() {
-        return postSyncBarrier(mClock.uptimeMillis());
+        return postSyncBarrier(SystemClock.uptimeMillis());
     }
 
     private int postSyncBarrier(long when) {
@@ -776,6 +772,41 @@ public final class MessageQueue {
         }
     }
 
+    void removeEqualMessages(Handler h, Runnable r, Object object) {
+        if (h == null || r == null) {
+            return;
+        }
+
+        synchronized (this) {
+            Message p = mMessages;
+
+            // Remove all messages at front.
+            while (p != null && p.target == h && p.callback == r
+                   && (object == null || object.equals(p.obj))) {
+                Message n = p.next;
+                mMessages = n;
+                p.recycleUnchecked();
+                p = n;
+            }
+
+            // Remove all messages after front.
+            while (p != null) {
+                Message n = p.next;
+                if (n != null) {
+                    if (n.target == h && n.callback == r
+                        && (object == null || object.equals(n.obj))) {
+                        Message nn = n.next;
+                        n.recycleUnchecked();
+                        p.next = nn;
+                        continue;
+                    }
+                }
+                p = n;
+            }
+        }
+    }
+
+
     void removeCallbacksAndMessages(Handler h, Object object) {
         if (h == null) {
             return;
@@ -853,7 +884,7 @@ public final class MessageQueue {
     }
 
     private void removeAllFutureMessagesLocked() {
-        final long now = mClock.uptimeMillis();
+        final long now = SystemClock.uptimeMillis();
         Message p = mMessages;
         if (p != null) {
             if (p.when > now) {
@@ -882,7 +913,7 @@ public final class MessageQueue {
 
     void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
-            long now = mClock.uptimeMillis();
+            long now = SystemClock.uptimeMillis();
             int n = 0;
             for (Message msg = mMessages; msg != null; msg = msg.next) {
                 if (h == null || h == msg.target) {
@@ -911,7 +942,7 @@ public final class MessageQueue {
      * Callback interface for discovering when a thread is going to block
      * waiting for more messages.
      */
-    public interface IdleHandler {
+    public static interface IdleHandler {
         /**
          * Called when the message queue has run out of messages and will now
          * wait for more.  Return true to keep your idle handler active, false
@@ -1009,18 +1040,5 @@ public final class MessageQueue {
             mEvents = events;
             mListener = listener;
         }
-    }
-
-    /**
-     * Time supplier for MessageQueue and the things that interact with it (e.g. {@link Looper}).
-     *
-     * Intentionally replaceable for testing.
-     *
-     * @hide
-     */
-    public interface Clock {
-        /** @see SystemClock#uptimeMillis */
-        @UptimeMillisLong
-        long uptimeMillis();
     }
 }
