@@ -369,9 +369,13 @@ class PackageFlattener {
 
     bool sparse_encode = use_sparse_entries_;
 
-    // Only sparse encode if the entries will be read on platforms O+.
-    sparse_encode =
-        sparse_encode && (context_->GetMinSdkVersion() >= SDK_O || config.sdkVersion >= SDK_O);
+    if (context_->GetMinSdkVersion() == 0 && config.sdkVersion == 0) {
+      // Sparse encode if sdk version is not set in context and config.
+    } else {
+      // Otherwise, only sparse encode if the entries will be read on platforms S_V2+.
+      sparse_encode = sparse_encode &&
+                      (context_->GetMinSdkVersion() >= SDK_S_V2 || config.sdkVersion >= SDK_S_V2);
+    }
 
     // Only sparse encode if the offsets are representable in 2 bytes.
     sparse_encode =
