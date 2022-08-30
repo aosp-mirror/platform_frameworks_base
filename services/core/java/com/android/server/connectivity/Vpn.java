@@ -756,6 +756,8 @@ public class Vpn {
             int errorCode, @NonNull final String packageName, @Nullable final String sessionKey,
             @NonNull final VpnProfileState profileState, @Nullable final Network underlyingNetwork,
             @Nullable final NetworkCapabilities nc, @Nullable final LinkProperties lp) {
+        // Add log for debugging flaky test. b/242833779
+        Log.d(TAG, "buildVpnManagerEventIntent: sessionKey = " + sessionKey);
         final Intent intent = new Intent(VpnManager.ACTION_VPN_MANAGER_EVENT);
         intent.setPackage(packageName);
         intent.addCategory(category);
@@ -1196,25 +1198,7 @@ public class Vpn {
                 mContext.unbindService(mConnection);
                 cleanupVpnStateLocked();
             } else if (mVpnRunner != null) {
-                // Build intent first because the sessionKey will be reset after performing
-                // VpnRunner.exit(). Also, cache mOwnerUID even if ownerUID will not be changed in
-                // VpnRunner.exit() to prevent design being changed in the future.
-                // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-                //  ConnectivityServiceTest.
-                final int ownerUid = mOwnerUID;
-                Intent intent = null;
-                if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
-                    intent = buildVpnManagerEventIntent(
-                            VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
-                            -1 /* errorClass */, -1 /* errorCode*/, mPackage,
-                            getSessionKeyLocked(), makeVpnProfileStateLocked(),
-                            null /* underlyingNetwork */, null /* nc */, null /* lp */);
-                }
-                // cleanupVpnStateLocked() is called from mVpnRunner.exit()
-                mVpnRunner.exit();
-                if (intent != null && isVpnApp(mPackage)) {
-                    notifyVpnManagerVpnStopped(mPackage, ownerUid, intent);
-                }
+                stopVpnRunnerAndNotifyAppLocked(mPackage);
             }
 
             try {
@@ -2774,6 +2758,8 @@ public class Vpn {
             mIpSecManager = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
             mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this, mExecutor);
             mSessionKey = UUID.randomUUID().toString();
+            // Add log for debugging flaky test. b/242833779
+            Log.d(TAG, "Generate session key = " + mSessionKey);
 
             // Set the policy so that cancelled tasks will be removed from the work queue
             mExecutor.setRemoveOnCancelPolicy(true);
@@ -3966,7 +3952,13 @@ public class Vpn {
     @GuardedBy("this")
     @Nullable
     private String getSessionKeyLocked() {
-        return isIkev2VpnRunner() ? ((IkeV2VpnRunner) mVpnRunner).mSessionKey : null;
+        // Add log for debugging flaky test. b/242833779
+        final boolean isIkev2VpnRunner = isIkev2VpnRunner();
+        final String sessionKey =
+                isIkev2VpnRunner ? ((IkeV2VpnRunner) mVpnRunner).mSessionKey : null;
+        Log.d(TAG, "getSessionKeyLocked: isIkev2VpnRunner = " + isIkev2VpnRunner
+                + ", sessionKey = " + sessionKey);
+        return sessionKey;
     }
 
     /**
@@ -4068,6 +4060,29 @@ public class Vpn {
         }
     }
 
+    @GuardedBy("this")
+    private void stopVpnRunnerAndNotifyAppLocked(@NonNull String packageName) {
+        // Build intent first because the sessionKey will be reset after performing
+        // VpnRunner.exit(). Also, cache mOwnerUID even if ownerUID will not be changed in
+        // VpnRunner.exit() to prevent design being changed in the future.
+        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+        //  ConnectivityServiceTest.
+        final int ownerUid = mOwnerUID;
+        Intent intent = null;
+        if (SdkLevel.isAtLeastT() && isVpnApp(packageName)) {
+            intent = buildVpnManagerEventIntent(
+                    VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
+                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                    getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
+        }
+        // cleanupVpnStateLocked() is called from mVpnRunner.exit()
+        mVpnRunner.exit();
+        if (intent != null && isVpnApp(packageName)) {
+            notifyVpnManagerVpnStopped(packageName, ownerUid, intent);
+        }
+    }
+
     /**
      * Stops an already running VPN Profile for the given package.
      *
@@ -4084,18 +4099,7 @@ public class Vpn {
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
         if (isCurrentIkev2VpnLocked(packageName)) {
-            // Build intent first because the sessionKey will be reset after performing
-            // VpnRunner.exit(). Also, cache mOwnerUID even if ownerUID will not be changed in
-            // VpnRunner.exit() to prevent design being changed in the future.
-            final int ownerUid = mOwnerUID;
-            final Intent intent = buildVpnManagerEventIntent(
-                    VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
-                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
-                    getSessionKeyLocked(), makeVpnProfileStateLocked(),
-                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
-
-            mVpnRunner.exit();
-            notifyVpnManagerVpnStopped(packageName, ownerUid, intent);
+            stopVpnRunnerAndNotifyAppLocked(packageName);
         }
     }
 
