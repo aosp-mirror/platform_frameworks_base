@@ -18,7 +18,6 @@ package com.android.server.media;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -50,8 +49,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.text.TextUtils;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
@@ -837,30 +834,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 
-        private boolean checkComponentNamePackage(PendingIntent pi, String packageName) {
-            ComponentName componentName = null;
-            if (pi != null && pi.getIntent() != null) {
-                componentName = pi.getIntent().getComponent();
-            }
-
-            if(componentName != null
-                   && !TextUtils.equals(packageName, componentName.getPackageName())) {
-                return false;
-            }
-
-            return true;
-        }
-
         @Override
         public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!checkComponentNamePackage(pi, mPackageName)) {
-                    EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet logging
-                    throw new IllegalArgumentException("Component Name package does not match "
-                            + "package name provided to MediaSessionRecord.");
-                }
-
                 if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
                         != 0) {
                     return;
