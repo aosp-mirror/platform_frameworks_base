@@ -25,8 +25,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -67,6 +65,9 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -3247,6 +3248,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new NotificationViewState();
     }
