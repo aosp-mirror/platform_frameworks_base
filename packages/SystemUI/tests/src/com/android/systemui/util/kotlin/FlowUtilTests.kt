@@ -127,6 +127,17 @@ class SetChangesFlowTest : SysuiTestCase() {
                 )
             )
     }
+
+    @Test
+    fun dontEmitFirstEvent() = runBlocking {
+        assertThatFlow(flowOf(setOf(1, 2), setOf(2, 3)).setChanges(emitFirstEvent = false))
+            .emitsExactly(
+                SetChanges(
+                    removed = setOf(1),
+                    added = setOf(3),
+                )
+            )
+    }
 }
 
 private fun <T> assertThatFlow(flow: Flow<T>) = object {
