@@ -7456,6 +7456,7 @@ package android.app.admin {
     method public long getMaximumTimeToLock(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<java.lang.String> getMeteredDataDisabledPackages(@NonNull android.content.ComponentName);
     method public int getMinimumRequiredWifiSecurityLevel();
+    method public int getMtePolicy();
     method @RequiresPermission(value=android.Manifest.permission.READ_NEARBY_STREAMING_POLICY, conditional=true) public int getNearbyAppStreamingPolicy();
     method @RequiresPermission(value=android.Manifest.permission.READ_NEARBY_STREAMING_POLICY, conditional=true) public int getNearbyNotificationStreamingPolicy();
     method @Deprecated @ColorInt public int getOrganizationColor(@NonNull android.content.ComponentName);
@@ -7604,6 +7605,7 @@ package android.app.admin {
     method public void setMaximumTimeToLock(@NonNull android.content.ComponentName, long);
     method @NonNull public java.util.List<java.lang.String> setMeteredDataDisabledPackages(@NonNull android.content.ComponentName, @NonNull java.util.List<java.lang.String>);
     method public void setMinimumRequiredWifiSecurityLevel(int);
+    method public void setMtePolicy(int);
     method public void setNearbyAppStreamingPolicy(int);
     method public void setNearbyNotificationStreamingPolicy(int);
     method public void setNetworkLoggingEnabled(@Nullable android.content.ComponentName, boolean);
@@ -7787,6 +7789,9 @@ package android.app.admin {
     field public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1; // 0x1
     field public static final int MAKE_USER_EPHEMERAL = 2; // 0x2
     field public static final String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
+    field public static final int MTE_DISABLED = 2; // 0x2
+    field public static final int MTE_ENABLED = 1; // 0x1
+    field public static final int MTE_NOT_CONTROLLED_BY_POLICY = 0; // 0x0
     field public static final int NEARBY_STREAMING_DISABLED = 1; // 0x1
     field public static final int NEARBY_STREAMING_ENABLED = 2; // 0x2
     field public static final int NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY = 0; // 0x0
