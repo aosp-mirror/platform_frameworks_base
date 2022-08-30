@@ -518,9 +518,20 @@ class MediaDataManager(
             }
             val actions = createActionsFromState(it.packageName,
                     mediaControllerFactory.create(it.token), UserHandle(it.userId))
-            val data = it.copy(
-                    semanticActions = actions,
-                    isPlaying = isPlayingState(state.state))
+
+            // Control buttons
+            // If flag is enabled and controller has a PlaybackState,
+            // create actions from session info
+            // otherwise, no need to update semantic actions.
+            val data = if (actions != null) {
+                it.copy(
+                        semanticActions = actions,
+                        isPlaying = isPlayingState(state.state))
+            } else {
+                it.copy(
+                        isPlaying = isPlayingState(state.state)
+                )
+            }
             if (DEBUG) Log.d(TAG, "State updated outside of notification")
             onMediaDataLoaded(key, key, data)
         }
