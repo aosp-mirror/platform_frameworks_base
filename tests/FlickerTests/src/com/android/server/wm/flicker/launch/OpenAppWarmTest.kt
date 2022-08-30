@@ -65,22 +65,16 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter) :
         get() = {
             super.transition(this)
             setup {
-                test {
-                    tapl.setExpectedRotationCheckEnabled(false)
-                    testApp.launchViaIntent(wmHelper)
-                }
-                eachRun {
-                    tapl.goHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                    this.setRotation(testSpec.startRotation)
-                }
+                tapl.setExpectedRotationCheckEnabled(false)
+                testApp.launchViaIntent(wmHelper)
+                tapl.goHome()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
+                this.setRotation(testSpec.startRotation)
             }
             teardown {
-                test {
-                    testApp.exit(wmHelper)
-                }
+                testApp.exit(wmHelper)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)

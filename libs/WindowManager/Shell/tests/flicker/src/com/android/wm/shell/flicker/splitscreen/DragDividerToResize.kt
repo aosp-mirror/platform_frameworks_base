@@ -53,9 +53,7 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
-                }
+                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
             }
             transitions {
                 SplitScreenHelper.dragDividerToResizeAndWait(device, wmHelper)

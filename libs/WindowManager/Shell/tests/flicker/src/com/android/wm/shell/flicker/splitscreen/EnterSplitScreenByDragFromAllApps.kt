@@ -65,10 +65,8 @@ class EnterSplitScreenByDragFromAllApps(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    tapl.goHome()
-                    primaryApp.launchViaIntent(wmHelper)
-                }
+                tapl.goHome()
+                primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
                 tapl.launchedAppState.taskbar

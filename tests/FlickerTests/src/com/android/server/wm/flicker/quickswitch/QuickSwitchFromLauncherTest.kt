@@ -62,24 +62,19 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotationCheckEnabled(false)
-            }
-            test {
-                tapl.setExpectedRotation(testSpec.startRotation)
-            }
+            tapl.setExpectedRotationCheckEnabled(false)
 
-            eachRun {
-                testApp.launchViaIntent(wmHelper)
-                tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .withWindowSurfaceDisappeared(testApp)
-                    .waitForAndVerify()
+            tapl.setExpectedRotation(testSpec.startRotation)
 
-                startDisplayBounds = wmHelper.currentState.layerState
-                    .physicalDisplayBounds ?: error("Display not found")
-            }
+            testApp.launchViaIntent(wmHelper)
+            tapl.goHome()
+            wmHelper.StateSyncBuilder()
+                .withHomeActivityVisible()
+                .withWindowSurfaceDisappeared(testApp)
+                .waitForAndVerify()
+
+            startDisplayBounds = wmHelper.currentState.layerState
+                .physicalDisplayBounds ?: error("Display not found")
         }
         transitions {
             tapl.workspace.quickSwitchToPreviousApp()
@@ -89,11 +84,8 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
                 .withStatusBarVisible()
                 .waitForAndVerify()
         }
-
         teardown {
-            eachRun {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
     }
 

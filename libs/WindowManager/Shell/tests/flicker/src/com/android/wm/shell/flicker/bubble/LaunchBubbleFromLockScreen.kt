@@ -49,15 +49,13 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                eachRun {
-                    val addBubbleBtn = waitAndGetAddBubbleBtn()
-                    addBubbleBtn?.click() ?: error("Bubble widget not found")
-                    device.sleep()
-                    wmHelper.StateSyncBuilder()
-                        .withoutTopVisibleAppWindows()
-                        .waitForAndVerify()
-                    device.wakeUp()
-                }
+                val addBubbleBtn = waitAndGetAddBubbleBtn()
+                addBubbleBtn?.click() ?: error("Bubble widget not found")
+                device.sleep()
+                wmHelper.StateSyncBuilder()
+                    .withoutTopVisibleAppWindows()
+                    .waitForAndVerify()
+                device.wakeUp()
             }
             transitions {
                 // Swipe & wait for the notification shade to expand so all can be seen

@@ -39,6 +39,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
+
 /**
  * Test dismiss split screen by dragging the divider bar.
  *
@@ -55,9 +56,7 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
-                }
+                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
             }
             transitions {
                 if (tapl.isTablet) {

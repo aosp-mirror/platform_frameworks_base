@@ -55,21 +55,17 @@ abstract class BaseBubbleScreen(
     ): FlickerBuilder.() -> Unit {
         return {
             setup {
-                test {
-                    notifyManager.setBubblesAllowed(testApp.`package`,
-                        uid, NotificationManager.BUBBLE_PREFERENCE_ALL)
-                    testApp.launchViaIntent(wmHelper)
-                    waitAndGetAddBubbleBtn()
-                    waitAndGetCancelAllBtn()
-                }
+                notifyManager.setBubblesAllowed(testApp.`package`,
+                    uid, NotificationManager.BUBBLE_PREFERENCE_ALL)
+                testApp.launchViaIntent(wmHelper)
+                waitAndGetAddBubbleBtn()
+                waitAndGetCancelAllBtn()
             }
 
             teardown {
-                test {
-                    notifyManager.setBubblesAllowed(testApp.`package`,
-                        uid, NotificationManager.BUBBLE_PREFERENCE_NONE)
-                    testApp.exit()
-                }
+                notifyManager.setBubblesAllowed(testApp.`package`,
+                    uid, NotificationManager.BUBBLE_PREFERENCE_NONE)
+                testApp.exit()
             }
 
             extraSpec(this)

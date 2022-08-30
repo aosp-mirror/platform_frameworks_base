@@ -80,9 +80,7 @@ class ChangeAppRotationTest(
         get() = {
             super.transition(this)
             setup {
-                test {
-                    testApp.launchViaIntent(wmHelper)
-                }
+                testApp.launchViaIntent(wmHelper)
             }
         }
 

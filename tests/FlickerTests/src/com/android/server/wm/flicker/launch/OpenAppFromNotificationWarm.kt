@@ -67,21 +67,17 @@ open class OpenAppFromNotificationWarm(
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                test {
-                    device.wakeUpAndGoToHomeScreen()
-                    this.setRotation(testSpec.startRotation)
-                }
-                eachRun {
-                    testApp.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp)
-                        .waitForAndVerify()
-                    testApp.postNotification(wmHelper)
-                    tapl.goHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                }
+                device.wakeUpAndGoToHomeScreen()
+                this.setRotation(testSpec.startRotation)
+                testApp.launchViaIntent(wmHelper)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp)
+                    .waitForAndVerify()
+                testApp.postNotification(wmHelper)
+                tapl.goHome()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
             }
 
             transitions {
@@ -125,9 +121,7 @@ open class OpenAppFromNotificationWarm(
             }
 
             teardown {
-                test {
-                    testApp.exit(wmHelper)
-                }
+                testApp.exit(wmHelper)
             }
         }
 

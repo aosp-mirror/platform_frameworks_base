@@ -68,12 +68,10 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
 
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
-                eachRun {
-                    device.sleep()
-                    wmHelper.StateSyncBuilder()
-                        .withoutTopVisibleAppWindows()
-                        .waitForAndVerify()
-                }
+                device.sleep()
+                wmHelper.StateSyncBuilder()
+                    .withoutTopVisibleAppWindows()
+                    .waitForAndVerify()
             }
         }
 

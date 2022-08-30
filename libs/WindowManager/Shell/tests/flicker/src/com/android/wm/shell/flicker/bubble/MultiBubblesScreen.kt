@@ -57,20 +57,18 @@ open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                test {
-                    for (i in 1..3) {
-                        val addBubbleBtn = waitAndGetAddBubbleBtn() ?: error("Add Bubble not found")
-                        addBubbleBtn.click()
-                        SystemClock.sleep(1000)
-                    }
-                    val showBubble = device.wait(
-                        Until.findObject(
-                            By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
-                        ), FIND_OBJECT_TIMEOUT
-                    ) ?: error("Show bubble not found")
-                    showBubble.click()
+                for (i in 1..3) {
+                    val addBubbleBtn = waitAndGetAddBubbleBtn() ?: error("Add Bubble not found")
+                    addBubbleBtn.click()
                     SystemClock.sleep(1000)
                 }
+                val showBubble = device.wait(
+                    Until.findObject(
+                        By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
+                    ), FIND_OBJECT_TIMEOUT
+                ) ?: error("Show bubble not found")
+                showBubble.click()
+                SystemClock.sleep(1000)
             }
             transitions {
                 val bubbles: List<UiObject2> = device.wait(

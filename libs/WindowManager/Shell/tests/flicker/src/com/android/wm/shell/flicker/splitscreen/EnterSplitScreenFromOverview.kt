@@ -53,16 +53,14 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    tapl.workspace.switchToOverview().dismissAllTasks()
-                    primaryApp.launchViaIntent(wmHelper)
-                    secondaryApp.launchViaIntent(wmHelper)
-                    tapl.goHome()
-                    wmHelper.StateSyncBuilder()
-                        .withAppTransitionIdle()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                }
+                tapl.workspace.switchToOverview().dismissAllTasks()
+                primaryApp.launchViaIntent(wmHelper)
+                secondaryApp.launchViaIntent(wmHelper)
+                tapl.goHome()
+                wmHelper.StateSyncBuilder()
+                    .withAppTransitionIdle()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
             }
             transitions {
                 SplitScreenHelper.splitFromOverview(tapl)

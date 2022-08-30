@@ -66,13 +66,11 @@ class EnterSplitScreenByDragFromTaskbar(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    tapl.goHome()
-                    SplitScreenHelper.createShortcutOnHotseatIfNotExist(
-                        tapl, secondaryApp.appName
-                    )
-                    primaryApp.launchViaIntent(wmHelper)
-                }
+                tapl.goHome()
+                SplitScreenHelper.createShortcutOnHotseatIfNotExist(
+                    tapl, secondaryApp.appName
+                )
+                primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
                 tapl.launchedAppState.taskbar

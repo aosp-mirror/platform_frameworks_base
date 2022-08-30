@@ -52,17 +52,13 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
                 testApp.launchViaIntent(wmHelper)
                 testApp.openIME(wmHelper)
-            }
-            eachRun {
                 this.setRotation(testSpec.startRotation)
                 device.pressRecentApps()
                 wmHelper.StateSyncBuilder()
                     .withRecentsActivityVisible()
                     .waitForAndVerify()
-            }
         }
         transitions {
             device.reopenAppFromOverview(wmHelper)
@@ -72,9 +68,7 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
                 .waitForAndVerify()
         }
         teardown {
-            test {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
     }
 

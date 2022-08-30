@@ -74,16 +74,12 @@ class LaunchAppShowImeOnStartTest(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                initializeApp.launchViaIntent(wmHelper)
-                this.setRotation(testSpec.startRotation)
-            }
+            initializeApp.launchViaIntent(wmHelper)
+            this.setRotation(testSpec.startRotation)
         }
         teardown {
-            eachRun {
-                initializeApp.exit(wmHelper)
-                testApp.exit(wmHelper)
-            }
+            initializeApp.exit(wmHelper)
+            testApp.exit(wmHelper)
         }
         transitions {
             testApp.launchViaIntent(wmHelper)

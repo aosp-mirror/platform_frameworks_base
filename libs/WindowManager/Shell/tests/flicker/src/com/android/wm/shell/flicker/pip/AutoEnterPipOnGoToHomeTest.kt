@@ -18,11 +18,16 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -59,19 +64,19 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
      */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setupAndTeardown(this)
             setup {
-                eachRun {
-                    pipApp.launchViaIntent(wmHelper)
-                    pipApp.enableAutoEnterForPipActivity()
-                }
+                removeAllTasksButHome()
+                device.wakeUpAndGoToHomeScreen()
+                pipApp.launchViaIntent(wmHelper)
+                pipApp.enableAutoEnterForPipActivity()
             }
             teardown {
-                eachRun {
-                    // close gracefully so that onActivityUnpinned() can be called before force exit
-                    pipApp.closePipWindow(wmHelper)
-                    pipApp.exit(wmHelper)
-                }
+                // close gracefully so that onActivityUnpinned() can be called before force exit
+                pipApp.closePipWindow(wmHelper)
+
+                setRotation(Surface.ROTATION_0)
+                RemoveAllTasksButHomeRule.removeAllTasksButHome()
+                pipApp.exit(wmHelper)
             }
             transitions {
                 tapl.goHome()

@@ -46,13 +46,9 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotationCheckEnabled(false)
-            }
-            eachRun {
-                imeTestApp.launchViaIntent(wmHelper)
-                imeTestApp.openIME(wmHelper)
-            }
+            tapl.setExpectedRotationCheckEnabled(false)
+            imeTestApp.launchViaIntent(wmHelper)
+            imeTestApp.openIME(wmHelper)
         }
         transitions {
             imeTestApp.dismissDialog(wmHelper)
@@ -61,13 +57,11 @@ class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(t
                 .waitForAndVerify()
         }
         teardown {
-            eachRun {
-                tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
-                imeTestApp.exit(wmHelper)
-            }
+            tapl.goHome()
+            wmHelper.StateSyncBuilder()
+                .withHomeActivityVisible()
+                .waitForAndVerify()
+            imeTestApp.exit(wmHelper)
         }
     }
 

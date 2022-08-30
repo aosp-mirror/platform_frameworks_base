@@ -32,17 +32,13 @@ abstract class SplitScreenBase(testSpec: FlickerTestParameter) : BaseTest(testSp
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                test {
-                    tapl.setEnableRotation(true)
-                    setRotation(testSpec.startRotation)
-                    tapl.setExpectedRotation(testSpec.startRotation)
-                }
+                tapl.setEnableRotation(true)
+                setRotation(testSpec.startRotation)
+                tapl.setExpectedRotation(testSpec.startRotation)
             }
             teardown {
-                eachRun {
-                    primaryApp.exit(wmHelper)
-                    secondaryApp.exit(wmHelper)
-                }
+                primaryApp.exit(wmHelper)
+                secondaryApp.exit(wmHelper)
             }
         }
 }
