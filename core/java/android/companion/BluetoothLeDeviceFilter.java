@@ -204,9 +204,10 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mNamePattern, mScanFilter, mRawDataFilter, mRawDataFilterMask,
-                mRenamePrefix, mRenameSuffix, mRenameBytesFrom, mRenameBytesLength,
-                mRenameNameFrom, mRenameNameLength, mRenameBytesReverseOrder);
+        return Objects.hash(mNamePattern, mScanFilter, Arrays.hashCode(mRawDataFilter),
+                Arrays.hashCode(mRawDataFilterMask), mRenamePrefix, mRenameSuffix,
+                mRenameBytesFrom, mRenameBytesLength, mRenameNameFrom, mRenameNameLength,
+                mRenameBytesReverseOrder);
     }
 
     @Override
