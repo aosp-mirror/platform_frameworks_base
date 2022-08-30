@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
@@ -92,7 +91,7 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 242088970)
     @Test
     fun testAppIsVisibleAtEnd() {
         testSpec.assertLayersEnd {
@@ -125,7 +124,7 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
         super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 242088970)
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() =
         super.taskBarLayerIsVisibleAtStartAndEnd()
@@ -135,4 +134,28 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     @Test
     override fun taskBarWindowIsAlwaysVisible() =
         super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 242088970)
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 242088970)
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 242088970)
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() =
+        super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 242088970)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }
