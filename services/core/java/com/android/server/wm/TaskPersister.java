@@ -53,6 +53,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -424,7 +425,7 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private static void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, File[] files) {
         if (DEBUG) Slog.d(TAG, "removeObsoleteFiles: persistentTaskIds=" + persistentTaskIds +
-                " files=" + files);
+                " files=" + Arrays.toString(files));
         if (files == null) {
             Slog.e(TAG, "File error accessing recents directory (directory doesn't exist?).");
             return;

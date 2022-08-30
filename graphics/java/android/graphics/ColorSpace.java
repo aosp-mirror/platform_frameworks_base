@@ -2796,7 +2796,8 @@ public abstract class ColorSpace {
                 if (mWhitePoint == null || mTransform == null) {
                     throw new IllegalStateException(
                             "ColorSpace (" + this + ") cannot create native object! mWhitePoint: "
-                            + mWhitePoint + " mTransform: " + mTransform);
+                            + Arrays.toString(mWhitePoint) + " mTransform: "
+                            + Arrays.toString(mTransform));
                 }
 
                 // This mimics the old code that was in native.
