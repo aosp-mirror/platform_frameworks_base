@@ -1582,13 +1582,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (newParent != null && isState(RESUMED)) {
             newParent.setResumedActivity(this, "onParentChanged");
-            if (mStartingWindow != null && mStartingData != null
-                    && mStartingData.mAssociatedTask == null && newParent.isEmbedded()) {
-                // The starting window should keep covering its task when the activity is
-                // reparented to a task fragment that may not fill the task bounds.
-                associateStartingDataWithTask();
-                attachStartingSurfaceToAssociatedTask();
-            }
             mImeInsetsFrozenUntilStartInput = false;
         }
 
@@ -2679,14 +2672,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /** Called when the starting window is added to this activity. */
     void attachStartingWindow(@NonNull WindowState startingWindow) {
         startingWindow.mStartingData = mStartingData;
         mStartingWindow = startingWindow;
+        // The snapshot type may have called associateStartingDataWithTask().
         if (mStartingData != null && mStartingData.mAssociatedTask != null) {
             attachStartingSurfaceToAssociatedTask();
         }
     }
 
+    /** Makes starting window always fill the associated task. */
     private void attachStartingSurfaceToAssociatedTask() {
         // Associate the configuration of starting window with the task.
         overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
@@ -2694,6 +2690,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mStartingData.mAssociatedTask.mSurfaceControl);
     }
 
+    /** Called when the starting window is not added yet but its data is known to fill the task. */
     private void associateStartingDataWithTask() {
         mStartingData.mAssociatedTask = task;
         task.forAllActivities(r -> {
@@ -2701,6 +2698,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 r.mSharedStartingData = mStartingData;
             }
         });
+    }
+
+    /** Associates and attaches an added starting window to the current task. */
+    void associateStartingWindowWithTaskIfNeeded() {
+        if (mStartingWindow == null || mStartingData == null
+                || mStartingData.mAssociatedTask != null) {
+            return;
+        }
+        associateStartingDataWithTask();
+        attachStartingSurfaceToAssociatedTask();
     }
 
     void removeStartingWindow() {
