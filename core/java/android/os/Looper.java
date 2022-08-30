@@ -24,6 +24,8 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import java.util.Objects;
+
 /**
   * Class used to run a message loop for a thread.  Threads by default do
   * not have a message loop associated with them; to create one, call
@@ -69,7 +71,7 @@ public final class Looper {
 
     // sThreadLocal.get() will return null unless you've called prepare().
     @UnsupportedAppUsage
-    static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
+    static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<>();
     @UnsupportedAppUsage
     private static Looper sMainLooper;  // guarded by Looper.class
     private static Observer sObserver;
@@ -77,6 +79,7 @@ public final class Looper {
     @UnsupportedAppUsage
     final MessageQueue mQueue;
     final Thread mThread;
+    final MessageQueue.Clock mClock;
     private boolean mInLoop;
 
     @UnsupportedAppUsage
@@ -191,7 +194,7 @@ public final class Looper {
             Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
         }
 
-        final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;
+        final long dispatchStart = needStartTime ? me.mClock.uptimeMillis() : 0;
         final long dispatchEnd;
         Object token = null;
         if (observer != null) {
@@ -203,7 +206,7 @@ public final class Looper {
             if (observer != null) {
                 observer.messageDispatched(token, msg);
             }
-            dispatchEnd = needEndTime ? SystemClock.uptimeMillis() : 0;
+            dispatchEnd = needEndTime ? me.mClock.uptimeMillis() : 0;
         } catch (Exception exception) {
             if (observer != null) {
                 observer.dispatchingThrewException(token, msg, exception);
@@ -325,8 +328,13 @@ public final class Looper {
     }
 
     private Looper(boolean quitAllowed) {
-        mQueue = new MessageQueue(quitAllowed);
+        this(quitAllowed, SystemClock::uptimeMillis);
+    }
+
+    private Looper(boolean quitAllowed, @NonNull MessageQueue.Clock clock) {
+        mQueue = new MessageQueue(quitAllowed, Objects.requireNonNull(clock));
         mThread = Thread.currentThread();
+        mClock = clock;
     }
 
     /**
@@ -416,6 +424,16 @@ public final class Looper {
      */
     public @NonNull MessageQueue getQueue() {
         return mQueue;
+    }
+
+    /**
+     * Gets the looper's clock.
+     *
+     * @return The looper's clock
+     * @hide
+     */
+    public @NonNull MessageQueue.Clock getClock() {
+        return mClock;
     }
 
     /**
