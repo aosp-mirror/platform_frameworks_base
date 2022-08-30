@@ -348,7 +348,11 @@ class MediaDeviceManager @Inject constructor(
 
                 // If we have a controller but get a null route, then don't trust the device
                 val enabled = device != null && (controller == null || route != null)
-                val name = route?.name?.toString() ?: device?.name
+                val name = if (controller == null || route != null) {
+                    route?.name?.toString() ?: device?.name
+                } else {
+                    null
+                }
                 current = MediaDeviceData(enabled, device?.iconWithoutBackground, name,
                         id = device?.id, showBroadcastButton = false)
             }
