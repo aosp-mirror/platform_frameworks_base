@@ -26,6 +26,9 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -344,6 +347,13 @@ public final class StrictMode {
     public static final int NETWORK_POLICY_LOG = 1;
     /** {@hide} */
     public static final int NETWORK_POLICY_REJECT = 2;
+  
+    /**
+     * Detect explicit calls to {@link Runtime#gc()}.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long DETECT_EXPLICIT_GC = 3400644L;
 
     // TODO: wrap in some ImmutableHashMap thing.
     // Note: must be before static initialization of sVmPolicy.
@@ -496,6 +506,7 @@ public final class StrictMode {
              * <p>As of the Gingerbread release this includes network and disk operations but will
              * likely expand in future releases.
              */
+            @SuppressWarnings("AndroidFrameworkCompatChange")
             public @NonNull Builder detectAll() {
                 detectDiskReads();
                 detectDiskWrites();
@@ -510,6 +521,9 @@ public final class StrictMode {
                 }
                 if (targetSdk >= Build.VERSION_CODES.O) {
                     detectUnbufferedIo();
+                }
+                if (CompatChanges.isChangeEnabled(DETECT_EXPLICIT_GC)) {
+                    detectExplicitGc();
                 }
                 return this;
             }
@@ -591,26 +605,16 @@ public final class StrictMode {
             }
 
             /**
-             * Detect explicit GC requests, i.e. calls to Runtime.gc().
-             *
-             * @hide
+             * Detect calls to {@link Runtime#gc()}.
              */
-            @TestApi
             public @NonNull Builder detectExplicitGc() {
-                // TODO(b/3400644): Un-hide this for next API update
-                // TODO(b/3400644): Un-hide ExplicitGcViolation for next API update
-                // TODO(b/3400644): Make DETECT_EXPLICIT_GC a @TestApi for next API update
-                // TODO(b/3400644): Call this from detectAll in next API update
                 return enable(DETECT_THREAD_EXPLICIT_GC);
             }
 
             /**
-             * Disable detection of explicit GC requests, i.e. calls to Runtime.gc().
-             *
-             * @hide
+             * Disable detection of calls to {@link Runtime#gc()}.
              */
             public @NonNull Builder permitExplicitGc() {
-                // TODO(b/3400644): Un-hide this for next API update
                 return disable(DETECT_THREAD_EXPLICIT_GC);
             }
 

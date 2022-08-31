@@ -1813,10 +1813,6 @@ package android.os {
     method public static void setViolationLogger(android.os.StrictMode.ViolationLogger);
   }
 
-  public static final class StrictMode.ThreadPolicy.Builder {
-    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
-  }
-
   public static final class StrictMode.ViolationInfo implements android.os.Parcelable {
     ctor public StrictMode.ViolationInfo(android.os.Parcel);
     ctor public StrictMode.ViolationInfo(android.os.Parcel, boolean);
@@ -2048,13 +2044,6 @@ package android.os.storage {
     method @NonNull public android.os.storage.StorageVolume.Builder setRemovable(boolean);
     method @NonNull public android.os.storage.StorageVolume.Builder setStorageUuid(@Nullable java.util.UUID);
     method @NonNull public android.os.storage.StorageVolume.Builder setUuid(@Nullable String);
-  }
-
-}
-
-package android.os.strictmode {
-
-  public final class ExplicitGcViolation extends android.os.strictmode.Violation {
   }
 
 }
