@@ -19,6 +19,8 @@ package com.android.server.companion.virtual;
 import android.annotation.NonNull;
 import android.companion.virtual.IVirtualDevice;
 
+import java.util.Set;
+
 /**
  * Virtual device manager local service interface.
  * Only for use within system server.
@@ -34,14 +36,35 @@ public abstract class VirtualDeviceManagerInternal {
         void onVirtualDisplayRemoved(int displayId);
     }
 
+
+    /** Interface to listen to the changes on the list of app UIDs running on any virtual device. */
+    public interface AppsOnVirtualDeviceListener {
+        /** Notifies that running apps on any virtual device has changed */
+        void onAppsOnAnyVirtualDeviceChanged(Set<Integer> allRunningUids);
+    }
+
     /** Register a listener for the creation and destruction of virtual displays. */
     public abstract void registerVirtualDisplayListener(
             @NonNull VirtualDisplayListener listener);
 
-    /** Unregister a listener for the creation and  destruction of virtual displays. */
+    /** Unregister a listener for the creation and destruction of virtual displays. */
     public abstract void unregisterVirtualDisplayListener(
             @NonNull VirtualDisplayListener listener);
 
+    /** Register a listener for changes of running app UIDs on any virtual device. */
+    public abstract void registerAppsOnVirtualDeviceListener(
+            @NonNull AppsOnVirtualDeviceListener listener);
+
+    /** Unregister a listener for changes of running app UIDs on any virtual device. */
+    public abstract void unregisterAppsOnVirtualDeviceListener(
+            @NonNull AppsOnVirtualDeviceListener listener);
+
+    /**
+     * Notifies that the set of apps running on virtual devices has changed.
+     * This method only notifies the listeners when the union of running UIDs on all virtual devices
+     * has changed.
+     */
+    public abstract void onAppsOnVirtualDeviceChanged();
 
     /**
      * Validate the virtual device.

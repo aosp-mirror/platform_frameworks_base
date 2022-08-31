@@ -30,13 +30,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.core.graphics.ColorUtils;
-
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.ripple.RippleShader.RippleShape;
 import com.android.systemui.ripple.RippleView;
+import com.android.systemui.ripple.RippleViewKt;
 
 import java.text.NumberFormat;
 
@@ -143,16 +142,15 @@ final class WirelessChargingLayout extends FrameLayout {
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
         mRippleView.setupShader(rippleShape);
+        int color = Utils.getColorAttr(mRippleView.getContext(),
+                android.R.attr.colorAccent).getDefaultColor();
         if (mRippleView.getRippleShape() == RippleShape.ROUNDED_BOX) {
             mRippleView.setDuration(ROUNDED_BOX_RIPPLE_ANIMATION_DURATION);
             mRippleView.setSparkleStrength(0.22f);
-            int color = Utils.getColorAttr(mRippleView.getContext(),
-                    android.R.attr.colorAccent).getDefaultColor();
-            mRippleView.setColor(ColorUtils.setAlphaComponent(color, 28));
+            mRippleView.setColor(color, 28);
         } else {
             mRippleView.setDuration(CIRCLE_RIPPLE_ANIMATION_DURATION);
-            mRippleView.setColor(Utils.getColorAttr(mRippleView.getContext(),
-                    android.R.attr.colorAccent).getDefaultColor());
+            mRippleView.setColor(color, RippleViewKt.RIPPLE_DEFAULT_ALPHA);
         }
 
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {
