@@ -229,6 +229,7 @@ public class TakeScreenshotService extends Service {
             Log.d(TAG, "handleMessage: Using request processor");
             mProcessor.processAsync(request,
                     (r) -> dispatchToController(r, onSaved, callback));
+            return;
         }
 
         dispatchToController(request, onSaved, callback);
