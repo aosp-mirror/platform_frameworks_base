@@ -288,6 +288,18 @@ public class TaskFragmentContainerTest {
     }
 
     @Test
+    public void testIsAbove() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container0 = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+        final TaskFragmentContainer container1 = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+
+        assertTrue(container1.isAbove(container0));
+        assertFalse(container0.isAbove(container1));
+    }
+
+    @Test
     public void testGetBottomMostActivity() {
         final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
