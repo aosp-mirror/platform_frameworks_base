@@ -303,7 +303,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accéder à la position de cet appareil"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"Messagerie texte"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"Messages texte"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et afficher des messages texte"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Fichiers"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"accéder aux fichiers sur votre appareil"</string>
