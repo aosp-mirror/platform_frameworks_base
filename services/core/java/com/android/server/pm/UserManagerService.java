@@ -1731,6 +1731,18 @@ public class UserManagerService extends IUserManager.Stub {
         return false;
     }
 
+    // TODO(b/239982558): add unit test
+    private int getDisplayAssignedToUser(@UserIdInt int userId) {
+        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
+            return Display.DEFAULT_DISPLAY;
+        }
+        synchronized (mUsersLock) {
+            return mUsersOnSecondaryDisplays == null
+                    ? Display.INVALID_DISPLAY
+                    : mUsersOnSecondaryDisplays.get(userId, Display.INVALID_DISPLAY);
+        }
+    }
+
     private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
         int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
 
@@ -6694,6 +6706,11 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public boolean isUserVisible(int userId, int displayId) {
             return isUserVisibleOnDisplay(userId, displayId);
+        }
+
+        @Override
+        public int getDisplayAssignedToUser(int userId) {
+            return UserManagerService.this.getDisplayAssignedToUser(userId);
         }
     } // class LocalService
 
