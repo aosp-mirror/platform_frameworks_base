@@ -1808,7 +1808,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(activity);
             }
 
-            if (displayPolicy.areSystemBarsForcedShownLw()) {
+            if (displayPolicy.areSystemBarsForcedConsumedLw()) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
 
@@ -2527,7 +2527,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.mActivityRecord != null) {
                 win.mActivityRecord.updateReportedVisibilityLocked();
             }
-            if (displayPolicy.areSystemBarsForcedShownLw()) {
+            if (displayPolicy.areSystemBarsForcedConsumedLw()) {
                 result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
             }
             if (!win.isGoneForLayout()) {
@@ -8896,7 +8896,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             : overrideScale;
                     outInsetsState.scale(1f / compatScale);
                 }
-                return dc.getDisplayPolicy().areSystemBarsForcedShownLw();
+                return dc.getDisplayPolicy().areSystemBarsForcedConsumedLw();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
