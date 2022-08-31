@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery.page
+package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
 import androidx.compose.material.icons.Icons
