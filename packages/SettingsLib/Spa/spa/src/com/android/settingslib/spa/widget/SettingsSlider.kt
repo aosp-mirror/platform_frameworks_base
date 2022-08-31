@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget.ui
+package com.android.settingslib.spa.widget
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessAlarm

@@ -118,8 +118,7 @@ public class UserAwareBiometricSchedulerTest {
                                 TEST_SENSOR_ID,  mBiometricLogger, mBiometricContext,
                                 mUserStartedCallback, mStartOperationsFinish);
                     }
-                },
-                CoexCoordinator.getInstance());
+                });
     }
 
     @Test

@@ -258,7 +258,7 @@ public final class GameServiceControllerTest {
                                 PROVIDER_A_SERVICE_A,
                                 PROVIDER_A_SERVICE_C));
         FakeGameServiceProviderInstance instanceB =
-                seedConfigurationForUser(USER_10, configurationA);
+                seedConfigurationForUser(USER_10, configurationB);
         Intent intent = new Intent();
         intent.setData(Uri.parse("package:" + PROVIDER_A_PACKAGE_NAME));
         broadcastReceiverArgumentCaptor.getValue().onReceive(mMockContext, intent);

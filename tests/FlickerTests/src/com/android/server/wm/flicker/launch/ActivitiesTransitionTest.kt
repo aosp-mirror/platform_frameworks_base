@@ -142,7 +142,7 @@ class ActivitiesTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 3)
+                .getConfigNonRotationTests()
         }
     }
 }

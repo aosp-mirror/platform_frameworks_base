@@ -37,6 +37,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
 
@@ -829,17 +830,41 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             @Override
             public void binderDied() {
                 // This is called whenever our client process dies.
+                SparseArray<ModelState.Activity> cachedMap =
+                        new SparseArray<ModelState.Activity>();
                 synchronized (SoundTriggerMiddlewareValidation.this) {
-                    try {
-                        // Gracefully stop all active recognitions and unload the models.
+                        // Copy the relevant state under the lock, so we can call back without
+                        // holding a lock. This exposes us to a potential race, but the client is
+                        // dead so we don't expect one.
+                        // TODO(240613068) A more resilient fix for this.
                         for (Map.Entry<Integer, ModelState> entry :
                                 mLoadedModels.entrySet()) {
-                            if (entry.getValue().activityState == ModelState.Activity.ACTIVE) {
-                                mDelegate.stopRecognition(entry.getKey());
-                            }
-                            mDelegate.unloadModel(entry.getKey());
+                            cachedMap.put(entry.getKey(), entry.getValue().activityState);
                         }
-                        // Detach.
+                }
+                try {
+                    // Gracefully stop all active recognitions and unload the models.
+                    for (int i = 0; i < cachedMap.size(); i++) {
+                        if (cachedMap.valueAt(i) == ModelState.Activity.ACTIVE) {
+                            mDelegate.stopRecognition(cachedMap.keyAt(i));
+                        }
+                        mDelegate.unloadModel(cachedMap.keyAt(i));
+                    }
+                } catch (Exception e) {
+                    throw handleException(e);
+                }
+                synchronized (SoundTriggerMiddlewareValidation.this) {
+                   // Check if state updated unexpectedly to log race conditions.
+                    for (Map.Entry<Integer, ModelState> entry : mLoadedModels.entrySet()) {
+                        if (cachedMap.get(entry.getKey()) != entry.getValue().activityState) {
+                            Log.e(TAG, "Unexpected state update in binderDied. Race occurred!");
+                        }
+                    }
+                    if (mLoadedModels.size() != cachedMap.size()) {
+                        Log.e(TAG, "Unexpected state update in binderDied. Race occurred!");
+                    }
+                    try {
+                        // Detach
                         detachInternal();
                     } catch (Exception e) {
                         throw handleException(e);

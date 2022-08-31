@@ -1139,6 +1139,11 @@
     <!-- Content description for accessibility: Hint if click will disable. [CHAR LIMIT=NONE] -->
     <string name="volume_odi_captions_hint_disable">disable</string>
 
+    <!-- Sound and vibration settings dialog title. [CHAR LIMIT=30] -->
+    <string name="sound_settings">Sound &amp; vibration</string>
+    <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
+    <string name="volume_panel_dialog_settings_button">Settings</string>
+
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
 
     <!-- Screen pinning dialog title. -->

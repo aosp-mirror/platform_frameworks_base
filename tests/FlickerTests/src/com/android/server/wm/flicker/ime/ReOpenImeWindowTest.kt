@@ -192,8 +192,7 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 3,
-                    supportedRotations = listOf(Surface.ROTATION_0)
+                                        supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }
     }

@@ -184,7 +184,6 @@ class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScr
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
                     listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))

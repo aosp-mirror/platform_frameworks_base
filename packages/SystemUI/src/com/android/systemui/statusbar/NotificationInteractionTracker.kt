@@ -1,7 +1,6 @@
 package com.android.systemui.statusbar
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import javax.inject.Inject
@@ -12,14 +11,12 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotificationInteractionTracker @Inject constructor(
-    private val clicker: NotificationClickNotifier,
-    private val entryManager: NotificationEntryManager
+    clicker: NotificationClickNotifier,
 ) : NotifCollectionListener, NotificationInteractionListener {
     private val interactions = mutableMapOf<String, Boolean>()
 
     init {
         clicker.addNotificationInteractionListener(this)
-        entryManager.addCollectionListener(this)
     }
 
     fun hasUserInteractedWith(key: String): Boolean {
@@ -38,5 +35,3 @@ class NotificationInteractionTracker @Inject constructor(
         interactions[key] = true
     }
 }
-
-private const val TAG = "NotificationInteractionTracker"
