@@ -235,6 +235,7 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
         mStubbedWakeLock = createStubbedWakeLock(false /* needVerification */);
         doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString());
+        doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString(), anyInt());
 
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
