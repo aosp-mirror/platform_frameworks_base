@@ -2542,7 +2542,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (outSyncIdBundle != null) {
                 final int maybeSyncSeqId;
-                if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility != View.GONE
+                if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
                     maybeSyncSeqId = win.shouldSyncWithBuffers() ? win.mSyncSeqId : -1;
                     win.markRedrawForSyncReported();
