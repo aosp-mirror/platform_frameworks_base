@@ -657,30 +657,50 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onAuthenticationSucceeded(@Modality int modality) {
-        mBiometricView.onAuthenticationSucceeded(modality);
+        if (mBiometricView != null) {
+            mBiometricView.onAuthenticationSucceeded(modality);
+        } else {
+            Log.e(TAG, "onAuthenticationSucceeded(): mBiometricView is null");
+        }
     }
 
     @Override
     public void onAuthenticationFailed(@Modality int modality, String failureReason) {
-        mFailedModalities.add(modality);
-        mBiometricView.onAuthenticationFailed(modality, failureReason);
+        if (mBiometricView != null) {
+            mFailedModalities.add(modality);
+            mBiometricView.onAuthenticationFailed(modality, failureReason);
+        } else {
+            Log.e(TAG, "onAuthenticationFailed(): mBiometricView is null");
+        }
     }
 
     @Override
     public void onHelp(@Modality int modality, String help) {
-        mBiometricView.onHelp(modality, help);
+        if (mBiometricView != null) {
+            mBiometricView.onHelp(modality, help);
+        } else {
+            Log.e(TAG, "onHelp(): mBiometricView is null");
+        }
     }
 
     @Override
     public void onError(@Modality int modality, String error) {
-        mBiometricView.onError(modality, error);
+        if (mBiometricView != null) {
+            mBiometricView.onError(modality, error);
+        } else {
+            Log.e(TAG, "onError(): mBiometricView is null");
+        }
     }
 
     @Override
     public void onPointerDown() {
-        if (mBiometricView.onPointerDown(mFailedModalities)) {
-            Log.d(TAG, "retrying failed modalities (pointer down)");
-            mBiometricCallback.onAction(AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN);
+        if (mBiometricView != null) {
+            if (mBiometricView.onPointerDown(mFailedModalities)) {
+                Log.d(TAG, "retrying failed modalities (pointer down)");
+                mBiometricCallback.onAction(AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN);
+            }
+        } else {
+            Log.e(TAG, "onPointerDown(): mBiometricView is null");
         }
     }
 
@@ -715,7 +735,11 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void animateToCredentialUI() {
-        mBiometricView.startTransitionToCredentialUI();
+        if (mBiometricView != null) {
+            mBiometricView.startTransitionToCredentialUI();
+        } else {
+            Log.e(TAG, "animateToCredentialUI(): mBiometricView is null");
+        }
     }
 
     void animateAway(@AuthDialogCallback.DismissedReason int reason) {
