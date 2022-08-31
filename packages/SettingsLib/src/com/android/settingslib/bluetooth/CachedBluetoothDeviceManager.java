@@ -17,6 +17,7 @@
 package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -317,12 +318,14 @@ public class CachedBluetoothDeviceManager {
     }
 
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
+        device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
         final Set<CachedBluetoothDevice> memberDevices = device.getMemberDevice();
         if (!memberDevices.isEmpty()) {
             // Main device is unpaired, to unpair the member device
             for (CachedBluetoothDevice memberDevice : memberDevices) {
                 memberDevice.unpair();
+                memberDevice.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
                 device.removeMemberDevice(memberDevice);
             }
         } else if (mainDevice != null) {
