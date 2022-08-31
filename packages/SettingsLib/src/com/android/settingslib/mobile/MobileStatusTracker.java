@@ -78,6 +78,9 @@ public class MobileStatusTracker {
      * Config the MobileStatusTracker to start or stop monitoring platform signals.
      */
     public void setListening(boolean listening) {
+        if (mListening == listening) {
+            return;
+        }
         mListening = listening;
         if (listening) {
             mPhone.registerTelephonyCallback(mReceiverHandler::post, mTelephonyCallback);
