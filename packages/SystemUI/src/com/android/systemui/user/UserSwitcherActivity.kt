@@ -51,7 +51,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA
-import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord
+import com.android.systemui.user.data.source.UserRecord
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -81,16 +81,17 @@ class UserSwitcherActivity @Inject constructor(
         }
     }
     // When the add users options become available, insert another option to manage users
-    private val manageUserRecord = UserRecord(
-        null /* info */,
-        null /* picture */,
-        false /* isGuest */,
-        false /* isCurrent */,
-        false /* isAddUser */,
-        false /* isRestricted */,
-        false /* isSwitchToEnabled */,
-        false /* isAddSupervisedUser */
-    )
+    private val manageUserRecord =
+        UserRecord(
+            null /* info */,
+            null /* picture */,
+            false /* isGuest */,
+            false /* isCurrent */,
+            false /* isAddUser */,
+            false /* isRestricted */,
+            false /* isSwitchToEnabled */,
+            false /* isAddSupervisedUser */
+        )
 
     private val adapter = object : BaseUserAdapter(userSwitcherController) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
