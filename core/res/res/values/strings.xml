@@ -1733,7 +1733,7 @@
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
-    <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
+    <string name="fingerprint_error_lockout_permanent">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
