@@ -40,4 +40,12 @@ public interface FreeformTaskTransitionStarter {
      *
      */
     void startMinimizedModeTransition(WindowContainerTransaction wct);
+
+    /**
+     * Starts close window transition
+     *
+     * @param wct the {@link WindowContainerTransaction} that closes the task
+     *
+     */
+    void startRemoveTransition(WindowContainerTransaction wct);
 }

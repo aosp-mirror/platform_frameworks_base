@@ -92,6 +92,12 @@ public class FreeformTaskTransitionHandler
 
 
     @Override
+    public void startRemoveTransition(WindowContainerTransaction wct) {
+        final int type = WindowManager.TRANSIT_CLOSE;
+        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+    }
+
+    @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT,

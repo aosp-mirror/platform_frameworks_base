@@ -29,6 +29,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
@@ -703,6 +704,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             @Nullable ITaskFragmentOrganizer organizer, @Nullable Transition finishTransition) {
         final int type = hop.getType();
         switch (type) {
+            case HIERARCHY_OP_TYPE_REMOVE_TASK: {
+                final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+                final Task task = wc != null ? wc.asTask() : null;
+                task.remove(true, "Applying remove task Hierarchy Op");
+                break;
+            }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
                 final Task task = wc != null ? wc.asTask() : null;
