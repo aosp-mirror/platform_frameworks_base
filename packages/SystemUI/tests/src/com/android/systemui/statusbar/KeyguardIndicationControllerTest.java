@@ -639,7 +639,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
-        verify(mStatusBarKeyguardViewManager).showBouncerMessage(eq(message), any());
+        verify(mStatusBarKeyguardViewManager).setKeyguardMessage(eq(message), any());
     }
 
     @Test

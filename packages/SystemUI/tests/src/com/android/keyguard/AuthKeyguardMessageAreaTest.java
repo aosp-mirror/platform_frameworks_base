@@ -33,14 +33,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public class KeyguardMessageAreaTest extends SysuiTestCase {
+public class AuthKeyguardMessageAreaTest extends SysuiTestCase {
     private KeyguardMessageArea mKeyguardMessageArea;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mKeyguardMessageArea = new KeyguardMessageArea(mContext, null);
-        mKeyguardMessageArea.setBouncerShowing(true);
+        mKeyguardMessageArea = new AuthKeyguardMessageArea(mContext, null);
+        mKeyguardMessageArea.setIsVisible(true);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class KeyguardMessageAreaTest extends SysuiTestCase {
 
     @Test
     public void testHiddenWhenBouncerHidden() {
-        mKeyguardMessageArea.setBouncerShowing(false);
+        mKeyguardMessageArea.setIsVisible(false);
         mKeyguardMessageArea.setVisibility(View.INVISIBLE);
         mKeyguardMessageArea.setMessage("oobleck");
         assertThat(mKeyguardMessageArea.getVisibility()).isEqualTo(View.INVISIBLE);

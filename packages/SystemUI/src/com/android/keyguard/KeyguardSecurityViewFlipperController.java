@@ -146,7 +146,8 @@ public class KeyguardSecurityViewFlipperController
         protected NullKeyguardInputViewController(SecurityMode securityMode,
                 KeyguardSecurityCallback keyguardSecurityCallback,
                 EmergencyButtonController emergencyButtonController) {
-            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController);
+            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController,
+                    null);
         }
 
         @Override
