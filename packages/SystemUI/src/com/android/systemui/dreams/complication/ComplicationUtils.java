@@ -35,7 +35,7 @@ import java.util.Set;
 public class ComplicationUtils {
     /**
      * Converts a {@link com.android.settingslib.dream.DreamBackend.ComplicationType} to
-     * {@link ComplicationType}.
+     * {@link Complication.ComplicationType}.
      */
     @Complication.ComplicationType
     public static int convertComplicationType(@DreamBackend.ComplicationType int type) {
