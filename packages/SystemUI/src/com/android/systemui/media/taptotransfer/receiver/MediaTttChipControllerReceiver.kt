@@ -30,7 +30,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
-import androidx.core.graphics.ColorUtils
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -209,8 +208,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         // Center the ripple on the bottom of the screen in the middle.
         rippleView.setCenter(width * 0.5f, height.toFloat())
         val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
-        val colorWithAlpha = ColorUtils.setAlphaComponent(color, 70)
-        rippleView.setColor(colorWithAlpha)
+        rippleView.setColor(color, 70)
     }
 }
 

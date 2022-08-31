@@ -33,7 +33,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -117,7 +116,7 @@ class CameraGestureHelper @Inject constructor(
                     )
                 } catch (e: RemoteException) {
                     Log.w(
-                        NotificationPanelViewController.TAG,
+                        "CameraGestureHelper",
                         "Unable to start camera activity",
                         e
                     )

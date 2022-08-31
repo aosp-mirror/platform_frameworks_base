@@ -27,10 +27,12 @@ import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
+import android.app.ambientcontext.IAmbientContextObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.RemoteCallback;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
@@ -48,6 +50,7 @@ import com.android.server.pm.KnownPackages;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -67,31 +70,27 @@ public class AmbientContextManagerService extends
     static class ClientRequest {
         private final int mUserId;
         private final AmbientContextEventRequest mRequest;
-        private final PendingIntent mPendingIntent;
-        private final RemoteCallback mClientStatusCallback;
+        private final String mPackageName;
+        private final IAmbientContextObserver mObserver;
 
         ClientRequest(int userId, AmbientContextEventRequest request,
-                PendingIntent pendingIntent, RemoteCallback clientStatusCallback) {
+                String packageName, IAmbientContextObserver observer) {
             this.mUserId = userId;
             this.mRequest = request;
-            this.mPendingIntent = pendingIntent;
-            this.mClientStatusCallback = clientStatusCallback;
+            this.mPackageName = packageName;
+            this.mObserver = observer;
         }
 
         String getPackageName() {
-            return mPendingIntent.getCreatorPackage();
+            return mPackageName;
         }
 
         AmbientContextEventRequest getRequest() {
             return mRequest;
         }
 
-        PendingIntent getPendingIntent() {
-            return mPendingIntent;
-        }
-
-        RemoteCallback getClientStatusCallback() {
-            return mClientStatusCallback;
+        IAmbientContextObserver getObserver() {
+            return mObserver;
         }
 
         boolean hasUserId(int userId) {
@@ -139,16 +138,16 @@ public class AmbientContextManagerService extends
     }
 
     void newClientAdded(int userId, AmbientContextEventRequest request,
-            PendingIntent pendingIntent, RemoteCallback clientStatusCallback) {
-        Slog.d(TAG, "New client added: " + pendingIntent.getCreatorPackage());
+            String callingPackage, IAmbientContextObserver observer) {
+        Slog.d(TAG, "New client added: " + callingPackage);
 
         // Remove any existing ClientRequest for this user and package.
         mExistingClientRequests.removeAll(
-                findExistingRequests(userId, pendingIntent.getCreatorPackage()));
+                findExistingRequests(userId, callingPackage));
 
         // Add to existing ClientRequests
         mExistingClientRequests.add(
-                new ClientRequest(userId, request, pendingIntent, clientStatusCallback));
+                new ClientRequest(userId, request, callingPackage, observer));
     }
 
     void clientRemoved(int userId, String packageName) {
@@ -167,10 +166,10 @@ public class AmbientContextManagerService extends
     }
 
     @Nullable
-    PendingIntent getPendingIntent(int userId, String packageName) {
+    IAmbientContextObserver getClientRequestObserver(int userId, String packageName) {
         for (ClientRequest clientRequest : mExistingClientRequests) {
             if (clientRequest.hasUserIdAndPackageName(userId, packageName)) {
-                return clientRequest.getPendingIntent();
+                return clientRequest.getObserver();
             }
         }
         return null;
@@ -236,15 +235,13 @@ public class AmbientContextManagerService extends
      * Requires ACCESS_AMBIENT_CONTEXT_EVENT permission.
      */
     void startDetection(@UserIdInt int userId, AmbientContextEventRequest request,
-            String packageName, RemoteCallback detectionResultCallback,
-            RemoteCallback statusCallback) {
+            String packageName, IAmbientContextObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
         synchronized (mLock) {
             final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
             if (service != null) {
-                service.startDetection(request, packageName, detectionResultCallback,
-                        statusCallback);
+                service.startDetection(request, packageName, observer);
             } else {
                 Slog.i(TAG, "service not available for user_id: " + userId);
             }
@@ -297,8 +294,7 @@ public class AmbientContextManagerService extends
                     Slog.d(TAG, "Restoring detection for " + clientRequest.getPackageName());
                     service.startDetection(clientRequest.getRequest(),
                             clientRequest.getPackageName(),
-                            service.createDetectionResultRemoteCallback(),
-                            clientRequest.getClientStatusCallback());
+                            clientRequest.getObserver());
                 }
             }
         }
@@ -328,16 +324,45 @@ public class AmbientContextManagerService extends
             Objects.requireNonNull(request);
             Objects.requireNonNull(resultPendingIntent);
             Objects.requireNonNull(statusCallback);
+            // Wrap the PendingIntent and statusCallback in a IAmbientContextObserver to make the
+            // code unified
+            IAmbientContextObserver observer = new IAmbientContextObserver.Stub() {
+                @Override
+                public void onEvents(List<AmbientContextEvent> events) throws RemoteException {
+                    mService.sendDetectionResultIntent(resultPendingIntent, events);
+                }
+
+                @Override
+                public void onRegistrationComplete(int statusCode) throws RemoteException {
+                    AmbientContextManagerPerUserService.sendStatusCallback(statusCallback,
+                            statusCode);
+                }
+            };
+            registerObserverWithCallback(request, resultPendingIntent.getCreatorPackage(),
+                    observer);
+        }
+
+        /**
+         * Register an observer for Ambient Context events.
+         */
+        @Override
+        public void registerObserverWithCallback(AmbientContextEventRequest request,
+                String packageName,
+                IAmbientContextObserver observer) {
+            Slog.i(TAG, "AmbientContextManagerService registerObserverWithCallback.");
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(observer);
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
-            assertCalledByPackageOwner(resultPendingIntent.getCreatorPackage());
+            assertCalledByPackageOwner(packageName);
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available.");
-                mService.sendStatusCallback(statusCallback,
+                AmbientContextManagerPerUserService.completeRegistration(observer,
                         AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
-            mService.onRegisterObserver(request, resultPendingIntent, statusCallback);
+            mService.onRegisterObserver(request, packageName, observer);
         }
 
         @Override
@@ -359,7 +384,7 @@ public class AmbientContextManagerService extends
             assertCalledByPackageOwner(callingPackage);
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Detection service not available.");
-                mService.sendStatusToCallback(statusCallback,
+                AmbientContextManagerPerUserService.sendStatusCallback(statusCallback,
                         AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }

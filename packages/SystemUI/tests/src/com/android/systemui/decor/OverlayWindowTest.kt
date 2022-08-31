@@ -16,6 +16,7 @@
 
 package com.android.systemui.decor
 
+import android.graphics.Color
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.DisplayCutout
@@ -51,35 +52,45 @@ class OverlayWindowTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        decorProvider1 = spy(PrivacyDotCornerDecorProviderImpl(
+        decorProvider1 = spy(
+            PrivacyDotCornerDecorProviderImpl(
                 viewId = TEST_DECOR_VIEW_ID_1,
                 alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
                 alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                layoutId = R.layout.privacy_dot_top_left))
-        decorProvider2 = spy(PrivacyDotCornerDecorProviderImpl(
+                layoutId = R.layout.privacy_dot_top_left
+            )
+        )
+        decorProvider2 = spy(
+            PrivacyDotCornerDecorProviderImpl(
                 viewId = TEST_DECOR_VIEW_ID_2,
                 alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
                 alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                layoutId = R.layout.privacy_dot_bottom_left))
-        decorProvider3 = spy(PrivacyDotCornerDecorProviderImpl(
+                layoutId = R.layout.privacy_dot_bottom_left
+            )
+        )
+        decorProvider3 = spy(
+            PrivacyDotCornerDecorProviderImpl(
                 viewId = TEST_DECOR_VIEW_ID_3,
                 alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
                 alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                layoutId = R.layout.privacy_dot_bottom_right))
-
+                layoutId = R.layout.privacy_dot_bottom_right
+            )
+        )
         overlay = OverlayWindow(mContext)
     }
 
     @Test
     fun testAddProvider() {
         @Surface.Rotation val rotation = Surface.ROTATION_270
-        overlay.addDecorProvider(decorProvider1, rotation)
-        overlay.addDecorProvider(decorProvider2, rotation)
+        overlay.addDecorProvider(decorProvider1, rotation, Color.BLACK)
+        overlay.addDecorProvider(decorProvider2, rotation, Color.YELLOW)
 
         verify(decorProvider1, times(1)).inflateView(
-                mContext, overlay.rootView, rotation)
+                mContext, overlay.rootView, rotation, Color.BLACK
+        )
         verify(decorProvider2, times(1)).inflateView(
-                mContext, overlay.rootView, rotation)
+                mContext, overlay.rootView, rotation, Color.YELLOW
+        )
 
         val view1FoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID_1)
         Assert.assertNotNull(view1FoundFromRootView)
@@ -91,8 +102,8 @@ class OverlayWindowTest : SysuiTestCase() {
 
     @Test
     fun testRemoveView() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270)
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270, Color.BLACK)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270, Color.BLACK)
         overlay.removeView(TEST_DECOR_VIEW_ID_1)
 
         val viewFoundFromRootView = overlay.rootView.findViewById<View>(TEST_DECOR_VIEW_ID_1)
@@ -102,39 +113,47 @@ class OverlayWindowTest : SysuiTestCase() {
 
     @Test
     fun testOnReloadResAndMeasureWithoutIds() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0)
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0, Color.BLACK)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0, Color.BLACK)
 
         overlay.onReloadResAndMeasure(
-                reloadToken = 1,
-                rotation = Surface.ROTATION_90,
-                displayUniqueId = null)
+            reloadToken = 1,
+            rotation = Surface.ROTATION_90,
+            tintColor = Color.BLACK,
+            displayUniqueId = null
+        )
         verify(decorProvider1, times(1)).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, null)
+                overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, Color.BLACK, null
+        )
         verify(decorProvider2, times(1)).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, null)
+                overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, Color.BLACK, null
+        )
     }
 
     @Test
     fun testOnReloadResAndMeasureWithIds() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0)
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0, Color.BLACK)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0, Color.BLACK)
 
         overlay.onReloadResAndMeasure(
-                filterIds = arrayOf(TEST_DECOR_VIEW_ID_2),
-                reloadToken = 1,
-                rotation = Surface.ROTATION_90,
-                displayUniqueId = null)
+            filterIds = arrayOf(TEST_DECOR_VIEW_ID_2),
+            reloadToken = 1,
+            rotation = Surface.ROTATION_90,
+            tintColor = Color.BLACK,
+            displayUniqueId = null
+        )
         verify(decorProvider1, never()).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, null)
+                overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, Color.BLACK, null
+        )
         verify(decorProvider2, times(1)).onReloadResAndMeasure(
-                overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, null)
+                overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, Color.BLACK, null
+        )
     }
 
     @Test
     fun testRemoveRedundantViewsWithNullParameter() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270)
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270, Color.BLACK)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270, Color.BLACK)
 
         overlay.removeRedundantViews(null)
 
@@ -146,13 +165,15 @@ class OverlayWindowTest : SysuiTestCase() {
 
     @Test
     fun testRemoveRedundantViewsWith2Providers() {
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270)
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270)
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270, Color.BLACK)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270, Color.BLACK)
 
-        overlay.removeRedundantViews(IntArray(2).apply {
-            this[0] = TEST_DECOR_VIEW_ID_3
-            this[1] = TEST_DECOR_VIEW_ID_1
-        })
+        overlay.removeRedundantViews(
+            IntArray(2).apply {
+                this[0] = TEST_DECOR_VIEW_ID_3
+                this[1] = TEST_DECOR_VIEW_ID_1
+            }
+        )
 
         Assert.assertNotNull(overlay.getView(TEST_DECOR_VIEW_ID_1))
         Assert.assertNotNull(overlay.rootView.findViewById(TEST_DECOR_VIEW_ID_1))
@@ -167,13 +188,13 @@ class OverlayWindowTest : SysuiTestCase() {
         Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2)))
         Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2, decorProvider1)))
 
-        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0)
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0, Color.BLACK)
         Assert.assertFalse(overlay.hasSameProviders(emptyList()))
         Assert.assertTrue(overlay.hasSameProviders(listOf(decorProvider1)))
         Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2)))
         Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2, decorProvider1)))
 
-        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0, Color.BLACK)
         Assert.assertFalse(overlay.hasSameProviders(emptyList()))
         Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider1)))
         Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2)))

@@ -29,6 +29,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
@@ -153,6 +155,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new ShelfState();
     }

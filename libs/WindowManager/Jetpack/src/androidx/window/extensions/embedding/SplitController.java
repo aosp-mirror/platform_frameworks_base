@@ -792,6 +792,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Checks if there is a rule to split the two activities. If there is one, puts them into split
      * and returns {@code true}. Otherwise, returns {@code false}.
      */
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(mPresenter.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
     @GuardedBy("mLock")
     private boolean putActivitiesIntoSplitIfNecessary(@NonNull WindowContainerTransaction wct,
             @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity) {

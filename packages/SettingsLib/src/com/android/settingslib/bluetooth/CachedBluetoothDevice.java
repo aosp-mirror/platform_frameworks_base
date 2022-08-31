@@ -1431,11 +1431,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * first connected device in the coordinated set, and then switch the content of the main
      * device and member devices.
      *
-     * @param prevMainDevice the previous Main device, it will be added into the member device set.
-     * @param newMainDevice the new Main device, it will be removed from the member device set.
+     * @param newMainDevice the new Main device which is from the previous main device's member
+     *                      list.
      */
-    public void switchMemberDeviceContent(CachedBluetoothDevice prevMainDevice,
-            CachedBluetoothDevice newMainDevice) {
+    public void switchMemberDeviceContent(CachedBluetoothDevice newMainDevice) {
         // Backup from main device
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
@@ -1444,8 +1443,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mDevice = newMainDevice.mDevice;
         mRssi = newMainDevice.mRssi;
         mJustDiscovered = newMainDevice.mJustDiscovered;
-        addMemberDevice(prevMainDevice);
-        mMemberDevices.remove(newMainDevice);
+
         // Set sub device from backup
         newMainDevice.mDevice = tmpDevice;
         newMainDevice.mRssi = tmpRssi;
