@@ -287,6 +287,9 @@ public class FullscreenTaskListener<T extends AutoCloseable>
     }
 
     private void releaseWindowDecor(T windowDecor) {
+        if (windowDecor == null) {
+            return;
+        }
         try {
             windowDecor.close();
         } catch (Exception e) {
