@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -106,14 +107,26 @@ public abstract class HandwritingGesture {
     public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 1 << 4;
 
     /**
+     * Gesture of type {@link SelectRangeGesture} to select range of text.
+     */
+    public static final int GESTURE_TYPE_SELECT_RANGE = 1 << 5;
+
+    /**
+     * Gesture of type {@link DeleteRangeGesture} to delete range of text.
+     */
+    public static final int GESTURE_TYPE_DELETE_RANGE = 1 << 6;
+
+    /**
      * Type of gesture like {@link #GESTURE_TYPE_SELECT}, {@link #GESTURE_TYPE_INSERT},
      * or {@link #GESTURE_TYPE_DELETE}.
      */
     @IntDef(prefix = {"GESTURE_TYPE_"}, value = {
             GESTURE_TYPE_NONE,
             GESTURE_TYPE_SELECT,
+            GESTURE_TYPE_SELECT_RANGE,
             GESTURE_TYPE_INSERT,
             GESTURE_TYPE_DELETE,
+            GESTURE_TYPE_DELETE_RANGE,
             GESTURE_TYPE_REMOVE_SPACE,
             GESTURE_TYPE_JOIN_OR_SPLIT})
     @Retention(RetentionPolicy.SOURCE)
@@ -123,13 +136,15 @@ public abstract class HandwritingGesture {
      * Flags which can be any combination of {@link #GESTURE_TYPE_SELECT},
      * {@link #GESTURE_TYPE_INSERT}, or {@link #GESTURE_TYPE_DELETE}.
      * {@link GestureTypeFlags} can be used by editors to declare what gestures are supported
-     *  and report them in {@link EditorInfo#setSupportedHandwritingGestureTypes(int)}.
+     *  and report them in {@link EditorInfo#setSupportedHandwritingGestures(List)}.
      * @hide
      */
     @IntDef(flag = true, prefix = {"GESTURE_TYPE_"}, value = {
             GESTURE_TYPE_SELECT,
+            GESTURE_TYPE_SELECT_RANGE,
             GESTURE_TYPE_INSERT,
             GESTURE_TYPE_DELETE,
+            GESTURE_TYPE_DELETE_RANGE,
             GESTURE_TYPE_REMOVE_SPACE,
             GESTURE_TYPE_JOIN_OR_SPLIT})
     @Retention(RetentionPolicy.SOURCE)
@@ -140,7 +155,7 @@ public abstract class HandwritingGesture {
     /**
      * Returns the gesture type {@link GestureType}.
      * {@link GestureType} can be used by editors to declare what gestures are supported and report
-     * them in {@link EditorInfo#setSupportedHandwritingGestureTypes(int)}.
+     * them in {@link EditorInfo#setSupportedHandwritingGestures(List)}.
      * @hide
      */
     @TestApi

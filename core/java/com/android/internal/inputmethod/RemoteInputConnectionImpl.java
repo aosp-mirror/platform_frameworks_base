@@ -41,6 +41,7 @@ import android.view.ViewRootImpl;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.HandwritingGesture;
@@ -51,6 +52,7 @@ import android.view.inputmethod.InsertGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
+import android.view.inputmethod.SelectRangeGesture;
 import android.view.inputmethod.TextAttribute;
 import android.view.inputmethod.TextSnapshot;
 
@@ -985,6 +987,14 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
 
     @Dispatching(cancellable = true)
     @Override
+    public void performHandwritingSelectRangeGesture(
+            InputConnectionCommandHeader header, SelectRangeGesture gesture,
+            ResultReceiver resultReceiver) {
+        performHandwritingGestureInternal(header, gesture, resultReceiver);
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
     public void performHandwritingInsertGesture(
             InputConnectionCommandHeader header, InsertGesture gesture,
             ResultReceiver resultReceiver) {
@@ -995,6 +1005,14 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
     @Override
     public void performHandwritingDeleteGesture(
             InputConnectionCommandHeader header, DeleteGesture gesture,
+            ResultReceiver resultReceiver) {
+        performHandwritingGestureInternal(header, gesture, resultReceiver);
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
+    public void performHandwritingDeleteRangeGesture(
+            InputConnectionCommandHeader header, DeleteRangeGesture gesture,
             ResultReceiver resultReceiver) {
         performHandwritingGestureInternal(header, gesture, resultReceiver);
     }
