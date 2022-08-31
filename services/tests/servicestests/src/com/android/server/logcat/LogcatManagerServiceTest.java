@@ -16,6 +16,8 @@
 
 package com.android.server.logcat;
 
+import static android.os.Process.INVALID_UID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.os.ILogd;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -69,6 +72,8 @@ public class LogcatManagerServiceTest {
     @Mock
     private ActivityManagerInternal mActivityManagerInternalMock;
     @Mock
+    private PackageManager mPackageManagerMock;
+    @Mock
     private ILogd mLogdMock;
 
     private LogcatManagerService mService;
@@ -81,10 +86,17 @@ public class LogcatManagerServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
+        when(mActivityManagerInternalMock.getInstrumentationSourceUid(anyInt()))
+                .thenReturn(INVALID_UID);
+
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
-
+        when(mContextSpy.getPackageManager()).thenReturn(mPackageManagerMock);
+        when(mPackageManagerMock.getPackagesForUid(APP1_UID)).thenReturn(
+                new String[]{APP1_PACKAGE_NAME});
+        when(mPackageManagerMock.getPackagesForUid(APP2_UID)).thenReturn(
+                new String[]{APP2_PACKAGE_NAME});
         when(mActivityManagerInternalMock.getPackageNameByPid(APP1_PID)).thenReturn(
                 APP1_PACKAGE_NAME);
         when(mActivityManagerInternalMock.getPackageNameByPid(APP2_PID)).thenReturn(
@@ -132,6 +144,20 @@ public class LogcatManagerServiceTest {
 
         verify(mLogdMock).decline(APP1_UID, APP1_GID, APP1_PID, FD1);
         verify(mLogdMock, never()).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
+        verify(mContextSpy, never()).startActivityAsUser(any(), any());
+    }
+
+    @Test
+    public void test_RequestFromBackground_ApprovedIfInstrumented() throws Exception {
+        when(mActivityManagerInternalMock.getInstrumentationSourceUid(APP1_UID))
+                .thenReturn(APP1_UID);
+        when(mActivityManagerInternalMock.getUidProcessState(APP1_UID)).thenReturn(
+                ActivityManager.PROCESS_STATE_RECEIVER);
+        mService.getBinderService().startThread(APP1_UID, APP1_GID, APP1_PID, FD1);
+        mTestLooper.dispatchAll();
+
+        verify(mLogdMock).approve(APP1_UID, APP1_GID, APP1_PID, FD1);
+        verify(mLogdMock, never()).decline(APP1_UID, APP1_GID, APP1_PID, FD1);
         verify(mContextSpy, never()).startActivityAsUser(any(), any());
     }
 
