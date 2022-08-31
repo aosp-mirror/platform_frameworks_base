@@ -21,14 +21,16 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
+import android.app.ambientcontext.IAmbientContextObserver;
 import android.content.Intent;
-import android.os.RemoteCallback;
 import android.os.UserHandle;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  * Unit test for {@link AmbientContextManagerService}.
@@ -48,12 +50,22 @@ public class AmbientContextManagerServiceTest {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 InstrumentationRegistry.getTargetContext(), 0,
                 intent, PendingIntent.FLAG_IMMUTABLE);
+        IAmbientContextObserver observer = new IAmbientContextObserver.Stub() {
+            @Override
+            public void onEvents(List<AmbientContextEvent> events) {
+            }
+
+            @Override
+            public void onRegistrationComplete(int statusCode) {
+            }
+        };
         AmbientContextManagerService.ClientRequest clientRequest =
                 new AmbientContextManagerService.ClientRequest(USER_ID, request,
-                        pendingIntent, new RemoteCallback(result -> {}));
+                        pendingIntent.getCreatorPackage(), observer);
 
         assertThat(clientRequest.getRequest()).isEqualTo(request);
         assertThat(clientRequest.getPackageName()).isEqualTo(SYSTEM_PACKAGE_NAME);
+        assertThat(clientRequest.getObserver()).isEqualTo(observer);
         assertThat(clientRequest.hasUserId(USER_ID)).isTrue();
         assertThat(clientRequest.hasUserId(-1)).isFalse();
         assertThat(clientRequest.hasUserIdAndPackageName(USER_ID, SYSTEM_PACKAGE_NAME)).isTrue();

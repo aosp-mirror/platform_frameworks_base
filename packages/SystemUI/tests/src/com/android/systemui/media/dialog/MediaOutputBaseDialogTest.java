@@ -224,6 +224,14 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void refresh_inDragging_directSetRefreshingToFalse() {
+        when(mMediaOutputBaseAdapter.isDragging()).thenReturn(true);
+        mMediaOutputBaseDialogImpl.refresh();
+
+        assertThat(mMediaOutputController.isRefreshing()).isFalse();
+    }
+
+    @Test
     public void refresh_notInDragging_verifyUpdateAdapter() {
         when(mMediaOutputBaseAdapter.getCurrentActivePosition()).thenReturn(-1);
         when(mMediaOutputBaseAdapter.isDragging()).thenReturn(false);

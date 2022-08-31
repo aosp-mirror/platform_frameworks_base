@@ -59,11 +59,21 @@ public final class AmbientContextEvent implements Parcelable {
      */
     public static final int EVENT_SNORE = 2;
 
+    /**
+     * The integer indicating a double-tap event was detected.
+     * For detecting this event type, there's no specific consent activity to request access, but
+     * the consent is implied through the double tap toggle in the Settings app.
+     *
+     * @hide
+     */
+    public static final int EVENT_BACK_DOUBLE_TAP = 3;
+
     /** @hide */
     @IntDef(prefix = { "EVENT_" }, value = {
             EVENT_UNKNOWN,
             EVENT_COUGH,
             EVENT_SNORE,
+            EVENT_BACK_DOUBLE_TAP,
     }) public @interface EventCode {}
 
     /** The integer indicating an unknown level. */
@@ -150,7 +160,8 @@ public final class AmbientContextEvent implements Parcelable {
     @IntDef(prefix = "EVENT_", value = {
         EVENT_UNKNOWN,
         EVENT_COUGH,
-        EVENT_SNORE
+        EVENT_SNORE,
+        EVENT_BACK_DOUBLE_TAP
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -166,6 +177,8 @@ public final class AmbientContextEvent implements Parcelable {
                     return "EVENT_COUGH";
             case EVENT_SNORE:
                     return "EVENT_SNORE";
+            case EVENT_BACK_DOUBLE_TAP:
+                    return "EVENT_BACK_DOUBLE_TAP";
             default: return Integer.toHexString(value);
         }
     }
@@ -478,10 +491,10 @@ public final class AmbientContextEvent implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1642040319323L,
+            time = 1659950304931L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/app/ambientcontext/AmbientContextEvent.java",
-            inputSignatures = "public static final  int EVENT_UNKNOWN\npublic static final  int EVENT_COUGH\npublic static final  int EVENT_SNORE\npublic static final  int LEVEL_UNKNOWN\npublic static final  int LEVEL_LOW\npublic static final  int LEVEL_MEDIUM_LOW\npublic static final  int LEVEL_MEDIUM\npublic static final  int LEVEL_MEDIUM_HIGH\npublic static final  int LEVEL_HIGH\nprivate final @android.app.ambientcontext.AmbientContextEvent.EventCode int mEventType\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mStartTime\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mEndTime\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mConfidenceLevel\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mDensityLevel\nprivate static  int defaultEventType()\nprivate static @android.annotation.NonNull java.time.Instant defaultStartTime()\nprivate static @android.annotation.NonNull java.time.Instant defaultEndTime()\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultDensityLevel()\nclass AmbientContextEvent extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=false, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int EVENT_UNKNOWN\npublic static final  int EVENT_COUGH\npublic static final  int EVENT_SNORE\npublic static final  int EVENT_BACK_DOUBLE_TAP\npublic static final  int LEVEL_UNKNOWN\npublic static final  int LEVEL_LOW\npublic static final  int LEVEL_MEDIUM_LOW\npublic static final  int LEVEL_MEDIUM\npublic static final  int LEVEL_MEDIUM_HIGH\npublic static final  int LEVEL_HIGH\nprivate final @android.app.ambientcontext.AmbientContextEvent.EventCode int mEventType\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mStartTime\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mEndTime\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mConfidenceLevel\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mDensityLevel\nprivate static  int defaultEventType()\nprivate static @android.annotation.NonNull java.time.Instant defaultStartTime()\nprivate static @android.annotation.NonNull java.time.Instant defaultEndTime()\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultDensityLevel()\nclass AmbientContextEvent extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=false, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
