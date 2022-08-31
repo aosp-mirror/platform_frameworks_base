@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
-import android.view.autofill.AutofillManager;
 import android.view.inputmethod.HandwritingGesture;
 
 import java.util.StringJoiner;
@@ -276,6 +275,12 @@ public final class InputMethodDebug {
         }
         if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_DELETE) != 0) {
             joiner.add("DELETE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE) != 0) {
+            joiner.add("REMOVE_SPACE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_JOIN_OR_SPLIT) != 0) {
+            joiner.add("JOIN_OR_SPLIT");
         }
 
         return joiner.setEmptyValue("(none)").toString();

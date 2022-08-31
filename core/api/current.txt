@@ -53160,7 +53160,9 @@ package android.view.inputmethod {
     method @Nullable public String getFallbackText();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
+    field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
     field public static final int GESTURE_TYPE_NONE = 0; // 0x0
+    field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8
     field public static final int GESTURE_TYPE_SELECT = 1; // 0x1
     field public static final int GRANULARITY_CHARACTER = 2; // 0x2
     field public static final int GRANULARITY_WORD = 1; // 0x1
@@ -53499,6 +53501,35 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setFallbackText(@Nullable String);
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setInsertionPoint(@NonNull android.graphics.PointF);
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setTextToInsert(@NonNull String);
+  }
+
+  public final class JoinOrSplitGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.PointF getJoinOrSplitPoint();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.JoinOrSplitGesture> CREATOR;
+  }
+
+  public static final class JoinOrSplitGesture.Builder {
+    ctor public JoinOrSplitGesture.Builder();
+    method @NonNull public android.view.inputmethod.JoinOrSplitGesture build();
+    method @NonNull public android.view.inputmethod.JoinOrSplitGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.JoinOrSplitGesture.Builder setJoinOrSplitPoint(@NonNull android.graphics.PointF);
+  }
+
+  public final class RemoveSpaceGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.PointF getEndPoint();
+    method @NonNull public android.graphics.PointF getStartPoint();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.RemoveSpaceGesture> CREATOR;
+  }
+
+  public static final class RemoveSpaceGesture.Builder {
+    ctor public RemoveSpaceGesture.Builder();
+    method @NonNull public android.view.inputmethod.RemoveSpaceGesture build();
+    method @NonNull public android.view.inputmethod.RemoveSpaceGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.RemoveSpaceGesture.Builder setPoints(@NonNull android.graphics.PointF, @NonNull android.graphics.PointF);
   }
 
   public final class SelectGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {

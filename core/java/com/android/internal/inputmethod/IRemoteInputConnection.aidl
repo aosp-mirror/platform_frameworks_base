@@ -25,6 +25,8 @@ import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.TextAttribute;
 
@@ -98,6 +100,12 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
     void performHandwritingDeleteGesture(in InputConnectionCommandHeader header,
             in DeleteGesture gesture, in ResultReceiver resultReceiver);
+
+    void performHandwritingRemoveSpaceGesture(in InputConnectionCommandHeader header,
+            in RemoveSpaceGesture gesture, in ResultReceiver resultReceiver);
+
+    void performHandwritingJoinOrSplitGesture(in InputConnectionCommandHeader header,
+            in JoinOrSplitGesture gesture, in ResultReceiver resultReceiver);
 
     void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
 
