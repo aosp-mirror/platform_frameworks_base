@@ -410,6 +410,22 @@ public final class DataSpace {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
+        DATASPACE_HEIF,
+    })
+    public @interface DataSpaceFileFormat {};
+
+    /**
+     * High Efficiency Image File Format (HEIF).
+     *
+     * <p>This value is valid with {@link android.hardware.HardwareBuffer#BLOB HardwareBuffer.BLOB}
+     * format. The combination is an HEIC image encoded by HEIC or HEVC encoder according to
+     * ISO/IEC 23008-12.</p>
+     */
+    public static final int DATASPACE_HEIF = 4100;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
         DATASPACE_UNKNOWN,
         DATASPACE_SCRGB_LINEAR,
         DATASPACE_SRGB,
