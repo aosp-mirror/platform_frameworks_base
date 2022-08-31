@@ -170,8 +170,7 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                repetitions = SplitScreenHelper.TEST_REPETITIONS)
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
         }
     }
 }
