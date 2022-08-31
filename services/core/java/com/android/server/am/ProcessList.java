@@ -814,12 +814,14 @@ public final class ProcessList {
                                                 < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
                                             return false;
                                         }
-                                        Pair<Integer, Integer> temp = getNumForegroundServices();
-                                        final int totalForegroundServices = temp.first;
-                                        final int procsWithForegroundServices = temp.second;
+                                        // Note: directly access
+                                        // ActiveServices.sNumForegroundServices, do not try to
+                                        // hold AMS lock here, otherwise it is a potential deadlock.
+                                        Pair<Integer, Integer> foregroundServices =
+                                                ActiveServices.sNumForegroundServices.get();
                                         LmkdStatsReporter.logKillOccurred(inputData,
-                                                totalForegroundServices,
-                                                procsWithForegroundServices);
+                                                foregroundServices.first,
+                                                foregroundServices.second);
                                         return true;
                                     case LMK_STATE_CHANGED:
                                         if (receivedLen
