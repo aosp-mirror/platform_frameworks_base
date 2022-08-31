@@ -1816,6 +1816,19 @@ public class ComputerEngine implements Computer {
         return mSettings.getPackage(packageName);
     }
 
+    @Override
+    public PackageStateInternal getPackageStateFiltered(@NonNull String packageName,
+            int callingUid, @UserIdInt int userId) {
+        packageName = resolveInternalPackageNameInternalLocked(
+                packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
+        var packageState = mSettings.getPackage(packageName);
+        if (shouldFilterApplication(packageState, callingUid, userId)) {
+            return null;
+        } else {
+            return packageState;
+        }
+    }
+
     public final ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         if (getInstantAppPackageName(callingUid) != null) {
