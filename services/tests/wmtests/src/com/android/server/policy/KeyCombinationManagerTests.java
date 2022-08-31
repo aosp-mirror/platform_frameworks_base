@@ -43,11 +43,11 @@ import java.util.concurrent.TimeUnit;
  * Test class for {@link KeyCombinationManager}.
  *
  * Build/Install/Run:
- *  atest KeyCombinationTests
+ *  atest KeyCombinationManagerTests
  */
 
 @SmallTest
-public class KeyCombinationTests {
+public class KeyCombinationManagerTests {
     private KeyCombinationManager mKeyCombinationManager;
 
     private final CountDownLatch mAction1Triggered = new CountDownLatch(1);
