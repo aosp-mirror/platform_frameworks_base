@@ -60,10 +60,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -4973,22 +4970,16 @@ class Task extends TaskFragment {
                 dc.prepareAppTransition(TRANSIT_NONE);
                 mTaskSupervisor.mNoAnimActivities.add(r);
             } else {
-                int transit = TRANSIT_OLD_ACTIVITY_OPEN;
-                if (newTask) {
-                    if (r.mLaunchTaskBehind) {
-                        transit = TRANSIT_OLD_TASK_OPEN_BEHIND;
-                    } else {
-                        // If a new task is being launched, then mark the existing top activity as
-                        // supporting picture-in-picture while pausing only if the starting activity
-                        // would not be considered an overlay on top of the current activity
-                        // (eg. not fullscreen, or the assistant)
-                        enableEnterPipOnTaskSwitch(pipCandidate,
-                                null /* toFrontTask */, r, options);
-                        transit = TRANSIT_OLD_TASK_OPEN;
-                    }
-                }
                 dc.prepareAppTransition(TRANSIT_OPEN);
                 mTaskSupervisor.mNoAnimActivities.remove(r);
+            }
+            if (newTask && !r.mLaunchTaskBehind) {
+                // If a new task is being launched, then mark the existing top activity as
+                // supporting picture-in-picture while pausing only if the starting activity
+                // would not be considered an overlay on top of the current activity
+                // (eg. not fullscreen, or the assistant)
+                enableEnterPipOnTaskSwitch(pipCandidate,
+                        null /* toFrontTask */, r, options);
             }
             boolean doShow = true;
             if (newTask) {
