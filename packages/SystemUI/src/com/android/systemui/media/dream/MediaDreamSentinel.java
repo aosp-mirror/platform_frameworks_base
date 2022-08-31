@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.complication.DreamMediaEntryComplication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaData;
 import com.android.systemui.media.MediaDataManager;
@@ -54,7 +55,7 @@ public class MediaDreamSentinel extends CoreStartable {
             }
 
             mAdded = false;
-            mDreamOverlayStateController.removeComplication(mComplication);
+            mDreamOverlayStateController.removeComplication(mMediaEntryComplication);
         }
 
         @Override
@@ -79,24 +80,24 @@ public class MediaDreamSentinel extends CoreStartable {
             }
 
             mAdded = true;
-            mDreamOverlayStateController.addComplication(mComplication);
+            mDreamOverlayStateController.addComplication(mMediaEntryComplication);
         }
     };
 
     private final MediaDataManager mMediaDataManager;
     private final DreamOverlayStateController mDreamOverlayStateController;
-    private final MediaDreamComplication mComplication;
+    private final DreamMediaEntryComplication mMediaEntryComplication;
     private final FeatureFlags mFeatureFlags;
 
     @Inject
     public MediaDreamSentinel(Context context, MediaDataManager mediaDataManager,
             DreamOverlayStateController dreamOverlayStateController,
-            MediaDreamComplication complication,
+            DreamMediaEntryComplication mediaEntryComplication,
             FeatureFlags featureFlags) {
         super(context);
         mMediaDataManager = mediaDataManager;
         mDreamOverlayStateController = dreamOverlayStateController;
-        mComplication = complication;
+        mMediaEntryComplication = mediaEntryComplication;
         mFeatureFlags = featureFlags;
     }
 
