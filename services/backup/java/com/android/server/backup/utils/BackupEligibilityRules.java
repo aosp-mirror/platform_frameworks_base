@@ -25,9 +25,9 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.Nullable;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.BackupTransport;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.Overridable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -46,6 +46,7 @@ import com.android.server.backup.transport.TransportConnection;
 
 import com.google.android.collect.Sets;
 
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -359,8 +360,8 @@ public class BackupEligibilityRules {
         }
 
         if (DEBUG) {
-            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device="
-                    + signingInfo.getApkContentsSigners());
+            Slog.v(TAG, "signaturesMatch(): stored=" + Arrays.toString(storedSigs)
+                    + " device=" + Arrays.toString(signingInfo.getApkContentsSigners()));
         }
 
         final int nStored = storedSigs.length;

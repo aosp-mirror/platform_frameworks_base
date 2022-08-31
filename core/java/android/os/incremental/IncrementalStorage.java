@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -515,7 +516,7 @@ public final class IncrementalStorage {
             throw new IOException("Unsupported log2BlockSize: " + hashingInfo.log2BlockSize);
         }
         if (hashingInfo.salt != null && hashingInfo.salt.length > 0) {
-            throw new IOException("Unsupported salt: " + hashingInfo.salt);
+            throw new IOException("Unsupported salt: " + Arrays.toString(hashingInfo.salt));
         }
         if (hashingInfo.rawRootHash.length != INCFS_MAX_HASH_SIZE) {
             throw new IOException("rawRootHash has to be " + INCFS_MAX_HASH_SIZE + " bytes");

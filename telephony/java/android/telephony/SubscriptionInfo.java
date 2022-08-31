@@ -967,9 +967,9 @@ public class SubscriptionInfo implements Parcelable {
     public int hashCode() {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
                 mIsOpportunistic, mGroupUUID, mIccId, mNumber, mMcc, mMnc, mCountryIso, mCardString,
-                mCardId, mDisplayName, mCarrierName, mNativeAccessRules, mIsGroupDisabled,
-                mCarrierId, mProfileClass, mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex,
-                mUsageSetting);
+                mCardId, mDisplayName, mCarrierName, Arrays.hashCode(mNativeAccessRules),
+                mIsGroupDisabled, mCarrierId, mProfileClass, mGroupOwner,
+                mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting);
     }
 
     @Override
