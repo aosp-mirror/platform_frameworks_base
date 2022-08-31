@@ -162,4 +162,8 @@ class TaskContainer {
         }
         return null;
     }
+
+    int indexOf(@NonNull TaskFragmentContainer child) {
+        return mContainers.indexOf(child);
+    }
 }

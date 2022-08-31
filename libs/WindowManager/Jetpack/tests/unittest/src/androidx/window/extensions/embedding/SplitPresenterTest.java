@@ -39,6 +39,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -245,6 +246,26 @@ public class SplitPresenterTest {
                         MinimumDimensionActivity.class)));
         verify(mPresenter).expandTaskFragment(mTransaction, primaryTf.getTaskFragmentToken());
         verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf.getTaskFragmentToken());
+    }
+
+    @Test
+    public void testCreateNewSplitContainer_secondaryAbovePrimary() {
+        final Activity secondaryActivity = createMockActivity();
+        final TaskFragmentContainer bottomTf = mController.newContainer(secondaryActivity, TASK_ID);
+        final TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
+        final SplitPairRule rule = new SplitPairRule.Builder(pair ->
+                pair.first == mActivity && pair.second == secondaryActivity, pair -> false,
+                metrics -> true)
+                .setShouldClearTop(false)
+                .build();
+
+        mPresenter.createNewSplitContainer(mTransaction, mActivity, secondaryActivity, rule);
+
+        assertEquals(primaryTf, mController.getContainerWithActivity(mActivity));
+        final TaskFragmentContainer secondaryTf = mController.getContainerWithActivity(
+                secondaryActivity);
+        assertNotEquals(bottomTf, secondaryTf);
+        assertTrue(secondaryTf.isAbove(primaryTf));
     }
 
     private Activity createMockActivity() {
