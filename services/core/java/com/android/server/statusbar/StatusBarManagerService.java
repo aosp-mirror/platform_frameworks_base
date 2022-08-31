@@ -62,7 +62,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -661,15 +660,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } catch (RemoteException ex) { }
             }
             return false;
-        }
-
-        @Override
-        public void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {
-            if (mBar != null) {
-                try {
-                    mBar.handleWindowManagerLoggingCommand(args, outFd);
-                } catch (RemoteException ex) { }
-            }
         }
 
         @Override
