@@ -23,6 +23,6 @@ package {
 
 java_binary {
     name: "locksettings",
-    wrapper: "locksettings",
+    wrapper: "locksettings.sh",
     srcs: ["**/*.java"],
 }
