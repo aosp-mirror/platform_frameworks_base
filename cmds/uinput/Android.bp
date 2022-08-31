@@ -20,9 +20,10 @@ license {
 
 java_binary {
     name: "uinput",
-    wrapper: "uinput",
-    srcs: ["**/*.java",
-           ":uinputcommand_aidl"
+    wrapper: "uinput.sh",
+    srcs: [
+        "**/*.java",
+        ":uinputcommand_aidl",
     ],
     required: ["libuinputcommand_jni"],
 }
