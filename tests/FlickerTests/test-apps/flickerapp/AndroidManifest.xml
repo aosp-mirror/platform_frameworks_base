@@ -165,7 +165,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ActivityEmbeddingMainActivity"
             android:label="ActivityEmbedding Main"
@@ -193,5 +192,15 @@
             android:theme="@style/CutoutShortEdges"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:exported="false"/>
+        <activity android:name=".MailActivity"
+            android:exported="true"
+            android:label="MailApp"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
