@@ -48,5 +48,6 @@ private fun PreferenceMain() {
     RegularScaffold(title = TITLE) {
         PreferencePageProvider.EntryItem()
         SwitchPreferencePageProvider.EntryItem()
+        TwoTargetSwitchPreferencePageProvider.EntryItem()
     }
 }
