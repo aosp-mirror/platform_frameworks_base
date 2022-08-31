@@ -38,6 +38,7 @@ import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -171,6 +172,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      *                          created and the activity will be re-parented to it.
      * @param rule The split rule to be applied to the container.
      */
+    @GuardedBy("mController.mLock")
     void createNewSplitContainer(@NonNull WindowContainerTransaction wct,
             @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity,
             @NonNull SplitPairRule rule) {
@@ -187,8 +189,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final TaskFragmentContainer curSecondaryContainer = mController.getContainerWithActivity(
                 secondaryActivity);
         TaskFragmentContainer containerToAvoid = primaryContainer;
-        if (rule.shouldClearTop() && curSecondaryContainer != null) {
-            // Do not reuse the current TaskFragment if the rule is to clear top.
+        if (curSecondaryContainer != null
+                && (rule.shouldClearTop() || primaryContainer.isAbove(curSecondaryContainer))) {
+            // Do not reuse the current TaskFragment if the rule is to clear top, or if it is below
+            // the primary TaskFragment.
             containerToAvoid = curSecondaryContainer;
         }
         final TaskFragmentContainer secondaryContainer = prepareContainerForActivity(wct,
