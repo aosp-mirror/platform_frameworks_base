@@ -43,7 +43,7 @@ public class SurfaceFlingerTestActivity extends Activity {
         setContentView(mTestSurfaceView);
     }
 
-    public SurfaceControl getChildSurfaceControl() throws InterruptedException {
+    public SurfaceControl createChildSurfaceControl() throws InterruptedException {
         return mTestSurfaceView.getChildSurfaceControlHelper();
     }
 
