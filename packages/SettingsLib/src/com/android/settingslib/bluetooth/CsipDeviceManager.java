@@ -231,7 +231,7 @@ public class CsipDeviceManager {
                         // When both LE Audio devices are disconnected, receiving member device
                         // connection. To switch content and dispatch to notify UI change
                         mBtManager.getEventManager().dispatchDeviceRemoved(mainDevice);
-                        mainDevice.switchMemberDeviceContent(mainDevice, cachedDevice);
+                        mainDevice.switchMemberDeviceContent(cachedDevice);
                         mainDevice.refresh();
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device
@@ -255,10 +255,11 @@ public class CsipDeviceManager {
 
                 for (CachedBluetoothDevice device: memberSet) {
                     if (device.isConnected()) {
+                        log("set device: " + device + " as the main device");
                         // Main device is disconnected and sub device is connected
                         // To copy data from sub device to main device
                         mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
-                        cachedDevice.switchMemberDeviceContent(device, cachedDevice);
+                        cachedDevice.switchMemberDeviceContent(device);
                         cachedDevice.refresh();
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device
