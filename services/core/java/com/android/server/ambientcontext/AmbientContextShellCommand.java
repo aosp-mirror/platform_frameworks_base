@@ -22,13 +22,15 @@ import android.annotation.NonNull;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.ambientcontext.AmbientContextManager;
+import android.app.ambientcontext.IAmbientContextObserver;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.RemoteCallback;
+import android.os.RemoteException;
 import android.os.ShellCommand;
-import android.service.ambientcontext.AmbientContextDetectionResult;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Shell command for {@link AmbientContextManagerService}.
@@ -39,6 +41,7 @@ final class AmbientContextShellCommand extends ShellCommand {
             new AmbientContextEventRequest.Builder()
                     .addEventType(AmbientContextEvent.EVENT_COUGH)
                     .addEventType(AmbientContextEvent.EVENT_SNORE)
+                    .addEventType(AmbientContextEvent.EVENT_BACK_DOUBLE_TAP)
                     .build();
 
     @NonNull
@@ -50,11 +53,11 @@ final class AmbientContextShellCommand extends ShellCommand {
 
     /** Callbacks for AmbientContextEventService results used internally for testing. */
     static class TestableCallbackInternal {
-        private AmbientContextDetectionResult mLastResult;
+        private List<AmbientContextEvent> mLastEvents;
         private int mLastStatus;
 
-        public AmbientContextDetectionResult getLastResult() {
-            return mLastResult;
+        public List<AmbientContextEvent> getLastEvents() {
+            return mLastEvents;
         }
 
         public int getLastStatus() {
@@ -62,19 +65,19 @@ final class AmbientContextShellCommand extends ShellCommand {
         }
 
         @NonNull
-        private RemoteCallback createRemoteDetectionResultCallback() {
-            return new RemoteCallback(result -> {
-                AmbientContextDetectionResult detectionResult =
-                        (AmbientContextDetectionResult) result.get(
-                                AmbientContextDetectionResult.RESULT_RESPONSE_BUNDLE_KEY);
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mLastResult = detectionResult;
-                    out.println("Detection result available: " + detectionResult);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
+        private IAmbientContextObserver createAmbientContextObserver() {
+            return new IAmbientContextObserver.Stub() {
+                @Override
+                public void onEvents(List<AmbientContextEvent> events) throws RemoteException {
+                    mLastEvents = events;
+                    out.println("Detection events available: " + events);
                 }
-            });
+
+                @Override
+                public void onRegistrationComplete(int statusCode) throws RemoteException {
+                    mLastStatus = statusCode;
+                }
+            };
         }
 
         @NonNull
@@ -123,8 +126,7 @@ final class AmbientContextShellCommand extends ShellCommand {
         final String packageName = getNextArgRequired();
         mService.startDetection(
                 userId, REQUEST, packageName,
-                sTestableCallbackInternal.createRemoteDetectionResultCallback(),
-                sTestableCallbackInternal.createRemoteStatusCallback());
+                sTestableCallbackInternal.createAmbientContextObserver());
         return 0;
     }
 

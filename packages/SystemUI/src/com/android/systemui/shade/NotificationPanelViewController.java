@@ -33,7 +33,7 @@ import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
-import static com.android.systemui.shade.PanelView.DEBUG;
+import static com.android.systemui.shade.NotificationPanelView.DEBUG;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -248,7 +248,7 @@ import javax.inject.Provider;
 
 @CentralSurfacesComponent.CentralSurfacesScope
 public final class NotificationPanelViewController {
-    public static final String TAG = PanelView.class.getSimpleName();
+    public static final String TAG = "PanelView";
     public static final float FLING_MAX_LENGTH_SECONDS = 0.6f;
     public static final float FLING_SPEED_UP_FACTOR = 0.6f;
     public static final float FLING_CLOSING_MAX_LENGTH_SECONDS = 0.6f;
@@ -274,7 +274,7 @@ public final class NotificationPanelViewController {
     /**
      * Fling expanding QS.
      */
-    private static final int FLING_EXPAND = 0;
+    public static final int FLING_EXPAND = 0;
 
     /**
      * Fling collapsing QS, potentially stopping when QS becomes QQS.
@@ -435,7 +435,8 @@ public final class NotificationPanelViewController {
     private boolean mQsTracking;
 
     /**
-     * If set, the ongoing touch gesture might both trigger the expansion in {@link PanelView} and
+     * If set, the ongoing touch gesture might both trigger the expansion in {@link
+     * NotificationPanelView} and
      * the expansion for quick settings.
      */
     private boolean mConflictingQsExpansionGesture;
@@ -5417,13 +5418,13 @@ public final class NotificationPanelViewController {
         return animator;
     }
 
-    /** Update the visibility of {@link PanelView} if necessary. */
+    /** Update the visibility of {@link NotificationPanelView} if necessary. */
     public void updateVisibility() {
         mView.setVisibility(shouldPanelBeVisible() ? VISIBLE : INVISIBLE);
     }
 
     /**
-     * Updates the panel expansion and {@link PanelView} visibility if necessary.
+     * Updates the panel expansion and {@link NotificationPanelView} visibility if necessary.
      *
      * TODO(b/200063118): Could public calls to this method be replaced with calls to
      *   {@link #updateVisibility()}? That would allow us to make this method private.
@@ -6186,7 +6187,7 @@ public final class NotificationPanelViewController {
     }
 
     public class OnConfigurationChangedListener implements
-            PanelView.OnConfigurationChangedListener {
+            NotificationPanelView.OnConfigurationChangedListener {
         @Override
         public void onConfigurationChanged(Configuration newConfig) {
             loadDimens();

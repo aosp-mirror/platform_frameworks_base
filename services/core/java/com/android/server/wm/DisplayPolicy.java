@@ -362,6 +362,7 @@ public class DisplayPolicy {
     private WindowState mTopFullscreenOpaqueWindowState;
     private boolean mTopIsFullscreen;
     private int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
+    private boolean mForceConsumeSystemBars;
     private boolean mForceShowSystemBars;
 
     private boolean mShowingDream;
@@ -1562,6 +1563,13 @@ public class DisplayPolicy {
     }
 
     /**
+     * @return true if the system bars are forced to be consumed
+     */
+    public boolean areSystemBarsForcedConsumedLw() {
+        return mForceConsumeSystemBars;
+    }
+
+    /**
      * @return true if the system bars are forced to stay visible
      */
     public boolean areSystemBarsForcedShownLw() {
@@ -2463,6 +2471,10 @@ public class DisplayPolicy {
         // We need to force showing system bars when the multi-window or freeform root task is
         // visible.
         mForceShowSystemBars = multiWindowTaskVisible || freeformRootTaskVisible;
+        // We need to force the consumption of the system bars if they are force shown or if they
+        // are controlled by a remote insets controller.
+        mForceConsumeSystemBars = mForceShowSystemBars
+                || mDisplayContent.getInsetsPolicy().remoteInsetsControllerControlsSystemBars(win);
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
         final boolean topAppHidesStatusBar = topAppHidesStatusBar();
