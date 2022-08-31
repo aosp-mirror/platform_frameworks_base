@@ -148,7 +148,13 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
         public void onClick(View v) {
             final int id = v.getId();
             if (id == R.id.close_window) {
-                mActivityTaskManager.removeTask(mTaskId);
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.removeTask(mTaskToken);
+                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    mTransitionStarter.startRemoveTransition(wct);
+                } else {
+                    mSyncQueue.queue(wct);
+                }
             } else if (id == R.id.maximize_window) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
