@@ -1235,6 +1235,8 @@ public class BatteryStatsHistory {
             for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
                 entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
+            mMeasuredEnergyHeaderWritten = false;
+
             // Make a copy of mHistoryCur.
             HistoryItem copy = new HistoryItem();
             copy.setTo(cur);
@@ -1400,6 +1402,8 @@ public class BatteryStatsHistory {
         }
         if (extensionFlags != 0) {
             cur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
+        } else {
+            cur.states2 &= ~HistoryItem.STATE2_EXTENSIONS_FLAG;
         }
         final boolean state2IntChanged = cur.states2 != last.states2;
         if (state2IntChanged) {
