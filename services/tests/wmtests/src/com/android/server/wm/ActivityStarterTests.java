@@ -150,6 +150,9 @@ public class ActivityStarterTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mController = mock(ActivityStartController.class);
+        BackgroundActivityStartController balController =
+                new BackgroundActivityStartController(mAtm, mSupervisor);
+        doReturn(balController).when(mController).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
     }
@@ -211,10 +214,13 @@ public class ActivityStarterTests extends WindowTestsBase {
             int expectedResult) {
         final ActivityTaskManagerService service = mAtm;
         final IPackageManager packageManager = mock(IPackageManager.class);
-        final ActivityStartController controller = mock(ActivityStartController.class);
 
-        final ActivityStarter starter = new ActivityStarter(controller, service,
-                service.mTaskSupervisor, mock(ActivityStartInterceptor.class));
+        final ActivityStarter starter =
+                new ActivityStarter(
+                        mController,
+                        service,
+                        service.mTaskSupervisor,
+                        mock(ActivityStartInterceptor.class));
         prepareStarter(launchFlags);
         final IApplicationThread caller = mock(IApplicationThread.class);
         final WindowProcessListener listener = mock(WindowProcessListener.class);
