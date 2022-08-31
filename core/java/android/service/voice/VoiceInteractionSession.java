@@ -75,6 +75,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -599,7 +600,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendPickOptionResult: req=" + mInterface
-                        + " finished=" + finished + " selections=" + selections
+                        + " finished=" + finished + " selections=" + Arrays.toString(selections)
                         + " result=" + result);
                 if (finished) {
                     finishRequest();
