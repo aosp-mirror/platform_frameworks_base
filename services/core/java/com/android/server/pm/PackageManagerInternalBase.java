@@ -727,6 +727,12 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         return snapshot().checkUidSignaturesForAllUsers(uid1, uid2);
     }
 
+    @Override
+    public void setPackageStoppedState(@NonNull String packageName, boolean stopped,
+            int userId) {
+        mService.setPackageStoppedState(snapshot(), packageName, stopped, userId);
+    }
+
     @NonNull
     @Override
     @Deprecated
