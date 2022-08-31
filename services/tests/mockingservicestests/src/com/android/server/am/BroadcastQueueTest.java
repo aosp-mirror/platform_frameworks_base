@@ -321,16 +321,19 @@ public class BroadcastQueueTest {
     private static final String PACKAGE_RED = "com.example.red";
     private static final String PACKAGE_GREEN = "com.example.green";
     private static final String PACKAGE_BLUE = "com.example.blue";
+    private static final String PACKAGE_YELLOW = "com.example.yellow";
 
     private static final String CLASS_RED = "com.example.red.Red";
     private static final String CLASS_GREEN = "com.example.green.Green";
     private static final String CLASS_BLUE = "com.example.blue.Blue";
+    private static final String CLASS_YELLOW = "com.example.yellow.Yellow";
 
     private static int getUidForPackage(String packageName) {
         switch (packageName) {
             case PACKAGE_RED: return android.os.Process.FIRST_APPLICATION_UID + 1;
             case PACKAGE_GREEN: return android.os.Process.FIRST_APPLICATION_UID + 2;
             case PACKAGE_BLUE: return android.os.Process.FIRST_APPLICATION_UID + 3;
+            case PACKAGE_YELLOW: return android.os.Process.FIRST_APPLICATION_UID + 4;
             default: throw new IllegalArgumentException();
         }
     }
@@ -452,6 +455,35 @@ public class BroadcastQueueTest {
         verifyScheduleRegisteredReceiver(receiverBlueApp, airplane);
     }
 
-    // TODO: verify mixing multiple manifest and registered receivers of same broadcast
-    // TODO: verify delivery of 3 distinct broadcasts
+    /**
+     * Verify dispatch of multiple broadcasts mixed to both manifest and
+     * registered receivers, to both warm and cold apps.
+     */
+    @Test
+    public void testComplex() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeRegisteredReceiver(receiverGreenApp),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeRegisteredReceiver(receiverYellowApp))));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+
+        waitForIdle();
+        final ProcessRecord receiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyScheduleReceiver(receiverGreenApp, timezone);
+        verifyScheduleRegisteredReceiver(receiverGreenApp, timezone);
+        verifyScheduleReceiver(receiverBlueApp, timezone);
+        verifyScheduleRegisteredReceiver(receiverYellowApp, timezone);
+        verifyScheduleReceiver(receiverYellowApp, airplane);
+    }
 }
