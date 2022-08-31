@@ -133,7 +133,6 @@ import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ProcessChangeItem;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
@@ -1790,14 +1789,6 @@ public final class ProcessList {
 
             if (app.info.isEmbeddedDexUsed()) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
-            } else if (app.info.isPrivilegedApp()) {
-                final PackageList pkgList = app.getPkgList();
-                synchronized (pkgList) {
-                    if (DexManager.isPackageSelectedToRunOob(
-                            pkgList.getPackageListLocked().keySet())) {
-                        runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
-                    }
-                }
             }
 
             if (!disableHiddenApiChecks && !mService.mHiddenApiBlacklist.isDisabled()) {
