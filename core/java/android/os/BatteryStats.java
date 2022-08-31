@@ -1767,6 +1767,49 @@ public abstract class BatteryStats {
     }
 
     /**
+     * Measured energy delta from the previous reading.
+     */
+    public static final class MeasuredEnergyDetails {
+        /**
+         * Description of the energy consumer, such as CPU, DISPLAY etc
+         */
+        public static final class EnergyConsumer {
+            /**
+             * See android.hardware.power.stats.EnergyConsumerType
+             */
+            public int type;
+            /**
+             * Used when there are multipe energy consumers of the same type, such
+             * as CPU clusters, multiple displays on foldable devices etc.
+             */
+            public int ordinal;
+            /**
+             * Human-readable name of the energy consumer, e.g. "CPU"
+             */
+            public String name;
+        }
+        public EnergyConsumer[] consumers;
+        public long[] chargeUC;
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < consumers.length; i++) {
+                if (chargeUC[i] == POWER_DATA_UNAVAILABLE) {
+                    continue;
+                }
+                if (sb.length() != 0) {
+                    sb.append(' ');
+                }
+                sb.append(consumers[i].name);
+                sb.append('=');
+                sb.append(chargeUC[i]);
+            }
+            return sb.toString();
+        }
+    }
+
+    /**
      * Battery history record.
      */
     public static final class HistoryItem {
@@ -1886,6 +1929,7 @@ public abstract class BatteryStats {
         public static final int STATE2_BLUETOOTH_SCAN_FLAG = 1 << 20;
         public static final int STATE2_CELLULAR_HIGH_TX_POWER_FLAG = 1 << 19;
         public static final int STATE2_USB_DATA_LINK_FLAG = 1 << 18;
+        public static final int STATE2_EXTENSIONS_FLAG = 1 << 17;
 
         public static final int MOST_INTERESTING_STATES2 =
                 STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_MASK
@@ -1904,6 +1948,9 @@ public abstract class BatteryStats {
 
         // Non-null when there is more detailed information at this step.
         public HistoryStepDetails stepDetails;
+
+        // Non-null when there is measured energy information
+        public MeasuredEnergyDetails measuredEnergyDetails;
 
         public static final int EVENT_FLAG_START = 0x8000;
         public static final int EVENT_FLAG_FINISH = 0x4000;
@@ -2113,6 +2160,7 @@ public abstract class BatteryStats {
             eventCode = EVENT_NONE;
             eventTag = null;
             tagsFirstOccurrence = false;
+            measuredEnergyDetails = null;
         }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -2162,6 +2210,7 @@ public abstract class BatteryStats {
             }
             tagsFirstOccurrence = o.tagsFirstOccurrence;
             currentTime = o.currentTime;
+            measuredEnergyDetails = o.measuredEnergyDetails;
         }
 
         public boolean sameNonEvent(HistoryItem o) {
@@ -6951,6 +7000,14 @@ public abstract class BatteryStats {
                         item.append("\"");
                     }
                 }
+                if ((rec.states2 & HistoryItem.STATE2_EXTENSIONS_FLAG) != 0) {
+                    if (!checkin) {
+                        item.append(" ext=");
+                        if (rec.measuredEnergyDetails != null) {
+                            item.append("E");
+                        }
+                    }
+                }
                 if (rec.eventCode != HistoryItem.EVENT_NONE) {
                     item.append(checkin ? "," : " ");
                     if ((rec.eventCode&HistoryItem.EVENT_FLAG_START) != 0) {
@@ -7071,6 +7128,25 @@ public abstract class BatteryStats {
 
                         if (rec.stepDetails.statSubsystemPowerState != null) {
                             item.append(rec.stepDetails.statSubsystemPowerState);
+                        }
+                        item.append("\n");
+                    }
+                }
+                if (rec.measuredEnergyDetails != null) {
+                    if (!checkin) {
+                        item.append("                 Energy: ");
+                        item.append(rec.measuredEnergyDetails);
+                        item.append("\n");
+                    } else {
+                        item.append(BATTERY_STATS_CHECKIN_VERSION); item.append(',');
+                        item.append(HISTORY_DATA); item.append(",0,XE");
+                        for (int i = 0; i < rec.measuredEnergyDetails.consumers.length; i++) {
+                            if (rec.measuredEnergyDetails.chargeUC[i] != POWER_DATA_UNAVAILABLE) {
+                                item.append(',');
+                                item.append(rec.measuredEnergyDetails.consumers[i].name);
+                                item.append('=');
+                                item.append(rec.measuredEnergyDetails.chargeUC[i]);
+                            }
                         }
                         item.append("\n");
                     }

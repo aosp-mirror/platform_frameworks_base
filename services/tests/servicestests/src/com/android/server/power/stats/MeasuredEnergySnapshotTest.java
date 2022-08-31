@@ -26,6 +26,7 @@ import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerAttribution;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
+import android.os.BatteryStats;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 
@@ -234,6 +235,17 @@ public final class MeasuredEnergySnapshotTest {
     public void testGetOtherOrdinalNames_none() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
         assertEquals(0, snapshot.getOtherOrdinalNames().length);
+    }
+
+    @Test
+    public void getMeasuredEnergyDetails() {
+        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
+        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_1, VOLTAGE_1);
+        BatteryStats.MeasuredEnergyDetails details = snapshot.getMeasuredEnergyDetails(delta);
+        assertThat(details.consumers).hasLength(4);
+        assertThat(details.chargeUC).isEqualTo(new long[]{2667, 3200000, 0, 0});
+        assertThat(details.toString()).isEqualTo("DISPLAY=2667 HPU=3200000 GPU=0 IPU &_=0");
     }
 
     private static EnergyConsumer createEnergyConsumer(int id, int ord, byte type, String name) {
