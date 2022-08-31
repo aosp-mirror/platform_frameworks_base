@@ -45,7 +45,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     private final EmergencyButtonController mEmergencyButtonController;
     private boolean mPaused;
 
-
     // The following is used to ignore callbacks from SecurityViews that are no longer current
     // (e.g. face unlock). This avoids unwanted asynchronous events from messing with the
     // state for the current security method.
