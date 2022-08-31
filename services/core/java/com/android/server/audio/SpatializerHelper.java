@@ -1115,6 +1115,9 @@ public class SpatializerHelper {
                 && ROUTING_DEVICES[0].getAddress().equals(ada.getAddress())) {
             setDesiredHeadTrackingMode(enabled ? mDesiredHeadTrackingModeWhenEnabled
                     : Spatializer.HEAD_TRACKING_MODE_DISABLED);
+            if (enabled && !mHeadTrackerAvailable) {
+                postInitSensors();
+            }
         }
     }
 
