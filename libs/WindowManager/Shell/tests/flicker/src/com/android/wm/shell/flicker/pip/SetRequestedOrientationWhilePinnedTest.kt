@@ -224,8 +224,7 @@ open class SetRequestedOrientationWhilePinnedTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 1)
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
         }
     }
 }

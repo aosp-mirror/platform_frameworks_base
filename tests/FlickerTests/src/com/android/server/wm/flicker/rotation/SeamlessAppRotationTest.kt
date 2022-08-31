@@ -241,7 +241,7 @@ open class SeamlessAppRotationTest(
         @JvmStatic
         private fun getConfigurations(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(repetitions = 2)
+                .getConfigRotationTests()
                 .flatMap { sourceConfig ->
                     val defaultRun = createConfig(sourceConfig, starveUiThread = false)
                     val busyUiRun = createConfig(sourceConfig, starveUiThread = true)

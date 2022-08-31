@@ -27,20 +27,20 @@ import com.android.systemui.statusbar.notification.AnimatedImageNotificationMana
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.NotificationClicker
 import com.android.systemui.statusbar.notification.NotificationEntryManager
-import com.android.systemui.statusbar.notification.NotificationListController
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.TargetSdkResolver
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
 import java.io.PrintWriter
@@ -65,7 +65,6 @@ class NotificationsControllerImpl @Inject constructor(
     private val notifPipelineInitializer: Lazy<NotifPipelineInitializer>,
     private val notifBindPipelineInitializer: NotifBindPipelineInitializer,
     private val notificationLogger: NotificationLogger,
-    private val deviceProvisionedController: DeviceProvisionedController,
     private val notificationRowBinder: NotificationRowBinderImpl,
     private val notificationsMediaManager: NotificationMediaManager,
     private val headsUpViewBinder: HeadsUpViewBinder,
@@ -85,12 +84,11 @@ class NotificationsControllerImpl @Inject constructor(
     ) {
         notificationListener.registerAsSystemService()
 
-        val listController =
-                NotificationListController(
-                        entryManager,
-                        listContainer,
-                        deviceProvisionedController)
-        listController.bind()
+        notifPipeline.get().addCollectionListener(object : NotifCollectionListener {
+            override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
+                listContainer.cleanUpViewStateForEntry(entry)
+            }
+        })
 
         notificationRowBinder.setNotificationClicker(
                 clickerBuilder.build(

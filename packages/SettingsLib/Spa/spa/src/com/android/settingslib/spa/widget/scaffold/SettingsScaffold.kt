@@ -49,7 +49,7 @@ fun SettingsScaffold(
                         modifier = Modifier.padding(SettingsDimension.itemPaddingAround),
                     )
                 },
-                navigationIcon = { NavigateUp() },
+                navigationIcon = { NavigateBack() },
                 actions = actions,
                 colors = settingsTopAppBarColors(),
             )

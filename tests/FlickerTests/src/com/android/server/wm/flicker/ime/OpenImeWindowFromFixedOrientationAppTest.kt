@@ -117,8 +117,7 @@ class OpenImeWindowFromFixedOrientationAppTest(
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 3,
-                    supportedRotations = listOf(Surface.ROTATION_90),
+                                        supportedRotations = listOf(Surface.ROTATION_90),
                     supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     )

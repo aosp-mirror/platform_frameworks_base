@@ -200,8 +200,7 @@ open class SwitchImeWindowsFromGestureNavTest(
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 3,
-                    supportedNavigationModes = listOf(
+                                        supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     ),
                     supportedRotations = listOf(Surface.ROTATION_0)

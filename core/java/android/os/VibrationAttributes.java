@@ -145,7 +145,8 @@ public final class VibrationAttributes implements Parcelable {
      */
     @IntDef(prefix = { "FLAG_" }, flag = true, value = {
             FLAG_BYPASS_INTERRUPTION_POLICY,
-            FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
+            FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
+            FLAG_INVALIDATE_SETTINGS_CACHE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flag{}
@@ -182,7 +183,7 @@ public final class VibrationAttributes implements Parcelable {
      *
      * @hide
      */
-    public static final int FLAG_INVALIDATE_SETTINGS_CACHE = 0x3;
+    public static final int FLAG_INVALIDATE_SETTINGS_CACHE = 0x4;
 
     /**
      * All flags supported by vibrator service, update it when adding new flag.

@@ -186,7 +186,6 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 supportedRotations = listOf(Surface.ROTATION_0),
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =

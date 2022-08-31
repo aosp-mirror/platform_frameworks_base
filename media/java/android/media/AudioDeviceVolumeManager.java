@@ -21,6 +21,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,23 +41,29 @@ import java.util.concurrent.Executor;
  * @hide
  * AudioDeviceVolumeManager provides access to audio device volume control.
  */
+@SystemApi
 public class AudioDeviceVolumeManager {
 
     // define when using Log.*
     //private static final String TAG = "AudioDeviceVolumeManager";
 
-    /** Indicates no special treatment in the handling of the volume adjustment */
+    /** @hide
+     * Indicates no special treatment in the handling of the volume adjustment */
     public static final int ADJUST_MODE_NORMAL = 0;
-    /** Indicates the start of a volume adjustment */
+    /** @hide
+     * Indicates the start of a volume adjustment */
     public static final int ADJUST_MODE_START = 1;
-    /** Indicates the end of a volume adjustment */
+    /** @hide
+     * Indicates the end of a volume adjustment */
     public static final int ADJUST_MODE_END = 2;
 
+    /** @hide */
     @IntDef(flag = false, prefix = "ADJUST_MODE", value = {
             ADJUST_MODE_NORMAL,
             ADJUST_MODE_START,
             ADJUST_MODE_END}
     )
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     public @interface VolumeAdjustmentMode {}
 
@@ -64,7 +72,16 @@ public class AudioDeviceVolumeManager {
     private final @NonNull String mPackageName;
     private final @Nullable String mAttributionTag;
 
-    public AudioDeviceVolumeManager(Context context) {
+    /**
+     * Constructor
+     * @param context the Context for the device volume operations
+     */
+    @SuppressLint("ManagerConstructor")
+    // reason for suppression: even though the functionality handled by this class is implemented in
+    // AudioService, we want to avoid bloating android.media.AudioManager
+    // with @SystemApi functionality
+    public AudioDeviceVolumeManager(@NonNull Context context) {
+        Objects.requireNonNull(context);
         mPackageName = context.getApplicationContext().getOpPackageName();
         mAttributionTag = context.getApplicationContext().getAttributionTag();
     }
@@ -101,6 +118,7 @@ public class AudioDeviceVolumeManager {
                 @VolumeAdjustmentMode int mode);
     }
 
+    /** @hide */
     static class ListenerInfo {
         final @NonNull OnAudioDeviceVolumeChangedListener mListener;
         final @NonNull Executor mExecutor;
@@ -127,6 +145,7 @@ public class AudioDeviceVolumeManager {
     @GuardedBy("mDeviceVolumeListenerLock")
     private DeviceVolumeDispatcherStub mDeviceVolumeDispatcherStub;
 
+    /** @hide */
     final class DeviceVolumeDispatcherStub extends IAudioDeviceVolumeDispatcher.Stub {
         /**
          * Register / unregister the stub
@@ -305,6 +324,7 @@ public class AudioDeviceVolumeManager {
      * @param vi the volume information, only stream-based volumes are supported
      * @param ada the device for which volume is to be modified
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada) {
         try {
@@ -315,6 +335,7 @@ public class AudioDeviceVolumeManager {
     }
 
     /**
+     * @hide
      * Return human-readable name for volume behavior
      * @param behavior one of the volume behaviors defined in AudioManager
      * @return a string for the given behavior

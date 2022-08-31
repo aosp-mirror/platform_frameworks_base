@@ -263,7 +263,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 3)
+                .getConfigNonRotationTests()
         }
     }
 }

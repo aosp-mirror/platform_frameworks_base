@@ -17,27 +17,24 @@
 #define LOG_TAG "NativeLibraryHelper"
 //#define LOG_NDEBUG 0
 
-#include "core_jni_helpers.h"
-
-#include <nativehelper/ScopedUtfChars.h>
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
-#include <utils/Log.h>
-#include <utils/Vector.h>
-
-#include <zlib.h>
-
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
-#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+#include <utils/Log.h>
+#include <zlib.h>
 
 #include <memory>
+
+#include "core_jni_helpers.h"
 
 #define APK_LIB "lib/"
 #define APK_LIB_LEN (sizeof(APK_LIB) - 1)
@@ -156,7 +153,7 @@ sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char
     size_t* total = (size_t*) arg;
     uint32_t uncompLen;
 
-    if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, NULL, NULL)) {
+    if (!zipFile->getEntryInfo(zipEntry, nullptr, &uncompLen, nullptr, nullptr, nullptr, nullptr)) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
@@ -186,7 +183,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     uint16_t method;
     off64_t offset;
 
-    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, NULL, &offset, &when, &crc)) {
+    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc)) {
         ALOGE("Couldn't read zip entry info\n");
         return INSTALL_FAILED_INVALID_APK;
     }
@@ -307,24 +304,24 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
 class NativeLibrariesIterator {
 private:
     NativeLibrariesIterator(ZipFileRO* zipFile, bool debuggable, void* cookie)
-        : mZipFile(zipFile), mDebuggable(debuggable), mCookie(cookie), mLastSlash(NULL) {
+          : mZipFile(zipFile), mDebuggable(debuggable), mCookie(cookie), mLastSlash(nullptr) {
         fileName[0] = '\0';
     }
 
 public:
     static NativeLibrariesIterator* create(ZipFileRO* zipFile, bool debuggable) {
-        void* cookie = NULL;
+        void* cookie = nullptr;
         // Do not specify a suffix to find both .so files and gdbserver.
-        if (!zipFile->startIteration(&cookie, APK_LIB, NULL /* suffix */)) {
-            return NULL;
+        if (!zipFile->startIteration(&cookie, APK_LIB, nullptr /* suffix */)) {
+            return nullptr;
         }
 
         return new NativeLibrariesIterator(zipFile, debuggable, cookie);
     }
 
     ZipEntryRO next() {
-        ZipEntryRO next = NULL;
-        while ((next = mZipFile->nextEntry(mCookie)) != NULL) {
+        ZipEntryRO next = nullptr;
+        while ((next = mZipFile->nextEntry(mCookie)) != nullptr) {
             // Make sure this entry has a filename.
             if (mZipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
                 continue;
@@ -338,7 +335,7 @@ public:
             }
 
             const char* lastSlash = strrchr(fileName, '/');
-            ALOG_ASSERT(lastSlash != NULL, "last slash was null somehow for %s\n", fileName);
+            ALOG_ASSERT(lastSlash != nullptr, "last slash was null somehow for %s\n", fileName);
 
             // Skip directories.
             if (*(lastSlash + 1) == 0) {
@@ -389,24 +386,23 @@ static install_status_t
 iterateOverNativeFiles(JNIEnv *env, jlong apkHandle, jstring javaCpuAbi,
                        jboolean debuggable, iterFunc callFunc, void* callArg) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
-    if (zipFile == NULL) {
+    if (zipFile == nullptr) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
     std::unique_ptr<NativeLibrariesIterator> it(
             NativeLibrariesIterator::create(zipFile, debuggable));
-    if (it.get() == NULL) {
+    if (it.get() == nullptr) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
     const ScopedUtfChars cpuAbi(env, javaCpuAbi);
-    if (cpuAbi.c_str() == NULL) {
-        // This would've thrown, so this return code isn't observable by
-        // Java.
+    if (cpuAbi.c_str() == nullptr) {
+        // This would've thrown, so this return code isn't observable by Java.
         return INSTALL_FAILED_INVALID_APK;
     }
-    ZipEntryRO entry = NULL;
-    while ((entry = it->next()) != NULL) {
+    ZipEntryRO entry = nullptr;
+    while ((entry = it->next()) != nullptr) {
         const char* fileName = it->currentEntry();
         const char* lastSlash = it->lastSlash();
 
@@ -427,31 +423,30 @@ iterateOverNativeFiles(JNIEnv *env, jlong apkHandle, jstring javaCpuAbi,
     return INSTALL_SUCCEEDED;
 }
 
-
-static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supportedAbisArray,
-        jboolean debuggable) {
-    const int numAbis = env->GetArrayLength(supportedAbisArray);
-    Vector<ScopedUtfChars*> supportedAbis;
-
-    for (int i = 0; i < numAbis; ++i) {
-        supportedAbis.add(new ScopedUtfChars(env,
-            (jstring) env->GetObjectArrayElement(supportedAbisArray, i)));
-    }
-
+static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supportedAbisArray,
+                            jboolean debuggable) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
-    if (zipFile == NULL) {
+    if (zipFile == nullptr) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
     std::unique_ptr<NativeLibrariesIterator> it(
             NativeLibrariesIterator::create(zipFile, debuggable));
-    if (it.get() == NULL) {
+    if (it.get() == nullptr) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    ZipEntryRO entry = NULL;
+    const int numAbis = env->GetArrayLength(supportedAbisArray);
+
+    std::vector<ScopedUtfChars> supportedAbis;
+    supportedAbis.reserve(numAbis);
+    for (int i = 0; i < numAbis; ++i) {
+        supportedAbis.emplace_back(env, (jstring)env->GetObjectArrayElement(supportedAbisArray, i));
+    }
+
+    ZipEntryRO entry = nullptr;
     int status = NO_NATIVE_LIBRARIES;
-    while ((entry = it->next()) != NULL) {
+    while ((entry = it->next()) != nullptr) {
         // We're currently in the lib/ directory of the APK, so it does have some native
         // code. We should return INSTALL_FAILED_NO_MATCHING_ABIS if none of the
         // libraries match.
@@ -466,18 +461,14 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
         const char* abiOffset = fileName + APK_LIB_LEN;
         const size_t abiSize = lastSlash - abiOffset;
         for (int i = 0; i < numAbis; i++) {
-            const ScopedUtfChars* abi = supportedAbis[i];
-            if (abi->size() == abiSize && !strncmp(abiOffset, abi->c_str(), abiSize)) {
+            const ScopedUtfChars& abi = supportedAbis[i];
+            if (abi.size() == abiSize && !strncmp(abiOffset, abi.c_str(), abiSize)) {
                 // The entry that comes in first (i.e. with a lower index) has the higher priority.
                 if (((i < status) && (status >= 0)) || (status < 0) ) {
                     status = i;
                 }
             }
         }
-    }
-
-    for (int i = 0; i < numAbis; ++i) {
-        delete supportedAbis[i];
     }
 
     return status;
@@ -521,19 +512,19 @@ static jint
 com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode(JNIEnv *env, jclass clazz,
         jlong apkHandle) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
-    void* cookie = NULL;
-    if (!zipFile->startIteration(&cookie, NULL /* prefix */, RS_BITCODE_SUFFIX)) {
+    void* cookie = nullptr;
+    if (!zipFile->startIteration(&cookie, nullptr /* prefix */, RS_BITCODE_SUFFIX)) {
         return APK_SCAN_ERROR;
     }
 
     char fileName[PATH_MAX];
-    ZipEntryRO next = NULL;
-    while ((next = zipFile->nextEntry(cookie)) != NULL) {
+    ZipEntryRO next = nullptr;
+    while ((next = zipFile->nextEntry(cookie)) != nullptr) {
         if (zipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
             continue;
         }
         const char* lastSlash = strrchr(fileName, '/');
-        const char* baseName = (lastSlash == NULL) ? fileName : fileName + 1;
+        const char* baseName = (lastSlash == nullptr) ? fileName : fileName + 1;
         if (isFilenameSafe(baseName)) {
             zipFile->endIteration(cookie);
             return BITCODE_PRESENT;

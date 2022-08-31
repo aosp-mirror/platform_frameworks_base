@@ -387,6 +387,33 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onResume_sideFpsHintShouldBeShown_sideFpsHintShown() {
+        setupGetSecurityView();
+        setupConditionsToEnableSideFpsHint();
+        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
+        reset(mSidefpsController);
+
+        mKeyguardSecurityContainerController.onResume(0);
+
+        verify(mSidefpsController).show();
+        verify(mSidefpsController, never()).hide();
+    }
+
+    @Test
+    public void onResume_sideFpsHintShouldNotBeShown_sideFpsHintHidden() {
+        setupGetSecurityView();
+        setupConditionsToEnableSideFpsHint();
+        setSideFpsHintEnabledFromResources(false);
+        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
+        reset(mSidefpsController);
+
+        mKeyguardSecurityContainerController.onResume(0);
+
+        verify(mSidefpsController).hide();
+        verify(mSidefpsController, never()).show();
+    }
+
+    @Test
     public void showNextSecurityScreenOrFinish_setsSecurityScreenToPinAfterSimPinUnlock() {
         // GIVEN the current security method is SimPin
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);

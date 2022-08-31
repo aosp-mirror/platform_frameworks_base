@@ -30,7 +30,6 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
@@ -44,7 +43,7 @@ private const val PACKAGE_NAME = "packageName"
 private const val USER_ID = "userId"
 
 internal class TogglePermissionAppInfoPageProvider(
-    private val factory: TogglePermissionAppListModelFactory,
+    private val appListTemplate: TogglePermissionAppListTemplate,
 ) : SettingsPageProvider {
     override val name = NAME
 
@@ -57,10 +56,10 @@ internal class TogglePermissionAppInfoPageProvider(
     @Composable
     override fun Page(arguments: Bundle?) {
         checkNotNull(arguments)
-        val permission = checkNotNull(arguments.getString(PERMISSION))
+        val permissionType = checkNotNull(arguments.getString(PERMISSION))
         val packageName = checkNotNull(arguments.getString(PACKAGE_NAME))
         val userId = arguments.getInt(USER_ID)
-        val listModel = rememberContext { context -> factory.createModel(permission, context) }
+        val listModel = appListTemplate.rememberModel(permissionType)
         TogglePermissionAppInfoPage(listModel, packageName, userId)
     }
 

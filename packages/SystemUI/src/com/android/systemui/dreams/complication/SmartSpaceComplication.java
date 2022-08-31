@@ -70,11 +70,7 @@ public class SmartSpaceComplication implements Complication {
                 new BcSmartspaceDataPlugin.SmartspaceTargetListener() {
             @Override
             public void onSmartspaceTargetsUpdated(List<? extends Parcelable> targets) {
-                if (!targets.isEmpty()) {
-                    mDreamOverlayStateController.addComplication(mComplication);
-                } else {
-                    mDreamOverlayStateController.removeComplication(mComplication);
-                }
+                mDreamOverlayStateController.addComplication(mComplication);
             }
         };
 

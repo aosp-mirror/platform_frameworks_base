@@ -38,7 +38,7 @@ private const val NAME = "TogglePermissionAppList"
 private const val PERMISSION = "permission"
 
 internal class TogglePermissionAppListPageProvider(
-    private val factory: TogglePermissionAppListModelFactory,
+    private val appListTemplate: TogglePermissionAppListTemplate,
 ) : SettingsPageProvider {
     override val name = NAME
 
@@ -55,7 +55,7 @@ internal class TogglePermissionAppListPageProvider(
 
     @Composable
     private fun TogglePermissionAppList(permissionType: String) {
-        val listModel = factory.rememberModel(permissionType)
+        val listModel = appListTemplate.rememberModel(permissionType)
         val context = LocalContext.current
         val internalListModel = remember {
             TogglePermissionInternalAppListModel(context, listModel)
@@ -75,8 +75,14 @@ internal class TogglePermissionAppListPageProvider(
     }
 
     companion object {
+        /**
+         * Gets the route to this page.
+         *
+         * Expose route to enable enter from non-SPA pages.
+         */
+        internal fun getRoute(permissionType: String) = "$NAME/$permissionType"
         @Composable
-        internal fun navigator(permissionType: String) = navigator(route = "$NAME/$permissionType")
+        internal fun navigator(permissionType: String) = navigator(route = getRoute(permissionType))
     }
 }
 

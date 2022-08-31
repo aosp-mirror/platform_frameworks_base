@@ -3188,8 +3188,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
             setRotationAnimation(null);
+            // Unlink death from remote to clear the reference from binder -> mRemoteInsetsDeath
+            // -> this DisplayContent.
+            setRemoteInsetsController(null);
             mWmService.mAnimator.removeDisplayLocked(mDisplayId);
             mOverlayLayer.release();
+            mWindowingLayer.release();
             mInputMonitor.onDisplayRemoved();
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
             mWmService.mAccessibilityController.onDisplayRemoved(mDisplayId);

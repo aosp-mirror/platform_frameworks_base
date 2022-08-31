@@ -146,7 +146,7 @@ class ChangeAppRotationTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(repetitions = 3)
+                .getConfigRotationTests()
         }
     }
 }
