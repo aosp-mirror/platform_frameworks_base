@@ -35,7 +35,9 @@ import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
@@ -48,6 +50,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.SparseArray;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -105,6 +108,11 @@ public class BroadcastQueueTest {
 
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
+
+    /**
+     * Map from PID to registered registered runtime receivers.
+     */
+    private SparseArray<ReceiverList> mRegisteredReceivers = new SparseArray<>();
 
     @Parameters(name = "impl={0}")
     public static Collection<Object[]> data() {
@@ -204,11 +212,17 @@ public class BroadcastQueueTest {
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         r.makeActive(thread, mAms.mProcessStats);
-
         doReturn(r).when(mAms).getProcessRecordLocked(eq(r.info.processName), eq(r.info.uid));
 
+        final IIntentReceiver receiver = mock(IIntentReceiver.class);
+        final IBinder receiverBinder = new Binder();
+        doReturn(receiverBinder).when(receiver).asBinder();
+        final ReceiverList receiverList = new ReceiverList(mAms, r, r.getPid(), r.info.uid,
+                UserHandle.getUserId(r.info.uid), receiver);
+        mRegisteredReceivers.put(r.getPid(), receiverList);
+
         doAnswer((invocation) -> {
-            Log.v(TAG, "Intercepting finishReceiverLocked() for "
+            Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             mHandlerThread.getThreadHandler().post(() -> {
                 mQueue.finishReceiverLocked(threadBinder, Activity.RESULT_OK,
@@ -217,6 +231,17 @@ public class BroadcastQueueTest {
             return null;
         }).when(thread).scheduleReceiver(any(), any(), any(), anyInt(), any(), any(), anyBoolean(),
                 anyInt(), anyInt());
+
+        doAnswer((invocation) -> {
+            Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
+                    + Arrays.toString(invocation.getArguments()));
+            mHandlerThread.getThreadHandler().post(() -> {
+                mQueue.finishReceiverLocked(receiverBinder, Activity.RESULT_OK, null, null,
+                        false, false);
+            });
+            return null;
+        }).when(thread).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
+                anyBoolean(), anyBoolean(), anyInt(), anyInt());
 
         return r;
     }
@@ -237,6 +262,16 @@ public class BroadcastQueueTest {
         ri.activityInfo.name = name;
         ri.activityInfo.applicationInfo = makeApplicationInfo(packageName);
         return ri;
+    }
+
+    private BroadcastFilter makeRegisteredReceiver(ProcessRecord app) {
+        final ReceiverList receiverList = mRegisteredReceivers.get(app.getPid());
+        final IntentFilter filter = new IntentFilter();
+        final BroadcastFilter res = new BroadcastFilter(filter, receiverList,
+                receiverList.app.info.packageName, null, null, null, receiverList.uid,
+                receiverList.userId, false, false, true);
+        receiverList.add(res);
+        return res;
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
@@ -274,6 +309,13 @@ public class BroadcastQueueTest {
         verify(app.getThread()).scheduleReceiver(
                 argThat(filterEqualsIgnoringComponent(intent)), any(), any(), anyInt(), any(),
                 any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    private void verifyScheduleRegisteredReceiver(ProcessRecord app, Intent intent)
+            throws Exception {
+        verify(app.getThread()).scheduleRegisteredReceiver(any(),
+                argThat(filterEqualsIgnoringComponent(intent)), anyInt(), any(), any(),
+                anyBoolean(), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
     }
 
     private static final String PACKAGE_RED = "com.example.red";
@@ -367,7 +409,48 @@ public class BroadcastQueueTest {
         verifyScheduleReceiver(receiverBlueApp, timezone);
     }
 
-    // TODO: verify registered receiver in warm app
+    /**
+     * Verify dispatch of simple broadcast to single registered receiver in
+     * already-running warm app.
+     */
+    @Test
+    public void testSimple_Registered() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(intent, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(receiverApp, intent);
+    }
+
+    /**
+     * Verify dispatch of multiple broadcasts to multiple registered receivers
+     * in already-running warm apps.
+     */
+    @Test
+    public void testSimple_Registered_Multiple() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeRegisteredReceiver(receiverGreenApp),
+                        makeRegisteredReceiver(receiverBlueApp))));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverBlueApp))));
+
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(receiverGreenApp, timezone);
+        verifyScheduleRegisteredReceiver(receiverBlueApp, timezone);
+        verifyScheduleRegisteredReceiver(receiverBlueApp, airplane);
+    }
 
     // TODO: verify mixing multiple manifest and registered receivers of same broadcast
     // TODO: verify delivery of 3 distinct broadcasts
