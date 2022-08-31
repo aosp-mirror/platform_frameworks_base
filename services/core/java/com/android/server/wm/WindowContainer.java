@@ -1834,6 +1834,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    int getDistanceFromTop(WindowContainer child) {
+        int idx = mChildren.indexOf(child);
+        return idx < 0 ? -1 : mChildren.size() - 1 - idx;
+    }
+
     private ActivityRecord processGetActivityWithBoundary(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
             boolean[] boundaryFound, WindowContainer wc) {
