@@ -35,9 +35,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -50,12 +48,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -81,10 +78,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var commandQueue: CommandQueue
-    @Mock
-    private lateinit var falsingManager: FalsingManager
-    @Mock
-    private lateinit var falsingCollector: FalsingCollector
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var fakeClock: FakeSystemClock
@@ -122,9 +115,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             accessibilityManager,
             configurationController,
             powerManager,
-            senderUiEventLogger,
-            falsingManager,
-            falsingCollector
+            senderUiEventLogger
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -416,38 +407,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
-        var undoCallbackCalled = false
-        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
-            override fun onUndoTriggered() {
-                undoCallbackCalled = true
-            }
-        }
-
-        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
-        getChipView().getUndoButton().performClick()
-
-        assertThat(undoCallbackCalled).isTrue()
-    }
-
-    @Test
-    fun transferToReceiverSucceeded_withUndoRunnable_falseTap_callbackNotRun() {
-        whenever(falsingManager.isFalseTap(anyInt())).thenReturn(true)
-        var undoCallbackCalled = false
-        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
-            override fun onUndoTriggered() {
-                undoCallbackCalled = true
-            }
-        }
-
-        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
-        getChipView().getUndoButton().performClick()
-
-        assertThat(undoCallbackCalled).isFalse()
-    }
-
-    @Test
-    fun transferToReceiverSucceeded_withUndoRunnable_realTap_callbackRun() {
-        whenever(falsingManager.isFalseTap(anyInt())).thenReturn(false)
         var undoCallbackCalled = false
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
