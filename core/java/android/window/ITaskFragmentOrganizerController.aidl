@@ -57,6 +57,12 @@ interface ITaskFragmentOrganizerController {
      * Notifies the server that the organizer has finished handling the given transaction. The
      * server should apply the given {@link WindowContainerTransaction} for the necessary changes.
      */
-    void onTransactionHandled(in ITaskFragmentOrganizer organizer, in IBinder transactionToken,
-        in WindowContainerTransaction wct);
+    void onTransactionHandled(in IBinder transactionToken, in WindowContainerTransaction wct,
+        int transitionType, boolean shouldApplyIndependently);
+
+    /**
+     * Requests the server to apply the given {@link WindowContainerTransaction}.
+     */
+    void applyTransaction(in WindowContainerTransaction wct, int transitionType,
+        boolean shouldApplyIndependently);
 }
