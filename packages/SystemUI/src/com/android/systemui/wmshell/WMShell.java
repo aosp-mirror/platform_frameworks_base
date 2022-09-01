@@ -34,7 +34,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -62,12 +61,10 @@ import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -336,44 +333,7 @@ public final class WMShell extends CoreStartable
         if (mShell.handleCommand(args, pw)) {
             return;
         }
-        // Handle logging commands if provided
-        if (handleLoggingCommand(args, pw)) {
-            return;
-        }
         // Dump WMShell stuff here if no commands were handled
         mShell.dump(pw);
-    }
-
-    @Override
-    public void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {
-        PrintWriter pw = new PrintWriter(new ParcelFileDescriptor.AutoCloseOutputStream(outFd));
-        handleLoggingCommand(args, pw);
-        pw.flush();
-        pw.close();
-    }
-
-    private boolean handleLoggingCommand(String[] args, PrintWriter pw) {
-        ShellProtoLogImpl protoLogImpl = ShellProtoLogImpl.getSingleInstance();
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "enable-text": {
-                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    int result = protoLogImpl.startTextLogging(groups, pw);
-                    if (result == 0) {
-                        pw.println("Starting logging on groups: " + Arrays.toString(groups));
-                    }
-                    return true;
-                }
-                case "disable-text": {
-                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    int result = protoLogImpl.stopTextLogging(groups, pw);
-                    if (result == 0) {
-                        pw.println("Stopping logging on groups: " + Arrays.toString(groups));
-                    }
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

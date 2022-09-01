@@ -27,6 +27,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.ProtoLogController;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -699,6 +700,7 @@ public abstract class WMShellBaseModule {
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
+            ProtoLogController protoLogController,
             @ShellCreateTriggerOverride Optional<Object> overriddenCreateTrigger) {
         return new Object();
     }
@@ -713,5 +715,13 @@ public abstract class WMShellBaseModule {
     @Provides
     static ShellCommandHandler provideShellCommandHandler() {
         return new ShellCommandHandler();
+    }
+
+    @WMSingleton
+    @Provides
+    static ProtoLogController provideProtoLogController(
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler) {
+        return new ProtoLogController(shellInit, shellCommandHandler);
     }
 }
