@@ -1351,7 +1351,18 @@ public final class CachedAppOptimizer {
                 return;
             }
             Slog.d(TAG_AM, "quick sync unfreeze " + pid);
-            unfreezeAppLSP(app, reason);
+            try {
+                freezeBinder(pid, false);
+            } catch (RuntimeException e) {
+                Slog.e(TAG_AM, "Unable to quick unfreeze binder for " + pid);
+                return;
+            }
+
+            try {
+                Process.setProcessFrozen(pid, app.uid, false);
+            } catch (Exception e) {
+                Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
+            }
         }
     }
 
