@@ -25,6 +25,7 @@ import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 
 val galleryPageProviders = SettingsPageProviderRepository(
@@ -33,6 +34,7 @@ val galleryPageProviders = SettingsPageProviderRepository(
         PreferenceMainPageProvider,
         PreferencePageProvider,
         SwitchPreferencePageProvider,
+        TwoTargetSwitchPreferencePageProvider,
         ArgumentPageProvider,
         SliderPageProvider,
         SpinnerPageProvider,
