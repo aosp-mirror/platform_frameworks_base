@@ -3649,7 +3649,14 @@ public final class ProcessList {
         if (thread == null) {
             return null;
         }
-        final IBinder threadBinder = thread.asBinder();
+        return getLRURecordForAppLOSP(thread.asBinder());
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    ProcessRecord getLRURecordForAppLOSP(IBinder threadBinder) {
+        if (threadBinder == null) {
+            return null;
+        }
         // Find the application record.
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord rec = mLruProcesses.get(i);

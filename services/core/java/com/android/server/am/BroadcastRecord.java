@@ -103,7 +103,6 @@ final class BroadcastRecord extends Binder {
     Bundle resultExtras;    // current result extra data values.
     boolean resultAbort;    // current result abortBroadcast value.
     int nextReceiver;       // next receiver to be executed.
-    IBinder receiver;       // who is currently running, null if none.
     int state;
     int anrCount;           // has this broadcast record hit any ANRs?
     int manifestCount;      // number of manifest receivers dispatched.
@@ -133,15 +132,10 @@ final class BroadcastRecord extends Binder {
     static final int DELIVERY_SKIPPED = 2;
     static final int DELIVERY_TIMEOUT = 3;
 
-    // The following are set when we are calling a receiver (one that
-    // was found in our list of registered receivers).
-    BroadcastFilter curFilter;
-
-    // The following are set only when we are launching a receiver (one
-    // that was found by querying the package manager).
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
-    ActivityInfo curReceiver;   // info about the receiver that is currently running.
+    ActivityInfo curReceiver;   // the manifest receiver that is currently running.
+    BroadcastFilter curFilter;  // the registered receiver currently running.
     Bundle curFilteredExtras;   // the bundle that has been filtered by the package visibility rules
 
     boolean mIsReceiverAppRunning; // Was the receiver's app already running.
@@ -217,9 +211,8 @@ final class BroadcastRecord extends Binder {
                     pw.print(" sticky="); pw.print(sticky);
                     pw.print(" initialSticky="); pw.println(initialSticky);
         }
-        if (nextReceiver != 0 || receiver != null) {
+        if (nextReceiver != 0) {
             pw.print(prefix); pw.print("nextReceiver="); pw.print(nextReceiver);
-                    pw.print(" receiver="); pw.println(receiver);
         }
         if (curFilter != null) {
             pw.print(prefix); pw.print("curFilter="); pw.println(curFilter);
@@ -368,7 +361,6 @@ final class BroadcastRecord extends Binder {
         resultExtras = from.resultExtras;
         resultAbort = from.resultAbort;
         nextReceiver = from.nextReceiver;
-        receiver = from.receiver;
         state = from.state;
         anrCount = from.anrCount;
         manifestCount = from.manifestCount;

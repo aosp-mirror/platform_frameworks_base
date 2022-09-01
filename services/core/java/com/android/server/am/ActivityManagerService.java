@@ -3263,13 +3263,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (thread == null) {
             return null;
         }
+        return getRecordForAppLOSP(thread.asBinder());
+    }
 
-        ProcessRecord record = mProcessList.getLRURecordForAppLOSP(thread);
+    @GuardedBy(anyOf = {"this", "mProcLock"})
+    ProcessRecord getRecordForAppLOSP(IBinder threadBinder) {
+        if (threadBinder == null) {
+            return null;
+        }
+
+        ProcessRecord record = mProcessList.getLRURecordForAppLOSP(threadBinder);
         if (record != null) return record;
 
         // Validation: if it isn't in the LRU list, it shouldn't exist, but let's
         // double-check that.
-        final IBinder threadBinder = thread.asBinder();
         final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
                 mProcessList.getProcessNamesLOSP().getMap();
         for (int i = pmap.size()-1; i >= 0; i--) {
@@ -13342,7 +13349,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final BroadcastRecord r = rl.curBroadcast;
                     if (r != null) {
                         final boolean doNext = r.queue.finishReceiverLocked(
-                                receiver.asBinder(), r.resultCode, r.resultData, r.resultExtras,
+                                rl.app, r.resultCode, r.resultData, r.resultExtras,
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
@@ -14510,9 +14517,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void finishReceiver(IBinder who, int resultCode, String resultData,
+    public void finishReceiver(IBinder caller, int resultCode, String resultData,
             Bundle resultExtras, boolean resultAbort, int flags) {
-        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Finish receiver: " + who);
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Finish receiver: " + caller);
 
         // Refuse possible leaked file descriptors
         if (resultExtras != null && resultExtras.hasFileDescriptors()) {
@@ -14521,12 +14528,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long origId = Binder.clearCallingIdentity();
         try {
-            boolean doNext = false;
-            BroadcastRecord r;
-            BroadcastQueue queue;
             synchronized(this) {
-                queue = broadcastQueueForFlags(flags);
-                doNext = queue.finishReceiverLocked(who, resultCode,
+                final ProcessRecord callerApp = getRecordForAppLOSP(caller);
+                if (callerApp == null) {
+                    Slog.w(TAG, "finishReceiver: no app for " + caller);
+                    return;
+                }
+
+                final BroadcastQueue queue = broadcastQueueForFlags(flags);
+                queue.finishReceiverLocked(callerApp, resultCode,
                         resultData, resultExtras, resultAbort, true);
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);

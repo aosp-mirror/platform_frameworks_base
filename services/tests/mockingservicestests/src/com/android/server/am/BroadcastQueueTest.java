@@ -225,7 +225,7 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.finishReceiverLocked(threadBinder, Activity.RESULT_OK,
+                mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
                         null, null, false, false);
             });
             return null;
@@ -236,7 +236,7 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.finishReceiverLocked(receiverBinder, Activity.RESULT_OK, null, null,
+                mQueue.finishReceiverLocked(r, Activity.RESULT_OK, null, null,
                         false, false);
             });
             return null;

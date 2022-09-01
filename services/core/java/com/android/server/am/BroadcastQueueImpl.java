@@ -370,7 +370,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             return;
         }
 
-        r.receiver = thread.asBinder();
         r.curApp = app;
         final ProcessReceiverRecord prr = app.mReceivers;
         prr.addCurReceiver(r);
@@ -408,7 +407,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             if (!started) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Process cur broadcast " + r + ": NOT STARTED!");
-                r.receiver = null;
                 r.curApp = null;
                 prr.removeCurReceiver(r);
             }
@@ -525,16 +523,16 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         mBroadcastsScheduled = true;
     }
 
-    public BroadcastRecord getMatchingOrderedReceiver(IBinder receiver) {
+    public BroadcastRecord getMatchingOrderedReceiver(ProcessRecord app) {
         BroadcastRecord br = mDispatcher.getActiveBroadcastLocked();
         if (br == null) {
             Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
                     + "] no active broadcast");
             return null;
         }
-        if (br.receiver != receiver) {
+        if (br.curApp != app) {
             Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
-                    + "] active broadcast " + br.receiver + " doesn't match " + receiver);
+                    + "] active broadcast " + br.curApp + " doesn't match " + app);
             return null;
         }
         return br;
@@ -565,9 +563,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
     }
 
-    public boolean finishReceiverLocked(IBinder receiver, int resultCode,
+    public boolean finishReceiverLocked(ProcessRecord app, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
-        final BroadcastRecord r = getMatchingOrderedReceiver(receiver);
+        final BroadcastRecord r = getMatchingOrderedReceiver(app);
         if (r != null) {
             return finishReceiverLocked(r, resultCode,
                     resultData, resultExtras, resultAbort, waitForServices);
@@ -648,7 +646,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
         }
 
-        r.receiver = null;
         r.intent.setComponent(null);
         if (r.curApp != null && r.curApp.mReceivers.hasCurReceiver(r)) {
             r.curApp.mReceivers.removeCurReceiver(r);
@@ -806,7 +803,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // don't want to touch the fields that keep track of the current
         // state of ordered broadcasts.
         if (ordered) {
-            r.receiver = filter.receiverList.receiver.asBinder();
             r.curFilter = filter;
             filter.receiverList.curBroadcast = r;
             r.state = BroadcastRecord.CALL_IN_RECEIVE;
@@ -870,7 +866,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
             // And BroadcastRecord state related to ordered delivery, if appropriate
             if (ordered) {
-                r.receiver = null;
                 r.curFilter = null;
                 filter.receiverList.curBroadcast = null;
             }
@@ -1290,12 +1285,13 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     + filter + ": " + r);
             r.mIsReceiverAppRunning = true;
             deliverToRegisteredReceiverLocked(r, filter, r.ordered, recIdx);
-            if (r.receiver == null || !r.ordered) {
+            if ((r.curReceiver == null && r.curFilter == null) || !r.ordered) {
                 // The receiver has already finished, so schedule to
                 // process the next one.
                 if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Quick finishing ["
-                        + mQueueName + "]: ordered="
-                        + r.ordered + " receiver=" + r.receiver);
+                        + mQueueName + "]: ordered=" + r.ordered
+                        + " curFilter=" + r.curFilter
+                        + " curReceiver=" + r.curReceiver);
                 r.state = BroadcastRecord.IDLE;
                 scheduleBroadcastsLocked();
             } else {
@@ -1347,7 +1343,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     "Skipping delivery of ordered [" + mQueueName + "] "
                     + r + " for reason described above");
             r.delivery[recIdx] = BroadcastRecord.DELIVERY_SKIPPED;
-            r.receiver = null;
             r.curFilter = null;
             r.state = BroadcastRecord.IDLE;
             r.manifestSkipCount++;
@@ -1637,8 +1632,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         final boolean debugging = (r.curApp != null && r.curApp.isDebugging());
 
         long timeoutDurationMs = now - r.receiverTime;
-        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
-                + ", started " + timeoutDurationMs + "ms ago");
+        Slog.w(TAG, "Timeout of broadcast " + r + " - curFilter=" + r.curFilter + " curReceiver="
+                + r.curReceiver + ", started " + timeoutDurationMs + "ms ago");
         r.receiverTime = now;
         if (!debugging) {
             r.anrCount++;
