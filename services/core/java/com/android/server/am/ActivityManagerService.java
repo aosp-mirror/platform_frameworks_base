@@ -17832,6 +17832,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Reset the dropbox rate limiter
+     */
+    void resetDropboxRateLimiter() {
+        mDropboxRateLimiter.reset();
+    }
+
+    /**
      * Kill processes for the user with id userId and that depend on the package named packageName
      */
     @Override
