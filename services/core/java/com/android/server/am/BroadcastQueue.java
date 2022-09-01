@@ -18,12 +18,10 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -144,22 +142,40 @@ public abstract class BroadcastQueue {
      * Quickly determine if this queue has broadcasts that are still waiting to
      * be delivered at some point in the future.
      *
-     * @see #flush()
+     * @see #waitForIdle
+     * @see #waitForBarrier
      */
-    public abstract boolean isIdle();
+    @GuardedBy("mService")
+    public abstract boolean isIdleLocked();
+
+    /**
+     * Wait until this queue becomes completely idle.
+     * <p>
+     * Any broadcasts waiting to be delivered at some point in the future will
+     * be dispatched as quickly as possible.
+     * <p>
+     * Callers are cautioned that the queue may take a long time to go idle,
+     * since running apps can continue sending new broadcasts in perpetuity;
+     * consider using {@link #waitForBarrier} instead.
+     */
+    public abstract void waitForIdle(@Nullable PrintWriter pw);
+
+    /**
+     * Wait until any currently waiting broadcasts have been dispatched.
+     * <p>
+     * Any broadcasts waiting to be delivered at some point in the future will
+     * be dispatched as quickly as possible.
+     * <p>
+     * Callers are advised that this method will <em>not</em> wait for any
+     * future broadcasts that are newly enqueued after being invoked.
+     */
+    public abstract void waitForBarrier(@Nullable PrintWriter pw);
 
     /**
      * Brief summary of internal state, useful for debugging purposes.
      */
-    public abstract @NonNull String describeState();
-
-    /**
-     * Flush any broadcasts still waiting to be delivered, causing them to be
-     * delivered as soon as possible.
-     *
-     * @see #isIdle()
-     */
-    public abstract void flush();
+    @GuardedBy("mService")
+    public abstract @NonNull String describeStateLocked();
 
     public abstract void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId);
 

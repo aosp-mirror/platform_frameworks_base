@@ -298,11 +298,7 @@ public class BroadcastQueueTest {
     }
 
     private void waitForIdle() throws Exception {
-        for (int i = 0; i < 100; i++) {
-            if (mQueue.isIdle()) break;
-            SystemClock.sleep(100);
-        }
-        assertTrue(mQueue.isIdle());
+        mQueue.waitForIdle(null);
     }
 
     private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {

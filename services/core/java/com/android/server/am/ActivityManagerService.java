@@ -10621,7 +10621,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
-                pw.println("  Queue " + queue.toString() + ": " + queue.describeState());
+                pw.println("  Queue " + queue.toString() + ": " + queue.describeStateLocked());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -15209,7 +15209,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.isIdle()) {
+            if (!q.isIdleLocked()) {
                 return false;
             }
         }
@@ -17786,35 +17786,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void waitForBroadcastIdle(@Nullable PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
-        while (true) {
-            boolean idle = true;
-            synchronized (this) {
-                for (BroadcastQueue queue : mBroadcastQueues) {
-                    if (!queue.isIdle()) {
-                        final String msg = "Waiting for queue " + queue + " to become idle...";
-                        if (pw != null) {
-                            pw.println(msg);
-                            pw.println(queue.describeState());
-                            pw.flush();
-                        }
-                        Slog.v(TAG, msg);
-                        queue.flush();
-                        idle = false;
-                    }
-                }
-            }
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForIdle(pw);
+        }
+    }
 
-            if (idle) {
-                final String msg = "All broadcast queues are idle!";
-                if (pw != null) {
-                    pw.println(msg);
-                    pw.flush();
-                }
-                Slog.v(TAG, msg);
-                return;
-            } else {
-                SystemClock.sleep(1000);
-            }
+    public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForBarrier(pw);
         }
     }
 

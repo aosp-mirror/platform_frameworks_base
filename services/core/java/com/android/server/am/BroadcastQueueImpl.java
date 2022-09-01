@@ -87,6 +87,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 /**
  * BROADCASTS
@@ -1781,13 +1782,72 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 record.intent == null ? "" : record.intent.getAction());
     }
 
-    public boolean isIdle() {
+    public boolean isIdleLocked() {
         return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
     }
 
-    public void flush() {
-        cancelDeferrals();
+    public boolean isBeyondBarrierLocked(long barrierTime) {
+        // If nothing active, we're beyond barrier
+        if (isIdleLocked()) return true;
+
+        // Check if active broadcast is beyond barrier
+        final BroadcastRecord active = getActiveBroadcastLocked();
+        if (active != null && active.enqueueTime > barrierTime) {
+            return true;
+        }
+
+        // Check if pending broadcast is beyond barrier
+        final BroadcastRecord pending = getPendingBroadcastLocked();
+        if (pending != null && pending.enqueueTime > barrierTime) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void waitForIdle(PrintWriter pw) {
+        waitFor(() -> isIdleLocked(), pw, "idle");
+    }
+
+    public void waitForBarrier(PrintWriter pw) {
+        final long barrierTime = SystemClock.uptimeMillis();
+        waitFor(() -> isBeyondBarrierLocked(barrierTime), pw, "barrier");
+    }
+
+    private void waitFor(BooleanSupplier condition, PrintWriter pw, String conditionName) {
+        long lastPrint = 0;
+        while (true) {
+            synchronized (mService) {
+                if (condition.getAsBoolean()) {
+                    final String msg = "Queue [" + mQueueName + "] reached " + conditionName
+                            + " condition";
+                    Slog.v(TAG, msg);
+                    if (pw != null) {
+                        pw.println(msg);
+                        pw.flush();
+                    }
+                    return;
+                }
+            }
+
+            // Print at most every second
+            final long now = SystemClock.uptimeMillis();
+            if (now >= lastPrint + 1000) {
+                lastPrint = now;
+                final String msg = "Queue [" + mQueueName + "] waiting for " + conditionName
+                        + " condition; state is " + describeStateLocked();
+                Slog.v(TAG, msg);
+                if (pw != null) {
+                    pw.println(msg);
+                    pw.flush();
+                }
+            }
+
+            // Push through any deferrals to try meeting our condition
+            cancelDeferrals();
+            SystemClock.sleep(100);
+        }
     }
 
     // Used by wait-for-broadcast-idle : fast-forward all current deferrals to
@@ -1799,11 +1859,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }
     }
 
-    public String describeState() {
-        synchronized (mService) {
-            return mParallelBroadcasts.size() + " parallel; "
-                    + mDispatcher.describeStateLocked();
-        }
+    public String describeStateLocked() {
+        return mParallelBroadcasts.size() + " parallel; "
+                + mDispatcher.describeStateLocked();
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
