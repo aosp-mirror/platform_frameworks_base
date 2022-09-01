@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"일부 기본값이 설정됨"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"기본값이 설정되지 않음"</string>
     <string name="tts_settings" msgid="8130616705989351312">"TTS 설정"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"TTS 출력"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"텍스트 음성 변환 출력"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"텍스트를 읽어주는 속도"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"음조"</string>
@@ -273,8 +273,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"부트로더 잠금 해제 허용"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM 잠금 해제를 허용하시겠습니까?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"경고: 이 설정을 사용하는 동안에는 이 기기에서 기기 보호 기능이 작동하지 않습니다."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"모의 위치 앱 선택"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"모의 위치 앱이 설정되어 있지 않음"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"가상 위치 앱 선택"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"가상 위치 앱이 설정되어 있지 않음"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"모의 위치 앱: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"네트워크"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"무선 디스플레이 인증서"</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> 후 충전 완료"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 일시중지됨"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"무선 충전 중"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"충전"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"연결됨, 충전 중 아님"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"충전됨"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"이더넷에서 연결 해제되었습니다."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"이더넷에 연결되었습니다."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"통화 모드가 없습니다."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"시간"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"날짜"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"날씨"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"대기 상태"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"전송 정보"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"홈 컨트롤"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"프로필 사진 선택하기"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"기본 사용자 아이콘"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"물리적 키보드"</string>

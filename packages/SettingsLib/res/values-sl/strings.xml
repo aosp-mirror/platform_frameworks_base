@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Še <xliff:g id="TIME">%1$s</xliff:g> do napolnjenosti"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – še <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – Polnjenje je začasno zaustavljeno"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Neznano"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Polnjenje"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Hitro polnjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Počasno polnjenje"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Brezžično polnjenje"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Polnjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Se ne polni"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, se ne polni"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napolnjeno"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetna povezava je prekinjena."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Klicanje ni mogoče."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Ura"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Vreme"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kakovost zraka"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"O zasedbi"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Nadzor doma"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Hitri pregled"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Izbira profilne slike"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Privzeta ikona uporabnika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizična tipkovnica"</string>

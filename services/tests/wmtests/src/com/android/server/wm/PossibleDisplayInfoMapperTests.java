@@ -36,6 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
@@ -88,7 +90,8 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mPossibleDisplayInfo.add(mDefaultDisplayInfo);
         mDisplayInfoMapper.updatePossibleDisplayInfos(DEFAULT_DISPLAY);
 
-        Set<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY);
+        List<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(
+                DEFAULT_DISPLAY);
         // An entry for rotation 0, for a display that can be in a single state.
         assertThat(displayInfos.size()).isEqualTo(1);
         assertPossibleDisplayInfoEntries(displayInfos, mDefaultDisplayInfo);
@@ -105,9 +108,10 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mPossibleDisplayInfo.add(mSecondDisplayInfo);
         mDisplayInfoMapper.updatePossibleDisplayInfos(DEFAULT_DISPLAY);
 
-        Set<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY);
-        Set<DisplayInfo> defaultDisplayInfos = new ArraySet<>();
-        Set<DisplayInfo> secondDisplayInfos = new ArraySet<>();
+        List<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(
+                DEFAULT_DISPLAY);
+        List<DisplayInfo> defaultDisplayInfos = new ArrayList<>();
+        List<DisplayInfo> secondDisplayInfos = new ArrayList<>();
         for (DisplayInfo di : displayInfos) {
             if ((di.flags & FLAG_PRESENTATION) != 0) {
                 secondDisplayInfos.add(di);
@@ -137,12 +141,13 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mPossibleDisplayInfo.add(mSecondDisplayInfo);
         mDisplayInfoMapper.updatePossibleDisplayInfos(mSecondDisplayInfo.displayId);
 
-        Set<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY);
+        List<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(
+                DEFAULT_DISPLAY);
         // An entry for rotation 0, for the default display.
         assertThat(displayInfos).hasSize(1);
         assertPossibleDisplayInfoEntries(displayInfos, mDefaultDisplayInfo);
 
-        Set<DisplayInfo> secondStateEntries =
+        List<DisplayInfo> secondStateEntries =
                 mDisplayInfoMapper.getPossibleDisplayInfos(mSecondDisplayInfo.displayId);
         // An entry for rotation 0, for the second display.
         assertThat(secondStateEntries).hasSize(1);
@@ -157,7 +162,7 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         outDisplayInfo.logicalHeight = logicalBounds.height();
     }
 
-    private static void assertPossibleDisplayInfoEntries(Set<DisplayInfo> displayInfos,
+    private static void assertPossibleDisplayInfoEntries(List<DisplayInfo> displayInfos,
             DisplayInfo expectedDisplayInfo) {
         for (DisplayInfo displayInfo : displayInfos) {
             assertThat(displayInfo.displayId).isEqualTo(expectedDisplayInfo.displayId);

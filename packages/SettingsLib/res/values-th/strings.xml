@@ -288,8 +288,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"เปิดใช้ Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
-    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชัน MAP ของบลูทูธ"</string>
-    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชัน MAP ของบลูทูธ"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชันของบลูทูธ MAP"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชันของบลูทูธ MAP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"อัตราตัวอย่างเสียงบลูทูธ"</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"อีก <xliff:g id="TIME">%1$s</xliff:g>จึงจะเต็ม"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - อีก <xliff:g id="TIME">%2$s</xliff:g> จึงจะเต็ม"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - การชาร์จหยุดชั่วคราว"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"กำลังชาร์จ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"กำลังชาร์จอย่างเร็ว"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"กำลังชาร์จอย่างช้าๆ"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"กำลังชาร์จแบบไร้สาย"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"กำลังชาร์จ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ไม่ได้ชาร์จ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"เชื่อมต่ออยู่ ไม่ได้ชาร์จ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ชาร์จแล้ว"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ยกเลิกการเชื่อมต่ออีเทอร์เน็ตแล้ว"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"อีเทอร์เน็ต"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ไม่มีการโทร"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"เวลา"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"วันที่"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"สภาพอากาศ"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"คุณภาพอากาศ"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ข้อมูลแคสต์"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"ระบบควบคุมอุปกรณ์ในบ้าน"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"เลือกรูปโปรไฟล์"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ไอคอนผู้ใช้เริ่มต้น"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"แป้นพิมพ์จริง"</string>

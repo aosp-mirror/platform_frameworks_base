@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics
 
-import android.graphics.PointF
+import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -31,11 +31,12 @@ import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.leak.RotationUtils
+import javax.inject.Provider
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -45,15 +46,14 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
-import javax.inject.Provider
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -116,7 +116,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     fun testFingerprintTrigger_KeyguardVisible_Ripple() {
         // GIVEN fp exists, keyguard is visible, user doesn't need strong auth
-        val fpsLocation = PointF(5f, 5f)
+        val fpsLocation = Point(5, 5)
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
@@ -139,7 +139,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     fun testFingerprintTrigger_Dreaming_Ripple() {
         // GIVEN fp exists, keyguard is visible, user doesn't need strong auth
-        val fpsLocation = PointF(5f, 5f)
+        val fpsLocation = Point(5, 5)
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(false)
@@ -162,7 +162,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     fun testFingerprintTrigger_KeyguardNotVisible_NotDreaming_NoRipple() {
         // GIVEN fp exists & user doesn't need strong auth
-        val fpsLocation = PointF(5f, 5f)
+        val fpsLocation = Point(5, 5)
         `when`(authController.udfpsLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.userNeedsStrongAuth()).thenReturn(false)
@@ -184,7 +184,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     fun testFingerprintTrigger_StrongAuthRequired_NoRipple() {
         // GIVEN fp exists & keyguard is visible
-        val fpsLocation = PointF(5f, 5f)
+        val fpsLocation = Point(5, 5)
         `when`(authController.udfpsLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
@@ -205,8 +205,8 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     fun testFaceTriggerBypassEnabled_Ripple() {
         // GIVEN face auth sensor exists, keyguard is visible & strong auth isn't required
-        val faceLocation = PointF(5f, 5f)
-        `when`(authController.faceAuthSensorLocation).thenReturn(faceLocation)
+        val faceLocation = Point(5, 5)
+        `when`(authController.faceSensorLocation).thenReturn(faceLocation)
         controller.onViewAttached()
 
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
@@ -229,8 +229,8 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     fun testFaceTriggerNonBypass_NoRipple() {
         // GIVEN face auth sensor exists
-        val faceLocation = PointF(5f, 5f)
-        `when`(authController.faceAuthSensorLocation).thenReturn(faceLocation)
+        val faceLocation = Point(5, 5)
+        `when`(authController.faceSensorLocation).thenReturn(faceLocation)
         controller.onViewAttached()
 
         // WHEN bypass isn't enabled & face authenticated
@@ -248,7 +248,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
     @Test
     fun testNullFaceSensorLocationDoesNothing() {
-        `when`(authController.faceAuthSensorLocation).thenReturn(null)
+        `when`(authController.faceSensorLocation).thenReturn(null)
         controller.onViewAttached()
 
         val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
@@ -293,7 +293,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     fun testAnimatorRunWhenWakeAndUnlock_fingerprint() {
-        val fpsLocation = PointF(5f, 5f)
+        val fpsLocation = Point(5, 5)
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
@@ -311,8 +311,8 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     fun testAnimatorRunWhenWakeAndUnlock_faceUdfpsFingerDown() {
-        val faceLocation = PointF(5f, 5f)
-        `when`(authController.faceAuthSensorLocation).thenReturn(faceLocation)
+        val faceLocation = Point(5, 5)
+        `when`(authController.faceSensorLocation).thenReturn(faceLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)

@@ -201,9 +201,9 @@
     <string name="tts_engine_network_required" msgid="8722087649733906851">"या भाषेस टेक्‍स्‍ट टू स्‍पीचसाठी एका नेटवर्क कनेक्शनची आवश्यकता आहे."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"हे उच्चार संश्लेषणाचे एक उदाहरण आहे"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"डीफॉल्ट भाषा स्थिती"</string>
-    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> पूर्णपणे समर्थित आहे"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> ला पूर्ण सपोर्ट आहे"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> ला नेटवर्क कनेक्शनची आवश्यकता आहे"</string>
-    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> समर्थित नाही"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> ला सपोर्ट नाही"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"तपासत आहे..."</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> साठी सेटिंग्ज"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"इंजीन सेटिंग्ज लाँच करा"</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज करणे थांबवले आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळू चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेसने चार्ज होत आहे"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज झाली"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट डिस्कनेक्ट केले."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कॉलिंग उपलब्ध नाही."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"वेळ"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"तारीख"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"हवामान"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"हवेची गुणवत्ता"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"कास्टसंबंधित माहिती"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"होम कंट्रोल"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"स्मार्टस्पेस"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो निवडा"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"डीफॉल्ट वापरकर्ता आयकन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"वास्तविक कीबोर्ड"</string>
