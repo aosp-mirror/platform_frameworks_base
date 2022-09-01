@@ -151,15 +151,15 @@ fun FlickerTestParameter.splitAppLayerBoundsChanges(
     assertLayers {
         if (landscapePosLeft) {
             this.splitAppLayerBoundsSnapToDivider(
-                    component, landscapePosLeft, portraitPosTop, endRotation)
+                component, landscapePosLeft, portraitPosTop, endRotation)
+        } else {
+            this.splitAppLayerBoundsSnapToDivider(
+                component, landscapePosLeft, portraitPosTop, endRotation)
                 .then()
                 .isInvisible(component)
                 .then()
                 .splitAppLayerBoundsSnapToDivider(
                     component, landscapePosLeft, portraitPosTop, endRotation)
-        } else {
-            this.splitAppLayerBoundsSnapToDivider(
-                component, landscapePosLeft, portraitPosTop, endRotation)
         }
     }
 }

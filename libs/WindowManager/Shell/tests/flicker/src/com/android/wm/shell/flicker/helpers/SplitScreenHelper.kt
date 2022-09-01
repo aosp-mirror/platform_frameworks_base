@@ -97,11 +97,27 @@ class SplitScreenHelper(
             secondaryApp: IComponentMatcher,
         ) {
             wmHelper.StateSyncBuilder()
-                .withAppTransitionIdle()
                 .withWindowSurfaceAppeared(primaryApp)
                 .withWindowSurfaceAppeared(secondaryApp)
                 .withSplitDividerVisible()
                 .waitForAndVerify()
+        }
+
+        fun enterSplit(
+            wmHelper: WindowManagerStateHelper,
+            tapl: LauncherInstrumentation,
+            primaryApp: SplitScreenHelper,
+            secondaryApp: SplitScreenHelper
+        ) {
+            tapl.workspace.switchToOverview().dismissAllTasks()
+            primaryApp.launchViaIntent(wmHelper)
+            secondaryApp.launchViaIntent(wmHelper)
+            tapl.goHome()
+            wmHelper.StateSyncBuilder()
+                .withHomeActivityVisible()
+                .waitForAndVerify()
+            splitFromOverview(tapl)
+            waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
         }
 
         fun splitFromOverview(tapl: LauncherInstrumentation) {
@@ -267,24 +283,35 @@ class SplitScreenHelper(
                 ?.layerStackSpace
                 ?: error("Display not found")
             val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-            dividerBar.drag(Point(displayBounds.width * 2 / 3, displayBounds.height * 2 / 3))
+            dividerBar.drag(Point(displayBounds.width * 1 / 3, displayBounds.height * 2 / 3))
 
             wmHelper.StateSyncBuilder()
-                .withAppTransitionIdle()
                 .withWindowSurfaceDisappeared(SPLIT_DECOR_MANAGER)
                 .waitForAndVerify()
         }
 
         fun dragDividerToDismissSplit(
             device: UiDevice,
-            wmHelper: WindowManagerStateHelper
+            wmHelper: WindowManagerStateHelper,
+            dragToRight: Boolean,
+            dragToBottom: Boolean
         ) {
             val displayBounds = wmHelper.currentState.layerState
                 .displays.firstOrNull { !it.isVirtual }
                 ?.layerStackSpace
                 ?: error("Display not found")
             val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-            dividerBar.drag(Point(displayBounds.width * 4 / 5, displayBounds.height * 4 / 5))
+            dividerBar.drag(Point(
+                if (dragToRight) {
+                    displayBounds.width * 4 / 5
+                } else {
+                    displayBounds.width * 1 / 5
+                },
+                if (dragToBottom) {
+                    displayBounds.height * 4 / 5
+                } else {
+                    displayBounds.height * 1 / 5
+                }))
         }
 
         fun doubleTapDividerToSwitch(device: UiDevice) {
@@ -296,7 +323,7 @@ class SplitScreenHelper(
             dividerBar.click()
         }
 
-        fun copyContentFromLeftToRight(
+        fun copyContentInSplit(
             instrumentation: Instrumentation,
             device: UiDevice,
             sourceApp: IComponentNameMatcher,
