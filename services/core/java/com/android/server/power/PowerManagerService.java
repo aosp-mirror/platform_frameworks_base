@@ -2953,7 +2953,8 @@ public final class PowerManagerService extends SystemService
 
             mHandler.removeMessages(MSG_ATTENTIVE_TIMEOUT);
 
-            if (isBeingKeptFromInattentiveSleepLocked()) {
+            if (getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP
+                    || isBeingKeptFromInattentiveSleepLocked()) {
                 return;
             }
 
@@ -2985,7 +2986,7 @@ public final class PowerManagerService extends SystemService
             return false;
         }
 
-        if (getGlobalWakefulnessLocked() != WAKEFULNESS_AWAKE) {
+        if (getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP) {
             mInattentiveSleepWarningOverlayController.dismiss(false);
             return true;
         } else if (attentiveTimeout < 0 || isBeingKeptFromInattentiveSleepLocked()

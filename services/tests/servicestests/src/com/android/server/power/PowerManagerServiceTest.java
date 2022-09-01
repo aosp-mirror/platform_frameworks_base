@@ -992,6 +992,40 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testInattentiveSleep_warningStaysWhenDreaming() {
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveWarningDuration(70);
+        setAttentiveTimeout(100);
+        createService();
+        startSystem();
+        advanceTime(50);
+        verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).show();
+        when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
+
+        forceDream();
+        when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
+
+        advanceTime(10);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+        verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
+    }
+
+    @Test
+    public void testInattentiveSleep_warningNotShownWhenSleeping() {
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveWarningDuration(70);
+        setAttentiveTimeout(100);
+        createService();
+        startSystem();
+
+        advanceTime(10);
+        forceSleep();
+
+        advanceTime(50);
+        verify(mInattentiveSleepWarningControllerMock, never()).show();
+    }
+
+    @Test
     public void testInattentiveSleep_noWarningShownIfInattentiveSleepDisabled() {
         setAttentiveTimeout(-1);
         createService();
