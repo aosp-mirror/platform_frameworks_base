@@ -883,6 +883,11 @@ public final class DreamManagerService extends SystemService {
         public ComponentName getActiveDreamComponent(boolean doze) {
             return getActiveDreamComponentInternal(doze);
         }
+
+        @Override
+        public void requestDream() {
+            requestDreamInternal();
+        }
     }
 
     private final Runnable mSystemPropertiesChanged = new Runnable() {
