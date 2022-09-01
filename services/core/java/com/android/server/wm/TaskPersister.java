@@ -232,12 +232,22 @@ public class TaskPersister implements PersisterQueue.Listener {
         if (icon != null) {
             return icon;
         }
+        final Bitmap cachedIcon = getImageFromCachedItem(filePath);
+        if (cachedIcon != null) {
+            return cachedIcon;
+        }
         return restoreImage(filePath);
     }
 
     private Bitmap getImageFromWriteQueue(String filePath) {
         final ImageWriteQueueItem item = mPersisterQueue.findLastItem(
                 queueItem -> queueItem.mFilePath.equals(filePath), ImageWriteQueueItem.class);
+        return item != null ? item.mImage : null;
+    }
+
+    private Bitmap getImageFromCachedItem(String filePath) {
+        final ImageWriteQueueItem item = mPersisterQueue.getCachedItem(
+                cachedItem -> cachedItem.mFilePath.equals(filePath), ImageWriteQueueItem.class);
         return item != null ? item.mImage : null;
     }
 

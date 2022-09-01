@@ -60,6 +60,8 @@ class PersisterQueue {
 
     private final ArrayList<Listener> mListeners = new ArrayList<>();
 
+    private WriteQueueItem mCachedItem = null;
+
     /**
      * Value determines write delay mode as follows: < 0 We are Flushing. No delays between writes
      * until the image queue is drained and all tasks needing persisting are written to disk. There
@@ -124,6 +126,17 @@ class PersisterQueue {
                 if (predicate.test(item)) {
                     return item;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    <T extends WriteQueueItem> T getCachedItem(Predicate<T> predicate, Class<T> clazz) {
+        if (clazz.isInstance(mCachedItem)) {
+            T item = clazz.cast(mCachedItem);
+            if (predicate.test(item)) {
+                return item;
             }
         }
 
@@ -228,6 +241,7 @@ class PersisterQueue {
                 // from now.
             }
             item = mWriteQueue.remove(0);
+            mCachedItem = item;
 
             long now = SystemClock.uptimeMillis();
             if (DEBUG) {
@@ -246,6 +260,7 @@ class PersisterQueue {
         }
 
         item.process();
+        mCachedItem = null;
     }
 
     interface WriteQueueItem<T extends WriteQueueItem<T>> {
