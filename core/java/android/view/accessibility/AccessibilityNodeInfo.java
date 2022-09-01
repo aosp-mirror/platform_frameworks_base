@@ -4812,6 +4812,9 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Action that gives accessibility focus to the node.
+         * <p>
+         * This is intended to be used by screen readers. Apps changing focus can confuse screen
+         * readers, so the resulting behavior can vary by device and screen reader version.
          */
         public static final AccessibilityAction ACTION_ACCESSIBILITY_FOCUS =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
