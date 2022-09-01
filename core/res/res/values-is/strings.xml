@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Hætt við fingrafarsaðgerð."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Notandi hætti við að nota fingrafar."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Of margar tilraunir. Reyndu aftur síðar."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Of margar tilraunir. Fingrafaralesari gerður óvirkur."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Reyndu aftur."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Engin fingraför hafa verið skráð."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Þetta tæki er ekki með fingrafaralesara."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Svæðisval"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sláðu inn heiti tungumáls"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Tillögur"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Tillögur"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Öll tungumál"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Öll svæði"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Leita"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Veita <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aðgang að öllum annálum í tækinu?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Leyfa aðgang í eitt skipti"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ekki leyfa"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Annálar tækisins skrá það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum. Framleiðandi tækisins getur þó hugsanlega opnað tiltekna annála eða upplýsingar í tækinu."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ekki sýna aftur"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill sýna sneiðar úr <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Breyta"</string>
@@ -2292,7 +2291,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skoða virk forrit"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ekki er hægt að opna myndavél símans úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ekki er hægt að opna myndavél spjaldtölvunnar úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Ekki er hægt að opna þetta á meðan streymi stendur yfir. Prófaðu það í símanum í staðinn."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sjálfgildi kerfis"</string>
 </resources>
