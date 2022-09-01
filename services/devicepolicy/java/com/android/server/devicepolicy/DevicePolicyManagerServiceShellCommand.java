@@ -256,7 +256,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
 
         try {
-            if (!mService.setDeviceOwner(mComponent, mName, mUserId,
+            if (!mService.setDeviceOwner(mComponent, mUserId,
                     /* setProfileOwnerOnCurrentUserIfNecessary= */ !mSetDoOnly)) {
                 throw new RuntimeException(
                         "Can't set package " + mComponent + " as device owner.");

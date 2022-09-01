@@ -966,7 +966,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set admin1 to active admin and device owner
         dpm.setActiveAdmin(admin1, false);
-        dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM);
+        dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM);
 
         // Save password history length
         dpm.setPasswordHistoryLength(admin1, passwordHistoryLength);
@@ -1124,7 +1124,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
 
         // Fire!
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         // getDeviceOwnerComponent should return the admin1 component.
         assertThat(dpm.getDeviceOwnerComponentOnCallingUser()).isEqualTo(admin1);
@@ -1181,7 +1181,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             // DO needs to be a DA
             dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
             // DO should be set on headless system user
-            assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+            assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
             // PO should be set on calling user.
             assertThat(dpm.getProfileOwnerAsUser(CALLER_USER_HANDLE)).isEqualTo(admin1);
         });
@@ -1353,7 +1353,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         assertExpectException(IllegalArgumentException.class,
                 /* messageRegex= */ "Invalid component",
-                () -> dpm.setDeviceOwner(new ComponentName("a.b.c", ".def"), /* ownerName= */ null,
+                () -> dpm.setDeviceOwner(new ComponentName("a.b.c", ".def"),
                         UserHandle.USER_SYSTEM));
     }
 
@@ -1363,13 +1363,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Package doesn't exist and caller is not system
         assertExpectException(SecurityException.class,
                 /* messageRegex= */ "Calling identity is not authorized",
-                () -> dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
+                () -> dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM));
 
         // Package exists, but caller is not system
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         assertExpectException(SecurityException.class,
                 /* messageRegex= */ "Calling identity is not authorized",
-                () -> dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
+                () -> dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM));
     }
 
     @Test
@@ -1389,7 +1389,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
         assertThat(dpm.getDeviceOwnerComponentOnAnyUser()).isEqualTo(admin1);
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
@@ -1452,7 +1452,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
                 eq(UserHandle.USER_SYSTEM), eq(false));
@@ -1493,7 +1493,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
         assertThat(dpm.getDeviceOwnerComponentOnAnyUser()).isEqualTo(admin1);
 
         // Now call clear from the secondary user, which should throw.
@@ -1527,7 +1527,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set admin1 to active admin and device owner
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM);
+        dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM);
 
         // Add reset password token
         final long handle = 12000;
@@ -1566,8 +1566,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             dpm.setActiveAdmin(admin2, /* refreshing= */ true, CALLER_USER_HANDLE);
             assertExpectException(IllegalStateException.class,
                     /* messageRegex= */ "already has a profile owner",
-                    () -> dpm.setDeviceOwner(admin2, "owner-name",
-                            CALLER_USER_HANDLE));
+                    () -> dpm.setDeviceOwner(admin2, CALLER_USER_HANDLE));
         });
     }
 
@@ -1656,7 +1655,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set DO on the system user which is only allowed during first boot.
         setUserSetupCompleteForUser(false, UserHandle.USER_SYSTEM);
-        assertThat(dpm.setDeviceOwner(admin3, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin3, UserHandle.USER_SYSTEM)).isTrue();
         assertThat(dpms.getDeviceOwnerComponent(/* callingUserOnly =*/ false)).isEqualTo(admin3);
 
         // Then check getDeviceOwnerAdminLocked().
@@ -1979,8 +1978,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Call.
         dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name",
-        UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         assertNoDeviceOwnerRestrictions();
         reset(getServices().userManagerInternal);
@@ -2358,8 +2356,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
 
         dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name",
-        UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         assertNoDeviceOwnerRestrictions();
 
@@ -2695,7 +2692,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.clearProfileOwner(admin1);
         dpm.setActiveAdmin(admin1, false);
         // Test 4, Caller is DO now.
-        assertThat(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         // 4-1.  But WifiManager is not ready.
         assertThat(dpm.getWifiMacAddress(admin1)).isNull();
@@ -2745,7 +2742,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Remove PO and add DO.
         dpm.clearProfileOwner(admin1);
         dpm.setActiveAdmin(admin1, false);
-        assertThat(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         // admin1 is DO.
         // Set current call state of device to ringing.
@@ -3030,7 +3027,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Set a device owner on the system user. Check that the system user becomes affiliated.
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
         assertThat(dpm.isAffiliatedUser()).isTrue();
         assertThat(dpm.getAffiliationIds(admin1).isEmpty()).isTrue();
 
@@ -3254,7 +3251,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, false);
-        assertThat(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM)).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, UserHandle.USER_SYSTEM)).isTrue();
 
         mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
     }
