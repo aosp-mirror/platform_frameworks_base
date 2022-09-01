@@ -145,6 +145,7 @@ public:
                                float dstTop, float dstRight, float dstBottom,
                                const Paint* paint) override;
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) override;
+    virtual void drawLottie(LottieDrawable* lottieDrawable) override;
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 

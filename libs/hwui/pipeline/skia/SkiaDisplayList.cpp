@@ -146,6 +146,16 @@ bool SkiaDisplayList::prepareListAndChildren(
         }
     }
 
+    for (auto& lottie : mLotties) {
+        // If any animated image in the display list needs updated, then damage the node.
+        if (lottie->isDirty()) {
+            isDirty = true;
+        }
+        if (lottie->isRunning()) {
+            info.out.hasAnimations = true;
+        }
+    }
+
     for (auto& [vectorDrawable, cachedMatrix] : mVectorDrawables) {
         // If any vector drawable in the display list needs update, damage the node.
         if (vectorDrawable->isDirty()) {
