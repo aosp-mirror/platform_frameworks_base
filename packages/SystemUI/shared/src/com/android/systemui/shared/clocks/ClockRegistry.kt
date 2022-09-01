@@ -35,8 +35,6 @@ import javax.inject.Inject
 private val TAG = ClockRegistry::class.simpleName
 private val DEBUG = true
 
-typealias ClockChangeListener = () -> Unit
-
 /** ClockRegistry aggregates providers and plugins */
 open class ClockRegistry(
     val context: Context,
@@ -51,6 +49,11 @@ open class ClockRegistry(
         defaultClockProvider: DefaultClockProvider
     ) : this(context, pluginManager, handler, defaultClockProvider as ClockProvider) { }
 
+    // Usually this would be a typealias, but a SAM provides better java interop
+    fun interface ClockChangeListener {
+        fun onClockChanged()
+    }
+
     var isEnabled: Boolean = false
 
     private val gson = Gson()
@@ -58,7 +61,7 @@ open class ClockRegistry(
     private val clockChangeListeners = mutableListOf<ClockChangeListener>()
     private val settingObserver = object : ContentObserver(handler) {
         override fun onChange(selfChange: Boolean, uris: Collection<Uri>, flags: Int, userId: Int) =
-            clockChangeListeners.forEach { it() }
+            clockChangeListeners.forEach { it.onClockChanged() }
     }
 
     private val pluginListener = object : PluginListener<ClockProviderPlugin> {
@@ -117,8 +120,11 @@ open class ClockRegistry(
             val id = clock.clockId
             val current = availableClocks[id]
             if (current != null) {
-                Log.e(TAG, "Clock Id conflict: $id is registered by both " +
-                    "${provider::class.simpleName} and ${current.provider::class.simpleName}")
+                Log.e(
+                    TAG,
+                    "Clock Id conflict: $id is registered by both " +
+                        "${provider::class.simpleName} and ${current.provider::class.simpleName}"
+                )
                 return
             }
 
@@ -127,7 +133,7 @@ open class ClockRegistry(
                 if (DEBUG) {
                     Log.i(TAG, "Current clock ($currentId) was connected")
                 }
-                clockChangeListeners.forEach { it() }
+                clockChangeListeners.forEach { it.onClockChanged() }
             }
         }
     }
@@ -139,7 +145,7 @@ open class ClockRegistry(
 
             if (currentId == clock.clockId) {
                 Log.w(TAG, "Current clock ($currentId) was disconnected")
-                clockChangeListeners.forEach { it() }
+                clockChangeListeners.forEach { it.onClockChanged() }
             }
         }
     }

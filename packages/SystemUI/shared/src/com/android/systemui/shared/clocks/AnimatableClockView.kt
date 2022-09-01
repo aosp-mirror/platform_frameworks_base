@@ -20,12 +20,16 @@ import android.annotation.ColorInt
 import android.annotation.FloatRange
 import android.annotation.IntRange
 import android.annotation.SuppressLint
+import android.app.compat.ChangeIdStateCache.invalidate
 import android.content.Context
 import android.graphics.Canvas
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.widget.TextView
+import com.android.internal.R.attr.contentDescription
+import com.android.internal.R.attr.format
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
@@ -74,13 +78,20 @@ class AnimatableClockView @JvmOverloads constructor(
     private var textAnimator: TextAnimator? = null
     private var onTextAnimatorInitialized: Runnable? = null
 
-    var timeOverrideInMillis: Long? = null
+    @VisibleForTesting var isAnimationEnabled: Boolean = true
+    @VisibleForTesting var timeOverrideInMillis: Long? = null
 
     val dozingWeight: Int
         get() = if (useBoldedVersion()) dozingWeightInternal + 100 else dozingWeightInternal
 
     val lockScreenWeight: Int
         get() = if (useBoldedVersion()) lockScreenWeightInternal + 100 else lockScreenWeightInternal
+
+    /**
+     * The number of pixels below the baseline. For fonts that support languages such as
+     * Burmese, this space can be significant and should be accounted for when computing layout.
+     */
+    val bottom get() = paint?.fontMetrics?.bottom ?: 0f
 
     init {
         val animatableClockViewAttributes = context.obtainStyledAttributes(
@@ -141,6 +152,15 @@ class AnimatableClockView @JvmOverloads constructor(
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
             lastTextUpdate = getTimestamp()
+
+            // Because the TextLayout may mutate under the hood as a result of the new text, we
+            // notify the TextAnimator that it may have changed and request a measure/layout. A
+            // crash will occur on the next invocation of setTextStyle if the layout is mutated
+            // without being notified TextInterpolator being notified.
+            if (layout != null) {
+                textAnimator?.updateLayout(layout)
+            }
+            requestLayout()
         }
     }
 
@@ -200,7 +220,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateAppearOnLockscreen() {
-        if (textAnimator == null) {
+        if (isAnimationEnabled && textAnimator == null) {
             return
         }
         setTextStyle(
@@ -216,7 +236,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = lockScreenWeight,
             textSize = -1f,
             color = lockScreenColor,
-            animate = true,
+            animate = isAnimationEnabled,
             duration = APPEAR_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -224,7 +244,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateFoldAppear(animate: Boolean = true) {
-        if (textAnimator == null) {
+        if (isAnimationEnabled && textAnimator == null) {
             return
         }
         setTextStyle(
@@ -240,7 +260,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = dozingWeightInternal,
             textSize = -1f,
             color = dozingColor,
-            animate = animate,
+            animate = animate && isAnimationEnabled,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
             duration = ANIMATION_DURATION_FOLD_TO_AOD.toLong(),
             delay = 0,
@@ -258,7 +278,7 @@ class AnimatableClockView @JvmOverloads constructor(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
                 textSize = -1f,
                 color = null,
-                animate = true,
+                animate = isAnimationEnabled,
                 duration = CHARGE_ANIM_DURATION_PHASE_1,
                 delay = 0,
                 onAnimationEnd = null
@@ -268,7 +288,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = if (isDozing()) lockScreenWeight else dozingWeight,
             textSize = -1f,
             color = null,
-            animate = true,
+            animate = isAnimationEnabled,
             duration = CHARGE_ANIM_DURATION_PHASE_0,
             delay = chargeAnimationDelay.toLong(),
             onAnimationEnd = startAnimPhase2
@@ -280,7 +300,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
             textSize = -1f,
             color = if (isDozing) dozingColor else lockScreenColor,
-            animate = animate,
+            animate = animate && isAnimationEnabled,
             duration = DOZE_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -314,7 +334,7 @@ class AnimatableClockView @JvmOverloads constructor(
                 weight = weight,
                 textSize = textSize,
                 color = color,
-                animate = animate,
+                animate = animate && isAnimationEnabled,
                 duration = duration,
                 interpolator = interpolator,
                 delay = delay,
@@ -352,7 +372,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = weight,
             textSize = textSize,
             color = color,
-            animate = animate,
+            animate = animate && isAnimationEnabled,
             interpolator = null,
             duration = duration,
             delay = delay,
