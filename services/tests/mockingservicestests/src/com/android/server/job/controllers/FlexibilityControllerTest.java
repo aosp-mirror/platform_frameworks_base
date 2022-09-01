@@ -561,14 +561,14 @@ public class FlexibilityControllerTest {
             assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.resetJobNumDroppedConstraints(jobs[0], FROZEN_TIME);
-            assertEquals(2, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
             assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.adjustJobsRequiredConstraints(jobs[0], -2, FROZEN_TIME);
-            assertEquals(2, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(0).size());
             assertEquals(1, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
             assertEquals(1, trackedJobs.get(3).size());
@@ -580,7 +580,7 @@ public class FlexibilityControllerTest {
                     Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
             flexTracker.resetJobNumDroppedConstraints(jobs[0], nowElapsed);
-            assertEquals(2, trackedJobs.get(0).size());
+            assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
             assertEquals(1, trackedJobs.get(2).size());
             assertEquals(1, trackedJobs.get(3).size());
