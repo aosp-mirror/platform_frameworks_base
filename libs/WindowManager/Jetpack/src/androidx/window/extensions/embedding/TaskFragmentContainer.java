@@ -28,6 +28,7 @@ import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -251,6 +252,7 @@ class TaskFragmentContainer {
         return mInfo;
     }
 
+    @GuardedBy("mController.mLock")
     void setInfo(@NonNull WindowContainerTransaction wct, @NonNull TaskFragmentInfo info) {
         if (!mIsFinished && mInfo == null && info.isEmpty()) {
             // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if no
@@ -258,10 +260,12 @@ class TaskFragmentContainer {
             // it is still empty after timeout.
             if (mPendingAppearedIntent != null || !mPendingAppearedActivities.isEmpty()) {
                 mAppearEmptyTimeout = () -> {
-                    mAppearEmptyTimeout = null;
-                    // Call without the pass-in wct when timeout. We need to applyWct directly
-                    // in this case.
-                    mController.onTaskFragmentAppearEmptyTimeout(this);
+                    synchronized (mController.mLock) {
+                        mAppearEmptyTimeout = null;
+                        // Call without the pass-in wct when timeout. We need to applyWct directly
+                        // in this case.
+                        mController.onTaskFragmentAppearEmptyTimeout(this);
+                    }
                 };
                 mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
             } else {

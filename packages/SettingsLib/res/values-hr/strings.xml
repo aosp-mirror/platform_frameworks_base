@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Potvrdi aplikacije putem USB-a"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite uzrokuju li aplikacije instalirane putem ADB-a/ADT-a poteškoće"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Prikazivat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, kao što su neprihvatljiva glasnoća ili nepostojanje kontrole"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, primjerice, zvuk je pretjerano glasan ili se ne može kontrolirati."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Omogućuje nizove značajke Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Omogućuje značajku Poboljšana povezivost."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokalni terminal"</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> do napunjenosti"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do napunjenosti"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – punjenje je pauzirano"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nepoznato"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Punjenje"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo punjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Sporo punjenje"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bežično punjenje"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Punjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, ne puni se"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napunjeno"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Prekinuta je veza s ethernetom."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Bez poziva."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Vrijeme"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Vremenska prognoza"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kvaliteta zraka"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Inform. o emitiranju"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Upravlj. kuć. uređ."</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Odabir profilne slike"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ikona zadanog korisnika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizička tipkovnica"</string>
@@ -678,6 +669,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiranje aplikacije <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promjena izlaza"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka s predviđanjem"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogući animacije sustava za pokret povratka s predviđanjem."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogući animaciju kad korisnik napravi povratnu kretnju."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ova postavka omogućuje animacije sustava za animaciju pokreta s predviđanjem. Zahtijeva postavljanje dopuštenja enableOnBackInvokedCallback po aplikaciji na True u datoteci manifesta."</string>
 </resources>

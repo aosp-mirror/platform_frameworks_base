@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
+import static android.window.TaskFragmentOrganizer.getTransitionType;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
@@ -109,7 +110,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
     private final Handler mHandler;
-    private final Object mLock = new Object();
+    final Object mLock = new Object();
     private final ActivityStartMonitor mActivityStartMonitor;
 
     public SplitController() {
@@ -209,8 +210,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 }
             }
 
-            // Notify the server, and the server should apply the WindowContainerTransaction.
-            mPresenter.onTransactionHandled(transaction.getTransactionToken(), wct);
+            // Notify the server, and the server should apply and merge the
+            // WindowContainerTransaction to the active sync to finish the TaskFragmentTransaction.
+            mPresenter.onTransactionHandled(transaction.getTransactionToken(), wct,
+                    getTransitionType(wct), false /* shouldApplyIndependently */);
             updateCallbackIfNecessary();
         }
     }
@@ -221,6 +224,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed.
      * @param taskFragmentInfo  Info of the TaskFragment that is created.
      */
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(container.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
     @VisibleForTesting
     @GuardedBy("mLock")
     void onTaskFragmentAppeared(@NonNull WindowContainerTransaction wct,
@@ -245,6 +251,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed.
      * @param taskFragmentInfo  Info of the TaskFragment that is changed.
      */
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(container.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
     @VisibleForTesting
     @GuardedBy("mLock")
     void onTaskFragmentInfoChanged(@NonNull WindowContainerTransaction wct,
@@ -430,6 +439,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      *                          transaction operation.
      * @param exception             exception from the server side.
      */
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(container.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
     @VisibleForTesting
     @GuardedBy("mLock")
     void onTaskFragmentError(@NonNull WindowContainerTransaction wct,
@@ -869,23 +881,23 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Called when we have been waiting too long for the TaskFragment to become non-empty after
      * creation.
      */
+    @GuardedBy("mLock")
     void onTaskFragmentAppearEmptyTimeout(@NonNull TaskFragmentContainer container) {
-        synchronized (mLock) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            onTaskFragmentAppearEmptyTimeout(wct, container);
-            mPresenter.applyTransaction(wct);
-        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        onTaskFragmentAppearEmptyTimeout(wct, container);
+        // Can be applied independently as a timeout callback.
+        mPresenter.applyTransaction(wct, getTransitionType(wct),
+                true /* shouldApplyIndependently */);
     }
 
     /**
      * Called when we have been waiting too long for the TaskFragment to become non-empty after
      * creation.
      */
+    @GuardedBy("mLock")
     void onTaskFragmentAppearEmptyTimeout(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
-        synchronized (mLock) {
-            mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
-        }
+        mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
     }
 
     /**
@@ -1714,7 +1726,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             synchronized (mLock) {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 SplitController.this.onActivityCreated(wct, activity);
-                mPresenter.applyTransaction(wct);
+                // The WCT should be applied and merged to the activity launch transition.
+                mPresenter.applyTransaction(wct, getTransitionType(wct),
+                        false /* shouldApplyIndependently */);
             }
         }
 
@@ -1723,7 +1737,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             synchronized (mLock) {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 SplitController.this.onActivityConfigurationChanged(wct, activity);
-                mPresenter.applyTransaction(wct);
+                // The WCT should be applied and merged to the Task change transition so that the
+                // placeholder is launched in the same transition.
+                mPresenter.applyTransaction(wct, getTransitionType(wct),
+                        false /* shouldApplyIndependently */);
             }
         }
 
@@ -1775,7 +1792,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 final TaskFragmentContainer launchedInTaskFragment = resolveStartActivityIntent(wct,
                         taskId, intent, launchingActivity);
                 if (launchedInTaskFragment != null) {
-                    mPresenter.applyTransaction(wct);
+                    // Make sure the WCT is applied immediately instead of being queued so that the
+                    // TaskFragment will be ready before activity attachment.
+                    mPresenter.applyTransaction(wct, getTransitionType(wct),
+                            false /* shouldApplyIndependently */);
                     // Amend the request to let the WM know that the activity should be placed in
                     // the dedicated container.
                     options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,

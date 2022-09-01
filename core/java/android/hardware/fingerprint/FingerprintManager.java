@@ -1433,10 +1433,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     @NonNull
-    private static float[] createEnrollStageThresholds(@NonNull Context context) {
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    private float[] createEnrollStageThresholds(@NonNull Context context) {
         // TODO(b/200604947): Fetch this value from FingerprintService, rather than internal config
-        final String[] enrollStageThresholdStrings = context.getResources().getStringArray(
-                com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+        final String[] enrollStageThresholdStrings;
+        if (isPowerbuttonFps()) {
+            enrollStageThresholdStrings = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_sfps_enroll_stage_thresholds);
+        } else {
+            enrollStageThresholdStrings = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+        }
 
         final float[] enrollStageThresholds = new float[enrollStageThresholdStrings.length];
         for (int i = 0; i < enrollStageThresholds.length; i++) {

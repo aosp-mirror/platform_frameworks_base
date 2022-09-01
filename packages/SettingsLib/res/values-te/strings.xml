@@ -234,7 +234,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"యాక్సెస్ స్థానం పేరు సెట్టింగ్‌లు ఈ వినియోగదారుకి అందుబాటులో లేవు"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB డీబగ్గింగ్"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB కనెక్ట్ చేయబడినప్పుడు డీబగ్ మోడ్"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"USB డీబగ్ ప్రామాణీకరణలను ఉపసంహరించు"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"USB డీబగ్ ప్రామాణీకరణలు ఉపసంహరించండి"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"వైర్‌లెస్ డీబగ్గింగ్"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi కనెక్ట్ అయి ఉన్నప్పుడు, డీబగ్ మోడ్‌లో ఉంచు"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ఎర్రర్"</string>
@@ -283,8 +283,8 @@
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi నిరంతరం కాని MAC ర్యాండమైజేషన్"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"మొబైల్ డేటాను ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"టెథెరింగ్ హార్డ్‌వేర్ యాగ్జిలరేషన్"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను డిజేబుల్ చేయి"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించండి"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను డిజేబుల్ చేయండి"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheను ఎనేబుల్ చేయి"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"బ్లూటూత్ AVRCP వెర్షన్‌ను ఎంచుకోండి"</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - ఛార్జింగ్ పాజ్ చేయబడింది"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"తెలియదు"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ఛార్జ్ అవుతోంది"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"వేగవంతమైన ఛార్జింగ్"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"నెమ్మదిగా ఛార్జింగ్"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"వైర్‌లెస్ ఛార్జింగ్"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ఛార్జ్ అవుతోంది"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ఛార్జ్ కావడం లేదు"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"కనెక్ట్ చేయబడింది, ఛార్జ్ చేయబడలేదు"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ఛార్జ్ చేయబడింది"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ఈథర్‌నెట్ డిస్‌కనెక్ట్ చేయబడింది."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ఈథర్‌నెట్."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"కాలింగ్ మోడ్ ఆఫ్‌లో ఉంది."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"సమయం"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"తేదీ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"వాతావరణం"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"గాలి క్వాలిటీ"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"కాస్ట్ సమాచారం"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"హోమ్ కంట్రోల్స్"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"స్మార్ట్‌స్పేస్"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"ప్రొఫైల్ ఫోటోను ఎంచుకోండి"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ఆటోమేటిక్ సెట్టింగ్ యూజర్ చిహ్నం"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"భౌతిక కీబోర్డ్"</string>

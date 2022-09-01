@@ -89,7 +89,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     SurfaceControl mDecorationContainerSurface;
     SurfaceControl mTaskBackgroundSurface;
 
-    private final CaptionWindowManager mCaptionWindowManager;
+    SurfaceControl mCaptionContainerSurface;
+    private CaptionWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
 
     private final Rect mCaptionInsetsRect = new Rect();
@@ -127,11 +128,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
         mDecorWindowContext = mContext.createConfigurationContext(mTaskInfo.getConfiguration());
-
-        // Put caption under task surface because ViewRootImpl sets the destination frame of
-        // windowless window layers and BLASTBufferQueue#update() doesn't support offset.
-        mCaptionWindowManager =
-                new CaptionWindowManager(mTaskInfo.getConfiguration(), mTaskSurface);
     }
 
     /**
@@ -213,6 +209,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         startT.setPosition(
                         mDecorationContainerSurface, decorContainerOffsetX, decorContainerOffsetY)
                 .setWindowCrop(mDecorationContainerSurface, outResult.mWidth, outResult.mHeight)
+                // TODO(b/244455401): Change the z-order when it's better organized
                 .setLayer(mDecorationContainerSurface, mTaskInfo.numActivities + 1)
                 .show(mDecorationContainerSurface);
 
@@ -234,12 +231,35 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(), taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
                 .setColor(mTaskBackgroundSurface, mTmpColor)
+                // TODO(b/244455401): Change the z-order when it's better organized
                 .setLayer(mTaskBackgroundSurface, -1)
                 .show(mTaskBackgroundSurface);
 
+        // CaptionContainerSurface, CaptionWindowManager
+        if (mCaptionContainerSurface == null) {
+            final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
+            mCaptionContainerSurface = builder
+                    .setName("Caption container of Task=" + mTaskInfo.taskId)
+                    .setContainerLayer()
+                    .setParent(mDecorationContainerSurface)
+                    .build();
+        }
+
+        final int captionHeight = (int) Math.ceil(captionHeightDp * outResult.mDensity);
+        startT.setPosition(
+                        mCaptionContainerSurface, -decorContainerOffsetX, -decorContainerOffsetY)
+                .setWindowCrop(mCaptionContainerSurface, taskBounds.width(), captionHeight)
+                .show(mCaptionContainerSurface);
+
+        if (mCaptionWindowManager == null) {
+            // Put caption under a container surface because ViewRootImpl sets the destination frame
+            // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
+            mCaptionWindowManager = new CaptionWindowManager(
+                    mTaskInfo.getConfiguration(), mCaptionContainerSurface);
+        }
+
         // Caption view
         mCaptionWindowManager.setConfiguration(taskConfig);
-        final int captionHeight = (int) Math.ceil(captionHeightDp * outResult.mDensity);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(taskBounds.width(), captionHeight,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
@@ -262,7 +282,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight;
             wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect, CAPTION_INSETS_TYPES);
         } else {
-            outResult.mRootView.setVisibility(View.GONE);
+            startT.hide(mCaptionContainerSurface);
         }
 
         // Task surface itself
@@ -296,6 +316,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;
+        }
+
+        mCaptionWindowManager = null;
+
+        if (mCaptionContainerSurface != null) {
+            mCaptionContainerSurface.release();
+            mCaptionContainerSurface = null;
         }
 
         if (mDecorationContainerSurface != null) {
