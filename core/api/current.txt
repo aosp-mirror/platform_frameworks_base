@@ -51955,7 +51955,6 @@ package android.view.accessibility {
     method public void addChild(android.view.View, int);
     method public boolean canOpenPopup();
     method public int describeContents();
-    method public void enableQueryFromAppProcess(@NonNull android.view.View);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(@NonNull String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
@@ -52075,6 +52074,7 @@ package android.view.accessibility {
     method public void setParent(android.view.View);
     method public void setParent(android.view.View, int);
     method public void setPassword(boolean);
+    method public void setQueryFromAppProcessEnabled(@NonNull android.view.View, boolean);
     method public void setRangeInfo(android.view.accessibility.AccessibilityNodeInfo.RangeInfo);
     method public void setScreenReaderFocusable(boolean);
     method public void setScrollable(boolean);
