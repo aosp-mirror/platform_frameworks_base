@@ -195,7 +195,7 @@
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Текстти окуй турган тилди тандоо"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Үлгүнү угуу"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"Кепти синтездөөнүн кыскача көргөзмөсүн ойнотуу"</string>
-    <string name="tts_install_data_title" msgid="1829942496472751703">"Үн дайындарын орнотуу"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"Үнгө байланыштуу нерселерди орнотуу"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Кеп синтезине керектүү үн дайындарын орнотуңуз"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Бул кепти синтездөө каражаты бардык айтыла турган текстти, анын ичинде сырсөздөр жана насыя карточкасынын номери сыяктуу жеке маалыматты, топтошу мүмкүн. Ал <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> каражатынан алынат. Бул кепти синтездөө каражаты колдонулсунбу?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Бул тилде кеп синтезаторун иштетүү үчүн Интернетке туташуу керек."</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> кийин толук кубатталат"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> кийин толук кубатталат"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Кубаттоо тындырылды"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгисиз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Кубатталууда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ыкчам кубатталууда"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Жай кубатталууда"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Зымсыз кубатталууда"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Кубатталууда"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Кубат алган жок"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Туташты, кубатталган жок"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Кубатталды"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet ажырады."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Чалуу жок."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Убакыт"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Күн"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Аба ырайы"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Абанын сапаты"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Тышкы экранга чыгаруу маалыматы"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Үйдү көзөмөлдөө"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Профилдин сүрөтүн тандоо"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Демейки колдонуучунун сүрөтчөсү"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Аппараттык баскычтоп"</string>
@@ -678,6 +669,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарлоо"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Аудионун чыгуусун өзгөртүү"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Божомолдонгон анимациялар"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Божомолдоп билүү үчүн тутумдун анимацияларын иштетиңиз."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Бул параметр жаңсоо анимациясын божомолдоп билүү үчүн тутумдун анимацияларын иштетет. Ал үчүн манифест файлындагы enableOnBackInvokedCallback параметри ар бир колдонмо үчүн \"true\" деп коюлушу керек."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Божомолдоп билүү үчүн системанын анимацияларын иштетиңиз."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Бул параметр жаңсоо анимациясын божомолдоп билүү үчүн системанын анимацияларын иштетет. Ал үчүн манифест файлындагы enableOnBackInvokedCallback параметри ар бир колдонмо үчүн \"true\" деп коюлушу керек."</string>
 </resources>
