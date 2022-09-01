@@ -340,7 +340,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private WindowState mTmpWindow;
     private boolean mUpdateImeTarget;
     private boolean mTmpInitial;
-    private int mMaxUiWidth;
+    private int mMaxUiWidth = 0;
 
     final AppTransition mAppTransition;
     final AppTransitionController mAppTransitionController;
@@ -365,9 +365,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Initial display metrics.
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
-    int mInitialDisplayDensity = 0;
     float mInitialPhysicalXDpi = 0.0f;
     float mInitialPhysicalYDpi = 0.0f;
+    // The physical density of the display
+    int mInitialDisplayDensity = 0;
 
     private Point mPhysicalDisplaySize;
 
@@ -2628,6 +2629,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mCurrentOverrideConfigurationChanges;
     }
 
+    /**
+     * @return The initial display density. This is constrained by config_maxUIWidth.
+     */
+    int getInitialDisplayDensity() {
+        int density = mInitialDisplayDensity;
+        if (mMaxUiWidth > 0 && mInitialDisplayWidth > mMaxUiWidth) {
+            density = (int) ((density * mMaxUiWidth) / (float) mInitialDisplayWidth);
+        }
+        return density;
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int lastOrientation = getConfiguration().orientation;
@@ -2956,7 +2968,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      *               so only need to configure display.
      */
     void setForcedDensity(int density, int userId) {
-        mIsDensityForced = density != mInitialDisplayDensity;
+        mIsDensityForced = density != getInitialDisplayDensity();
         final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
         if (mWmService.mCurrentUserId == userId || updateCurrent) {
             mBaseDisplayDensity = density;
@@ -2967,7 +2979,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
 
-        if (density == mInitialDisplayDensity) {
+        if (density == getInitialDisplayDensity()) {
             density = 0;
         }
         mWmService.mDisplayWindowSettings.setForcedDensity(this, density, userId);
