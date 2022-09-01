@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatze-prozesua etenda dago"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ezezaguna"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Kargatzen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Bizkor kargatzen"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mantso kargatzen"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Hari gabe kargatzen"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Kargatzen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ez da kargatzen ari"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Konektatuta dago, baina ez da kargatzen ari"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Kargatuta"</string>
@@ -556,7 +554,7 @@
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
     <string name="storage_category" msgid="2287342585424631813">"Biltegiratzea"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Datu partekatuak"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu partekatutako datuak"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu datu partekatuak"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Ez dago erabiltzaile honen datu partekaturik."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Errore bat gertatu da datu partekatuak eskuratzean. Saiatu berriro."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Partekatutako datuen IDa: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -587,7 +585,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profileko informazioa"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Profil murriztua sortu aurretik, aplikazioak eta datu pertsonalak babesteko, pantaila blokeatzeko metodo bat konfiguratu beharko duzu."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ezarri blokeoa"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Aldatu <xliff:g id="USER_NAME">%s</xliff:g> erabiltzailera"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Aldatu \"<xliff:g id="USER_NAME">%s</xliff:g>\" erabiltzailera"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Beste erabiltzaile bat sortzen…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Beste gonbidatu bat sortzen…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Ezin izan da sortu erabiltzailea"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet bidezko konexioa eten da."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Deirik ez."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Ordua"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Data"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Eguraldia"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Airearen kalitatea"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Igorpenari buruzko informazioa"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Etxeko gailuak kontrolatzeko aukerak"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Aukeratu profileko argazki bat"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Erabiltzaile lehenetsiaren ikonoa"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teklatu fisikoa"</string>

@@ -65,6 +65,8 @@ public class DisplayWhiteBalanceController implements
     // this effect.
     private final float mHighLightAmbientColorTemperature;
 
+    private final boolean mLightModeAllowed;
+
     private float mAmbientColorTemperature;
     @VisibleForTesting
     float mPendingAmbientColorTemperature;
@@ -148,6 +150,8 @@ public class DisplayWhiteBalanceController implements
      * @param displayColorTemperatures
      *      The display color temperatures used to map the ambient color temperature to the display
      *      color temperature (or null if no mapping is necessary).
+     * @param lightModeAllowed
+     *      Whether a lighter version should be applied when Strong Mode is not enabled.
      *
      * @throws NullPointerException
      *      - brightnessSensor is null;
@@ -171,7 +175,8 @@ public class DisplayWhiteBalanceController implements
             float[] ambientColorTemperatures,
             float[] displayColorTemperatures,
             float[] strongAmbientColorTemperatures,
-            float[] strongDisplayColorTemperatures) {
+            float[] strongDisplayColorTemperatures,
+            boolean lightModeAllowed) {
         validateArguments(brightnessSensor, brightnessFilter, colorTemperatureSensor,
                 colorTemperatureFilter, throttler);
         mBrightnessSensor = brightnessSensor;
@@ -186,6 +191,7 @@ public class DisplayWhiteBalanceController implements
         mLastAmbientColorTemperature = -1.0f;
         mAmbientColorTemperatureHistory = new History(/* size= */ 50);
         mAmbientColorTemperatureOverride = -1.0f;
+        mLightModeAllowed = lightModeAllowed;
 
         try {
             mLowLightAmbientBrightnessToBiasSpline = new Spline.LinearSpline(
@@ -273,6 +279,8 @@ public class DisplayWhiteBalanceController implements
      */
     public void setStrongModeEnabled(boolean enabled) {
         mStrongModeEnabled = enabled;
+        mColorDisplayServiceInternal.setDisplayWhiteBalanceAllowed(mLightModeAllowed
+                || mStrongModeEnabled);
         if (mEnabled) {
             updateAmbientColorTemperature();
             updateDisplayColorTemperature();

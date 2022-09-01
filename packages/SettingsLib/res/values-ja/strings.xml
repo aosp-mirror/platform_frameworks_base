@@ -233,10 +233,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"このユーザーはテザリング設定を利用できません"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"このユーザーはアクセスポイント名設定を利用できません"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB デバッグ"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB 接続時はデバッグモードにする"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB 接続時にデバッグモードにする"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB デバッグの許可の取り消し"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ワイヤレス デバッグ"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時はデバッグモードにする"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時にデバッグモードにする"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"エラー"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ワイヤレス デバッグ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグを ON にしてください"</string>
@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"完了まであと <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 完了まであと <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電は一時停止中"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"急速充電中"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"低速充電中"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ワイヤレス充電中"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"充電中"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"充電していません"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"接続済み、充電していません"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"充電が完了しました"</string>
@@ -658,13 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"イーサネット接続を解除しました。"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"イーサネット。"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"通話なし。"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"時刻"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"日付"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"天気"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"大気質"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"キャスト情報"</string>
-    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"スマートホーム"</string>
-    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"プロフィール写真の選択"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"デフォルト ユーザー アイコン"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"物理キーボード"</string>
