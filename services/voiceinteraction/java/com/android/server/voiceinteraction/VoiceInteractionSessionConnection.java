@@ -613,10 +613,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
 
         mScheduledExecutorService.execute(() -> {
             if (DEBUG) {
-                Slog.d(TAG, "call updateVisibleActivitiesLocked from enable listening");
+                Slog.d(TAG, "call handleVisibleActivitiesLocked from enable listening");
             }
             synchronized (mLock) {
-                updateVisibleActivitiesLocked();
+                handleVisibleActivitiesLocked();
             }
         });
     }
@@ -641,10 +641,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         }
         mScheduledExecutorService.execute(() -> {
             if (DEBUG) {
-                Slog.d(TAG, "call updateVisibleActivitiesLocked from activity event");
+                Slog.d(TAG, "call handleVisibleActivitiesLocked from activity event");
             }
             synchronized (mLock) {
-                updateVisibleActivitiesLocked();
+                handleVisibleActivitiesLocked();
             }
         });
     }
@@ -679,9 +679,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         return visibleActivityInfos;
     }
 
-    private void updateVisibleActivitiesLocked() {
+    private void handleVisibleActivitiesLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "updateVisibleActivitiesLocked");
+            Slog.d(TAG, "handleVisibleActivitiesLocked");
         }
         if (mSession == null) {
             return;
@@ -692,13 +692,13 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         final List<VisibleActivityInfo> newVisibleActivityInfos = getVisibleActivityInfosLocked();
 
         if (newVisibleActivityInfos == null || newVisibleActivityInfos.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(mVisibleActivityInfos,
+            notifyVisibleActivitiesChangedLocked(mVisibleActivityInfos,
                     VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
             mVisibleActivityInfos.clear();
             return;
         }
         if (mVisibleActivityInfos.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(newVisibleActivityInfos,
+            notifyVisibleActivitiesChangedLocked(newVisibleActivityInfos,
                     VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
             mVisibleActivityInfos.addAll(newVisibleActivityInfos);
             return;
@@ -719,11 +719,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         }
 
         if (!addedActivities.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(addedActivities,
+            notifyVisibleActivitiesChangedLocked(addedActivities,
                     VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
         }
         if (!removedActivities.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(removedActivities,
+            notifyVisibleActivitiesChangedLocked(removedActivities,
                     VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
         }
 
@@ -731,7 +731,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mVisibleActivityInfos.addAll(newVisibleActivityInfos);
     }
 
-    private void updateVisibleActivitiesChangedLocked(
+    private void notifyVisibleActivitiesChangedLocked(
             List<VisibleActivityInfo> visibleActivityInfos, int type) {
         if (visibleActivityInfos == null || visibleActivityInfos.isEmpty()) {
             return;
@@ -741,15 +741,15 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         }
         try {
             for (int i = 0; i < visibleActivityInfos.size(); i++) {
-                mSession.updateVisibleActivityInfo(visibleActivityInfos.get(i), type);
+                mSession.notifyVisibleActivityInfoChanged(visibleActivityInfos.get(i), type);
             }
         } catch (RemoteException e) {
             if (DEBUG) {
-                Slog.w(TAG, "updateVisibleActivitiesChangedLocked RemoteException : " + e);
+                Slog.w(TAG, "notifyVisibleActivitiesChangedLocked RemoteException : " + e);
             }
         }
         if (DEBUG) {
-            Slog.d(TAG, "updateVisibleActivitiesChangedLocked type=" + type + ", count="
+            Slog.d(TAG, "notifyVisibleActivitiesChangedLocked type=" + type + ", count="
                     + visibleActivityInfos.size());
         }
     }
