@@ -3093,7 +3093,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * Accessibility interactions from services without {@code isAccessibilityTool} set to true are
      * disallowed for any of the following conditions:
-     * <li>this view's window sets {@link WindowManager.LayoutParams#FLAG_SECURE}.</li>
      * <li>this view sets {@link #getFilterTouchesWhenObscured()}.</li>
      * <li>any parent of this view returns true from {@link #isAccessibilityDataPrivate()}.</li>
      * </p>
@@ -14507,9 +14506,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Use the explicit value if set.
         if (mExplicitAccessibilityDataPrivate != ACCESSIBILITY_DATA_PRIVATE_AUTO) {
             mInferredAccessibilityDataPrivate = mExplicitAccessibilityDataPrivate;
-        } else if (mAttachInfo != null && mAttachInfo.mWindowSecure) {
-            // Views inside FLAG_SECURE windows default to accessibilityDataPrivate.
-            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
         } else if (getFilterTouchesWhenObscured()) {
             // Views that set filterTouchesWhenObscured default to accessibilityDataPrivate.
             mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
@@ -30219,11 +30215,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * The current visibility of the window.
          */
         int mWindowVisibility;
-
-        /**
-         * Indicates whether the view's window sets {@link WindowManager.LayoutParams#FLAG_SECURE}.
-         */
-        boolean mWindowSecure;
 
         /**
          * Indicates the time at which drawing started to occur.
