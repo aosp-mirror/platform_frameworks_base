@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.RemoteAnimationAdapter;
@@ -89,7 +90,7 @@ interface ISplitScreen {
             float splitRatio, in RemoteAnimationAdapter adapter) = 11;
 
     /**
-     * Start a pair of intent and task using legacy transition system.
+     * Starts a pair of intent and task using legacy transition system.
      */
     oneway void startIntentAndTaskWithLegacyTransition(in PendingIntent pendingIntent,
             in Intent fillInIntent, int taskId, in Bundle mainOptions,in Bundle sideOptions,
@@ -108,4 +109,11 @@ interface ISplitScreen {
      * does not expect split to currently be running.
      */
     RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
+
+    /**
+     * Starts a pair of shortcut and task using legacy transition system.
+     */
+    oneway void startShortcutAndTaskWithLegacyTransition(in ShortcutInfo shortcutInfo, int taskId,
+            in Bundle mainOptions, in Bundle sideOptions, int sidePosition, float splitRatio,
+            in RemoteAnimationAdapter adapter) = 15;
 }
