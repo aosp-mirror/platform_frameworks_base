@@ -89,7 +89,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter;
-import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import java.util.ArrayList;

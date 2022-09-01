@@ -14,5 +14,5 @@ package {
 
 sh_binary {
     name: "device_config",
-    src: "device_config",
+    src: "device_config.sh",
 }

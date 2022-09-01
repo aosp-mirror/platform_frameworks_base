@@ -367,8 +367,14 @@ public class BluetoothEventManager {
             if (bondState == BluetoothDevice.BOND_NONE) {
                 // Check if we need to remove other Coordinated set member devices / Hearing Aid
                 // devices
+                if (DEBUG) {
+                    Log.d(TAG, "BondStateChangedHandler: cachedDevice.getGroupId() = "
+                            + cachedDevice.getGroupId() + ", cachedDevice.getHiSyncId()= "
+                            + cachedDevice.getHiSyncId());
+                }
                 if (cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
                         || cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                    Log.d(TAG, "BondStateChangedHandler: Start onDeviceUnpaired");
                     mDeviceManager.onDeviceUnpaired(cachedDevice);
                 }
                 int reason = intent.getIntExtra(BluetoothDevice.EXTRA_UNBOND_REASON,

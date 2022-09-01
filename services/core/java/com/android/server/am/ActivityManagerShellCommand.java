@@ -363,6 +363,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runGetBgRestrictionLevel(pw);
                 case "observe-foreground-process":
                     return runGetCurrentForegroundProcess(pw, mInternal, mTaskInterface);
+                case "reset-dropbox-rate-limiter":
+                    return runResetDropboxRateLimiter();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3574,6 +3576,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final @ActivityManager.RestrictionLevel int level =
                 mInternal.getBackgroundRestrictionLevel(packageName, userId);
         pw.println(ActivityManager.restrictionLevelToName(level));
+        return 0;
+    }
+
+    int runResetDropboxRateLimiter() throws RemoteException {
+        mInternal.resetDropboxRateLimiter();
         return 0;
     }
 

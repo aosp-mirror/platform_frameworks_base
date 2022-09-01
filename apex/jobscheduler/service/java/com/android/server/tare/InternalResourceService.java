@@ -765,6 +765,7 @@ public class InternalResourceService extends SystemService {
             return;
         }
         synchronized (mLock) {
+            mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
             loadInstalledPackageListLocked();
             final boolean isFirstSetup = !mScribe.recordExists();
             if (isFirstSetup) {
@@ -803,10 +804,7 @@ public class InternalResourceService extends SystemService {
         if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || !mIsEnabled) {
             return;
         }
-        synchronized (mLock) {
-            mHandler.post(this::setupHeavyWork);
-            mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
-        }
+        mHandler.post(this::setupHeavyWork);
     }
 
     private void onBootPhaseBootCompleted() {

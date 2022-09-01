@@ -315,21 +315,27 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
     private ICancellationSignal doAuthenticate() throws RemoteException {
         final AidlSession session = getFreshDaemon();
 
+        final OperationContext opContext = getOperationContext();
+        getBiometricContext().subscribe(opContext, ctx -> {
+            if (session.hasContextMethods()) {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            }
+
+            // TODO(b/243836005): this should come via ctx
+            final boolean isAwake = getBiometricContext().isAwake();
+            if (isAwake) {
+                mALSProbeCallback.getProbe().enable();
+            } else {
+                mALSProbeCallback.getProbe().disable();
+            }
+        });
+
         if (session.hasContextMethods()) {
-            final OperationContext opContext = getOperationContext();
-            final ICancellationSignal cancel =
-                    session.getSession().authenticateWithContext(mOperationId, opContext);
-            getBiometricContext()
-                    .subscribe(
-                            opContext,
-                            ctx -> {
-                                try {
-                                    session.getSession().onContextChanged(ctx);
-                                } catch (RemoteException e) {
-                                    Slog.e(TAG, "Unable to notify context changed", e);
-                                }
-                            });
-            return cancel;
+            return session.getSession().authenticateWithContext(mOperationId, opContext);
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -360,7 +366,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         try {
             mIsPointerDown = true;
             mState = STATE_STARTED;
-            mALSProbeCallback.getProbe().enable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
@@ -389,7 +394,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         try {
             mIsPointerDown = false;
             mState = STATE_STARTED_PAUSED_ATTEMPTED;
-            mALSProbeCallback.getProbe().disable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {

@@ -1312,6 +1312,9 @@ public class JobInfo implements Parcelable {
          * Calling this method will override any requirements previously defined
          * by {@link #setRequiredNetwork(NetworkRequest)}; you typically only
          * want to call one of these methods.
+         * <p> Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * {@link JobScheduler} may try to shift the execution of jobs requiring
+         * {@link #NETWORK_TYPE_ANY} to when there is access to an un-metered network.
          * <p class="note">
          * When your job executes in
          * {@link JobService#onStartJob(JobParameters)}, be sure to use the
@@ -1742,6 +1745,7 @@ public class JobInfo implements Parcelable {
          *     <li>Bypass Doze, app standby, and battery saver network restrictions</li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
+         *     <li>Be exempt from delay to optimize job execution</li>
          * </ol>
          *
          * <p>

@@ -469,7 +469,15 @@ public class GraphicsEnvironment {
      * 2) The per-application switch (i.e. Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS and
      *    Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES; which corresponds to the
      *    “angle_gl_driver_selection_pkgs” and “angle_gl_driver_selection_values” settings); if it
-     *    forces a choice; otherwise ...
+     *    forces a choice;
+     *      - Workaround Note: ANGLE and Vulkan currently have issues with applications that use YUV
+     *        target functionality.  The ANGLE broadcast receiver code will apply a "deferlist" at
+     *        the first boot of a newly-flashed device.  However, there is a gap in time between
+     *        when applications can start and when the deferlist is applied.  For now, assume that
+     *        if ANGLE is the system driver and Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS is
+     *        empty, that the deferlist has not yet been applied.  In this case, select the Legacy
+     *        driver.
+     *    otherwise ...
      * 3) Use ANGLE if isAngleEnabledByGameMode() returns true; otherwise ...
      * 4) The global switch (i.e. use the system driver, whether ANGLE or legacy;
      *    a.k.a. mAngleIsSystemDriver, which is set by the device’s “ro.hardware.egl” property)
@@ -509,8 +517,15 @@ public class GraphicsEnvironment {
         final List<String> optInValues = getGlobalSettingsString(
                 contentResolver, bundle, Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES);
         Log.v(TAG, "Currently set values for:");
-        Log.v(TAG, "  angle_gl_driver_selection_pkgs = " + optInPackages);
+        Log.v(TAG, "    angle_gl_driver_selection_pkgs =" + optInPackages);
         Log.v(TAG, "  angle_gl_driver_selection_values =" + optInValues);
+
+        // If ANGLE is the system driver AND the deferlist has not yet been applied, select the
+        // Legacy driver
+        if (mAngleIsSystemDriver && optInPackages.size() <= 1) {
+            Log.v(TAG, "Ignoring angle_gl_driver_selection_* until deferlist has been applied");
+            return ANGLE_GL_DRIVER_TO_USE_LEGACY;
+        }
 
         // Make sure we have good settings to use
         if (optInPackages.size() != optInValues.size()) {

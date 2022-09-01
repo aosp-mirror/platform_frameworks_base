@@ -3917,7 +3917,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean forceRelayout = syncWithBuffers || isDragResizeChanged;
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
-                displayContent.getDisplayPolicy().areSystemBarsForcedShownLw();
+                displayContent.getDisplayPolicy().areSystemBarsForcedConsumedLw();
         final int displayId = displayContent.getDisplayId();
 
         if (isDragResizeChanged) {

@@ -45,8 +45,23 @@ import java.util.List;
  * </p>
  * <p>
  * The framework will be intelligent about when it executes jobs, and attempt to batch
- * and defer them as much as possible. Typically if you don't specify a deadline on a job, it
+ * and defer them as much as possible. Typically, if you don't specify a deadline on a job, it
  * can be run at any moment depending on the current state of the JobScheduler's internal queue.
+ * </p>
+ * <p>
+ * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+ * JobScheduler may try to optimize job execution by shifting execution to times with more available
+ * system resources in order to lower user impact. Factors in system health include sufficient
+ * battery, idle, charging, and access to an un-metered network. Jobs will initially be treated as
+ * if they have all these requirements, but as their deadlines approach, restrictions will become
+ * less strict. Requested requirements will not be affected by this change.
+ * </p>
+ *
+ * {@see android.app.job.JobInfo.Builder#setRequiresBatteryNotLow(boolean)}
+ * {@see android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}
+ * {@see android.app.job.JobInfo.Builder#setRequiresCharging(boolean)}
+ * {@see android.app.job.JobInfo.Builder#setRequiredNetworkType(int)}
+ *
  * <p>
  * While a job is running, the system holds a wakelock on behalf of your app.  For this reason,
  * you do not need to take any action to guarantee that the device stays awake for the

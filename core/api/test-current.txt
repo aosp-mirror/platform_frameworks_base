@@ -793,6 +793,7 @@ package android.content.pm {
     field public static final long FORCE_RESIZE_APP = 174042936L; // 0xa5faf38L
     field public static final long NEVER_SANDBOX_DISPLAY_APIS = 184838306L; // 0xb0468a2L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // 0xa5faf64L
+    field public static final long OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN = 218959984L; // 0xd0d1070L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_LARGE = 180326787L; // 0xabf9183L
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 1.7777778f;
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_MEDIUM = 180326845L; // 0xabf91bdL
@@ -1826,10 +1827,6 @@ package android.os {
     method public static void setViolationLogger(android.os.StrictMode.ViolationLogger);
   }
 
-  public static final class StrictMode.ThreadPolicy.Builder {
-    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
-  }
-
   public static final class StrictMode.ViolationInfo implements android.os.Parcelable {
     ctor public StrictMode.ViolationInfo(android.os.Parcel);
     ctor public StrictMode.ViolationInfo(android.os.Parcel, boolean);
@@ -2034,13 +2031,6 @@ package android.os.storage {
     method @NonNull public android.os.storage.StorageVolume.Builder setRemovable(boolean);
     method @NonNull public android.os.storage.StorageVolume.Builder setStorageUuid(@Nullable java.util.UUID);
     method @NonNull public android.os.storage.StorageVolume.Builder setUuid(@Nullable String);
-  }
-
-}
-
-package android.os.strictmode {
-
-  public final class ExplicitGcViolation extends android.os.strictmode.Violation {
   }
 
 }
@@ -3386,6 +3376,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction createTaskFragment(@NonNull android.window.TaskFragmentCreationParams);
     method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.window.WindowContainerToken);
     method public int describeContents();
+    method @NonNull public android.window.WindowContainerTransaction removeTask(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction reorder(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparent(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparentActivityToTaskFragment(@NonNull android.os.IBinder, @NonNull android.os.IBinder);

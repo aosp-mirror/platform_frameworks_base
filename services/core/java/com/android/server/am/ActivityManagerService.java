@@ -659,7 +659,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final BroadcastQueue mFgOffloadBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
-    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[4];
+    final BroadcastQueue[] mBroadcastQueues;
 
     @GuardedBy("this")
     BroadcastStats mLastBroadcastStats;
@@ -670,25 +670,33 @@ public class ActivityManagerService extends IActivityManager.Stub
     TraceErrorLogger mTraceErrorLogger;
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
-        if (isOnFgOffloadQueue(intent.getFlags())) {
+        return broadcastQueueForFlags(intent.getFlags(), intent);
+    }
+
+    BroadcastQueue broadcastQueueForFlags(int flags) {
+        return broadcastQueueForFlags(flags, null);
+    }
+
+    BroadcastQueue broadcastQueueForFlags(int flags, Object cookie) {
+        if (isOnFgOffloadQueue(flags)) {
             if (DEBUG_BROADCAST_BACKGROUND) {
                 Slog.i(TAG_BROADCAST,
-                        "Broadcast intent " + intent + " on foreground offload queue");
+                        "Broadcast intent " + cookie + " on foreground offload queue");
             }
             return mFgOffloadBroadcastQueue;
         }
 
-        if (isOnBgOffloadQueue(intent.getFlags())) {
+        if (isOnBgOffloadQueue(flags)) {
             if (DEBUG_BROADCAST_BACKGROUND) {
                 Slog.i(TAG_BROADCAST,
-                        "Broadcast intent " + intent + " on background offload queue");
+                        "Broadcast intent " + cookie + " on background offload queue");
             }
             return mBgOffloadBroadcastQueue;
         }
 
-        final boolean isFg = (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
+        final boolean isFg = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
         if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
-                "Broadcast intent " + intent + " on "
+                "Broadcast intent " + cookie + " on "
                 + (isFg ? "foreground" : "background") + " queue");
         return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
     }
@@ -2323,7 +2331,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, handlerThread);
 
         mIntentFirewall = null;
-        mProcessStats = null;
+        mProcessStats = new ProcessStatsService(this, mContext.getCacheDir());
         mCpHelper = new ContentProviderHelper(this, false);
         mServices = null;
         mSystemThread = null;
@@ -2343,6 +2351,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
+        mBroadcastQueues = new BroadcastQueue[0];
         mFgBroadcastQueue = mBgBroadcastQueue = mBgOffloadBroadcastQueue =
                 mFgOffloadBroadcastQueue = null;
         mComponentAliasResolver = new ComponentAliasResolver(this);
@@ -2401,6 +2410,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
 
+        mBroadcastQueues = new BroadcastQueue[4];
         mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
                 "foreground", foreConstants, false);
         mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
@@ -6727,9 +6737,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // TODO: how set package stopped state should work for sdk sandboxes?
         if (!isSdkSandbox) {
             try {
-                AppGlobals.getPackageManager().setPackageStoppedState(
+                mPackageManagerInt.setPackageStoppedState(
                         info.packageName, false, UserHandle.getUserId(app.uid));
-            } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "
                         + info.packageName + ": " + e);
@@ -12845,9 +12854,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // !!! TODO: currently no check here that we're already bound
             // Backup agent is now in use, its package can't be stopped.
             try {
-                AppGlobals.getPackageManager().setPackageStoppedState(
+                mPackageManagerInt.setPackageStoppedState(
                         app.packageName, false, UserHandle.getUserId(app.uid));
-            } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "
                         + app.packageName + ": " + e);
@@ -13328,20 +13336,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             boolean doTrim = false;
-
             synchronized(this) {
                 ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
                 if (rl != null) {
                     final BroadcastRecord r = rl.curBroadcast;
-                    if (r != null && r == r.queue.getMatchingOrderedReceiver(r)) {
+                    if (r != null) {
                         final boolean doNext = r.queue.finishReceiverLocked(
-                                r, r.resultCode, r.resultData, r.resultExtras,
+                                receiver.asBinder(), r.resultCode, r.resultData, r.resultExtras,
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
                         }
                     }
-
                     if (rl.app != null) {
                         rl.app.mReceivers.removeReceiver(rl);
                     }
@@ -14518,22 +14524,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean doNext = false;
             BroadcastRecord r;
             BroadcastQueue queue;
-
             synchronized(this) {
-                if (isOnFgOffloadQueue(flags)) {
-                    queue = mFgOffloadBroadcastQueue;
-                } else if (isOnBgOffloadQueue(flags)) {
-                    queue = mBgOffloadBroadcastQueue;
-                } else {
-                    queue = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0
-                            ? mFgBroadcastQueue : mBgBroadcastQueue;
-                }
-
-                r = queue.getMatchingOrderedReceiver(who);
-                if (r != null) {
-                    doNext = r.queue.finishReceiverLocked(r, resultCode,
+                queue = broadcastQueueForFlags(flags);
+                doNext = queue.finishReceiverLocked(who, resultCode,
                         resultData, resultExtras, resultAbort, true);
-                }
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
             }
@@ -17878,6 +17872,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void refreshSettingsCache() {
         mCoreSettingsObserver.onChange(true);
+    }
+
+    /**
+     * Reset the dropbox rate limiter
+     */
+    void resetDropboxRateLimiter() {
+        mDropboxRateLimiter.reset();
     }
 
     /**

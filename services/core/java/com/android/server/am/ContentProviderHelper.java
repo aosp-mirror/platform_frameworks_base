@@ -464,10 +464,9 @@ public class ContentProviderHelper {
                         try {
                             checkTime(startTime,
                                     "getContentProviderImpl: before set stopped state");
-                            AppGlobals.getPackageManager().setPackageStoppedState(
+                            mService.mPackageManagerInt.setPackageStoppedState(
                                     cpr.appInfo.packageName, false, userId);
                             checkTime(startTime, "getContentProviderImpl: after set stopped state");
-                        } catch (RemoteException e) {
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "
                                     + cpr.appInfo.packageName + ": " + e);

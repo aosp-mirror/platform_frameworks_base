@@ -32172,6 +32172,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectCustomSlowCalls();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectDiskReads();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectDiskWrites();
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectNetwork();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectResourceMismatches();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectUnbufferedIo();
@@ -32186,6 +32187,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitCustomSlowCalls();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitDiskReads();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitDiskWrites();
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitExplicitGc();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitNetwork();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitResourceMismatches();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitUnbufferedIo();
@@ -32765,6 +32767,9 @@ package android.os.strictmode {
   }
 
   public final class DiskWriteViolation extends android.os.strictmode.Violation {
+  }
+
+  public final class ExplicitGcViolation extends android.os.strictmode.Violation {
   }
 
   public final class FileUriExposedViolation extends android.os.strictmode.Violation {

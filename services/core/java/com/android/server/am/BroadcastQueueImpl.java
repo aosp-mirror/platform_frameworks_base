@@ -42,7 +42,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AppGlobals;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
@@ -213,7 +212,14 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, boolean allowDelayBehindServices) {
-        super(service, handler, name, constants);
+        this(service, handler, name, constants, new BroadcastSkipPolicy(service),
+                allowDelayBehindServices);
+    }
+
+    BroadcastQueueImpl(ActivityManagerService service, Handler handler,
+            String name, BroadcastConstants constants, BroadcastSkipPolicy skipPolicy,
+            boolean allowDelayBehindServices) {
+        super(service, handler, name, constants, skipPolicy);
         mHandler = new BroadcastHandler(handler.getLooper());
         mDelayBehindServices = allowDelayBehindServices;
         mDispatcher = new BroadcastDispatcher(this, mConstants, mHandler, mService);
@@ -520,10 +526,17 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     public BroadcastRecord getMatchingOrderedReceiver(IBinder receiver) {
         BroadcastRecord br = mDispatcher.getActiveBroadcastLocked();
-        if (br != null && br.receiver == receiver) {
-            return br;
+        if (br == null) {
+            Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
+                    + "] no active broadcast");
+            return null;
         }
-        return null;
+        if (br.receiver != receiver) {
+            Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
+                    + "] active broadcast " + br.receiver + " doesn't match " + receiver);
+            return null;
+        }
+        return br;
     }
 
     // > 0 only, no worry about "eventual" recycling
@@ -549,6 +562,17 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 app.removeAllowBackgroundActivityStartsToken(r);
             }
         }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
+    }
+
+    public boolean finishReceiverLocked(IBinder receiver, int resultCode,
+            String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
+        final BroadcastRecord r = getMatchingOrderedReceiver(receiver);
+        if (r != null) {
+            return finishReceiverLocked(r, resultCode,
+                    resultData, resultExtras, resultAbort, waitForServices);
+        } else {
+            return false;
+        }
     }
 
     public boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
@@ -1354,9 +1378,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
         // Broadcast is being executed, its package can't be stopped.
         try {
-            AppGlobals.getPackageManager().setPackageStoppedState(
+            mService.mPackageManagerInt.setPackageStoppedState(
                     r.curComponent.getPackageName(), false, r.userId);
-        } catch (RemoteException e) {
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + r.curComponent.getPackageName() + ": " + e);

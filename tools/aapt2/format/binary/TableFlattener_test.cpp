@@ -330,7 +330,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkO) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder()
                                               .SetCompilationPackage("android")
                                               .SetPackageId(0x01)
-                                              .SetMinSdkVersion(SDK_O)
+                                              .SetMinSdkVersion(SDK_S_V2)
                                               .Build();
 
   const ConfigDescription sparse_config = test::ParseConfigOrDie("en-rGB");
@@ -376,7 +376,7 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithConfigSdkVersionO) {
                                               .SetMinSdkVersion(SDK_LOLLIPOP)
                                               .Build();
 
-  const ConfigDescription sparse_config = test::ParseConfigOrDie("en-rGB-v26");
+  const ConfigDescription sparse_config = test::ParseConfigOrDie("en-rGB-v32");
   auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.25f);
 
   TableFlattenerOptions options;
@@ -389,6 +389,46 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithConfigSdkVersionO) {
   ASSERT_TRUE(Flatten(context.get(), options, table_in.get(), &sparse_contents));
 
   EXPECT_GT(no_sparse_contents.size(), sparse_contents.size());
+}
+
+TEST_F(TableFlattenerTest, FlattenSparseEntryWithSdkVersionNotSet) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("android").SetPackageId(0x01).Build();
+
+  const ConfigDescription sparse_config = test::ParseConfigOrDie("en-rGB");
+  auto table_in = BuildTableWithSparseEntries(context.get(), sparse_config, 0.25f);
+
+  TableFlattenerOptions options;
+  options.use_sparse_entries = true;
+
+  std::string no_sparse_contents;
+  ASSERT_TRUE(Flatten(context.get(), {}, table_in.get(), &no_sparse_contents));
+
+  std::string sparse_contents;
+  ASSERT_TRUE(Flatten(context.get(), options, table_in.get(), &sparse_contents));
+
+  EXPECT_GT(no_sparse_contents.size(), sparse_contents.size());
+
+  // Attempt to parse the sparse contents.
+
+  ResourceTable sparse_table;
+  BinaryResourceParser parser(context->GetDiagnostics(), &sparse_table, Source("test.arsc"),
+                              sparse_contents.data(), sparse_contents.size());
+  ASSERT_TRUE(parser.Parse());
+
+  auto value = test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_0",
+                                                        sparse_config);
+  ASSERT_THAT(value, NotNull());
+  EXPECT_EQ(0u, value->value.data);
+
+  ASSERT_THAT(test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_1",
+                                                       sparse_config),
+              IsNull());
+
+  value = test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_4",
+                                                   sparse_config);
+  ASSERT_THAT(value, NotNull());
+  EXPECT_EQ(4u, value->value.data);
 }
 
 TEST_F(TableFlattenerTest, DoNotUseSparseEntryForDenseConfig) {

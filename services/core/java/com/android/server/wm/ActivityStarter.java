@@ -1866,6 +1866,16 @@ class ActivityStarter {
         final ActivityRecord targetTaskTop = newTask
                 ? null : targetTask.getTopNonFinishingActivity();
         if (targetTaskTop != null) {
+            // Removes the existing singleInstance activity in another task (if any) while
+            // launching a singleInstance activity on sourceRecord's task.
+            if (LAUNCH_SINGLE_INSTANCE == mLaunchMode && mSourceRecord != null
+                    && targetTask == mSourceRecord.getTask()) {
+                final ActivityRecord activity = mRootWindowContainer.findActivity(mIntent,
+                        mStartActivity.info, false);
+                if (activity != null && activity.getTask() != targetTask) {
+                    activity.destroyIfPossible("Removes redundant singleInstance");
+                }
+            }
             // Recycle the target task for this launch.
             startResult = recycleTask(targetTask, targetTaskTop, reusedTask, intentGrants);
             if (startResult != START_SUCCESS) {
