@@ -298,6 +298,18 @@ class TestPhoneWindowManager {
         Mockito.reset(mPowerManager);
     }
 
+    void overrideIncallPowerBehavior(int behavior) {
+        mPhoneWindowManager.mIncallPowerBehavior = behavior;
+        setPhoneCallIsInProgress();
+    }
+
+    void setPhoneCallIsInProgress() {
+        // Let device has an ongoing phone call.
+        doReturn(false).when(mTelecomManager).isRinging();
+        doReturn(true).when(mTelecomManager).isInCall();
+        doReturn(true).when(mTelecomManager).endCall();
+    }
+
     /**
      * Below functions will check the policy behavior could be invoked.
      */
