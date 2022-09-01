@@ -111,10 +111,10 @@ int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArr
     ScopedUtfChars path(env, filePath);
     ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
     if (rfd.get() < 0) {
-        return rfd.get();
+        return -errno;
     }
-    if (auto err = ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data); err < 0) {
-        return err;
+    if (::ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data) < 0) {
+        return -errno;
     }
 
     if (data->digest_algorithm != FS_VERITY_HASH_ALG_SHA256) {
