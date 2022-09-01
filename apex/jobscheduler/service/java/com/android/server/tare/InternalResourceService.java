@@ -815,6 +815,18 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
+            // Get the current battery presence, if available. This would succeed if TARE is
+            // toggled long after boot.
+            final Intent batteryStatus = getContext().registerReceiver(null,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            if (batteryStatus != null) {
+                final boolean hasBattery =
+                        batteryStatus.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
+                if (mHasBattery != hasBattery) {
+                    mHasBattery = hasBattery;
+                    mConfigObserver.updateEnabledStatus();
+                }
+            }
         }
     }
 
