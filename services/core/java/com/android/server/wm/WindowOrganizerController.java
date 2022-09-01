@@ -29,6 +29,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
@@ -74,6 +75,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
@@ -176,7 +178,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (t == null) {
             throw new IllegalArgumentException("Null transaction passed to applyTransaction");
         }
-        enforceTaskPermission("applyTransaction()", t);
+        enforceTaskPermission("applyTransaction()");
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -194,7 +196,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (t == null) {
             throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
         }
-        enforceTaskPermission("applySyncTransaction()", t);
+        enforceTaskPermission("applySyncTransaction()");
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -373,6 +375,87 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
+    /**
+     * Applies the {@link WindowContainerTransaction} as a request from
+     * {@link android.window.TaskFragmentOrganizer}.
+     *
+     * @param wct   {@link WindowContainerTransaction} to apply.
+     * @param type  {@link WindowManager.TransitionType} if it needs to start a new transition.
+     * @param shouldApplyIndependently  If {@code true}, the {@code wct} will request a new
+     *                                  transition, which will be queued until the sync engine is
+     *                                  free if there is any other active sync. If {@code false},
+     *                                  the {@code wct} will be directly applied to the active sync.
+     */
+    void applyTaskFragmentTransactionLocked(@NonNull WindowContainerTransaction wct,
+            @WindowManager.TransitionType int type, boolean shouldApplyIndependently) {
+        if (!isValidTransaction(wct)) {
+            return;
+        }
+        enforceTaskFragmentOrganizerPermission("applyTaskFragmentTransaction()",
+                Objects.requireNonNull(wct.getTaskFragmentOrganizer()),
+                Objects.requireNonNull(wct));
+        final CallerInfo caller = new CallerInfo();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mTransitionController.getTransitionPlayer() == null) {
+                // No need to worry about transition when Shell transition is not enabled.
+                applyTransaction(wct, -1 /* syncId */, null /* transition */, caller);
+                return;
+            }
+
+            if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+                // Sync is for either transition or applySyncTransaction(). We don't support
+                // multiple sync at the same time because it may cause conflict.
+                // Create a new transition when there is no active sync to collect the changes.
+                final Transition transition = mTransitionController.createTransition(type);
+                applyTransaction(wct, -1 /* syncId */, transition, caller);
+                mTransitionController.requestStartTransition(transition, null /* startTask */,
+                        null /* remoteTransition */, null /* displayChange */);
+                return;
+            }
+
+            if (!shouldApplyIndependently) {
+                // Although there is an active sync, we want to apply the transaction now.
+                if (!mTransitionController.isCollecting()) {
+                    // This should rarely happen, and we should try to avoid using
+                    // {@link #applySyncTransaction} with Shell transition.
+                    // We still want to apply and merge the transaction to the active sync
+                    // because {@code shouldApplyIndependently} is {@code false}.
+                    ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "TaskFragmentTransaction changes are not collected in transition"
+                                    + " because there is an ongoing sync for"
+                                    + " applySyncTransaction().");
+                }
+                // TODO(b/207070762) make sure changes are all collected.
+                applyTransaction(wct, -1 /* syncId */, null /* transition */, caller);
+                return;
+            }
+
+            // It is ok to queue the WCT until the sync engine is free.
+            final Transition nextTransition = new Transition(type, 0 /* flags */,
+                    mTransitionController, mService.mWindowManager.mSyncEngine);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Creating Pending Transition for TaskFragment: %s", nextTransition);
+            mService.mWindowManager.mSyncEngine.queueSyncSet(
+                    // Make sure to collect immediately to prevent another transition
+                    // from sneaking in before it. Note: moveToCollecting internally
+                    // calls startSyncSet.
+                    () -> mTransitionController.moveToCollecting(nextTransition),
+                    () -> {
+                        if (isValidTransaction(wct)) {
+                            applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                            mTransitionController.requestStartTransition(nextTransition,
+                                    null /* startTask */, null /* remoteTransition */,
+                                    null /* displayChange */);
+                        } else {
+                            nextTransition.abort();
+                        }
+                    });
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller) {
         applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
@@ -387,12 +470,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller,
             @Nullable Transition finishTransition) {
-        if (t.getTaskFragmentOrganizer() != null && !mTaskFragmentOrganizerController
-                .isOrganizerRegistered(t.getTaskFragmentOrganizer())) {
-            Slog.e(TAG, "Caller organizer=" + t.getTaskFragmentOrganizer()
-                    + " is no longer registered");
-            return;
-        }
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
@@ -703,6 +780,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             @Nullable ITaskFragmentOrganizer organizer, @Nullable Transition finishTransition) {
         final int type = hop.getType();
         switch (type) {
+            case HIERARCHY_OP_TYPE_REMOVE_TASK: {
+                final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+                final Task task = wc != null ? wc.asTask() : null;
+                task.remove(true, "Applying remove task Hierarchy Op");
+                break;
+            }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
                 final Task task = wc != null ? wc.asTask() : null;
@@ -1488,25 +1571,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mService.enforceTaskPermission(func);
     }
 
-    private void enforceTaskPermission(String func, @Nullable WindowContainerTransaction t) {
-        if (t == null || t.getTaskFragmentOrganizer() == null) {
-            enforceTaskPermission(func);
-            return;
+    private boolean isValidTransaction(@NonNull WindowContainerTransaction t) {
+        if (t.getTaskFragmentOrganizer() != null && !mTaskFragmentOrganizerController
+                .isOrganizerRegistered(t.getTaskFragmentOrganizer())) {
+            // Transaction from an unregistered organizer should not be applied. This can happen
+            // when the organizer process died before the transaction is applied.
+            Slog.e(TAG, "Caller organizer=" + t.getTaskFragmentOrganizer()
+                    + " is no longer registered");
+            return false;
         }
-
-        // Apps may not have the permission to manage Tasks, but we are allowing apps to manage
-        // TaskFragments belonging to their own Task.
-        enforceOperationsAllowedForTaskFragmentOrganizer(func, t);
+        return true;
     }
 
     /**
      * Makes sure that the transaction only contains operations that are allowed for the
      * {@link WindowContainerTransaction#getTaskFragmentOrganizer()}.
      */
-    private void enforceOperationsAllowedForTaskFragmentOrganizer(
-            String func, WindowContainerTransaction t) {
-        final ITaskFragmentOrganizer organizer = t.getTaskFragmentOrganizer();
-
+    private void enforceTaskFragmentOrganizerPermission(@NonNull String func,
+            @NonNull ITaskFragmentOrganizer organizer, @NonNull WindowContainerTransaction t) {
         // Configuration changes
         final Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
                 t.getChanges().entrySet().iterator();

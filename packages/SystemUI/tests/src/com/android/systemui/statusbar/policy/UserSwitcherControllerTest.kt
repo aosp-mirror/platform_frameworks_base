@@ -56,6 +56,7 @@ import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
+import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -235,15 +236,16 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testSwitchUser_parentDialogDismissed() {
-        val otherUserRecord = UserSwitcherController.UserRecord(
-                secondaryUser,
-                picture,
-                false /* guest */,
-                false /* current */,
-                false /* isAddUser */,
-                false /* isRestricted */,
-                true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+        val otherUserRecord = UserRecord(
+            secondaryUser,
+            picture,
+            false /* guest */,
+            false /* current */,
+            false /* isAddUser */,
+            false /* isRestricted */,
+            true /* isSwitchToEnabled */,
+            false /* isAddSupervisedUser */
+        )
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
@@ -255,7 +257,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testAddGuest_okButtonPressed() {
-        val emptyGuestUserRecord = UserSwitcherController.UserRecord(
+        val emptyGuestUserRecord =
+            UserRecord(
                 null,
                 null,
                 true /* guest */,
@@ -263,7 +266,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
@@ -282,7 +286,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testAddGuest_parentDialogDismissed() {
-        val emptyGuestUserRecord = UserSwitcherController.UserRecord(
+        val emptyGuestUserRecord =
+            UserRecord(
                 null,
                 null,
                 true /* guest */,
@@ -290,7 +295,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
@@ -305,7 +311,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testRemoveGuest_removeButtonPressed_isLogged() {
-        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+        val currentGuestUserRecord =
+            UserRecord(
                 guestInfo,
                 picture,
                 true /* guest */,
@@ -313,7 +320,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -331,7 +339,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testRemoveGuest_removeButtonPressed_dialogDismissed() {
-        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+        val currentGuestUserRecord =
+            UserRecord(
                 guestInfo,
                 picture,
                 true /* guest */,
@@ -339,7 +348,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -353,7 +363,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testRemoveGuest_dialogShowerUsed() {
-        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+        val currentGuestUserRecord =
+            UserRecord(
                 guestInfo,
                 picture,
                 true /* guest */,
@@ -361,7 +372,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -376,7 +388,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testRemoveGuest_cancelButtonPressed_isNotLogged() {
-        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+        val currentGuestUserRecord =
+            UserRecord(
                 guestInfo,
                 picture,
                 true /* guest */,
@@ -384,7 +397,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -398,7 +412,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testWipeGuest_startOverButtonPressed_isLogged() {
-        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+        val currentGuestUserRecord =
+            UserRecord(
                 guestInfo,
                 picture,
                 true /* guest */,
@@ -406,7 +421,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -433,7 +449,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
     @Test
     fun testWipeGuest_continueButtonPressed_isLogged() {
-        val currentGuestUserRecord = UserSwitcherController.UserRecord(
+        val currentGuestUserRecord =
+            UserRecord(
                 guestInfo,
                 picture,
                 true /* guest */,
@@ -441,7 +458,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* isAddUser */,
                 false /* isRestricted */,
                 true /* isSwitchToEnabled */,
-                false /* isAddSupervisedUser */)
+                false /* isAddSupervisedUser */
+            )
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -470,11 +488,13 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Test
     fun test_getCurrentUserName_shouldReturnNameOfTheCurrentUser() {
         fun addUser(id: Int, name: String, isCurrent: Boolean) {
-            userSwitcherController.users.add(UserSwitcherController.UserRecord(
+            userSwitcherController.users.add(
+                UserRecord(
                     UserInfo(id, name, 0),
                     null, false, isCurrent, false,
                     false, false, false
-            ))
+                )
+            )
         }
         val bgUserName = "background_user"
         val fgUserName = "foreground_user"
@@ -593,7 +613,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Test
     fun onUserItemClicked_guest_runsOnBgThread() {
         val dialogShower = mock(UserSwitchDialogController.DialogShower::class.java)
-        val guestUserRecord = UserSwitcherController.UserRecord(
+        val guestUserRecord = UserRecord(
             null,
             picture,
             true /* guest */,
@@ -601,7 +621,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
             false /* isAddUser */,
             false /* isRestricted */,
             true /* isSwitchToEnabled */,
-            false /* isAddSupervisedUser */)
+            false /* isAddSupervisedUser */
+        )
 
         userSwitcherController.onUserListItemClicked(guestUserRecord, dialogShower)
         assertTrue(bgExecutor.numPending() > 0)

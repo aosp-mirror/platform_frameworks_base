@@ -570,6 +570,33 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBiometricHelp_coEx_faceFailure() {
+        createController();
+
+        // GIVEN unlocking with fingerprint is possible
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(anyInt()))
+                .thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a face not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FACE);
+
+        // THEN show sequential messages such as: 'face not recognized' and
+        // 'try fingerprint instead'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_failed));
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    @Test
     public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromError() {
         createController();
         String message = mContext.getString(R.string.keyguard_unlock);

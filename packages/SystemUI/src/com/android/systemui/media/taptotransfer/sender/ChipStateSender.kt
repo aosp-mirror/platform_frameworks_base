@@ -26,7 +26,6 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
-import com.android.systemui.plugins.FalsingManager
 
 /**
  * A class enumerating all the possible states of the media tap-to-transfer chip on the sender
@@ -107,15 +106,12 @@ enum class ChipStateSender(
             controllerSender: MediaTttChipControllerSender,
             routeInfo: MediaRoute2Info,
             undoCallback: IUndoMediaTransferCallback?,
-            uiEventLogger: MediaTttSenderUiEventLogger,
-            falsingManager: FalsingManager,
+            uiEventLogger: MediaTttSenderUiEventLogger
         ): View.OnClickListener? {
             if (undoCallback == null) {
                 return null
             }
             return View.OnClickListener {
-                if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@OnClickListener
-
                 uiEventLogger.logUndoClicked(
                     MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED
                 )
@@ -145,15 +141,12 @@ enum class ChipStateSender(
             controllerSender: MediaTttChipControllerSender,
             routeInfo: MediaRoute2Info,
             undoCallback: IUndoMediaTransferCallback?,
-            uiEventLogger: MediaTttSenderUiEventLogger,
-            falsingManager: FalsingManager,
+            uiEventLogger: MediaTttSenderUiEventLogger
         ): View.OnClickListener? {
             if (undoCallback == null) {
                 return null
             }
             return View.OnClickListener {
-                if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@OnClickListener
-
                 uiEventLogger.logUndoClicked(
                     MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED
                 )
@@ -219,8 +212,7 @@ enum class ChipStateSender(
         controllerSender: MediaTttChipControllerSender,
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?,
-        uiEventLogger: MediaTttSenderUiEventLogger,
-        falsingManager: FalsingManager,
+        uiEventLogger: MediaTttSenderUiEventLogger
     ): View.OnClickListener? = null
 
     companion object {
