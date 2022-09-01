@@ -72,7 +72,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final DumpManager mDumpManager;
     private final ClockEventController mClockEventController;
 
-    /** Clock frames for both small and large sizes */
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
@@ -151,7 +150,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Attach the controller to the view it relates to.
      */
     @Override
-    public void onInit() {
+    protected void onInit() {
         mKeyguardSliceViewController.init();
 
         mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
@@ -390,8 +389,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * bounds during the unlock transition.
      */
     private void setClipChildrenForUnlock(boolean clip) {
-        mView.setClipChildren(clip);
-
         if (mStatusArea != null) {
             mStatusArea.setClipChildren(clip);
         }
