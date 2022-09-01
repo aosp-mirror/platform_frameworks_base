@@ -763,10 +763,8 @@ public final class WindowContainerTransaction implements Parcelable {
      * @hide
      */
     @NonNull
-    WindowContainerTransaction setTaskFragmentOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        if (mTaskFragmentOrganizer != null) {
-            throw new IllegalStateException("Can't set multiple organizers for one transaction.");
-        }
+    public WindowContainerTransaction setTaskFragmentOrganizer(
+            @NonNull ITaskFragmentOrganizer organizer) {
         mTaskFragmentOrganizer = organizer;
         return this;
     }

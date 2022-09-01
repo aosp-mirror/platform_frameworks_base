@@ -1801,6 +1801,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "-353495930": {
+      "message": "TaskFragmentTransaction changes are not collected in transition because there is an ongoing sync for applySyncTransaction().",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
+    },
     "-347866078": {
       "message": "Setting move animation on %s",
       "level": "VERBOSE",
@@ -2490,6 +2496,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "286170861": {
+      "message": "Creating Pending Transition for TaskFragment: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
     },
     "288485303": {
       "message": "Attempted to set remove mode to a display that does not exist: %d",
