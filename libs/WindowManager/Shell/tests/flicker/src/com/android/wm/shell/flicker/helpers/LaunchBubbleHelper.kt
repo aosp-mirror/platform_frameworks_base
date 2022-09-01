@@ -27,7 +27,6 @@ class LaunchBubbleHelper(instrumentation: Instrumentation) : BaseAppHelper(
 ) {
 
     companion object {
-        const val TEST_REPETITIONS = 1
         const val TIMEOUT_MS = 3_000L
     }
 }

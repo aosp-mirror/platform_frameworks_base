@@ -246,8 +246,17 @@
     <!-- The corner radius of the letterbox education dialog. -->
     <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
 
-    <!-- The size of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_size">48dp</dimen>
+    <!-- The width of the top icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_title_icon_width">45dp</dimen>
+
+    <!-- The height of the top icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_title_icon_height">44dp</dimen>
+
+    <!-- The width of an icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_icon_width">40dp</dimen>
+
+    <!-- The height of an icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_icon_height">32dp</dimen>
 
     <!-- The fixed width of the dialog if there is enough space in the parent. -->
     <dimen name="letterbox_education_dialog_width">472dp</dimen>

@@ -321,4 +321,15 @@ public abstract class UserManagerInternal {
      * {@link UserManager#isUserVisible()} in the given display.
      */
     public abstract boolean isUserVisible(@UserIdInt int userId, int displayId);
+
+    /**
+     * Returns the display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
+     * user is not assigned to any display.
+     *
+     * <p>The current foreground user is associated with the main display, while other users would
+     * only assigned to a display if they were started with
+     * {@code ActivityManager.startUserInBackgroundOnSecondaryDisplay()}. If the user is a profile
+     * and is running, it's assigned to its parent display.
+     */
+    public abstract int getDisplayAssignedToUser(@UserIdInt int userId);
 }

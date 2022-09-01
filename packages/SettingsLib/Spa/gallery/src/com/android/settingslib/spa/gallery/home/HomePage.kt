@@ -25,10 +25,9 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
-import com.android.settingslib.spa.gallery.page.PreferencePageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
-import com.android.settingslib.spa.gallery.page.SwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
@@ -44,8 +43,7 @@ object HomePageProvider : SettingsPageProvider {
 @Composable
 private fun HomePage() {
     HomeScaffold(title = stringResource(R.string.app_name)) {
-        PreferencePageProvider.EntryItem()
-        SwitchPreferencePageProvider.EntryItem()
+        PreferenceMainPageProvider.EntryItem()
         ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
 
         SliderPageProvider.EntryItem()

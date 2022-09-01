@@ -201,6 +201,7 @@ public class LowPowerStandbyController {
             mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            initSettingsLocked();
             updateSettingsLocked();
 
             if (mIsEnabled) {
@@ -209,6 +210,23 @@ public class LowPowerStandbyController {
         }
 
         LocalServices.addService(LowPowerStandbyControllerInternal.class, mLocalService);
+    }
+
+    @GuardedBy("mLock")
+    private void initSettingsLocked() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        if (mSupportedConfig) {
+            final int enabledSetting = Settings.Global.getInt(resolver,
+                    Settings.Global.LOW_POWER_STANDBY_ENABLED, /* def= */ -1);
+
+            // If the ENABLED setting hasn't been assigned yet, set it to its default value.
+            // This ensures reading the setting reflects the enabled state, without having to know
+            // the default value for this device.
+            if (enabledSetting == -1) {
+                Settings.Global.putInt(resolver, Settings.Global.LOW_POWER_STANDBY_ENABLED,
+                        /* value= */ mEnabledByDefaultConfig ? 1 : 0);
+            }
+        }
     }
 
     @GuardedBy("mLock")

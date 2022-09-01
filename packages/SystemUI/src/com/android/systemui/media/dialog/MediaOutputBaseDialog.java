@@ -356,15 +356,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderSubtitle.setText(subTitle);
             mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
         }
-        if (!mAdapter.isDragging()) {
-            int currentActivePosition = mAdapter.getCurrentActivePosition();
-            if (!colorSetUpdated && !deviceSetChanged && currentActivePosition >= 0
-                    && currentActivePosition < mAdapter.getItemCount()) {
-                mAdapter.notifyItemChanged(currentActivePosition);
-            } else {
-                mAdapter.notifyDataSetChanged();
-            }
-        }
         // Show when remote media session is available or
         //      when the device supports BT LE audio + media is playing
         mStopButton.setVisibility(getStopButtonVisibility());
@@ -374,6 +365,18 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
         mBroadcastIcon.setVisibility(getBroadcastIconVisibility());
         mBroadcastIcon.setOnClickListener(v -> onBroadcastIconClick());
+        if (!mAdapter.isDragging()) {
+            int currentActivePosition = mAdapter.getCurrentActivePosition();
+            if (!colorSetUpdated && !deviceSetChanged && currentActivePosition >= 0
+                    && currentActivePosition < mAdapter.getItemCount()) {
+                mAdapter.notifyItemChanged(currentActivePosition);
+            } else {
+                mAdapter.notifyDataSetChanged();
+            }
+        } else {
+            mMediaOutputController.setRefreshing(false);
+            mMediaOutputController.refreshDataSetIfNeeded();
+        }
     }
 
     private void updateButtonBackgroundColorFilter() {

@@ -33,6 +33,7 @@
 #include "ValueVisitor.h"
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
 #include "idmap2/Policies.h"
 #include "text/Printer.h"
 #include "util/Util.h"
@@ -515,7 +516,8 @@ class XmlPrinter : public xml::ConstVisitor {
   }
 
   void Visit(const xml::Text* text) override {
-    printer_->Println(StringPrintf("T: '%s'", text->text.c_str()));
+    printer_->Println(
+        StringPrintf("T: '%s'", android::ResTable::normalizeForOutput(text->text.c_str()).c_str()));
   }
 
  private:

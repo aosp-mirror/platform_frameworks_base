@@ -44,7 +44,7 @@
         <option name="hidden-api-checks" value="false"/>
 
         <!-- Listener related args for collecting the traces and waiting for the device to stabilize. -->
-        <option name="device-listeners" value="android.device.collectors.PerfettoListener,android.device.collectors.SimpleperfListener" />
+        <option name="device-listeners" value="android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener,android.device.collectors.SimpleperfListener" />
 
         <!-- Guarantee that user defined RunListeners will be running before any of the default listeners defined in this runner. -->
         <option name="instrumentation-arg" key="newRunListenerMode" value="true" />
@@ -58,7 +58,15 @@
         <option name="instrumentation-arg" key="arguments" value="&quot;&quot;" />
         <option name="instrumentation-arg" key="events_to_record" value="instructions,cpu-cycles,raw-l3d-cache-refill,sched:sched_waking" />
         <option name="instrumentation-arg" key="processes_to_record" value="surfaceflinger" />
-        <option name="instrumentation-arg" key="symbols_to_report" value="&quot;android::SurfaceFlinger::commit(long, long, long)&quot;" />
+        <option name="instrumentation-arg" key="symbols_to_report" value="&quot;android::SurfaceFlinger::commit(;android::SurfaceFlinger::composite(&quot;" />
+
+        <!-- ProcLoadListener related arguments -->
+        <!-- Wait for device last minute threshold to reach 3 with 2 minute timeout before starting the test run -->
+        <option name="instrumentation-arg" key="procload-collector:per_run" value="true" />
+        <option name="instrumentation-arg" key="proc-loadavg-threshold" value="3" />
+        <option name="instrumentation-arg" key="proc-loadavg-timeout" value="120000" />
+        <option name="instrumentation-arg" key="proc-loadavg-interval" value="10000" />
+
     </test>
 
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
