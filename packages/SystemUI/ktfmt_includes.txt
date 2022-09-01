@@ -332,7 +332,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/ActionClickLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/BaseStatusBarWifiView.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/BlurUtils.kt
--packages/SystemUI/src/com/android/systemui/statusbar/DisableFlagsLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/LightRevealScrim.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/LockScreenShadeOverScroller.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/LockscreenShadeKeyguardTransitionController.kt
@@ -356,6 +355,7 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/connectivity/WifiStatusTrackerFactory.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/core/StatusBarInitializer.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/dagger/StartCentralSurfacesModule.kt
+-packages/SystemUI/src/com/android/systemui/statusbar/disableflags/DisableFlagsLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/PrivacyDotViewController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/StatusEvent.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/SystemEventChipAnimationController.kt
@@ -744,7 +744,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/smartspace/LockscreenAndDreamTargetFilterTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/smartspace/LockscreenPreconditionTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/BlurUtilsTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/DisableFlagsLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/LSShadeTransitionLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/LightRevealScrimTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/LockscreenShadeTransitionControllerTest.kt
@@ -757,6 +756,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/VibratorHelperTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/commandline/CommandRegistryTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/connectivity/AccessPointControllerImplTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/statusbar/disableflags/DisableFlagsLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/gesture/GenericGestureDetectorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/lockscreen/LockscreenSmartspaceControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/notification/NotificationLaunchAnimatorControllerTest.kt
