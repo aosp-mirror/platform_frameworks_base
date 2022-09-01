@@ -45,6 +45,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationDefinition;
+import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.TaskFragmentInfo;
@@ -484,13 +485,28 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void onTransactionHandled(@NonNull ITaskFragmentOrganizer organizer,
-            @NonNull IBinder transactionToken, @NonNull WindowContainerTransaction wct) {
+    public void onTransactionHandled(@NonNull IBinder transactionToken,
+            @NonNull WindowContainerTransaction wct,
+            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+        // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
-            // Keep the calling identity to avoid unsecure change.
-            mWindowOrganizerController.applyTransaction(wct);
-            final TaskFragmentOrganizerState state = validateAndGetState(organizer);
+            applyTransaction(wct, transitionType, shouldApplyIndependently);
+            final TaskFragmentOrganizerState state = validateAndGetState(
+                    wct.getTaskFragmentOrganizer());
             state.onTransactionFinished(transactionToken);
+        }
+    }
+
+    @Override
+    public void applyTransaction(@NonNull WindowContainerTransaction wct,
+            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+        // Keep the calling identity to avoid unsecure change.
+        synchronized (mGlobalLock) {
+            if (wct.isEmpty()) {
+                return;
+            }
+            mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
+                    shouldApplyIndependently);
         }
     }
 
