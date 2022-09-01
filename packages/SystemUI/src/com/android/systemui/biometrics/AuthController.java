@@ -19,6 +19,9 @@ package com.android.systemui.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -655,7 +658,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             @Background DelayableExecutor bgExecutor) {
         super(context);
         mExecution = execution;
-        mWakefulnessLifecycle = wakefulnessLifecycle;
         mUserManager = userManager;
         mLockPatternUtils = lockPatternUtils;
         mHandler = handler;
@@ -681,11 +683,24 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     return Unit.INSTANCE;
                 });
 
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
+            @Override
+            public void onFinishedWakingUp() {
+                notifyDozeChanged(mStatusBarStateController.isDozing(), WAKEFULNESS_AWAKE);
+            }
+
+            @Override
+            public void onStartedGoingToSleep() {
+                notifyDozeChanged(mStatusBarStateController.isDozing(), WAKEFULNESS_GOING_TO_SLEEP);
+            }
+        });
+
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
             @Override
             public void onDozingChanged(boolean isDozing) {
-                notifyDozeChanged(isDozing);
+                notifyDozeChanged(isDozing, wakefulnessLifecycle.getWakefulness());
             }
         });
 
@@ -763,13 +778,16 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Override
     public void setBiometicContextListener(IBiometricContextListener listener) {
         mBiometricContextListener = listener;
-        notifyDozeChanged(mStatusBarStateController.isDozing());
+        notifyDozeChanged(mStatusBarStateController.isDozing(),
+                mWakefulnessLifecycle.getWakefulness());
     }
 
-    private void notifyDozeChanged(boolean isDozing) {
+    private void notifyDozeChanged(boolean isDozing,
+            @WakefulnessLifecycle.Wakefulness int wakefullness) {
         if (mBiometricContextListener != null) {
             try {
-                mBiometricContextListener.onDozeChanged(isDozing);
+                final boolean isAwake = wakefullness == WAKEFULNESS_AWAKE;
+                mBiometricContextListener.onDozeChanged(isDozing, isAwake);
             } catch (RemoteException e) {
                 Log.w(TAG, "failed to notify initial doze state");
             }
