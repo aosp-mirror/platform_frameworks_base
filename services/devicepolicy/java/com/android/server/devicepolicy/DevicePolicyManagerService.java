@@ -5760,36 +5760,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return new ParcelableGranteeMap(result);
     }
 
-    /**
-     * Enforce one the following conditions are met:
-     * (1) The device has a Device Owner, and one of the following holds:
-     *   (1.1) The caller is the Device Owner
-     *   (1.2) The caller is another app in the same user as the device owner, AND
-     *         The caller is the delegated certificate installer.
-     *   (1.3) The caller is a Profile Owner and the calling user is affiliated.
-     * (2) The user has a profile owner, AND:
-     *   (2.1) The profile owner has been granted access to Device IDs and one of the following
-     *         holds:
-     *     (2.1.1) The caller is the profile owner.
-     *     (2.1.2) The caller is from another app in the same user as the profile owner, AND
-     *       (2.1.2.1) The caller is the delegated cert installer.
-     *
-     *  For the device owner case, simply check that the caller is the device owner or the
-     *  delegated certificate installer.
-     *
-     *  For the profile owner case, first check that the caller is the profile owner or can
-     *  manage the DELEGATION_CERT_INSTALL scope.
-     *  If that check succeeds, ensure the profile owner was granted access to device
-     *  identifiers. The grant is transitive: The delegated cert installer is implicitly allowed
-     *  access to device identifiers in this case as part of the delegation.
-     */
-    @VisibleForTesting
-    public void enforceCallerCanRequestDeviceIdAttestation(CallerIdentity caller)
-            throws SecurityException {
-        Preconditions.checkCallAuthorization(hasDeviceIdAccessUnchecked(caller.getPackageName(),
-                caller.getUid()));
-    }
-
     @VisibleForTesting
     public static int[] translateIdAttestationFlags(
             int idAttestationFlags) {
@@ -5844,8 +5814,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
         final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
         if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
-            // TODO: replace enforce methods
-            enforceCallerCanRequestDeviceIdAttestation(caller);
+            Preconditions.checkCallAuthorization(hasDeviceIdAccessUnchecked(
+                    caller.getPackageName(), caller.getUid()));
             enforceIndividualAttestationSupportedIfRequested(attestationUtilsFlags);
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
@@ -9376,21 +9346,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Check if caller is device owner, delegate cert installer or profile owner of
-     * affiliated user. Or if caller is profile owner for a specified user or delegate cert
-     * installer on an organization-owned device.
+     * Check if one the following conditions hold:
+     * (1) The device has a Device Owner, and one of the following holds:
+     *   (1.1) The caller is the Device Owner
+     *   (1.2) The caller is another app in the same user as the device owner, AND
+     *         The caller is the delegated certificate installer.
+     *   (1.3) The caller is a Profile Owner and the calling user is affiliated.
+     * (2) The user has a profile owner, AND:
+     *   (2.1) The profile owner has been granted access to Device IDs and one of the following
+     *         holds:
+     *     (2.1.1) The caller is the profile owner.
+     *     (2.1.2) The caller is from another app in the same user as the profile owner, AND
+     *             the caller is the delegated cert installer.
+     *
+     *  For the device owner case, simply check that the caller is the device owner or the
+     *  delegated certificate installer.
+     *
+     *  For the profile owner case, first check that the caller is the profile owner or can
+     *  manage the DELEGATION_CERT_INSTALL scope.
+     *  If that check succeeds, ensure the profile owner was granted access to device
+     *  identifiers. The grant is transitive: The delegated cert installer is implicitly allowed
+     *  access to device identifiers in this case as part of the delegation.
      */
-    private boolean hasDeviceIdAccessUnchecked(String packageName, int uid) {
-        // Is the caller a  device owner, delegate cert installer or profile owner of an
-        // affiliated user.
+    @VisibleForTesting
+    boolean hasDeviceIdAccessUnchecked(String packageName, int uid) {
         ComponentName deviceOwner = getDeviceOwnerComponent(true);
         if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
                 || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;
         }
         final int userId = UserHandle.getUserId(uid);
-        // Is the caller the profile owner for the specified user, or delegate cert installer on an
-        // organization-owned device.
         ComponentName profileOwner = getProfileOwnerAsUser(userId);
         final boolean isCallerProfileOwnerOrDelegate = profileOwner != null
                 && (profileOwner.getPackageName().equals(packageName)

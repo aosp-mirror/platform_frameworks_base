@@ -217,7 +217,7 @@
      the force lock button. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_user_request">Device was locked manually</string>
 
-    <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
+    <!-- Face hint message when face was not recognized. [CHAR LIMIT=20] -->
     <string name="kg_face_not_recognized">Not recognized</string>
 
      <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=53] -->

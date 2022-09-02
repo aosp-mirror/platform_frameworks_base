@@ -8748,10 +8748,38 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (process.info.isInstantApp()) {
                 sb.append("Instant-App: true\n");
             }
+
             if (isSdkSandboxUid(process.uid)) {
+                final int appUid = Process.getAppUidForSdkSandboxUid(process.uid);
+                try {
+                    String[] clientPackages = pm.getPackagesForUid(appUid);
+                    // In shared UID case, don't add the package information
+                    if (clientPackages.length == 1) {
+                        appendSdkSandboxClientPackageHeader(sb, clientPackages[0], callingUserId);
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error getting packages for client app uid: " + appUid, e);
+                }
                 sb.append("SdkSandbox: true\n");
             }
         }
+    }
+
+    private void appendSdkSandboxClientPackageHeader(StringBuilder sb, String pkg, int userId) {
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        sb.append("SdkSandbox-Client-Package: ").append(pkg);
+        try {
+            final PackageInfo pi = pm.getPackageInfo(pkg, 0, userId);
+            if (pi != null) {
+                sb.append(" v").append(pi.getLongVersionCode());
+                if (pi.versionName != null) {
+                    sb.append(" (").append(pi.versionName).append(")");
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error getting package info for SDK sandbox client: " + pkg, e);
+        }
+        sb.append("\n");
     }
 
     private static String processClass(ProcessRecord process) {

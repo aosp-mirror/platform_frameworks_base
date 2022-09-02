@@ -304,6 +304,7 @@ import com.android.server.notification.toast.CustomToastRecord;
 import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -533,6 +534,7 @@ public class NotificationManagerService extends SystemService {
     private UriGrantsManagerInternal mUgmInternal;
     private volatile RoleObserver mRoleObserver;
     private UserManager mUm;
+    private UserManagerInternal mUmInternal;
     private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
     private PermissionHelper mPermissionHelper;
@@ -819,7 +821,8 @@ public class NotificationManagerService extends SystemService {
         final List<UserInfo> activeUsers = mUm.getUsers();
         for (UserInfo userInfo : activeUsers) {
             int userId = userInfo.getUserHandle().getIdentifier();
-            if (isNASMigrationDone(userId) || mUm.isManagedProfile(userId)) {
+            if (isNASMigrationDone(userId)
+                    || userInfo.isManagedProfile() || userInfo.isCloneProfile()) {
                 continue;
             }
             List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
@@ -950,7 +953,9 @@ public class NotificationManagerService extends SystemService {
         }
         XmlUtils.beginDocument(parser, TAG_NOTIFICATION_POLICY);
         boolean migratedManagedServices = false;
-        boolean ineligibleForManagedServices = forRestore && mUm.isManagedProfile(userId);
+        UserInfo userInfo = mUmInternal.getUserInfo(userId);
+        boolean ineligibleForManagedServices = forRestore &&
+                (userInfo.isManagedProfile() || userInfo.isCloneProfile());
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
@@ -1824,7 +1829,7 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
-                if (!mUserProfiles.isManagedProfile(userId)) {
+                if (mUserProfiles.canProfileUseBoundServices(userId)) {
                     // reload per-user settings
                     mSettingsObserver.update(null);
                     // Refresh managed services
@@ -1838,7 +1843,7 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 if (userId != USER_NULL) {
                     mUserProfiles.updateCache(context);
-                    if (!mUserProfiles.isManagedProfile(userId)) {
+                    if (mUserProfiles.canProfileUseBoundServices(userId)) {
                         allowDefaultApprovedServices(userId);
                     }
                 }
@@ -1856,7 +1861,7 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
                 mAssistants.onUserUnlocked(userId);
-                if (!mUserProfiles.isManagedProfile(userId)) {
+                if (mUserProfiles.canProfileUseBoundServices(userId)) {
                     mConditionProviders.onUserUnlocked(userId);
                     mListeners.onUserUnlocked(userId);
                     mZenModeHelper.onUserUnlocked(userId);
@@ -2218,6 +2223,7 @@ public class NotificationManagerService extends SystemService {
         mPackageManagerClient = packageManagerClient;
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
+        mUmInternal = LocalServices.getService(UserManagerInternal.class);
         mUsageStatsManagerInternal = usageStatsManagerInternal;
         mAppOps = appOps;
         mAppOpsService = iAppOps;

@@ -81,4 +81,10 @@ public class SystemServiceManagerTest extends AndroidTestCase {
         assertEquals(1, counter.get());
     }
 
+    @Test
+    public void onUserCompletedEventShouldNotThrowExceptionWithStoppedOrUnknownUser() {
+        mSystemServiceManager.onUserCompletedEvent(99,
+                SystemService.UserCompletedEventType.EVENT_TYPE_USER_STARTING);
+    }
+
 }

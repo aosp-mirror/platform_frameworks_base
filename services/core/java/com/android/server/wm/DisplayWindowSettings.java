@@ -276,7 +276,7 @@ class DisplayWindowSettings {
         final int width = hasSizeOverride ? settings.mForcedWidth : dc.mInitialDisplayWidth;
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
         final int density = hasDensityOverride ? settings.mForcedDensity
-                : dc.mInitialDisplayDensity;
+                : dc.getInitialDisplayDensity();
         dc.updateBaseDisplayMetrics(width, height, density, dc.mBaseDisplayPhysicalXDpi,
                 dc.mBaseDisplayPhysicalYDpi);
 

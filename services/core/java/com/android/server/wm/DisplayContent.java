@@ -61,6 +61,7 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -94,6 +95,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECOR
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
@@ -182,11 +184,13 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -336,7 +340,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private WindowState mTmpWindow;
     private boolean mUpdateImeTarget;
     private boolean mTmpInitial;
-    private int mMaxUiWidth;
+    private int mMaxUiWidth = 0;
 
     final AppTransition mAppTransition;
     final AppTransitionController mAppTransitionController;
@@ -361,9 +365,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Initial display metrics.
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
-    int mInitialDisplayDensity = 0;
     float mInitialPhysicalXDpi = 0.0f;
     float mInitialPhysicalYDpi = 0.0f;
+    // The physical density of the display
+    int mInitialDisplayDensity = 0;
 
     private Point mPhysicalDisplaySize;
 
@@ -701,9 +706,32 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mInEnsureActivitiesVisible = false;
 
-    // Used to indicate that the movement of child tasks to top will not move the display to top as
-    // well and thus won't change the top resumed / focused record
+    /**
+     * Used to indicate that the movement of child tasks to top will not move the display to top as
+     * well and thus won't change the top resumed / focused record
+     */
     boolean mDontMoveToTop;
+
+    /** Used for windows that want to keep the screen awake. */
+    private PowerManager.WakeLock mHoldScreenWakeLock;
+
+    /** The current window causing mHoldScreenWakeLock to be held. */
+    private WindowState mHoldScreenWindow;
+
+    /**
+     * Used during updates to temporarily store what will become the next value for
+     * mHoldScreenWindow.
+     */
+    private WindowState mTmpHoldScreenWindow;
+
+    /** Last window that obscures all windows below. */
+    private WindowState mObscuringWindow;
+
+    /** Last window which obscured a window holding the screen locked. */
+    private WindowState mLastWakeLockObscuringWindow;
+
+    /** Last window to hold the screen locked. */
+    private WindowState mLastWakeLockHoldingWindow;
 
     /**
      * The helper of policy controller.
@@ -917,7 +945,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (isDisplayed && w.isObscuringDisplay()) {
                 // This window completely covers everything behind it, so we want to leave all
                 // of them as undimmed (for performance reasons).
-                root.mObscuringWindow = w;
+                mObscuringWindow = w;
                 mTmpApplySurfaceChangesTransactionState.obscured = true;
             }
 
@@ -931,6 +959,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
 
             if (w.mHasSurface && isDisplayed) {
+                if ((w.mAttrs.flags & FLAG_KEEP_SCREEN_ON) != 0) {
+                    mTmpHoldScreenWindow = w;
+                } else if (w == mLastWakeLockHoldingWindow) {
+                    ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
+                            "handleNotObscuredLocked: %s was holding screen wakelock but no longer "
+                                    + "has FLAG_KEEP_SCREEN_ON!!! called by%s",
+                            w, Debug.getCallers(10));
+                }
+
                 final int type = w.mAttrs.type;
                 if (type == TYPE_SYSTEM_DIALOG
                         || type == TYPE_SYSTEM_ERROR
@@ -1038,6 +1075,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentUniqueDisplayId = display.getUniqueId();
         mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
+        mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
@@ -1049,6 +1087,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 calculateRoundedCornersForRotation(mDisplayInfo.rotation),
                 calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
+
+        mHoldScreenWakeLock = mWmService.mPowerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
+                TAG_WM + "/displayId:" + mDisplayId, mDisplayId);
+        mHoldScreenWakeLock.setReferenceCounted(false);
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
         mAppTransition.registerListenerLocked(mWmService.mActivityManagerAppTransitionNotifier);
@@ -1108,6 +1151,37 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Creating display=" + display);
 
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
+    }
+
+    private void beginHoldScreenUpdate() {
+        mTmpHoldScreenWindow = null;
+        mObscuringWindow = null;
+    }
+
+    private void finishHoldScreenUpdate() {
+        final boolean hold = mTmpHoldScreenWindow != null;
+        if (hold && mTmpHoldScreenWindow != mHoldScreenWindow) {
+            mHoldScreenWakeLock.setWorkSource(new WorkSource(mTmpHoldScreenWindow.mSession.mUid));
+        }
+        mHoldScreenWindow = mTmpHoldScreenWindow;
+        mTmpHoldScreenWindow = null;
+
+        final boolean state = mHoldScreenWakeLock.isHeld();
+        if (hold != state) {
+            if (hold) {
+                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "Acquiring screen wakelock due to %s",
+                        mHoldScreenWindow);
+                mLastWakeLockHoldingWindow = mHoldScreenWindow;
+                mLastWakeLockObscuringWindow = null;
+                mHoldScreenWakeLock.acquire();
+            } else {
+                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "Releasing screen wakelock, obscured by %s",
+                        mObscuringWindow);
+                mLastWakeLockHoldingWindow = null;
+                mLastWakeLockObscuringWindow = mObscuringWindow;
+                mHoldScreenWakeLock.release();
+            }
+        }
     }
 
     @Override
@@ -2555,6 +2629,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mCurrentOverrideConfigurationChanges;
     }
 
+    /**
+     * @return The initial display density. This is constrained by config_maxUIWidth.
+     */
+    int getInitialDisplayDensity() {
+        int density = mInitialDisplayDensity;
+        if (mMaxUiWidth > 0 && mInitialDisplayWidth > mMaxUiWidth) {
+            density = (int) ((density * mMaxUiWidth) / (float) mInitialDisplayWidth);
+        }
+        return density;
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int lastOrientation = getConfiguration().orientation;
@@ -2883,7 +2968,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      *               so only need to configure display.
      */
     void setForcedDensity(int density, int userId) {
-        mIsDensityForced = density != mInitialDisplayDensity;
+        mIsDensityForced = density != getInitialDisplayDensity();
         final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
         if (mWmService.mCurrentUserId == userId || updateCurrent) {
             mBaseDisplayDensity = density;
@@ -2894,7 +2979,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
 
-        if (density == mInitialDisplayDensity) {
+        if (density == getInitialDisplayDensity()) {
             density = 0;
         }
         mWmService.mDisplayWindowSettings.setForcedDensity(this, density, userId);
@@ -3199,6 +3284,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWmService.mAccessibilityController.onDisplayRemoved(mDisplayId);
             mRootWindowContainer.mTaskSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
+            mWallpaperController.resetLargestDisplay(mDisplay);
         } finally {
             mDisplayReady = false;
         }
@@ -3454,6 +3540,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mFixedRotationLaunchingApp != null) {
             pw.println("  mFixedRotationLaunchingApp=" + mFixedRotationLaunchingApp);
         }
+
+        pw.println();
+        pw.print(prefix + "mHoldScreenWindow="); pw.print(mHoldScreenWindow);
+        pw.println();
+        pw.print(prefix + "mObscuringWindow="); pw.print(mObscuringWindow);
+        pw.println();
+        pw.print(prefix + "mLastWakeLockHoldingWindow="); pw.print(mLastWakeLockHoldingWindow);
+        pw.println();
+        pw.print(prefix + "mLastWakeLockObscuringWindow=");
+        pw.println(mLastWakeLockObscuringWindow);
 
         pw.println();
         mWallpaperController.dump(pw, "  ");
@@ -4675,6 +4771,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void applySurfaceChangesTransaction() {
         final WindowSurfacePlacer surfacePlacer = mWmService.mWindowPlacerLocked;
 
+        beginHoldScreenUpdate();
+
         mTmpUpdateAllDrawn.clear();
 
         if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("On entry to LockedInner",
@@ -4750,6 +4848,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // can now be shown.
             activity.updateAllDrawn();
         }
+
+        finishHoldScreenUpdate();
     }
 
     private void getBounds(Rect out, @Rotation int rotation) {
@@ -5769,6 +5869,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 updateRecording();
             }
         }
+        // Notify wallpaper controller of any size changes.
+        mWallpaperController.resetLargestDisplay(mDisplay);
         // Dispatch pending Configuration to WindowContext if the associated display changes to
         // un-suspended state from suspended.
         if (isSuspendedState(lastDisplayState)
