@@ -57,6 +57,9 @@ class BackNavigationController {
     private static final String TAG = "BackNavigationController";
     private WindowManagerService mWindowManagerService;
     private IWindowFocusObserver mFocusObserver;
+    private boolean mBackAnimationInProgress;
+    private boolean mShowWallpaper;
+    private Runnable mPendingAnimation;
 
     /**
      * Returns true if the back predictability feature is enabled
@@ -208,6 +211,7 @@ class BackNavigationController {
                 return infoBuilder.setType(backType).build();
             }
 
+            mBackAnimationInProgress = true;
             // We don't have an application callback, let's find the destination of the back gesture
             Task finalTask = currentTask;
             prevActivity = currentTask.getActivity(
@@ -228,6 +232,7 @@ class BackNavigationController {
                 // Our Task should bring back to home
                 removedWindowContainer = currentTask;
                 backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
+                mShowWallpaper = true;
             } else if (currentActivity.isRootOfTask()) {
                 // TODO(208789724): Create single source of truth for this, maybe in
                 //  RootWindowContainer
@@ -240,6 +245,7 @@ class BackNavigationController {
                 } else {
                     backType = BackNavigationInfo.TYPE_CROSS_TASK;
                 }
+                mShowWallpaper = true;
             }
             infoBuilder.setType(backType);
 
@@ -369,6 +375,13 @@ class BackNavigationController {
             }
         }
 
+        if (mShowWallpaper) {
+            currentTask.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
+            // TODO(b/241808055): If the current animation need to show wallpaper and animate the
+            //  wallpaper, start the wallpaper animation to collect wallpaper target and deliver it
+            //  to the back animation controller.
+        }
+
         final RemoteAnimationTarget[] targets = (behindAppTarget == null)
                 ? new RemoteAnimationTarget[] {topAppTarget}
                 : new RemoteAnimationTarget[] {topAppTarget, behindAppTarget};
@@ -399,7 +412,7 @@ class BackNavigationController {
                     }
                 };
 
-        startAnimation(backType, targets, adapter, callback);
+        scheduleAnimationLocked(backType, targets, adapter, callback);
     }
 
     @NonNull
@@ -445,17 +458,38 @@ class BackNavigationController {
     }
 
     @VisibleForTesting
-    void startAnimation(@BackNavigationInfo.BackTargetType int type,
+    void scheduleAnimationLocked(@BackNavigationInfo.BackTargetType int type,
             RemoteAnimationTarget[] targets, BackAnimationAdapter backAnimationAdapter,
             IBackAnimationFinishedCallback callback) {
-        mWindowManagerService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
+        mPendingAnimation = () -> {
             try {
                 backAnimationAdapter.getRunner().onAnimationStart(type,
                         targets, null, null, callback);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-        });
+        };
+        mWindowManagerService.mWindowPlacerLocked.requestTraversal();
+    }
+
+    void checkAnimationReady(WallpaperController wallpaperController) {
+        if (!mBackAnimationInProgress) {
+            return;
+        }
+
+        final boolean wallpaperReady = !mShowWallpaper
+                || (wallpaperController.getWallpaperTarget() != null
+                && wallpaperController.wallpaperTransitionReady());
+        if (wallpaperReady && mPendingAnimation != null) {
+            startAnimation();
+        }
+    }
+
+    void startAnimation() {
+        if (mPendingAnimation != null) {
+            mPendingAnimation.run();
+            mPendingAnimation = null;
+        }
     }
 
     private void onBackNavigationDone(Bundle result, WindowState focusedWindow, int backType) {
@@ -468,6 +502,8 @@ class BackNavigationController {
             focusedWindow.unregisterFocusObserver(mFocusObserver);
             mFocusObserver = null;
         }
+        mBackAnimationInProgress = false;
+        mShowWallpaper = false;
     }
 
     private HardwareBuffer getActivitySnapshot(@NonNull Task task,
@@ -543,5 +579,12 @@ class BackNavigationController {
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
                 activity);
+    }
+
+    boolean isWallpaperVisible(WindowState w) {
+        if (mBackAnimationInProgress && w.isFocused()) {
+            return mShowWallpaper;
+        }
+        return false;
     }
 }

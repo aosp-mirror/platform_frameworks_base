@@ -460,7 +460,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private final ClientLifecycleManager mLifecycleManager;
 
     @Nullable
-    private final BackNavigationController mBackNavigationController;
+    final BackNavigationController mBackNavigationController;
 
     private TaskChangeNotificationController mTaskChangeNotificationController;
     /** The controller for all operations related to locktask. */

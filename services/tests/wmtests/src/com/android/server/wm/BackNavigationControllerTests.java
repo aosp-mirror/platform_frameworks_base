@@ -90,7 +90,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
 
         // verify if back animation would start.
-        verify(mBackNavigationController).startAnimation(
+        verify(mBackNavigationController).scheduleAnimationLocked(
                 eq(BackNavigationInfo.TYPE_RETURN_TO_HOME), any(), eq(mBackAnimationAdapter),
                 any());
     }
