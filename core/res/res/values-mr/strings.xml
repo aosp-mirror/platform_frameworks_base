@@ -166,7 +166,7 @@
     <string name="httpErrorIO" msgid="3860318696166314490">"या सर्व्हरशी संवाद प्रस्थापित करू शकलो नाही. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"सर्व्हरवरील कनेक्शन टाइमआउट झाले."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"पृष्ठामध्ये बरीच सर्व्हर पुनर्निर्देशने आहेत."</string>
-    <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"प्रोटोकॉल समर्थित नाही."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"प्रोटोकॉलला सपोर्ट नाही."</string>
     <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"सुरक्षित कनेक्शन इंस्टॉल करू शकलो नाही."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL अवैध असल्यामुळे पेज उघडू शकलो नाही."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"फायलीवर प्रवेश करू शकलो नाही."</string>
@@ -1003,7 +1003,7 @@
     <string name="granularity_label_link" msgid="9007852307112046526">"लिंक"</string>
     <string name="granularity_label_line" msgid="376204904280620221">"रेखा"</string>
     <string name="factorytest_failed" msgid="3190979160945298006">"फॅक्टरी चाचणी अयशस्वी"</string>
-    <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST क्रिया फक्त /सिस्टम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी समर्थित आहे."</string>
+    <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
@@ -1434,7 +1434,7 @@
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"केवळ-वाचनीय"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"असुरक्षितपणे काढले"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"दूषित झाले"</string>
-    <string name="ext_media_status_unsupported" msgid="5460509911660539317">"समर्थित नसलेले"</string>
+    <string name="ext_media_status_unsupported" msgid="5460509911660539317">"सपोर्ट नसलेले"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"बाहेर काढत आहे…"</string>
     <string name="ext_media_status_formatting" msgid="774148701503179906">"फॉर्मेट करत आहे..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"घातले नाही"</string>
