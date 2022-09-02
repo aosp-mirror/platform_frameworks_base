@@ -103,7 +103,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private final Runnable mTimeoutRunnable = this::timeout;
 
-    private boolean mStopAfterFirstMatch;;
+    private boolean mStopAfterFirstMatch;
 
     /**
      * A state enum for devices' discovery.
