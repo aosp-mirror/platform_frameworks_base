@@ -7618,7 +7618,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         createEditorIfNeeded();
         mEditor.setError(error, icon);
         notifyViewAccessibilityStateChangedIfNeeded(
-                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_INVALID);
     }
 
     @Override
