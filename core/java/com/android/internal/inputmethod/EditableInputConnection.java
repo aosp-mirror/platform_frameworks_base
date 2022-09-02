@@ -278,7 +278,7 @@ public final class EditableInputConnection extends BaseInputConnection
         } else if (gesture instanceof InsertGesture) {
             result = mTextView.performHandwritingInsertGesture((InsertGesture) gesture);
         } else {
-            result = 0;
+            result = HANDWRITING_GESTURE_RESULT_UNSUPPORTED;
         }
         if (executor != null && consumer != null) {
             executor.execute(() -> consumer.accept(result));
