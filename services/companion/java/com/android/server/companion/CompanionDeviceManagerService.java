@@ -480,6 +480,10 @@ public class CompanionDeviceManagerService extends SystemService {
         for (AssociationInfo association : associationsForPackage) {
             mAssociationStore.removeAssociation(association.getId());
         }
+        // Clear role holders
+        for (AssociationInfo association : associationsForPackage) {
+            maybeRemoveRoleHolderForAssociation(association);
+        }
 
         mCompanionAppController.onPackagesChanged(userId);
     }
