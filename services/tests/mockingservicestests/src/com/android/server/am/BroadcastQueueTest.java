@@ -168,10 +168,14 @@ public class BroadcastQueueTest {
                 return false;
             }
         };
+        final BroadcastHistory emptyHistory = new BroadcastHistory() {
+            public void addBroadcastToHistoryLocked(BroadcastRecord original) {
+            }
+        };
 
         if (mImpl == Impl.DEFAULT) {
             mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
-                    constants, emptySkipPolicy, false);
+                    constants, emptySkipPolicy, emptyHistory, false);
         } else {
             throw new UnsupportedOperationException();
         }

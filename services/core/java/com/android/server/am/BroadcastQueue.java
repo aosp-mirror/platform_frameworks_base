@@ -41,16 +41,18 @@ public abstract class BroadcastQueue {
     final @NonNull Handler mHandler;
     final @NonNull BroadcastConstants mConstants;
     final @NonNull BroadcastSkipPolicy mSkipPolicy;
+    final @NonNull BroadcastHistory mHistory;
     final @NonNull String mQueueName;
 
     BroadcastQueue(@NonNull ActivityManagerService service, @NonNull Handler handler,
             @NonNull String name, @NonNull BroadcastConstants constants,
-            @NonNull BroadcastSkipPolicy skipPolicy) {
+            @NonNull BroadcastSkipPolicy skipPolicy, @NonNull BroadcastHistory history) {
         mService = Objects.requireNonNull(service);
         mHandler = Objects.requireNonNull(handler);
         mQueueName = Objects.requireNonNull(name);
         mConstants = Objects.requireNonNull(constants);
         mSkipPolicy = Objects.requireNonNull(skipPolicy);
+        mHistory = Objects.requireNonNull(history);
     }
 
     void start(@NonNull ContentResolver resolver) {
