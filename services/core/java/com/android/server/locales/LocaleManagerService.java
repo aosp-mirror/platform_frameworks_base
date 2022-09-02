@@ -94,9 +94,11 @@ public class LocaleManagerService extends SystemService {
 
         mBackupHelper = new LocaleManagerBackupHelper(this,
                 mPackageManager, broadcastHandlerThread);
+        AppUpdateTracker appUpdateTracker =
+                new AppUpdateTracker(mContext, this, mBackupHelper);
 
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
-                systemAppUpdateTracker);
+                systemAppUpdateTracker, appUpdateTracker);
         mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
                 UserHandle.ALL,
                 true);

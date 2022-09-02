@@ -359,7 +359,7 @@ class LocaleManagerBackupHelper {
             if (!currLocales.isEmpty()) {
                 return;
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Could not check for current locales before restoring", e);
         }
 
@@ -580,16 +580,16 @@ class LocaleManagerBackupHelper {
         }
 
         SharedPreferences.Editor editor = mDelegateAppLocalePackages.edit();
-        String key = Integer.toString(userId);
+        String user = Integer.toString(userId);
         Set<String> packageNames = new ArraySet<>(
-                mDelegateAppLocalePackages.getStringSet(key, new ArraySet<>()));
+                mDelegateAppLocalePackages.getStringSet(user, new ArraySet<>()));
         if (fromDelegate && !emptyLocales) {
             if (!packageNames.contains(packageName)) {
                 if (DEBUG) {
                     Slog.d(TAG, "persist package: " + packageName);
                 }
                 packageNames.add(packageName);
-                editor.putStringSet(key, packageNames);
+                editor.putStringSet(user, packageNames);
             }
         } else {
             // Remove the package name if per-app locales was not set from the delegate selector
@@ -599,7 +599,7 @@ class LocaleManagerBackupHelper {
                     Slog.d(TAG, "remove package: " + packageName);
                 }
                 packageNames.remove(packageName);
-                editor.putStringSet(key, packageNames);
+                editor.putStringSet(user, packageNames);
             }
         }
 
