@@ -15684,6 +15684,7 @@ package android.graphics {
     method public static android.graphics.Typeface createFromFile(@Nullable String);
     method public static android.graphics.Typeface defaultFromStyle(int);
     method public int getStyle();
+    method @Nullable public final String getSystemFontFamilyName();
     method @IntRange(from=0, to=1000) public int getWeight();
     method public final boolean isBold();
     method public final boolean isItalic();
