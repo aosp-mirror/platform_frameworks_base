@@ -3353,8 +3353,7 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, newIndex);
             }
 
-            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
+            if (AudioSystem.isLeAudioDeviceType(device)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -4110,8 +4109,7 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, index);
             }
 
-            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
+            if (AudioSystem.isLeAudioDeviceType(device)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -6950,7 +6948,8 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
         }
         if (isAbsoluteVolumeDevice(audioSystemDeviceOut)
-                || isA2dpAbsoluteVolumeDevice(audioSystemDeviceOut)) {
+                || isA2dpAbsoluteVolumeDevice(audioSystemDeviceOut)
+                || AudioSystem.isLeAudioDeviceType(audioSystemDeviceOut)) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
         }
         return AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE;
@@ -7717,7 +7716,9 @@ public class AudioService extends IAudioService.Stub
             int index;
             if (isFullyMuted()) {
                 index = 0;
-            } else if (isAbsoluteVolumeDevice(device) || isA2dpAbsoluteVolumeDevice(device)) {
+            } else if (isAbsoluteVolumeDevice(device)
+                    || isA2dpAbsoluteVolumeDevice(device)
+                    || AudioSystem.isLeAudioDeviceType(device)) {
                 index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
             } else if (isFullVolumeDevice(device)) {
                 index = (mIndexMax + 5)/10;
@@ -7739,7 +7740,8 @@ public class AudioService extends IAudioService.Stub
                         if (isFullyMuted()) {
                             index = 0;
                         } else if (isAbsoluteVolumeDevice(device)
-                                || isA2dpAbsoluteVolumeDevice(device)) {
+                                || isA2dpAbsoluteVolumeDevice(device)
+                                || AudioSystem.isLeAudioDeviceType(device)) {
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if (isFullVolumeDevice(device)) {
                             index = (mIndexMax + 5)/10;
@@ -8160,7 +8162,8 @@ public class AudioService extends IAudioService.Stub
                     int streamDevice = getDeviceForStream(streamType);
                     if ((device != streamDevice)
                             && (isAbsoluteVolumeDevice(device)
-                            || isA2dpAbsoluteVolumeDevice(device))) {
+                                || isA2dpAbsoluteVolumeDevice(device)
+                                || AudioSystem.isLeAudioDeviceType(device))) {
                         mStreamStates[streamType].applyDeviceVolume_syncVSS(device);
                     }
                     mStreamStates[streamType].applyDeviceVolume_syncVSS(streamDevice);
