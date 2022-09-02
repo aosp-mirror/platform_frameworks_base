@@ -27,10 +27,12 @@ namespace android {
 
 // --- SpriteController ---
 
-SpriteController::SpriteController(const sp<Looper>& looper, int32_t overlayLayer) :
-        mLooper(looper), mOverlayLayer(overlayLayer) {
+SpriteController::SpriteController(const sp<Looper>& looper, int32_t overlayLayer,
+                                   ParentSurfaceProvider parentSurfaceProvider)
+      : mLooper(looper),
+        mOverlayLayer(overlayLayer),
+        mParentSurfaceProvider(std::move(parentSurfaceProvider)) {
     mHandler = new WeakMessageHandler(this);
-
     mLocked.transactionNestingCount = 0;
     mLocked.deferredSpriteUpdate = false;
 }
@@ -68,8 +70,8 @@ void SpriteController::closeTransaction() {
 }
 
 void SpriteController::invalidateSpriteLocked(const sp<SpriteImpl>& sprite) {
-    bool wasEmpty = mLocked.invalidatedSprites.isEmpty();
-    mLocked.invalidatedSprites.push(sprite);
+    bool wasEmpty = mLocked.invalidatedSprites.empty();
+    mLocked.invalidatedSprites.push_back(sprite);
     if (wasEmpty) {
         if (mLocked.transactionNestingCount != 0) {
             mLocked.deferredSpriteUpdate = true;
@@ -80,8 +82,8 @@ void SpriteController::invalidateSpriteLocked(const sp<SpriteImpl>& sprite) {
 }
 
 void SpriteController::disposeSurfaceLocked(const sp<SurfaceControl>& surfaceControl) {
-    bool wasEmpty = mLocked.disposedSurfaces.isEmpty();
-    mLocked.disposedSurfaces.push(surfaceControl);
+    bool wasEmpty = mLocked.disposedSurfaces.empty();
+    mLocked.disposedSurfaces.push_back(surfaceControl);
     if (wasEmpty) {
         mLooper->sendMessage(mHandler, Message(MSG_DISPOSE_SURFACES));
     }
@@ -111,7 +113,7 @@ void SpriteController::doUpdateSprites() {
 
         numSprites = mLocked.invalidatedSprites.size();
         for (size_t i = 0; i < numSprites; i++) {
-            const sp<SpriteImpl>& sprite = mLocked.invalidatedSprites.itemAt(i);
+            const sp<SpriteImpl>& sprite = mLocked.invalidatedSprites[i];
 
             updates.push(SpriteUpdate(sprite, sprite->getStateLocked()));
             sprite->resetDirtyLocked();
@@ -168,7 +170,7 @@ void SpriteController::doUpdateSprites() {
 
         // If surface is a new one, we have to set right layer stack.
         if (update.surfaceChanged || update.state.dirty & DIRTY_DISPLAY_ID) {
-            t.setLayerStack(update.state.surfaceControl, update.state.displayId);
+            t.reparent(update.state.surfaceControl, mParentSurfaceProvider(update.state.displayId));
             needApplyTransaction = true;
         }
     }
@@ -303,13 +305,20 @@ void SpriteController::doUpdateSprites() {
 
 void SpriteController::doDisposeSurfaces() {
     // Collect disposed surfaces.
-    Vector<sp<SurfaceControl> > disposedSurfaces;
+    std::vector<sp<SurfaceControl>> disposedSurfaces;
     { // acquire lock
         AutoMutex _l(mLock);
 
         disposedSurfaces = mLocked.disposedSurfaces;
         mLocked.disposedSurfaces.clear();
     } // release lock
+
+    // Remove the parent from all surfaces.
+    SurfaceComposerClient::Transaction t;
+    for (const sp<SurfaceControl>& sc : disposedSurfaces) {
+        t.reparent(sc, nullptr);
+    }
+    t.apply();
 
     // Release the last reference to each surface outside of the lock.
     // We don't want the surfaces to be deleted while we are holding our lock.

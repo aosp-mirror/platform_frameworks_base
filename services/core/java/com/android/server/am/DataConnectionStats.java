@@ -73,8 +73,7 @@ public class DataConnectionStats extends BroadcastReceiver {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SIM_STATE_CHANGED);
-        mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler,
-                Context.RECEIVER_NOT_EXPORTED);
+        mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler);
     }
 
     @Override
@@ -110,7 +109,7 @@ public class DataConnectionStats extends BroadcastReceiver {
         }
         try {
             mBatteryStats.notePhoneDataConnectionState(networkType, visible,
-                    mServiceState.getState());
+                    mServiceState.getState(), mServiceState.getNrFrequencyRange());
         } catch (RemoteException e) {
             Log.w(TAG, "Error noting data connection state", e);
         }

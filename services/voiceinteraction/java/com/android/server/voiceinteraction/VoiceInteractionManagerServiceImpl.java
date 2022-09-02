@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
+import android.app.ApplicationExitInfo;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -38,6 +39,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -53,6 +56,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
+import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -67,6 +71,7 @@ import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -76,6 +81,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
@@ -83,15 +89,20 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     final static String CLOSE_REASON_VOICE_INTERACTION = "voiceinteraction";
 
+    /** The delay time for retrying to request DirectActions. */
+    private static final long REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS = 200;
+
     final boolean mValid;
 
     final Context mContext;
     final Handler mHandler;
+    final Handler mDirectActionsHandler;
     final VoiceInteractionManagerService.VoiceInteractionManagerServiceStub mServiceStub;
     final int mUser;
     final ComponentName mComponent;
     final IActivityManager mAm;
     final IActivityTaskManager mAtm;
+    final PackageManagerInternal mPackageManagerInternal;
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
@@ -102,6 +113,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
+    int mDetectorType;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -147,6 +159,32 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 resetHotwordDetectionConnectionLocked();
             }
         }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            Slog.d(TAG, "onBindingDied to " + name);
+            String packageName = name.getPackageName();
+            ParceledListSlice<ApplicationExitInfo> plistSlice = null;
+            try {
+                plistSlice = mAm.getHistoricalProcessExitReasons(packageName, 0, 1, mUser);
+            } catch (RemoteException e) {
+                // do nothing. The local binder so it can not throw it.
+            }
+            if (plistSlice == null) {
+                return;
+            }
+            List<ApplicationExitInfo> list = plistSlice.getList();
+            if (list.isEmpty()) {
+                return;
+            }
+            // TODO(b/229956310): Refactor the logic of PackageMonitor and onBindingDied
+            ApplicationExitInfo info = list.get(0);
+            if (info.getReason() == ApplicationExitInfo.REASON_USER_REQUESTED
+                    && info.getSubReason() == ApplicationExitInfo.SUBREASON_STOP_APP) {
+                // only handle user stopped the application from the task manager
+                mServiceStub.handleUserStop(packageName, mUser);
+            }
+        }
     };
 
     VoiceInteractionManagerServiceImpl(Context context, Handler handler,
@@ -154,11 +192,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             int userHandle, ComponentName service) {
         mContext = context;
         mHandler = handler;
+        mDirectActionsHandler = new Handler(true);
         mServiceStub = stub;
         mUser = userHandle;
         mComponent = service;
         mAm = ActivityManager.getService();
         mAtm = ActivityTaskManager.getService();
+        mPackageManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(PackageManagerInternal.class));
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -190,7 +231,17 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
+        mContext.registerReceiver(mBroadcastReceiver, filter, null, handler,
+                Context.RECEIVER_EXPORTED);
+    }
+
+    public void grantImplicitAccessLocked(int grantRecipientUid, @Nullable Intent intent) {
+        final int grantRecipientAppId = UserHandle.getAppId(grantRecipientUid);
+        final int grantRecipientUserId = UserHandle.getUserId(grantRecipientUid);
+        final int voiceInteractionUid = mInfo.getServiceInfo().applicationInfo.uid;
+        mPackageManagerInternal.grantImplicitAccess(
+                grantRecipientUserId, intent, grantRecipientAppId, voiceInteractionUid,
+                /* direct= */ true);
     }
 
     public boolean showSessionLocked(Bundle args, int flags,
@@ -308,18 +359,49 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             callback.sendResult(null);
             return;
         }
-        final ActivityTokens tokens = LocalServices.getService(
-                ActivityTaskManagerInternal.class).getTopActivityForTask(taskId);
+        final ActivityTokens tokens = LocalServices.getService(ActivityTaskManagerInternal.class)
+                .getAttachedNonFinishingActivityForTask(taskId, null);
         if (tokens == null || tokens.getAssistToken() != assistToken) {
             Slog.w(TAG, "Unknown activity to query for direct actions");
-            callback.sendResult(null);
+            mDirectActionsHandler.sendMessageDelayed(PooledLambda.obtainMessage(
+                    VoiceInteractionManagerServiceImpl::retryRequestDirectActions,
+                    VoiceInteractionManagerServiceImpl.this, token, taskId, assistToken,
+                    cancellationCallback, callback), REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS);
         } else {
+            grantImplicitAccessLocked(tokens.getUid(), /* intent= */ null);
             try {
                 tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
                         mActiveSession.mInteractor, cancellationCallback, callback);
             } catch (RemoteException e) {
                 Slog.w("Unexpected remote error", e);
                 callback.sendResult(null);
+            }
+        }
+    }
+
+    private void retryRequestDirectActions(@NonNull IBinder token, int taskId,
+            @NonNull IBinder assistToken,  @Nullable RemoteCallback cancellationCallback,
+            @NonNull RemoteCallback callback) {
+        synchronized (mServiceStub) {
+            if (mActiveSession == null || token != mActiveSession.mToken) {
+                Slog.w(TAG, "retryRequestDirectActions does not match active session");
+                callback.sendResult(null);
+                return;
+            }
+            final ActivityTokens tokens = LocalServices.getService(
+                            ActivityTaskManagerInternal.class)
+                    .getAttachedNonFinishingActivityForTask(taskId, null);
+            if (tokens == null || tokens.getAssistToken() != assistToken) {
+                Slog.w(TAG, "Unknown activity to query for direct actions during retrying");
+                callback.sendResult(null);
+            } else {
+                try {
+                    tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
+                            mActiveSession.mInteractor, cancellationCallback, callback);
+                } catch (RemoteException e) {
+                    Slog.w("Unexpected remote error", e);
+                    callback.sendResult(null);
+                }
             }
         }
     }
@@ -333,8 +415,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             resultCallback.sendResult(null);
             return;
         }
-        final ActivityTokens tokens = LocalServices.getService(
-                ActivityTaskManagerInternal.class).getTopActivityForTask(taskId);
+        final ActivityTokens tokens = LocalServices.getService(ActivityTaskManagerInternal.class)
+                .getAttachedNonFinishingActivityForTask(taskId, null);
         if (tokens == null || tokens.getAssistToken() != assistToken) {
             Slog.w(TAG, "Unknown activity to perform a direct action");
             resultCallback.sendResult(null);
@@ -456,26 +538,36 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             @NonNull Identity voiceInteractorIdentity,
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
-            IHotwordRecognitionStatusCallback callback) {
+            IHotwordRecognitionStatusCallback callback,
+            int detectorType) {
         Slog.v(TAG, "updateStateLocked");
+        int voiceInteractionServiceUid = mInfo.getServiceInfo().applicationInfo.uid;
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service name not found");
         }
         ServiceInfo hotwordDetectionServiceInfo = getServiceInfoLocked(
                 mHotwordDetectionComponentName, mUser);
         if (hotwordDetectionServiceInfo == null) {
             Slog.w(TAG, "Hotword detection service info not found");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service info not found");
         }
         if (!isIsolatedProcessLocked(hotwordDetectionServiceInfo)) {
             Slog.w(TAG, "Hotword detection service not in isolated process");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Hotword detection service not in isolated process");
         }
         if (!Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE.equals(
                 hotwordDetectionServiceInfo.permission)) {
             Slog.w(TAG, "Hotword detection service does not require permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new SecurityException("Hotword detection service does not require permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
         }
@@ -484,23 +576,40 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 mInfo.getServiceInfo().packageName) == PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Voice interaction service should not hold permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new SecurityException("Voice interaction service should not hold permission "
                     + Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE);
         }
 
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");
+            logDetectorCreateEventIfNeeded(callback, detectorType, false,
+                    voiceInteractionServiceUid);
             throw new IllegalStateException("Can't set sharedMemory to be read-only");
         }
 
+        mDetectorType = detectorType;
+
+        logDetectorCreateEventIfNeeded(callback, detectorType, true,
+                voiceInteractionServiceUid);
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory, callback);
+                    options, sharedMemory, callback, detectorType);
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
+    }
+
+    private void logDetectorCreateEventIfNeeded(IHotwordRecognitionStatusCallback callback,
+            int detectorType, boolean isCreated, int voiceInteractionServiceUid) {
+        if (callback != null) {
+            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, true,
+                    voiceInteractionServiceUid);
+        }
+
     }
 
     public void shutdownHotwordDetectionServiceLocked() {
@@ -667,6 +776,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println(Integer.toHexString(mDisabledShowContext));
         }
         pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
+        pw.print("  mDetectorType=");
+        pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
         if (mHotwordDetectionConnection != null) {
             pw.println("  Hotword detection connection:");
             mHotwordDetectionConnection.dump("    ", pw);

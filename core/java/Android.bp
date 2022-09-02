@@ -15,6 +15,14 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
+    exclude_srcs: [
+        // Remove election toolbar code from build time
+        "android/service/selectiontoolbar/*.aidl",
+        "android/service/selectiontoolbar/*.java",
+        "android/view/selectiontoolbar/*.aidl",
+        "android/view/selectiontoolbar/*.java",
+        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
+    ],
     visibility: ["//frameworks/base"],
 }
 
@@ -29,6 +37,11 @@ filegroup {
 }
 
 filegroup {
+    name: "IBinaryTransparencyService.aidl",
+    srcs: ["com/android/internal/os/IBinaryTransparencyService.aidl"],
+}
+
+filegroup {
     name: "ITracingServiceProxy.aidl",
     srcs: ["android/tracing/ITracingServiceProxy.aidl"],
 }
@@ -36,6 +49,12 @@ filegroup {
 filegroup {
     name: "TraceReportParams.aidl",
     srcs: ["android/tracing/TraceReportParams.aidl"],
+}
+
+filegroup {
+    name: "framework-internal-display-sources",
+    srcs: ["com/android/internal/display/BrightnessSynchronizer.java"],
+    visibility: ["//frameworks/base/services/tests/mockingservicestests"],
 }
 
 // These are subset of framework-core-sources that are needed by the
@@ -123,7 +142,13 @@ filegroup {
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
         "android/os/IPowerManager.aidl",
+        "android/os/IWakeLockCallback.aidl",
     ],
+}
+
+filegroup {
+    name: "ILogcatManagerService_aidl",
+    srcs: ["android/os/logcat/ILogcatManagerService.aidl"],
 }
 
 genrule {
@@ -134,23 +159,29 @@ genrule {
     out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
+// Library that provides functionality to log UiEvents in framework space.
+// If this functionality is needed outside the framework, the interfaces library
+// can be re-used and a local implementation is needed.
 java_library {
     name: "uieventloggerlib",
     srcs: [
-        "com/android/internal/logging/UiEvent.java",
-        "com/android/internal/logging/UiEventLogger.java",
         "com/android/internal/logging/UiEventLoggerImpl.java",
-        "com/android/internal/logging/InstanceId.java",
-        "com/android/internal/logging/InstanceIdSequence.java",
         ":statslog-framework-java-gen",
     ],
+    static_libs: ["modules-utils-uieventlogger-interface"],
 }
 
-filegroup {
-    name: "framework-services-net-module-wifi-shared-srcs",
-    srcs: [
-        "android/util/LocalLog.java",
+java_library {
+    name: "modules-utils-locallog",
+    srcs: ["android/util/LocalLog.java"],
+    libs: ["unsupportedappusage"],
+    sdk_version: "module_current",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform",
     ],
+    visibility: ["//visibility:public"],
 }
 
 // keep these files in sync with the package/Tethering/jarjar-rules.txt and
@@ -164,8 +195,6 @@ filegroup {
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
-        // TODO: delete as soon as NetworkStatsFactory stops using
-        "com/android/internal/util/ProcFileReader.java",
     ],
 }
 
@@ -317,6 +346,17 @@ cc_library {
     ],
 }
 
+cc_library {
+    name: "libactivity_manager_procstate_aidl-cpp",
+    host_supported: true,
+    srcs: [
+        ":activity_manager_procstate_aidl",
+    ],
+    aidl: {
+        export_aidl_headers: true,
+    },
+}
+
 // Build Rust bindings for PermissionController. Needed by keystore2.
 aidl_interface {
     name: "android.os.permissions_aidl",
@@ -372,36 +412,6 @@ filegroup {
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/UserIcons.java",
-    ],
-}
-
-// Avoid including Parcelable classes as we don't want to have two copies of
-// Parcelable cross the process.
-filegroup {
-    name: "framework-cellbroadcast-shared-srcs",
-    srcs: [
-        "android/util/LocalLog.java",
-    ],
-}
-
-java_library {
-    name: "modules-utils-statemachine",
-    srcs: [
-        "com/android/internal/util/IState.java",
-        "com/android/internal/util/State.java",
-        "com/android/internal/util/StateMachine.java",
-    ],
-    libs: [
-        "framework-annotations-lib",
-        "unsupportedappusage",
-    ],
-    sdk_version: "module_current",
-    min_sdk_version: "29",
-
-    visibility: ["//visibility:public"],
-    apex_available: [
-        "//apex_available:anyapex",
-        "//apex_available:platform",
     ],
 }
 

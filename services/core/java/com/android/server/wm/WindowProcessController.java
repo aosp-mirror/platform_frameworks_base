@@ -821,10 +821,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // TODO(b/199277065): Re-assess how app-specific locales are applied based on UXR
     // TODO(b/199277729): Consider whether we need to add special casing for edge cases like
     //  activity-embeddings etc.
-    void updateAppSpecificSettingsForAllActivities(Integer nightMode, LocaleList localesOverride) {
+    void updateAppSpecificSettingsForAllActivitiesInPackage(String packageName, Integer nightMode,
+            LocaleList localesOverride) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            if (r.applyAppSpecificConfig(nightMode, localesOverride) && r.mVisibleRequested) {
+            // Activities from other packages could be sharing this process. Only propagate updates
+            // to those activities that are part of the package whose app-specific settings changed
+            if (packageName.equals(r.packageName)
+                    && r.applyAppSpecificConfig(nightMode, localesOverride)
+                    && r.mVisibleRequested) {
                 r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
             }
         }
@@ -1123,7 +1128,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /** Makes the process have top state before oom-adj is computed from a posted message. */
     void addToPendingTop() {
-        mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+        mAtm.mAmInternal.addPendingTopUid(mUid, mPid, mThread);
     }
 
     void updateServiceConnectionActivities() {
@@ -1176,7 +1181,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         // update ActivityManagerService.PendingStartActivityUids list.
         if (topProcessState == ActivityManager.PROCESS_STATE_TOP) {
-            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+            mAtm.mAmInternal.addPendingTopUid(mUid, mPid, mThread);
         }
         prepareOomAdjustment();
         // Posting the message at the front of queue so WM lock isn't held when we call into AM,

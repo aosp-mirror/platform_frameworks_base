@@ -88,14 +88,15 @@ public class BatteryStatus {
     }
 
     /**
-     * Determine whether the device is plugged in (USB, power, or wireless).
+     * Determine whether the device is plugged in (USB, power, wireless or dock).
      *
      * @return true if the device is plugged in.
      */
     public boolean isPluggedIn() {
         return plugged == BatteryManager.BATTERY_PLUGGED_AC
                 || plugged == BatteryManager.BATTERY_PLUGGED_USB
-                || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
+                || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
 
     /**
@@ -115,6 +116,15 @@ public class BatteryStatus {
      */
     public boolean isPluggedInWireless() {
         return plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+    }
+
+    /**
+     * Determine whether the device is plugged in dock.
+     *
+     * @return true if the device is plugged in dock
+     */
+    public boolean isPluggedInDock() {
+        return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
 
     /**

@@ -143,7 +143,7 @@ public final class ShortcutQueryWrapper extends LauncherApps.ShortcutQuery imple
         List<LocusId> locusIds = null;
         if ((flg & 0x8) != 0) {
             locusIds = new ArrayList<>();
-            in.readParcelableList(locusIds, LocusId.class.getClassLoader());
+            in.readParcelableList(locusIds, LocusId.class.getClassLoader(), android.content.LocusId.class);
         }
         ComponentName activity = (flg & 0x10) == 0 ? null
                 : (ComponentName) in.readTypedObject(ComponentName.CREATOR);

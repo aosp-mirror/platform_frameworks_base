@@ -1,4 +1,3 @@
-
 package {
     default_applicable_licenses: ["frameworks_base_cmds_abx_license"],
 }
@@ -18,7 +17,7 @@ license {
 
 java_binary {
     name: "abx",
-    wrapper: "abx",
+    wrapper: "abx.sh",
     srcs: ["**/*.java"],
     required: [
         "abx2xml",
@@ -28,10 +27,10 @@ java_binary {
 
 sh_binary {
     name: "abx2xml",
-    src: "abx2xml",
+    src: "abx2xml.sh",
 }
 
 sh_binary {
     name: "xml2abx",
-    src: "xml2abx",
+    src: "xml2abx.sh",
 }

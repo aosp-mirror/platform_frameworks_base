@@ -25,6 +25,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
+
     <ViewStub
         android:id="@+id/keyguard_qs_user_switch_stub"
         android:layout="@layout/keyguard_qs_user_switch"
@@ -61,7 +62,6 @@
             android:id="@+id/lock_icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/lock_icon_padding"
             android:layout_gravity="center"
             android:scaleType="centerCrop"/>
 
@@ -90,10 +90,11 @@
         <FrameLayout
             android:id="@+id/qs_frame"
             android:layout="@layout/qs_panel"
-            android:layout_width="@dimen/qs_panel_width"
+            android:layout_width="0dp"
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:clipChildren="false"
+            android:layout_marginHorizontal="@dimen/notification_panel_margin_horizontal"
             systemui:viewType="com.android.systemui.plugins.qs.QS"
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
@@ -111,9 +112,10 @@
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_marginTop="@dimen/notification_panel_margin_top"
-            android:layout_width="@dimen/notification_panel_width"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/close_handle_underlap"
+            android:layout_marginHorizontal="@dimen/notification_panel_margin_horizontal"
+            android:layout_marginBottom="@dimen/notification_panel_margin_bottom"
             android:importantForAccessibility="no"
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"

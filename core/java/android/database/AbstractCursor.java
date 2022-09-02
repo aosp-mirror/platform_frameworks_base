@@ -224,7 +224,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /* Implementation */
     public AbstractCursor() {
         mPos = -1;
-        mCloseGuard.open("close");
+        mCloseGuard.open("AbstractCursor.close");
     }
 
     @Override

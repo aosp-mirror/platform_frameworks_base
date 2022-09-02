@@ -39,6 +39,7 @@ namespace android {
 
 static struct {
     jmethodID finishInputEvent;
+    jmethodID getNativePtr;
 } gInputQueueClassInfo;
 
 enum {
@@ -135,7 +136,7 @@ void InputQueue::handleMessage(const Message& message) {
     switch(message.what) {
     case MSG_FINISH_INPUT:
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        ScopedLocalRef<jobject> inputQueueObj(env, jniGetReferent(env, mInputQueueWeakGlobal));
+        ScopedLocalRef<jobject> inputQueueObj(env, GetReferent(env, mInputQueueWeakGlobal));
         if (!inputQueueObj.get()) {
             ALOGW("InputQueue was finalized without being disposed");
             return;
@@ -263,8 +264,14 @@ int register_android_view_InputQueue(JNIEnv* env)
     jclass clazz = FindClassOrDie(env, kInputQueuePathName);
     gInputQueueClassInfo.finishInputEvent = GetMethodIDOrDie(env, clazz, "finishInputEvent",
                                                              "(JZ)V");
+    gInputQueueClassInfo.getNativePtr = GetMethodIDOrDie(env, clazz, "getNativePtr", "()J");
 
     return RegisterMethodsOrDie(env, kInputQueuePathName, g_methods, NELEM(g_methods));
+}
+
+AInputQueue* android_view_InputQueue_getNativePtr(JNIEnv* env, jobject inputQueue) {
+    jlong ptr = env->CallLongMethod(inputQueue, gInputQueueClassInfo.getNativePtr);
+    return reinterpret_cast<AInputQueue*>(ptr);
 }
 
 } // namespace android

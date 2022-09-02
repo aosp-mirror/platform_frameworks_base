@@ -39,6 +39,8 @@ import java.util.function.Consumer;
  */
 public class InsetsSourceControl implements Parcelable {
 
+    public static final Insets INVALID_HINTS = Insets.of(-1, -1, -1, -1);
+
     private final @InternalInsetsType int mType;
     private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;

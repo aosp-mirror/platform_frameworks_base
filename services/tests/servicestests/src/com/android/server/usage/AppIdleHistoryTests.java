@@ -22,16 +22,20 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_NOTIFICATION_SEEN;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+import static android.app.usage.UsageStatsManager.standbyBucketToString;
 
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
 
 import java.io.File;
+import java.util.Map;
 
 public class AppIdleHistoryTests extends AndroidTestCase {
 
@@ -65,7 +69,7 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         // Screen On time file should be written right away
         assertTrue(aih.getScreenOnTimeFile().exists());
 
-        aih.writeAppIdleTimes(USER_ID);
+        aih.writeAppIdleTimes(USER_ID, /* elapsedRealtime= */ 2000);
         // stats file should be written now
         assertTrue(new File(new File(mStorageDir, "users/" + USER_ID),
                 AppIdleHistory.APP_IDLE_FILENAME).exists());
@@ -128,7 +132,7 @@ public class AppIdleHistoryTests extends AndroidTestCase {
 
         // Check persistence
         aih.writeAppIdleDurations();
-        aih.writeAppIdleTimes(USER_ID);
+        aih.writeAppIdleTimes(USER_ID, /* elapsedRealtime= */ 3000);
         aih = new AppIdleHistory(mStorageDir, 4000);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_1, USER_ID, 5000), STANDBY_BUCKET_RARE);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_2, USER_ID, 5000), STANDBY_BUCKET_ACTIVE);
@@ -165,7 +169,7 @@ public class AppIdleHistoryTests extends AndroidTestCase {
                 aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000));
         aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 4000, STANDBY_BUCKET_WORKING_SET,
                 REASON_MAIN_TIMEOUT);
-        aih.writeAppIdleTimes(USER_ID);
+        aih.writeAppIdleTimes(USER_ID, /* elapsedRealtime= */ 4000);
 
         aih = new AppIdleHistory(mStorageDir, 5000);
         assertEquals(REASON_MAIN_TIMEOUT, aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000));
@@ -180,11 +184,63 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         aih.reportUsage(null, USER_ID, STANDBY_BUCKET_ACTIVE,
                 REASON_SUB_USAGE_MOVE_TO_FOREGROUND, 2000, 0);
         // Persist data
-        aih.writeAppIdleTimes(USER_ID);
+        aih.writeAppIdleTimes(USER_ID, /* elapsedRealtime= */ 2000);
         // Recover data from disk
         aih = new AppIdleHistory(mStorageDir, 5000);
         // Verify data is intact
         assertEquals(REASON_MAIN_USAGE | REASON_SUB_USAGE_MOVE_TO_FOREGROUND,
                 aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000));
+    }
+
+    public void testBucketExpiryTimes() throws Exception {
+        AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000 /* elapsedRealtime */);
+        aih.reportUsage(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_SUB_USAGE_SLICE_PINNED,
+                2000 /* elapsedRealtime */, 6000 /* expiryRealtime */);
+        assertEquals(5000 /* expectedExpiryTimeMs */, aih.getBucketExpiryTimeMs(PACKAGE_1, USER_ID,
+                STANDBY_BUCKET_WORKING_SET, 2000 /* elapsedRealtime */));
+        aih.reportUsage(PACKAGE_2, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_SUB_USAGE_NOTIFICATION_SEEN,
+                2000 /* elapsedRealtime */, 3000 /* expiryRealtime */);
+        assertEquals(2000 /* expectedExpiryTimeMs */, aih.getBucketExpiryTimeMs(PACKAGE_2, USER_ID,
+                STANDBY_BUCKET_FREQUENT, 2000 /* elapsedRealtime */));
+        aih.writeAppIdleTimes(USER_ID, 4000 /* elapsedRealtime */);
+
+        // Persist data
+        aih = new AppIdleHistory(mStorageDir, 5000 /* elapsedRealtime */);
+        final Map<Integer, Long> expectedExpiryTimes1 = Map.of(
+                STANDBY_BUCKET_ACTIVE, 0L,
+                STANDBY_BUCKET_WORKING_SET, 5000L,
+                STANDBY_BUCKET_FREQUENT, 0L,
+                STANDBY_BUCKET_RARE, 0L,
+                STANDBY_BUCKET_RESTRICTED, 0L
+        );
+        // For PACKAGE_1, only WORKING_SET bucket should have an expiry time.
+        verifyBucketExpiryTimes(aih, PACKAGE_1, USER_ID, 5000 /* elapsedRealtime */,
+                expectedExpiryTimes1);
+        final Map<Integer, Long> expectedExpiryTimes2 = Map.of(
+                STANDBY_BUCKET_ACTIVE, 0L,
+                STANDBY_BUCKET_WORKING_SET, 0L,
+                STANDBY_BUCKET_FREQUENT, 0L,
+                STANDBY_BUCKET_RARE, 0L,
+                STANDBY_BUCKET_RESTRICTED, 0L
+        );
+        // For PACKAGE_2, there shouldn't be any expiry time since the one set earlier would have
+        // elapsed by the time the data was persisted to disk
+        verifyBucketExpiryTimes(aih, PACKAGE_2, USER_ID, 5000 /* elapsedRealtime */,
+                expectedExpiryTimes2);
+    }
+
+    private void verifyBucketExpiryTimes(AppIdleHistory aih, String packageName, int userId,
+            long elapsedRealtimeMs, Map<Integer, Long> expectedExpiryTimesMs) throws Exception {
+        for (Map.Entry<Integer, Long> entry : expectedExpiryTimesMs.entrySet()) {
+            final int bucket = entry.getKey();
+            final long expectedExpiryTimeMs = entry.getValue();
+            final long actualExpiryTimeMs = aih.getBucketExpiryTimeMs(packageName, userId, bucket,
+                    elapsedRealtimeMs);
+            assertEquals("Unexpected expiry time for pkg=" + packageName + ", userId=" + userId
+                            + ", bucket=" + standbyBucketToString(bucket),
+                    expectedExpiryTimeMs, actualExpiryTimeMs);
+        }
     }
 }

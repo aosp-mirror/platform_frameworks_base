@@ -16,6 +16,9 @@
 
 package com.android.server.notification;
 
+import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
+import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,6 +33,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.pm.PackageManagerService;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 /**
@@ -89,8 +93,7 @@ public final class VibratorHelper {
      * Safely create a {@link VibrationEffect} from given waveform description.
      *
      * <p>The waveform is described by a sequence of values for target amplitude, frequency and
-     * duration, that are forwarded to
-     * {@link VibrationEffect.WaveformBuilder#addRamp(float, float, int)}.
+     * duration, that are forwarded to {@link VibrationEffect.WaveformBuilder#addTransition}.
      *
      * <p>This method returns {@code null} if the pattern is also {@code null} or invalid.
      *
@@ -114,14 +117,17 @@ public final class VibratorHelper {
 
             VibrationEffect.WaveformBuilder waveformBuilder = VibrationEffect.startWaveform();
             for (int i = 0; i < length; i += 3) {
-                waveformBuilder.addRamp(/* amplitude= */ values[i], /* frequency= */ values[i + 1],
-                        /* duration= */ (int) values[i + 2]);
+                waveformBuilder.addTransition(Duration.ofMillis((int) values[i + 2]),
+                        targetAmplitude(values[i]), targetFrequency(values[i + 1]));
             }
 
+            VibrationEffect effect = waveformBuilder.build();
             if (insistent) {
-                return waveformBuilder.build(/* repeat= */ 0);
+                return VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(effect)
+                        .compose();
             }
-            return waveformBuilder.build();
+            return effect;
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, "Error creating vibration PWLE waveform with pattern: "
                     + Arrays.toString(values));
@@ -136,7 +142,7 @@ public final class VibratorHelper {
      */
     public void vibrate(VibrationEffect effect, AudioAttributes attrs, String reason) {
         mVibrator.vibrate(Process.SYSTEM_UID, PackageManagerService.PLATFORM_PACKAGE_NAME,
-                effect, reason, attrs);
+                effect, reason, new VibrationAttributes.Builder(attrs).build());
     }
 
     /** Stop all notification vibrations (ringtone, alarm, notification usages). */

@@ -60,7 +60,6 @@ import com.android.systemui.settings.CurrentUserTracker;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -138,7 +137,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         startTracking();
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("SecurityController state:");
         pw.print("  mCurrentVpns={");
         for (int i = 0 ; i < mCurrentVpns.size(); i++) {

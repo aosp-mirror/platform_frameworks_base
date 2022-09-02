@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.Color;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,7 +31,8 @@ import java.lang.annotation.RetentionPolicy;
 final class LetterboxConfiguration {
 
     /**
-     * Override of aspect ratio for fixed orientation letterboxing that is set via {@link
+     * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
+     * set-fixed-orientation-letterbox-aspect-ratio or via {@link
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored
      * if it is <= this value.
      */
@@ -125,6 +127,9 @@ final class LetterboxConfiguration {
     @LetterboxReachabilityPosition
     private volatile int mLetterboxPositionForReachability;
 
+    // Whether education is allowed for letterboxed fullscreen apps.
+    private boolean mIsEducationEnabled;
+
     LetterboxConfiguration(Context systemUiContext) {
         mContext = systemUiContext;
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
@@ -142,6 +147,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsReachabilityEnabled);
         mDefaultPositionForReachability = readLetterboxReachabilityPositionFromConfig(mContext);
         mLetterboxPositionForReachability = mDefaultPositionForReachability;
+        mIsEducationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEducationEnabled);
     }
 
     /**
@@ -150,6 +157,7 @@ final class LetterboxConfiguration {
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored and
      * the framework implementation will be used to determine the aspect ratio.
      */
+    @VisibleForTesting
     void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
         mFixedOrientationLetterboxAspectRatio = aspectRatio;
     }
@@ -158,6 +166,7 @@ final class LetterboxConfiguration {
      * Resets the aspect ratio of letterbox for fixed orientation to {@link
      * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}.
      */
+    @VisibleForTesting
     void resetFixedOrientationLetterboxAspectRatio() {
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
@@ -168,25 +177,6 @@ final class LetterboxConfiguration {
      */
     float getFixedOrientationLetterboxAspectRatio() {
         return mFixedOrientationLetterboxAspectRatio;
-    }
-
-    /**
-     * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
-     * both it and a value of {@link
-     * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
-     * corners of the activity won't be rounded.
-     */
-    void setLetterboxActivityCornersRadius(int cornersRadius) {
-        mLetterboxActivityCornersRadius = cornersRadius;
-    }
-
-    /**
-     * Resets corners raidus for activities presented in the letterbox mode to {@link
-     * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
-     */
-    void resetLetterboxActivityCornersRadius() {
-        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
     }
 
     /**
@@ -220,54 +210,13 @@ final class LetterboxConfiguration {
         return Color.valueOf(mContext.getResources().getColor(colorId));
     }
 
-
-    /**
-     * Sets color of letterbox background which is used when {@link
-     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
-     */
-    void setLetterboxBackgroundColor(Color color) {
-        mLetterboxBackgroundColorOverride = color;
-    }
-
-    /**
-     * Sets color ID of letterbox background which is used when {@link
-     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
-     */
-    void setLetterboxBackgroundColorResourceId(int colorId) {
-        mLetterboxBackgroundColorResourceIdOverride = colorId;
-    }
-
-    /**
-     * Resets color of letterbox background to {@link
-     * com.android.internal.R.color.config_letterboxBackgroundColor}.
-     */
-    void resetLetterboxBackgroundColor() {
-        mLetterboxBackgroundColorOverride = null;
-        mLetterboxBackgroundColorResourceIdOverride = null;
-    }
-
     /**
      * Gets {@link LetterboxBackgroundType} specified in {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType}.
+     * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
      */
     @LetterboxBackgroundType
     int getLetterboxBackgroundType() {
         return mLetterboxBackgroundType;
-    }
-
-    /** Sets letterbox background type. */
-    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
-        mLetterboxBackgroundType = backgroundType;
-    }
-
-    /**
-     * Resets cletterbox background type to {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType}.
-     */
-    void resetLetterboxBackgroundType() {
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
     }
 
     /** Returns a string representing the given {@link LetterboxBackgroundType}. */
@@ -299,53 +248,10 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Overrides alpha of a black scrim shown over wallpaper for {@link
-     * #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link mLetterboxBackgroundType}.
-     *
-     * <p>If given value is < 0 or >= 1, both it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha} are ignored
-     * and 0.0 (transparent) is instead.
-     */
-    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float alpha) {
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = alpha;
-    }
-
-    /**
-     * Resets alpha of a black scrim shown over wallpaper letterbox background to {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha}.
-     */
-    void resetLetterboxBackgroundWallpaperDarkScrimAlpha() {
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
-    }
-
-    /**
      * Gets alpha of a black scrim shown over wallpaper letterbox background.
      */
     float getLetterboxBackgroundWallpaperDarkScrimAlpha() {
         return mLetterboxBackgroundWallpaperDarkScrimAlpha;
-    }
-
-    /**
-     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in
-     * {@link mLetterboxBackgroundType}.
-     *
-     * <p> If given value <= 0, both it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius} are ignored
-     * and 0 is used instead.
-     */
-    void setLetterboxBackgroundWallpaperBlurRadius(int radius) {
-        mLetterboxBackgroundWallpaperBlurRadius = radius;
-    }
-
-    /**
-     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
-     * mLetterboxBackgroundType} to {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius}.
-     */
-    void resetLetterboxBackgroundWallpaperBlurRadius() {
-        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
     }
 
     /**
@@ -358,8 +264,9 @@ final class LetterboxConfiguration {
 
     /*
      * Gets horizontal position of a center of the letterboxed app window specified
-     * in {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}.
-     * 0 corresponds to the left side of the screen and 1 to the right side.
+     * in {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}
+     * or via an ADB command. 0 corresponds to the left side of the screen and 1 to the
+     * right side.
      */
     float getLetterboxHorizontalPositionMultiplier() {
         return (mLetterboxHorizontalPositionMultiplier < 0.0f
@@ -374,6 +281,7 @@ final class LetterboxConfiguration {
      * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier} are ignored and
      * central position (0.5) is used.
      */
+    @VisibleForTesting
     void setLetterboxHorizontalPositionMultiplier(float multiplier) {
         mLetterboxHorizontalPositionMultiplier = multiplier;
     }
@@ -382,6 +290,7 @@ final class LetterboxConfiguration {
      * Resets horizontal position of a center of the letterboxed app window to {@link
      * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}.
      */
+    @VisibleForTesting
     void resetLetterboxHorizontalPositionMultiplier() {
         mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier);
@@ -399,6 +308,7 @@ final class LetterboxConfiguration {
      * Overrides whether reachability repositioning is allowed for letterboxed fullscreen apps in
      * landscape device orientation.
      */
+    @VisibleForTesting
     void setIsReachabilityEnabled(boolean enabled) {
         mIsReachabilityEnabled = enabled;
     }
@@ -407,6 +317,7 @@ final class LetterboxConfiguration {
      * Resets whether reachability repositioning is allowed for letterboxed fullscreen apps in
      * landscape device orientation to {@link R.bool.config_letterboxIsReachabilityEnabled}.
      */
+    @VisibleForTesting
     void resetIsReachabilityEnabled() {
         mIsReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsReachabilityEnabled);
@@ -414,27 +325,12 @@ final class LetterboxConfiguration {
 
     /*
      * Gets default horizontal position of the letterboxed app window when reachability is enabled.
-     * Specified in {@link R.integer.config_letterboxDefaultPositionForReachability}.
+     * Specified in {@link R.integer.config_letterboxDefaultPositionForReachability} or via an ADB
+     * command.
      */
     @LetterboxReachabilityPosition
     int getDefaultPositionForReachability() {
         return mDefaultPositionForReachability;
-    }
-
-    /**
-     * Overrides default horizonal position of the letterboxed app window when reachability
-     * is enabled.
-     */
-    void setDefaultPositionForReachability(@LetterboxReachabilityPosition int position) {
-        mDefaultPositionForReachability = position;
-    }
-
-    /**
-     * Resets default horizontal position of the letterboxed app window when reachability is
-     * enabled to {@link R.integer.config_letterboxDefaultPositionForReachability}.
-     */
-    void resetDefaultPositionForReachability() {
-        mDefaultPositionForReachability = readLetterboxReachabilityPositionFromConfig(mContext);
     }
 
     @LetterboxReachabilityPosition
@@ -498,4 +394,18 @@ final class LetterboxConfiguration {
         mLetterboxPositionForReachability = Math.max(mLetterboxPositionForReachability - 1, 0);
     }
 
+    /**
+     * Whether education is allowed for letterboxed fullscreen apps.
+     */
+    boolean getIsEducationEnabled() {
+        return mIsEducationEnabled;
+    }
+
+    /**
+     * Overrides whether education is allowed for letterboxed fullscreen apps.
+     */
+    @VisibleForTesting
+    void setIsEducationEnabled(boolean enabled) {
+        mIsEducationEnabled = enabled;
+    }
 }

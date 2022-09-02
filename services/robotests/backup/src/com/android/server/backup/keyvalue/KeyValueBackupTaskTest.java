@@ -43,23 +43,23 @@ import static com.android.server.backup.testing.Utils.transferStreamedData;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.intThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.intThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.shadow.api.Shadow.extract;
@@ -278,7 +278,7 @@ public class KeyValueBackupTaskTest  {
 
         assertThat(mBackupManagerService.getPendingInits()).isEmpty();
         assertThat(mBackupManagerService.isBackupRunning()).isFalse();
-        assertThat(mBackupManagerService.getCurrentOperations().size()).isEqualTo(0);
+        assertThat(mBackupManagerService.getOperationStorage().numOperations()).isEqualTo(0);
         verify(mOldJournal).delete();
     }
 
@@ -449,7 +449,7 @@ public class KeyValueBackupTaskTest  {
 
         assertThat(mBackupManagerService.getPendingInits()).isEmpty();
         assertThat(mBackupManagerService.isBackupRunning()).isFalse();
-        assertThat(mBackupManagerService.getCurrentOperations().size()).isEqualTo(0);
+        assertThat(mBackupManagerService.getOperationStorage().numOperations()).isEqualTo(0);
         assertThat(mBackupManagerService.getCurrentToken()).isEqualTo(1234L);
         verify(mBackupManagerService).writeRestoreTokens();
         verify(mOldJournal).delete();
@@ -2185,7 +2185,7 @@ public class KeyValueBackupTaskTest  {
         task.waitCancel();
         reset(transportMock.transport);
         taskFinished.block();
-        verifyZeroInteractions(transportMock.transport);
+        verifyNoInteractions(transportMock.transport);
     }
 
     @Test
@@ -2665,7 +2665,8 @@ public class KeyValueBackupTaskTest  {
         KeyValueBackupTask task =
                 new KeyValueBackupTask(
                         mBackupManagerService,
-                        transportMock.transportClient,
+                        mBackupManagerService.getOperationStorage(),
+                        transportMock.mTransportConnection,
                         transportMock.transportData.transportDirName,
                         queue,
                         mOldJournal,
@@ -2726,7 +2727,7 @@ public class KeyValueBackupTaskTest  {
         // The second line will throw NPE because it will call lambda 1 with null, since argThat()
         // returns null. So we guard against that by checking for null.
         return packageInfo ->
-                packageInfo != null && packageInfo.packageName.equals(packageInfo.packageName);
+                packageInfo != null && packageInfo.packageName.equals(packageData.packageName);
     }
 
     /** Matches {@link ApplicationInfo} whose package name is {@code packageData.packageName}. */

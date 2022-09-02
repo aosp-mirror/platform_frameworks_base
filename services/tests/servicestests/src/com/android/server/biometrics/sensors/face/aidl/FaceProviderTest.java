@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -60,6 +61,8 @@ public class FaceProviderTest {
     private UserManager mUserManager;
     @Mock
     private IFace mDaemon;
+    @Mock
+    private BiometricContext mBiometricContext;
 
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
@@ -89,7 +92,7 @@ public class FaceProviderTest {
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
         mFaceProvider = new TestableFaceProvider(mDaemon, mContext, mSensorProps, TAG,
-                mLockoutResetDispatcher);
+                mLockoutResetDispatcher, mBiometricContext);
     }
 
     @SuppressWarnings("rawtypes")
@@ -139,8 +142,9 @@ public class FaceProviderTest {
                 @NonNull Context context,
                 @NonNull SensorProps[] props,
                 @NonNull String halInstanceName,
-                @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-            super(context, props, halInstanceName, lockoutResetDispatcher);
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+                @NonNull BiometricContext biometricContext) {
+            super(context, props, halInstanceName, lockoutResetDispatcher, biometricContext);
             mDaemon = daemon;
         }
 

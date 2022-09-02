@@ -16,20 +16,19 @@
 
 package com.android.internal.policy;
 
-import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.clearCompatInsets;
+import static android.view.InsetsState.clearsCompatInsets;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -121,7 +120,7 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorCaptionView;
-import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -283,6 +282,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Insets mBackgroundInsets = Insets.NONE;
     private Insets mLastBackgroundInsets = Insets.NONE;
     private boolean mDrawLegacyNavigationBarBackground;
+    private boolean mDrawLegacyNavigationBarBackgroundHandled;
 
     private PendingInsetsController mPendingInsetsController = new PendingInsetsController();
 
@@ -1030,6 +1030,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
         updateColorViews(null /* insets */, true /* animate */);
+        if (mWindow != null) {
+            mWindow.dispatchOnSystemBarAppearanceChanged(appearance);
+        }
     }
 
     @Override
@@ -1117,11 +1120,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     : controller.getSystemBarsAppearance();
 
             if (insets != null) {
-                final boolean clearCompatInsets = clearCompatInsets(attrs.type, attrs.flags,
+                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
                         getResources().getConfiguration().windowConfiguration.getWindowingMode());
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                final Insets systemInsets = clearCompatInsets
+                final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
                         : Insets.min(insets.getInsets(WindowInsets.Type.systemBars()
                                 | WindowInsets.Type.displayCutout()), stableBarInsets);
@@ -1164,6 +1167,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
                     && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
+                mDrawLegacyNavigationBarBackgroundHandled =
+                        mWindow.onDrawLegacyNavigationBarBackgroundChanged(
+                                mDrawLegacyNavigationBarBackground);
                 if (viewRoot != null) {
                     viewRoot.requestInvalidateRootRenderNode();
                 }
@@ -1256,7 +1262,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
 
-        if (forceConsumingNavBar) {
+        if (forceConsumingNavBar && !hideNavigation && !mDrawLegacyNavigationBarBackgroundHandled) {
             mBackgroundInsets = Insets.of(mLastLeftInset, 0, mLastRightInset, mLastBottomInset);
         } else {
             mBackgroundInsets = Insets.NONE;
@@ -2113,7 +2119,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * corresponding insets change to the InsetsController.
      */
     public void notifyCaptionHeightChanged() {
-        getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
+        if (!CAPTION_ON_SHELL) {
+            getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
+        }
     }
 
     void setWindow(PhoneWindow phoneWindow) {
@@ -2251,7 +2259,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
         final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
         // Only a non floating application window on one of the allowed workspaces can get a caption
-        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()) {
+        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()
+                && !CAPTION_ON_SHELL) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (decorCaptionView == null) {
@@ -2474,7 +2483,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     private void drawLegacyNavigationBarBackground(RecordingCanvas canvas) {
-        if (!mDrawLegacyNavigationBarBackground) {
+        if (!mDrawLegacyNavigationBarBackground || mDrawLegacyNavigationBarBackgroundHandled) {
             return;
         }
         View v = mNavigationColorViewState.view;
@@ -2538,9 +2547,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
             // Convert the DP elevation into physical pixels.
             elevation = dipToPx(elevation);
-            mElevationAdjustedForStack = true;
-        } else if (windowingMode == WINDOWING_MODE_PINNED) {
-            elevation = dipToPx(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP);
             mElevationAdjustedForStack = true;
         } else {
             mElevationAdjustedForStack = false;

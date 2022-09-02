@@ -27,6 +27,7 @@ import (
 const art = "art.module.public.api"
 const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
+
 var core_libraries_modules = []string{art, conscrypt, i18n}
 
 // The intention behind this soong plugin is to generate a number of "merged"
@@ -92,6 +93,8 @@ type fgProps struct {
 type MergedTxtDefinition struct {
 	// "current.txt" or "removed.txt"
 	TxtFilename string
+	// Filename in the new dist dir. "android.txt" or "android-removed.txt"
+	DistFilename string
 	// The module for the non-updatable / non-module part of the api.
 	BaseTxt string
 	// The list of modules that are relevant for this merged txt.
@@ -112,7 +115,6 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	if txt.Scope != "public" {
 		filename = txt.Scope + "-" + filename
 	}
-
 	props := genruleProps{}
 	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
 	props.Tools = []string{"metalava"}
@@ -126,9 +128,9 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 			Dest:    proptools.StringPtr(filename),
 		},
 		{
-			Targets: []string{"sdk"},
+			Targets: []string{"api_txt", "sdk"},
 			Dir:     proptools.StringPtr("apistubs/android/" + txt.Scope + "/api"),
-			Dest:    proptools.StringPtr(txt.TxtFilename),
+			Dest:    proptools.StringPtr(txt.DistFilename),
 		},
 	}
 	props.Visibility = []string{"//visibility:public"}
@@ -146,17 +148,18 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
-// This produces the same annotations.zip as framework-doc-stubs, but by using
-// outputs from individual modules instead of all the source code.
-func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
-	props := genruleProps{}
-	props.Name = proptools.StringPtr("sdk-annotations.zip")
-	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
-	props.Out = []string{"annotations.zip"}
-	props.Cmd = proptools.StringPtr("$(location merge_annotation_zips) $(genDir)/out $(in) && " +
-		"$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out")
-	props.Srcs = append([]string{":android-non-updatable-doc-stubs{.annotations.zip}"}, createSrcs(modules, "{.public.annotations.zip}")...)
-	ctx.CreateModule(genrule.GenRuleFactory, &props)
+func createMergedPublicAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-public-annotations")
+	props.Srcs = createSrcs(modules, "{.public.annotations.zip}")
+	ctx.CreateModule(android.FileGroupFactory, &props)
+}
+
+func createMergedSystemAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-system-annotations")
+	props.Srcs = createSrcs(modules, "{.system.annotations.zip}")
+	ctx.CreateModule(android.FileGroupFactory, &props)
 }
 
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
@@ -177,7 +180,7 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	// Note: order matters: first parameter is the full api-versions.xml
 	// after that the stubs files in any order
 	// stubs files are all modules that export API surfaces EXCEPT ART
-	props.Srcs = append([]string{":framework-doc-stubs{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
+	props.Srcs = append([]string{":api_versions_public{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
 	props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
@@ -203,17 +206,9 @@ func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
 func createMergedFrameworkImpl(ctx android.LoadHookContext, modules []string) {
 	// This module is for the "framework-all" module, which should not include the core libraries.
 	modules = removeAll(modules, core_libraries_modules)
-	// TODO(b/214988855): remove the line below when framework-bluetooth has an impl jar.
-	modules = remove(modules, "framework-bluetooth")
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("all-framework-module-impl")
 	props.Static_libs = transformArray(modules, "", ".impl")
-	// Media module's impl jar is called "updatable-media"
-	for i, v := range props.Static_libs {
-		if v == "framework-media.impl" {
-			props.Static_libs[i] = "updatable-media"
-		}
-	}
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(java.LibraryFactory, &props)
@@ -242,34 +237,39 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 	var textFiles []MergedTxtDefinition
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
+	distFilename := []string{"android.txt", "android-removed.txt"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-" + f,
-			Modules:     bootclasspath,
-			ModuleTag:   "{.public" + tagSuffix[i],
-			Scope:       "public",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-" + f,
+			Modules:      bootclasspath,
+			ModuleTag:    "{.public" + tagSuffix[i],
+			Scope:        "public",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-system-" + f,
-			Modules:     bootclasspath,
-			ModuleTag:   "{.system" + tagSuffix[i],
-			Scope:       "system",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-system-" + f,
+			Modules:      bootclasspath,
+			ModuleTag:    "{.system" + tagSuffix[i],
+			Scope:        "system",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-module-lib-" + f,
-			Modules:     bootclasspath,
-			ModuleTag:   "{.module-lib" + tagSuffix[i],
-			Scope:       "module-lib",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-module-lib-" + f,
+			Modules:      bootclasspath,
+			ModuleTag:    "{.module-lib" + tagSuffix[i],
+			Scope:        "module-lib",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-system-server-" + f,
-			Modules:     system_server_classpath,
-			ModuleTag:   "{.system-server" + tagSuffix[i],
-			Scope:       "system-server",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-system-server-" + f,
+			Modules:      system_server_classpath,
+			ModuleTag:    "{.system-server" + tagSuffix[i],
+			Scope:        "system-server",
 		})
 	}
 	for _, txt := range textFiles {
@@ -292,7 +292,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
-	createMergedAnnotations(ctx, bootclasspath)
+	createMergedPublicAnnotationsFilegroup(ctx, bootclasspath)
+	createMergedSystemAnnotationsFilegroup(ctx, bootclasspath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
 

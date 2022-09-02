@@ -16,6 +16,10 @@
 
 package com.android.settingslib.drawable;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_USER_ICON;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -38,9 +42,13 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.UserHandle;
 
-import com.android.settingslib.R;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * Converts the user avatar icon to a circularly clipped one with an optional badge and frame
@@ -80,8 +88,23 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * @return drawable containing just the badge
      */
     public static Drawable getManagedUserDrawable(Context context) {
-        return getDrawableForDisplayDensity
-                (context, com.android.internal.R.drawable.ic_corp_user_badge);
+        if (BuildCompatUtils.isAtLeastT()) {
+            return getUpdatableManagedUserDrawable(context);
+        } else {
+            return getDrawableForDisplayDensity(
+                    context, com.android.internal.R.drawable.ic_corp_user_badge);
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static Drawable getUpdatableManagedUserDrawable(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getResources().getDrawableForDensity(
+                WORK_PROFILE_USER_ICON,
+                SOLID_COLORED,
+                context.getResources().getDisplayMetrics().densityDpi,
+                /* default= */ () -> getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_user_badge));
     }
 
     private static Drawable getDrawableForDisplayDensity(
@@ -96,8 +119,9 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * @param context
      * @return size in pixels
      */
-    public static int getSizeForList(Context context) {
-        return (int) context.getResources().getDimension(R.dimen.circle_avatar_size);
+    public static int getDefaultSize(Context context) {
+        return context.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.user_icon_size);
     }
 
     public UserIconDrawable() {
@@ -153,6 +177,10 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    public boolean isEmpty() {
+        return getUserIcon() == null && getUserDrawable() == null;
+    }
+
     public UserIconDrawable setBadge(Drawable badge) {
         mBadge = badge;
         if (mBadge != null) {
@@ -173,11 +201,13 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     public UserIconDrawable setBadgeIfManagedUser(Context context, int userId) {
         Drawable badge = null;
         if (userId != UserHandle.USER_NULL) {
-            boolean isManaged = context.getSystemService(DevicePolicyManager.class)
-                    .getProfileOwnerAsUser(userId) != null;
-            if (isManaged) {
-                badge = getDrawableForDisplayDensity(
-                        context, com.android.internal.R.drawable.ic_corp_badge_case);
+            DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+            boolean isCorp =
+                    dpm.getProfileOwnerAsUser(userId) != null // has an owner
+                    && dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(UserHandle.of(userId))
+                            == null; // and has no supervisor
+            if (isCorp) {
+                badge = getManagementBadge(context);
             }
         }
         return setBadge(badge);
@@ -187,14 +217,33 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * Sets the managed badge to this user icon if the device has a device owner.
      */
     public UserIconDrawable setBadgeIfManagedDevice(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         Drawable badge = null;
-        boolean deviceOwnerExists = context.getSystemService(DevicePolicyManager.class)
-                .getDeviceOwnerComponentOnAnyUser() != null;
+        boolean deviceOwnerExists = dpm.getDeviceOwnerComponentOnAnyUser() != null;
         if (deviceOwnerExists) {
-            badge = getDrawableForDisplayDensity(
-                    context, com.android.internal.R.drawable.ic_corp_badge_case);
+            badge = getManagementBadge(context);
         }
         return setBadge(badge);
+    }
+
+    private static Drawable getManagementBadge(Context context) {
+        if (BuildCompatUtils.isAtLeastT()) {
+            return getUpdatableManagementBadge(context);
+        } else {
+            return getDrawableForDisplayDensity(
+                    context, com.android.internal.R.drawable.ic_corp_user_badge);
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static Drawable getUpdatableManagementBadge(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getResources().getDrawableForDensity(
+                WORK_PROFILE_ICON,
+                SOLID_COLORED,
+                context.getResources().getDisplayMetrics().densityDpi,
+                /* default= */ () -> getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_badge_case));
     }
 
     public void setBadgeRadius(float radius) {
@@ -465,5 +514,25 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         unscheduleSelf(what);
+    }
+
+    @VisibleForTesting
+    public Drawable getUserDrawable() {
+        return mUserDrawable;
+    }
+
+    @VisibleForTesting
+    public Bitmap getUserIcon() {
+        return mUserIcon;
+    }
+
+    @VisibleForTesting
+    public boolean isInvalidated() {
+        return mInvalidated;
+    }
+
+    @VisibleForTesting
+    public Drawable getBadge() {
+        return mBadge;
     }
 }

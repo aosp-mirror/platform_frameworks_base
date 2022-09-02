@@ -90,11 +90,36 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
 
     SkRect srcRect = inSrcRect.toSkRect();
 
-    SkRect imageSrcRect =
-            SkRect::MakeLTRB(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom);
-    if (imageSrcRect.isEmpty()) {
-        imageSrcRect = SkRect::MakeIWH(description.width, description.height);
+    SkRect imageSrcRect = SkRect::MakeIWH(description.width, description.height);
+    SkISize imageWH = SkISize::Make(description.width, description.height);
+    if (cropRect.left < cropRect.right && cropRect.top < cropRect.bottom) {
+        imageSrcRect =
+                SkRect::MakeLTRB(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom);
+        imageWH = SkISize::Make(cropRect.right - cropRect.left, cropRect.bottom - cropRect.top);
+
+        // Chroma channels of YUV420 images are subsampled we may need to shrink the crop region by
+        // a whole texel on each side. Since skia still adds its own 0.5 inset, we apply an
+        // additional 0.5 inset. See GLConsumer::computeTransformMatrix for details.
+        float shrinkAmount = 0.0f;
+        switch (description.format) {
+            // Use HAL formats since some AHB formats are only available in vndk
+            case HAL_PIXEL_FORMAT_YCBCR_420_888:
+            case HAL_PIXEL_FORMAT_YV12:
+            case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+                shrinkAmount = 0.5f;
+                break;
+            default:
+                break;
+        }
+
+        // Shrink the crop if it has more than 1-px and differs from the buffer size.
+        if (imageWH.width() > 1 && imageWH.width() < (int32_t)description.width)
+            imageSrcRect = imageSrcRect.makeInset(shrinkAmount, 0);
+
+        if (imageWH.height() > 1 && imageWH.height() < (int32_t)description.height)
+            imageSrcRect = imageSrcRect.makeInset(0, shrinkAmount);
     }
+
     ALOGV("imageSrcRect = " RECT_STRING, SK_RECT_ARGS(imageSrcRect));
 
     // Represents the "logical" width/height of the texture. That is, the dimensions of the buffer
@@ -153,7 +178,7 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
      */
 
     SkMatrix m;
-    const SkRect imageDstRect = SkRect::MakeIWH(imageSrcRect.width(), imageSrcRect.height());
+    const SkRect imageDstRect = SkRect::Make(imageWH);
     const float px = imageDstRect.centerX();
     const float py = imageDstRect.centerY();
     if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {
@@ -243,18 +268,14 @@ CopyResult Readback::copySurfaceIntoLegacy(ANativeWindow* window, const Rect& sr
             static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
     sk_sp<SkImage> image =
             SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
-    return copyImageInto(image, texTransform, srcRect, bitmap);
+    return copyImageInto(image, srcRect, bitmap);
 }
 
 CopyResult Readback::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
     LOG_ALWAYS_FATAL_IF(!hwBitmap->isHardware());
 
     Rect srcRect;
-    Matrix4 transform;
-    transform.loadScale(1, -1, 1);
-    transform.translate(0, -1);
-
-    return copyImageInto(hwBitmap->makeImage(), transform, srcRect, bitmap);
+    return copyImageInto(hwBitmap->makeImage(), srcRect, bitmap);
 }
 
 CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap* bitmap) {
@@ -279,14 +300,11 @@ CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap
 
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
     Rect srcRect;
-    Matrix4 transform;
-    transform.loadScale(1, -1, 1);
-    transform.translate(0, -1);
-    return copyImageInto(image, transform, srcRect, bitmap);
+    return copyImageInto(image, srcRect, bitmap);
 }
 
-CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTransform,
-                                   const Rect& srcRect, SkBitmap* bitmap) {
+CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, const Rect& srcRect,
+                                   SkBitmap* bitmap) {
     ATRACE_CALL();
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         mRenderThread.requireGlContext();
@@ -303,11 +321,6 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
     CopyResult copyResult = CopyResult::UnknownError;
 
     int displayedWidth = imgWidth, displayedHeight = imgHeight;
-    // If this is a 90 or 270 degree rotation we need to swap width/height to get the device
-    // size.
-    if (texTransform[Matrix4::kSkewX] >= 0.5f || texTransform[Matrix4::kSkewX] <= -0.5f) {
-        std::swap(displayedWidth, displayedHeight);
-    }
     SkRect skiaDestRect = SkRect::MakeWH(bitmap->width(), bitmap->height());
     SkRect skiaSrcRect = srcRect.toSkRect();
     if (skiaSrcRect.isEmpty()) {
@@ -320,7 +333,6 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
 
     Layer layer(mRenderThread.renderState(), nullptr, 255, SkBlendMode::kSrc);
     layer.setSize(displayedWidth, displayedHeight);
-    texTransform.copyTo(layer.getTexTransform());
     layer.setImage(image);
     // Scaling filter is not explicitly set here, because it is done inside copyLayerInfo
     // after checking the necessity based on the src/dest rect size and the transformation.

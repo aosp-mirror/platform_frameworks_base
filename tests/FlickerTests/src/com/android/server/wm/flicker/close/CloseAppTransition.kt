@@ -30,7 +30,6 @@ import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -47,16 +46,16 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
     /**
      * Specification of the test transition to execute
      */
-    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
+    protected open val transition: FlickerBuilder.() -> Unit = {
         setup {
             eachRun {
                 testApp.launchViaIntent(wmHelper)
-                this.setRotation(testSpec.config.startRotation)
+                this.setRotation(testSpec.startRotation)
             }
         }
         teardown {
             test {
-                testApp.exit()
+                testApp.exit(wmHelper)
             }
         }
     }
@@ -68,7 +67,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            transition(testSpec.config)
+            transition()
         }
     }
 

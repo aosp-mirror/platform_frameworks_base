@@ -6,6 +6,8 @@
 
 #include "graphics_jni_helpers.h"
 
+#include <csetjmp>
+
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
     // Only ImageFormat.NV21 and ImageFormat.YUY2 are supported
     // for now.
@@ -85,7 +87,7 @@ Yuv420SpToJpegEncoder::Yuv420SpToJpegEncoder(int* strides) :
 
 void Yuv420SpToJpegEncoder::compress(jpeg_compress_struct* cinfo,
         uint8_t* yuv, int* offsets) {
-    SkDebugf("onFlyCompress");
+    ALOGD("onFlyCompress");
     JSAMPROW y[16];
     JSAMPROW cb[8];
     JSAMPROW cr[8];
@@ -161,7 +163,7 @@ Yuv422IToJpegEncoder::Yuv422IToJpegEncoder(int* strides) :
 
 void Yuv422IToJpegEncoder::compress(jpeg_compress_struct* cinfo,
         uint8_t* yuv, int* offsets) {
-    SkDebugf("onFlyCompress_422");
+    ALOGD("onFlyCompress_422");
     JSAMPROW y[16];
     JSAMPROW cb[16];
     JSAMPROW cr[16];

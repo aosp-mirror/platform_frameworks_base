@@ -26,6 +26,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.FEATURE_ID;
+import static com.android.server.wm.DisplayAreaProto.IS_IGNORING_ORIENTATION_REQUEST;
 import static com.android.server.wm.DisplayAreaProto.IS_ORGANIZED;
 import static com.android.server.wm.DisplayAreaProto.IS_ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayAreaProto.IS_TASK_DISPLAY_AREA;
@@ -78,8 +79,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * Whether this {@link DisplayArea} should ignore fixed-orientation request. If {@code true}, it
      * can never specify orientation, but shows the fixed-orientation apps below it in the
      * letterbox; otherwise, it rotates based on the fixed-orientation request.
+     *
+     * <p>Note: use {@link #getIgnoreOrientationRequest} to access outside of {@link
+     * #setIgnoreOrientationRequest} since the value can be overridden at runtime on a device level.
      */
-    protected boolean mIgnoreOrientationRequest;
+    protected boolean mSetIgnoreOrientationRequest;
 
     DisplayArea(WindowManagerService wms, Type type, String name) {
         this(wms, type, name, FEATURE_UNDEFINED);
@@ -140,7 +144,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
-        if (mIgnoreOrientationRequest) {
+        if (getIgnoreOrientationRequest()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -149,14 +153,15 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean handlesOrientationChangeFromDescendant() {
-        return !mIgnoreOrientationRequest && super.handlesOrientationChangeFromDescendant();
+        return !getIgnoreOrientationRequest()
+                && super.handlesOrientationChangeFromDescendant();
     }
 
     @Override
     boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
         // If this is set to ignore the orientation request, we don't propagate descendant
         // orientation request.
-        return !mIgnoreOrientationRequest
+        return !getIgnoreOrientationRequest()
                 && super.onDescendantOrientationChanged(requestingContainer);
     }
 
@@ -167,10 +172,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * @return Whether the display orientation changed after calling this method.
      */
     boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        if (mIgnoreOrientationRequest == ignoreOrientationRequest) {
+        if (mSetIgnoreOrientationRequest == ignoreOrientationRequest) {
             return false;
         }
-        mIgnoreOrientationRequest = ignoreOrientationRequest;
+        mSetIgnoreOrientationRequest = ignoreOrientationRequest;
 
         // Check whether we should notify Display to update orientation.
         if (mDisplayContent == null) {
@@ -204,7 +209,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     boolean getIgnoreOrientationRequest() {
-        return mIgnoreOrientationRequest;
+        // Adding an exception for when ignoreOrientationRequest is overridden at runtime for all
+        // DisplayArea-s. For example, this is needed for the Kids Mode since many Kids apps aren't
+        // optimised to support both orientations and it will be hard for kids to understand the
+        // app compat mode.
+        return mSetIgnoreOrientationRequest && !mWmService.isIgnoreOrientationRequestDisabled();
     }
 
     /**
@@ -272,6 +281,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(NAME, mName);
@@ -279,14 +292,15 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         proto.write(IS_ROOT_DISPLAY_AREA, asRootDisplayArea() != null);
         proto.write(FEATURE_ID, mFeatureId);
         proto.write(IS_ORGANIZED, isOrganized());
+        proto.write(IS_IGNORING_ORIENTATION_REQUEST, getIgnoreOrientationRequest());
         proto.end(token);
     }
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
-        if (mIgnoreOrientationRequest) {
-            pw.println(prefix + "mIgnoreOrientationRequest=true");
+        if (mSetIgnoreOrientationRequest) {
+            pw.println(prefix + "mSetIgnoreOrientationRequest=true");
         }
         if (hasRequestedOverrideConfiguration()) {
             pw.println(prefix + "overrideConfig=" + getRequestedOverrideConfiguration());
@@ -332,7 +346,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
-    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+    boolean forAllTaskDisplayAreas(Predicate<TaskDisplayArea> callback,
             boolean traverseTopToBottom) {
         // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
         if (mType != DisplayArea.Type.ANY) {
@@ -556,7 +570,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 // Ignore the orientation of keyguard if it is going away or is not showing while
                 // the device is fully awake. In other words, use the orientation of keyguard if
                 // its window is visible while the device is going to sleep or is sleeping.
-                if (!mWmService.mAtmService.isKeyguardLocked()
+                if (!mDisplayContent.isKeyguardLocked()
                         && mDisplayContent.getDisplayPolicy().isAwake()
                         // Device is not going to sleep.
                         && policy.okToAnimate(true /* ignoreScreenOn */)) {
@@ -582,7 +596,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         };
 
         Tokens(WindowManagerService wms, Type type, String name) {
-            super(wms, type, name, FEATURE_WINDOW_TOKENS);
+            this(wms, type, name, FEATURE_WINDOW_TOKENS);
+        }
+
+        Tokens(WindowManagerService wms, Type type, String name, int featureId) {
+            super(wms, type, name, featureId);
         }
 
         void addChild(WindowToken token) {
@@ -592,7 +610,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         @Override
         int getOrientation(int candidate) {
             mLastOrientationSource = null;
-            if (mIgnoreOrientationRequest) {
+            if (getIgnoreOrientationRequest()) {
                 return SCREEN_ORIENTATION_UNSET;
             }
 
@@ -644,7 +662,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         void prepareSurfaces() {
             mDimmer.resetDimStates();
             super.prepareSurfaces();
+            // Bounds need to be relative, as the dim layer is a child.
             getBounds(mTmpDimBoundsRect);
+            mTmpDimBoundsRect.offsetTo(0 /* newLeft */, 0 /* newTop */);
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
             // on the display level fades out.
@@ -652,7 +672,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+            if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
                 scheduleAnimation();
             }
         }

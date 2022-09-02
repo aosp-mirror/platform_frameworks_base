@@ -68,7 +68,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock
     StatusBarWindowController mStatusBarWindowController;
     @Mock
-    UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    ScreenOffAnimationController mScreenOffAnimationController;
     private NotificationIconAreaController mController;
     @Mock
     private Bubbles mBubbles;
@@ -91,7 +91,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
                 mDemoModeController,
                 mDarkIconDispatcher,
                 mStatusBarWindowController,
-                mUnlockedScreenOffAnimationController);
+                mScreenOffAnimationController);
     }
 
     @Test

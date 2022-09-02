@@ -22,6 +22,7 @@ import android.annotation.StyleRes;
 import android.annotation.SuppressLint;
 import android.annotation.UiThread;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.Context;
@@ -48,20 +49,20 @@ public interface SplashScreen {
      */
     int SPLASH_SCREEN_STYLE_UNDEFINED = -1;
     /**
-     * Force splash screen to be empty.
-     * @hide
+     * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to avoid showing the
+     * splash screen icon of the launched activity
      */
-    int SPLASH_SCREEN_STYLE_EMPTY = 0;
+    int SPLASH_SCREEN_STYLE_SOLID_COLOR = 0;
     /**
-     * Force splash screen to show icon.
-     * @hide
+     * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to show the splash screen
+     * icon of the launched activity.
      */
     int SPLASH_SCREEN_STYLE_ICON = 1;
 
     /** @hide */
     @IntDef(prefix = { "SPLASH_SCREEN_STYLE_" }, value = {
             SPLASH_SCREEN_STYLE_UNDEFINED,
-            SPLASH_SCREEN_STYLE_EMPTY,
+            SPLASH_SCREEN_STYLE_SOLID_COLOR,
             SPLASH_SCREEN_STYLE_ICON
     })
     @interface SplashScreenStyle {}
@@ -99,8 +100,12 @@ public interface SplashScreen {
      * <p>
      * To reset to the default theme, set this the themeId to {@link Resources#ID_NULL}.
      * <p>
-     * <b>Note:</b> The theme name must be stable across versions, otherwise it won't be found
-     * after your application is updated.
+     * <b>Note:</b> Internally, the theme name is resolved and persisted. This means that the theme
+     * name must be stable across versions, otherwise it won't be found after your application is
+     * updated.
+     *
+     * @param themeId The ID of the splashscreen theme to be used in place of the one defined in
+     *                the manifest.
      */
     void setSplashScreenTheme(@StyleRes int themeId);
 

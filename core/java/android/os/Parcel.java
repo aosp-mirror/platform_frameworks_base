@@ -33,6 +33,7 @@ import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.Size;
 import android.util.SizeF;
 import android.util.Slog;
@@ -247,6 +248,7 @@ public final class Parcel {
     private ArrayMap<Class, Object> mClassCookies;
 
     private RuntimeException mStack;
+    private boolean mRecycled = false;
 
     /** @hide */
     @TestApi
@@ -347,7 +349,15 @@ public final class Parcel {
     private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_PARCELABLE = -9;
     /** @hide */
+    // WARNING: DO NOT add more 'reply' headers. These also need to add work to native
+    // code and this encodes extra information in object statuses. If we need to expand
+    // this design, we should add a generic way to attach parcelables/structured parcelables
+    // to transactions which can work across languages.
     public static final int EX_HAS_NOTED_APPOPS_REPLY_HEADER = -127; // special; see below
+    // WARNING: DO NOT add more 'reply' headers. These also need to add work to native
+    // code and this encodes extra information in object statuses. If we need to expand
+    // this design, we should add a generic way to attach parcelables/structured parcelables
+    // to transactions which can work across languages.
     private static final int EX_HAS_STRICTMODE_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
@@ -520,6 +530,7 @@ public final class Parcel {
         if (res == null) {
             res = new Parcel(0);
         } else {
+            res.mRecycled = false;
             if (DEBUG_RECYCLE) {
                 res.mStack = new RuntimeException();
             }
@@ -548,7 +559,16 @@ public final class Parcel {
      * the object after this call.
      */
     public final void recycle() {
-        if (DEBUG_RECYCLE) mStack = null;
+        if (mRecycled) {
+            Log.w(TAG, "Recycle called on unowned Parcel. (recycle twice?)", mStack);
+        }
+        mRecycled = true;
+
+        // We try to reset the entire object here, but in order to be
+        // able to print a stack when a Parcel is recycled twice, that
+        // is cleared in obtain instead.
+
+        mClassCookies = null;
         freeBuffer();
 
         if (mOwnsNativeParcelObject) {
@@ -747,7 +767,7 @@ public final class Parcel {
     }
 
     /**
-     * Set the bytes in data to be the raw bytes of this Parcel.
+     * Fills the raw bytes of this Parcel with the supplied data.
      */
     public final void unmarshall(@NonNull byte[] data, int offset, int length) {
         nativeUnmarshall(mNativePtr, data, offset, length);
@@ -987,11 +1007,15 @@ public final class Parcel {
     /**
      * Write a blob of data into the parcel at the current {@link #dataPosition},
      * growing {@link #dataCapacity} if needed.
+     *
+     * <p> If the blob is small, then it is stored in-place, otherwise it is transferred by way of
+     * an anonymous shared memory region. If you prefer send in-place, please use
+     * {@link #writeByteArray(byte[])}.
+     *
      * @param b Bytes to place into the parcel.
-     * {@hide}
-     * {@SystemApi}
+     *
+     * @see #readBlob()
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final void writeBlob(@Nullable byte[] b) {
         writeBlob(b, 0, (b != null) ? b.length : 0);
     }
@@ -999,11 +1023,16 @@ public final class Parcel {
     /**
      * Write a blob of data into the parcel at the current {@link #dataPosition},
      * growing {@link #dataCapacity} if needed.
+     *
+     * <p> If the blob is small, then it is stored in-place, otherwise it is transferred by way of
+     * an anonymous shared memory region. If you prefer send in-place, please use
+     * {@link #writeByteArray(byte[], int, int)}.
+     *
      * @param b Bytes to place into the parcel.
      * @param offset Index of first byte to be written.
      * @param len Number of bytes to write.
-     * {@hide}
-     * {@SystemApi}
+     *
+     * @see #readBlob()
      */
     public final void writeBlob(@Nullable byte[] b, int offset, int len) {
         if (b == null) {
@@ -1990,7 +2019,20 @@ public final class Parcel {
     }
 
     /**
-     * @hide
+     * Flatten a List containing a particular object type into the parcel, at
+     * the current dataPosition() and growing dataCapacity() if needed.  The
+     * type of the objects in the list must be one that implements Parcelable.
+     * Unlike the generic writeList() method, however, only the raw data of the
+     * objects is written and not their type, so you must use the corresponding
+     * readTypedList() to unmarshall them.
+     *
+     * @param val The list of objects to be written.
+     * @param parcelableFlags Contextual flags as per
+     * {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
+     *
+     * @see #createTypedArrayList
+     * @see #readTypedList
+     * @see Parcelable
      */
     public <T extends Parcelable> void writeTypedList(@Nullable List<T> val, int parcelableFlags) {
         if (val == null) {
@@ -2163,7 +2205,7 @@ public final class Parcel {
      *   sized with the exact size of dimensions.
      *
      * @see #readFixedArray
-     * @see #createFixedArray
+     * @see #createFixedArray createFixedArray(Class&lt;T&gt;, Parcelable.Creator&lt;S&gt;, int...)
      * @see #writeBooleanArray
      * @see #writeByteArray
      * @see #writeCharArray
@@ -3372,10 +3414,8 @@ public final class Parcel {
 
     /**
      * Read a blob of data from the parcel and return it as a byte array.
-     * {@hide}
-     * {@SystemApi}
+     * @see #writeBlob(byte[], int, int)
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     public final byte[] readBlob() {
         return nativeReadBlob(mNativePtr);
@@ -4826,28 +4866,36 @@ public final class Parcel {
         if (name == null) {
             return null;
         }
-        Parcelable.Creator<?> creator;
-        HashMap<String, Parcelable.Creator<?>> map;
-        synchronized (mCreators) {
-            map = mCreators.get(loader);
+
+        Pair<Parcelable.Creator<?>, Class<?>> creatorAndParcelableClass;
+        synchronized (sPairedCreators) {
+            HashMap<String, Pair<Parcelable.Creator<?>, Class<?>>> map =
+                    sPairedCreators.get(loader);
             if (map == null) {
-                map = new HashMap<>();
-                mCreators.put(loader, map);
+                sPairedCreators.put(loader, new HashMap<>());
+                mCreators.put(loader, new HashMap<>());
+                creatorAndParcelableClass = null;
+            } else {
+                creatorAndParcelableClass = map.get(name);
             }
-            creator = map.get(name);
         }
-        if (creator != null) {
+
+        if (creatorAndParcelableClass != null) {
+            Parcelable.Creator<?> creator = creatorAndParcelableClass.first;
+            Class<?> parcelableClass = creatorAndParcelableClass.second;
             if (clazz != null) {
-                Class<?> parcelableClass = creator.getClass().getEnclosingClass();
                 if (!clazz.isAssignableFrom(parcelableClass)) {
                     throw new BadTypeParcelableException("Parcelable creator " + name + " is not "
                             + "a subclass of required class " + clazz.getName()
                             + " provided in the parameter");
                 }
             }
+
             return (Parcelable.Creator<T>) creator;
         }
 
+        Parcelable.Creator<?> creator;
+        Class<?> parcelableClass;
         try {
             // If loader == null, explicitly emulate Class.forName(String) "caller
             // classloader" behavior.
@@ -4855,7 +4903,7 @@ public final class Parcel {
                     (loader == null ? getClass().getClassLoader() : loader);
             // Avoid initializing the Parcelable class until we know it implements
             // Parcelable and has the necessary CREATOR field. http://b/1171613.
-            Class<?> parcelableClass = Class.forName(name, false /* initialize */,
+            parcelableClass = Class.forName(name, false /* initialize */,
                     parcelableClassLoader);
             if (!Parcelable.class.isAssignableFrom(parcelableClass)) {
                 throw new BadParcelableException("Parcelable protocol requires subclassing "
@@ -4902,8 +4950,9 @@ public final class Parcel {
                     + "CREATOR on class " + name);
         }
 
-        synchronized (mCreators) {
-            map.put(name, creator);
+        synchronized (sPairedCreators) {
+            sPairedCreators.get(loader).put(name, Pair.create(creator, parcelableClass));
+            mCreators.get(loader).put(name, creator);
         }
 
         return (Parcelable.Creator<T>) creator;
@@ -5054,12 +5103,17 @@ public final class Parcel {
         }
     }
 
-    // Cache of previously looked up CREATOR.createFromParcel() methods for
-    // particular classes.  Keys are the names of the classes, values are
-    // Method objects.
+
+    // Left due to the UnsupportedAppUsage. Do not use anymore - use sPairedCreators instead
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    private static final HashMap<ClassLoader,HashMap<String,Parcelable.Creator<?>>>
-        mCreators = new HashMap<>();
+    private static final HashMap<ClassLoader, HashMap<String, Parcelable.Creator<?>>>
+            mCreators = new HashMap<>();
+
+    // Cache of previously looked up CREATOR.createFromParcel() methods for particular classes.
+    // Keys are the names of the classes, values are a pair consisting of a parcelable creator,
+    // and the class of the parcelable type for the object.
+    private static final HashMap<ClassLoader, HashMap<String,
+            Pair<Parcelable.Creator<?>, Class<?>>>> sPairedCreators = new HashMap<>();
 
     /** @hide for internal use only. */
     static protected final Parcel obtain(int obj) {
@@ -5083,6 +5137,7 @@ public final class Parcel {
         if (res == null) {
             res = new Parcel(obj);
         } else {
+            res.mRecycled = false;
             if (DEBUG_RECYCLE) {
                 res.mStack = new RuntimeException();
             }
@@ -5131,7 +5186,8 @@ public final class Parcel {
     @Override
     protected void finalize() throws Throwable {
         if (DEBUG_RECYCLE) {
-            if (mStack != null) {
+            // we could always have this log on, but it's spammy
+            if (!mRecycled) {
                 Log.w(TAG, "Client did not call Parcel.recycle()", mStack);
             }
         }

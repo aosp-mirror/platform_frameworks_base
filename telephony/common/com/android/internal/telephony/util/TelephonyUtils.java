@@ -26,7 +26,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 
@@ -72,11 +71,6 @@ public final class TelephonyUtils {
     /** Returns an empty list if the input is {@code null}. */
     public static @NonNull <T> List<T> emptyIfNull(@Nullable List<T> cur) {
         return cur == null ? Collections.emptyList() : cur;
-    }
-
-    /** Throws a {@link RuntimeException} that wrapps the {@link RemoteException}. */
-    public static RuntimeException rethrowAsRuntimeException(RemoteException remoteException) {
-        throw new RuntimeException(remoteException);
     }
 
     /**
@@ -192,6 +186,7 @@ public final class TelephonyUtils {
             case TelephonyManager.DATA_CONNECTED: return "CONNECTED";
             case TelephonyManager.DATA_SUSPENDED: return "SUSPENDED";
             case TelephonyManager.DATA_DISCONNECTING: return "DISCONNECTING";
+            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS: return "HANDOVERINPROGRESS";
             case TelephonyManager.DATA_UNKNOWN: return "UNKNOWN";
         }
         // This is the error case. The well-defined value for UNKNOWN is -1.

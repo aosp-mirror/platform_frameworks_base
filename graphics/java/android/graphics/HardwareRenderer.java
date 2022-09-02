@@ -758,22 +758,14 @@ public class HardwareRenderer {
         nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
-    private ASurfaceTransactionCallback mASurfaceTransactionCallback;
-
     /** @hide */
-    public void setASurfaceTransactionCallback(ASurfaceTransactionCallback callback) {
-        // ensure callback is kept alive on the java side since weak ref is used in native code
-        mASurfaceTransactionCallback = callback;
+    protected void setASurfaceTransactionCallback(ASurfaceTransactionCallback callback) {
         nSetASurfaceTransactionCallback(mNativeProxy, callback);
     }
 
-    private PrepareSurfaceControlForWebviewCallback mAPrepareSurfaceControlForWebviewCallback;
-
     /** @hide */
-    public void setPrepareSurfaceControlForWebviewCallback(
+    protected void setPrepareSurfaceControlForWebviewCallback(
             PrepareSurfaceControlForWebviewCallback callback) {
-        // ensure callback is kept alive on the java side since weak ref is used in native code
-        mAPrepareSurfaceControlForWebviewCallback = callback;
         nSetPrepareSurfaceControlForWebviewCallback(mNativeProxy, callback);
     }
 
@@ -831,6 +823,13 @@ public class HardwareRenderer {
     /**
      * @hide
      */
+    public static void dumpGlobalProfileInfo(FileDescriptor fd, @DumpFlags int dumpFlags) {
+        nDumpGlobalProfileInfo(fd, dumpFlags);
+    }
+
+    /**
+     * @hide
+     */
     public void dumpProfileInfo(FileDescriptor fd, @DumpFlags int dumpFlags) {
         nDumpProfileInfo(mNativeProxy, fd, dumpFlags);
     }
@@ -848,6 +847,14 @@ public class HardwareRenderer {
      */
     public void setContentDrawBounds(int left, int top, int right, int bottom) {
         nSetContentDrawBounds(mNativeProxy, left, top, right, bottom);
+    }
+
+    /**
+     * Force the new frame to draw, ensuring the UI draw request will attempt a draw this vsync.
+     * @hide
+     */
+    public void forceDrawNextFrame() {
+        nForceDrawNextFrame(mNativeProxy);
     }
 
     /** @hide */
@@ -903,6 +910,20 @@ public class HardwareRenderer {
          * @param frame The id of the frame being drawn.
          */
         void onFrameDraw(long frame);
+
+        /**
+         * Invoked during a frame drawing.
+         *
+         * @param syncResult The result of the draw. Should be a value or a combination of values
+         *                   from {@link SyncAndDrawResult}
+         * @param frame The id of the frame being drawn.
+         *
+         * @return A {@link FrameCommitCallback} that will report back if the current vsync draws.
+         */
+        default FrameCommitCallback onFrameDraw(@SyncAndDrawResult int syncResult, long frame) {
+            onFrameDraw(frame);
+            return null;
+        }
     }
 
     /**
@@ -963,12 +984,12 @@ public class HardwareRenderer {
     }
 
     /**
-     * b/68769804: For low FPS experiments.
+     * b/68769804, b/66945974: For low FPS experiments.
      *
      * @hide
      */
     public static void setFPSDivisor(int divisor) {
-        nHackySetRTAnimationsEnabled(divisor <= 1);
+        nSetRtAnimationsEnabled(divisor <= 1);
     }
 
     /**
@@ -1093,6 +1114,53 @@ public class HardwareRenderer {
      */
     public static void setContextForInit(Context context) {
         ProcessInitializer.sInstance.setContext(context);
+    }
+
+    /**
+     * Returns true if HardwareRender will produce output.
+     *
+     * This value is global to the process and affects all uses of HardwareRenderer,
+     * including
+     * those created by the system such as those used by the View tree when using hardware
+     * accelerated rendering.
+     *
+     * Default is true in all production environments, but may be false in testing-focused
+     * emulators or if {@link #setDrawingEnabled(boolean)} is used.
+     */
+    public static boolean isDrawingEnabled() {
+        return nIsDrawingEnabled();
+    }
+
+    /**
+     * Toggles whether or not HardwareRenderer will produce drawing output globally in the current
+     * process.
+     *
+     * This applies to all HardwareRenderer instances, including those created by the platform such
+     * as those used by the system for hardware accelerated View rendering.
+     *
+     * The capability to disable drawing output is intended for test environments, primarily
+     * headless ones. By setting this to false, tests that launch activities or interact with Views
+     * can be quicker with less RAM usage by skipping the final step of View drawing. All View
+     * lifecycle events will occur as normal, only the final step of rendering on the GPU to the
+     * display will be skipped.
+     *
+     * This can be toggled on and off at will, so screenshot tests can also run in this same
+     * environment by toggling drawing back on and forcing a frame to be drawn such as by calling
+     * view#invalidate(). Once drawn and the screenshot captured, this can then be turned back off.
+     */
+    // TODO(b/194195794): Add link to androidx's Screenshot library for help with this
+    public static void setDrawingEnabled(boolean drawingEnabled) {
+        nSetDrawingEnabled(drawingEnabled);
+    }
+
+    /**
+     * Disable RenderThread animations that schedule draws directly from RenderThread. This is used
+     * when we don't want to de-schedule draw requests that come from the UI thread.
+     *
+     * @hide
+     */
+    public static void setRtAnimationsEnabled(boolean enabled) {
+        nSetRtAnimationsEnabled(enabled);
     }
 
     private static final class DestroyContextRunnable implements Runnable {
@@ -1282,7 +1350,7 @@ public class HardwareRenderer {
     /**
      * @hide
      */
-    public static native boolean isWebViewOverlaysEnabled();
+    protected static native boolean isWebViewOverlaysEnabled();
 
     /** @hide */
     protected static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
@@ -1361,6 +1429,8 @@ public class HardwareRenderer {
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);
 
+    private static native void nDumpGlobalProfileInfo(FileDescriptor fd, @DumpFlags int dumpFlags);
+
     private static native void nAddRenderNode(long nativeProxy, long rootRenderNode,
             boolean placeFront);
 
@@ -1370,6 +1440,8 @@ public class HardwareRenderer {
 
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
             int top, int right, int bottom);
+
+    private static native void nForceDrawNextFrame(long nativeProxy);
 
     private static native void nSetPictureCaptureCallback(long nativeProxy,
             PictureCapturedCallback callback);
@@ -1399,9 +1471,6 @@ public class HardwareRenderer {
 
     private static native void nSetHighContrastText(boolean enabled);
 
-    // For temporary experimentation b/66945974
-    private static native void nHackySetRTAnimationsEnabled(boolean enabled);
-
     private static native void nSetDebuggingEnabled(boolean enabled);
 
     private static native void nSetIsolatedProcess(boolean enabled);
@@ -1416,4 +1485,10 @@ public class HardwareRenderer {
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
             int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos);
+
+    private static native void nSetDrawingEnabled(boolean drawingEnabled);
+
+    private static native boolean nIsDrawingEnabled();
+
+    private static native void nSetRtAnimationsEnabled(boolean rtAnimationsEnabled);
 }

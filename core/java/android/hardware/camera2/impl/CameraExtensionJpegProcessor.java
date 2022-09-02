@@ -24,6 +24,7 @@ import android.graphics.ImageFormat;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.extension.CaptureBundle;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
+import android.hardware.camera2.extension.IProcessResultImpl;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
@@ -183,11 +184,13 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
             int cropLeft, int cropTop, int cropRight, int cropBottom,
             int rot90);
 
-    public void process(List<CaptureBundle> captureBundle) throws RemoteException {
+    @Override
+    public void process(List<CaptureBundle> captureBundle, IProcessResultImpl captureCallback)
+            throws RemoteException {
         JpegParameters jpegParams = getJpegParameters(captureBundle);
         try {
             mJpegParameters.add(jpegParams);
-            mProcessor.process(captureBundle);
+            mProcessor.process(captureBundle, captureCallback);
         } catch (Exception e) {
             mJpegParameters.remove(jpegParams);
             throw e;
@@ -300,6 +303,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
                     jpegBuffer, jpegCapacity, jpegParams.mQuality,
                     0, 0, yuvImage.getWidth(), yuvImage.getHeight(),
                     jpegParams.mRotation);
+            jpegImage.setTimestamp(yuvImage.getTimestamp());
             yuvImage.close();
 
             try {

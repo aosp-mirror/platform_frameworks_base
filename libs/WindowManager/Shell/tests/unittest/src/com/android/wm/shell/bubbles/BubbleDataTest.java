@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.LocusId;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -39,7 +40,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.Log;
 import android.util.Pair;
 import android.view.WindowManager;
 
@@ -82,6 +82,7 @@ public class BubbleDataTest extends ShellTestCase {
     private BubbleEntry mEntryC1;
     private BubbleEntry mEntryInterruptive;
     private BubbleEntry mEntryDismissed;
+    private BubbleEntry mEntryLocusId;
 
     private Bubble mBubbleA1;
     private Bubble mBubbleA2;
@@ -92,6 +93,7 @@ public class BubbleDataTest extends ShellTestCase {
     private Bubble mBubbleC1;
     private Bubble mBubbleInterruptive;
     private Bubble mBubbleDismissed;
+    private Bubble mBubbleLocusId;
 
     private BubbleData mBubbleData;
     private TestableBubblePositioner mPositioner;
@@ -113,7 +115,7 @@ public class BubbleDataTest extends ShellTestCase {
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
 
     @Mock
-    private Bubbles.SuppressionChangedListener mSuppressionListener;
+    private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
 
     @Mock
     private Bubbles.PendingIntentCanceledListener mPendingIntentCanceledListener;
@@ -127,33 +129,54 @@ public class BubbleDataTest extends ShellTestCase {
         mEntryA3 = createBubbleEntry(1, "a3", "package.a", null);
         mEntryB1 = createBubbleEntry(1, "b1", "package.b", null);
         mEntryB2 = createBubbleEntry(1, "b2", "package.b", null);
-        mEntryB3 = createBubbleEntry(1, "b3", "package.b", null);
-        mEntryC1 = createBubbleEntry(1, "c1", "package.c", null);
+        mEntryB3 = createBubbleEntry(11, "b3", "package.b", null);
+        mEntryC1 = createBubbleEntry(11, "c1", "package.c", null);
 
         NotificationListenerService.Ranking ranking =
                 mock(NotificationListenerService.Ranking.class);
         when(ranking.isTextChanged()).thenReturn(true);
         mEntryInterruptive = createBubbleEntry(1, "interruptive", "package.d", ranking);
-        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null,
+        mBubbleInterruptive = new Bubble(mEntryInterruptive, mBubbleMetadataFlagListener, null,
                 mMainExecutor);
 
         mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d", null);
-        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener, null,
+        mBubbleDismissed = new Bubble(mEntryDismissed, mBubbleMetadataFlagListener, null,
                 mMainExecutor);
 
-        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener, mPendingIntentCanceledListener,
+        mEntryLocusId = createBubbleEntry(1, "keyLocus", "package.e", null,
+                new LocusId("locusId1"));
+        mBubbleLocusId = new Bubble(mEntryLocusId,
+                mBubbleMetadataFlagListener,
+                null /* pendingIntentCanceledListener */,
                 mMainExecutor);
-        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener, mPendingIntentCanceledListener,
+
+        mBubbleA1 = new Bubble(mEntryA1,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleA2 = new Bubble(mEntryA2,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleA3 = new Bubble(mEntryA3,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleB1 = new Bubble(mEntryB1,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleB2 = new Bubble(mEntryB2,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleB3 = new Bubble(mEntryB3,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleC1 = new Bubble(mEntryC1,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
         mPositioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));
@@ -794,7 +817,7 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_expanded_removeLastBubble_showsOverflowIfNotEmpty() {
+    public void test_expanded_removeLastBubble_collapsesIfOverflowNotEmpty() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         changeExpandedStateAtTime(true, 2000);
@@ -804,7 +827,7 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertThat(mBubbleData.getOverflowBubbles().size()).isGreaterThan(0);
-        assertSelectionChangedTo(mBubbleData.getOverflow());
+        assertExpandedChangedTo(false);
     }
 
     @Test
@@ -939,6 +962,133 @@ public class BubbleDataTest extends ShellTestCase {
         assertOrderChangedTo(mBubbleB3, mBubbleB2, mBubbleB1, mBubbleA3, mBubbleA2);
     }
 
+    /**
+     * There is one bubble in the stack. If a task matching the locusId becomes visible, suppress
+     * the bubble. If it is hidden, unsuppress the bubble.
+     */
+    @Test
+    public void test_onLocusVisibilityChanged_singleBubble() {
+        sendUpdatedEntryAtTime(mEntryLocusId, 1000);
+        mBubbleData.setListener(mListener);
+
+        // Suppress the bubble
+        mBubbleData.onLocusVisibilityChanged(100, mEntryLocusId.getLocusId(), true /* visible */);
+        verifyUpdateReceived();
+        assertBubbleSuppressed(mBubbleLocusId);
+        assertOrderNotChanged();
+        assertBubbleListContains(/* empty list */);
+
+        // Unsuppress the bubble
+        mBubbleData.onLocusVisibilityChanged(100, mEntryLocusId.getLocusId(), false /* visible */);
+        verifyUpdateReceived();
+        assertBubbleUnsuppressed(mBubbleLocusId);
+        assertOrderNotChanged();
+        assertBubbleListContains(mBubbleLocusId);
+    }
+
+    /**
+     * Bubble stack has multiple bubbles. Suppress bubble based on matching locusId. Suppressed
+     * bubble is at the top.
+     *
+     * When suppressed:
+     * - hide bubble
+     * - update order
+     * - update selection
+     *
+     * When unsuppressed:
+     * - show bubble
+     * - update order
+     * - update selection
+     */
+    @Test
+    public void test_onLocusVisibilityChanged_multipleBubbles_suppressTopBubble() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryLocusId, 3000);
+        mBubbleData.setListener(mListener);
+
+        // Suppress bubble
+        mBubbleData.onLocusVisibilityChanged(100, mEntryLocusId.getLocusId(), true /* visible */);
+        verifyUpdateReceived();
+        assertBubbleSuppressed(mBubbleLocusId);
+        assertSelectionChangedTo(mBubbleA2);
+        assertOrderChangedTo(mBubbleA2, mBubbleA1);
+
+        // Unsuppress bubble
+        mBubbleData.onLocusVisibilityChanged(100, mEntryLocusId.getLocusId(), false /* visible */);
+        verifyUpdateReceived();
+        assertBubbleUnsuppressed(mBubbleLocusId);
+        assertSelectionChangedTo(mBubbleLocusId);
+        assertOrderChangedTo(mBubbleLocusId, mBubbleA2, mBubbleA1);
+    }
+
+    /**
+     * Bubble stack has multiple bubbles. Suppress bubble based on matching locusId. Suppressed
+     * bubble is not at the top.
+     *
+     * When suppressed:
+     * - hide suppressed bubble
+     * - do not update order
+     * - do not update selection
+     *
+     * When unsuppressed:
+     * - show bubble
+     * - do not update order
+     * - do not update selection
+     */
+    @Test
+    public void test_onLocusVisibilityChanged_multipleBubbles_suppressStackedBubble() {
+        sendUpdatedEntryAtTime(mEntryLocusId, 1000);
+        sendUpdatedEntryAtTime(mEntryA1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        mBubbleData.setListener(mListener);
+
+        // Suppress bubble
+        mBubbleData.onLocusVisibilityChanged(100, mEntryLocusId.getLocusId(), true /* visible */);
+        verifyUpdateReceived();
+        assertBubbleSuppressed(mBubbleLocusId);
+        assertSelectionNotChanged();
+        assertBubbleListContains(mBubbleA2, mBubbleA1);
+
+        // Unsuppress bubble
+        mBubbleData.onLocusVisibilityChanged(100, mEntryLocusId.getLocusId(), false /* visible */);
+        verifyUpdateReceived();
+        assertBubbleUnsuppressed(mBubbleLocusId);
+        assertSelectionNotChanged();
+        assertBubbleListContains(mBubbleA2, mBubbleA1, mBubbleLocusId);
+    }
+
+    @Test
+    public void test_removeBubblesForUser() {
+        // A is user 1
+        sendUpdatedEntryAtTime(mEntryA1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        // B & C belong to user 11
+        sendUpdatedEntryAtTime(mEntryB3, 4000);
+        sendUpdatedEntryAtTime(mEntryC1, 5000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+        assertBubbleListContains(mBubbleC1, mBubbleB3, mBubbleA2);
+
+        // Remove all the A bubbles
+        mBubbleData.removeBubblesForUser(1);
+        verifyUpdateReceived();
+
+        // Verify the update has the removals.
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.removedBubbles.get(0)).isEqualTo(
+                Pair.create(mBubbleA2, Bubbles.DISMISS_USER_REMOVED));
+        assertThat(update.removedBubbles.get(1)).isEqualTo(
+                Pair.create(mBubbleA1, Bubbles.DISMISS_USER_REMOVED));
+
+        // Verify no A bubbles in active or overflow.
+        assertBubbleListContains(mBubbleC1, mBubbleB3);
+        assertOverflowChangedTo(ImmutableList.of());
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);
@@ -995,9 +1145,29 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(update.overflowBubbles).isEqualTo(bubbles);
     }
 
+    private void assertBubbleListContains(Bubble... bubbles) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertWithMessage("bubbleList").that(update.bubbles).containsExactlyElementsIn(bubbles);
+    }
+
+    private void assertBubbleSuppressed(Bubble expected) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertWithMessage("suppressedBubble").that(update.suppressedBubble).isEqualTo(expected);
+    }
+
+    private void assertBubbleUnsuppressed(Bubble expected) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertWithMessage("unsuppressedBubble").that(update.unsuppressedBubble).isEqualTo(expected);
+    }
+
     private BubbleEntry createBubbleEntry(int userId, String notifKey, String packageName,
             NotificationListenerService.Ranking ranking) {
-        return createBubbleEntry(userId, notifKey, packageName, ranking, 1000);
+        return createBubbleEntry(userId, notifKey, packageName, ranking, 1000, null);
+    }
+
+    private BubbleEntry createBubbleEntry(int userId, String notifKey, String packageName,
+            NotificationListenerService.Ranking ranking, LocusId locusId) {
+        return createBubbleEntry(userId, notifKey, packageName, ranking, 1000, locusId);
     }
 
     private void setPostTime(BubbleEntry entry, long postTime) {
@@ -1010,15 +1180,18 @@ public class BubbleDataTest extends ShellTestCase {
      * as a convenience to create a Notification w/BubbleMetadata.
      */
     private BubbleEntry createBubbleEntry(int userId, String notifKey, String packageName,
-            NotificationListenerService.Ranking ranking, long postTime) {
+            NotificationListenerService.Ranking ranking, long postTime,
+            LocusId locusId) {
         // BubbleMetadata
         Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder(
                 mExpandIntent, Icon.createWithResource("", 0))
                 .setDeleteIntent(mDeleteIntent)
+                .setSuppressableBubble(true)
                 .build();
         // Notification -> BubbleMetadata
         Notification notification = mock(Notification.class);
-        notification.setBubbleMetadata(bubbleMetadata);
+        when(notification.getBubbleMetadata()).thenReturn(bubbleMetadata);
+        when(notification.getLocusId()).thenReturn(locusId);
 
         // Notification -> extras
         notification.extras = new Bundle();

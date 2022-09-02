@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -54,7 +55,9 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.view.IDisplayWindowListener;
 import android.view.IWindowManager;
@@ -84,8 +87,6 @@ import com.android.wm.shell.common.TransactionPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 
@@ -93,7 +94,7 @@ import java.util.ArrayList;
  * Tests for the shell transitions.
  *
  * Build/Install/Run:
- *  atest WMShellUnitTests:ShellTransitionTests
+ * atest WMShellUnitTests:ShellTransitionTests
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -106,6 +107,7 @@ public class ShellTransitionTests {
     private final TestShellExecutor mMainExecutor = new TestShellExecutor();
     private final ShellExecutor mAnimExecutor = new TestShellExecutor();
     private final TestTransitionHandler mDefaultHandler = new TestTransitionHandler();
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     @Before
     public void setUp() {
@@ -590,6 +592,90 @@ public class ShellTransitionTests {
                         .setRotate().build())
                 .build();
         assertFalse(DefaultTransitionHandler.isRotationSeamless(noTask, displays));
+
+        // Seamless if display is explicitly seamless.
+        final TransitionInfo seamlessDisplay = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertTrue(DefaultTransitionHandler.isRotationSeamless(seamlessDisplay, displays));
+    }
+
+    @Test
+    public void testRunWhenIdle() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        Runnable runnable1 = mock(Runnable.class);
+        Runnable runnable2 = mock(Runnable.class);
+        Runnable runnable3 = mock(Runnable.class);
+        Runnable runnable4 = mock(Runnable.class);
+
+        transitions.runOnIdle(runnable1);
+
+        // runnable1 is executed immediately because there are no active transitions.
+        verify(runnable1, times(1)).run();
+
+        clearInvocations(runnable1);
+
+        IBinder transitToken1 = new Binder();
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken1, info1, mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+        assertEquals(1, mDefaultHandler.activeCount());
+
+        transitions.runOnIdle(runnable2);
+        transitions.runOnIdle(runnable3);
+
+        // runnable2 and runnable3 aren't executed immediately because there is an active
+        // transaction.
+
+        IBinder transitToken2 = new Binder();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
+        TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken2, info2, mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+        assertEquals(1, mDefaultHandler.activeCount());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        // first transition finished
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any(), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any(), any());
+        // But now the "queued" transition is running
+        assertEquals(1, mDefaultHandler.activeCount());
+
+        // runnable2 and runnable3 are still not executed because the second transition is still
+        // active.
+        verify(runnable2, times(0)).run();
+        verify(runnable3, times(0)).run();
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any(), any());
+
+        // runnable2 and runnable3 are executed after the second transition finishes because there
+        // are no other active transitions, runnable1 isn't executed again.
+        verify(runnable1, times(0)).run();
+        verify(runnable2, times(1)).run();
+        verify(runnable3, times(1)).run();
+
+        clearInvocations(runnable2);
+        clearInvocations(runnable3);
+
+        transitions.runOnIdle(runnable4);
+
+        // runnable4 is executed immediately because there are no active transitions, all other
+        // runnables aren't executed again.
+        verify(runnable1, times(0)).run();
+        verify(runnable2, times(0)).run();
+        verify(runnable3, times(0)).run();
+        verify(runnable4, times(1)).run();
     }
 
     class TransitionInfoBuilder {
@@ -741,7 +827,7 @@ public class ShellTransitionTests {
         IWindowManager mockWM = mock(IWindowManager.class);
         final IDisplayWindowListener[] displayListener = new IDisplayWindowListener[1];
         try {
-            doReturn(new int[] {DEFAULT_DISPLAY}).when(mockWM).registerDisplayWindowListener(any());
+            doReturn(new int[]{DEFAULT_DISPLAY}).when(mockWM).registerDisplayWindowListener(any());
         } catch (RemoteException e) {
             // No remote stuff happening, so this can't be hit
         }
@@ -752,7 +838,7 @@ public class ShellTransitionTests {
 
     private Transitions createTestTransitions() {
         return new Transitions(mOrganizer, mTransactionPool, createTestDisplayController(),
-                mContext, mMainExecutor, mAnimExecutor);
+                mContext, mMainExecutor, mMainHandler, mAnimExecutor);
     }
 //
 //    private class TestDisplayController extends DisplayController {

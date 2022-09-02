@@ -52,7 +52,7 @@ static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
   // We allow unqualified class names (ie: .HelloActivity)
   // Since we don't know the package name, we can just make a fake one here and
   // the test will be identical as long as the real package name is valid too.
-  Maybe<std::string> fully_qualified_class_name =
+  std::optional<std::string> fully_qualified_class_name =
       util::GetFullyQualifiedClassName("a", attr->value);
 
   StringPiece qualified_class_name = fully_qualified_class_name
@@ -146,7 +146,7 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
     // Now inject the android:isFeatureSplit="true" attribute.
     xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kIsFeatureSplit);
     if (attr != nullptr) {
-      if (!ResourceUtils::ParseBool(attr->value).value_or_default(false)) {
+      if (!ResourceUtils::ParseBool(attr->value).value_or(false)) {
         // The isFeatureSplit attribute is false, which conflicts with the use
         // of "featureSplit".
         diag->Error(DiagMessage(el->line_number)
@@ -158,6 +158,31 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
       // The attribute is already there and set to true, nothing to do.
     } else {
       el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, kIsFeatureSplit, "true"});
+    }
+  }
+  return true;
+}
+
+static bool AutoGenerateIsSplitRequired(xml::Element* el, SourcePathDiagnostics* diag) {
+  constexpr const char* kRequiredSplitTypes = "requiredSplitTypes";
+  constexpr const char* kIsSplitRequired = "isSplitRequired";
+
+  xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kRequiredSplitTypes);
+  if (attr != nullptr) {
+    // Now inject the android:isSplitRequired="true" attribute.
+    xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, kIsSplitRequired);
+    if (attr != nullptr) {
+      if (!ResourceUtils::ParseBool(attr->value).value_or(false)) {
+        // The isFeatureSplit attribute is false, which conflicts with the use
+        // of "featureSplit".
+        diag->Error(DiagMessage(el->line_number)
+                    << "attribute 'requiredSplitTypes' used in <manifest> but "
+                       "'android:isSplitRequired' is not 'true'");
+        return false;
+      }
+      // The attribute is already there and set to true, nothing to do.
+    } else {
+      el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, kIsSplitRequired, "true"});
     }
   }
   return true;
@@ -329,6 +354,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   // Manifest actions.
   xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
   manifest_action.Action(AutoGenerateIsFeatureSplit);
+  manifest_action.Action(AutoGenerateIsSplitRequired);
   manifest_action.Action(VerifyManifest);
   manifest_action.Action(FixCoreAppAttribute);
   manifest_action.Action([&](xml::Element* el) -> bool {
@@ -482,6 +508,16 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
   uses_static_library_action["additional-certificate"];
 
+  xml::XmlNodeAction& sdk_library_action = application_action["sdk-library"];
+  sdk_library_action.Action(RequiredNameIsJavaPackage);
+  sdk_library_action.Action(RequiredAndroidAttribute("versionMajor"));
+
+  xml::XmlNodeAction& uses_sdk_library_action = application_action["uses-sdk-library"];
+  uses_sdk_library_action.Action(RequiredNameIsJavaPackage);
+  uses_sdk_library_action.Action(RequiredAndroidAttribute("versionMajor"));
+  uses_sdk_library_action.Action(RequiredAndroidAttribute("certDigest"));
+  uses_sdk_library_action["additional-certificate"];
+
   xml::XmlNodeAction& uses_package_action = application_action["uses-package"];
   uses_package_action.Action(RequiredNameIsJavaPackage);
   uses_package_action["additional-certificate"];
@@ -508,6 +544,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   application_action["activity-alias"] = component_action;
   application_action["service"] = component_action;
   application_action["receiver"] = component_action;
+  application_action["apex-system-service"] = component_action;
 
   // Provider actions.
   application_action["provider"] = component_action;
@@ -523,7 +560,8 @@ static void FullyQualifyClassName(const StringPiece& package, const StringPiece&
                                   const StringPiece& attr_name, xml::Element* el) {
   xml::Attribute* attr = el->FindAttribute(attr_ns, attr_name);
   if (attr != nullptr) {
-    if (Maybe<std::string> new_value = util::GetFullyQualifiedClassName(package, attr->value)) {
+    if (std::optional<std::string> new_value =
+            util::GetFullyQualifiedClassName(package, attr->value)) {
       attr->value = std::move(new_value.value());
     }
   }
@@ -550,10 +588,21 @@ static bool RenameManifestPackage(const StringPiece& package_override, xml::Elem
             child_el->name == "provider" || child_el->name == "receiver" ||
             child_el->name == "service") {
           FullyQualifyClassName(original_package, xml::kSchemaAndroid, "name", child_el);
+          continue;
         }
 
         if (child_el->name == "activity-alias") {
           FullyQualifyClassName(original_package, xml::kSchemaAndroid, "targetActivity", child_el);
+          continue;
+        }
+
+        if (child_el->name == "processes") {
+          for (xml::Element* grand_child_el : child_el->GetChildElements()) {
+            if (grand_child_el->name == "process") {
+              FullyQualifyClassName(original_package, xml::kSchemaAndroid, "name", grand_child_el);
+            }
+          }
+          continue;
         }
       }
     }

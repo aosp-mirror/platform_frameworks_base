@@ -49,9 +49,13 @@ public class ResumeMediaBrowser {
     private static final String TAG = "ResumeMediaBrowser";
     private final Context mContext;
     @Nullable private final Callback mCallback;
-    private MediaBrowserFactory mBrowserFactory;
+    private final MediaBrowserFactory mBrowserFactory;
+    private final ResumeMediaBrowserLogger mLogger;
+    private final ComponentName mComponentName;
+    private final MediaController.Callback mMediaControllerCallback = new SessionDestroyCallback();
+
     private MediaBrowser mMediaBrowser;
-    private ComponentName mComponentName;
+    @Nullable private MediaController mMediaController;
 
     /**
      * Initialize a new media browser
@@ -59,12 +63,17 @@ public class ResumeMediaBrowser {
      * @param callback used to report media items found
      * @param componentName Component name of the MediaBrowserService this browser will connect to
      */
-    public ResumeMediaBrowser(Context context, @Nullable Callback callback,
-            ComponentName componentName, MediaBrowserFactory browserFactory) {
+    public ResumeMediaBrowser(
+            Context context,
+            @Nullable Callback callback,
+            ComponentName componentName,
+            MediaBrowserFactory browserFactory,
+            ResumeMediaBrowserLogger logger) {
         mContext = context;
         mCallback = callback;
         mComponentName = componentName;
         mBrowserFactory = browserFactory;
+        mLogger = logger;
     }
 
     /**
@@ -76,7 +85,6 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect will be called automatically with this function.
      */
     public void findRecentMedia() {
-        Log.d(TAG, "Connecting to " + mComponentName);
         disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
@@ -84,6 +92,8 @@ public class ResumeMediaBrowser {
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
+        updateMediaController();
+        mLogger.logConnection(mComponentName, "findRecentMedia");
         mMediaBrowser.connect();
     }
 
@@ -147,7 +157,8 @@ public class ResumeMediaBrowser {
         @Override
         public void onConnected() {
             Log.d(TAG, "Service connected for " + mComponentName);
-            if (mMediaBrowser != null && mMediaBrowser.isConnected()) {
+            updateMediaController();
+            if (isBrowserConnected()) {
                 String root = mMediaBrowser.getRoot();
                 if (!TextUtils.isEmpty(root)) {
                     if (mCallback != null) {
@@ -196,9 +207,11 @@ public class ResumeMediaBrowser {
      */
     protected void disconnect() {
         if (mMediaBrowser != null) {
+            mLogger.logDisconnect(mComponentName);
             mMediaBrowser.disconnect();
         }
         mMediaBrowser = null;
+        updateMediaController();
     }
 
     /**
@@ -217,7 +230,8 @@ public class ResumeMediaBrowser {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "Connected for restart " + mMediaBrowser.isConnected());
-                        if (mMediaBrowser == null || !mMediaBrowser.isConnected()) {
+                        updateMediaController();
+                        if (!isBrowserConnected()) {
                             if (mCallback != null) {
                                 mCallback.onError();
                             }
@@ -251,6 +265,8 @@ public class ResumeMediaBrowser {
                         disconnect();
                     }
                 }, rootHints);
+        updateMediaController();
+        mLogger.logConnection(mComponentName, "restart");
         mMediaBrowser.connect();
     }
 
@@ -264,7 +280,7 @@ public class ResumeMediaBrowser {
      * @return the token, or null if the MediaBrowser is null or disconnected
      */
     public MediaSession.Token getToken() {
-        if (mMediaBrowser == null || !mMediaBrowser.isConnected()) {
+        if (!isBrowserConnected()) {
             return null;
         }
         return mMediaBrowser.getSessionToken();
@@ -296,7 +312,37 @@ public class ResumeMediaBrowser {
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
+        updateMediaController();
+        mLogger.logConnection(mComponentName, "testConnection");
         mMediaBrowser.connect();
+    }
+
+    /** Updates mMediaController based on our current browser values. */
+    private void updateMediaController() {
+        MediaSession.Token controllerToken =
+                mMediaController != null ? mMediaController.getSessionToken() : null;
+        MediaSession.Token currentToken = getToken();
+        boolean areEqual = (controllerToken == null && currentToken == null)
+                || (controllerToken != null && controllerToken.equals(currentToken));
+        if (areEqual) {
+            return;
+        }
+
+        // Whenever the token changes, un-register the callback on the old controller (if we have
+        // one) and create a new controller with the callback attached.
+        if (mMediaController != null) {
+            mMediaController.unregisterCallback(mMediaControllerCallback);
+        }
+        if (currentToken != null) {
+            mMediaController = createMediaController(currentToken);
+            mMediaController.registerCallback(mMediaControllerCallback);
+        } else {
+            mMediaController = null;
+        }
+    }
+
+    private boolean isBrowserConnected() {
+        return mMediaBrowser != null && mMediaBrowser.isConnected();
     }
 
     /**
@@ -323,6 +369,14 @@ public class ResumeMediaBrowser {
          */
         public void addTrack(MediaDescription track, ComponentName component,
                 ResumeMediaBrowser browser) {
+        }
+    }
+
+    private class SessionDestroyCallback extends MediaController.Callback {
+        @Override
+        public void onSessionDestroyed() {
+            mLogger.logSessionDestroyed(isBrowserConnected(), mComponentName);
+            disconnect();
         }
     }
 }

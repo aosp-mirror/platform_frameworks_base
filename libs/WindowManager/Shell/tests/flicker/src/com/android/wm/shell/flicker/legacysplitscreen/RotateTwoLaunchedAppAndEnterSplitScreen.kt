@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -29,7 +30,6 @@ import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
@@ -54,11 +54,11 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppAndEnterSplitScreen(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenRotateTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            super.transition(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             transitions {
-                this.setRotation(testSpec.config.startRotation)
+                this.setRotation(testSpec.startRotation)
                 device.launchSplitScreen(wmHelper)
                 device.reopenAppFromOverview(wmHelper)
             }
@@ -71,20 +71,20 @@ class RotateTwoLaunchedAppAndEnterSplitScreen(
     @Presubmit
     @Test
     fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
-        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.startRotation,
             splitScreenApp.component)
 
     @Presubmit
     @Test
     fun dockedStackSecondaryBoundsIsVisibleAtEnd() =
-        testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+        testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.startRotation,
             secondaryApp.component)
 
     @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 

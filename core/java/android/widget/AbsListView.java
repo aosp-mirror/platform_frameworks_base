@@ -2543,33 +2543,32 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return;
         }
 
-        boolean isItemEnabled = view.isEnabled() && isEnabled();
+        boolean isItemActionable = isEnabled();
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof AbsListView.LayoutParams) {
-            isItemEnabled &= ((AbsListView.LayoutParams) lp).isEnabled;
+            isItemActionable &= ((AbsListView.LayoutParams) lp).isEnabled;
         }
-
-        info.setEnabled(isItemEnabled);
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_CLEAR_SELECTION);
         } else  {
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_SELECT);
         }
 
         if (isItemClickable(view)) {
-            addAccessibilityActionIfEnabled(info, isItemEnabled, AccessibilityAction.ACTION_CLICK);
+            addAccessibilityActionIfEnabled(info, isItemActionable,
+                    AccessibilityAction.ACTION_CLICK);
             // A disabled item is a separator which should not be clickable.
-            info.setClickable(isItemEnabled);
+            info.setClickable(isItemActionable);
         }
 
         if (isLongClickable()) {
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_LONG_CLICK);
-            info.setLongClickable(true);
+            info.setLongClickable(isItemActionable);
         }
     }
 
@@ -2655,6 +2654,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 selector.setHotspot(x, y);
             }
         }
+    }
+
+    /**
+     * Returns whether the selected child view (from the adapter's getView) is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isSelectedChildViewEnabled() {
+        return mIsChildViewEnabled;
+    }
+
+    /**
+     * Set whether the selected child view (from the adapter's getView) is enabled.
+     *
+     * When refreshDrawableState is called, AbsListView will control the "enabled" state
+     * of the selector based on this.
+     *
+     * @param selectedChildViewEnabled true if enabled
+     */
+    public void setSelectedChildViewEnabled(boolean selectedChildViewEnabled) {
+        mIsChildViewEnabled = selectedChildViewEnabled;
     }
 
     @Override
@@ -5928,36 +5948,37 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean handled = false;
         boolean okToSend = true;
         switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_UP:
-        case KeyEvent.KEYCODE_DPAD_DOWN:
-        case KeyEvent.KEYCODE_DPAD_LEFT:
-        case KeyEvent.KEYCODE_DPAD_RIGHT:
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-        case KeyEvent.KEYCODE_ENTER:
-        case KeyEvent.KEYCODE_NUMPAD_ENTER:
-            okToSend = false;
-            break;
-        case KeyEvent.KEYCODE_BACK:
-            if (mFiltered && mPopup != null && mPopup.isShowing()) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN
-                        && event.getRepeatCount() == 0) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.startTracking(event, this);
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
+                okToSend = false;
+                break;
+            case KeyEvent.KEYCODE_BACK:
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (mFiltered && mPopup != null && mPopup.isShowing()) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN
+                            && event.getRepeatCount() == 0) {
+                        KeyEvent.DispatcherState state = getKeyDispatcherState();
+                        if (state != null) {
+                            state.startTracking(event, this);
+                        }
+                        handled = true;
+                    } else if (event.getAction() == KeyEvent.ACTION_UP
+                            && event.isTracking() && !event.isCanceled()) {
+                        handled = true;
+                        mTextFilter.setText("");
                     }
-                    handled = true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && event.isTracking() && !event.isCanceled()) {
-                    handled = true;
-                    mTextFilter.setText("");
                 }
-            }
-            okToSend = false;
-            break;
-        case KeyEvent.KEYCODE_SPACE:
-            // Only send spaces once we are filtered
-            okToSend = mFiltered;
-            break;
+                okToSend = false;
+                break;
+            case KeyEvent.KEYCODE_SPACE:
+                // Only send spaces once we are filtered
+                okToSend = mFiltered;
+                break;
         }
 
         if (okToSend) {
@@ -6156,6 +6177,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public boolean requestCursorUpdates(int cursorUpdateMode) {
             return getTarget().requestCursorUpdates(cursorUpdateMode);
+        }
+
+        @Override
+        public boolean requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter) {
+            return getTarget().requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
         }
 
         @Override

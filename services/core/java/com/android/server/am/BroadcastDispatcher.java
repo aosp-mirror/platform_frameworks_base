@@ -18,14 +18,21 @@ package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
+import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 
+import android.annotation.Nullable;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
 
@@ -232,6 +239,253 @@ public class BroadcastDispatcher {
     // Next outbound broadcast, established by getNextBroadcastLocked()
     private BroadcastRecord mCurrentBroadcast;
 
+    // Map userId to its deferred boot completed broadcasts.
+    private SparseArray<DeferredBootCompletedBroadcastPerUser> mUser2Deferred = new SparseArray<>();
+
+    /**
+     * Deferred LOCKED_BOOT_COMPLETED and BOOT_COMPLETED broadcasts that is sent to a user.
+     */
+    static class DeferredBootCompletedBroadcastPerUser {
+        private int mUserId;
+        // UID that has process started at least once, ready to execute LOCKED_BOOT_COMPLETED
+        // receivers.
+        @VisibleForTesting
+        SparseBooleanArray mUidReadyForLockedBootCompletedBroadcast = new SparseBooleanArray();
+        // UID that has process started at least once, ready to execute BOOT_COMPLETED receivers.
+        @VisibleForTesting
+        SparseBooleanArray mUidReadyForBootCompletedBroadcast = new SparseBooleanArray();
+        // Map UID to deferred LOCKED_BOOT_COMPLETED broadcasts.
+        // LOCKED_BOOT_COMPLETED broadcast receivers are deferred until the first time the uid has
+        // any process started.
+        @VisibleForTesting
+        SparseArray<BroadcastRecord> mDeferredLockedBootCompletedBroadcasts = new SparseArray<>();
+        // is the LOCKED_BOOT_COMPLETED broadcast received by the user.
+        @VisibleForTesting
+        boolean mLockedBootCompletedBroadcastReceived;
+        // Map UID to deferred BOOT_COMPLETED broadcasts.
+        // BOOT_COMPLETED broadcast receivers are deferred until the first time the uid has any
+        // process started.
+        @VisibleForTesting
+        SparseArray<BroadcastRecord> mDeferredBootCompletedBroadcasts = new SparseArray<>();
+        // is the BOOT_COMPLETED broadcast received by the user.
+        @VisibleForTesting
+        boolean mBootCompletedBroadcastReceived;
+
+        DeferredBootCompletedBroadcastPerUser(int userId) {
+            this.mUserId = userId;
+        }
+
+        public void updateUidReady(int uid) {
+            if (!mLockedBootCompletedBroadcastReceived
+                    || mDeferredLockedBootCompletedBroadcasts.size() != 0) {
+                mUidReadyForLockedBootCompletedBroadcast.put(uid, true);
+            }
+            if (!mBootCompletedBroadcastReceived
+                    || mDeferredBootCompletedBroadcasts.size() != 0) {
+                mUidReadyForBootCompletedBroadcast.put(uid, true);
+            }
+        }
+
+        public void enqueueBootCompletedBroadcasts(String action,
+                SparseArray<BroadcastRecord> deferred) {
+            if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)) {
+                enqueueBootCompletedBroadcasts(deferred, mDeferredLockedBootCompletedBroadcasts,
+                        mUidReadyForLockedBootCompletedBroadcast);
+                mLockedBootCompletedBroadcastReceived = true;
+                if (DEBUG_BROADCAST_DEFERRAL) {
+                    dumpBootCompletedBroadcastRecord(mDeferredLockedBootCompletedBroadcasts);
+                }
+            } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                enqueueBootCompletedBroadcasts(deferred, mDeferredBootCompletedBroadcasts,
+                        mUidReadyForBootCompletedBroadcast);
+                mBootCompletedBroadcastReceived = true;
+                if (DEBUG_BROADCAST_DEFERRAL) {
+                    dumpBootCompletedBroadcastRecord(mDeferredBootCompletedBroadcasts);
+                }
+            }
+        }
+
+        /**
+         * Merge UID to BroadcastRecord map into {@link #mDeferredBootCompletedBroadcasts} or
+         * {@link #mDeferredLockedBootCompletedBroadcasts}
+         * @param from the UID to BroadcastRecord map.
+         * @param into The UID to list of BroadcastRecord map.
+         */
+        private void enqueueBootCompletedBroadcasts(SparseArray<BroadcastRecord> from,
+                SparseArray<BroadcastRecord> into, SparseBooleanArray uidReadyForReceiver) {
+            // remove unwanted uids from uidReadyForReceiver.
+            for (int i = uidReadyForReceiver.size() - 1; i >= 0; i--) {
+                if (from.indexOfKey(uidReadyForReceiver.keyAt(i)) < 0) {
+                    uidReadyForReceiver.removeAt(i);
+                }
+            }
+            for (int i = 0, size = from.size(); i < size; i++) {
+                final int uid = from.keyAt(i);
+                into.put(uid, from.valueAt(i));
+                if (uidReadyForReceiver.indexOfKey(uid) < 0) {
+                    // uid is wanted but not ready.
+                    uidReadyForReceiver.put(uid, false);
+                }
+            }
+        }
+
+        public @Nullable BroadcastRecord dequeueDeferredBootCompletedBroadcast(
+                boolean isAllUidReady) {
+            BroadcastRecord next = dequeueDeferredBootCompletedBroadcast(
+                    mDeferredLockedBootCompletedBroadcasts,
+                    mUidReadyForLockedBootCompletedBroadcast, isAllUidReady);
+            if (next == null) {
+                next = dequeueDeferredBootCompletedBroadcast(mDeferredBootCompletedBroadcasts,
+                        mUidReadyForBootCompletedBroadcast, isAllUidReady);
+            }
+            return next;
+        }
+
+        private @Nullable BroadcastRecord dequeueDeferredBootCompletedBroadcast(
+                SparseArray<BroadcastRecord> uid2br, SparseBooleanArray uidReadyForReceiver,
+                boolean isAllUidReady) {
+            for (int i = 0, size = uid2br.size(); i < size; i++) {
+                final int uid = uid2br.keyAt(i);
+                if (isAllUidReady || uidReadyForReceiver.get(uid)) {
+                    final BroadcastRecord br = uid2br.valueAt(i);
+                    if (DEBUG_BROADCAST_DEFERRAL) {
+                        final Object receiver = br.receivers.get(0);
+                        if (receiver instanceof BroadcastFilter) {
+                            if (DEBUG_BROADCAST_DEFERRAL) {
+                                Slog.i(TAG, "getDeferredBootCompletedBroadcast uid:" + uid
+                                        + " BroadcastFilter:" + (BroadcastFilter) receiver
+                                        + " broadcast:" + br.intent.getAction());
+                            }
+                        } else /* if (receiver instanceof ResolveInfo) */ {
+                            ResolveInfo info = (ResolveInfo) receiver;
+                            String packageName = info.activityInfo.applicationInfo.packageName;
+                            if (DEBUG_BROADCAST_DEFERRAL) {
+                                Slog.i(TAG, "getDeferredBootCompletedBroadcast uid:" + uid
+                                        + " packageName:" + packageName
+                                        + " broadcast:" + br.intent.getAction());
+                            }
+                        }
+                    }
+                    // remove the BroadcastRecord.
+                    uid2br.removeAt(i);
+                    if (uid2br.size() == 0) {
+                        // All deferred receivers are executed, do not need uidReadyForReceiver
+                        // any more.
+                        uidReadyForReceiver.clear();
+                    }
+                    return br;
+                }
+            }
+            return null;
+        }
+
+        private @Nullable SparseArray<BroadcastRecord> getDeferredList(String action) {
+            SparseArray<BroadcastRecord> brs = null;
+            if (action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)) {
+                brs = mDeferredLockedBootCompletedBroadcasts;
+            } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                brs = mDeferredBootCompletedBroadcasts;
+            }
+            return brs;
+        }
+
+        /**
+         * Return the total number of UIDs in all BroadcastRecord in
+         * {@link #mDeferredBootCompletedBroadcasts} or
+         * {@link #mDeferredLockedBootCompletedBroadcasts}
+         */
+        private int getBootCompletedBroadcastsUidsSize(String action) {
+            SparseArray<BroadcastRecord> brs = getDeferredList(action);
+            return brs != null ? brs.size() : 0;
+        }
+
+        /**
+         * Return the total number of receivers in all BroadcastRecord in
+         * {@link #mDeferredBootCompletedBroadcasts} or
+         * {@link #mDeferredLockedBootCompletedBroadcasts}
+         */
+        private int getBootCompletedBroadcastsReceiversSize(String action) {
+            SparseArray<BroadcastRecord> brs = getDeferredList(action);
+            if (brs == null) {
+                return 0;
+            }
+            int size = 0;
+            for (int i = 0, s = brs.size(); i < s; i++) {
+                size += brs.valueAt(i).receivers.size();
+            }
+            return size;
+        }
+
+        public void dump(Dumper dumper, String action) {
+            SparseArray<BroadcastRecord> brs = getDeferredList(action);
+            if (brs == null) {
+                return;
+            }
+            for (int i = 0, size = brs.size(); i < size; i++) {
+                dumper.dump(brs.valueAt(i));
+            }
+        }
+
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+            for (int i = 0, size = mDeferredLockedBootCompletedBroadcasts.size(); i < size; i++) {
+                mDeferredLockedBootCompletedBroadcasts.valueAt(i).dumpDebug(proto, fieldId);
+            }
+            for (int i = 0, size = mDeferredBootCompletedBroadcasts.size(); i < size; i++) {
+                mDeferredBootCompletedBroadcasts.valueAt(i).dumpDebug(proto, fieldId);
+            }
+        }
+
+        private void dumpBootCompletedBroadcastRecord(SparseArray<BroadcastRecord> brs) {
+            for (int i = 0, size = brs.size(); i < size; i++) {
+                final Object receiver = brs.valueAt(i).receivers.get(0);
+                String packageName = null;
+                if (receiver instanceof BroadcastFilter) {
+                    BroadcastFilter recv = (BroadcastFilter) receiver;
+                    packageName = recv.receiverList.app.processName;
+                } else /* if (receiver instanceof ResolveInfo) */ {
+                    ResolveInfo info = (ResolveInfo) receiver;
+                    packageName = info.activityInfo.applicationInfo.packageName;
+                }
+                Slog.i(TAG, "uid:" + brs.keyAt(i)
+                        + " packageName:" + packageName
+                        + " receivers:" + brs.valueAt(i).receivers.size());
+            }
+        }
+    }
+
+    private DeferredBootCompletedBroadcastPerUser getDeferredPerUser(int userId) {
+        if (mUser2Deferred.contains(userId)) {
+            return mUser2Deferred.get(userId);
+        } else {
+            final DeferredBootCompletedBroadcastPerUser temp =
+                    new DeferredBootCompletedBroadcastPerUser(userId);
+            mUser2Deferred.put(userId, temp);
+            return temp;
+        }
+    }
+
+    /**
+     * ActivityManagerService.attachApplication() call this method to notify that the UID is ready
+     * to accept deferred LOCKED_BOOT_COMPLETED and BOOT_COMPLETED broadcasts.
+     * @param uid
+     */
+    public void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
+        getDeferredPerUser(UserHandle.getUserId(uid)).updateUidReady(uid);
+    }
+
+    private @Nullable BroadcastRecord dequeueDeferredBootCompletedBroadcast() {
+        final boolean isAllUidReady = (mQueue.mService.mConstants.mDeferBootCompletedBroadcast
+                == DEFER_BOOT_COMPLETED_BROADCAST_NONE);
+        BroadcastRecord next = null;
+        for (int i = 0, size = mUser2Deferred.size(); i < size; i++) {
+            next = mUser2Deferred.valueAt(i).dequeueDeferredBootCompletedBroadcast(isAllUidReady);
+            if (next != null) {
+                break;
+            }
+        }
+        return next;
+    }
+
     /**
      * Constructed & sharing a lock with its associated BroadcastQueue instance
      */
@@ -257,6 +511,20 @@ public class BroadcastDispatcher {
      * Standard contents-are-empty check
      */
     public boolean isEmpty() {
+        synchronized (mLock) {
+            return isIdle()
+                    && getBootCompletedBroadcastsUidsSize(Intent.ACTION_LOCKED_BOOT_COMPLETED) == 0
+                    && getBootCompletedBroadcastsUidsSize(Intent.ACTION_BOOT_COMPLETED) == 0;
+        }
+    }
+
+    /**
+     * Have less check than {@link #isEmpty()}.
+     * The dispatcher is considered as idle even with deferred LOCKED_BOOT_COMPLETED/BOOT_COMPLETED
+     * broadcasts because those can be deferred until the first time the uid's process is started.
+     * @return
+     */
+    public boolean isIdle() {
         synchronized (mLock) {
             return mCurrentBroadcast == null
                     && mOrderedBroadcasts.isEmpty()
@@ -301,14 +569,83 @@ public class BroadcastDispatcher {
             sb.append(n);
             sb.append(" deferred");
         }
+        n = getBootCompletedBroadcastsUidsSize(Intent.ACTION_LOCKED_BOOT_COMPLETED);
+        if (n > 0) {
+            sb.append(", ");
+            sb.append(n);
+            sb.append(" deferred LOCKED_BOOT_COMPLETED/");
+            sb.append(getBootCompletedBroadcastsReceiversSize(Intent.ACTION_LOCKED_BOOT_COMPLETED));
+            sb.append(" receivers");
+        }
+
+        n = getBootCompletedBroadcastsUidsSize(Intent.ACTION_BOOT_COMPLETED);
+        if (n > 0) {
+            sb.append(", ");
+            sb.append(n);
+            sb.append(" deferred BOOT_COMPLETED/");
+            sb.append(getBootCompletedBroadcastsReceiversSize(Intent.ACTION_BOOT_COMPLETED));
+            sb.append(" receivers");
+        }
         return sb.toString();
     }
 
     // ----------------------------------
     // BroadcastQueue operation support
-
     void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
-        mOrderedBroadcasts.add(r);
+        if (r.receivers == null || r.receivers.isEmpty()) {
+            mOrderedBroadcasts.add(r);
+            return;
+        }
+
+        if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(r.intent.getAction())) {
+            // Create one BroadcastRecord for each UID that can be deferred.
+            final SparseArray<BroadcastRecord> deferred =
+                    r.splitDeferredBootCompletedBroadcastLocked(mQueue.mService.mInternal,
+                            mQueue.mService.mConstants.mDeferBootCompletedBroadcast);
+            getDeferredPerUser(r.userId).enqueueBootCompletedBroadcasts(
+                    Intent.ACTION_LOCKED_BOOT_COMPLETED, deferred);
+            if (!r.receivers.isEmpty()) {
+                // The non-deferred receivers.
+                mOrderedBroadcasts.add(r);
+                return;
+            }
+        } else if (Intent.ACTION_BOOT_COMPLETED.equals(r.intent.getAction())) {
+            // Create one BroadcastRecord for each UID that can be deferred.
+            final SparseArray<BroadcastRecord> deferred =
+                    r.splitDeferredBootCompletedBroadcastLocked(mQueue.mService.mInternal,
+                            mQueue.mService.mConstants.mDeferBootCompletedBroadcast);
+            getDeferredPerUser(r.userId).enqueueBootCompletedBroadcasts(
+                    Intent.ACTION_BOOT_COMPLETED, deferred);
+            if (!r.receivers.isEmpty()) {
+                // The non-deferred receivers.
+                mOrderedBroadcasts.add(r);
+                return;
+            }
+        } else {
+            mOrderedBroadcasts.add(r);
+        }
+    }
+
+    /**
+     * Return the total number of UIDs in all deferred boot completed BroadcastRecord.
+     */
+    private int getBootCompletedBroadcastsUidsSize(String action) {
+        int size = 0;
+        for (int i = 0, s = mUser2Deferred.size(); i < s; i++) {
+            size += mUser2Deferred.valueAt(i).getBootCompletedBroadcastsUidsSize(action);
+        }
+        return size;
+    }
+
+    /**
+     * Return the total number of receivers in all deferred boot completed BroadcastRecord.
+     */
+    private int getBootCompletedBroadcastsReceiversSize(String action) {
+        int size = 0;
+        for (int i = 0, s = mUser2Deferred.size(); i < s; i++) {
+            size += mUser2Deferred.valueAt(i).getBootCompletedBroadcastsReceiversSize(action);
+        }
+        return size;
     }
 
     // Returns the now-replaced broadcast record, or null if none
@@ -369,6 +706,31 @@ public class BroadcastDispatcher {
         boolean didSomething = cleanupBroadcastListDisabledReceiversLocked(mOrderedBroadcasts,
                 packageName, filterByClasses, userId, doit);
         if (doit || !didSomething) {
+            ArrayList<BroadcastRecord> lockedBootCompletedBroadcasts = new ArrayList<>();
+            for (int u = 0, usize = mUser2Deferred.size(); u < usize; u++) {
+                SparseArray<BroadcastRecord> brs =
+                        mUser2Deferred.valueAt(u).mDeferredLockedBootCompletedBroadcasts;
+                for (int i = 0, size = brs.size(); i < size; i++) {
+                    lockedBootCompletedBroadcasts.add(brs.valueAt(i));
+                }
+            }
+            didSomething = cleanupBroadcastListDisabledReceiversLocked(
+                    lockedBootCompletedBroadcasts,
+                    packageName, filterByClasses, userId, doit);
+        }
+        if (doit || !didSomething) {
+            ArrayList<BroadcastRecord> bootCompletedBroadcasts = new ArrayList<>();
+            for (int u = 0, usize = mUser2Deferred.size(); u < usize; u++) {
+                SparseArray<BroadcastRecord> brs =
+                        mUser2Deferred.valueAt(u).mDeferredBootCompletedBroadcasts;
+                for (int i = 0, size = brs.size(); i < size; i++) {
+                    bootCompletedBroadcasts.add(brs.valueAt(i));
+                }
+            }
+            didSomething = cleanupBroadcastListDisabledReceiversLocked(bootCompletedBroadcasts,
+                    packageName, filterByClasses, userId, doit);
+        }
+        if (doit || !didSomething) {
             didSomething |= cleanupDeferralsListDisabledReceiversLocked(mAlarmBroadcasts,
                     packageName, filterByClasses, userId, doit);
         }
@@ -428,6 +790,10 @@ public class BroadcastDispatcher {
         for (Deferrals d : mDeferredBroadcasts) {
             d.dumpDebug(proto, fieldId);
         }
+
+        for (int i = 0, size = mUser2Deferred.size(); i < size; i++) {
+            mUser2Deferred.valueAt(i).dumpDebug(proto, fieldId);
+        }
     }
 
     // ----------------------------------
@@ -453,7 +819,12 @@ public class BroadcastDispatcher {
         final boolean someQueued = !mOrderedBroadcasts.isEmpty();
 
         BroadcastRecord next = null;
-        if (!mAlarmBroadcasts.isEmpty()) {
+
+        if (next == null) {
+            next = dequeueDeferredBootCompletedBroadcast();
+        }
+
+        if (next == null && !mAlarmBroadcasts.isEmpty()) {
             next = popLocked(mAlarmBroadcasts);
             if (DEBUG_BROADCAST_DEFERRAL && next != null) {
                 Slog.i(TAG, "Next broadcast from alarm targets: " + next);
@@ -749,6 +1120,20 @@ public class BroadcastDispatcher {
         dumper.setLabel("Deferred Ordered Broadcast");
         for (Deferrals d : mDeferredBroadcasts) {
             d.dumpLocked(dumper);
+        }
+        printed |= dumper.didPrint();
+
+        dumper.setHeading("Deferred LOCKED_BOOT_COMPLETED broadcasts");
+        dumper.setLabel("Deferred LOCKED_BOOT_COMPLETED Broadcast");
+        for (int i = 0, size = mUser2Deferred.size(); i < size; i++) {
+            mUser2Deferred.valueAt(i).dump(dumper, Intent.ACTION_LOCKED_BOOT_COMPLETED);
+        }
+        printed |= dumper.didPrint();
+
+        dumper.setHeading("Deferred BOOT_COMPLETED broadcasts");
+        dumper.setLabel("Deferred BOOT_COMPLETED Broadcast");
+        for (int i = 0, size = mUser2Deferred.size(); i < size; i++) {
+            mUser2Deferred.valueAt(i).dump(dumper, Intent.ACTION_BOOT_COMPLETED);
         }
         printed |= dumper.didPrint();
 

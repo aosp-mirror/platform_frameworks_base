@@ -25,6 +25,7 @@
                   android:resizeableActivity="true"
                   android:supportsPictureInPicture="true"
                   android:launchMode="singleTop"
+                  android:theme="@style/CutoutShortEdges"
                   android:label="FixedApp"
                   android:exported="true">
             <intent-filter>
@@ -37,6 +38,7 @@
                  android:supportsPictureInPicture="true"
                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
                  android:taskAffinity="com.android.wm.shell.flicker.testapp.PipActivity"
+                 android:theme="@style/CutoutShortEdges"
                  android:launchMode="singleTop"
                  android:label="PipApp"
                  android:exported="true">
@@ -52,6 +54,7 @@
 
         <activity android:name=".ImeActivity"
                  android:taskAffinity="com.android.wm.shell.flicker.testapp.ImeActivity"
+                 android:theme="@style/CutoutShortEdges"
                  android:label="ImeApp"
                  android:launchMode="singleTop"
                  android:exported="true">
@@ -68,6 +71,7 @@
         <activity android:name=".SplitScreenActivity"
                   android:resizeableActivity="true"
                   android:taskAffinity="com.android.wm.shell.flicker.testapp.SplitScreenActivity"
+                  android:theme="@style/CutoutShortEdges"
                   android:label="SplitScreenPrimaryApp"
                   android:exported="true">
             <intent-filter>
@@ -79,6 +83,7 @@
         <activity android:name=".SplitScreenSecondaryActivity"
                   android:resizeableActivity="true"
                   android:taskAffinity="com.android.wm.shell.flicker.testapp.SplitScreenSecondaryActivity"
+                  android:theme="@style/CutoutShortEdges"
                   android:label="SplitScreenSecondaryApp"
                   android:exported="true">
             <intent-filter>
@@ -90,6 +95,7 @@
         <activity android:name=".NonResizeableActivity"
                   android:resizeableActivity="false"
                   android:taskAffinity="com.android.wm.shell.flicker.testapp.NonResizeableActivity"
+                  android:theme="@style/CutoutShortEdges"
                   android:label="NonResizeableApp"
                   android:exported="true">
             <intent-filter>
@@ -100,6 +106,7 @@
 
         <activity android:name=".SimpleActivity"
                   android:taskAffinity="com.android.wm.shell.flicker.testapp.SimpleActivity"
+                  android:theme="@style/CutoutShortEdges"
                   android:label="SimpleApp"
                   android:exported="true">
             <intent-filter>
@@ -111,16 +118,19 @@
             android:name=".LaunchBubbleActivity"
             android:label="LaunchBubbleApp"
             android:exported="true"
+            android:theme="@style/CutoutShortEdges"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".BubbleActivity"
             android:label="BubbleApp"
             android:exported="false"
+            android:theme="@style/CutoutShortEdges"
             android:resizeableActivity="true" />
     </application>
 </manifest>

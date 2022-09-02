@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -81,6 +82,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /** ID for Communication strategy retrieved form audio policy manager */
     private int mCommunicationStrategyId = -1;
+
+    /** ID for Accessibility strategy retrieved form audio policy manager */
+    private int mAccessibilityStrategyId = -1;
+
+
     /** Active communication device reported by audio policy manager */
     private AudioDeviceInfo mActiveCommunicationDevice;
     /** Last preferred device set for communication strategy */
@@ -140,22 +146,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
         init();
     }
 
-    private void initCommunicationStrategyId() {
+    private void initRoutingStrategyIds() {
         List<AudioProductStrategy> strategies = AudioProductStrategy.getAudioProductStrategies();
+        mCommunicationStrategyId = -1;
+        mAccessibilityStrategyId = -1;
         for (AudioProductStrategy strategy : strategies) {
-            if (strategy.getAudioAttributesForLegacyStreamType(AudioSystem.STREAM_VOICE_CALL)
-                    != null) {
+            if (mCommunicationStrategyId == -1
+                    && strategy.getAudioAttributesForLegacyStreamType(
+                            AudioSystem.STREAM_VOICE_CALL) != null) {
                 mCommunicationStrategyId = strategy.getId();
-                return;
+            }
+            if (mAccessibilityStrategyId == -1
+                    && strategy.getAudioAttributesForLegacyStreamType(
+                            AudioSystem.STREAM_ACCESSIBILITY) != null) {
+                mAccessibilityStrategyId = strategy.getId();
             }
         }
-        mCommunicationStrategyId = -1;
     }
 
     private void init() {
         setupMessaging(mContext);
 
-        initCommunicationStrategyId();
+        initRoutingStrategyIds();
         mPreferredCommunicationDevice = null;
         updateActiveCommunicationDevice();
 
@@ -251,8 +263,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         return;
                     }
                 }
-                setCommunicationRouteForClient(
-                        cb, pid, device, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, device, BtHelper.SCO_MODE_UNDEFINED, eventSource));
             }
         }
     }
@@ -282,8 +294,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         return false;
                     }
                 }
-                setCommunicationRouteForClient(
-                        cb, pid, deviceAttr, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, deviceAttr, BtHelper.SCO_MODE_UNDEFINED, eventSource));
             }
         }
         return true;
@@ -347,26 +359,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
     }
 
     /**
-     * Returns the device currently requested for communication use case.
-     * If the current audio mode owner is in the communication route client list,
-     * use this preference.
-     * Otherwise use first client's preference (first client corresponds to latest request).
-     * null is returned if no client is in the list.
-     * @return AudioDeviceAttributes the requested device for communication.
+     * Returns the communication client with the highest priority:
+     * - 1) the client which is currently also controlling the audio mode
+     * - 2) the first client in the stack if there is no audio mode owner
+     * - 3) no client otherwise
+     * @return CommunicationRouteClient the client driving the communication use case routing.
      */
-
     @GuardedBy("mDeviceStateLock")
-    private AudioDeviceAttributes requestedCommunicationDevice() {
-        AudioDeviceAttributes device = null;
-        for (CommunicationRouteClient cl : mCommunicationRouteClients) {
-            if (cl.getPid() == mModeOwnerPid) {
-                device = cl.getDevice();
+    private CommunicationRouteClient topCommunicationRouteClient() {
+        for (CommunicationRouteClient crc : mCommunicationRouteClients) {
+            if (crc.getPid() == mModeOwnerPid) {
+                return crc;
             }
         }
         if (!mCommunicationRouteClients.isEmpty() && mModeOwnerPid == 0) {
-            device = mCommunicationRouteClients.get(0).getDevice();
+            return mCommunicationRouteClients.get(0);
         }
+        return null;
+    }
 
+    /**
+     * Returns the device currently requested for communication use case.
+     * Use the device requested by the communication route client selected by
+     * {@link #topCommunicationRouteClient()} if any or none otherwise.
+     * @return AudioDeviceAttributes the requested device for communication.
+     */
+    @GuardedBy("mDeviceStateLock")
+    private AudioDeviceAttributes requestedCommunicationDevice() {
+        CommunicationRouteClient crc = topCommunicationRouteClient();
+        AudioDeviceAttributes device = crc != null ? crc.getDevice() : null;
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "requestedCommunicationDevice, device: "
                     + device + " mode owner pid: " + mModeOwnerPid);
@@ -395,7 +416,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
             AudioAttributes attr =
                     AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
                             AudioSystem.STREAM_VOICE_CALL);
-            List<AudioDeviceAttributes> devices = AudioSystem.getDevicesForAttributes(attr);
+            List<AudioDeviceAttributes> devices = AudioSystem.getDevicesForAttributes(
+                    attr, false /* forVolume */);
             if (devices.isEmpty()) {
                 if (mAudioService.isPlatformVoice()) {
                     Log.w(TAG,
@@ -493,12 +515,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
-    /*package*/ void setWiredDeviceConnectionState(int type,
-            @AudioService.ConnectionState int state, String address, String name,
-            String caller) {
+    /*package*/ boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.isDeviceConnected(device);
+        }
+    }
+
+    /*package*/ void setWiredDeviceConnectionState(AudioDeviceAttributes attributes,
+            @AudioService.ConnectionState int state, String caller) {
         //TODO move logging here just like in setBluetooth* methods
         synchronized (mDeviceStateLock) {
-            mDeviceInventory.setWiredDeviceConnectionState(type, state, address, name, caller);
+            mDeviceInventory.setWiredDeviceConnectionState(attributes, state, caller);
+        }
+    }
+
+    /*package*/ void setTestDeviceConnectionState(@NonNull AudioDeviceAttributes device,
+            @AudioService.ConnectionState int state) {
+        synchronized (mDeviceStateLock) {
+            mDeviceInventory.setTestDeviceConnectionState(device, state);
         }
     }
 
@@ -633,6 +667,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     audioDevice = AudioSystem.DEVICE_IN_BLE_HEADSET;
                 }
                 break;
+            case BluetoothProfile.LE_AUDIO_BROADCAST:
+                audioDevice = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
+                break;
             default: throw new IllegalArgumentException("Invalid profile " + d.mInfo.getProfile());
         }
         return new BtDeviceInfo(d, device, state, audioDevice, codec);
@@ -696,7 +733,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
         synchronized (mDeviceStateLock) {
             mBluetoothScoOn = on;
-            sendLMsgNoDelay(MSG_L_UPDATE_COMMUNICATION_ROUTE, SENDMSG_QUEUE, eventSource);
+            postUpdateCommunicationRouteClient(eventSource);
         }
     }
 
@@ -756,7 +793,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
             synchronized (mDeviceStateLock) {
                 AudioDeviceAttributes device =
                         new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO, "");
-                setCommunicationRouteForClient(cb, pid, device, scoAudioMode, eventSource);
+
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, device, scoAudioMode, eventSource));
             }
         }
     }
@@ -774,8 +813,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 if (client == null || !client.requestsBluetoothSco()) {
                     return;
                 }
-                setCommunicationRouteForClient(
-                        cb, pid, null, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, null, BtHelper.SCO_MODE_UNDEFINED, eventSource));
             }
         }
     }
@@ -785,17 +824,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return mDeviceInventory.setPreferredDevicesForStrategySync(strategy, devices);
     }
 
-    /*package*/ void postSetPreferredDevicesForStrategy(int strategy,
-            @NonNull List<AudioDeviceAttributes> devices) {
-        sendILMsgNoDelay(MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY, SENDMSG_REPLACE, strategy, devices);
-    }
-
     /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
         return mDeviceInventory.removePreferredDevicesForStrategySync(strategy);
-    }
-
-    /*package*/ void postRemovePreferredDevicesForStrategy(int strategy) {
-        sendIMsgNoDelay(MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_REPLACE, strategy);
     }
 
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
@@ -976,6 +1006,61 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET, SENDMSG_QUEUE, capturePreset);
     }
 
+    /*package*/ void postUpdateCommunicationRouteClient(String eventSource) {
+        sendLMsgNoDelay(MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT, SENDMSG_QUEUE, eventSource);
+    }
+
+    /*package*/ void postSetCommunicationRouteForClient(CommunicationClientInfo info) {
+        sendLMsgNoDelay(MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT, SENDMSG_QUEUE, info);
+    }
+
+    /*package*/ void postScoAudioStateChanged(int state) {
+        sendIMsgNoDelay(MSG_I_SCO_AUDIO_STATE_CHANGED, SENDMSG_QUEUE, state);
+    }
+
+    /*package*/ static final class CommunicationClientInfo {
+        final @NonNull IBinder mCb;
+        final int mPid;
+        final @NonNull AudioDeviceAttributes mDevice;
+        final int mScoAudioMode;
+        final @NonNull String mEventSource;
+
+        CommunicationClientInfo(@NonNull IBinder cb, int pid, @NonNull AudioDeviceAttributes device,
+                int scoAudioMode, @NonNull String eventSource) {
+            mCb = cb;
+            mPid = pid;
+            mDevice = device;
+            mScoAudioMode = scoAudioMode;
+            mEventSource = eventSource;
+        }
+
+        // redefine equality op so we can match messages intended for this client
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof CommunicationClientInfo)) {
+                return false;
+            }
+
+            return mCb.equals(((CommunicationClientInfo) o).mCb)
+                    && mPid == ((CommunicationClientInfo) o).mPid;
+        }
+
+        @Override
+        public String toString() {
+            return "CommunicationClientInfo mCb=" + mCb.toString()
+                    +"mPid=" + mPid
+                    +"mDevice=" + mDevice.toString()
+                    +"mScoAudioMode=" + mScoAudioMode
+                    +"mEventSource=" + mEventSource;
+        }
+    }
+
     //---------------------------------------------------------------------
     // Method forwarding between the helper classes (BtHelper, AudioDeviceInventory)
     // only call from a "handle"* method or "on"* method
@@ -999,10 +1084,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
-                                                       String deviceName) {
+    /*package*/ boolean handleDeviceConnection(AudioDeviceAttributes attributes, boolean connect) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName);
+            return mDeviceInventory.handleDeviceConnection(attributes, connect, false /*for test*/);
         }
     }
 
@@ -1074,6 +1158,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
         pw.println(prefix + "mCommunicationStrategyId: "
                 +  mCommunicationStrategyId);
+
+        pw.println(prefix + "mAccessibilityStrategyId: "
+                +  mAccessibilityStrategyId);
 
         pw.println("\n" + prefix + "mModeOwnerPid: " + mModeOwnerPid);
 
@@ -1170,7 +1257,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_RESTORE_DEVICES:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            initCommunicationStrategyId();
+                            initRoutingStrategyIds();
                             updateActiveCommunicationDevice();
                             mDeviceInventory.onRestoreDevices();
                             mBtHelper.onAudioServerDiedRestoreA2dp();
@@ -1202,8 +1289,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     break;
                 case MSG_L_SET_BT_ACTIVE_DEVICE:
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.onSetBtActiveDevice((BtDeviceInfo) msg.obj,
-                                mAudioService.getBluetoothContextualVolumeStream());
+                        BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
+                        mDeviceInventory.onSetBtActiveDevice(btInfo,
+                                (btInfo.mProfile != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
+                                        ? mAudioService.getBluetoothContextualVolumeStream()
+                                        : AudioSystem.STREAM_DEFAULT);
                     }
                     break;
                 case MSG_BT_HEADSET_CNCT_FAILED:
@@ -1252,18 +1342,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         synchronized (mDeviceStateLock) {
                             mModeOwnerPid = msg.arg1;
                             if (msg.arg2 != AudioSystem.MODE_RINGTONE) {
-                                onUpdateCommunicationRoute("setNewModeOwner");
+                                onUpdateCommunicationRouteClient("setNewModeOwner");
                             }
                         }
                     }
                     break;
-                case MSG_L_COMMUNICATION_ROUTE_CLIENT_DIED:
+
+                case MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            onCommunicationRouteClientDied((CommunicationRouteClient) msg.obj);
+                            CommunicationClientInfo info = (CommunicationClientInfo) msg.obj;
+                            setCommunicationRouteForClient(info.mCb, info.mPid, info.mDevice,
+                                    info.mScoAudioMode, info.mEventSource);
                         }
                     }
                     break;
+
+                case MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            onUpdateCommunicationRouteClient((String) msg.obj);
+                        }
+                    }
+                    break;
+
                 case MSG_L_UPDATE_COMMUNICATION_ROUTE:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
@@ -1271,6 +1373,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         }
                     }
                     break;
+
+                case MSG_L_COMMUNICATION_ROUTE_CLIENT_DIED:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            onCommunicationRouteClientDied((CommunicationRouteClient) msg.obj);
+                        }
+                    }
+                    break;
+
+                case MSG_I_SCO_AUDIO_STATE_CHANGED:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.onScoAudioStateChanged(msg.arg1);
+                        }
+                    }
+                    break;
+
                 case MSG_TOGGLE_HDMI:
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onToggleHdmi();
@@ -1328,22 +1447,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY: {
                     final int strategy = msg.arg1;
                     mDeviceInventory.onSaveRemovePreferredDevices(strategy);
-                } break;
-                case MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    final List<AudioDeviceAttributes> devices =
-                            (List<AudioDeviceAttributes>) msg.obj;
-                    setPreferredDevicesForStrategySync(strategy, devices);
-                    if (strategy == mCommunicationStrategyId) {
-                        onUpdatePhoneStrategyDevice(devices.isEmpty() ? null : devices.get(0));
-                    }
-                } break;
-                case MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    removePreferredDevicesForStrategySync(strategy);
-                    if (strategy == mCommunicationStrategyId) {
-                        onUpdatePhoneStrategyDevice(null);
-                    }
                 } break;
                 case MSG_CHECK_MUTE_MUSIC:
                     checkMessagesMuteMusic(0);
@@ -1422,8 +1525,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET = 38;
 
     private static final int MSG_L_UPDATE_COMMUNICATION_ROUTE = 39;
-    private static final int MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY = 40;
-    private static final int MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY = 41;
+    private static final int MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT = 42;
+    private static final int MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT = 43;
+    private static final int MSG_I_SCO_AUDIO_STATE_CHANGED = 44;
 
     private static final int MSG_L_BT_ACTIVE_DEVICE_CHANGE_EXT = 45;
     //
@@ -1548,19 +1652,43 @@ import java.util.concurrent.atomic.AtomicBoolean;
         MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONFIG_CHANGE);
         MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT);
         MESSAGES_MUTE_MUSIC.add(MSG_IIL_SET_FORCE_BT_A2DP_USE);
-        MESSAGES_MUTE_MUSIC.add(MSG_REPORT_NEW_ROUTES_A2DP);
     }
 
     private AtomicBoolean mMusicMuted = new AtomicBoolean(false);
 
+    private static <T> boolean hasIntersection(Set<T> a, Set<T> b) {
+        for (T e : a) {
+            if (b.contains(e)) return true;
+        }
+        return false;
+    }
+
+    boolean messageMutesMusic(int message) {
+        if (message == 0) {
+            return false;
+        }
+        // Do not mute on bluetooth event if music is playing on a wired headset.
+        if ((message == MSG_L_SET_BT_ACTIVE_DEVICE
+                || message == MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT
+                || message == MSG_L_A2DP_DEVICE_CONFIG_CHANGE)
+                && AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)
+                && hasIntersection(mDeviceInventory.DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET,
+                        mAudioService.getDeviceSetForStream(AudioSystem.STREAM_MUSIC))) {
+            return false;
+        }
+        return true;
+    }
+
     /** Mutes or unmutes music according to pending A2DP messages */
     private void checkMessagesMuteMusic(int message) {
-        boolean mute = message != 0;
+        boolean mute = messageMutesMusic(message);
         if (!mute) {
             for (int msg : MESSAGES_MUTE_MUSIC) {
                 if (mBrokerHandler.hasMessages(msg)) {
-                    mute = true;
-                    break;
+                    if (messageMutesMusic(msg)) {
+                        mute = true;
+                        break;
+                    }
                 }
             }
         }
@@ -1642,9 +1770,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
             return;
         }
         Log.w(TAG, "Communication client died");
-        setCommunicationRouteForClient(
-                client.getBinder(), client.getPid(), null, BtHelper.SCO_MODE_UNDEFINED,
-                "onCommunicationRouteClientDied");
+        removeCommunicationRouteClient(client.getBinder(), true);
+        onUpdateCommunicationRouteClient("onCommunicationRouteClientDied");
     }
 
     /**
@@ -1698,10 +1825,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
             AudioSystem.setParameters("BT_SCO=on");
         }
         if (preferredCommunicationDevice == null) {
-            postRemovePreferredDevicesForStrategy(mCommunicationStrategyId);
+            removePreferredDevicesForStrategySync(mCommunicationStrategyId);
+            removePreferredDevicesForStrategySync(mAccessibilityStrategyId);
         } else {
-            postSetPreferredDevicesForStrategy(
+            setPreferredDevicesForStrategySync(
                     mCommunicationStrategyId, Arrays.asList(preferredCommunicationDevice));
+            setPreferredDevicesForStrategySync(
+                    mAccessibilityStrategyId, Arrays.asList(preferredCommunicationDevice));
+        }
+        onUpdatePhoneStrategyDevice(preferredCommunicationDevice);
+    }
+
+    /**
+     * Select new communication device from communication route client at the top of the stack
+     * and restore communication route including restarting SCO audio if needed.
+     */
+    // @GuardedBy("mSetModeLock")
+    @GuardedBy("mDeviceStateLock")
+    private void onUpdateCommunicationRouteClient(String eventSource) {
+        onUpdateCommunicationRoute(eventSource);
+        CommunicationRouteClient crc = topCommunicationRouteClient();
+        if (AudioService.DEBUG_COMM_RTE) {
+            Log.v(TAG, "onUpdateCommunicationRouteClient, crc: "
+                    + crc + " eventSource: " + eventSource);
+        }
+        if (crc != null) {
+            setCommunicationRouteForClient(crc.getBinder(), crc.getPid(), crc.getDevice(),
+                    BtHelper.SCO_MODE_UNDEFINED, eventSource);
         }
     }
 
@@ -1762,5 +1912,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
             }
         }
         return null;
+    }
+
+    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.getDeviceSensorUuid(device);
+        }
     }
 }

@@ -106,6 +106,9 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
+                "android.hardware.graphics.common-V3-ndk",
+                "android.hardware.graphics.common@1.2",
+                "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -125,9 +128,11 @@ cc_defaults {
             static_libs: [
                 "libEGL_blobCache",
                 "libprotoutil",
+                "libshaders",
                 "libstatslog_hwui",
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
+                "libtonemap",
             ],
         },
         host: {
@@ -245,6 +250,7 @@ cc_defaults {
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
+        "apex/properties.cpp",
     ],
 
     header_libs: ["android_graphics_apex_headers"],
@@ -255,7 +261,6 @@ cc_defaults {
                 "apex/android_bitmap.cpp",
                 "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
-                "apex/renderthread.cpp",
             ],
         },
         host: {
@@ -342,6 +347,7 @@ cc_defaults {
         "jni/PathEffect.cpp",
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
+        "jni/Region.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
@@ -391,7 +397,6 @@ cc_defaults {
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
                 "jni/MovieImpl.cpp",
-                "jni/Region.cpp", // requires libbinder_ndk
                 "jni/pdf/PdfDocument.cpp",
                 "jni/pdf/PdfEditor.cpp",
                 "jni/pdf/PdfRenderer.cpp",
@@ -532,7 +537,10 @@ cc_defaults {
 
     target: {
         android: {
-            header_libs: ["libandroid_headers_private"],
+            header_libs: [
+                "libandroid_headers_private",
+                "libtonemap_headers",
+            ],
 
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
@@ -571,6 +579,7 @@ cc_defaults {
                 "HardwareBitmapUploader.cpp",
                 "HWUIProperties.sysprop",
                 "JankTracker.cpp",
+                "FrameMetricsReporter.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
                 "ProfileData.cpp",
@@ -676,6 +685,7 @@ cc_test {
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
+        "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
         "tests/unit/LinearAllocatorTests.cpp",
         "tests/unit/MatrixTests.cpp",

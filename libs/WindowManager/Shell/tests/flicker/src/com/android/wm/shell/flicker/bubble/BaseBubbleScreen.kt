@@ -22,19 +22,17 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.ServiceManager
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
-import com.android.server.wm.flicker.repetitions
 import com.android.wm.shell.flicker.helpers.LaunchBubbleHelper
-import org.junit.Test
 import org.junit.runners.Parameterized
 
 /**
@@ -49,56 +47,47 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
     protected val notifyManager = INotificationManager.Stub.asInterface(
             ServiceManager.getService(Context.NOTIFICATION_SERVICE))
 
-    protected val packageManager = context.getPackageManager()
-    protected val uid = packageManager.getApplicationInfo(
+    protected val uid = context.packageManager.getApplicationInfo(
             testApp.component.packageName, 0).uid
 
-    protected lateinit var addBubbleBtn: UiObject2
-    protected lateinit var cancelAllBtn: UiObject2
-
-    protected abstract val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    protected abstract val transition: FlickerBuilder.() -> Unit
 
     @JvmOverloads
     protected open fun buildTransition(
-        extraSpec: FlickerBuilder.(Map<String, Any?>) -> Unit = {}
-    ): FlickerBuilder.(Map<String, Any?>) -> Unit {
-        return { configuration ->
-
+        extraSpec: FlickerBuilder.() -> Unit = {}
+    ): FlickerBuilder.() -> Unit {
+        return {
             setup {
                 test {
                     notifyManager.setBubblesAllowed(testApp.component.packageName,
                             uid, NotificationManager.BUBBLE_PREFERENCE_ALL)
                     testApp.launchViaIntent(wmHelper)
-                    addBubbleBtn = device.wait(Until.findObject(
-                            By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
-                    cancelAllBtn = device.wait(Until.findObject(
-                            By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
+                    waitAndGetAddBubbleBtn()
+                    waitAndGetCancelAllBtn()
                 }
             }
 
             teardown {
-                notifyManager.setBubblesAllowed(testApp.component.packageName,
+                test {
+                    notifyManager.setBubblesAllowed(testApp.component.packageName,
                         uid, NotificationManager.BUBBLE_PREFERENCE_NONE)
-                testApp.exit()
+                    testApp.exit()
+                }
             }
 
-            extraSpec(this, configuration)
+            extraSpec(this)
         }
     }
 
-    @FlakyTest
-    @Test
-    fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-        }
-    }
+    protected fun Flicker.waitAndGetAddBubbleBtn(): UiObject2? = device.wait(Until.findObject(
+            By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
+    protected fun Flicker.waitAndGetCancelAllBtn(): UiObject2? = device.wait(Until.findObject(
+            By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            repeat { testSpec.config.repetitions }
-            transition(this, testSpec.config)
+            transition(this)
         }
     }
 
@@ -108,7 +97,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 5)
+                            repetitions = 3)
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L

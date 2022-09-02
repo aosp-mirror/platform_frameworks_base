@@ -43,6 +43,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -1103,7 +1104,10 @@ public final class VoiceInteractor {
         }
         try {
             boolean[] res = mInteractor.supportsCommands(mContext.getOpPackageName(), commands);
-            if (DEBUG) Log.d(TAG, "supportsCommands: cmds=" + commands + " res=" + res);
+            if (DEBUG) {
+                Log.d(TAG, "supportsCommands: cmds=" + Arrays.toString(commands) + " res="
+                        + Arrays.toString(res));
+            }
             return res;
         } catch (RemoteException e) {
             throw new RuntimeException("Voice interactor has died", e);
@@ -1166,6 +1170,23 @@ public final class VoiceInteractor {
         } catch (RemoteException e) {
             Log.w(TAG, "Voice interactor has died", e);
         }
+    }
+
+    /**
+     * @return the package name of the service providing the VoiceInteractionService.
+     */
+    @NonNull
+    public String getPackageName() {
+        String packageName = null;
+        if (mActivity != null && mInteractor != null) {
+            try {
+                packageName = ActivityTaskManager.getService()
+                    .getVoiceInteractorPackageName(mInteractor.asBinder());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return packageName == null ? "" : packageName;
     }
 
     void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {

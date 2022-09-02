@@ -109,6 +109,7 @@ combined_apis {
         "android.net.ipsec.ike",
         "art.module.public.api",
         "conscrypt.module.public.api",
+        "framework-adservices",
         "framework-appsearch",
         "framework-bluetooth",
         "framework-connectivity",
@@ -116,18 +117,22 @@ combined_apis {
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
+        "framework-ondevicepersonalization",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
+        "framework-sdksandbox",
         "framework-tethering",
+        "framework-uwb",
         "framework-wifi",
         "i18n.module.public.api",
     ],
     system_server_classpath: [
         "service-media-s",
         "service-permission",
+        "service-sdksandbox",
     ],
 }
 
@@ -186,6 +191,37 @@ genrule {
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
         "$(location :frameworks-base-api-module-lib-current.txt)",
+}
+
+// This produces the same annotations.zip as framework-doc-stubs, but by using
+// outputs from individual modules instead of all the source code.
+genrule_defaults {
+    name: "sdk-annotations-defaults",
+    out: ["annotations.zip"],
+    tools: [
+        "merge_annotation_zips",
+        "soong_zip",
+    ],
+    cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
+}
+
+genrule {
+    name: "sdk-annotations.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":all-modules-public-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-system.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
+        ":all-modules-system-annotations",
+    ],
 }
 
 genrule {

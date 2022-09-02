@@ -27,6 +27,7 @@ import android.annotation.BoolRes;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DimenRes;
+import android.annotation.Discouraged;
 import android.annotation.DrawableRes;
 import android.annotation.FontRes;
 import android.annotation.FractionRes;
@@ -52,6 +53,7 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -77,11 +79,15 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Class for accessing an application's resources.  This sits on top of the
@@ -141,9 +147,6 @@ public class Resources {
     @UnsupportedAppUsage
     private DrawableInflater mDrawableInflater;
 
-    /** Used to override the returned adjustments of {@link #getDisplayAdjustments}. */
-    private DisplayAdjustments mOverrideDisplayAdjustments;
-
     /** Lock object used to protect access to {@link #mTmpValue}. */
     private final Object mTmpValueLock = new Object();
 
@@ -173,6 +176,11 @@ public class Resources {
     private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
 
     private int mBaseApkAssetsSize;
+
+    /** @hide */
+    private static Set<Resources> sResourcesHistory = Collections.synchronizedSet(
+            Collections.newSetFromMap(
+                    new WeakHashMap<>()));
 
     /**
      * Returns the most appropriate default theme for the specified target SDK version.
@@ -320,6 +328,7 @@ public class Resources {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
+        sResourcesHistory.add(this);
     }
 
     /**
@@ -1466,6 +1475,12 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      */
+    @Discouraged(message = "Use of this function is discouraged because it makes internal calls to "
+                         + "`getIdentifier()`, which uses resource reflection. Reflection makes it "
+                         + "harder to perform build optimizations and compile-time verification of "
+                         + "code. It is much more efficient to retrieve resource values by "
+                         + "identifier (e.g. `getValue(R.foo.bar, outValue, true)`) than by name "
+                         + "(e.g. `getValue(\"foo\", outvalue, true)`).")
     public void getValue(String name, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         mResourcesImpl.getValue(name, outValue, resolveRefs);
@@ -1500,6 +1515,12 @@ public class Resources {
      * retrieve XML attributes with style and theme information applied.
      */
     public final class Theme {
+        /**
+         * To trace parent themes needs to prevent a cycle situation.
+         * e.x. A's parent is B, B's parent is C, and C's parent is A.
+         */
+        private static final int MAX_NUMBER_OF_TRACING_PARENT_THEME = 100;
+
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
@@ -1793,6 +1814,13 @@ public class Resources {
             }
         }
 
+        @StyleRes
+        /*package*/ int getParentThemeIdentifier(@StyleRes int resId) {
+            synchronized (mLock) {
+                return mThemeImpl.getParentThemeIdentifier(resId);
+            }
+        }
+
         /**
          * @hide
          */
@@ -1915,6 +1943,54 @@ public class Resources {
                     return stack;
                 }
             }
+        }
+
+        @Override
+        public int hashCode() {
+            return getKey().hashCode();
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass() || hashCode() != o.hashCode()) {
+                return false;
+            }
+
+            final Theme other = (Theme) o;
+            return getKey().equals(other.getKey());
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append('{');
+            int themeResId = getAppliedStyleResId();
+            int i = 0;
+            sb.append("InheritanceMap=[");
+            while (themeResId > 0) {
+                if (i > MAX_NUMBER_OF_TRACING_PARENT_THEME) {
+                    sb.append(",...");
+                    break;
+                }
+
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append("id=0x").append(Integer.toHexString(themeResId));
+                sb.append(getResourcePackageName(themeResId))
+                        .append(":").append(getResourceTypeName(themeResId))
+                        .append("/").append(getResourceEntryName(themeResId));
+
+                i++;
+                themeResId = getParentThemeIdentifier(themeResId);
+            }
+            sb.append("], Themes=").append(Arrays.deepToString(getTheme()));
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -2105,30 +2181,7 @@ public class Resources {
     /** @hide */
     @UnsupportedAppUsage(trackingBug = 176190631)
     public DisplayAdjustments getDisplayAdjustments() {
-        final DisplayAdjustments overrideDisplayAdjustments = mOverrideDisplayAdjustments;
-        if (overrideDisplayAdjustments != null) {
-            return overrideDisplayAdjustments;
-        }
         return mResourcesImpl.getDisplayAdjustments();
-    }
-
-    /**
-     * Customize the display adjustments based on the current one in {@link #mResourcesImpl}, in
-     * order to isolate the effect with other instances of {@link Resource} that may share the same
-     * instance of {@link ResourcesImpl}.
-     *
-     * @param override The operation to override the existing display adjustments. If it is null,
-     *                 the override adjustments will be cleared.
-     * @hide
-     */
-    public void overrideDisplayAdjustments(@Nullable Consumer<DisplayAdjustments> override) {
-        if (override != null) {
-            mOverrideDisplayAdjustments = new DisplayAdjustments(
-                    mResourcesImpl.getDisplayAdjustments());
-            override.accept(mOverrideDisplayAdjustments);
-        } else {
-            mOverrideDisplayAdjustments = null;
-        }
     }
 
     /**
@@ -2136,7 +2189,7 @@ public class Resources {
      * @hide
      */
     public boolean hasOverrideDisplayAdjustments() {
-        return mOverrideDisplayAdjustments != null;
+        return false;
     }
 
     /**
@@ -2198,6 +2251,11 @@ public class Resources {
      * @return int The associated resource identifier.  Returns 0 if no such
      *         resource was found.  (0 is not a valid resource ID.)
      */
+    @Discouraged(message = "Use of this function is discouraged because resource reflection makes "
+                         + "it harder to perform build optimizations and compile-time "
+                         + "verification of code. It is much more efficient to retrieve "
+                         + "resources by identifier (e.g. `R.foo.bar`) than by name (e.g. "
+                         + "`getIdentifier(\"bar\", \"foo\", null)`).")
     public int getIdentifier(String name, String defType, String defPackage) {
         return mResourcesImpl.getIdentifier(name, defType, defPackage);
     }
@@ -2599,6 +2657,30 @@ public class Resources {
             mCallbacks.onLoadersChanged(this, newLoaders);
             for (ResourcesLoader loader : oldLoaders) {
                 loader.unregisterOnProvidersChangedCallback(this);
+            }
+        }
+    }
+
+    /** @hide */
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "class=" + getClass());
+        pw.println(prefix + "resourcesImpl");
+        mResourcesImpl.dump(pw, prefix + "  ");
+    }
+
+    /** @hide */
+    public static void dumpHistory(PrintWriter pw, String prefix) {
+        pw.println(prefix + "history");
+        // Putting into a map keyed on the apk assets to deduplicate resources that are different
+        // objects but ultimately represent the same assets
+        Map<List<ApkAssets>, Resources> history = new ArrayMap<>();
+        sResourcesHistory.forEach(
+                r -> history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r));
+        int i = 0;
+        for (Resources r : history.values()) {
+            if (r != null) {
+                pw.println(prefix + i++);
+                r.dump(pw, prefix + "  ");
             }
         }
     }

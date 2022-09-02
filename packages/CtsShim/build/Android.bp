@@ -45,16 +45,21 @@ android_app {
     jni_libs: ["libshim_jni"],
 
     uses_libs: ["android.test.runner"],
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
+    ],
 }
 
 genrule {
-  name: "generate_priv_manifest",
-  srcs: [
-    "shim_priv/AndroidManifest.xml",
-    ":CtsShimPrivUpgrade"
-  ],
-  out: ["AndroidManifest.xml"],
-  cmd: "sed -e s/__HASH__/`sha512sum -b $(location :CtsShimPrivUpgrade) | cut -d' ' -f1`/ $(location shim_priv/AndroidManifest.xml) > $(out)",
+    name: "generate_priv_manifest",
+    srcs: [
+        "shim_priv/AndroidManifest.xml",
+        ":CtsShimPrivUpgrade",
+    ],
+    out: ["AndroidManifest.xml"],
+    cmd: "sed -e s/__HASH__/`sha512sum -b $(location :CtsShimPrivUpgrade) | cut -d' ' -f1`/ $(location shim_priv/AndroidManifest.xml) > $(out)",
 }
 
 //##########################################################
@@ -84,6 +89,7 @@ android_app {
         "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
         "com.android.apex.cts.shim.v2_no_hashtree",
         "com.android.apex.cts.shim.v2_legacy",
         "com.android.apex.cts.shim.v2_sdk_target_p",
@@ -141,6 +147,34 @@ android_app {
 }
 
 //##########################################################
+// Variant: System app upgrade
+
+android_app {
+    name: "CtsShimUpgrade",
+
+    sdk_version: "current",
+    optimize: {
+        enabled: false,
+    },
+    dex_preopt: {
+        enabled: false,
+    },
+
+    manifest: "shim/AndroidManifestUpgrade.xml",
+    min_sdk_version: "24",
+}
+
+genrule {
+    name: "generate_shim_manifest",
+    srcs: [
+        "shim/AndroidManifest.xml",
+        ":CtsShimUpgrade",
+    ],
+    out: ["AndroidManifest.xml"],
+    cmd: "sed -e s/__HASH__/`sha512sum -b $(location :CtsShimUpgrade) | cut -d' ' -f1`/ $(location shim/AndroidManifest.xml) > $(out)",
+}
+
+//##########################################################
 // Variant: System app
 
 android_app {
@@ -154,11 +188,12 @@ android_app {
         enabled: false,
     },
 
-    manifest: "shim/AndroidManifest.xml",
+    manifest: ":generate_shim_manifest",
     apex_available: [
         "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
         "com.android.apex.cts.shim.v2_no_hashtree",
         "com.android.apex.cts.shim.v2_legacy",
         "com.android.apex.cts.shim.v2_sdk_target_p",

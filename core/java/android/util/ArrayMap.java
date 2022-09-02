@@ -23,10 +23,13 @@ import com.android.internal.util.ArrayUtils;
 
 import libcore.util.EmptyArray;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 /**
  * ArrayMap is a generic key->value mapping data structure that is
@@ -229,7 +232,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                             array[0] = array[1] = null;
                             mTwiceBaseCacheSize--;
                             if (DEBUG) {
-                                Log.d(TAG, "Retrieving 2x cache " + mHashes
+                                Log.d(TAG, "Retrieving 2x cache " + Arrays.toString(mHashes)
                                         + " now have " + mTwiceBaseCacheSize + " entries");
                             }
                             return;
@@ -256,7 +259,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                             array[0] = array[1] = null;
                             mBaseCacheSize--;
                             if (DEBUG) {
-                                Log.d(TAG, "Retrieving 1x cache " + mHashes
+                                Log.d(TAG, "Retrieving 1x cache " + Arrays.toString(mHashes)
                                         + " now have " + mBaseCacheSize + " entries");
                             }
                             return;
@@ -293,8 +296,10 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     }
                     mTwiceBaseCache = array;
                     mTwiceBaseCacheSize++;
-                    if (DEBUG) Log.d(TAG, "Storing 2x cache " + array
-                            + " now have " + mTwiceBaseCacheSize + " entries");
+                    if (DEBUG) {
+                        Log.d(TAG, "Storing 2x cache " + Arrays.toString(array)
+                                + " now have " + mTwiceBaseCacheSize + " entries");
+                    }
                 }
             }
         } else if (hashes.length == BASE_SIZE) {
@@ -307,8 +312,10 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     }
                     mBaseCache = array;
                     mBaseCacheSize++;
-                    if (DEBUG) Log.d(TAG, "Storing 1x cache " + array
-                            + " now have " + mBaseCacheSize + " entries");
+                    if (DEBUG) {
+                        Log.d(TAG, "Storing 1x cache " + Arrays.toString(array)
+                                + " now have " + mBaseCacheSize + " entries");
+                    }
                 }
             }
         }
@@ -980,6 +987,28 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * Performs the given action for all elements in the stored order. This implementation overrides
+     * the default implementation to avoid iterating using the {@link #entrySet()} and iterates in
+     * the key-value order consistent with {@link #keyAt(int)} and {@link #valueAt(int)}.
+     *
+     * @param action The action to be performed for each element
+     */
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        if (action == null) {
+            throw new NullPointerException("action must not be null");
+        }
+
+        final int size = mSize;
+        for (int i = 0; i < size; ++i) {
+            if (size != mSize) {
+                throw new ConcurrentModificationException();
+            }
+            action.accept(keyAt(i), valueAt(i));
+        }
+    }
+
+    /**
      * Perform a {@link #put(Object, Object)} of all key/value pairs in <var>map</var>
      * @param map The map whose contents are to be retrieved.
      */
@@ -998,6 +1027,36 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public boolean removeAll(Collection<?> collection) {
         return MapCollections.removeAllHelper(this, collection);
+    }
+
+    /**
+     * Replaces each entry's value with the result of invoking the given function on that entry
+     * until all entries have been processed or the function throws an exception. Exceptions thrown
+     * by the function are relayed to the caller. This implementation overrides
+     * the default implementation to avoid iterating using the {@link #entrySet()} and iterates in
+     * the key-value order consistent with {@link #keyAt(int)} and {@link #valueAt(int)}.
+     *
+     * @param function The function to apply to each entry
+     */
+    @Override
+    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+        if (function == null) {
+            throw new NullPointerException("function must not be null");
+        }
+
+        final int size = mSize;
+        try {
+            for (int i = 0; i < size; ++i) {
+                final int valIndex = (i << 1) + 1;
+                //noinspection unchecked
+                mArray[valIndex] = function.apply((K) mArray[i << 1], (V) mArray[valIndex]);
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new ConcurrentModificationException();
+        }
+        if (size != mSize) {
+            throw new ConcurrentModificationException();
+        }
     }
 
     /**

@@ -90,6 +90,7 @@ EglManager::EglManager()
         , mEglConfig(nullptr)
         , mEglConfigF16(nullptr)
         , mEglConfig1010102(nullptr)
+        , mEglConfigA8(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
         , mCurrentSurface(EGL_NO_SURFACE)
@@ -246,6 +247,50 @@ EGLConfig EglManager::loadFP16Config(EGLDisplay display, SwapBehavior swapBehavi
     return config;
 }
 
+EGLConfig EglManager::loadA8Config(EGLDisplay display, EglManager::SwapBehavior swapBehavior) {
+    EGLint eglSwapBehavior =
+            (swapBehavior == SwapBehavior::Preserved) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+    EGLint attribs[] = {EGL_RENDERABLE_TYPE,
+                        EGL_OPENGL_ES2_BIT,
+                        EGL_RED_SIZE,
+                        8,
+                        EGL_GREEN_SIZE,
+                        0,
+                        EGL_BLUE_SIZE,
+                        0,
+                        EGL_ALPHA_SIZE,
+                        0,
+                        EGL_DEPTH_SIZE,
+                        0,
+                        EGL_SURFACE_TYPE,
+                        EGL_WINDOW_BIT | eglSwapBehavior,
+                        EGL_NONE};
+    EGLint numConfigs = 1;
+    if (!eglChooseConfig(display, attribs, nullptr, numConfigs, &numConfigs)) {
+        return EGL_NO_CONFIG_KHR;
+    }
+
+    std::vector<EGLConfig> configs(numConfigs, EGL_NO_CONFIG_KHR);
+    if (!eglChooseConfig(display, attribs, configs.data(), numConfigs, &numConfigs)) {
+        return EGL_NO_CONFIG_KHR;
+    }
+
+    // The component sizes passed to eglChooseConfig are minimums, so configs
+    // contains entries that exceed them. Choose one that matches the sizes
+    // exactly.
+    for (EGLConfig config : configs) {
+        EGLint r{0}, g{0}, b{0}, a{0};
+        eglGetConfigAttrib(display, config, EGL_RED_SIZE, &r);
+        eglGetConfigAttrib(display, config, EGL_GREEN_SIZE, &g);
+        eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &b);
+        eglGetConfigAttrib(display, config, EGL_ALPHA_SIZE, &a);
+        if (8 == r && 0 == g && 0 == b && 0 == a) {
+            return config;
+        }
+    }
+    return EGL_NO_CONFIG_KHR;
+}
+
 void EglManager::initExtensions() {
     auto extensions = StringUtils::split(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
 
@@ -345,10 +390,14 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
                                                      sk_sp<SkColorSpace> colorSpace) {
     LOG_ALWAYS_FATAL_IF(!hasEglContext(), "Not initialized");
 
-    if (!mHasWideColorGamutSupport || !EglExtensions.noConfigContext) {
+    if (!EglExtensions.noConfigContext) {
+        // The caller shouldn't use A8 if we cannot switch modes.
+        LOG_ALWAYS_FATAL_IF(colorMode == ColorMode::A8,
+                            "Cannot use A8 without EGL_KHR_no_config_context!");
+
+        // Cannot switch modes without EGL_KHR_no_config_context.
         colorMode = ColorMode::Default;
     }
-
     // The color space we want to use depends on whether linear blending is turned
     // on and whether the app has requested wide color gamut rendering. When wide
     // color gamut rendering is off, the app simply renders in the display's native
@@ -374,42 +423,61 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
     EGLint attribs[] = {EGL_NONE, EGL_NONE, EGL_NONE};
 
     EGLConfig config = mEglConfig;
-    if (DeviceInfo::get()->getWideColorType() == kRGBA_F16_SkColorType) {
-        if (mEglConfigF16 == EGL_NO_CONFIG_KHR) {
-            colorMode = ColorMode::Default;
-        } else {
-            config = mEglConfigF16;
+    if (colorMode == ColorMode::A8) {
+        // A8 doesn't use a color space
+        if (!mEglConfigA8) {
+            mEglConfigA8 = loadA8Config(mEglDisplay, mSwapBehavior);
+            LOG_ALWAYS_FATAL_IF(!mEglConfigA8,
+                                "Requested ColorMode::A8, but EGL lacks support! error = %s",
+                                eglErrorString());
         }
-    }
-    if (EglExtensions.glColorSpace) {
-        attribs[0] = EGL_GL_COLORSPACE_KHR;
-        switch (colorMode) {
-            case ColorMode::Default:
-                attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
-                break;
-            case ColorMode::WideColorGamut: {
-                skcms_Matrix3x3 colorGamut;
-                LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&colorGamut),
-                                    "Could not get gamut matrix from color space");
-                if (memcmp(&colorGamut, &SkNamedGamut::kDisplayP3, sizeof(colorGamut)) == 0) {
-                    attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
-                } else if (memcmp(&colorGamut, &SkNamedGamut::kSRGB, sizeof(colorGamut)) == 0) {
-                    attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
-                } else if (memcmp(&colorGamut, &SkNamedGamut::kRec2020, sizeof(colorGamut)) == 0) {
-                    attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
-                } else {
-                    LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
-                }
-                break;
-            }
-            case ColorMode::Hdr:
+        config = mEglConfigA8;
+    } else {
+        if (!mHasWideColorGamutSupport) {
+            colorMode = ColorMode::Default;
+        }
+
+        if (DeviceInfo::get()->getWideColorType() == kRGBA_F16_SkColorType) {
+            if (mEglConfigF16 == EGL_NO_CONFIG_KHR) {
+                colorMode = ColorMode::Default;
+            } else {
                 config = mEglConfigF16;
-                attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
-                break;
-            case ColorMode::Hdr10:
-                config = mEglConfig1010102;
-                attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
-                break;
+            }
+        }
+        if (EglExtensions.glColorSpace) {
+            attribs[0] = EGL_GL_COLORSPACE_KHR;
+            switch (colorMode) {
+                case ColorMode::Default:
+                    attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
+                    break;
+                case ColorMode::WideColorGamut: {
+                    skcms_Matrix3x3 colorGamut;
+                    LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&colorGamut),
+                                        "Could not get gamut matrix from color space");
+                    if (memcmp(&colorGamut, &SkNamedGamut::kDisplayP3, sizeof(colorGamut)) == 0) {
+                        attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
+                    } else if (memcmp(&colorGamut, &SkNamedGamut::kSRGB, sizeof(colorGamut)) == 0) {
+                        attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
+                    } else if (memcmp(&colorGamut, &SkNamedGamut::kRec2020, sizeof(colorGamut)) ==
+                               0) {
+                        attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
+                    } else {
+                        LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+                    }
+                    break;
+                }
+                case ColorMode::Hdr:
+                    config = mEglConfigF16;
+                    attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
+                    break;
+                case ColorMode::Hdr10:
+                    config = mEglConfig1010102;
+                    attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
+                    break;
+                case ColorMode::A8:
+                    LOG_ALWAYS_FATAL("Unreachable: A8 doesn't use a color space");
+                    break;
+            }
         }
     }
 

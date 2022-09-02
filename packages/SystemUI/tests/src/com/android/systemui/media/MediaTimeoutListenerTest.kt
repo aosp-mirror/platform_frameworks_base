@@ -23,8 +23,12 @@ import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -32,7 +36,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
@@ -50,9 +53,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
-private const val USER_ID = 0
 
-private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
 }
@@ -63,9 +64,14 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Mock private lateinit var mediaControllerFactory: MediaControllerFactory
     @Mock private lateinit var mediaController: MediaController
+    @Mock private lateinit var logger: MediaTimeoutLogger
+    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     private lateinit var executor: FakeExecutor
     @Mock private lateinit var timeoutCallback: (String, Boolean) -> Unit
+    @Mock private lateinit var stateCallback: (String, PlaybackState) -> Unit
     @Captor private lateinit var mediaCallbackCaptor: ArgumentCaptor<MediaController.Callback>
+    @Captor private lateinit var dozingCallbackCaptor:
+        ArgumentCaptor<StatusBarStateController.StateListener>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     private lateinit var metadataBuilder: MediaMetadata.Builder
     private lateinit var playbackBuilder: PlaybackState.Builder
@@ -73,13 +79,21 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     private lateinit var mediaData: MediaData
     private lateinit var resumeData: MediaData
     private lateinit var mediaTimeoutListener: MediaTimeoutListener
+    private var clock = FakeSystemClock()
 
     @Before
     fun setup() {
         `when`(mediaControllerFactory.create(any())).thenReturn(mediaController)
-        executor = FakeExecutor(FakeSystemClock())
-        mediaTimeoutListener = MediaTimeoutListener(mediaControllerFactory, executor)
+        executor = FakeExecutor(clock)
+        mediaTimeoutListener = MediaTimeoutListener(
+            mediaControllerFactory,
+            executor,
+            logger,
+            statusBarStateController,
+            clock
+        )
         mediaTimeoutListener.timeoutCallback = timeoutCallback
+        mediaTimeoutListener.stateCallback = stateCallback
 
         // Create a media session and notification for testing.
         metadataBuilder = MediaMetadata.Builder().apply {
@@ -95,13 +109,14 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             setPlaybackState(playbackBuilder.build())
         }
         session.setActive(true)
-        mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-            emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
-            device = null, active = true, resumeAction = null)
 
-        resumeData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-                emptyList(), emptyList(), PACKAGE, null, clickIntent = null,
-                device = null, active = false, resumeAction = null, resumption = true)
+        mediaData = MediaTestUtils.emptyMediaData.copy(
+            app = PACKAGE,
+            packageName = PACKAGE,
+            token = session.sessionToken
+        )
+
+        resumeData = mediaData.copy(token = null, active = false, resumption = true)
     }
 
     @Test
@@ -112,8 +127,9 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         `when`(mediaController.playbackState).thenReturn(playingState)
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
+        verify(logger).logPlaybackState(eq(KEY), eq(playingState))
 
-        // Ignores is same key
+        // Ignores if same key
         clearInvocations(mediaController)
         mediaTimeoutListener.onMediaDataLoaded(KEY, KEY, mediaData)
         verify(mediaController, never()).registerCallback(anyObject())
@@ -125,6 +141,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
         assertThat(executor.numPending()).isEqualTo(1)
         verify(timeoutCallback, never()).invoke(anyString(), anyBoolean())
+        verify(logger).logScheduleTimeout(eq(KEY), eq(false), eq(false))
         assertThat(executor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
     }
 
@@ -153,6 +170,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnMediaDataLoaded_migratesKeys() {
+        val newKey = "NEWKEY"
         // From not playing
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         clearInvocations(mediaController)
@@ -161,9 +179,10 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         val playingState = mock(android.media.session.PlaybackState::class.java)
         `when`(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
         `when`(mediaController.playbackState).thenReturn(playingState)
-        mediaTimeoutListener.onMediaDataLoaded("NEWKEY", KEY, mediaData)
+        mediaTimeoutListener.onMediaDataLoaded(newKey, KEY, mediaData)
         verify(mediaController).unregisterCallback(anyObject())
         verify(mediaController).registerCallback(anyObject())
+        verify(logger).logMigrateListener(eq(KEY), eq(newKey), eq(true))
 
         // Enqueues callback
         assertThat(executor.numPending()).isEqualTo(1)
@@ -171,6 +190,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnMediaDataLoaded_migratesKeys_noTimeoutExtension() {
+        val newKey = "NEWKEY"
         // From not playing
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         clearInvocations(mediaController)
@@ -179,11 +199,12 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         val playingState = mock(android.media.session.PlaybackState::class.java)
         `when`(playingState.state).thenReturn(PlaybackState.STATE_PAUSED)
         `when`(mediaController.playbackState).thenReturn(playingState)
-        mediaTimeoutListener.onMediaDataLoaded("NEWKEY", KEY, mediaData)
+        mediaTimeoutListener.onMediaDataLoaded(newKey, KEY, mediaData)
 
         // The number of queued timeout tasks remains the same. The timeout task isn't cancelled nor
         // is another scheduled
         assertThat(executor.numPending()).isEqualTo(1)
+        verify(logger).logUpdateListener(eq(newKey), eq(false))
     }
 
     @Test
@@ -205,6 +226,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
                 .setState(PlaybackState.STATE_PLAYING, 0L, 0f).build())
         assertThat(executor.numPending()).isEqualTo(0)
+        verify(logger).logTimeoutCancelled(eq(KEY), any())
     }
 
     @Test
@@ -249,6 +271,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // THEN the controller is unregistered and timeout run
         verify(mediaController).unregisterCallback(anyObject())
         assertThat(executor.numPending()).isEqualTo(0)
+        verify(logger).logSessionDestroyed(eq(KEY))
     }
 
     @Test
@@ -270,6 +293,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             runAllReady()
         }
         verify(timeoutCallback).invoke(eq(KEY), eq(false))
+        verify(logger).logReuseListener(eq(KEY))
     }
 
     @Test
@@ -357,5 +381,213 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // THEN the timeout runnable is cancelled
         assertThat(executor.numPending()).isEqualTo(0)
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_playbackActionsChanged_noCallback() {
+        // Load media data once
+        val pausedState = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE)
+                .build()
+        loadMediaDataWithPlaybackState(pausedState)
+
+        // When media data is loaded again, with different actions
+        val playingState = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PLAY)
+                .build()
+        loadMediaDataWithPlaybackState(playingState)
+
+        // Then the callback is not invoked
+        verify(stateCallback, never()).invoke(eq(KEY), any())
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_playbackActionsChanged_sendsCallback() {
+        // Load media data once
+        val pausedState = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE)
+                .build()
+        loadMediaDataWithPlaybackState(pausedState)
+
+        // When the playback state changes, and has different actions
+        val playingState = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PLAY)
+                .build()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+
+        // Then the callback is invoked
+        verify(stateCallback).invoke(eq(KEY), eq(playingState!!))
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_differentCustomActions_sendsCallback() {
+        val customOne = PlaybackState.CustomAction.Builder(
+                    "ACTION_1",
+                    "custom action 1",
+                    android.R.drawable.ic_media_ff)
+                .build()
+        val pausedState = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE)
+                .addCustomAction(customOne)
+                .build()
+        loadMediaDataWithPlaybackState(pausedState)
+
+        // When the playback state actions change
+        val customTwo = PlaybackState.CustomAction.Builder(
+                "ACTION_2",
+                "custom action 2",
+                android.R.drawable.ic_media_rew)
+                .build()
+        val pausedStateTwoActions = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE)
+                .addCustomAction(customOne)
+                .addCustomAction(customTwo)
+                .build()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(pausedStateTwoActions)
+
+        // Then the callback is invoked
+        verify(stateCallback).invoke(eq(KEY), eq(pausedStateTwoActions!!))
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_sameActions_noCallback() {
+        val stateWithActions = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PLAY)
+                .build()
+        loadMediaDataWithPlaybackState(stateWithActions)
+
+        // When the playback state updates with the same actions
+        mediaCallbackCaptor.value.onPlaybackStateChanged(stateWithActions)
+
+        // Then the callback is not invoked again
+        verify(stateCallback, never()).invoke(eq(KEY), any())
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_sameCustomActions_noCallback() {
+        val actionName = "custom action"
+        val actionIcon = android.R.drawable.ic_media_ff
+        val customOne = PlaybackState.CustomAction.Builder(actionName, actionName, actionIcon)
+                .build()
+        val stateOne = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE)
+                .addCustomAction(customOne)
+                .build()
+        loadMediaDataWithPlaybackState(stateOne)
+
+        // When the playback state is updated, but has the same actions
+        val customTwo = PlaybackState.CustomAction.Builder(actionName, actionName, actionIcon)
+                .build()
+        val stateTwo = PlaybackState.Builder()
+                .setActions(PlaybackState.ACTION_PAUSE)
+                .addCustomAction(customTwo)
+                .build()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(stateTwo)
+
+        // Then the callback is not invoked
+        verify(stateCallback, never()).invoke(eq(KEY), any())
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_isPlayingChanged_noCallback() {
+        // Load media data in paused state
+        val pausedState = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PAUSED, 0L, 0f)
+                .build()
+        loadMediaDataWithPlaybackState(pausedState)
+
+        // When media data is loaded again but playing
+        val playingState = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0L, 1f)
+                .build()
+        loadMediaDataWithPlaybackState(playingState)
+
+        // Then the callback is not invoked
+        verify(stateCallback, never()).invoke(eq(KEY), any())
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_isPlayingChanged_sendsCallback() {
+        // Load media data in paused state
+        val pausedState = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PAUSED, 0L, 0f)
+                .build()
+        loadMediaDataWithPlaybackState(pausedState)
+
+        // When the playback state changes to playing
+        val playingState = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0L, 1f)
+                .build()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+
+        // Then the callback is invoked
+        verify(stateCallback).invoke(eq(KEY), eq(playingState!!))
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_isPlayingSame_noCallback() {
+        // Load media data in paused state
+        val pausedState = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PAUSED, 0L, 0f)
+                .build()
+        loadMediaDataWithPlaybackState(pausedState)
+
+        // When the playback state is updated, but still not playing
+        val playingState = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_STOPPED, 0L, 0f)
+                .build()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+
+        // Then the callback is not invoked
+        verify(stateCallback, never()).invoke(eq(KEY), eq(playingState!!))
+    }
+
+    @Test
+    fun testTimeoutCallback_dozedPastTimeout_invokedOnWakeup() {
+        // When paused media is loaded
+        testOnMediaDataLoaded_registersPlaybackListener()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
+            .setState(PlaybackState.STATE_PAUSED, 0L, 0f).build())
+        verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
+
+        // And we doze past the scheduled timeout
+        val time = clock.currentTimeMillis()
+        clock.setElapsedRealtime(time + PAUSED_MEDIA_TIMEOUT)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // Then when no longer dozing, the timeout runs immediately
+        dozingCallbackCaptor.value.onDozingChanged(false)
+        verify(timeoutCallback).invoke(eq(KEY), eq(true))
+        verify(logger).logTimeout(eq(KEY))
+
+        // and cancel any later scheduled timeout
+        verify(logger).logTimeoutCancelled(eq(KEY), any())
+        assertThat(executor.numPending()).isEqualTo(0)
+    }
+
+    @Test
+    fun testTimeoutCallback_dozeShortTime_notInvokedOnWakeup() {
+        // When paused media is loaded
+        val time = clock.currentTimeMillis()
+        clock.setElapsedRealtime(time)
+        testOnMediaDataLoaded_registersPlaybackListener()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
+            .setState(PlaybackState.STATE_PAUSED, 0L, 0f).build())
+        verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
+
+        // And we doze, but not past the scheduled timeout
+        clock.setElapsedRealtime(time + PAUSED_MEDIA_TIMEOUT / 2L)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // Then when no longer dozing, the timeout remains scheduled
+        dozingCallbackCaptor.value.onDozingChanged(false)
+        verify(timeoutCallback, never()).invoke(eq(KEY), eq(true))
+        assertThat(executor.numPending()).isEqualTo(1)
+    }
+
+    private fun loadMediaDataWithPlaybackState(state: PlaybackState) {
+        `when`(mediaController.playbackState).thenReturn(state)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
     }
 }

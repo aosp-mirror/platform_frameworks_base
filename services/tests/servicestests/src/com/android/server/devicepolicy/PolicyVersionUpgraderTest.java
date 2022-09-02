@@ -16,6 +16,13 @@
 
 package com.android.server.devicepolicy;
 
+import static android.content.pm.UserInfo.FLAG_PRIMARY;
+import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+
+import static com.android.server.devicepolicy.DevicePolicyManagerService.DEVICE_POLICIES_XML;
+import static com.android.server.devicepolicy.DevicePolicyManagerService.POLICIES_VERSION_XML;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.admin.DeviceAdminInfo;
@@ -23,13 +30,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.os.IpcDataCache;
 import android.os.Parcel;
+import android.os.UserHandle;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.JournaledFile;
+import com.android.server.SystemService;
 
 import com.google.common.io.Files;
 
@@ -42,7 +52,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -51,26 +60,18 @@ import java.util.Map;
 import java.util.function.Function;
 
 @RunWith(JUnit4.class)
-public class PolicyVersionUpgraderTest {
+public class PolicyVersionUpgraderTest extends DpmTestBase {
     // NOTE: Only change this value if the corresponding CL also adds a test to test the upgrade
     // to the new version.
-    private static final int LATEST_TESTED_VERSION = 2;
+    private static final int LATEST_TESTED_VERSION = 3;
     public static final String PERMISSIONS_TAG = "admin-can-grant-sensors-permissions";
+    public static final String DEVICE_OWNER_XML = "device_owner_2.xml";
     private ComponentName mFakeAdmin;
 
-    private static class FakePolicyUpgraderDataProvider implements PolicyUpgraderDataProvider {
-        int mDeviceOwnerUserId;
-        ComponentName mDeviceOwnerComponent = new ComponentName("", "");
+    private class FakePolicyUpgraderDataProvider implements PolicyUpgraderDataProvider {
         boolean mIsFileBasedEncryptionEnabled;
-        Map<Integer, ComponentName> mUserToComponent = new HashMap<>();
         Map<ComponentName, DeviceAdminInfo> mComponentToDeviceAdminInfo = new HashMap<>();
-        File mDataDir;
         int[] mUsers;
-
-        @Override
-        public boolean isDeviceOwner(int userId, ComponentName who) {
-            return userId == mDeviceOwnerUserId && mDeviceOwnerComponent.equals(who);
-        }
 
         @Override
         public boolean storageManagerIsFileBasedEncryptionEnabled() {
@@ -78,10 +79,7 @@ public class PolicyVersionUpgraderTest {
         }
 
         private JournaledFile makeJournaledFile(int userId, String fileName) {
-            File parentDir = new File(mDataDir, String.format("user%d", userId));
-            if (!parentDir.exists()) {
-                parentDir.mkdirs();
-            }
+            File parentDir = getServices().environment.getUserSystemDirectory(userId);
 
             final String base = new File(parentDir, fileName).getAbsolutePath();
             return new JournaledFile(new File(base), new File(base + ".tmp"));
@@ -89,17 +87,12 @@ public class PolicyVersionUpgraderTest {
 
         @Override
         public JournaledFile makeDevicePoliciesJournaledFile(int userId) {
-            return makeJournaledFile(userId, DevicePolicyManagerService.DEVICE_POLICIES_XML);
+            return makeJournaledFile(userId, DEVICE_POLICIES_XML);
         }
 
         @Override
         public JournaledFile makePoliciesVersionJournaledFile(int userId) {
-            return makeJournaledFile(userId, DevicePolicyManagerService.POLICIES_VERSION_XML);
-        }
-
-        @Override
-        public ComponentName getOwnerComponent(int userId) {
-            return mUserToComponent.get(userId);
+            return makeJournaledFile(userId, POLICIES_VERSION_XML);
         }
 
         @Override
@@ -116,30 +109,29 @@ public class PolicyVersionUpgraderTest {
     private final Context mRealTestContext = InstrumentationRegistry.getTargetContext();
     private FakePolicyUpgraderDataProvider mProvider;
     private PolicyVersionUpgrader mUpgrader;
-    private File mDataDir;
 
     @Before
     public void setUp() {
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
+
         mProvider = new FakePolicyUpgraderDataProvider();
-        mUpgrader = new PolicyVersionUpgrader(mProvider);
-        mDataDir = new File(mRealTestContext.getCacheDir(), "test-data");
-        mDataDir.getParentFile().mkdirs();
-        // Prepare provider.
-        mProvider.mDataDir = mDataDir;
+        mUpgrader = new PolicyVersionUpgrader(mProvider, getServices().pathProvider);
         mFakeAdmin = new ComponentName(
                 "com.android.frameworks.servicestests",
-                        "com.android.server.devicepolicy.DummyDeviceAdmins$Admin1");
+                "com.android.server.devicepolicy.DummyDeviceAdmins$Admin1");
         ActivityInfo activityInfo = createActivityInfo(mFakeAdmin);
         DeviceAdminInfo dai = createDeviceAdminInfo(activityInfo);
         mProvider.mComponentToDeviceAdminInfo.put(mFakeAdmin, dai);
-        mProvider.mUsers = new int[] {0};
+        mProvider.mUsers = new int[]{0};
     }
 
     @Test
     public void testSameVersionDoesNothing() throws IOException {
         writeVersionToXml(DevicePolicyManagerService.DPMS_VERSION);
         final int userId = mProvider.mUsers[0];
-        preparePoliciesFile(userId);
+        preparePoliciesFile(userId, "device_policies.xml");
         String oldContents = readPoliciesFile(userId);
 
         mUpgrader.upgradePolicy(DevicePolicyManagerService.DPMS_VERSION);
@@ -151,18 +143,19 @@ public class PolicyVersionUpgraderTest {
     @Test
     public void testUpgrade0To1RemovesPasswordMetrics() throws IOException, XmlPullParserException {
         final String activePasswordTag = "active-password";
-        mProvider.mUsers = new int[] {0, 10};
+        mProvider.mUsers = new int[]{0, 10};
+        getServices().addUser(10, /* flags= */ 0, USER_TYPE_PROFILE_MANAGED);
         writeVersionToXml(0);
         for (int userId : mProvider.mUsers) {
-            preparePoliciesFile(userId);
+            preparePoliciesFile(userId, "device_policies.xml");
         }
         // Validate test set-up.
         assertThat(isTagPresent(readPoliciesFileToStream(0), activePasswordTag)).isTrue();
 
         mUpgrader.upgradePolicy(1);
 
-        assertThat(readVersionFromXml()).isGreaterThan(1);
-        for (int user: mProvider.mUsers) {
+        assertThat(readVersionFromXml()).isAtLeast(1);
+        for (int user : mProvider.mUsers) {
             assertThat(isTagPresent(readPoliciesFileToStream(user), activePasswordTag)).isFalse();
         }
     }
@@ -171,22 +164,102 @@ public class PolicyVersionUpgraderTest {
     public void testUpgrade1To2MarksDoForPermissionControl()
             throws IOException, XmlPullParserException {
         final int ownerUser = 10;
-        mProvider.mUsers = new int[] {0, ownerUser};
+        mProvider.mUsers = new int[]{0, ownerUser};
+        getServices().addUser(ownerUser, FLAG_PRIMARY, USER_TYPE_FULL_SYSTEM);
         writeVersionToXml(1);
         for (int userId : mProvider.mUsers) {
-            preparePoliciesFile(userId);
+            preparePoliciesFile(userId, "device_policies.xml");
         }
-        mProvider.mDeviceOwnerUserId = ownerUser;
-        mProvider.mDeviceOwnerComponent = mFakeAdmin;
-        mProvider.mUserToComponent.put(ownerUser, mFakeAdmin);
+        prepareDeviceOwnerFile(ownerUser, "device_owner_2.xml");
 
         mUpgrader.upgradePolicy(2);
 
-        assertThat(readVersionFromXml()).isEqualTo(2);
+        assertThat(readVersionFromXml()).isAtLeast(2);
         assertThat(getBooleanValueTag(readPoliciesFileToStream(mProvider.mUsers[0]),
                 PERMISSIONS_TAG)).isFalse();
         assertThat(getBooleanValueTag(readPoliciesFileToStream(ownerUser),
                 PERMISSIONS_TAG)).isTrue();
+    }
+
+    @Test
+    public void testNoStaleDataInCacheAfterUpgrade() throws Exception {
+        final int ownerUser = 0;
+        getServices().addUser(ownerUser, FLAG_PRIMARY, USER_TYPE_FULL_SYSTEM);
+        setUpPackageManagerForAdmin(admin1, UserHandle.getUid(ownerUser, 123 /* admin app ID */));
+        writeVersionToXml(0);
+        preparePoliciesFile(ownerUser, "device_policies.xml");
+        prepareDeviceOwnerFile(ownerUser, "device_owner_2.xml");
+
+        DevicePolicyManagerServiceTestable dpms;
+        final long ident = getContext().binder.clearCallingIdentity();
+        try {
+            dpms = new DevicePolicyManagerServiceTestable(getServices(), getContext());
+
+            // Simulate access that would cause policy data to be cached in mUserData.
+            dpms.isCommonCriteriaModeEnabled(null);
+
+            dpms.systemReady(SystemService.PHASE_LOCK_SETTINGS_READY);
+        } finally {
+            getContext().binder.restoreCallingIdentity(ident);
+        }
+
+        assertThat(readVersionFromXml()).isEqualTo(DevicePolicyManagerService.DPMS_VERSION);
+
+        // DO should be marked as able to grant sensors permission during upgrade and should be
+        // reported as such via the API.
+        assertThat(dpms.canAdminGrantSensorsPermissionsForUser(ownerUser)).isTrue();
+    }
+
+    /**
+     * Up to Android R DO protected packages were stored in DevicePolicyData, verify that they are
+     * moved to ActiveAdmin.
+     */
+    @Test
+    public void testUserControlDisabledPackagesFromR() throws Exception {
+        final String oldTag = "protected-packages";
+        final String newTag = "protected_packages";
+        final int ownerUser = 0;
+        mProvider.mUsers = new int[]{0};
+        getServices().addUser(ownerUser, FLAG_PRIMARY, USER_TYPE_FULL_SYSTEM);
+        writeVersionToXml(2);
+        preparePoliciesFile(ownerUser, "protected_packages_device_policies.xml");
+        prepareDeviceOwnerFile(ownerUser, "device_owner_2.xml");
+
+        // Validate the setup.
+        assertThat(isTagPresent(readPoliciesFileToStream(ownerUser), oldTag)).isTrue();
+        assertThat(isTagPresent(readPoliciesFileToStream(ownerUser), newTag)).isFalse();
+
+        mUpgrader.upgradePolicy(3);
+
+        assertThat(readVersionFromXml()).isAtLeast(3);
+        assertThat(isTagPresent(readPoliciesFileToStream(ownerUser), oldTag)).isFalse();
+        assertThat(isTagPresent(readPoliciesFileToStream(ownerUser), newTag)).isTrue();
+    }
+
+    /**
+     * In Android S DO protected packages were stored in Owners, verify that they are moved to
+     * ActiveAdmin.
+     */
+    @Test
+    public void testUserControlDisabledPackagesFromS() throws Exception {
+        final String oldTag = "device-owner-protected-packages";
+        final String newTag = "protected_packages";
+        final int ownerUser = 0;
+        mProvider.mUsers = new int[]{0};
+        getServices().addUser(ownerUser, FLAG_PRIMARY, USER_TYPE_FULL_SYSTEM);
+        writeVersionToXml(2);
+        preparePoliciesFile(ownerUser, "device_policies.xml");
+        prepareDeviceOwnerFile(ownerUser, "protected_packages_device_owner_2.xml");
+
+        // Validate the setup.
+        assertThat(isTagPresent(readDoToStream(), oldTag)).isTrue();
+        assertThat(isTagPresent(readPoliciesFileToStream(ownerUser), newTag)).isFalse();
+
+        mUpgrader.upgradePolicy(3);
+
+        assertThat(readVersionFromXml()).isAtLeast(3);
+        assertThat(isTagPresent(readDoToStream(), oldTag)).isFalse();
+        assertThat(isTagPresent(readPoliciesFileToStream(ownerUser), newTag)).isTrue();
     }
 
     @Test
@@ -208,19 +281,36 @@ public class PolicyVersionUpgraderTest {
         return Integer.parseInt(versionString);
     }
 
-    private void preparePoliciesFile(int userId) throws IOException {
+    private void preparePoliciesFile(int userId, String assetFile) throws IOException {
         JournaledFile policiesFile = mProvider.makeDevicePoliciesJournaledFile(userId);
         DpmTestUtils.writeToFile(
                 policiesFile.chooseForWrite(),
-                DpmTestUtils.readAsset(mRealTestContext,
-                        "PolicyVersionUpgraderTest/device_policies.xml"));
+                DpmTestUtils.readAsset(mRealTestContext, "PolicyVersionUpgraderTest/" + assetFile));
         policiesFile.commit();
+    }
+
+    private void prepareDeviceOwnerFile(int userId, String assetFile) throws IOException {
+        File doFilePath = getDoFilePath();
+        String doFileContent = DpmTestUtils.readAsset(mRealTestContext,
+                        "PolicyVersionUpgraderTest/" + assetFile)
+                // Substitute the right DO userId, XML in resources has 0
+                .replace("userId=\"0\"", "userId=\"" + userId + "\"");
+        DpmTestUtils.writeToFile(doFilePath, doFileContent);
+    }
+
+    private File getDoFilePath() {
+        File parentDir = getServices().pathProvider.getDataSystemDirectory();
+        File doFilePath = (new File(parentDir, DEVICE_OWNER_XML)).getAbsoluteFile();
+        return doFilePath;
     }
 
     private String readPoliciesFile(int userId) throws IOException {
         File policiesFile = mProvider.makeDevicePoliciesJournaledFile(userId).chooseForRead();
-        FileReader reader = new FileReader(policiesFile);
         return new String(Files.asByteSource(policiesFile).read(), Charset.defaultCharset());
+    }
+
+    private InputStream readDoToStream() throws IOException {
+        return new FileInputStream(getDoFilePath());
     }
 
     private InputStream readPoliciesFileToStream(int userId) throws IOException {

@@ -25,14 +25,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
  * Actions:
  *     Launch a [pipApp] in pip mode
  *     Launch another app [fixedApp] (appears below pip)
- *     Rotate the screen from [testSpec.config.startRotation] to [testSpec.config.endRotation]
+ *     Rotate the screen from [testSpec.startRotation] to [testSpec.endRotation]
  *     (usually, 0->90 and 90->0)
  *
  * Notes:
@@ -63,23 +63,23 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
-    private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-    private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
+    private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
+    private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition(eachRun = false) { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = buildTransition(eachRun = false) {
             setup {
                 test {
                     fixedApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
-                    setRotation(configuration.startRotation)
+                    setRotation(testSpec.startRotation)
                 }
             }
             transitions {
-                setRotation(configuration.endRotation)
+                setRotation(testSpec.endRotation)
             }
         }
 
@@ -100,7 +100,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     /**
      * Checks the position of the status bar at the start and end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -129,12 +129,27 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     /**
      * Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition
      */
-    @Presubmit
-    @Test
-    fun pipLayerRotates_StartingBounds() {
+    private fun pipLayerRotates_StartingBounds_internal() {
         testSpec.assertLayersStart {
             visibleRegion(pipApp.component).coversAtMost(screenBoundsStart)
         }
+    }
+
+    /**
+     * Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition
+     */
+    @Presubmit
+    @Test
+    fun pipLayerRotates_StartingBounds() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        pipLayerRotates_StartingBounds_internal()
+    }
+
+    @FlakyTest(bugId = 228024285)
+    @Test
+    fun pipLayerRotates_StartingBounds_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        pipLayerRotates_StartingBounds_internal()
     }
 
     /**
@@ -184,7 +199,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigRotationTests(
                 supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                repetitions = 5)
+                repetitions = 3)
         }
     }
 }

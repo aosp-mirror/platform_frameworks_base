@@ -31,13 +31,16 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
@@ -74,6 +77,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     public static final float CALLER_TARGET_SCORE_BOOST = 900.f;
     /** {@link #getBaseScore} */
     public static final float SHORTCUT_TARGET_SCORE_BOOST = 90.f;
+    private static final float PINNED_SHORTCUT_TARGET_SCORE_BOOST = 1000.f;
 
     private final int mMaxShortcutTargetsPerApp;
     private final ChooserListCommunicator mChooserListCommunicator;
@@ -99,6 +103,37 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private List<DisplayResolveInfo> mSortedList = new ArrayList<>();
     private AppPredictor mAppPredictor;
     private AppPredictor.Callback mAppPredictorCallback;
+
+    // For pinned direct share labels, if the text spans multiple lines, the TextView will consume
+    // the full width, even if the characters actually take up less than that. Measure the actual
+    // line widths and constrain the View's width based upon that so that the pin doesn't end up
+    // very far from the text.
+    private final View.OnLayoutChangeListener mPinTextSpacingListener =
+            new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    TextView textView = (TextView) v;
+                    Layout layout = textView.getLayout();
+                    if (layout != null) {
+                        int textWidth = 0;
+                        for (int line = 0; line < layout.getLineCount(); line++) {
+                            textWidth = Math.max((int) Math.ceil(layout.getLineMax(line)),
+                                    textWidth);
+                        }
+                        int desiredWidth = textWidth + textView.getPaddingLeft()
+                                + textView.getPaddingRight();
+                        if (textView.getWidth() > desiredWidth) {
+                            ViewGroup.LayoutParams params = textView.getLayoutParams();
+                            params.width = desiredWidth;
+                            textView.setLayoutParams(params);
+                            // Need to wait until layout pass is over before requesting layout.
+                            textView.post(() -> textView.requestLayout());
+                        }
+                        textView.removeOnLayoutChangeListener(this);
+                    }
+                }
+            };
 
     public ChooserListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
@@ -143,7 +178,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     }
                 }
                 if (ai == null) {
-                    ri = packageManager.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
+                    // Because of AIDL bug, resolveActivity can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ri = packageManager.resolveActivity(rii, PackageManager.MATCH_DEFAULT_ONLY);
                     ai = ri != null ? ri.activityInfo : null;
                 }
                 if (ai == null) {
@@ -221,6 +258,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     @Override
     protected void onBindView(View view, TargetInfo info, int position) {
         final ViewHolder holder = (ViewHolder) view.getTag();
+
         if (info == null) {
             holder.icon.setImageDrawable(
                     mContext.getDrawable(R.drawable.resolver_icon_placeholder));
@@ -270,16 +308,22 @@ public class ChooserListAdapter extends ResolverListAdapter {
             holder.itemView.setBackground(holder.defaultItemViewBackground);
         }
 
+        // Always remove the spacing listener, attach as needed to direct share targets below.
+        holder.text.removeOnLayoutChangeListener(mPinTextSpacingListener);
+
         if (info instanceof MultiDisplayResolveInfo) {
             // If the target is grouped show an indicator
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_group_background);
             holder.text.setPaddingRelative(0, 0, bkg.getIntrinsicWidth() /* end */, 0);
             holder.text.setBackground(bkg);
-        } else if (info.isPinned() && getPositionTargetType(position) == TARGET_STANDARD) {
-            // If the target is pinned and in the suggested row show a pinned indicator
+        } else if (info.isPinned() && (getPositionTargetType(position) == TARGET_STANDARD
+                || getPositionTargetType(position) == TARGET_SERVICE)) {
+            // If the appShare or directShare target is pinned and in the suggested row show a
+            // pinned indicator
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_pinned_background);
             holder.text.setPaddingRelative(bkg.getIntrinsicWidth() /* start */, 0, 0, 0);
             holder.text.setBackground(bkg);
+            holder.text.addOnLayoutChangeListener(mPinTextSpacingListener);
         } else {
             holder.text.setBackground(null);
             holder.text.setPaddingRelative(0, 0, 0, 0);
@@ -299,18 +343,19 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 // Consolidate multiple targets from same app.
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
-                    String packageName = info.getResolvedComponentName().getPackageName();
-                    DisplayResolveInfo multiDri = consolidated.get(packageName);
+                    String resolvedTarget = info.getResolvedComponentName().getPackageName()
+                        + '#' + info.getDisplayLabel();
+                    DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
                     if (multiDri == null) {
-                        consolidated.put(packageName, info);
+                        consolidated.put(resolvedTarget, info);
                     } else if (multiDri instanceof MultiDisplayResolveInfo) {
                         ((MultiDisplayResolveInfo) multiDri).addTarget(info);
                     } else {
                         // create consolidated target from the single DisplayResolveInfo
                         MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, multiDri);
+                            new MultiDisplayResolveInfo(resolvedTarget, multiDri);
                         multiDisplayResolveInfo.addTarget(info);
-                        consolidated.put(packageName, multiDisplayResolveInfo);
+                        consolidated.put(resolvedTarget, multiDisplayResolveInfo);
                     }
                 }
                 List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
@@ -491,9 +536,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
             @ChooserActivity.ShareTargetType int targetType,
-            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
-            List<ChooserActivity.ChooserTargetServiceConnection>
-                    pendingChooserTargetServiceConnections) {
+            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos) {
         if (DEBUG) {
             Log.d(TAG, "addServiceResults " + origTarget.getResolvedComponentName() + ", "
                     + targets.size()
@@ -524,11 +567,16 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     targetScore = lastScore * 0.95f;
                 }
             }
+            ShortcutInfo shortcutInfo = isShortcutResult ? directShareToShortcutInfos.get(target)
+                    : null;
+            if ((shortcutInfo != null) && shortcutInfo.isPinned()) {
+                targetScore += PINNED_SHORTCUT_TARGET_SCORE_BOOST;
+            }
             UserHandle userHandle = getUserHandle();
             Context contextAsUser = mContext.createContextAsUser(userHandle, 0 /* flags */);
             boolean isInserted = insertServiceTarget(new SelectableTargetInfo(contextAsUser,
                     origTarget, target, targetScore, mSelectableTargetInfoCommunicator,
-                    (isShortcutResult ? directShareToShortcutInfos.get(target) : null)));
+                    shortcutInfo));
 
             if (isInserted && isShortcutResult) {
                 mNumShortcutResults++;
@@ -658,8 +706,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
             @Override
             protected List<ResolvedComponentInfo> doInBackground(
                     List<ResolvedComponentInfo>... params) {
+                Trace.beginSection("ChooserListAdapter#SortingTask");
                 mResolverListController.topK(params[0],
                         mChooserListCommunicator.getMaxRankedTargets());
+                Trace.endSection();
                 return params[0];
             }
             @Override

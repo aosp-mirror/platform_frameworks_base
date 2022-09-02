@@ -19,6 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"ການສະແດງຜົນຊ້ອນກັນ"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(ໂປຣແກຣມບໍ່ມີຊື່)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"ປິດ PIP"</string>
+    <string name="pip_close" msgid="2955969519031223530">"ປິດ"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"ເຕັມໜ້າຈໍ"</string>
+    <string name="pip_move" msgid="158770205886688553">"ຍ້າຍ"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"ຂະຫຍາຍ"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"ຫຍໍ້"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" ກົດ "<annotation icon="home_icon">" HOME "</annotation>" ສອງເທື່ອສຳລັບການຄວບຄຸມ"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"ເມນູການສະແດງຜົນຊ້ອນກັນ."</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"ຍ້າຍໄປຊ້າຍ"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"ຍ້າຍໄປຂວາ"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"ຍ້າຍຂຶ້ນ"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"ຍ້າຍລົງ"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"ແລ້ວໆ"</string>
 </resources>

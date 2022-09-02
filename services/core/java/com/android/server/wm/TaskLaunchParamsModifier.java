@@ -35,6 +35,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -157,9 +158,23 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // display.
         if (launchMode == WINDOWING_MODE_UNDEFINED
                 && canInheritWindowingModeFromSource(display, source)) {
-            launchMode = source.getWindowingMode();
+            // The source's windowing mode may be different from its task, e.g. activity is set
+            // to fullscreen and its task is pinned windowing mode when the activity is entering
+            // pip.
+            launchMode = source.getTask().getWindowingMode();
             if (DEBUG) {
                 appendLog("inherit-from-source="
+                        + WindowConfiguration.windowingModeToString(launchMode));
+            }
+        }
+        // If the launch windowing mode is still undefined, inherit from the target task if the
+        // task is already on the right display area (otherwise, the task may be on a different
+        // display area that has incompatible windowing mode).
+        if (launchMode == WINDOWING_MODE_UNDEFINED
+                && task != null && task.getTaskDisplayArea() == suggestedDisplayArea) {
+            launchMode = task.getWindowingMode();
+            if (DEBUG) {
+                appendLog("inherit-from-task="
                         + WindowConfiguration.windowingModeToString(launchMode));
             }
         }
@@ -293,7 +308,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         TaskDisplayArea taskDisplayArea = suggestedDisplayArea;
         // If launch task display area is set in options we should just use it. We assume the
         // suggestedDisplayArea has the right one in this case.
-        if (options == null || options.getLaunchTaskDisplayArea() == null) {
+        if (options == null || (options.getLaunchTaskDisplayArea() == null
+                && options.getLaunchTaskDisplayAreaFeatureId() == FEATURE_UNDEFINED)) {
             final int activityType =
                     mSupervisor.mRootWindowContainer.resolveActivityType(root, options, task);
             display.forAllTaskDisplayAreas(displayArea -> {
@@ -377,7 +393,22 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (optionLaunchTaskDisplayAreaToken != null) {
             taskDisplayArea = (TaskDisplayArea) WindowContainer.fromBinder(
                     optionLaunchTaskDisplayAreaToken.asBinder());
-            if (DEBUG) appendLog("display-area-from-option=" + taskDisplayArea);
+            if (DEBUG) appendLog("display-area-token-from-option=" + taskDisplayArea);
+        }
+
+        if (taskDisplayArea == null && options != null) {
+            final int launchTaskDisplayAreaFeatureId = options.getLaunchTaskDisplayAreaFeatureId();
+            if (launchTaskDisplayAreaFeatureId != FEATURE_UNDEFINED) {
+                final int launchDisplayId = options.getLaunchDisplayId() == INVALID_DISPLAY
+                        ? DEFAULT_DISPLAY : options.getLaunchDisplayId();
+                final DisplayContent dc = mSupervisor.mRootWindowContainer
+                        .getDisplayContent(launchDisplayId);
+                if (dc != null) {
+                    taskDisplayArea = dc.getItemFromTaskDisplayAreas(tda ->
+                            tda.mFeatureId == launchTaskDisplayAreaFeatureId ? tda : null);
+                    if (DEBUG) appendLog("display-area-feature-from-option=" + taskDisplayArea);
+                }
+            }
         }
 
         // If task display area is not specified in options - try display id

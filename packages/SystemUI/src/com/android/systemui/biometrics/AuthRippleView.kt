@@ -35,12 +35,13 @@ import com.android.systemui.statusbar.charging.RippleShader
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 
 /**
- * Expanding ripple effect
- * - startUnlockedRipple for the transition from biometric authentication success to showing
- * launcher.
- * - startDwellRipple for the ripple expansion out when the user has their finger down on the UDFPS
- * sensor area
- * - retractRipple for the ripple animation inwards to signal a failure
+ * Handles two ripple effects: dwell ripple and unlocked ripple
+ * Dwell Ripple:
+ *     - startDwellRipple: dwell ripple expands outwards around the biometric area
+ *     - retractDwellRipple: retracts the dwell ripple to radius 0 to signal a failure
+ *     - fadeDwellRipple: fades the dwell ripple away to alpha 0
+ * Unlocked ripple:
+ *     - startUnlockedRipple: ripple expands from biometric auth location to the edges of the screen
  */
 class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val retractInterpolator = PathInterpolator(.05f, .93f, .1f, 1f)
@@ -52,6 +53,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     private var drawRipple: Boolean = false
 
     private var lockScreenColorVal = Color.WHITE
+    private val fadeDuration = 83L
     private val retractDuration = 400L
     private var alphaInDuration: Long = 0
     private var unlockedRippleInProgress: Boolean = false
@@ -59,7 +61,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     private val dwellPaint = Paint()
     private val rippleShader = RippleShader()
     private val ripplePaint = Paint()
-    private var retractAnimator: Animator? = null
+    private var fadeDwellAnimator: Animator? = null
+    private var retractDwellAnimator: Animator? = null
     private var dwellPulseOutAnimator: Animator? = null
     private var dwellRadius: Float = 0f
         set(value) {
@@ -112,15 +115,15 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     }
 
     /**
-     * Animate ripple inwards back to radius 0
+     * Animate dwell ripple inwards back to radius 0
      */
-    fun retractRipple() {
-        if (retractAnimator?.isRunning == true) {
+    fun retractDwellRipple() {
+        if (retractDwellAnimator?.isRunning == true || fadeDwellAnimator?.isRunning == true) {
             return // let the animation finish
         }
 
         if (dwellPulseOutAnimator?.isRunning == true) {
-            val retractRippleAnimator = ValueAnimator.ofFloat(dwellShader.progress, 0f)
+            val retractDwellRippleAnimator = ValueAnimator.ofFloat(dwellShader.progress, 0f)
                     .apply {
                 interpolator = retractInterpolator
                 duration = retractDuration
@@ -145,10 +148,46 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
                 }
             }
 
-            retractAnimator = AnimatorSet().apply {
-                playTogether(retractRippleAnimator, retractAlphaAnimator)
+            retractDwellAnimator = AnimatorSet().apply {
+                playTogether(retractDwellRippleAnimator, retractAlphaAnimator)
                 addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationStart(animation: Animator?) {
+                        dwellPulseOutAnimator?.cancel()
+                        drawDwell = true
+                    }
+
+                    override fun onAnimationEnd(animation: Animator?) {
+                        drawDwell = false
+                        resetDwellAlpha()
+                    }
+                })
+                start()
+            }
+        }
+    }
+
+    /**
+     * Animate ripple fade to alpha=0
+     */
+    fun fadeDwellRipple() {
+        if (fadeDwellAnimator?.isRunning == true) {
+            return // let the animation finish
+        }
+
+        if (dwellPulseOutAnimator?.isRunning == true || retractDwellAnimator?.isRunning == true) {
+            fadeDwellAnimator = ValueAnimator.ofInt(Color.alpha(dwellShader.color), 0).apply {
+                interpolator = Interpolators.LINEAR
+                duration = fadeDuration
+                addUpdateListener { animator ->
+                    dwellShader.color = ColorUtils.setAlphaComponent(
+                            dwellShader.color,
+                            animator.animatedValue as Int
+                    )
+                    invalidate()
+                }
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationStart(animation: Animator?) {
+                        retractDwellAnimator?.cancel()
                         dwellPulseOutAnimator?.cancel()
                         drawDwell = true
                     }
@@ -205,7 +244,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             )
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
-                    retractAnimator?.cancel()
+                    retractDwellAnimator?.cancel()
+                    fadeDwellAnimator?.cancel()
                     visibility = VISIBLE
                     drawDwell = true
                 }

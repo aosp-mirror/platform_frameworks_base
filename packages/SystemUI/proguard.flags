@@ -1,29 +1,15 @@
--keep class com.android.systemui.navigationbar.buttons.KeyButtonView {
-  public float getDrawingAlpha();
-  public void setDrawingAlpha(float);
-}
-
--keep class com.android.systemui.navigationbar.buttons.KeyButtonRipple {
-  public float getGlowAlpha();
-  public float getGlowScale();
-  public void setGlowAlpha(float);
-  public void setGlowScale(float);
-}
-
--keep class com.android.systemui.settings.brightness.BrightnessSliderView {
-  public float getSliderScaleY();
-  public void setSliderScaleY(float);
-}
+# Preserve line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
 
 -keep class com.android.systemui.recents.OverviewProxyRecentsImpl
 -keep class com.android.systemui.statusbar.car.CarStatusBar
--keep class com.android.systemui.statusbar.phone.StatusBar
+-keep class com.android.systemui.statusbar.phone.CentralSurfaces
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
 -keep class com.android.systemui.tv.TvSystemUIFactory
--keep class * extends com.android.systemui.SystemUI
--keep class * implements com.android.systemui.SystemUI$Injector
+-keep class * extends com.android.systemui.CoreStartable
+-keep class * implements com.android.systemui.CoreStartable$Injector
 
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
@@ -39,7 +25,7 @@
 }
 -keep class androidx.core.app.CoreComponentFactory
 
--keep public class * extends com.android.systemui.SystemUI {
+-keep public class * extends com.android.systemui.CoreStartable {
     public <init>(android.content.Context);
 }
 
@@ -50,7 +36,57 @@
     *;
 }
 
--keep class com.android.systemui.dagger.GlobalRootComponent { *; }
--keep class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { *; }
--keep class com.android.systemui.dagger.Dagger** { *; }
--keep class com.android.systemui.tv.Dagger** { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.GlobalRootComponent { !synthetic *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { !synthetic *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.Dagger** { !synthetic *; }
+-keep,allowoptimization,allowaccessmodification class com.android.systemui.tv.Dagger** { !synthetic *; }
+
+# Prevent optimization or access modification of any referenced code that may
+# conflict with code in the bootclasspath.
+# TODO(b/222468116): Resolve such collisions in the build system.
+-keepnames class android.**.nano.** { *; }
+-keepnames class com.android.**.nano.** { *; }
+-keepnames class com.android.internal.protolog.** { *; }
+-keepnames class android.hardware.common.** { *; }
+
+# Allows proguard to make private and protected methods and fields public as
+# part of optimization. This lets proguard inline trivial getter/setter methods.
+-allowaccessmodification
+
+# Removes runtime checks added through Kotlin to JVM code genereration to
+# avoid linear growth as more Kotlin code is converted / added to the codebase.
+# These checks are generally applied to Java platform types (values returned
+# from Java code that don't have nullness annotations), but we remove them to
+# avoid code size increases.
+#
+# See also https://kotlinlang.org/docs/reference/java-interop.html
+#
+# TODO(b/199941987): Consider standardizing these rules in a central place as
+# Kotlin gains adoption with other platform targets.
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics {
+    # Remove check for method parameters being null
+    static void checkParameterIsNotNull(java.lang.Object, java.lang.String);
+
+    # When a Java platform type is returned and passed to Kotlin NonNull method,
+    # remove the null check
+    static void checkExpressionValueIsNotNull(java.lang.Object, java.lang.String);
+    static void checkNotNullExpressionValue(java.lang.Object, java.lang.String);
+
+    # Remove check that final value returned from method is null, if passing
+    # back Java platform type.
+    static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
+    static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String);
+
+    # Null check for accessing a field from a parent class written in Java.
+    static void checkFieldIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
+    static void checkFieldIsNotNull(java.lang.Object, java.lang.String);
+
+    # Removes code generated from !! operator which converts Nullable type to
+    # NonNull type. These would throw an NPE immediate after on access.
+    static void checkNotNull(java.lang.Object, java.lang.String);
+    static void checkNotNullParameter(java.lang.Object, java.lang.String);
+
+    # Removes lateinit var check being used before being set. Check is applied
+    # on every field access without this.
+    static void throwUninitializedPropertyAccessException(java.lang.String);
+}

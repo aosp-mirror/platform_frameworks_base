@@ -46,6 +46,7 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
+import com.android.internal.jank.FrameTracker.StatsLogWrapper;
 import com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 import com.android.internal.jank.FrameTracker.ViewRootWrapper;
@@ -176,7 +177,6 @@ public class InteractionJankMonitorTest {
     private InteractionJankMonitor createMockedInteractionJankMonitor() {
         InteractionJankMonitor monitor = spy(new InteractionJankMonitor(mWorker));
         doReturn(true).when(monitor).shouldMonitor(anyInt());
-        doNothing().when(monitor).notifyEvents(any(), any(), any());
         return monitor;
     }
 
@@ -203,7 +203,8 @@ public class InteractionJankMonitorTest {
 
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 threadedRenderer, viewRoot, surfaceControl, choreographer,
-                new FrameMetricsWrapper(), /* traceThresholdMissedFrames= */ 1,
+                new FrameMetricsWrapper(), new StatsLogWrapper(),
+                /* traceThresholdMissedFrames= */ 1,
                 /* traceThresholdFrameTimeMillis= */ -1, listener, configuration));
 
         doNothing().when(tracker).postTraceStartMarker();
