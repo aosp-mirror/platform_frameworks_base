@@ -23,6 +23,7 @@ import android.view.DisplayInfo
 import android.view.Surface
 import android.view.View
 import com.airbnb.lottie.LottieAnimationView
+import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
 import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
@@ -100,6 +101,8 @@ open class AuthBiometricFingerprintIconController(
             iconView.playAnimation()
             iconViewOverlay.playAnimation()
         }
+        LottieColorUtils.applyDynamicColors(context, iconView)
+        LottieColorUtils.applyDynamicColors(context, iconViewOverlay)
     }
 
     private fun updateIconNormal(@BiometricState lastState: Int, @BiometricState newState: Int) {
@@ -118,6 +121,7 @@ open class AuthBiometricFingerprintIconController(
         if (shouldAnimateForTransition(lastState, newState)) {
             iconView.playAnimation()
         }
+        LottieColorUtils.applyDynamicColors(context, iconView)
     }
 
     override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
