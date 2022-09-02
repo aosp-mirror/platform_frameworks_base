@@ -1770,6 +1770,13 @@ public class UserManagerService extends IUserManager.Stub {
 
     // TODO(b/239982558): try to merge with isUserVisibleUnchecked() (once both are unit tested)
     boolean isUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+        // TODO(b/244644281): temporary workaround to let WM use this API without breaking current
+        // behavior (otherwise current user / profiles wouldn't be able to launch activities on
+        // other non-passenger displays, like cluster, display, or virtual displays)
+        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
+            return true;
+        }
+
         if (displayId == Display.DEFAULT_DISPLAY) {
             return isCurrentUserOrRunningProfileOfCurrentUser(userId);
         }
@@ -6725,6 +6732,11 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 mUsersOnSecondaryDisplays.delete(userId);
             }
+        }
+
+        @Override
+        public boolean isUserVisible(int userId) {
+            return isUserVisibleUnchecked(userId);
         }
 
         @Override
