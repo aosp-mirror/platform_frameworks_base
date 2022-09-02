@@ -28,24 +28,29 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.pm.IPackageManager;
@@ -54,7 +59,10 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
@@ -63,10 +71,10 @@ import android.service.notification.StatusBarNotification;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.util.Xml;
-
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import android.util.Xml;
+
 import com.android.server.UiServiceTestCase;
 
 import com.google.common.collect.ImmutableList;
@@ -112,6 +120,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
         getContext().setMockPackageManager(mPm);
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
+
+        when(mNm.isInteractionVisibleToListener(any(), anyInt())).thenReturn(true);
 
         mListeners = spy(mNm.new NotificationListeners(
                 mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm));
@@ -595,5 +605,45 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
         verify(mPmi).grantImplicitAccess(sbn.getUserId(), null, UserHandle.getAppId(33),
                 sbn.getUid(), false, false);
+    }
+
+    @Test
+    public void testUpdateGroup_notifyTwoListeners() throws Exception {
+        final NotificationChannelGroup updated = new NotificationChannelGroup("id", "name");
+        updated.setChannels(ImmutableList.of(
+                new NotificationChannel("a", "a", 1), new NotificationChannel("b", "b", 2)));
+        updated.setBlocked(true);
+
+        ManagedServices.ManagedServiceInfo i1 = getParcelingListener(updated);
+        ManagedServices.ManagedServiceInfo i2= getParcelingListener(updated);
+        when(mListeners.getServices()).thenReturn(ImmutableList.of(i1, i2));
+        NotificationChannelGroup existing = new NotificationChannelGroup("id", "name");
+
+        mListeners.notifyNotificationChannelGroupChanged("pkg", UserHandle.of(0), updated, 0);
+        Thread.sleep(500);
+
+        verify(((INotificationListener) i1.getService()), times(1))
+                .onNotificationChannelGroupModification(anyString(), any(), any(), anyInt());
+    }
+
+    private ManagedServices.ManagedServiceInfo getParcelingListener(
+            final NotificationChannelGroup toParcel)
+            throws RemoteException {
+        ManagedServices.ManagedServiceInfo i1 = mock(ManagedServices.ManagedServiceInfo.class);
+        when(i1.isSystem()).thenReturn(true);
+        INotificationListener l1 = mock(INotificationListener.class);
+        when(i1.enabledAndUserMatches(anyInt())).thenReturn(true);
+        doAnswer(invocationOnMock -> {
+            try {
+                toParcel.writeToParcel(Parcel.obtain(), 0);
+            } catch (Exception e) {
+                fail("Failed to parcel group to listener");
+                return e;
+
+            }
+            return null;
+        }).when(l1).onNotificationChannelGroupModification(anyString(), any(), any(), anyInt());
+        when(i1.getService()).thenReturn(l1);
+        return i1;
     }
 }
