@@ -16,6 +16,8 @@
 
 package com.android.wm.shell;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -637,26 +639,22 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     }
 
     @Test
-    public void testPrepareClearBoundsForTasks() {
-        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_UNDEFINED);
-        task1.displayId = 1;
+    public void testPrepareClearBoundsForStandardTasks() {
         MockToken token1 = new MockToken();
-        task1.token = token1.token();
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_UNDEFINED, token1);
         mOrganizer.onTaskAppeared(task1, null);
 
-        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_UNDEFINED);
-        task2.displayId = 1;
         MockToken token2 = new MockToken();
-        task2.token = token2.token();
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_UNDEFINED, token2);
         mOrganizer.onTaskAppeared(task2, null);
 
-        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_UNDEFINED);
-        otherDisplayTask.displayId = 2;
         MockToken otherDisplayToken = new MockToken();
-        otherDisplayTask.token = otherDisplayToken.token();
+        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_UNDEFINED,
+                otherDisplayToken);
+        otherDisplayTask.displayId = 2;
         mOrganizer.onTaskAppeared(otherDisplayTask, null);
 
-        WindowContainerTransaction wct = mOrganizer.prepareClearBoundsForTasks(1);
+        WindowContainerTransaction wct = mOrganizer.prepareClearBoundsForStandardTasks(1);
 
         assertEquals(wct.getChanges().size(), 2);
         Change boundsChange1 = wct.getChanges().get(token1.binder());
@@ -673,26 +671,40 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     }
 
     @Test
-    public void testPrepareClearFreeformForTasks() {
-        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FREEFORM);
-        task1.displayId = 1;
+    public void testPrepareClearBoundsForStandardTasks_onlyClearActivityTypeStandard() {
         MockToken token1 = new MockToken();
-        task1.token = token1.token();
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_UNDEFINED, token1);
         mOrganizer.onTaskAppeared(task1, null);
 
-        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
-        task2.displayId = 1;
         MockToken token2 = new MockToken();
-        task2.token = token2.token();
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_UNDEFINED, token2);
+        task2.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_HOME);
         mOrganizer.onTaskAppeared(task2, null);
 
-        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_FREEFORM);
-        otherDisplayTask.displayId = 2;
+        WindowContainerTransaction wct = mOrganizer.prepareClearBoundsForStandardTasks(1);
+
+        // Only clear bounds for task1
+        assertEquals(1, wct.getChanges().size());
+        assertNotNull(wct.getChanges().get(token1.binder()));
+    }
+
+    @Test
+    public void testPrepareClearFreeformForStandardTasks() {
+        MockToken token1 = new MockToken();
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FREEFORM, token1);
+        mOrganizer.onTaskAppeared(task1, null);
+
+        MockToken token2 = new MockToken();
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW, token2);
+        mOrganizer.onTaskAppeared(task2, null);
+
         MockToken otherDisplayToken = new MockToken();
-        otherDisplayTask.token = otherDisplayToken.token();
+        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_FREEFORM,
+                otherDisplayToken);
+        otherDisplayTask.displayId = 2;
         mOrganizer.onTaskAppeared(otherDisplayTask, null);
 
-        WindowContainerTransaction wct = mOrganizer.prepareClearFreeformForTasks(1);
+        WindowContainerTransaction wct = mOrganizer.prepareClearFreeformForStandardTasks(1);
 
         // Only task with freeform windowing mode and the right display should be updated
         assertEquals(wct.getChanges().size(), 1);
@@ -701,10 +713,36 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         assertEquals(wmModeChange1.getWindowingMode(), WINDOWING_MODE_UNDEFINED);
     }
 
+    @Test
+    public void testPrepareClearFreeformForStandardTasks_onlyClearActivityTypeStandard() {
+        MockToken token1 = new MockToken();
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FREEFORM, token1);
+        mOrganizer.onTaskAppeared(task1, null);
+
+        MockToken token2 = new MockToken();
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_FREEFORM, token2);
+        task2.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_HOME);
+        mOrganizer.onTaskAppeared(task2, null);
+
+        WindowContainerTransaction wct = mOrganizer.prepareClearFreeformForStandardTasks(1);
+
+        // Only clear freeform for task1
+        assertEquals(1, wct.getChanges().size());
+        assertNotNull(wct.getChanges().get(token1.binder()));
+    }
+
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
+        return taskInfo;
+    }
+
+    private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode, MockToken token) {
+        RunningTaskInfo taskInfo = createTaskInfo(taskId, windowingMode);
+        taskInfo.displayId = 1;
+        taskInfo.token = token.token();
+        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
         return taskInfo;
     }
 
