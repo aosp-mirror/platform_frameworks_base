@@ -192,6 +192,14 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         verify(view).setIsSingleCarrier(false)
     }
 
+    @Test
+    fun testAlarmIconIgnored() {
+        controller.init()
+
+        verify(iconContainer).addIgnoredSlot(
+                mContext.getString(com.android.internal.R.string.status_bar_alarm_clock))
+    }
+
     private fun stubViews() {
         `when`(view.findViewById<View>(anyInt())).thenReturn(mockView)
         `when`(view.findViewById<QSCarrierGroup>(R.id.carrier_group)).thenReturn(qsCarrierGroup)
