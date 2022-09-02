@@ -59,6 +59,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -229,9 +230,11 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 badPassword, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
 
         // Check the same secret was passed each time
-        ArgumentCaptor<ArrayList<Byte>> secret = ArgumentCaptor.forClass(ArrayList.class);
-        verify(mAuthSecretService, atLeastOnce()).primaryUserCredential(secret.capture());
-        assertEquals(1, secret.getAllValues().stream().distinct().count());
+        ArgumentCaptor<byte[]> secret = ArgumentCaptor.forClass(byte[].class);
+        verify(mAuthSecretService, atLeastOnce()).setPrimaryUserCredential(secret.capture());
+        for (byte[] val : secret.getAllValues()) {
+          assertArrayEquals(val, secret.getAllValues().get(0));
+        }
     }
 
     @Test
@@ -242,7 +245,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         reset(mAuthSecretService);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 password, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
-        verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
+        verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
     }
 
     @Test
@@ -252,7 +255,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredential(password, SECONDARY_USER_ID);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 password, SECONDARY_USER_ID, 0 /* flags */).getResponseCode());
-        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
+        verify(mAuthSecretService, never()).setPrimaryUserCredential(any(byte[].class));
     }
 
     @Test
@@ -263,7 +266,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         reset(mAuthSecretService);
         mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
-        verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
+        verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
     }
 
     @Test
@@ -591,7 +594,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredential(password, PRIMARY_USER_ID);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 password, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
-        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
+        verify(mAuthSecretService, never()).setPrimaryUserCredential(any(byte[].class));
     }
 
     @Test
