@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar
+package com.android.systemui.statusbar.disableflags
 
+import android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS
+import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
+import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
+import android.app.StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS
+import android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS
 import android.app.StatusBarManager.DISABLE_BACK
 import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_EXPAND
 import android.app.StatusBarManager.DISABLE_HOME
-import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS
+import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
 import android.app.StatusBarManager.DISABLE_ONGOING_CALL_CHIP
 import android.app.StatusBarManager.DISABLE_RECENT
 import android.app.StatusBarManager.DISABLE_SEARCH
 import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
-import android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS
-import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
-import android.app.StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS
-import android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS
-import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
