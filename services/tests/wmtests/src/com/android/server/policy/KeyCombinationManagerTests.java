@@ -228,4 +228,30 @@ public class KeyCombinationManagerTests {
         mKeyCombinationManager.interceptKey(firstKeyDown, true);
         assertTrue(mKeyCombinationManager.getKeyInterceptTimeout(KEYCODE_VOLUME_UP) > eventTime);
     }
+
+    @Test
+    public void testAddRemove() throws InterruptedException {
+        final KeyCombinationManager.TwoKeysCombinationRule rule =
+                new KeyCombinationManager.TwoKeysCombinationRule(KEYCODE_VOLUME_DOWN,
+                        KEYCODE_POWER) {
+                    @Override
+                    void execute() {
+                        mAction1Triggered.countDown();
+                    }
+
+                    @Override
+                    void cancel() {
+                    }
+                };
+
+        long eventTime = SystemClock.uptimeMillis();
+        mKeyCombinationManager.removeRule(rule);
+        pressKeys(eventTime, KEYCODE_POWER, eventTime, KEYCODE_VOLUME_DOWN);
+        assertFalse(mAction1Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+
+        mKeyCombinationManager.addRule(rule);
+        eventTime = SystemClock.uptimeMillis();
+        pressKeys(eventTime, KEYCODE_POWER, eventTime, KEYCODE_VOLUME_DOWN);
+        assertTrue(mAction1Triggered.await(SCHEDULE_TIME, TimeUnit.MILLISECONDS));
+    }
 }
