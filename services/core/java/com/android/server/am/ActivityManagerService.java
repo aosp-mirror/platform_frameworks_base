@@ -2412,13 +2412,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mBroadcastQueues = new BroadcastQueue[4];
         mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "foreground", foreConstants, false);
+                "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
         mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "background", backConstants, true);
+                "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
         mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_bg", offloadConstants, true);
+                "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
         mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_fg", foreConstants, true);
+                "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
         mBroadcastQueues[2] = mBgOffloadBroadcastQueue;
@@ -15088,30 +15088,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     // LIFETIME MANAGEMENT
     // =========================================================
 
-    // Returns whether the app is receiving broadcast.
-    // If receiving, fetch all broadcast queues which the app is
-    // the current [or imminent] receiver on.
-    boolean isReceivingBroadcastLocked(ProcessRecord app,
-            ArraySet<BroadcastQueue> receivingQueues) {
-        final ProcessReceiverRecord prr = app.mReceivers;
-        final int numOfReceivers = prr.numberOfCurReceivers();
-        if (numOfReceivers > 0) {
-            for (int i = 0; i < numOfReceivers; i++) {
-                receivingQueues.add(prr.getCurReceiverAt(i).queue);
-            }
-            return true;
-        }
-
-        // It's not the current receiver, but it might be starting up to become one
+    boolean isReceivingBroadcastLocked(ProcessRecord app, int[] outSchedGroup) {
+        int res = ProcessList.SCHED_GROUP_UNDEFINED;
         for (BroadcastQueue queue : mBroadcastQueues) {
-            final BroadcastRecord r = queue.getPendingBroadcastLocked();
-            if (r != null && r.curApp == app) {
-                // found it; report which queue it's in
-                receivingQueues.add(queue);
-            }
+            res = Math.max(res, queue.getPreferredSchedulingGroupLocked(app));
         }
-
-        return !receivingQueues.isEmpty();
+        outSchedGroup[0] = res;
+        return res != ProcessList.SCHED_GROUP_UNDEFINED;
     }
 
     Association startAssociationLocked(int sourceUid, String sourceProcess, int sourceState,

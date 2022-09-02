@@ -104,6 +104,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
      */
     final boolean mDelayBehindServices;
 
+    final int mSchedGroup;
+
     /**
      * Lists of all active broadcasts that are to be executed immediately
      * (without waiting for another broadcast to finish).  Currently this only
@@ -183,17 +185,19 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
-            String name, BroadcastConstants constants, boolean allowDelayBehindServices) {
+            String name, BroadcastConstants constants, boolean allowDelayBehindServices,
+            int schedGroup) {
         this(service, handler, name, constants, new BroadcastSkipPolicy(service),
-                new BroadcastHistory(), allowDelayBehindServices);
+                new BroadcastHistory(), allowDelayBehindServices, schedGroup);
     }
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, BroadcastSkipPolicy skipPolicy,
-            BroadcastHistory history, boolean allowDelayBehindServices) {
+            BroadcastHistory history, boolean allowDelayBehindServices, int schedGroup) {
         super(service, handler, name, constants, skipPolicy, history);
         mHandler = new BroadcastHandler(handler.getLooper());
         mDelayBehindServices = allowDelayBehindServices;
+        mSchedGroup = schedGroup;
         mDispatcher = new BroadcastDispatcher(this, mConstants, mHandler, mService);
     }
 
@@ -212,6 +216,18 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     public BroadcastRecord getActiveBroadcastLocked() {
         return mDispatcher.getActiveBroadcastLocked();
+    }
+
+    public int getPreferredSchedulingGroupLocked(ProcessRecord app) {
+        final BroadcastRecord active = getActiveBroadcastLocked();
+        if (active != null && active.curApp == app) {
+            return mSchedGroup;
+        }
+        final BroadcastRecord pending = getPendingBroadcastLocked();
+        if (pending != null && pending.curApp == app) {
+            return mSchedGroup;
+        }
+        return ProcessList.SCHED_GROUP_UNDEFINED;
     }
 
     public void enqueueBroadcastLocked(BroadcastRecord r) {
@@ -643,7 +659,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // If we want to wait behind services *AND* we're finishing the head/
         // active broadcast on its queue
         if (waitForServices && r.curComponent != null && r.queue.isDelayBehindServices()
-                && r.queue.getActiveBroadcastLocked() == r) {
+                && ((BroadcastQueueImpl) r.queue).getActiveBroadcastLocked() == r) {
             ActivityInfo nextReceiver;
             if (r.nextReceiver < r.receivers.size()) {
                 Object obj = r.receivers.get(r.nextReceiver);

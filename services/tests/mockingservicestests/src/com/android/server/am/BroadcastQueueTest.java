@@ -175,7 +175,8 @@ public class BroadcastQueueTest {
 
         if (mImpl == Impl.DEFAULT) {
             mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
-                    constants, emptySkipPolicy, emptyHistory, false);
+                    constants, emptySkipPolicy, emptyHistory, false,
+                    ProcessList.SCHED_GROUP_DEFAULT);
         } else {
             throw new UnsupportedOperationException();
         }

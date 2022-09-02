@@ -66,11 +66,15 @@ public abstract class BroadcastQueue {
 
     public abstract boolean isDelayBehindServices();
 
-    @GuardedBy("mService")
-    public abstract @Nullable BroadcastRecord getPendingBroadcastLocked();
-
-    @GuardedBy("mService")
-    public abstract @Nullable BroadcastRecord getActiveBroadcastLocked();
+    /**
+     * Return the preferred scheduling group for the given process, typically
+     * influenced by a broadcast being actively dispatched.
+     *
+     * @return scheduling group such as {@link ProcessList#SCHED_GROUP_DEFAULT},
+     *         otherwise {@link ProcessList#SCHED_GROUP_UNDEFINED} if this queue
+     *         has no opinion.
+     */
+    public abstract int getPreferredSchedulingGroupLocked(@NonNull ProcessRecord app);
 
     /**
      * Enqueue the given broadcast to be eventually dispatched.

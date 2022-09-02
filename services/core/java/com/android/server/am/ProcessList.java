@@ -277,6 +277,8 @@ public final class ProcessList {
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4 * 1024;
 
+    // Activity manager's version of an undefined schedule group
+    static final int SCHED_GROUP_UNDEFINED = Integer.MIN_VALUE;
     // Activity manager's version of Process.THREAD_GROUP_BACKGROUND
     static final int SCHED_GROUP_BACKGROUND = 0;
       // Activity manager's version of Process.THREAD_GROUP_RESTRICTED
