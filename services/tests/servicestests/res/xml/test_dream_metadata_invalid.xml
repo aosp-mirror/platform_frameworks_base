@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 
+<!-- The settings activity is in a different package, which is invalid -->
 <dream xmlns:android="http://schemas.android.com/apk/res/android"
-       android:settingsActivity="com.android.frameworks.servicestests/.TestDreamSettingsActivity"
-       android:showClockAndComplications="false" />
+       android:settingsActivity="com.android.server.dreams/.TestDreamSettingsActivity"
+       android:showClockAndComplications="false"/>
