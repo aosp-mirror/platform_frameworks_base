@@ -11956,6 +11956,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return onTextContextMenuItem(ID_PASTE);
                     }
                     break;
+                case KeyEvent.KEYCODE_Y:
+                    if (canRedo()) {
+                        return onTextContextMenuItem(ID_REDO);
+                    }
+                    break;
             }
         } else if (event.hasModifiers(KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)) {
             // Handle Ctrl-Shift shortcuts.
