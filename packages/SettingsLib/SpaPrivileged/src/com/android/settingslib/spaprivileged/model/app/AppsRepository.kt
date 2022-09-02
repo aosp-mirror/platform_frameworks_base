@@ -46,8 +46,7 @@ class AppsRepository(context: Context) {
                     .toSet()
             }
             val flags = PackageManager.ApplicationInfoFlags.of(
-                ((if (userInfo.isAdmin) PackageManager.MATCH_ANY_USER else 0) or
-                    PackageManager.MATCH_DISABLED_COMPONENTS or
+                (PackageManager.MATCH_DISABLED_COMPONENTS or
                     PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
             )
             val installedApplicationsAsUser =

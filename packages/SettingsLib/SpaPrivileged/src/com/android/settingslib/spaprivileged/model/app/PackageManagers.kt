@@ -19,6 +19,9 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.util.Log
+
+private const val TAG = "PackageManagers"
 
 object PackageManagers {
     fun getPackageInfoAsUser(packageName: String, userId: Int): PackageInfo =
@@ -26,4 +29,18 @@ object PackageManagers {
 
     fun getApplicationInfoAsUser(packageName: String, userId: Int): ApplicationInfo =
         PackageManager.getApplicationInfoAsUserCached(packageName, 0, userId)
+
+    fun hasRequestPermission(app: ApplicationInfo, permission: String): Boolean {
+        val packageInfo = try {
+            PackageManager.getPackageInfoAsUserCached(
+                app.packageName, PackageManager.GET_PERMISSIONS.toLong(), app.userId
+            )
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "getPackageInfoAsUserCached() failed", e)
+            return false
+        }
+        return packageInfo?.requestedPermissions?.let {
+            permission in it
+        } ?: false
+    }
 }
