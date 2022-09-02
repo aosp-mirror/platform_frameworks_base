@@ -23,6 +23,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.MediaCarouselController
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
@@ -59,6 +60,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var tileLayout: TileLayout
     @Mock private lateinit var tileView: QSTileView
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
+    @Mock private lateinit var mediaCarouselController: MediaCarouselController
 
     private val uiEventLogger = UiEventLoggerFake()
     private val dumpManager = DumpManager()
@@ -88,7 +90,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager)
+                dumpManager,
+                mediaCarouselController)
 
         controller.init()
     }
@@ -157,7 +160,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         metricsLogger: MetricsLogger,
         uiEventLogger: UiEventLoggerFake,
         qsLogger: QSLogger,
-        dumpManager: DumpManager
+        dumpManager: DumpManager,
+        mediaCarouselController: MediaCarouselController
     ) :
         QuickQSPanelController(
             view,
@@ -169,7 +173,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             metricsLogger,
             uiEventLogger,
             qsLogger,
-            dumpManager) {
+            dumpManager,
+            mediaCarouselController) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 
