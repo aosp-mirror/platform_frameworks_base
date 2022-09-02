@@ -14705,12 +14705,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (parentUser == null) {
                 throw new IllegalStateException(String.format("User %d is not a profile", userId));
             }
-            if (!parentUser.isSystem()) {
-                throw new IllegalStateException(
-                        String.format("Only the profile owner of a managed profile on the"
-                                + " primary user can be granted access to device identifiers, not"
-                                + " on user %d", parentUser.getIdentifier()));
-            }
 
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
                     isProfileOwnerOnOrganizationOwnedDevice,
