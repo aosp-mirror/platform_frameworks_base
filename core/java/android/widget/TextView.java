@@ -12049,6 +12049,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /** @hide */
+    @Override
+    public boolean isStylusHandwritingAvailable() {
+        if (mTextOperationUser == null) {
+            return super.isStylusHandwritingAvailable();
+        }
+        final int userId = mTextOperationUser.getIdentifier();
+        final InputMethodManager imm = getInputMethodManager();
+        return imm.isStylusHandwritingAvailableAsUser(userId);
+    }
+
     @Nullable
     final TextServicesManager getTextServicesManagerForUser() {
         return getServiceManagerForUser("android", TextServicesManager.class);
