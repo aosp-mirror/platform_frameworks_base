@@ -74,7 +74,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtStatsLogUtils;
 import com.android.server.pm.dex.ArtStatsLogUtils.ArtStatsLogger;
-import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -787,10 +786,7 @@ public class PackageDexOptimizer {
      */
     private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
             boolean isUsedByOtherApps) {
-        // When an app or priv app is configured to run out of box, only verify it.
-        if (info.isEmbeddedDexUsed()
-                || (info.isPrivilegedApp()
-                && DexManager.isPackageSelectedToRunOob(info.packageName))) {
+        if (info.isEmbeddedDexUsed()) {
             return "verify";
         }
 
@@ -827,10 +823,7 @@ public class PackageDexOptimizer {
      * handling the case where the package code is used by other apps.
      */
     private String getRealCompilerFilter(AndroidPackage pkg, String targetCompilerFilter) {
-        // When an app or priv app is configured to run out of box, only verify it.
-        if (pkg.isUseEmbeddedDex()
-                || (pkg.isPrivileged()
-                    && DexManager.isPackageSelectedToRunOob(pkg.getPackageName()))) {
+        if (pkg.isUseEmbeddedDex()) {
             return "verify";
         }
 

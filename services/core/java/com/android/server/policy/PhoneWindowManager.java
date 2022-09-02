@@ -917,7 +917,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         } else {
             // handled by another power key policy.
-            if (!mSingleKeyGestureDetector.isKeyIntercepted(KEYCODE_POWER)) {
+            if (mSingleKeyGestureDetector.isKeyIntercepted(KEYCODE_POWER)) {
+                Slog.d(TAG, "Skip power key gesture for other policy has handled it.");
                 mSingleKeyGestureDetector.reset();
             }
         }
@@ -930,11 +931,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) == 0) {
                 // Abort possibly stuck animations only when power key up without long press case.
                 mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
-            }
-        } else {
-            // handled by single key or another power key policy.
-            if (!mSingleKeyGestureDetector.isKeyIntercepted(KEYCODE_POWER)) {
-                mSingleKeyGestureDetector.reset();
             }
         }
 

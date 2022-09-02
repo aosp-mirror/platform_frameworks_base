@@ -9085,6 +9085,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
                 outAttrs.contentMimeTypes = getReceiveContentMimeTypes();
+
+                ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
+                gestures.add(SelectGesture.class);
+                gestures.add(DeleteGesture.class);
+                gestures.add(InsertGesture.class);
+                outAttrs.setSupportedHandwritingGestures(gestures);
                 return ic;
             }
         }

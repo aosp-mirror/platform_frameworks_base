@@ -443,6 +443,17 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Finds and removes a task and its children using its container token. The task is removed
+     * from recents.
+     * @param containerToken ContainerToken of Task to be removed
+     */
+    @NonNull
+    public WindowContainerTransaction removeTask(@NonNull WindowContainerToken containerToken) {
+        mHierarchyOps.add(HierarchyOp.createForRemoveTask(containerToken.asBinder()));
+        return this;
+    }
+
+    /**
      * Sends a pending intent in sync.
      * @param sender The PendingIntent sender.
      * @param intent The fillIn intent to patch over the sender's base intent.
@@ -740,10 +751,8 @@ public final class WindowContainerTransaction implements Parcelable {
      * @hide
      */
     @NonNull
-    WindowContainerTransaction setTaskFragmentOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        if (mTaskFragmentOrganizer != null) {
-            throw new IllegalStateException("Can't set multiple organizers for one transaction.");
-        }
+    public WindowContainerTransaction setTaskFragmentOrganizer(
+            @NonNull ITaskFragmentOrganizer organizer) {
         mTaskFragmentOrganizer = organizer;
         return this;
     }
@@ -1141,6 +1150,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER = 17;
         public static final int HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT = 18;
         public static final int HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP = 19;
+        public static final int HIERARCHY_OP_TYPE_REMOVE_TASK = 20;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1267,6 +1277,13 @@ public final class WindowContainerTransaction implements Parcelable {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT)
                     .setContainer(container)
                     .setToTop(clearRoot)
+                    .build();
+        }
+
+        /** create a hierarchy op for deleting a task **/
+        public static HierarchyOp createForRemoveTask(@NonNull IBinder container) {
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REMOVE_TASK)
+                    .setContainer(container)
                     .build();
         }
 
@@ -1453,6 +1470,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP:
                     return "{setAlwaysOnTop: container=" + mContainer
                             + " alwaysOnTop=" + mAlwaysOnTop + "}";
+                case HIERARCHY_OP_TYPE_REMOVE_TASK:
+                    return "{RemoveTask: task=" + mContainer + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop

@@ -102,6 +102,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -882,6 +883,40 @@ public class VibratorManagerServiceTest {
                 mVibratorProviders.get(1).getAllEffectSegments().stream()
                         .filter(PrebakedSegment.class::isInstance)
                         .count());
+    }
+
+    @Test
+    public void vibrate_withOngoingSameImportancePipelinedVibration_continuesOngoingEffect()
+            throws Exception {
+        VibrationAttributes pipelineAttrs = new VibrationAttributes.Builder(HAPTIC_FEEDBACK_ATTRS)
+                .setFlags(VibrationAttributes.FLAG_PIPELINED_EFFECT)
+                .build();
+
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{100, 100}, new int[]{128, 255}, -1);
+        vibrate(service, effect, pipelineAttrs);
+        // This vibration will be enqueued, but evicted by the EFFECT_CLICK.
+        vibrate(service, VibrationEffect.startComposition()
+                .addOffDuration(Duration.ofSeconds(10))
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SLOW_RISE)
+                .compose(), pipelineAttrs);  // This will queue and be evicted for the click.
+
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                pipelineAttrs);
+
+        // The second vibration should have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(2)).noteVibratorOn(anyInt(), anyLong());
+        // One step segment (with several amplitudes) and one click should have played. Notably
+        // there is no primitive segment.
+        List<VibrationEffectSegment> played = mVibratorProviders.get(1).getAllEffectSegments();
+        assertEquals(2, played.size());
+        assertEquals(1, played.stream().filter(StepSegment.class::isInstance).count());
+        assertEquals(1, played.stream().filter(PrebakedSegment.class::isInstance).count());
     }
 
     @Test

@@ -32172,6 +32172,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectCustomSlowCalls();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectDiskReads();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectDiskWrites();
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectNetwork();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectResourceMismatches();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectUnbufferedIo();
@@ -32186,6 +32187,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitCustomSlowCalls();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitDiskReads();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitDiskWrites();
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitExplicitGc();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitNetwork();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitResourceMismatches();
     method @NonNull public android.os.StrictMode.ThreadPolicy.Builder permitUnbufferedIo();
@@ -32765,6 +32767,9 @@ package android.os.strictmode {
   }
 
   public final class DiskWriteViolation extends android.os.strictmode.Violation {
+  }
+
+  public final class ExplicitGcViolation extends android.os.strictmode.Violation {
   }
 
   public final class FileUriExposedViolation extends android.os.strictmode.Violation {
@@ -51950,7 +51955,6 @@ package android.view.accessibility {
     method public void addChild(android.view.View, int);
     method public boolean canOpenPopup();
     method public int describeContents();
-    method public void enableQueryFromAppProcess(@NonNull android.view.View);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(@NonNull String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
@@ -52070,6 +52074,7 @@ package android.view.accessibility {
     method public void setParent(android.view.View);
     method public void setParent(android.view.View, int);
     method public void setPassword(boolean);
+    method public void setQueryFromAppProcessEnabled(@NonNull android.view.View, boolean);
     method public void setRangeInfo(android.view.accessibility.AccessibilityNodeInfo.RangeInfo);
     method public void setScreenReaderFocusable(boolean);
     method public void setScrollable(boolean);
@@ -53005,6 +53010,7 @@ package android.view.inputmethod {
     method public android.graphics.Matrix getMatrix();
     method public int getSelectionEnd();
     method public int getSelectionStart();
+    method @NonNull public java.util.List<android.graphics.RectF> getVisibleLineBounds();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.CursorAnchorInfo> CREATOR;
     field public static final int FLAG_HAS_INVISIBLE_REGION = 2; // 0x2
@@ -53015,7 +53021,9 @@ package android.view.inputmethod {
   public static final class CursorAnchorInfo.Builder {
     ctor public CursorAnchorInfo.Builder();
     method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterBounds(int, float, float, float, float, int);
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder addVisibleLineBounds(float, float, float, float);
     method public android.view.inputmethod.CursorAnchorInfo build();
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder clearVisibleLineBounds();
     method public void reset();
     method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, CharSequence);
     method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setEditorBoundsInfo(@Nullable android.view.inputmethod.EditorBoundsInfo);
@@ -53253,6 +53261,7 @@ package android.view.inputmethod {
     field public static final int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 8; // 0x8
     field public static final int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 4; // 0x4
     field public static final int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 16; // 0x10
+    field public static final int CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS = 32; // 0x20
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1

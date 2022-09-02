@@ -935,6 +935,8 @@
         <!-- Nominal White Z --> <item>1.089058</item>
     </string-array>
 
+    <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
+    <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
@@ -4859,6 +4861,14 @@
         <item>0.875</item>
     </string-array>
 
+    <!-- When each intermediate SFPS enroll stage ends, as a fraction of total progress. -->
+    <string-array name="config_sfps_enroll_stage_thresholds" translatable="false">
+        <item>0</item> <!-- [-1 // <0/25] No animation 1x -->
+        <item>0.36</item> <!-- [0 to 8 // <9/25] Pad center 9x -->
+        <item>0.52</item> <!-- [9 to 12 // <13/25] Tip 4x -->
+        <item>0.76</item> <!-- [13 to 18 // <19/25] Left 6x -->
+    </string-array> <!-- [19 to 24 // <25/25] Right 6x -->
+
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
          used to hide messages that may be too chatty or messages that the user can't do much about.
          Entries are defined in android.hardware.biometrics.face@1.0 types.hal -->
@@ -5065,6 +5075,10 @@
 
     <!-- If true, the wallpaper will scale regardless of the value of shouldZoomOutWallpaper() -->
     <bool name="config_alwaysScaleWallpaper">false</bool>
+
+    <!-- Set to true to offset the wallpaper when using multiple displays so that it's centered
+         at the same position as in the largest display.-->
+    <bool name="config_offsetWallpaperToCenterOfLargestDisplay">false</bool>
 
     <!-- Package name that will receive an explicit manifest broadcast for
          android.os.action.POWER_SAVE_MODE_CHANGED. -->

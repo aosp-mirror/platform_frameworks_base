@@ -61,7 +61,6 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1028,45 +1027,5 @@ public class DexManagerTests {
             mPackageInfo.applicationInfo.splitSourceDirs[length - 1] += ".dex";
             return mPackageInfo.applicationInfo.splitSourceDirs[length - 1];
         }
-    }
-
-    private boolean shouldPackageRunOob(boolean isDefaultEnabled, String whitelist,
-            Collection<String> packageNamesInSameProcess) {
-        return DexManager.isPackageSelectedToRunOobInternal(
-                isDefaultEnabled, whitelist, packageNamesInSameProcess);
-    }
-
-    @Test
-    public void testOobPackageSelectionDefault() {
-        // Feature is off by default, not overriden
-        assertFalse(shouldPackageRunOob(false, "ALL", null));
-    }
-
-    @Test
-    public void testOobPackageSelectionWhitelist() {
-        // Various allowlist of apps to run in OOB mode.
-        final String kWhitelistApp0 = "com.priv.app0";
-        final String kWhitelistApp1 = "com.priv.app1";
-        final String kWhitelistApp2 = "com.priv.app2";
-        final String kWhitelistApp1AndApp2 = "com.priv.app1,com.priv.app2";
-
-        // Packages that shares the targeting process.
-        final Collection<String> runningPackages = Arrays.asList("com.priv.app1", "com.priv.app2");
-
-        // Feature is off, allowlist does not matter
-        assertFalse(shouldPackageRunOob(false, kWhitelistApp0, runningPackages));
-        assertFalse(shouldPackageRunOob(false, kWhitelistApp1, runningPackages));
-        assertFalse(shouldPackageRunOob(false, "", runningPackages));
-        assertFalse(shouldPackageRunOob(false, "ALL", runningPackages));
-
-        // Feature is on, app not in allowlist
-        assertFalse(shouldPackageRunOob(true, kWhitelistApp0, runningPackages));
-        assertFalse(shouldPackageRunOob(true, "", runningPackages));
-
-        // Feature is on, app in allowlist
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp1, runningPackages));
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp2, runningPackages));
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp1AndApp2, runningPackages));
-        assertTrue(shouldPackageRunOob(true, "ALL", runningPackages));
     }
 }

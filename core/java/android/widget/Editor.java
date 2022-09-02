@@ -4617,12 +4617,16 @@ public class Editor {
                     (filter & InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS) != 0;
             boolean includeInsertionMarker =
                     (filter & InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER) != 0;
+            boolean includeVisibleLineBounds =
+                    (filter & InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS) != 0;
             boolean includeAll =
-                    (!includeEditorBounds && !includeCharacterBounds && !includeInsertionMarker);
+                    (!includeEditorBounds && !includeCharacterBounds && !includeInsertionMarker
+                    && !includeVisibleLineBounds);
 
             includeEditorBounds |= includeAll;
             includeCharacterBounds |= includeAll;
             includeInsertionMarker |= includeAll;
+            includeVisibleLineBounds |= includeAll;
 
             final CursorAnchorInfo.Builder builder = mSelectionInfoBuilder;
             builder.reset();
@@ -4651,7 +4655,7 @@ public class Editor {
                 builder.setEditorBoundsInfo(editorBoundsInfo);
             }
 
-            if (includeCharacterBounds || includeInsertionMarker) {
+            if (includeCharacterBounds || includeInsertionMarker || includeVisibleLineBounds) {
                 final float viewportToContentHorizontalOffset =
                         mTextView.viewportToContentHorizontalOffset();
                 final float viewportToContentVerticalOffset =
@@ -4712,6 +4716,32 @@ public class Editor {
                         builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
                                 insertionMarkerBaseline, insertionMarkerBottom,
                                 insertionMarkerFlags);
+                    }
+                }
+
+                if (includeVisibleLineBounds) {
+                    Rect visibleRect = new Rect();
+                    if (mTextView.getLocalVisibleRect(visibleRect)) {
+                        final float visibleTop =
+                                visibleRect.top + viewportToContentVerticalOffset;
+                        final float visibleBottom =
+                                visibleRect.bottom + viewportToContentVerticalOffset;
+                        final int firstLine =
+                                layout.getLineForVertical((int) Math.floor(visibleTop));
+                        final int lastLine =
+                                layout.getLineForVertical((int) Math.ceil(visibleBottom));
+
+                        for (int line = firstLine; line <= lastLine; ++line) {
+                            final float left = layout.getLineLeft(line)
+                                    + viewportToContentHorizontalOffset;
+                            final float top = layout.getLineTop(line)
+                                    + viewportToContentVerticalOffset;
+                            final float right = layout.getLineRight(line)
+                                    + viewportToContentHorizontalOffset;
+                            final float bottom = layout.getLineBottom(line)
+                                    + viewportToContentVerticalOffset;
+                            builder.addVisibleLineBounds(left, top, right, bottom);
+                        }
                     }
                 }
             }

@@ -45,6 +45,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -54,6 +55,7 @@ import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.collection.SimpleArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -83,6 +85,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -138,6 +141,9 @@ public class UserSwitcherController implements Dumpable {
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final SimpleArrayMap<UserRecord, EnforcedAdmin> mEnforcedAdminByUserRecord =
+            new SimpleArrayMap<>();
+    private final ArraySet<UserRecord> mDisabledByAdmin = new ArraySet<>();
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -975,6 +981,21 @@ public class UserSwitcherController implements Dumpable {
         return mKeyguardStateController;
     }
 
+    /**
+     * Returns the {@link EnforcedAdmin} for the given record, or {@code null} if there isn't one.
+     */
+    @Nullable
+    public EnforcedAdmin getEnforcedAdmin(UserRecord record) {
+        return mEnforcedAdminByUserRecord.get(record);
+    }
+
+    /**
+     * Returns {@code true} if the given record is disabled by the admin; {@code false} otherwise.
+     */
+    public boolean isDisabledByAdmin(UserRecord record) {
+        return mDisabledByAdmin.contains(record);
+    }
+
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
@@ -1106,11 +1127,11 @@ public class UserSwitcherController implements Dumpable {
                 UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId());
         if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
                 UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId())) {
-            record.isDisabledByAdmin = true;
-            record.enforcedAdmin = admin;
+            mDisabledByAdmin.add(record);
+            mEnforcedAdminByUserRecord.put(record, admin);
         } else {
-            record.isDisabledByAdmin = false;
-            record.enforcedAdmin = null;
+            mDisabledByAdmin.remove(record);
+            mEnforcedAdminByUserRecord.put(record, null);
         }
     }
 
@@ -1149,74 +1170,6 @@ public class UserSwitcherController implements Dumpable {
         }
         for (UserSwitchCallback callback : temp) {
             callback.onUserSwitched();
-        }
-    }
-
-    public static final class UserRecord {
-        public final UserInfo info;
-        public final Bitmap picture;
-        public final boolean isGuest;
-        public final boolean isCurrent;
-        public final boolean isAddUser;
-        public final boolean isAddSupervisedUser;
-        /** If true, the record is only visible to the owner and only when unlocked. */
-        public final boolean isRestricted;
-        public boolean isDisabledByAdmin;
-        public EnforcedAdmin enforcedAdmin;
-        public boolean isSwitchToEnabled;
-
-        public UserRecord(UserInfo info, Bitmap picture, boolean isGuest, boolean isCurrent,
-                boolean isAddUser, boolean isRestricted, boolean isSwitchToEnabled,
-                boolean isAddSupervisedUser) {
-            this.info = info;
-            this.picture = picture;
-            this.isGuest = isGuest;
-            this.isCurrent = isCurrent;
-            this.isAddUser = isAddUser;
-            this.isRestricted = isRestricted;
-            this.isSwitchToEnabled = isSwitchToEnabled;
-            this.isAddSupervisedUser = isAddSupervisedUser;
-        }
-
-        public UserRecord copyWithIsCurrent(boolean _isCurrent) {
-            return new UserRecord(info, picture, isGuest, _isCurrent, isAddUser, isRestricted,
-                    isSwitchToEnabled, isAddSupervisedUser);
-        }
-
-        public int resolveId() {
-            if (isGuest || info == null) {
-                return UserHandle.USER_NULL;
-            }
-            return info.id;
-        }
-
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("UserRecord(");
-            if (info != null) {
-                sb.append("name=\"").append(info.name).append("\" id=").append(info.id);
-            } else {
-                if (isGuest) {
-                    sb.append("<add guest placeholder>");
-                } else if (isAddUser) {
-                    sb.append("<add user placeholder>");
-                }
-            }
-            if (isGuest) sb.append(" <isGuest>");
-            if (isAddUser) sb.append(" <isAddUser>");
-            if (isAddSupervisedUser) sb.append(" <isAddSupervisedUser>");
-            if (isCurrent) sb.append(" <isCurrent>");
-            if (picture != null) sb.append(" <hasPicture>");
-            if (isRestricted) sb.append(" <isRestricted>");
-            if (isDisabledByAdmin) {
-                sb.append(" <isDisabledByAdmin>");
-                sb.append(" enforcedAdmin=").append(enforcedAdmin);
-            }
-            if (isSwitchToEnabled) {
-                sb.append(" <isSwitchToEnabled>");
-            }
-            sb.append(')');
-            return sb.toString();
         }
     }
 

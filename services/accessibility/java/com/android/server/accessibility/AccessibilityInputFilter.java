@@ -38,6 +38,7 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.LocalServices;
+import com.android.server.accessibility.cursor.SoftwareCursorGestureHandler;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
@@ -141,6 +142,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_SEND_MOTION_EVENTS = 0x00000400;
 
+    /**
+     * Flag for enabling the Software Cursor accessibility feature.
+     *
+     * @see setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_FEATURE_SOFTWARE_CURSOR = 0x00000800;
+
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK
@@ -149,7 +157,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER
                     | FLAG_SERVICE_HANDLES_DOUBLE_TAP
                     | FLAG_REQUEST_MULTI_FINGER_GESTURES
-                    | FLAG_REQUEST_2_FINGER_PASSTHROUGH;
+                    | FLAG_REQUEST_2_FINGER_PASSTHROUGH
+                    | FLAG_FEATURE_SOFTWARE_CURSOR;
 
     private final Context mContext;
 
@@ -169,6 +178,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private AutoclickController mAutoclickController;
 
     private KeyboardInterceptor mKeyboardInterceptor;
+
+    private SparseArray<SoftwareCursorGestureHandler> mSoftwareCursorGestureHandler =
+            new SparseArray<>(0);
 
     private boolean mInstalled;
 
@@ -495,6 +507,16 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
         }
 
+        if ((mEnabledFeatures & FLAG_FEATURE_SOFTWARE_CURSOR) != 0) {
+            // TODO: Add full support for multiple displays.
+            final SoftwareCursorGestureHandler softwareCursorGestureHandler =
+                    new SoftwareCursorGestureHandler(displayContext,
+                        mAms.getSoftwareCursorManager(),
+                        mAms.getTraceManager());
+            addFirstEventHandler(displayId, softwareCursorGestureHandler);
+            mSoftwareCursorGestureHandler.put(displayId, softwareCursorGestureHandler);
+        }
+
         if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
             MotionEventInjector injector = new MotionEventInjector(
                     mContext.getMainLooper(), mAms.getTraceManager());
@@ -565,10 +587,18 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mTouchExplorer.remove(displayId);
         }
 
-        final MagnificationGestureHandler handler = mMagnificationGestureHandler.get(displayId);
+        final MagnificationGestureHandler handler =
+                mMagnificationGestureHandler.get(displayId);
         if (handler != null) {
             handler.onDestroy();
             mMagnificationGestureHandler.remove(displayId);
+        }
+
+        final SoftwareCursorGestureHandler softwareCursorHandler =
+                mSoftwareCursorGestureHandler.get(displayId);
+        if (softwareCursorHandler != null) {
+            softwareCursorHandler.onDestroy();
+            mSoftwareCursorGestureHandler.remove(displayId);
         }
 
         final EventStreamTransformation eventStreamTransformation = mEventHandler.get(displayId);

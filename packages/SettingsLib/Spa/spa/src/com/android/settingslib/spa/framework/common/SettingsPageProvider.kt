@@ -36,5 +36,5 @@ interface SettingsPageProvider {
     @Composable
     fun Page(arguments: Bundle?)
 
-    // fun buildEntry( arguments: Bundle?) : List<entry>
+    fun buildEntry(arguments: Bundle?): List<SettingsEntry> = emptyList()
 }

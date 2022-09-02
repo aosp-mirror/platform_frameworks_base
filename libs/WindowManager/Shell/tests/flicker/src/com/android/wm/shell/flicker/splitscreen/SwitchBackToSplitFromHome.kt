@@ -30,8 +30,6 @@ import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,28 +48,15 @@ import org.junit.runners.Parameterized
 @Group1
 class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
 
-    // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
-    @Before
-    open fun before() {
-        Assume.assumeTrue(tapl.isTablet)
-    }
-
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
                 eachRun {
-                    primaryApp.launchViaIntent(wmHelper)
-                    // TODO(b/231399940): Use recent shortcut to enter split.
-                    tapl.launchedAppState.taskbar
-                        .openAllApps()
-                        .getAppIcon(secondaryApp.appName)
-                        .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
-                    SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
 
                     tapl.goHome()
                     wmHelper.StateSyncBuilder()
-                        .withAppTransitionIdle()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
                 }
@@ -97,12 +82,12 @@ class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBas
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, landscapePosLeft = false, portraitPosTop = false)
+        primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
+        secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
 
     @Presubmit
     @Test

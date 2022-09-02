@@ -43,6 +43,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
@@ -163,6 +164,7 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Boolean> mVipOverrides = new SparseArrayMap<>();
 
+    private volatile boolean mHasBattery = true;
     private volatile boolean mIsEnabled;
     private volatile int mBootPhase;
     private volatile boolean mExemptListLoaded;
@@ -204,6 +206,15 @@ public class InternalResourceService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
+                case Intent.ACTION_BATTERY_CHANGED: {
+                    final boolean hasBattery =
+                            intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, mHasBattery);
+                    if (mHasBattery != hasBattery) {
+                        mHasBattery = hasBattery;
+                        mConfigObserver.updateEnabledStatus();
+                    }
+                }
+                break;
                 case Intent.ACTION_BATTERY_LEVEL_CHANGED:
                     onBatteryLevelChanged();
                     break;
@@ -713,6 +724,12 @@ public class InternalResourceService extends SystemService {
         return packages;
     }
 
+    private boolean isTareSupported() {
+        // TARE is presently designed for devices with batteries. Don't enable it on
+        // battery-less devices for now.
+        return mHasBattery;
+    }
+
     @GuardedBy("mLock")
     private void loadInstalledPackageListLocked() {
         mPkgCache.clear();
@@ -731,6 +748,7 @@ public class InternalResourceService extends SystemService {
 
     private void registerListeners() {
         final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
@@ -765,6 +783,7 @@ public class InternalResourceService extends SystemService {
             return;
         }
         synchronized (mLock) {
+            mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
             loadInstalledPackageListLocked();
             final boolean isFirstSetup = !mScribe.recordExists();
             if (isFirstSetup) {
@@ -796,6 +815,18 @@ public class InternalResourceService extends SystemService {
         synchronized (mLock) {
             registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
+            // Get the current battery presence, if available. This would succeed if TARE is
+            // toggled long after boot.
+            final Intent batteryStatus = getContext().registerReceiver(null,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            if (batteryStatus != null) {
+                final boolean hasBattery =
+                        batteryStatus.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
+                if (mHasBattery != hasBattery) {
+                    mHasBattery = hasBattery;
+                    mConfigObserver.updateEnabledStatus();
+                }
+            }
         }
     }
 
@@ -803,10 +834,7 @@ public class InternalResourceService extends SystemService {
         if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || !mIsEnabled) {
             return;
         }
-        synchronized (mLock) {
-            mHandler.post(this::setupHeavyWork);
-            mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
-        }
+        mHandler.post(this::setupHeavyWork);
     }
 
     private void onBootPhaseBootCompleted() {
@@ -985,7 +1013,7 @@ public class InternalResourceService extends SystemService {
         @Override
         public void registerAffordabilityChangeListener(int userId, @NonNull String pkgName,
                 @NonNull AffordabilityChangeListener listener, @NonNull ActionBill bill) {
-            if (isSystem(userId, pkgName)) {
+            if (!isTareSupported() || isSystem(userId, pkgName)) {
                 // The system's affordability never changes.
                 return;
             }
@@ -1008,6 +1036,9 @@ public class InternalResourceService extends SystemService {
 
         @Override
         public void registerTareStateChangeListener(@NonNull TareStateChangeListener listener) {
+            if (!isTareSupported()) {
+                return;
+            }
             mStateChangeListeners.add(listener);
         }
 
@@ -1180,11 +1211,10 @@ public class InternalResourceService extends SystemService {
 
         private void updateEnabledStatus() {
             // User setting should override DeviceConfig setting.
-            // NOTE: There's currently no way for a user to reset the value (via UI), so if a user
-            // manually toggles TARE via UI, we'll always defer to the user's current setting
             final boolean isTareEnabledDC = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TARE,
                     KEY_DC_ENABLE_TARE, Settings.Global.DEFAULT_ENABLE_TARE == 1);
-            final boolean isTareEnabled = Settings.Global.getInt(mContentResolver,
+            final boolean isTareEnabled = isTareSupported()
+                    && Settings.Global.getInt(mContentResolver,
                     Settings.Global.ENABLE_TARE, isTareEnabledDC ? 1 : 0) == 1;
             if (mIsEnabled != isTareEnabled) {
                 mIsEnabled = isTareEnabled;
@@ -1268,6 +1298,10 @@ public class InternalResourceService extends SystemService {
     }
 
     private void dumpInternal(final IndentingPrintWriter pw, final boolean dumpAll) {
+        if (!isTareSupported()) {
+            pw.print("Unsupported by device");
+            return;
+        }
         synchronized (mLock) {
             pw.print("Is enabled: ");
             pw.println(mIsEnabled);

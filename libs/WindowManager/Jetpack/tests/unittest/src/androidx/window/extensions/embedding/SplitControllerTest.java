@@ -127,7 +127,7 @@ public class SplitControllerTest {
         mSplitPresenter = mSplitController.mPresenter;
         spyOn(mSplitController);
         spyOn(mSplitPresenter);
-        doNothing().when(mSplitPresenter).applyTransaction(any());
+        doNothing().when(mSplitPresenter).applyTransaction(any(), anyInt(), anyBoolean());
         final Configuration activityConfig = new Configuration();
         activityConfig.windowConfiguration.setBounds(TASK_BOUNDS);
         activityConfig.windowConfiguration.setMaxBounds(TASK_BOUNDS);
@@ -1000,7 +1000,8 @@ public class SplitControllerTest {
         mSplitController.onTransactionReady(transaction);
 
         verify(mSplitController).onTaskFragmentAppeared(any(), eq(info));
-        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
+                anyInt(), anyBoolean());
     }
 
     @Test
@@ -1014,7 +1015,8 @@ public class SplitControllerTest {
         mSplitController.onTransactionReady(transaction);
 
         verify(mSplitController).onTaskFragmentInfoChanged(any(), eq(info));
-        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
+                anyInt(), anyBoolean());
     }
 
     @Test
@@ -1028,7 +1030,8 @@ public class SplitControllerTest {
         mSplitController.onTransactionReady(transaction);
 
         verify(mSplitController).onTaskFragmentVanished(any(), eq(info));
-        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
+                anyInt(), anyBoolean());
     }
 
     @Test
@@ -1043,7 +1046,8 @@ public class SplitControllerTest {
 
         verify(mSplitController).onTaskFragmentParentInfoChanged(any(), eq(TASK_ID),
                 eq(taskConfig));
-        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
+                anyInt(), anyBoolean());
     }
 
     @Test
@@ -1062,7 +1066,8 @@ public class SplitControllerTest {
 
         verify(mSplitController).onTaskFragmentError(any(), eq(errorToken), eq(info), eq(opType),
                 eq(exception));
-        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
+                anyInt(), anyBoolean());
     }
 
     @Test
@@ -1078,7 +1083,8 @@ public class SplitControllerTest {
 
         verify(mSplitController).onActivityReparentedToTask(any(), eq(TASK_ID), eq(intent),
                 eq(activityToken));
-        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any());
+        verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
+                anyInt(), anyBoolean());
     }
 
     /** Creates a mock activity in the organizer process. */

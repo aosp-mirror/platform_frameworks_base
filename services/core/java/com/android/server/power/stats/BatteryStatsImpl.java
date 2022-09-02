@@ -7404,6 +7404,16 @@ public class BatteryStatsImpl extends BatteryStats {
         return names;
     }
 
+    /**
+     * Adds measured energy delta to battery history.
+     */
+    @GuardedBy("this")
+    public void recordMeasuredEnergyDetailsLocked(long elapsedRealtimeMs,
+            long uptimeMs, MeasuredEnergyDetails measuredEnergyDetails) {
+        mHistory.recordMeasuredEnergyDetails(elapsedRealtimeMs, uptimeMs,
+                measuredEnergyDetails);
+    }
+
     @GuardedBy("this")
     @Override public long getStartClockTime() {
         final long currentTimeMs = mClock.currentTimeMillis();

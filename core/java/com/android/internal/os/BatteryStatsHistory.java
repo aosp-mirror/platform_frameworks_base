@@ -21,6 +21,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.HistoryStepDetails;
 import android.os.BatteryStats.HistoryTag;
+import android.os.BatteryStats.MeasuredEnergyDetails;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Process;
@@ -113,6 +114,9 @@ public class BatteryStatsHistory {
     // therefore the tag value is written in the parcel
     static final int TAG_FIRST_OCCURRENCE_FLAG = 0x8000;
 
+    static final int EXTENSION_MEASURED_ENERGY_HEADER_FLAG = 0x00000001;
+    static final int EXTENSION_MEASURED_ENERGY_FLAG = 0x00000002;
+
     private final Parcel mHistoryBuffer;
     private final File mSystemDir;
     private final HistoryStepDetailsCalculator mStepDetailsCalculator;
@@ -183,6 +187,7 @@ public class BatteryStatsHistory {
     private long mTrackRunningHistoryElapsedRealtimeMs = 0;
     private long mTrackRunningHistoryUptimeMs = 0;
     private long mHistoryBaseTimeMs;
+    private boolean mMeasuredEnergyHeaderWritten = false;
 
     private byte mLastHistoryStepLevel = 0;
 
@@ -293,6 +298,7 @@ public class BatteryStatsHistory {
         mLastHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryUptimeMs = 0;
+        mMeasuredEnergyHeaderWritten = false;
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
@@ -933,6 +939,16 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Records measured energy data.
+     */
+    public void recordMeasuredEnergyDetails(long elapsedRealtimeMs, long uptimeMs,
+            MeasuredEnergyDetails measuredEnergyDetails) {
+        mHistoryCur.measuredEnergyDetails = measuredEnergyDetails;
+        mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
+        writeHistoryItem(elapsedRealtimeMs, uptimeMs);
+    }
+
+    /**
      * Records a history item with the amount of charge consumed by WiFi.  Used on certain devices
      * equipped with on-device power metering.
      */
@@ -1219,6 +1235,8 @@ public class BatteryStatsHistory {
             for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
                 entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
+            mMeasuredEnergyHeaderWritten = false;
+
             // Make a copy of mHistoryCur.
             HistoryItem copy = new HistoryItem();
             copy.setTo(cur);
@@ -1256,6 +1274,7 @@ public class BatteryStatsHistory {
         cur.eventCode = HistoryItem.EVENT_NONE;
         cur.eventTag = null;
         cur.tagsFirstOccurrence = false;
+        cur.measuredEnergyDetails = null;
         if (DEBUG) {
             Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                     + " now " + mHistoryBuffer.dataPosition()
@@ -1348,6 +1367,7 @@ public class BatteryStatsHistory {
             return;
         }
 
+        int extensionFlags = 0;
         final long deltaTime = cur.time - last.time;
         final int lastBatteryLevelInt = buildBatteryLevelInt(last);
         final int lastStateInt = buildStateInt(last);
@@ -1373,6 +1393,17 @@ public class BatteryStatsHistory {
         final boolean stateIntChanged = stateInt != lastStateInt;
         if (stateIntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_STATE_FLAG;
+        }
+        if (cur.measuredEnergyDetails != null) {
+            extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_FLAG;
+            if (!mMeasuredEnergyHeaderWritten) {
+                extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG;
+            }
+        }
+        if (extensionFlags != 0) {
+            cur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
+        } else {
+            cur.states2 &= ~HistoryItem.STATE2_EXTENSIONS_FLAG;
         }
         final boolean state2IntChanged = cur.states2 != last.states2;
         if (state2IntChanged) {
@@ -1491,6 +1522,28 @@ public class BatteryStatsHistory {
         }
         dest.writeDouble(cur.modemRailChargeMah);
         dest.writeDouble(cur.wifiRailChargeMah);
+        if (extensionFlags != 0) {
+            dest.writeInt(extensionFlags);
+            if (cur.measuredEnergyDetails != null) {
+                if (DEBUG) {
+                    Slog.i(TAG, "WRITE DELTA: measuredEnergyDetails=" + cur.measuredEnergyDetails);
+                }
+                if (!mMeasuredEnergyHeaderWritten) {
+                    MeasuredEnergyDetails.EnergyConsumer[] consumers =
+                            cur.measuredEnergyDetails.consumers;
+                    dest.writeInt(consumers.length);
+                    for (MeasuredEnergyDetails.EnergyConsumer consumer : consumers) {
+                        dest.writeInt(consumer.type);
+                        dest.writeInt(consumer.ordinal);
+                        dest.writeString(consumer.name);
+                    }
+                    mMeasuredEnergyHeaderWritten = true;
+                }
+                for (long chargeUC : cur.measuredEnergyDetails.chargeUC) {
+                    dest.writeLong(chargeUC);
+                }
+            }
+        }
     }
 
     private int buildBatteryLevelInt(HistoryItem h) {

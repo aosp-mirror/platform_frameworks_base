@@ -82,8 +82,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
-        this(syncRoot, context, handler, listener,
-                (String name, boolean secure) -> SurfaceControl.createDisplay(name, secure));
+        this(syncRoot, context, handler, listener, DisplayControl::createDisplay);
     }
 
     @VisibleForTesting
@@ -296,7 +295,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
+            DisplayControl.destroyDisplay(getDisplayTokenLocked());
             if (mProjection != null && mMediaProjectionCallback != null) {
                 try {
                     mProjection.unregisterCallback(mMediaProjectionCallback);
