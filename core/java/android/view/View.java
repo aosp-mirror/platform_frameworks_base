@@ -10993,8 +10993,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * description. An image of a floppy disk that is used to save a file may
      * use "Save".
      *
+     * <p>
+     * This should omit role or state. Role refers to the kind of user-interface element the View
+     * is, such as a Button or Checkbox. State refers to a frequently changing property of the View,
+     * such as an On/Off state of a button or the audio level of a volume slider.
+     *
+     * <p>
+     * Content description updates are not frequent, and are used when the semantic content - not
+     * the state - of the element changes. For example, a Play button might change to a Pause
+     * button during music playback.
+     *
      * @param contentDescription The content description.
      * @see #getContentDescription()
+     * @see #setStateDescription(CharSequence)} for state changes.
      * @attr ref android.R.styleable#View_contentDescription
      */
     @RemotableViewMethod
