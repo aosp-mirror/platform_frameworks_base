@@ -43,8 +43,21 @@ public final class ImeFocusController {
 
     private final ViewRootImpl mViewRootImpl;
     private boolean mHasImeFocus = false;
+
+    /**
+     * This is the view that should currently be served by an input method,
+     * regardless of the state of setting that up.
+     * @see InputMethodManagerDelegate#getLockObject()
+     */
     private View mServedView;
+
+    /**
+     * This is the next view that will be served by the input method, when
+     * we get around to updating things.
+     * @see InputMethodManagerDelegate#getLockObject()
+     */
     private View mNextServedView;
+
     private InputMethodManagerDelegate mDelegate;
 
     @UiThread
@@ -284,21 +297,44 @@ public final class ImeFocusController {
         boolean isCurrentRootView(ViewRootImpl rootView);
         boolean isRestartOnNextWindowFocus(boolean reset);
         boolean hasActiveConnection(View view);
+
+        /**
+         * Returns the {@code InputMethodManager#mH} lock object.
+         * Used for {@link ImeFocusController} to guard the served view being accessed by
+         * {@link InputMethodManager} in different threads.
+         *
+         * TODO(b/244504062): Use this to all places requires synchronization in controller.
+         */
+        Object getLockObject();
     }
 
-    public View getServedView() {
+    /**
+     * Returns The current IME served view for {@link InputMethodManager}.
+     * Used to start input connection or check the caller's validity when calling
+     * {@link InputMethodManager} APIs.
+     * Note that this method requires to be called inside {@code InputMethodManager#mH} lock for
+     * data consistency.
+     */
+    public View getServedViewLocked() {
         return mServedView;
     }
 
-    public View getNextServedView() {
+    /**
+     * Returns The next incoming IME served view for {@link InputMethodManager}.
+     * Note that this method requires to be called inside {@code InputMethodManager#mH} lock for
+     * data consistency.
+     */
+    public View getNextServedViewLocked() {
         return mNextServedView;
     }
 
-    public void setServedView(View view) {
+    // TODO(b/244504062): Remove this method dependency from InputMethodManager.
+    public void setServedViewLocked(View view) {
         mServedView = view;
     }
 
-    public void setNextServedView(View view) {
+    // TODO(b/244504062): Remove this method dependency from InputMethodManager.
+    public void setNextServedViewLocked(View view) {
         mNextServedView = view;
     }
 

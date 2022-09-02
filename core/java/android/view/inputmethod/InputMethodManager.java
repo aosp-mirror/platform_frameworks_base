@@ -677,6 +677,21 @@ public final class InputMethodManager {
         return fallbackImm;
     }
 
+    /**
+     * An internal API that returns the {@link Context} of the current served view connected to
+     * an input method.
+     * @hide
+     */
+    Context getFallbackContextFromServedView() {
+        synchronized (mH) {
+            if (mCurRootView == null) {
+                return null;
+            }
+            final View servedView = mCurRootView.getImeFocusController().getServedViewLocked();
+            return servedView != null ? servedView.getContext() : null;
+        }
+    }
+
     private static boolean canStartInput(View servedView) {
         // We can start input ether the servedView has window focus
         // or the activity is showing autofill ui.
@@ -786,7 +801,7 @@ public final class InputMethodManager {
             synchronized (mH) {
                 // For some reason we didn't do a startInput + windowFocusGain, so
                 // we'll just do a window focus gain and call it a day.
-                View servedView = controller.getServedView();
+                View servedView = controller.getServedViewLocked();
                 boolean nextFocusHasConnection = servedView != null && servedView == focusedView
                         && hasActiveConnection(focusedView);
                 if (DEBUG) {
@@ -878,6 +893,16 @@ public final class InputMethodManager {
                         && mServedInputConnection.getServedView() == view;
             }
         }
+
+        /**
+         * Returns the {@link InputMethodManager#mH} lock object.
+         * Used for {@link ImeFocusController} to guard the served view being accessed by
+         * {@link InputMethodManager} in different threads.
+         */
+        @Override
+        public Object getLockObject() {
+            return mH;
+        }
     }
 
     /** @hide */
@@ -898,26 +923,27 @@ public final class InputMethodManager {
 
     @GuardedBy("mH")
     private View getServedViewLocked() {
-        return mCurRootView != null ? mCurRootView.getImeFocusController().getServedView() : null;
+        return mCurRootView != null ? mCurRootView.getImeFocusController().getServedViewLocked()
+                : null;
     }
 
     @GuardedBy("mH")
     private View getNextServedViewLocked() {
-        return mCurRootView != null ? mCurRootView.getImeFocusController().getNextServedView()
+        return mCurRootView != null ? mCurRootView.getImeFocusController().getNextServedViewLocked()
                 : null;
     }
 
     @GuardedBy("mH")
     private void setServedViewLocked(View view) {
         if (mCurRootView != null) {
-            mCurRootView.getImeFocusController().setServedView(view);
+            mCurRootView.getImeFocusController().setServedViewLocked(view);
         }
     }
 
     @GuardedBy("mH")
     private void setNextServedViewLocked(View view) {
         if (mCurRootView != null) {
-            mCurRootView.getImeFocusController().setNextServedView(view);
+            mCurRootView.getImeFocusController().setNextServedViewLocked(view);
         }
     }
 
