@@ -471,6 +471,11 @@ public final class InputMethodManager {
      * to the input connection.
      */
     private EditorInfo mCurrentEditorInfo;
+
+    @GuardedBy("mH")
+    @Nullable
+    private ViewFocusParameterInfo mPreviousViewFocusParameters;
+
     /**
      * The InputConnection that was last retrieved from the served view.
      */
@@ -660,26 +665,6 @@ public final class InputMethodManager {
 
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
-        @GuardedBy("mH")
-        @Nullable
-        private ViewFocusParameterInfo mPreviousViewFocusParameters;
-
-        @GuardedBy("mH")
-        private void updatePreviousViewFocusParametersLocked(
-                @Nullable EditorInfo currentEditorInfo,
-                @StartInputFlags int startInputFlags,
-                @StartInputReason int startInputReason,
-                @SoftInputModeFlags int softInputMode,
-                int windowFlags) {
-            mPreviousViewFocusParameters = new ViewFocusParameterInfo(currentEditorInfo,
-                    startInputFlags, startInputReason, softInputMode, windowFlags);
-        }
-
-        @GuardedBy("mH")
-        private void clearStateLocked() {
-            mPreviousViewFocusParameters = null;
-        }
-
         /**
          * Used by {@link ImeFocusController} to start input connection.
          */
@@ -1729,7 +1714,7 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private void clearConnectionLocked() {
         mCurrentEditorInfo = null;
-        mDelegate.clearStateLocked();
+        mPreviousViewFocusParameters = null;
         if (mServedInputConnection != null) {
             mServedInputConnection.deactivate();
             mServedInputConnection = null;
@@ -2424,10 +2409,10 @@ public final class InputMethodManager {
                     && previouslyServedConnection == null
                     && ic == null
                     && isSwitchingBetweenEquivalentNonEditableViews(
-                            mDelegate.mPreviousViewFocusParameters, startInputFlags,
+                            mPreviousViewFocusParameters, startInputFlags,
                             startInputReason, softInputMode, windowFlags);
-            updatePreviousViewFocusParametersLocked(mCurrentEditorInfo, startInputFlags,
-                    startInputReason, softInputMode, windowFlags);
+            mPreviousViewFocusParameters = new ViewFocusParameterInfo(mCurrentEditorInfo,
+                    startInputFlags, startInputReason, softInputMode, windowFlags);
             if (canSkip) {
                 if (DEBUG) {
                     Log.d(TAG, "Not calling IMMS due to switching between non-editable views.");
@@ -2496,29 +2481,6 @@ public final class InputMethodManager {
         }
 
         return true;
-    }
-
-    /**
-     * This method exists only so that the
-     * <a href="https://errorprone.info/bugpattern/GuardedBy">errorprone</a> false positive warning
-     * can be suppressed without granting a blanket exception to the {@link #startInputInner}
-     * method.
-     * <p>
-     * The warning in question implies that the access to the
-     * {@link DelegateImpl#updatePreviousViewFocusParametersLocked} method should be guarded by
-     * {@code InputMethodManager.this.mH}, but instead {@code mDelegate.mH} is held in the caller.
-     * In this case errorprone fails to realize that it is the same object.
-     */
-    @GuardedBy("mH")
-    @SuppressWarnings("GuardedBy")
-    private void updatePreviousViewFocusParametersLocked(
-            @Nullable EditorInfo currentEditorInfo,
-            @StartInputFlags int startInputFlags,
-            @StartInputReason int startInputReason,
-            @SoftInputModeFlags int softInputMode,
-            int windowFlags) {
-        mDelegate.updatePreviousViewFocusParametersLocked(currentEditorInfo, startInputFlags,
-                startInputReason, softInputMode, windowFlags);
     }
 
     /**
