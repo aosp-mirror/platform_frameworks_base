@@ -289,7 +289,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"拡大"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ユーザー補助の使用"</string>
-    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
+    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」がバッテリーを使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップしてバッテリーやデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
@@ -2139,7 +2139,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして有効化"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして ON にする"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
@@ -2276,7 +2276,7 @@
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"バックグラウンド アクティビティ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"アプリがバッテリーを消費しています"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"アプリがまだアクティブです"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用量を管理できます。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用状況を管理できます。"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、実行中のアプリをご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"実行中のアプリをチェック"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
