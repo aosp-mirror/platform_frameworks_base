@@ -100,4 +100,9 @@ public class ActivityOptions {
             ACTIVITY_EMBEDDING_PLACEHOLDER_SECONDARY_ACTIVITY_COMPONENT_NAME = new ComponentName(
                     FLICKER_APP_PACKAGE,
             FLICKER_APP_PACKAGE + ".ActivityEmbeddingPlaceholderSecondaryActivity");
+
+    public static final String GAME_ACTIVITY_LAUNCHER_NAME = "GameApp";
+    public static final ComponentName GAME_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                   FLICKER_APP_PACKAGE + ".GameActivity");
 }
