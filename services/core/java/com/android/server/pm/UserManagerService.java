@@ -2630,6 +2630,11 @@ public class UserManagerService extends IUserManager.Stub {
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
             return;
         }
+
+        if (!userExists(userId)) {
+            throw new IllegalArgumentException("Cannot set user restriction. "
+                    + "User with this id does not exist");
+        }
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
             // a copy.
@@ -3214,6 +3219,22 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Checks whether user with a given ID exists.
+     * @param id User id to be checked.
+     */
+    @VisibleForTesting
+    boolean userExists(int id) {
+        synchronized (mUsersLock) {
+            for (int userId : mUserIds) {
+                if (userId == id) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns an array of user ids, including pre-created users.
      *
      * <p>This method should only used for the specific cases that need to handle pre-created users;
@@ -3736,7 +3757,6 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
-        updateUserIds();
         initDefaultGuestRestrictions();
 
         writeUserLP(userData);
@@ -4933,6 +4953,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             mUsers.put(userInfo.id, userData);
         }
+        updateUserIds();
         return userData;
     }
 
