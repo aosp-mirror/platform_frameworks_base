@@ -8770,9 +8770,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
-    // TODO(b/240562946): Remove owner name from API parameters.
     @Override
-    public boolean setProfileOwner(ComponentName who, String ownerName, int userHandle) {
+    public boolean setProfileOwner(ComponentName who, int userHandle) {
         if (!mHasFeature) {
             logMissingFeatureAction("Cannot set " + ComponentName.flattenToShortString(who)
                     + " as profile owner for user " + userHandle);
@@ -10793,9 +10792,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // Set admin.
         setActiveAdmin(profileOwner, /* refreshing= */ true, userId);
-        final String ownerName = getProfileOwnerNameUnchecked(
-                Process.myUserHandle().getIdentifier());
-        setProfileOwner(profileOwner, ownerName, userId);
+        setProfileOwner(profileOwner, userId);
 
         synchronized (getLockObject()) {
             DevicePolicyData policyData = getUserData(userId);
@@ -17640,8 +17637,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             maybeInstallDevicePolicyManagementRoleHolderInUser(userInfo.id);
 
             installExistingAdminPackage(userInfo.id, admin.getPackageName());
-            if (!enableAdminAndSetProfileOwner(
-                    userInfo.id, caller.getUserId(), admin, provisioningParams.getOwnerName())) {
+            if (!enableAdminAndSetProfileOwner(userInfo.id, caller.getUserId(), admin)) {
                 throw new ServiceSpecificException(
                         ERROR_SETTING_PROFILE_OWNER_FAILED,
                         "Error setting profile owner.");
@@ -17830,10 +17826,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean enableAdminAndSetProfileOwner(
-            @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent,
-            String ownerName) {
+            @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent) {
         enableAndSetActiveAdmin(userId, callingUserId, adminComponent);
-        return setProfileOwner(adminComponent, ownerName, userId);
+        return setProfileOwner(adminComponent, userId);
     }
 
     private void enableAndSetActiveAdmin(
