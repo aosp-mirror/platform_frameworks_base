@@ -90,6 +90,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
@@ -178,6 +179,9 @@ public class AuthControllerTest extends SysuiTestCase {
     private DelayableExecutor mBackgroundExecutor;
     private TestableAuthController mAuthController;
 
+    @Mock
+    private VibratorHelper mVibratorHelper;
+
     @Before
     public void setup() throws RemoteException {
         mContextSpy = spy(mContext);
@@ -236,10 +240,12 @@ public class AuthControllerTest extends SysuiTestCase {
                         true /* supportsSelfIllumination */,
                         true /* resetLockoutRequireHardwareAuthToken */));
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(faceProps);
+        when(mVibratorHelper.hasVibrator()).thenReturn(true);
 
         mAuthController = new TestableAuthController(mContextSpy, mExecution, mCommandQueue,
                 mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
-                () -> mUdfpsController, () -> mSidefpsController, mStatusBarStateController);
+                () -> mUdfpsController, () -> mSidefpsController, mStatusBarStateController,
+                mVibratorHelper);
 
         mAuthController.start();
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
@@ -268,11 +274,13 @@ public class AuthControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         reset(mFaceManager);
 
+        when(mVibratorHelper.hasVibrator()).thenReturn(true);
+
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
                 mFaceManager, () -> mUdfpsController, () -> mSidefpsController,
-                mStatusBarStateController);
+                mStatusBarStateController, mVibratorHelper);
         authController.start();
 
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
@@ -298,11 +306,13 @@ public class AuthControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         reset(mFaceManager);
 
+        when(mVibratorHelper.hasVibrator()).thenReturn(true);
+
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
                 mFaceManager, () -> mUdfpsController, () -> mSidefpsController,
-                mStatusBarStateController);
+                mStatusBarStateController, mVibratorHelper);
         authController.start();
 
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
@@ -963,12 +973,13 @@ public class AuthControllerTest extends SysuiTestCase {
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
                 Provider<SidefpsController> sidefpsControllerFactory,
-                StatusBarStateController statusBarStateController) {
+                StatusBarStateController statusBarStateController,
+                VibratorHelper vibratorHelper) {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
                     mUserManager, mLockPatternUtils, statusBarStateController,
-                    mInteractionJankMonitor, mHandler, mBackgroundExecutor);
+                    mInteractionJankMonitor, mHandler, mBackgroundExecutor, vibratorHelper);
         }
 
         @Override
