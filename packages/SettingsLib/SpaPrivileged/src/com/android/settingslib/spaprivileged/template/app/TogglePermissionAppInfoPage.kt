@@ -47,7 +47,7 @@ internal class TogglePermissionAppInfoPageProvider(
 ) : SettingsPageProvider {
     override val name = NAME
 
-    override val arguments = listOf(
+    override val parameter = listOf(
         navArgument(PERMISSION) { type = NavType.StringType },
         navArgument(PACKAGE_NAME) { type = NavType.StringType },
         navArgument(USER_ID) { type = NavType.IntType },

@@ -28,8 +28,8 @@ interface SettingsPageProvider {
     /** The page name without arguments. */
     val name: String
 
-    /** The page arguments, default is no arguments. */
-    val arguments: List<NamedNavArgument>
+    /** The page parameters, default is no parameters. */
+    val parameter: List<NamedNavArgument>
         get() = emptyList()
 
     /** The [Composable] used to render this page. */
