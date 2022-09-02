@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Vingerafdrukhandeling is gekanselleer."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vingerafdrukhandeling is deur gebruiker gekanselleer."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Te veel pogings. Probeer later weer."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Te veel pogings. Vingerafdruksensor is gedeaktiveer."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Probeer weer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Geen vingerafdrukke is geregistreer nie."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Hierdie toetstel het nie \'n vingerafdruksensor nie."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Streekvoorkeur"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Voer taalnaam in"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Voorgestel"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Voorgestel"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle tale"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Allle streke"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Soek"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Gee <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> toegang tot alle toestelloglêers?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Gee eenmalige toegang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Moenie toelaat nie"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Toestelloglêers teken aan wat op jou toestel gebeur. Programme kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting en daarom moet jy toegang tot alle toestelloglêers net gee aan programme wat jy vertrou. \n\nAs jy nie vir hierdie program toegang tot alle toestelloglêers gee nie, het die program steeds toegang tot eie loglêers. Jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Moenie weer wys nie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil <xliff:g id="APP_2">%2$s</xliff:g>-skyfies wys"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Wysig"</string>

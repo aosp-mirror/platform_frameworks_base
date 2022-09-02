@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Se canceló la operación de huella dactilar."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"El usuario canceló la operación de huella dactilar."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Demasiados intentos. Vuelve a intentarlo más tarde."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Realizaste demasiados intentos. Se inhabilitó el sensor de huellas dactilares."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Vuelve a intentarlo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No se registraron huellas digitales."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas dactilares."</string>
@@ -1426,7 +1427,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Expulsar"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Explorar"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Cambiar salida"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"No se encuentra dispositivo <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Falta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Vuelve a insertar dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfiriendo la aplicación <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Transfiriendo los datos"</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferencia de región"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Nombre del idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugerencias"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Todos los idiomas"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Todas las regiones"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Búsqueda"</string>
