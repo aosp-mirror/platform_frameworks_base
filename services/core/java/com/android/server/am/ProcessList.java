@@ -3724,6 +3724,10 @@ public final class ProcessList {
                 ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.getPid(), app.getPackageList());
+                if (app.getPkgDeps() != null) {
+                    final int size = app.getPkgDeps().size();
+                    currApp.pkgDeps = app.getPkgDeps().toArray(new String[size]);
+                }
                 fillInProcMemInfoLOSP(app, currApp, clientTargetSdk);
                 if (state.getAdjSource() instanceof ProcessRecord) {
                     currApp.importanceReasonPid = ((ProcessRecord) state.getAdjSource()).getPid();
