@@ -31,6 +31,7 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.people.PeopleProvider;
+import com.android.systemui.statusbar.QsFrameTranslateModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.FoldStateLogger;
 import com.android.systemui.unfold.FoldStateLoggingProvider;
@@ -66,6 +67,7 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {
         DefaultComponentBinder.class,
         DependencyProvider.class,
+        QsFrameTranslateModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
         SystemUICoreStartableModule.class,

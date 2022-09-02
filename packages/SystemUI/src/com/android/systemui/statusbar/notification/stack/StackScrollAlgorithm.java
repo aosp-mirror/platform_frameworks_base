@@ -417,12 +417,19 @@ public class StackScrollAlgorithm {
     }
 
     /**
+     * Update the position of QS Frame.
+     */
+    public void updateQSFrameTop(int qsHeight) {
+        // Intentionally empty for sub-classes in other device form factors to override
+    }
+
+    /**
      * Determine the positions for the views. This is the main part of the algorithm.
      *
      * @param algorithmState The state in which the current pass of the algorithm is currently in
      * @param ambientState   The current ambient state
      */
-    private void updatePositionsForState(StackScrollAlgorithmState algorithmState,
+    protected void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
         if (!ambientState.isOnKeyguard()
                 || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
@@ -448,7 +455,7 @@ public class StackScrollAlgorithm {
      * @return Fraction to apply to view height and gap between views.
      *         Does not include shelf height even if shelf is showing.
      */
-    private float getExpansionFractionWithoutShelf(
+    protected float getExpansionFractionWithoutShelf(
             StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
 
