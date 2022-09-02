@@ -66,6 +66,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     final DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
+    final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
     final Supplier<WindowContainerTransaction> mWindowContainerTransactionSupplier;
     final SurfaceControlViewHostFactory mSurfaceControlViewHostFactory;
     private final DisplayController.OnDisplaysChangedListener mOnDisplaysChangedListener =
@@ -104,8 +105,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
         this(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                SurfaceControl.Builder::new, WindowContainerTransaction::new,
-                new SurfaceControlViewHostFactory() {});
+                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+                WindowContainerTransaction::new, new SurfaceControlViewHostFactory() {});
     }
 
     WindowDecoration(
@@ -115,6 +116,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
@@ -123,6 +125,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTaskInfo = taskInfo;
         mTaskSurface = taskSurface;
         mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
+        mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
@@ -320,19 +323,28 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         mCaptionWindowManager = null;
 
+        final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        boolean released = false;
         if (mCaptionContainerSurface != null) {
-            mCaptionContainerSurface.release();
+            t.remove(mCaptionContainerSurface);
             mCaptionContainerSurface = null;
+            released = true;
         }
 
         if (mDecorationContainerSurface != null) {
-            mDecorationContainerSurface.release();
+            t.remove(mDecorationContainerSurface);
             mDecorationContainerSurface = null;
+            released = true;
         }
 
         if (mTaskBackgroundSurface != null) {
-            mTaskBackgroundSurface.release();
+            t.remove(mTaskBackgroundSurface);
             mTaskBackgroundSurface = null;
+            released = true;
+        }
+
+        if (released) {
+            t.apply();
         }
 
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
