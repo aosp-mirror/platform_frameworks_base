@@ -2383,6 +2383,16 @@ package android.service.dreams {
     method public final boolean shouldShowComplications();
   }
 
+  public class DreamService extends android.app.Service implements android.view.Window.Callback {
+    method @Nullable public static android.service.dreams.DreamService.DreamMetadata getDreamMetadata(@NonNull android.content.Context, @Nullable android.content.pm.ServiceInfo);
+  }
+
+  public static final class DreamService.DreamMetadata {
+    field @Nullable public final android.graphics.drawable.Drawable previewImage;
+    field @Nullable public final android.content.ComponentName settingsActivity;
+    field @NonNull public final boolean showComplications;
+  }
+
 }
 
 package android.service.notification {
