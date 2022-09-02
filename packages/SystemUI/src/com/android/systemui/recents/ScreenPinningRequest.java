@@ -49,14 +49,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
@@ -70,28 +69,32 @@ public class ScreenPinningRequest implements View.OnClickListener,
         NavigationModeController.ModeChangedListener {
 
     private final Context mContext;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
 
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
-    private final OverviewProxyService mOverviewProxyService;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private RequestWindowView mRequestWindow;
     private int mNavBarMode;
 
-    // Id of task to be pinned or locked.
+    /** ID of task to be pinned or locked. */
     private int taskId;
 
     @Inject
-    public ScreenPinningRequest(Context context, Lazy<Optional<StatusBar>> statusBarOptionalLazy) {
+    public ScreenPinningRequest(
+            Context context,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            NavigationModeController navigationModeController,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mAccessibilityService = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
+        mNavBarMode = navigationModeController.addListener(this);
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     public void clearPrompt() {
@@ -170,13 +173,10 @@ public class ScreenPinningRequest implements View.OnClickListener,
         private static final int OFFSET_DP = 96;
 
         private final ColorDrawable mColor = new ColorDrawable(0);
-        private ValueAnimator mColorAnim;
         private ViewGroup mLayout;
-        private boolean mShowCancel;
-        private final BroadcastDispatcher mBroadcastDispatcher =
-                Dependency.get(BroadcastDispatcher.class);
+        private final boolean mShowCancel;
 
-        public RequestWindowView(Context context, boolean showCancel) {
+        private RequestWindowView(Context context, boolean showCancel) {
             super(context);
             setClickable(true);
             setOnClickListener(ScreenPinningRequest.this);
@@ -211,16 +211,16 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         .setInterpolator(new DecelerateInterpolator())
                         .start();
 
-                mColorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), 0, bgColor);
-                mColorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                ValueAnimator colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), 0, bgColor);
+                colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         final int c = (Integer) animation.getAnimatedValue();
                         mColor.setColor(c);
                     }
                 });
-                mColorAnim.setDuration(1000);
-                mColorAnim.start();
+                colorAnim.setDuration(1000);
+                colorAnim.start();
             } else {
                 mColor.setColor(bgColor);
             }
@@ -267,11 +267,10 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         .setVisibility(View.INVISIBLE);
             }
 
-            final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-            NavigationBarView navigationBarView =
-                    statusBarOptional.map(StatusBar::getNavigationBarView).orElse(null);
-            final boolean recentsVisible = navigationBarView != null
-                    && navigationBarView.isRecentsButtonVisible();
+            final Optional<CentralSurfaces> centralSurfacesOptional =
+                    mCentralSurfacesOptionalLazy.get();
+            boolean recentsVisible =
+                    centralSurfacesOptional.map(CentralSurfaces::isOverviewEnabled).orElse(false);
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
             int descriptionStringResId;
             if (QuickStepContract.isGesturalMode(mNavBarMode)) {
@@ -292,6 +291,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         : R.string.screen_pinning_description_recents_invisible;
             }
 
+            NavigationBarView navigationBarView =
+                    centralSurfacesOptional.map(CentralSurfaces::getNavigationBarView).orElse(null);
             if (navigationBarView != null) {
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
                         .setImageDrawable(navigationBarView.getBackDrawable());
@@ -379,5 +380,4 @@ public class ScreenPinningRequest implements View.OnClickListener,
             }
         };
     }
-
 }

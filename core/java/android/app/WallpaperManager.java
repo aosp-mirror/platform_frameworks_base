@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,6 +71,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.view.Display;
 import android.view.WindowManagerGlobal;
@@ -107,7 +109,7 @@ import java.util.concurrent.TimeUnit;
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
@@ -556,23 +558,26 @@ public class WallpaperManager {
                 }
                 mCachedWallpaper = null;
                 mCachedWallpaperUserId = 0;
-                try {
-                    mCachedWallpaper = getCurrentWallpaperLocked(
-                            context, userId, hardware, cmProxy);
-                    mCachedWallpaperUserId = userId;
-                } catch (OutOfMemoryError e) {
-                    Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
-                } catch (SecurityException e) {
-                    if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O_MR1) {
-                        Log.w(TAG, "No permission to access wallpaper, suppressing"
-                                + " exception to avoid crashing legacy app.");
-                    } else {
-                        // Post-O apps really most sincerely need the permission.
-                        throw e;
+            }
+            try {
+                Bitmap currentWallpaper = getCurrentWallpaperLocked(
+                        context, userId, hardware, cmProxy);
+                if (currentWallpaper != null) {
+                    synchronized (this) {
+                        mCachedWallpaper = currentWallpaper;
+                        mCachedWallpaperUserId = userId;
+                        return mCachedWallpaper;
                     }
                 }
-                if (mCachedWallpaper != null) {
-                    return mCachedWallpaper;
+            } catch (OutOfMemoryError e) {
+                Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
+            } catch (SecurityException e) {
+                if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O_MR1) {
+                    Log.w(TAG, "No permission to access wallpaper, suppressing"
+                            + " exception to avoid crashing legacy app.");
+                } else {
+                    // Post-O apps really most sincerely need the permission.
+                    throw e;
                 }
             }
             if (returnDefault) {
@@ -1993,6 +1998,63 @@ public class WallpaperManager {
     }
 
     /**
+     * Sets the wallpaper dim amount between [0f, 1f] which would be blended with the system default
+     * dimming. 0f doesn't add any additional dimming and 1f makes the wallpaper fully black.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    public void setWallpaperDimAmount(@FloatRange (from = 0f, to = 1f) float dimAmount) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            sGlobals.mService.setWallpaperDimAmount(MathUtils.saturate(dimAmount));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the current additional dim amount set on the wallpaper. 0f means no application has
+     * added any dimming on top of the system default dim amount.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    public float getWallpaperDimAmount() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            return sGlobals.mService.getWallpaperDimAmount();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Whether the lock screen wallpaper is different from the system wallpaper.
+     *
+     * @hide
+     */
+    public boolean lockScreenWallpaperExists() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            return sGlobals.mService.lockScreenWallpaperExists();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Set the live wallpaper.
      *
      * This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
@@ -2410,22 +2472,24 @@ public class WallpaperManager {
          * A {@link android.app.WallpaperColors} object containing a simplified
          * color histogram will be given.
          *
-         * @param colors Wallpaper color info
+         * @param colors Wallpaper color info, {@code null} when not available.
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
+         * @see android.service.wallpaper.WallpaperService.Engine#onComputeColors()
          */
-        void onColorsChanged(WallpaperColors colors, int which);
+        void onColorsChanged(@Nullable WallpaperColors colors, int which);
 
         /**
          * Called when colors change.
          * A {@link android.app.WallpaperColors} object containing a simplified
          * color histogram will be given.
          *
-         * @param colors Wallpaper color info
+         * @param colors Wallpaper color info, {@code null} when not available.
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
          * @param userId Owner of the wallpaper
+         * @see android.service.wallpaper.WallpaperService.Engine#onComputeColors()
          * @hide
          */
-        default void onColorsChanged(WallpaperColors colors, int which, int userId) {
+        default void onColorsChanged(@Nullable WallpaperColors colors, int which, int userId) {
             onColorsChanged(colors, which);
         }
     }

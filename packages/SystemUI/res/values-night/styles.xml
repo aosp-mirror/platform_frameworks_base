@@ -38,8 +38,21 @@
         <item name="android:textColorSecondary">?android:attr/textColorPrimaryInverse</item>
     </style>
 
-    <style name="Screenshot" parent="@android:style/Theme.DeviceDefault.DayNight">
-        <item name="android:textColorPrimary">?android:attr/textColorPrimaryInverse</item>
+    <!-- Clipboard overlay's edit text activity. -->
+    <style name="EditTextActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
+        <item name="android:textColorSecondary">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
+    <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="overlayButtonTextColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
+    <style name="EditTextActivityButton" parent="@android:style/Widget.DeviceDefault.Button.Colored">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
     </style>
 
     <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">

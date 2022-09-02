@@ -94,6 +94,8 @@ public class GraphicsEnvironment {
 
     private static final int VULKAN_1_0 = 0x00400000;
     private static final int VULKAN_1_1 = 0x00401000;
+    private static final int VULKAN_1_2 = 0x00402000;
+    private static final int VULKAN_1_3 = 0x00403000;
 
     // Values for UPDATABLE_DRIVER_ALL_APPS
     // 0: Default (Invalid values fallback to default as well)
@@ -157,6 +159,13 @@ public class GraphicsEnvironment {
             }
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "notifyGraphicsEnvironmentSetup");
+        if (mGameManager != null
+                && appInfoWithMetaData.category == ApplicationInfo.CATEGORY_GAME) {
+            mGameManager.notifyGraphicsEnvironmentSetup();
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
     }
 
     /**
@@ -192,19 +201,28 @@ public class GraphicsEnvironment {
 
         // We only want to use ANGLE if the developer has explicitly chosen something other than
         // default driver.
-        final boolean requested = devOptIn.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE);
-        if (requested) {
+        final boolean forceAngle = devOptIn.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE);
+        final boolean forceNative = devOptIn.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE);
+        if (forceAngle || forceNative) {
             Log.v(TAG, "ANGLE developer option for " + packageName + ": " + devOptIn);
         }
 
         final boolean gameModeEnabledAngle = isAngleEnabledByGameMode(context, packageName);
 
-        return requested || gameModeEnabledAngle;
+        return !forceNative && (forceAngle || gameModeEnabledAngle);
     }
 
     private int getVulkanVersion(PackageManager pm) {
         // PackageManager doesn't have an API to retrieve the version of a specific feature, and we
         // need to avoid retrieving all system features here and looping through them.
+        if (pm.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION, VULKAN_1_3)) {
+            return VULKAN_1_3;
+        }
+
+        if (pm.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION, VULKAN_1_2)) {
+            return VULKAN_1_2;
+        }
+
         if (pm.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION, VULKAN_1_1)) {
             return VULKAN_1_1;
         }

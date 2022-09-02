@@ -28,15 +28,18 @@ import android.os.Parcelable
 class SmartspaceState() : Parcelable {
     var boundsOnScreen: Rect = Rect()
     var selectedPage = 0
+    var visibleOnScreen = false
 
     constructor(parcel: Parcel) : this() {
         this.boundsOnScreen = parcel.readParcelable(Rect::javaClass.javaClass.classLoader)
         this.selectedPage = parcel.readInt()
+        this.visibleOnScreen = parcel.readBoolean()
     }
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.writeParcelable(boundsOnScreen, 0)
         dest?.writeInt(selectedPage)
+        dest?.writeBoolean(visibleOnScreen)
     }
 
     override fun describeContents(): Int {
@@ -44,7 +47,9 @@ class SmartspaceState() : Parcelable {
     }
 
     override fun toString(): String {
-        return "boundsOnScreen: $boundsOnScreen, selectedPage: $selectedPage"
+        return "boundsOnScreen: $boundsOnScreen, " +
+                "selectedPage: $selectedPage, " +
+                "visibleOnScreen: $visibleOnScreen"
     }
 
     companion object CREATOR : Parcelable.Creator<SmartspaceState> {

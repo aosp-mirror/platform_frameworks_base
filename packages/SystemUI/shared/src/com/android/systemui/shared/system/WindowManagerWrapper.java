@@ -78,10 +78,6 @@ public class WindowManagerWrapper {
     public static final int WINDOWING_MODE_MULTI_WINDOW =
             WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
-    public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY =
-            WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-    public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY =
-            WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
     public static final int ITYPE_EXTRA_NAVIGATION_BAR = InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
@@ -90,6 +86,7 @@ public class WindowManagerWrapper {
     public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = InsetsState.ITYPE_RIGHT_TAPPABLE_ELEMENT;
     public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT =
             InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+    public static final int ITYPE_SIZE = InsetsState.SIZE;
 
     public static final int ANIMATION_DURATION_RESIZE = InsetsController.ANIMATION_DURATION_RESIZE;
     public static final Interpolator RESIZE_INTERPOLATOR = InsetsController.RESIZE_INTERPOLATOR;

@@ -23,7 +23,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_M
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
@@ -35,14 +34,13 @@ import android.view.accessibility.IWindowMagnificationConnection;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -54,7 +52,7 @@ import javax.inject.Inject;
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @SysUISingleton
-public class WindowMagnification extends SystemUI implements WindowMagnifierCallback,
+public class WindowMagnification extends CoreStartable implements WindowMagnifierCallback,
         CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";
 
@@ -65,18 +63,17 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     private final OverviewProxyService mOverviewProxyService;
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
-    private Configuration mLastConfiguration;
     private SysUiState mSysUiState;
 
-    private static class AnimationControllerSupplier extends
-            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
+    private static class ControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationController> {
 
         private final Context mContext;
         private final Handler mHandler;
         private final WindowMagnifierCallback mWindowMagnifierCallback;
         private final SysUiState mSysUiState;
 
-        AnimationControllerSupplier(Context context, Handler handler,
+        ControllerSupplier(Context context, Handler handler,
                 WindowMagnifierCallback windowMagnifierCallback,
                 DisplayManager displayManager, SysUiState sysUiState) {
             super(displayManager);
@@ -87,19 +84,19 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         }
 
         @Override
-        protected WindowMagnificationAnimationController createInstance(Display display) {
+        protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            final WindowMagnificationController controller = new WindowMagnificationController(
+            return new WindowMagnificationController(
                     windowContext,
-                    mHandler, new SfVsyncFrameCallbackProvider(), null,
+                    mHandler, new WindowMagnificationAnimationController(windowContext),
+                    new SfVsyncFrameCallbackProvider(), null,
                     new SurfaceControl.Transaction(), mWindowMagnifierCallback, mSysUiState);
-            return new WindowMagnificationAnimationController(windowContext, controller);
         }
     }
 
     @VisibleForTesting
-    DisplayIdIndexSupplier<WindowMagnificationAnimationController> mAnimationControllerSupplier;
+    DisplayIdIndexSupplier<WindowMagnificationController> mMagnificationControllerSupplier;
 
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
@@ -107,25 +104,13 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             SysUiState sysUiState, OverviewProxyService overviewProxyService) {
         super(context);
         mHandler = mainHandler;
-        mLastConfiguration = new Configuration(context.getResources().getConfiguration());
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
         mSysUiState = sysUiState;
         mOverviewProxyService = overviewProxyService;
-        mAnimationControllerSupplier = new AnimationControllerSupplier(context,
+        mMagnificationControllerSupplier = new ControllerSupplier(context,
                 mHandler, this, context.getSystemService(DisplayManager.class), sysUiState);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        final int configDiff = newConfig.diff(mLastConfiguration);
-        mLastConfiguration.setTo(newConfig);
-        mAnimationControllerSupplier.forEach(
-                animationController -> animationController.onConfigurationChanged(configDiff));
-        if (mModeSwitchesController != null) {
-            mModeSwitchesController.onConfigurationChanged(configDiff);
-        }
     }
 
     @Override
@@ -143,10 +128,10 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     private void updateSysUiStateFlag() {
         //TODO(b/187510533): support multi-display once SysuiState supports it.
-        final WindowMagnificationAnimationController controller =
-                mAnimationControllerSupplier.valueAt(Display.DEFAULT_DISPLAY);
+        final WindowMagnificationController controller =
+                mMagnificationControllerSupplier.valueAt(Display.DEFAULT_DISPLAY);
         if (controller != null) {
-            controller.updateSysUiStateFlag();
+            controller.updateSysUIStateFlag();
         } else {
             // The instance is initialized when there is an IPC request. Considering
             // self-crash cases, we need to reset the flag in such situation.
@@ -157,40 +142,52 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     @MainThread
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+            float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.enableWindowMagnification(scale, centerX,
-                    centerY, callback);
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.enableWindowMagnification(scale, centerX, centerY,
+                    magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY, callback);
         }
     }
 
     @MainThread
     void setScale(int displayId, float scale) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.setScale(scale);
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.setScale(scale);
         }
     }
 
     @MainThread
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.moveWindowMagnifier(offsetX, offsetY);
+        final WindowMagnificationController windowMagnificationcontroller =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationcontroller != null) {
+            windowMagnificationcontroller.moveWindowMagnifier(offsetX, offsetY);
+        }
+    }
+
+    @MainThread
+    void moveWindowMagnifierToPositionInternal(int displayId, float positionX, float positionY,
+            IRemoteMagnificationAnimationCallback callback) {
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.moveWindowMagnifierToPosition(positionX, positionY,
+                    callback);
         }
     }
 
     @MainThread
     void disableWindowMagnification(int displayId,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
-        final WindowMagnificationAnimationController windowMagnificationAnimationController =
-                mAnimationControllerSupplier.get(displayId);
-        if (windowMagnificationAnimationController != null) {
-            windowMagnificationAnimationController.deleteWindowMagnification(callback);
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.deleteWindowMagnification(callback);
         }
     }
 
@@ -223,6 +220,13 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     }
 
     @Override
+    public void onMove(int displayId) {
+        if (mWindowMagnificationConnectionImpl != null) {
+            mWindowMagnificationConnectionImpl.onMove(displayId);
+        }
+    }
+
+    @Override
     public void requestWindowMagnificationConnection(boolean connect) {
         if (connect) {
             setWindowMagnificationConnection();
@@ -232,10 +236,10 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG);
-        mAnimationControllerSupplier.forEach(
-                animationController -> animationController.dump(pw));
+        mMagnificationControllerSupplier.forEach(
+                magnificationController -> magnificationController.dump(pw));
     }
 
     private void setWindowMagnificationConnection() {
@@ -243,12 +247,15 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             mWindowMagnificationConnectionImpl = new WindowMagnificationConnectionImpl(this,
                     mHandler, mModeSwitchesController);
         }
+        mModeSwitchesController.setSwitchListenerDelegate(
+                mWindowMagnificationConnectionImpl::onChangeMagnificationMode);
         mAccessibilityManager.setWindowMagnificationConnection(
                 mWindowMagnificationConnectionImpl);
     }
 
     private void clearWindowMagnificationConnection() {
         mAccessibilityManager.setWindowMagnificationConnection(null);
+        mModeSwitchesController.setSwitchListenerDelegate(null);
         //TODO: destroy controllers.
     }
 }

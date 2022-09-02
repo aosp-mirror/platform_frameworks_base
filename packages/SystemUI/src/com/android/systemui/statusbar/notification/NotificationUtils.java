@@ -24,6 +24,9 @@ import android.widget.ImageView;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.util.Compile;
 
 /**
  * A util class for various reusable functions
@@ -71,6 +74,33 @@ public class NotificationUtils {
         float factor = Math.max(1.0f, context.getResources().getDisplayMetrics().scaledDensity /
                 context.getResources().getDisplayMetrics().density);
         return (int) (dimensionPixelSize * factor);
+    }
+
+    private static final boolean INCLUDE_HASH_CODE_IN_LIST_ENTRY_LOG_KEY = false;
+
+    /** Get the notification key, reformatted for logging, for the (optional) entry */
+    public static String logKey(ListEntry entry) {
+        if (entry == null) {
+            return "null";
+        }
+        if (Compile.IS_DEBUG && INCLUDE_HASH_CODE_IN_LIST_ENTRY_LOG_KEY) {
+            return logKey(entry.getKey()) + "@" + Integer.toHexString(entry.hashCode());
+        } else {
+            return logKey(entry.getKey());
+        }
+    }
+
+    /** Get the notification key, reformatted for logging, for the (optional) row */
+    public static String logKey(ExpandableNotificationRow row) {
+        return row == null ? "null" : logKey(row.getEntry());
+    }
+
+    /** Removes newlines from the notification key to prettify apps that have these in the tag */
+    public static String logKey(String key) {
+        if (key == null) {
+            return "null";
+        }
+        return key.replace("\n", "");
     }
 
 }

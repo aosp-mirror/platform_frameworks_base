@@ -134,19 +134,19 @@ TEST_F(Idmap2BinaryTests, Dump) {
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr_str;
 
   ASSERT_NE(result->stdout_str.find(StringPrintf("0x%08x -> 0x%08x", R::target::integer::int1,
-                                             R::overlay::integer::int1)),
+                                                 R::overlay::integer::int1)),
             std::string::npos)
       << result->stdout_str;
   ASSERT_NE(result->stdout_str.find(StringPrintf("0x%08x -> 0x%08x", R::target::string::str1,
-                                             R::overlay::string::str1)),
+                                                 R::overlay::string::str1)),
             std::string::npos)
       << result->stdout_str;
   ASSERT_NE(result->stdout_str.find(StringPrintf("0x%08x -> 0x%08x", R::target::string::str3,
-                                             R::overlay::string::str3)),
+                                                 R::overlay::string::str3)),
             std::string::npos)
       << result->stdout_str;
   ASSERT_NE(result->stdout_str.find(StringPrintf("0x%08x -> 0x%08x", R::target::string::str4,
-                                             R::overlay::string::str4)),
+                                                 R::overlay::string::str4)),
             std::string::npos)
       << result->stdout_str;
 

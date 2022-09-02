@@ -17,6 +17,8 @@
 package androidx.window.extensions.embedding;
 
 import static android.graphics.Matrix.MSCALE_X;
+import static android.graphics.Matrix.MTRANS_X;
+import static android.graphics.Matrix.MTRANS_Y;
 
 import android.graphics.Rect;
 import android.view.Choreographer;
@@ -33,6 +35,12 @@ import androidx.annotation.NonNull;
  * The base adapter can be used for {@link RemoteAnimationTarget} that is simple open/close.
  */
 class TaskFragmentAnimationAdapter {
+
+    /**
+     * If {@link #mOverrideLayer} is set to this value, we don't want to override the surface layer.
+     */
+    private static final int LAYER_NO_OVERRIDE = -1;
+
     final Animation mAnimation;
     final RemoteAnimationTarget mTarget;
     final SurfaceControl mLeash;
@@ -42,6 +50,7 @@ class TaskFragmentAnimationAdapter {
     final float[] mVecs = new float[4];
     final Rect mRect = new Rect();
     private boolean mIsFirstFrame = true;
+    private int mOverrideLayer = LAYER_NO_OVERRIDE;
 
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target) {
@@ -58,10 +67,21 @@ class TaskFragmentAnimationAdapter {
         mLeash = leash;
     }
 
+    /**
+     * Surface layer to be set at the first frame of the animation. We will not set the layer if it
+     * is set to {@link #LAYER_NO_OVERRIDE}.
+     */
+    final void overrideLayer(int layer) {
+        mOverrideLayer = layer;
+    }
+
     /** Called on frame update. */
     final void onAnimationUpdate(@NonNull SurfaceControl.Transaction t, long currentPlayTime) {
         if (mIsFirstFrame) {
             t.show(mLeash);
+            if (mOverrideLayer != LAYER_NO_OVERRIDE) {
+                t.setLayer(mLeash, mOverrideLayer);
+            }
             mIsFirstFrame = false;
         }
 
@@ -78,22 +98,20 @@ class TaskFragmentAnimationAdapter {
                 mTarget.localBounds.left, mTarget.localBounds.top);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
-
-        // Open/close animation may scale up the surface. Apply an inverse scale to the window crop
-        // so that it will not be covering other windows.
-        mVecs[1] = mVecs[2] = 0;
-        mVecs[0] = mVecs[3] = 1;
-        mTransformation.getMatrix().mapVectors(mVecs);
-        mVecs[0] = 1.f / mVecs[0];
-        mVecs[3] = 1.f / mVecs[3];
-        final Rect clipRect = mTarget.localBounds;
-        mRect.left = (int) (clipRect.left * mVecs[0] + 0.5f);
-        mRect.right = (int) (clipRect.right * mVecs[0] + 0.5f);
-        mRect.top = (int) (clipRect.top * mVecs[3] + 0.5f);
-        mRect.bottom = (int) (clipRect.bottom * mVecs[3] + 0.5f);
-        mRect.offsetTo(Math.round(mTarget.localBounds.width() * (1 - mVecs[0]) / 2.f),
-                Math.round(mTarget.localBounds.height() * (1 - mVecs[3]) / 2.f));
-        t.setWindowCrop(mLeash, mRect);
+        // Get current animation position.
+        final int positionX = Math.round(mMatrix[MTRANS_X]);
+        final int positionY = Math.round(mMatrix[MTRANS_Y]);
+        // The exiting surface starts at position: mTarget.localBounds and moves with
+        // positionX varying. Offset our crop region by the amount we have slided so crop
+        // regions stays exactly on the original container in split.
+        final int cropOffsetX = mTarget.localBounds.left - positionX;
+        final int cropOffsetY = mTarget.localBounds.top - positionY;
+        final Rect cropRect = new Rect();
+        cropRect.set(mTarget.localBounds);
+        // Because window crop uses absolute position.
+        cropRect.offsetTo(0, 0);
+        cropRect.offset(cropOffsetX, cropOffsetY);
+        t.setCrop(mLeash, cropRect);
     }
 
     /** Called after animation finished. */

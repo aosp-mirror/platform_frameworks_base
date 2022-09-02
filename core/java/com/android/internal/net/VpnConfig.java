@@ -214,7 +214,7 @@ public class VpnConfig implements Parcelable {
             config.searchDomains = in.createStringArrayList();
             config.allowedApplications = in.createStringArrayList();
             config.disallowedApplications = in.createStringArrayList();
-            config.configureIntent = in.readParcelable(null);
+            config.configureIntent = in.readParcelable(null, android.app.PendingIntent.class);
             config.startTime = in.readLong();
             config.legacy = in.readInt() != 0;
             config.blocking = in.readInt() != 0;
@@ -225,7 +225,7 @@ public class VpnConfig implements Parcelable {
             config.requiresInternetValidation = in.readInt() != 0;
             config.excludeLocalRoutes = in.readInt() != 0;
             config.underlyingNetworks = in.createTypedArray(Network.CREATOR);
-            config.proxyInfo = in.readParcelable(null);
+            config.proxyInfo = in.readParcelable(null, android.net.ProxyInfo.class);
             return config;
         }
 

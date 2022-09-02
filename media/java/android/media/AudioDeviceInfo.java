@@ -421,7 +421,7 @@ public final class AudioDeviceInfo {
      */
     public CharSequence getProductName() {
         String portName = mPort.name();
-        return portName.length() != 0 ? portName : android.os.Build.MODEL;
+        return (portName != null && portName.length() != 0) ? portName : android.os.Build.MODEL;
     }
 
     /**
@@ -589,7 +589,16 @@ public final class AudioDeviceInfo {
 
     /** @hide */
     public static int convertDeviceTypeToInternalInputDevice(int deviceType) {
-        return EXT_TO_INT_INPUT_DEVICE_MAPPING.get(deviceType, AudioSystem.DEVICE_NONE);
+        return convertDeviceTypeToInternalInputDevice(deviceType, "");
+    }
+    /** @hide */
+    public static int convertDeviceTypeToInternalInputDevice(int deviceType, String address) {
+        int internalType = EXT_TO_INT_INPUT_DEVICE_MAPPING.get(deviceType, AudioSystem.DEVICE_NONE);
+        if (internalType == AudioSystem.DEVICE_IN_BUILTIN_MIC
+                && "back".equals(address)) {
+            internalType = AudioSystem.DEVICE_IN_BACK_MIC;
+        }
+        return internalType;
     }
 
     private static final SparseIntArray INT_TO_EXT_DEVICE_MAPPING;
@@ -680,9 +689,6 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_USB_ACCESSORY, AudioSystem.DEVICE_OUT_USB_ACCESSORY);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_DOCK, AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_FM, AudioSystem.DEVICE_OUT_FM);
-        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BUILTIN_MIC, AudioSystem.DEVICE_IN_BUILTIN_MIC);
-        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_FM_TUNER, AudioSystem.DEVICE_IN_FM_TUNER);
-        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_TV_TUNER, AudioSystem.DEVICE_IN_TV_TUNER);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_TELEPHONY, AudioSystem.DEVICE_OUT_TELEPHONY_TX);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_AUX_LINE, AudioSystem.DEVICE_OUT_AUX_LINE);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_IP, AudioSystem.DEVICE_OUT_IP);

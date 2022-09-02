@@ -142,6 +142,16 @@
         <item>On</item>
     </string-array>
 
+    <!-- State names for color correction tile: unavailable, off, on.
+         This subtitle is shown when the tile is in that particular state but does not set its own
+         subtitle, so some of these may never appear on screen. They should still be translated as
+         if they could appear. [CHAR LIMIT=32] -->
+    <string-array name="tile_states_color_correction">
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
+    </string-array>
+
     <!-- State names for (color) inversion tile: unavailable, off, on.
          This subtitle is shown when the tile is in that particular state but does not set its own
          subtitle, so some of these may never appear on screen. They should still be translated as
@@ -272,11 +282,28 @@
         <item>On</item>
     </string-array>
 
+    <!-- State names for qr code scanner tile: unavailable, off, on.
+         This subtitle is shown when the tile is in that particular state but does not set its own
+         subtitle, so some of these may never appear on screen. They should still be translated as
+         if they could appear. [CHAR LIMIT=32] -->
+    <string-array name="tile_states_qr_code_scanner">
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
+    </string-array>
+
     <!-- State names for alarm tile: unavailable, off, on.
          This subtitle is shown when the tile is in that particular state but does not set its own
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_alarm">
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
+    </string-array>
+
+    <!-- State names for One-handed mode tile: unavailable, off, on [CHAR LIMIT=32] -->
+    <string-array name="tile_states_onehanded">
         <item>Unavailable</item>
         <item>Off</item>
         <item>On</item>

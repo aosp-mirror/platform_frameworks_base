@@ -1,25 +1,13 @@
 {
   "presubmit": [
     {
-      "name": "CtsContentTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "include-filter": "android.content.wm.cts"
-        }
-      ],
-      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
-    },
-    {
       "name": "CtsOsTestCases",
       "options": [
         {
           "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.LargeTest"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -47,9 +35,29 @@
         },
         {
           "include-filter": "android.content.ComponentCallbacksControllerTest"
+        },
+        {
+          "include-filter": "android.content.ContextWrapperTest"
         }
       ],
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java", "(/|^)ComponentCallbacksController.java"]
+    }
+  ],
+  "presubmit-large": [
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.wm.cts"
+        }
+      ],
+      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
     }
   ]
 }

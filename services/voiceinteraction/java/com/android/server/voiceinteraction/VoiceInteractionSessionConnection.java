@@ -69,6 +69,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
+import com.android.server.power.LowPowerStandbyControllerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityAssistInfo;
@@ -89,6 +90,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     static final int POWER_BOOST_TIMEOUT_MS = Integer.parseInt(
             System.getProperty("vendor.powerhal.interaction.max", "200"));
     static final int BOOST_TIMEOUT_MS = 300;
+    /**
+     * The maximum time an app can stay on the Low Power Standby allowlist when
+     * the session is shown. There to safeguard against apps that don't call hide.
+     */
+    private static final int LOW_POWER_STANDBY_ALLOWLIST_TIMEOUT_MS = 120_000;
     // TODO: To avoid ap doesn't call hide, only 10 secs for now, need a better way to manage it
     //  in the future.
     static final int MAX_POWER_BOOST_TIMEOUT = 10_000;
@@ -124,6 +130,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             Executors.newSingleThreadScheduledExecutor();
     private final List<VisibleActivityInfo> mVisibleActivityInfos = new ArrayList<>();
     private final PowerManagerInternal mPowerManagerInternal;
+    private final LowPowerStandbyControllerInternal mLowPowerStandbyControllerInternal;
+    private final Runnable mRemoveFromLowPowerStandbyAllowlistRunnable =
+            this::removeFromLowPowerStandbyAllowlist;
+    private boolean mLowPowerStandbyAllowlisted;
     private PowerBoostSetter mSetPowerBoostRunnable;
     private final Handler mFgHandler;
 
@@ -211,6 +221,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mLowPowerStandbyControllerInternal = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
         mAppOps = context.getSystemService(AppOpsManager.class);
         mFgHandler = FgThread.getHandler();
         mAssistDataRequester = new AssistDataRequester(mContext, mIWindowManager,
@@ -322,6 +334,15 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             mSetPowerBoostRunnable = new PowerBoostSetter(
                     Instant.now().plusMillis(MAX_POWER_BOOST_TIMEOUT));
             mFgHandler.post(mSetPowerBoostRunnable);
+
+            if (mLowPowerStandbyControllerInternal != null) {
+                mLowPowerStandbyControllerInternal.addToAllowlist(mCallingUid);
+                mLowPowerStandbyAllowlisted = true;
+                mFgHandler.removeCallbacks(mRemoveFromLowPowerStandbyAllowlistRunnable);
+                mFgHandler.postDelayed(mRemoveFromLowPowerStandbyAllowlistRunnable,
+                        LOW_POWER_STANDBY_ALLOWLIST_TIMEOUT_MS);
+            }
+
             mCallback.onSessionShown(this);
             return true;
         }
@@ -493,6 +514,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 }
                 // A negative value indicates canceling previous boost.
                 mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, /* durationMs */ -1);
+                if (mLowPowerStandbyControllerInternal != null) {
+                    removeFromLowPowerStandbyAllowlist();
+                }
                 mCallback.onSessionHidden(this);
             }
             if (mFullyBound) {
@@ -727,6 +751,16 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         if (DEBUG) {
             Slog.d(TAG, "updateVisibleActivitiesChangedLocked type=" + type + ", count="
                     + visibleActivityInfos.size());
+        }
+    }
+
+    private void removeFromLowPowerStandbyAllowlist() {
+        synchronized (mLock) {
+            if (mLowPowerStandbyAllowlisted) {
+                mFgHandler.removeCallbacks(mRemoveFromLowPowerStandbyAllowlistRunnable);
+                mLowPowerStandbyControllerInternal.removeFromAllowlist(mCallingUid);
+                mLowPowerStandbyAllowlisted = false;
+            }
         }
     }
 

@@ -27,6 +27,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
@@ -43,7 +44,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-/** Controls the signal policies for icons shown in the StatusBar. **/
+/** Controls the signal policies for icons shown in the statusbar. **/
 @SysUISingleton
 public class StatusBarSignalPolicy implements SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
@@ -379,7 +380,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
     @Override
     public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
             boolean noNetworksAvailable) {
-        if (!mFeatureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+        if (!mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
             return;
         }
         if (DEBUG) {
@@ -448,7 +449,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
     }
 
     /**
-     * Stores the StatusBar state for no Calling & SMS.
+     * Stores the statusbar state for no Calling & SMS.
      */
     public static class CallIndicatorIconState {
         public boolean isNoCalling;

@@ -17,6 +17,7 @@
 package android.speech;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -46,7 +47,9 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -112,7 +115,8 @@ public class SpeechRecognizer {
             ERROR_TOO_MANY_REQUESTS,
             ERROR_SERVER_DISCONNECTED,
             ERROR_LANGUAGE_NOT_SUPPORTED,
-            ERROR_LANGUAGE_UNAVAILABLE
+            ERROR_LANGUAGE_UNAVAILABLE,
+            ERROR_CANNOT_CHECK_SUPPORT,
     })
     public @interface RecognitionError {}
 
@@ -155,19 +159,24 @@ public class SpeechRecognizer {
     /** Requested language is supported, but not available currently (e.g. not downloaded yet). */
     public static final int ERROR_LANGUAGE_UNAVAILABLE = 13;
 
+    /** The service does not allow to check for support. */
+    public static final int ERROR_CANNOT_CHECK_SUPPORT = 14;
+
     /** action codes */
     private static final int MSG_START = 1;
     private static final int MSG_STOP = 2;
     private static final int MSG_CANCEL = 3;
     private static final int MSG_CHANGE_LISTENER = 4;
     private static final int MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT = 5;
+    private static final int MSG_CHECK_RECOGNITION_SUPPORT = 6;
+    private static final int MSG_TRIGGER_MODEL_DOWNLOAD = 7;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
 
     /** Context with which the manager was created */
     private final Context mContext;
-    
+
     /** Component to direct service intent to */
     private final ComponentName mServiceComponent;
 
@@ -197,6 +206,14 @@ public class SpeechRecognizer {
                 case MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT:
                     handleSetTemporaryComponent((ComponentName) msg.obj);
                     break;
+                case MSG_CHECK_RECOGNITION_SUPPORT:
+                    CheckRecognitionSupportArgs args = (CheckRecognitionSupportArgs) msg.obj;
+                    handleCheckRecognitionSupport(
+                            args.mIntent, args.mCallbackExecutor, args.mCallback);
+                    break;
+                case MSG_TRIGGER_MODEL_DOWNLOAD:
+                    handleTriggerModelDownload((Intent) msg.obj);
+                    break;
             }
         }
     };
@@ -208,7 +225,7 @@ public class SpeechRecognizer {
     private final Queue<Message> mPendingTasks = new LinkedBlockingQueue<>();
 
     /** The Listener that will receive all the callbacks */
-    private final InternalListener mListener = new InternalListener();
+    private final InternalRecognitionListener mListener = new InternalRecognitionListener();
 
     private final IBinder mClientToken = new Binder();
 
@@ -465,6 +482,60 @@ public class SpeechRecognizer {
     }
 
     /**
+     * Checks whether {@code recognizerIntent} is supported by
+     * {@link SpeechRecognizer#startListening(Intent)}.
+     *
+     * @param recognizerIntent contains parameters for the recognition to be performed. The intent
+     *        may also contain optional extras. See {@link RecognizerIntent} for the list of
+     *        supported extras, any unlisted extra might be ignored.
+     * @param supportListener the listener on which to receive the support query results.
+     */
+    public void checkRecognitionSupport(
+            @NonNull Intent recognizerIntent,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull RecognitionSupportCallback supportListener) {
+        Objects.requireNonNull(recognizerIntent, "intent must not be null");
+        Objects.requireNonNull(supportListener, "listener must not be null");
+
+        if (DBG) {
+            Slog.i(TAG, "#checkRecognitionSupport called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(mHandler, MSG_CHECK_RECOGNITION_SUPPORT,
+                new CheckRecognitionSupportArgs(recognizerIntent, executor, supportListener)));
+    }
+
+    /**
+     * Attempts to download the support for the given {@code recognizerIntent}. This might trigger
+     * user interaction to approve the download. Callers can verify the status of the request via
+     * {@link #checkRecognitionSupport(Intent, Executor, RecognitionSupportCallback)}.
+     *
+     * @param recognizerIntent contains parameters for the recognition to be performed. The intent
+     *        may also contain optional extras, see {@link RecognizerIntent}.
+     */
+    public void triggerModelDownload(@NonNull Intent recognizerIntent) {
+        Objects.requireNonNull(recognizerIntent, "intent must not be null");
+        if (DBG) {
+            Slog.i(TAG, "#triggerModelDownload called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+    }
+
+    /**
      * Sets a temporary component to power on-device speech recognizer.
      *
      * <p>This is only expected to be called in tests, system would reject calls from client apps.
@@ -503,7 +574,7 @@ public class SpeechRecognizer {
         }
         try {
             mService.startListening(recognizerIntent, mListener, mContext.getAttributionSource());
-            if (DBG) Log.d(TAG, "service start listening command succeded");
+            if (DBG) Log.d(TAG, "service start listening command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "startListening() failed", e);
             mListener.onError(ERROR_CLIENT);
@@ -517,7 +588,7 @@ public class SpeechRecognizer {
         }
         try {
             mService.stopListening(mListener);
-            if (DBG) Log.d(TAG, "service stop listening command succeded");
+            if (DBG) Log.d(TAG, "service stop listening command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "stopListening() failed", e);
             mListener.onError(ERROR_CLIENT);
@@ -531,7 +602,7 @@ public class SpeechRecognizer {
         }
         try {
             mService.cancel(mListener, /*isShutdown*/ false);
-            if (DBG) Log.d(TAG, "service cancel command succeded");
+            if (DBG) Log.d(TAG, "service cancel command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "cancel() failed", e);
             mListener.onError(ERROR_CLIENT);
@@ -551,6 +622,36 @@ public class SpeechRecognizer {
             mManagerService.setTemporaryComponent(componentName);
         } catch (final RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    private void handleCheckRecognitionSupport(
+            Intent recognizerIntent,
+            Executor callbackExecutor,
+            RecognitionSupportCallback recognitionSupportCallback) {
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+        try {
+            mService.checkRecognitionSupport(
+                    recognizerIntent,
+                    new InternalSupportCallback(callbackExecutor, recognitionSupportCallback));
+            if (DBG) Log.d(TAG, "service support command succeeded");
+        } catch (final RemoteException e) {
+            Log.e(TAG, "checkRecognitionSupport() failed", e);
+            callbackExecutor.execute(() -> recognitionSupportCallback.onError(ERROR_CLIENT));
+        }
+    }
+
+    private void handleTriggerModelDownload(Intent recognizerIntent) {
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+        try {
+            mService.triggerModelDownload(recognizerIntent);
+        } catch (final RemoteException e) {
+            Log.e(TAG, "downloadModel() failed", e);
+            mListener.onError(ERROR_CLIENT);
         }
     }
 
@@ -626,7 +727,10 @@ public class SpeechRecognizer {
         }
     }
 
-    private boolean maybeInitializeManagerService() {
+    private synchronized boolean maybeInitializeManagerService() {
+        if (DBG) {
+            Log.i(TAG, "#maybeInitializeManagerService found = " + mManagerService);
+        }
         if (mManagerService != null) {
             return true;
         }
@@ -634,8 +738,13 @@ public class SpeechRecognizer {
         mManagerService = IRecognitionServiceManager.Stub.asInterface(
                 ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE));
 
-        if (mManagerService == null && mListener != null) {
-            mListener.onError(ERROR_CLIENT);
+        if (DBG) {
+            Log.i(TAG, "#maybeInitializeManagerService instantiated =" + mManagerService);
+        }
+        if (mManagerService == null) {
+            if (mListener != null) {
+                mListener.onError(ERROR_CLIENT);
+            }
             return false;
         }
         return true;
@@ -674,11 +783,26 @@ public class SpeechRecognizer {
         return ComponentName.unflattenFromString(serviceComponent);
     }
 
+    private static class CheckRecognitionSupportArgs {
+        final Intent mIntent;
+        final Executor mCallbackExecutor;
+        final RecognitionSupportCallback mCallback;
+
+        private CheckRecognitionSupportArgs(
+                Intent intent,
+                Executor callbackExecutor,
+                RecognitionSupportCallback callback) {
+            mIntent = intent;
+            mCallbackExecutor = callbackExecutor;
+            mCallback = callback;
+        }
+    }
+
     /**
      * Internal wrapper of IRecognitionListener which will propagate the results to
      * RecognitionListener
      */
-    private static class InternalListener extends IRecognitionListener.Stub {
+    private static class InternalRecognitionListener extends IRecognitionListener.Stub {
         private RecognitionListener mInternalListener;
 
         private static final int MSG_BEGINNING_OF_SPEECH = 1;
@@ -690,6 +814,8 @@ public class SpeechRecognizer {
         private static final int MSG_PARTIAL_RESULTS = 7;
         private static final int MSG_RMS_CHANGED = 8;
         private static final int MSG_ON_EVENT = 9;
+        private static final int MSG_SEGMENT_RESULTS = 10;
+        private static final int MSG_SEGMENT_END_SESSION = 11;
 
         private final Handler mInternalHandler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -724,6 +850,12 @@ public class SpeechRecognizer {
                         break;
                     case MSG_ON_EVENT:
                         mInternalListener.onEvent(msg.arg1, (Bundle) msg.obj);
+                        break;
+                    case MSG_SEGMENT_RESULTS:
+                        mInternalListener.onSegmentResults((Bundle) msg.obj);
+                        break;
+                    case MSG_SEGMENT_END_SESSION:
+                        mInternalListener.onEndOfSegmentedSession();
                         break;
                 }
             }
@@ -761,9 +893,37 @@ public class SpeechRecognizer {
             Message.obtain(mInternalHandler, MSG_RMS_CHANGED, rmsdB).sendToTarget();
         }
 
+        public void onSegmentResults(final Bundle bundle) {
+            Message.obtain(mInternalHandler, MSG_SEGMENT_RESULTS, bundle).sendToTarget();
+        }
+
+        public void onEndOfSegmentedSession() {
+            Message.obtain(mInternalHandler, MSG_SEGMENT_END_SESSION).sendToTarget();
+        }
+
         public void onEvent(final int eventType, final Bundle params) {
             Message.obtain(mInternalHandler, MSG_ON_EVENT, eventType, eventType, params)
                     .sendToTarget();
+        }
+    }
+
+    private static class InternalSupportCallback extends IRecognitionSupportCallback.Stub {
+        private final Executor mExecutor;
+        private final RecognitionSupportCallback mCallback;
+
+        private InternalSupportCallback(Executor executor, RecognitionSupportCallback callback) {
+            this.mExecutor = executor;
+            this.mCallback = callback;
+        }
+
+        @Override
+        public void onSupportResult(RecognitionSupport recognitionSupport) throws RemoteException {
+            mExecutor.execute(() -> mCallback.onSupportResult(recognitionSupport));
+        }
+
+        @Override
+        public void onError(int errorCode) throws RemoteException {
+            mExecutor.execute(() -> mCallback.onError(errorCode));
         }
     }
 }

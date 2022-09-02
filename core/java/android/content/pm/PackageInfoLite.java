@@ -21,7 +21,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 
 /**
  * Basic information about a package as specified in its manifest.
@@ -79,11 +79,16 @@ public class PackageInfoLite implements Parcelable {
     public boolean debuggable;
 
     /**
+     * Indicates if this apk is a sdk.
+     */
+    public boolean isSdkLibrary;
+
+    /**
      * Specifies the recommended install location. Can be one of
-     * {@link PackageHelper#RECOMMEND_INSTALL_INTERNAL} to install on internal storage,
-     * {@link PackageHelper#RECOMMEND_INSTALL_EXTERNAL} to install on external media,
-     * {@link PackageHelper#RECOMMEND_FAILED_INSUFFICIENT_STORAGE} for storage errors,
-     * or {@link PackageHelper#RECOMMEND_FAILED_INVALID_APK} for parse errors.
+     * {@link InstallLocationUtils#RECOMMEND_INSTALL_INTERNAL} to install on internal storage,
+     * {@link InstallLocationUtils#RECOMMEND_INSTALL_EXTERNAL} to install on external media,
+     * {@link InstallLocationUtils#RECOMMEND_FAILED_INSUFFICIENT_STORAGE} for storage errors,
+     * or {@link InstallLocationUtils#RECOMMEND_FAILED_INVALID_APK} for parse errors.
      */
     public int recommendedInstallLocation;
     public int installLocation;

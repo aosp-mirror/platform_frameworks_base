@@ -91,6 +91,10 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
                 if (!volume.isMountedWritable()) {
                     continue;
                 }
+                // gsid only supports vfat external storage.
+                if (!"vfat".equalsIgnoreCase(volume.fsType)) {
+                    continue;
+                }
                 DiskInfo disk = volume.getDisk();
                 long mega = disk.size >> 20;
                 Slog.i(TAG, volume.getPath() + ": " + mega + " MB");
@@ -119,14 +123,13 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
 
     @Override
     @EnforcePermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public boolean createPartition(String name, long size, boolean readOnly)
-            throws RemoteException {
+    public int createPartition(String name, long size, boolean readOnly) throws RemoteException {
         IGsiService service = getGsiService();
-        if (service.createPartition(name, size, readOnly) != 0) {
-            Slog.i(TAG, "Failed to install " + name);
-            return false;
+        int status = service.createPartition(name, size, readOnly);
+        if (status != IGsiService.INSTALL_OK) {
+            Slog.i(TAG, "Failed to create partition: " + name);
         }
-        return true;
+        return status;
     }
 
     @Override

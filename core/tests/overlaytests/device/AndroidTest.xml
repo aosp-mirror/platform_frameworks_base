@@ -20,7 +20,7 @@
     <option name="test-suite-tag" value="apct-instrumentation" />
 
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
         <option name="remount-system" value="true" />
         <option name="push" value="OverlayDeviceTests.apk->/system/app/OverlayDeviceTests.apk" />

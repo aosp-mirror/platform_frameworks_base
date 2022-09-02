@@ -2970,14 +2970,6 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                     }
                     e->setNameIndex(keyStrings.add(e->getName(), true));
 
-                    // If this entry has no values for other configs,
-                    // and is the default config, then it is special.  Otherwise
-                    // we want to add it with the config info.
-                    ConfigDescription* valueConfig = NULL;
-                    if (N != 1 || config == nullConfig) {
-                        valueConfig = &config;
-                    }
-
                     status_t err = e->prepareFlatten(&valueStrings, this,
                             &configTypeName, &config);
                     if (err != NO_ERROR) {

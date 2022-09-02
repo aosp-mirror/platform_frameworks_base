@@ -1,6 +1,14 @@
 {
   "presubmit": [
     {
+      "name": "CtsCameraTestCases",
+      "options" : [
+        {
+          "include-filter": "android.hardware.camera2.cts.ImageReaderTest#testP010"
+        }
+      ]
+    },
+    {
       "name": "GtsMediaTestCases",
       "options" : [
         {
@@ -12,7 +20,8 @@
         {
           "include-filter": "com.google.android.media.gts.WidevineH264PlaybackTests"
         }
-      ]
+      ],
+      "file_patterns": ["(?i)drm|crypto"]
     }
   ],
   "imports": [

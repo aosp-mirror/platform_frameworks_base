@@ -35,6 +35,7 @@ import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
@@ -72,6 +73,7 @@ public class ScrollCaptureController {
     private ListenableFuture<CaptureResult> mTileFuture;
     private ListenableFuture<Void> mEndFuture;
     private String mWindowOwner;
+    private volatile boolean mCancelled;
 
     static class LongScreenshot {
         private final ImageTileSet mImageTileSet;
@@ -159,9 +161,11 @@ public class ScrollCaptureController {
      * @return a future ImageTile set containing the result
      */
     ListenableFuture<LongScreenshot> run(ScrollCaptureResponse response) {
+        mCancelled = false;
         return CallbackToFutureAdapter.getFuture(completer -> {
             mCaptureCompleter = completer;
             mWindowOwner = response.getPackageName();
+            mCaptureCompleter.addCancellationListener(this::onCancelled, mBgExecutor);
             mBgExecutor.execute(() -> {
                 float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
                         SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
@@ -170,6 +174,24 @@ public class ScrollCaptureController {
             });
             return "<batch scroll capture>";
         });
+    }
+
+    /**
+     * The ListenableFuture for the long screenshot was cancelled. Be sure to cancel all downstream
+     * futures that might be pending.
+     */
+    private void onCancelled() {
+        mCancelled = true;
+        if (mSessionFuture != null) {
+            mSessionFuture.cancel(true);
+        }
+        if (mTileFuture != null) {
+            mTileFuture.cancel(true);
+        }
+        if (mSession != null) {
+            mSession.end();
+        }
+        mEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_FAILURE, 0, mWindowOwner);
     }
 
     private void onStartComplete() {
@@ -192,18 +214,21 @@ public class ScrollCaptureController {
         if (LogConfig.DEBUG_SCROLL) {
             Log.d(TAG, "requestNextTile: " + topPx);
         }
+        if (mCancelled) {
+            Log.d(TAG, "requestNextTile: CANCELLED");
+            return;
+        }
         mTileFuture = mSession.requestTile(topPx);
         mTileFuture.addListener(() -> {
             try {
-                if (LogConfig.DEBUG_SCROLL) {
-                    Log.d(TAG, "onCaptureResult");
-                }
                 onCaptureResult(mTileFuture.get());
+            } catch (CancellationException e) {
+                Log.e(TAG, "requestTile cancelled");
             } catch (InterruptedException | ExecutionException e) {
                 Log.e(TAG, "requestTile failed!", e);
                 mCaptureCompleter.setException(e);
             }
-        }, mContext.getMainExecutor());
+        }, mBgExecutor);
     }
 
     private void onCaptureResult(CaptureResult result) {

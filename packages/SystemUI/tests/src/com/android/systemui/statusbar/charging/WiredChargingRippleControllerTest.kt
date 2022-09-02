@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -57,11 +58,12 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(featureFlags.isChargingRippleEnabled).thenReturn(true)
+        `when`(featureFlags.isEnabled(Flags.CHARGING_RIPPLE)).thenReturn(true)
         controller = WiredChargingRippleController(
                 commandRegistry, batteryController, configurationController,
                 featureFlags, context, windowManager, systemClock, uiEventLogger)
         controller.rippleView = rippleView // Replace the real ripple view with a mock instance
+        controller.registerCallbacks()
     }
 
     @Test

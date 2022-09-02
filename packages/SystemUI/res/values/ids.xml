@@ -23,6 +23,7 @@
     <item type="id" name="scale_x_animator_tag"/>
     <item type="id" name="scale_y_animator_tag"/>
     <item type="id" name="top_inset_animator_tag"/>
+    <item type="id" name="bottom_inset_animator_tag"/>
     <item type="id" name="height_animator_tag"/>
     <item type="id" name="x_animator_tag"/>
     <item type="id" name="y_animator_tag"/>
@@ -33,6 +34,7 @@
     <item type="id" name="scale_y_animator_end_value_tag"/>
     <item type="id" name="alpha_animator_end_value_tag"/>
     <item type="id" name="top_inset_animator_end_value_tag"/>
+    <item type="id" name="bottom_inset_animator_end_value_tag"/>
     <item type="id" name="height_animator_end_value_tag"/>
     <item type="id" name="x_animator_tag_end_value"/>
     <item type="id" name="y_animator_tag_end_value"/>
@@ -43,6 +45,7 @@
     <item type="id" name="scale_y_animator_start_value_tag"/>
     <item type="id" name="alpha_animator_start_value_tag"/>
     <item type="id" name="top_inset_animator_start_value_tag"/>
+    <item type="id" name="bottom_inset_animator_start_value_tag"/>
     <item type="id" name="height_animator_start_value_tag"/>
     <item type="id" name="x_animator_tag_start_value"/>
     <item type="id" name="y_animator_tag_start_value"/>
@@ -167,5 +170,11 @@
     <item type="id" name="action_move_bottom_right"/>
     <item type="id" name="action_move_to_edge_and_hide"/>
     <item type="id" name="action_move_out_edge_and_show"/>
+
+    <!-- rounded corner view id -->
+    <item type="id" name="rounded_corner_top_left"/>
+    <item type="id" name="rounded_corner_top_right"/>
+    <item type="id" name="rounded_corner_bottom_left"/>
+    <item type="id" name="rounded_corner_bottom_right"/>
 </resources>
 

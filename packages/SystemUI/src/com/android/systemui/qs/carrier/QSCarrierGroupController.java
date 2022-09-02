@@ -20,6 +20,7 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -42,6 +43,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -80,6 +82,7 @@ public class QSCarrierGroupController {
     private final CarrierConfigTracker mCarrierConfigTracker;
 
     private boolean mIsSingleCarrier;
+    @Nullable
     private OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
 
     private final SlotIndexResolver mSlotIndexResolver;
@@ -219,7 +222,7 @@ public class QSCarrierGroupController {
             CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags,
             SlotIndexResolver slotIndexResolver) {
 
-        if (featureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+        if (featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
             mProviderModel = true;
         } else {
             mProviderModel = false;
@@ -293,7 +296,8 @@ public class QSCarrierGroupController {
      * This will get notified when the number of carriers changes between 1 and "not one".
      * @param listener
      */
-    public void setOnSingleCarrierChangedListener(OnSingleCarrierChangedListener listener) {
+    public void setOnSingleCarrierChangedListener(
+            @Nullable OnSingleCarrierChangedListener listener) {
         mOnSingleCarrierChangedListener = listener;
     }
 

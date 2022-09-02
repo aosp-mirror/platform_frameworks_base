@@ -18,6 +18,7 @@ package com.android.server.locksettings;
 
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PasswordMetrics;
@@ -28,6 +29,7 @@ import android.hardware.weaver.V1_0.WeaverConfig;
 import android.hardware.weaver.V1_0.WeaverReadResponse;
 import android.hardware.weaver.V1_0.WeaverReadStatus;
 import android.hardware.weaver.V1_0.WeaverStatus;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.security.GateKeeper;
@@ -41,6 +43,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
+import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -48,6 +51,8 @@ import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
 import libcore.util.HexEncoding;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -111,14 +116,15 @@ public class SyntheticPasswordManager {
     private static final byte SYNTHETIC_PASSWORD_VERSION_V2 = 2;
     private static final byte SYNTHETIC_PASSWORD_VERSION_V3 = 3;
     private static final byte SYNTHETIC_PASSWORD_PASSWORD_BASED = 0;
-    private static final byte SYNTHETIC_PASSWORD_TOKEN_BASED = 1;
+    private static final byte SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED = 1;
+    private static final byte SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED = 2;
 
     // 256-bit synthetic password
     private static final byte SYNTHETIC_PASSWORD_LENGTH = 256 / 8;
 
-    private static final int PASSWORD_SCRYPT_N = 11;
-    private static final int PASSWORD_SCRYPT_R = 3;
-    private static final int PASSWORD_SCRYPT_P = 1;
+    private static final int PASSWORD_SCRYPT_LOG_N = 11;
+    private static final int PASSWORD_SCRYPT_LOG_R = 3;
+    private static final int PASSWORD_SCRYPT_LOG_P = 1;
     private static final int PASSWORD_SALT_LENGTH = 16;
     private static final int PASSWORD_TOKEN_LENGTH = 32;
     private static final String TAG = "SyntheticPasswordManager";
@@ -186,7 +192,11 @@ public class SyntheticPasswordManager {
             mVersion = version;
         }
 
-        private byte[] derivePassword(byte[] personalization) {
+        /**
+         * Derives a subkey from the synthetic password. For v3 and later synthetic passwords the
+         * subkeys are 256-bit; for v1 and v2 they are 512-bit.
+         */
+        private byte[] deriveSubkey(byte[] personalization) {
             if (mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
                 return (new SP800Derive(mSyntheticPassword))
                     .withContext(personalization, PERSONALISATION_CONTEXT);
@@ -197,28 +207,28 @@ public class SyntheticPasswordManager {
         }
 
         public byte[] deriveKeyStorePassword() {
-            return bytesToHex(derivePassword(PERSONALIZATION_KEY_STORE_PASSWORD));
+            return bytesToHex(deriveSubkey(PERSONALIZATION_KEY_STORE_PASSWORD));
         }
 
         public byte[] deriveGkPassword() {
-            return derivePassword(PERSONALIZATION_SP_GK_AUTH);
+            return deriveSubkey(PERSONALIZATION_SP_GK_AUTH);
         }
 
         public byte[] deriveDiskEncryptionKey() {
-            return derivePassword(PERSONALIZATION_FBE_KEY);
+            return deriveSubkey(PERSONALIZATION_FBE_KEY);
         }
 
         public byte[] deriveVendorAuthSecret() {
-            return derivePassword(PERSONALIZATION_AUTHSECRET_KEY);
+            return deriveSubkey(PERSONALIZATION_AUTHSECRET_KEY);
         }
 
         public byte[] derivePasswordHashFactor() {
-            return derivePassword(PERSONALIZATION_PASSWORD_HASH);
+            return deriveSubkey(PERSONALIZATION_PASSWORD_HASH);
         }
 
         /** Derives key used to encrypt password metrics */
         public byte[] deriveMetricsKey() {
-            return derivePassword(PERSONALIZATION_PASSWORD_METRICS);
+            return deriveSubkey(PERSONALIZATION_PASSWORD_METRICS);
         }
 
         /**
@@ -268,9 +278,8 @@ public class SyntheticPasswordManager {
          * AuthenticationToken.mSyntheticPassword for details on what each block means.
          */
         private void recreate(byte[] escrowSplit0, byte[] escrowSplit1) {
-            mSyntheticPassword = String.valueOf(HexEncoding.encode(
-                    SyntheticPasswordCrypto.personalisedHash(
-                            PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1))).getBytes();
+            mSyntheticPassword = bytesToHex(SyntheticPasswordCrypto.personalisedHash(
+                    PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1));
         }
 
         /**
@@ -304,9 +313,9 @@ public class SyntheticPasswordManager {
     }
 
     static class PasswordData {
-        byte scryptN;
-        byte scryptR;
-        byte scryptP;
+        byte scryptLogN;
+        byte scryptLogR;
+        byte scryptLogP;
         public int credentialType;
         byte[] salt;
         // For GateKeeper-based credential, this is the password handle returned by GK,
@@ -315,9 +324,9 @@ public class SyntheticPasswordManager {
 
         public static PasswordData create(int passwordType) {
             PasswordData result = new PasswordData();
-            result.scryptN = PASSWORD_SCRYPT_N;
-            result.scryptR = PASSWORD_SCRYPT_R;
-            result.scryptP = PASSWORD_SCRYPT_P;
+            result.scryptLogN = PASSWORD_SCRYPT_LOG_N;
+            result.scryptLogR = PASSWORD_SCRYPT_LOG_R;
+            result.scryptLogP = PASSWORD_SCRYPT_LOG_P;
             result.credentialType = passwordType;
             result.salt = secureRandom(PASSWORD_SALT_LENGTH);
             return result;
@@ -329,9 +338,9 @@ public class SyntheticPasswordManager {
             buffer.put(data, 0, data.length);
             buffer.flip();
             result.credentialType = buffer.getInt();
-            result.scryptN = buffer.get();
-            result.scryptR = buffer.get();
-            result.scryptP = buffer.get();
+            result.scryptLogN = buffer.get();
+            result.scryptLogR = buffer.get();
+            result.scryptLogP = buffer.get();
             int saltLen = buffer.getInt();
             result.salt = new byte[saltLen];
             buffer.get(result.salt);
@@ -351,9 +360,9 @@ public class SyntheticPasswordManager {
                     + Integer.BYTES + salt.length + Integer.BYTES +
                     (passwordHandle != null ? passwordHandle.length : 0));
             buffer.putInt(credentialType);
-            buffer.put(scryptN);
-            buffer.put(scryptR);
-            buffer.put(scryptP);
+            buffer.put(scryptLogN);
+            buffer.put(scryptLogR);
+            buffer.put(scryptLogP);
             buffer.putInt(salt.length);
             buffer.put(salt);
             if (passwordHandle != null && passwordHandle.length > 0) {
@@ -366,10 +375,47 @@ public class SyntheticPasswordManager {
         }
     }
 
+    static class SyntheticPasswordBlob {
+        byte mVersion;
+        byte mType;
+        byte[] mContent;
+
+        public static SyntheticPasswordBlob create(byte version, byte type, byte[] content) {
+            SyntheticPasswordBlob result = new SyntheticPasswordBlob();
+            result.mVersion = version;
+            result.mType = type;
+            result.mContent = content;
+            return result;
+        }
+
+        public static SyntheticPasswordBlob fromBytes(byte[] data) {
+            SyntheticPasswordBlob result = new SyntheticPasswordBlob();
+            result.mVersion = data[0];
+            result.mType = data[1];
+            result.mContent = Arrays.copyOfRange(data, 2, data.length);
+            return result;
+        }
+
+        public byte[] toByte() {
+            byte[] blob = new byte[mContent.length + 1 + 1];
+            blob[0] = mVersion;
+            blob[1] = mType;
+            System.arraycopy(mContent, 0, blob, 2, mContent.length);
+            return blob;
+        }
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TOKEN_TYPE_STRONG, TOKEN_TYPE_WEAK})
+    @interface TokenType {}
+    static final int TOKEN_TYPE_STRONG = 0;
+    static final int TOKEN_TYPE_WEAK = 1;
+
     static class TokenData {
         byte[] secdiscardableOnDisk;
         byte[] weaverSecret;
         byte[] aggregatedSecret;
+        @TokenType int mType;
         EscrowTokenStateChangeCallback mCallback;
     }
 
@@ -380,6 +426,9 @@ public class SyntheticPasswordManager {
     private PasswordSlotManager mPasswordSlotManager;
 
     private final UserManager mUserManager;
+
+    private final RemoteCallbackList<IWeakEscrowTokenRemovedListener> mListeners =
+            new RemoteCallbackList<>();
 
     public SyntheticPasswordManager(Context context, LockSettingsStorage storage,
             UserManager userManager, PasswordSlotManager passwordSlotManager) {
@@ -519,10 +568,17 @@ public class SyntheticPasswordManager {
         return response[0];
     }
 
-    public void removeUser(int userId) {
+    public void removeUser(IGateKeeperService gatekeeper, int userId) {
         for (long handle : mStorage.listSyntheticPasswordHandlesForUser(SP_BLOB_NAME, userId)) {
             destroyWeaverSlot(handle, userId);
             destroySPBlobKey(getKeyName(handle));
+        }
+        // Remove potential persistent state (in RPMB), to prevent them from accumulating and
+        // causing problems.
+        try {
+            gatekeeper.clearSecureUserId(fakeUid(userId));
+        } catch (RemoteException ignore) {
+            Slog.w(TAG, "Failed to clear SID from gatekeeper");
         }
     }
 
@@ -880,13 +936,34 @@ public class SyntheticPasswordManager {
      * Create a token based Synthetic password for the given user.
      * @return the handle of the token
      */
-    public long createTokenBasedSyntheticPassword(byte[] token, int userId,
+    public long createStrongTokenBasedSyntheticPassword(byte[] token, int userId,
+            @Nullable EscrowTokenStateChangeCallback changeCallback) {
+        return createTokenBasedSyntheticPassword(token, TOKEN_TYPE_STRONG, userId,
+                changeCallback);
+    }
+
+    /**
+     * Create a weak token based Synthetic password for the given user.
+     * @return the handle of the weak token
+     */
+    public long createWeakTokenBasedSyntheticPassword(byte[] token, int userId,
+            @Nullable EscrowTokenStateChangeCallback changeCallback) {
+        return createTokenBasedSyntheticPassword(token, TOKEN_TYPE_WEAK, userId,
+                changeCallback);
+    }
+
+    /**
+     * Create a token based Synthetic password of the given type for the given user.
+     * @return the handle of the token
+     */
+    public long createTokenBasedSyntheticPassword(byte[] token, @TokenType int type, int userId,
             @Nullable EscrowTokenStateChangeCallback changeCallback) {
         long handle = generateHandle();
         if (!tokenMap.containsKey(userId)) {
             tokenMap.put(userId, new ArrayMap<>());
         }
         TokenData tokenData = new TokenData();
+        tokenData.mType = type;
         final byte[] secdiscardable = secureRandom(SECDISCARDABLE_LENGTH);
         if (isWeaverAvailable()) {
             tokenData.weaverSecret = secureRandom(mWeaverConfig.valueSize);
@@ -910,6 +987,7 @@ public class SyntheticPasswordManager {
         return new ArraySet<>(tokenMap.get(userId).keySet());
     }
 
+    /** Remove the given pending token. */
     public boolean removePendingToken(long handle, int userId) {
         if (!tokenMap.containsKey(userId)) {
             return false;
@@ -941,7 +1019,7 @@ public class SyntheticPasswordManager {
             mPasswordSlotManager.markSlotInUse(slot);
         }
         saveSecdiscardable(handle, tokenData.secdiscardableOnDisk, userId);
-        createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED, authToken,
+        createSyntheticPasswordBlob(handle, getTokenBasedBlobType(tokenData.mType), authToken,
                 tokenData.aggregatedSecret, 0L, userId);
         tokenMap.get(userId).remove(handle);
         if (tokenData.mCallback != null) {
@@ -953,26 +1031,23 @@ public class SyntheticPasswordManager {
     private void createSyntheticPasswordBlob(long handle, byte type, AuthenticationToken authToken,
             byte[] applicationId, long sid, int userId) {
         final byte[] secret;
-        if (type == SYNTHETIC_PASSWORD_TOKEN_BASED) {
+        if (type == SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED
+                || type == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
             secret = authToken.getEscrowSecret();
         } else {
             secret = authToken.getSyntheticPassword();
         }
         byte[] content = createSPBlob(getKeyName(handle), secret, applicationId, sid);
-        byte[] blob = new byte[content.length + 1 + 1];
         /*
          * We can upgrade from v1 to v2 because that's just a change in the way that
          * the SP is stored. However, we can't upgrade to v3 because that is a change
          * in the way that passwords are derived from the SP.
          */
-        if (authToken.mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
-            blob[0] = SYNTHETIC_PASSWORD_VERSION_V3;
-        } else {
-            blob[0] = SYNTHETIC_PASSWORD_VERSION_V2;
-        }
-        blob[1] = type;
-        System.arraycopy(content, 0, blob, 2, content.length);
-        saveState(SP_BLOB_NAME, blob, handle, userId);
+        byte version = authToken.mVersion == SYNTHETIC_PASSWORD_VERSION_V3
+                ? SYNTHETIC_PASSWORD_VERSION_V3 : SYNTHETIC_PASSWORD_VERSION_V2;
+
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob.create(version, type, content);
+        saveState(SP_BLOB_NAME, blob.toByte(), handle, userId);
     }
 
     /**
@@ -1089,6 +1164,36 @@ public class SyntheticPasswordManager {
      */
     public @NonNull AuthenticationResult unwrapTokenBasedSyntheticPassword(
             IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob
+                .fromBytes(loadState(SP_BLOB_NAME, handle, userId));
+        return unwrapTokenBasedSyntheticPasswordInternal(gatekeeper, handle,
+                blob.mType, token, userId);
+    }
+
+    /**
+     * Decrypt a synthetic password by supplying an strong escrow token and corresponding token
+     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
+     * verification to referesh the SID & Auth token maintained by the system.
+     */
+    public @NonNull AuthenticationResult unwrapStrongTokenBasedSyntheticPassword(
+            IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
+        return unwrapTokenBasedSyntheticPasswordInternal(gatekeeper, handle,
+                SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED, token, userId);
+    }
+
+    /**
+     * Decrypt a synthetic password by supplying a weak escrow token and corresponding token
+     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
+     * verification to referesh the SID & Auth token maintained by the system.
+     */
+    public @NonNull AuthenticationResult unwrapWeakTokenBasedSyntheticPassword(
+            IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
+        return unwrapTokenBasedSyntheticPasswordInternal(gatekeeper, handle,
+                SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED, token, userId);
+    }
+
+    private  @NonNull AuthenticationResult unwrapTokenBasedSyntheticPasswordInternal(
+            IGateKeeperService gatekeeper, long handle, byte type, byte[] token, int userId) {
         AuthenticationResult result = new AuthenticationResult();
         byte[] secdiscardable = loadSecdiscardable(handle, userId);
         int slotId = loadWeaverSlot(handle, userId);
@@ -1109,8 +1214,7 @@ public class SyntheticPasswordManager {
                     PERSONALISATION_WEAVER_TOKEN, secdiscardable);
         }
         byte[] applicationId = transformUnderSecdiscardable(token, secdiscardable);
-        result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED,
-                applicationId, 0L, userId);
+        result.authToken = unwrapSyntheticPasswordBlob(handle, type, applicationId, 0L, userId);
         if (result.authToken != null) {
             result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
             if (result.gkResponse == null) {
@@ -1126,33 +1230,33 @@ public class SyntheticPasswordManager {
 
     private AuthenticationToken unwrapSyntheticPasswordBlob(long handle, byte type,
             byte[] applicationId, long sid, int userId) {
-        byte[] blob = loadState(SP_BLOB_NAME, handle, userId);
-        if (blob == null) {
+        byte[] data = loadState(SP_BLOB_NAME, handle, userId);
+        if (data == null) {
             return null;
         }
-        final byte version = blob[0];
-        if (version != SYNTHETIC_PASSWORD_VERSION_V3
-                && version != SYNTHETIC_PASSWORD_VERSION_V2
-                && version != SYNTHETIC_PASSWORD_VERSION_V1) {
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(data);
+        if (blob.mVersion != SYNTHETIC_PASSWORD_VERSION_V3
+                && blob.mVersion != SYNTHETIC_PASSWORD_VERSION_V2
+                && blob.mVersion != SYNTHETIC_PASSWORD_VERSION_V1) {
             throw new IllegalArgumentException("Unknown blob version");
         }
-        if (blob[1] != type) {
+        if (blob.mType != type) {
             throw new IllegalArgumentException("Invalid blob type");
         }
         final byte[] secret;
-        if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
-            secret = SyntheticPasswordCrypto.decryptBlobV1(getKeyName(handle),
-                    Arrays.copyOfRange(blob, 2, blob.length), applicationId);
+        if (blob.mVersion == SYNTHETIC_PASSWORD_VERSION_V1) {
+            secret = SyntheticPasswordCrypto.decryptBlobV1(getKeyName(handle), blob.mContent,
+                    applicationId);
         } else {
-            secret = decryptSPBlob(getKeyName(handle),
-                Arrays.copyOfRange(blob, 2, blob.length), applicationId);
+            secret = decryptSPBlob(getKeyName(handle), blob.mContent, applicationId);
         }
         if (secret == null) {
             Slog.e(TAG, "Fail to decrypt SP for user " + userId);
             return null;
         }
-        AuthenticationToken result = new AuthenticationToken(version);
-        if (type == SYNTHETIC_PASSWORD_TOKEN_BASED) {
+        AuthenticationToken result = new AuthenticationToken(blob.mVersion);
+        if (type == SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED
+                || type == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
             if (!loadEscrowData(result, userId)) {
                 Slog.e(TAG, "User is not escrowable: " + userId);
                 return null;
@@ -1161,7 +1265,7 @@ public class SyntheticPasswordManager {
         } else {
             result.recreateDirectly(secret);
         }
-        if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
+        if (blob.mVersion == SYNTHETIC_PASSWORD_VERSION_V1) {
             Slog.i(TAG, "Upgrade v1 SP blob for user " + userId + ", type = " + type);
             createSyntheticPasswordBlob(handle, type, result, applicationId, sid, userId);
         }
@@ -1233,9 +1337,28 @@ public class SyntheticPasswordManager {
         return hasState(SP_BLOB_NAME, handle, userId);
     }
 
+    /** Destroy the escrow token with the given handle for the given user. */
     public void destroyTokenBasedSyntheticPassword(long handle, int userId) {
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME, handle,
+                userId));
         destroySyntheticPassword(handle, userId);
         destroyState(SECDISCARDABLE_NAME, handle, userId);
+        if (blob.mType == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
+            notifyWeakEscrowTokenRemovedListeners(handle, userId);
+        }
+    }
+
+    /** Destroy all weak escrow tokens for the given user. */
+    public void destroyAllWeakTokenBasedSyntheticPasswords(int userId) {
+        List<Long> handles = mStorage.listSyntheticPasswordHandlesForUser(SECDISCARDABLE_NAME,
+                userId);
+        for (long handle: handles) {
+            SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
+                    handle, userId));
+            if (blob.mType == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
+                destroyTokenBasedSyntheticPassword(handle, userId);
+            }
+        }
     }
 
     public void destroyPasswordBasedSyntheticPassword(long handle, int userId) {
@@ -1283,6 +1406,16 @@ public class SyntheticPasswordManager {
 
     private byte[] loadSecdiscardable(long handle, int userId) {
         return loadState(SECDISCARDABLE_NAME, handle, userId);
+    }
+
+    private byte getTokenBasedBlobType(@TokenType int type) {
+        switch (type) {
+            case TOKEN_TYPE_WEAK:
+                return SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED;
+            case TOKEN_TYPE_STRONG:
+            default:
+                return SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED;
+        }
     }
 
     /**
@@ -1369,8 +1502,8 @@ public class SyntheticPasswordManager {
 
     private byte[] computePasswordToken(LockscreenCredential credential, PasswordData data) {
         final byte[] password = credential.isNone() ? DEFAULT_PASSWORD : credential.getCredential();
-        return scrypt(password, data.salt, 1 << data.scryptN, 1 << data.scryptR, 1 << data.scryptP,
-                PASSWORD_TOKEN_LENGTH);
+        return scrypt(password, data.salt, 1 << data.scryptLogN, 1 << data.scryptLogR,
+                1 << data.scryptLogP, PASSWORD_TOKEN_LENGTH);
     }
 
     private byte[] passwordTokenToGkInput(byte[] token) {
@@ -1411,18 +1544,9 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    protected static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
-    private static byte[] bytesToHex(byte[] bytes) {
-        if (bytes == null) {
-            return "null".getBytes();
-        }
-        byte[] hexBytes = new byte[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexBytes[j * 2] = HEX_ARRAY[v >>> 4];
-            hexBytes[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return hexBytes;
+    @VisibleForTesting
+    static byte[] bytesToHex(byte[] bytes) {
+        return HexEncoding.encodeToString(bytes).getBytes();
     }
 
     /**
@@ -1438,5 +1562,34 @@ public class SyntheticPasswordManager {
             }
         }
         return success;
+    }
+
+    /** Register the given IWeakEscrowTokenRemovedListener. */
+    public boolean registerWeakEscrowTokenRemovedListener(
+            IWeakEscrowTokenRemovedListener listener) {
+        return mListeners.register(listener);
+    }
+
+    /** Unregister the given IWeakEscrowTokenRemovedListener. */
+    public boolean unregisterWeakEscrowTokenRemovedListener(
+            IWeakEscrowTokenRemovedListener listener) {
+        return mListeners.unregister(listener);
+    }
+
+    private void notifyWeakEscrowTokenRemovedListeners(long handle, int userId) {
+        int i = mListeners.beginBroadcast();
+        try {
+            while (i > 0) {
+                i--;
+                try {
+                    mListeners.getBroadcastItem(i).onWeakEscrowTokenRemoved(handle, userId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception while notifying WeakEscrowTokenRemovedListener.",
+                            e);
+                }
+            }
+        } finally {
+            mListeners.finishBroadcast();
+        }
     }
 }

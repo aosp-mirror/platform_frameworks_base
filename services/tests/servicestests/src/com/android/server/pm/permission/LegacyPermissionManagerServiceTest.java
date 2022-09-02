@@ -31,6 +31,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -41,6 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LegacyPermissionManagerServiceTest {
     private static final int SYSTEM_UID = 1000;

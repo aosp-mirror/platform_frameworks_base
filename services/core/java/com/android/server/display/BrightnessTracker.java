@@ -131,6 +131,7 @@ public class BrightnessTracker {
     private static final int MSG_STOP_SENSOR_LISTENER = 2;
     private static final int MSG_START_SENSOR_LISTENER = 3;
     private static final int MSG_BRIGHTNESS_CONFIG_CHANGED = 4;
+    private static final int MSG_SENSOR_CHANGED = 5;
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
@@ -158,6 +159,7 @@ public class BrightnessTracker {
     // These members should only be accessed on the mBgHandler thread.
     private BroadcastReceiver mBroadcastReceiver;
     private SensorListener mSensorListener;
+    private Sensor mLightSensor;
     private SettingsObserver mSettingsObserver;
     private DisplayListener mDisplayListener;
     private boolean mSensorRegistered;
@@ -327,6 +329,14 @@ public class BrightnessTracker {
         m.sendToTarget();
     }
 
+    /**
+     * Updates the light sensor to use.
+     */
+    public void setLightSensor(Sensor lightSensor) {
+        mBgHandler.obtainMessage(MSG_SENSOR_CHANGED, 0 /*unused*/, 0/*unused*/, lightSensor)
+                .sendToTarget();
+    }
+
     private void handleBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean isUserSetBrightness,
             boolean isDefaultBrightnessConfig, long timestamp, String uniqueDisplayId) {
@@ -428,13 +438,28 @@ public class BrightnessTracker {
         }
     }
 
+    private void handleSensorChanged(Sensor lightSensor) {
+        if (mLightSensor != lightSensor) {
+            mLightSensor = lightSensor;
+            stopSensorListener();
+            synchronized (mDataCollectionLock) {
+                mLastSensorReadings.clear();
+            }
+            // Attempt to restart the sensor listener. It will check to see if it should be running
+            // so there is no need to also check here.
+            startSensorListener();
+        }
+    }
+
     private void startSensorListener() {
         if (!mSensorRegistered
+                && mLightSensor != null
+                && mAmbientBrightnessStatsTracker != null
                 && mInjector.isInteractive(mContext)
                 && mInjector.isBrightnessModeAutomatic(mContentResolver)) {
             mAmbientBrightnessStatsTracker.start();
             mSensorRegistered = true;
-            mInjector.registerSensorListener(mContext, mSensorListener,
+            mInjector.registerSensorListener(mContext, mSensorListener, mLightSensor,
                     mInjector.getBackgroundHandler());
         }
     }
@@ -505,12 +530,36 @@ public class BrightnessTracker {
         }
     }
 
+    // Return the path to the given file, either the new path
+    // /data/system/$filename, or the old path /data/system_de/$filename if the
+    // file exists there but not at the new path.  Only use this for EVENTS_FILE
+    // and AMBIENT_BRIGHTNESS_STATS_FILE.
+    //
+    // Explanation: this service previously incorrectly stored these two files
+    // directly in /data/system_de, instead of in /data/system where they should
+    // have been.  As system_server no longer has write access to
+    // /data/system_de itself, these files were moved to /data/system.  To
+    // lazily migrate the files, we simply read from the old path if it exists
+    // and the new one doesn't, and always write to the new path.  Note that
+    // system_server doesn't have permission to delete the old files.
+    private AtomicFile getFileWithLegacyFallback(String filename) {
+        AtomicFile file = mInjector.getFile(filename);
+        if (file != null && !file.exists()) {
+            AtomicFile legacyFile = mInjector.getLegacyFile(filename);
+            if (legacyFile != null && legacyFile.exists()) {
+                Slog.i(TAG, "Reading " + filename + " from old location");
+                return legacyFile;
+            }
+        }
+        return file;
+    }
+
     private void readEvents() {
         synchronized (mEventsLock) {
             // Read might prune events so mark as dirty.
             mEventsDirty = true;
             mEvents.clear();
-            final AtomicFile readFrom = mInjector.getFile(EVENTS_FILE);
+            final AtomicFile readFrom = getFileWithLegacyFallback(EVENTS_FILE);
             if (readFrom != null && readFrom.exists()) {
                 FileInputStream input = null;
                 try {
@@ -528,7 +577,7 @@ public class BrightnessTracker {
 
     private void readAmbientBrightnessStats() {
         mAmbientBrightnessStatsTracker = new AmbientBrightnessStatsTracker(mUserManager, null);
-        final AtomicFile readFrom = mInjector.getFile(AMBIENT_BRIGHTNESS_STATS_FILE);
+        final AtomicFile readFrom = getFileWithLegacyFallback(AMBIENT_BRIGHTNESS_STATS_FILE);
         if (readFrom != null && readFrom.exists()) {
             FileInputStream input = null;
             try {
@@ -736,6 +785,7 @@ public class BrightnessTracker {
         pw.println("BrightnessTracker state:");
         synchronized (mDataCollectionLock) {
             pw.println("  mStarted=" + mStarted);
+            pw.println("  mLightSensor=" + mLightSensor);
             pw.println("  mLastBatteryLevel=" + mLastBatteryLevel);
             pw.println("  mLastBrightness=" + mLastBrightness);
             pw.println("  mLastSensorReadings.size=" + mLastSensorReadings.size());
@@ -1017,6 +1067,9 @@ public class BrightnessTracker {
                         disableColorSampling();
                     }
                     break;
+                case MSG_SENSOR_CHANGED:
+                    handleSensorChanged((Sensor) msg.obj);
+                    break;
 
             }
         }
@@ -1045,9 +1098,8 @@ public class BrightnessTracker {
     @VisibleForTesting
     static class Injector {
         public void registerSensorListener(Context context,
-                SensorEventListener sensorListener, Handler handler) {
+                SensorEventListener sensorListener, Sensor lightSensor, Handler handler) {
             SensorManager sensorManager = context.getSystemService(SensorManager.class);
-            Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
             sensorManager.registerListener(sensorListener,
                     lightSensor, SensorManager.SENSOR_DELAY_NORMAL, handler);
         }
@@ -1095,6 +1147,10 @@ public class BrightnessTracker {
         }
 
         public AtomicFile getFile(String filename) {
+            return new AtomicFile(new File(Environment.getDataSystemDirectory(), filename));
+        }
+
+        public AtomicFile getLegacyFile(String filename) {
             return new AtomicFile(new File(Environment.getDataSystemDeDirectory(), filename));
         }
 

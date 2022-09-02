@@ -115,25 +115,13 @@
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]
         },
         {
-            "name": "CtsContentTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
-            "file_patterns": ["(/|^)ContextImpl.java"]
-        },
-        {
             "name": "CtsOsTestCases",
             "options": [
                 {
                     "include-annotation": "android.platform.test.annotations.Presubmit"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.LargeTest"
                 },
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -158,6 +146,32 @@
                 },
                 {
                     "include-filter": "android.content.ContextTest"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "file_patterns": ["(/|^)LocaleManager.java"],
+            "name": "CtsLocaleManagerTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
+        }
+    ],
+    "presubmit-large": [
+        {
+            "name": "CtsContentTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
                 }
             ],
             "file_patterns": ["(/|^)ContextImpl.java"]

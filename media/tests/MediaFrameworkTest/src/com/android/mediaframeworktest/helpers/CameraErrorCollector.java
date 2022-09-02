@@ -16,10 +16,6 @@
 
 package com.android.mediaframeworktest.helpers;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matcher;
-import org.junit.rules.ErrorCollector;
-
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
@@ -29,6 +25,10 @@ import android.hardware.camera2.params.MeteringRectangle;
 import android.media.Image;
 import android.util.Log;
 import android.util.Size;
+
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matcher;
+import org.junit.rules.ErrorCollector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -903,7 +903,7 @@ public class CameraErrorCollector extends ErrorCollector {
         if ((value = expectKeyValueNotNull(characteristics, key)) == null) {
             return;
         }
-        String reason = "Key " + key.getName() + " value " + value
+        String reason = "Key " + key.getName() + " value " + Arrays.toString(value)
                 + " doesn't contain the expected value " + expected;
         expectContains(reason, value, expected);
     }
@@ -921,7 +921,7 @@ public class CameraErrorCollector extends ErrorCollector {
         if ((value = expectKeyValueNotNull(characteristics, key)) == null) {
             return;
         }
-        String reason = "Key " + key.getName() + " value " + value
+        String reason = "Key " + key.getName() + " value " + Arrays.toString(value)
                 + " doesn't contain the expected value " + expected;
         expectContains(reason, value, expected);
     }
@@ -939,7 +939,7 @@ public class CameraErrorCollector extends ErrorCollector {
         if ((value = expectKeyValueNotNull(characteristics, key)) == null) {
             return;
         }
-        String reason = "Key " + key.getName() + " value " + value
+        String reason = "Key " + key.getName() + " value " + Arrays.toString(value)
                 + " doesn't contain the expected value " + expected;
         expectContains(reason, value, expected);
     }
@@ -960,7 +960,7 @@ public class CameraErrorCollector extends ErrorCollector {
 
     public <T> void expectContains(T[] values, T expected) {
         String reason = "Expected value " + expected
-                + " is not contained in the given values " + values;
+                + " is not contained in the given values " + Arrays.toString(values);
         expectContains(reason, values, expected);
     }
 
@@ -996,7 +996,7 @@ public class CameraErrorCollector extends ErrorCollector {
 
     public void expectContains(int[] values, int expected) {
         String reason = "Expected value " + expected
-                + " is not contained in the given values " + values;
+                + " is not contained in the given values " + Arrays.toString(values);
         expectContains(reason, values, expected);
     }
 
@@ -1040,7 +1040,7 @@ public class CameraErrorCollector extends ErrorCollector {
      */
     public void expectContains(boolean[] values, boolean expected) {
         String reason = "Expected value " + expected
-                + " is not contained in the given values " + values;
+                + " is not contained in the given values " + Arrays.toString(values);
         expectContains(reason, values, expected);
     }
 

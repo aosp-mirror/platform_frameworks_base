@@ -28,6 +28,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    android:layout_gravity="center_horizontal|bottom"
     android:clipChildren="false"
     android:clipToPadding="false">
 
@@ -65,6 +66,7 @@
         android:orientation="vertical"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+        android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
         android:gravity="center_horizontal" />
 
 </com.android.keyguard.KeyguardPatternView>

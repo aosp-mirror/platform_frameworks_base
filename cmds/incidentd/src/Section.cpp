@@ -733,7 +733,7 @@ status_t TombstoneSection::BlockingCall(unique_fd& pipeWriteFd) const {
         return -errno;
     }
 
-    const std::set<int> hal_pids = get_interesting_hal_pids();
+    const std::set<int> hal_pids = get_interesting_pids();
 
     auto pooledBuffer = get_buffer_from_pool();
     ProtoOutputStream proto(pooledBuffer);

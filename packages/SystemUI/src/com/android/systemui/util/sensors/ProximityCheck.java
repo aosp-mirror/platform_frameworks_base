@@ -73,6 +73,13 @@ public class ProximityCheck implements Runnable {
         }
     }
 
+    /**
+     * Cleanup after no longer needed.
+     */
+    public void destroy() {
+        mSensor.destroy();
+    }
+
     private void unregister() {
         mSensor.unregister(mListener);
         mRegistered.set(false);

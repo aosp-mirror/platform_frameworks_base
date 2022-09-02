@@ -108,7 +108,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         isDcNrRestricted = source.readBoolean();
         isNrAvailable = source.readBoolean();
         isEnDcAvailable = source.readBoolean();
-        mVopsSupportInfo = source.readParcelable(VopsSupportInfo.class.getClassLoader());
+        mVopsSupportInfo = source.readParcelable(VopsSupportInfo.class.getClassLoader(), android.telephony.VopsSupportInfo.class);
     }
 
     @Override

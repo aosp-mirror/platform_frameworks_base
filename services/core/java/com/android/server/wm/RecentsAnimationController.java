@@ -18,14 +18,13 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.hardware.input.InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -42,6 +41,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
@@ -54,12 +54,18 @@ import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
+import android.view.InputDevice;
 import android.view.InputWindowHandle;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.WindowInsets.Type;
+import android.window.BackEvent;
+import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
@@ -69,7 +75,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -100,6 +105,9 @@ public class RecentsAnimationController implements DeathRecipient {
      */
     private static final long LATENCY_TRACKER_LOG_DELAY_MS = 300;
 
+    // Constant for a yet-to-be-calculated {@link RemoteAnimationTarget#Mode} state
+    private static final int MODE_UNKNOWN = -1;
+
     public static final int REORDER_KEEP_IN_PLACE = 0;
     public static final int REORDER_MOVE_TO_TOP = 1;
     public static final int REORDER_MOVE_TO_ORIGINAL_POSITION = 2;
@@ -124,13 +132,11 @@ public class RecentsAnimationController implements DeathRecipient {
     private final int mDisplayId;
     private boolean mWillFinishToHome = false;
     private final Runnable mFailsafeRunnable = this::onFailsafe;
-    private Runnable mCheckRotationAfterCleanup;
 
     // The recents component app token that is shown behind the visibile tasks
     private ActivityRecord mTargetActivityRecord;
     private DisplayContent mDisplayContent;
     private int mTargetActivityType;
-    private Rect mMinimizedHomeBounds = new Rect();
 
     // We start the RecentsAnimationController in a pending-start state since we need to wait for
     // the wallpaper/activity to draw before we can give control to the handler to start animating
@@ -194,6 +200,46 @@ public class RecentsAnimationController implements DeathRecipient {
                 mCancelOnNextTransitionStart = false;
                 cancelAnimationWithScreenshot(mCancelDeferredWithScreenshot);
             }
+        }
+    };
+
+    /**
+     * Back invoked callback for legacy recents transition with the new back dispatch system.
+     */
+    final IOnBackInvokedCallback mBackCallback = new IOnBackInvokedCallback.Stub() {
+        @Override
+        public void onBackStarted() {
+            // Do nothing
+        }
+
+        @Override
+        public void onBackProgressed(BackEvent backEvent) {
+            // Do nothing
+        }
+
+        @Override
+        public void onBackCancelled() {
+            // Do nothing
+        }
+
+        @Override
+        public void onBackInvoked() {
+            sendBackEvent(KeyEvent.ACTION_DOWN);
+            sendBackEvent(KeyEvent.ACTION_UP);
+        }
+
+        private void sendBackEvent(int action) {
+            if (mTargetActivityRecord == null) {
+                return;
+            }
+            long when = SystemClock.uptimeMillis();
+            final KeyEvent ev = new KeyEvent(when, when, action,
+                    KeyEvent.KEYCODE_BACK, 0 /* repeat */, 0 /* metaState */,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                    KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                    InputDevice.SOURCE_KEYBOARD);
+            ev.setDisplayId(mTargetActivityRecord.getDisplayId());
+            InputManager.getInstance().injectInputEvent(ev, INJECT_INPUT_EVENT_MODE_ASYNC);
         }
     };
 
@@ -286,6 +332,7 @@ public class RecentsAnimationController implements DeathRecipient {
                             task.setCanAffectSystemUiFlags(behindSystemBars);
                         }
                     }
+                    InputMethodManagerInternal.get().maybeFinishStylusHandwriting();
                     if (!behindSystemBars) {
                         // Hiding IME if IME window is not attached to app.
                         // Since some windowing mode is not proper to snapshot Task with IME window
@@ -446,7 +493,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         final int taskCount = visibleTasks.size();
-        for (int i = 0; i < taskCount; i++) {
+        for (int i = taskCount - 1; i >= 0; i--) {
             final Task task = visibleTasks.get(i);
             if (skipAnimation(task)) {
                 continue;
@@ -481,11 +528,6 @@ public class RecentsAnimationController implements DeathRecipient {
             mDisplayContent.setLayoutNeeded();
         }
 
-        // Save the minimized home height
-        final Task rootHomeTask =
-                mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
-        mMinimizedHomeBounds = rootHomeTask != null ? rootHomeTask.getBounds() : null;
-
         mService.mWindowPlacerLocked.performSurfacePlacement();
 
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(targetActivity);
@@ -503,9 +545,7 @@ public class RecentsAnimationController implements DeathRecipient {
      */
     private boolean skipAnimation(Task task) {
         final WindowConfiguration config = task.getWindowConfiguration();
-        return task.isAlwaysOnTop()
-                || config.tasksAreFloating()
-                || config.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+        return task.isAlwaysOnTop() || config.tasksAreFloating();
     }
 
     @VisibleForTesting
@@ -565,14 +605,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
             mPendingStart = false;
 
-            // Perform layout if it was scheduled before to make sure that we get correct content
-            // insets for the target app window after a rotation
-            mDisplayContent.performLayout(false /* initial */, false /* updateInputWindows */);
-
-            final Rect minimizedHomeBounds = mTargetActivityRecord != null
-                    && mTargetActivityRecord.inSplitScreenSecondaryWindowingMode()
-                            ? mMinimizedHomeBounds
-                            : null;
             final Rect contentInsets;
             final WindowState targetAppMainWindow = getTargetAppMainWindow();
             if (targetAppMainWindow != null) {
@@ -586,7 +618,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 contentInsets = mTmpRect;
             }
             mRunner.onAnimationStart(mController, appTargets, wallpaperTargets, contentInsets,
-                    minimizedHomeBounds);
+                    null);
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "startAnimation(): Notify animation start: %s",
                     mPendingAnimations.stream()
@@ -615,25 +647,15 @@ public class RecentsAnimationController implements DeathRecipient {
     private void attachNavigationBarToApp() {
         if (!mShouldAttachNavBarToAppDuringTransition
                 // Skip the case where the nav bar is controlled by fade rotation.
-                || mDisplayContent.getFadeRotationAnimationController() != null) {
+                || mDisplayContent.getAsyncRotationController() != null) {
             return;
         }
-        boolean shouldTranslateNavBar = false;
-        final boolean isDisplayLandscape =
-                mDisplayContent.getConfiguration().orientation == ORIENTATION_LANDSCAPE;
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
-            final boolean isSplitScreenSecondary =
-                    task.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-            if (task.isHomeOrRecentsRootTask()
-                    // TODO(b/178449492): Will need to update for the new split screen mode once
-                    // it's ready.
-                    // Skip if the task is the secondary split screen and in landscape.
-                    || (isSplitScreenSecondary && isDisplayLandscape)) {
+            if (task.isActivityTypeHomeOrRecents()) {
                 continue;
             }
-            shouldTranslateNavBar = isSplitScreenSecondary;
             mNavBarAttachedApp = task.getTopVisibleActivity();
             break;
         }
@@ -646,9 +668,7 @@ public class RecentsAnimationController implements DeathRecipient {
         navWindow.mToken.cancelAnimation();
         final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
         final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
-        if (shouldTranslateNavBar) {
-            navWindow.setSurfaceTranslationY(-mNavBarAttachedApp.getBounds().top);
-        }
+        navWindow.setSurfaceTranslationY(-mNavBarAttachedApp.getBounds().top);
         t.reparent(navSurfaceControl, mNavBarAttachedApp.getSurfaceControl());
         t.show(navSurfaceControl);
 
@@ -702,7 +722,7 @@ public class RecentsAnimationController implements DeathRecipient {
     void animateNavigationBarForAppLaunch(long duration) {
         if (!mShouldAttachNavBarToAppDuringTransition
                 // Skip the case where the nav bar is controlled by fade rotation.
-                || mDisplayContent.getFadeRotationAnimationController() != null
+                || mDisplayContent.getAsyncRotationController() != null
                 || mNavigationBarAttachedToApp
                 || mNavBarAttachedApp == null) {
             return;
@@ -723,12 +743,7 @@ public class RecentsAnimationController implements DeathRecipient {
             if (isAnimatingTask(task) || skipAnimation(task)) {
                 return;
             }
-            final RemoteAnimationTarget target = createTaskRemoteAnimation(task, finishedCallback);
-            if (target == null) {
-                return;
-            }
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "addTaskToTargets, target: %s", target);
-            mPendingTaskAppears.add(target);
+            collectTaskRemoteAnimations(task, MODE_OPENING, finishedCallback);
         }
     }
 
@@ -744,19 +759,30 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
-    private RemoteAnimationTarget createTaskRemoteAnimation(Task task,
+    private void collectTaskRemoteAnimations(Task task, int mode,
             OnAnimationFinishedCallback finishedCallback) {
         final SparseBooleanArray recentTaskIds =
                 mService.mAtmService.getRecentTasks().getRecentTaskIds();
+
         // The target must be built off the root task (the leaf task surface would be cropped
-        // within the root surface). However, recents only tracks leaf task ids, so we'll replace
-        // the task-id with the leaf id.
-        final Task leafTask = task.getTopLeafTask();
-        int taskId = leafTask.mTaskId;
-        TaskAnimationAdapter adapter = addAnimation(task,
-                !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
-        mPendingNewTaskTargets.add(taskId);
-        return adapter.createRemoteAnimationTarget(taskId);
+        // within the root surface). However, recents only tracks leaf task ids, so we'll traverse
+        // and create animation target for all visible leaf tasks.
+        task.forAllLeafTasks(leafTask -> {
+            if (!leafTask.shouldBeVisible(null /* starting */)) {
+                return;
+            }
+            final int taskId = leafTask.mTaskId;
+            TaskAnimationAdapter adapter = addAnimation(leafTask,
+                    !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
+            mPendingNewTaskTargets.add(taskId);
+            final RemoteAnimationTarget target =
+                    adapter.createRemoteAnimationTarget(taskId, mode);
+            if (target != null) {
+                mPendingTaskAppears.add(target);
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                        "collectTaskRemoteAnimations, target: %s", target);
+            }
+        }, false /* traverseTopToBottom */);
     }
 
     void logRecentsAnimationStartTime(int durationMs) {
@@ -792,7 +818,7 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
             final RemoteAnimationTarget target =
-                    taskAdapter.createRemoteAnimationTarget(INVALID_TASK_ID);
+                    taskAdapter.createRemoteAnimationTarget(INVALID_TASK_ID, MODE_UNKNOWN);
             if (target != null) {
                 targets.add(target);
             } else {
@@ -933,24 +959,6 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     /**
-     * If the display rotation change is ignored while recents animation is running, make sure that
-     * the pending rotation change will be applied after the animation finishes.
-     */
-    void setCheckRotationAfterCleanup() {
-        if (mCheckRotationAfterCleanup != null) return;
-        mCheckRotationAfterCleanup = () -> {
-            synchronized (mService.mGlobalLock) {
-                if (mDisplayContent.getDisplayRotation()
-                        .updateRotationAndSendNewConfigIfChanged()) {
-                    if (mTargetActivityRecord != null) {
-                        mTargetActivityRecord.finishFixedRotationTransform();
-                    }
-                }
-            }
-        };
-    }
-
-    /**
      * @return Whether we should defer the cancel from a root task order change until the next app
      * transition.
      */
@@ -1050,10 +1058,6 @@ public class RecentsAnimationController implements DeathRecipient {
         if (mStatusBar != null) {
             mStatusBar.onRecentsAnimationStateChanged(false /* running */);
         }
-        if (mCheckRotationAfterCleanup != null) {
-            mService.mH.post(mCheckRotationAfterCleanup);
-            mCheckRotationAfterCleanup = null;
-        }
     }
 
     void scheduleFailsafe() {
@@ -1149,6 +1153,10 @@ public class RecentsAnimationController implements DeathRecipient {
         return mTargetActivityRecord.findMainWindow();
     }
 
+    OnBackInvokedCallbackInfo getBackInvokedInfo() {
+        return new OnBackInvokedCallbackInfo(mBackCallback, PRIORITY_DEFAULT);
+    }
+
     DisplayArea getTargetAppDisplayArea() {
         if (mTargetActivityRecord == null) {
             return null;
@@ -1176,13 +1184,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     private boolean isAnimatingApp(ActivityRecord activity) {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-            final Task task = mPendingAnimations.get(i).mTask;
-            final PooledFunction f = PooledLambda.obtainFunction(
-                    (a, b) -> a == b, activity,
-                    PooledLambda.__(ActivityRecord.class));
-            boolean isAnimatingApp = task.forAllActivities(f);
-            f.recycle();
-            if (isAnimatingApp) {
+            if (activity.isDescendantOf(mPendingAnimations.get(i).mTask)) {
                 return true;
             }
         }
@@ -1243,9 +1245,15 @@ public class RecentsAnimationController implements DeathRecipient {
          *                       some cases where we are animating root tasks but need need leaf
          *                       ids for identification. If this is INVALID (-1), then mTaskId
          *                       will be used.
+         * @param overrideMode overrides the target's mode. If this is -1, the mode will be
+         *                     calculated relative to going to the target activity (ie. OPENING if
+         *                     this is the target task, CLOSING otherwise).
          */
-        RemoteAnimationTarget createRemoteAnimationTarget(int overrideTaskId) {
-            final ActivityRecord topApp = mTask.getTopVisibleActivity();
+        RemoteAnimationTarget createRemoteAnimationTarget(int overrideTaskId, int overrideMode) {
+            ActivityRecord topApp = mTask.getTopRealVisibleActivity();
+            if (topApp == null) {
+                topApp = mTask.getTopVisibleActivity();
+            }
             final WindowState mainWindow = topApp != null
                     ? topApp.findMainWindow()
                     : null;
@@ -1255,9 +1263,11 @@ public class RecentsAnimationController implements DeathRecipient {
             final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
                     mBounds, Type.systemBars(), false /* ignoreVisibility */).toRect();
             InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
-            final int mode = topApp.getActivityType() == mTargetActivityType
-                    ? MODE_OPENING
-                    : MODE_CLOSING;
+            final int mode = overrideMode != MODE_UNKNOWN
+                    ? overrideMode
+                    : topApp.getActivityType() == mTargetActivityType
+                            ? MODE_OPENING
+                            : MODE_CLOSING;
             if (overrideTaskId < 0) {
                 overrideTaskId = mTask.mTaskId;
             }

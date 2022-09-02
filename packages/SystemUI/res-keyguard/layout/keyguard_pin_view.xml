@@ -25,6 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+        android:layout_gravity="center_horizontal|bottom"
         android:orientation="vertical"
         >
 
@@ -49,8 +50,6 @@
             android:paddingBottom="@dimen/num_pad_entry_row_margin_bottom"
             androidprv:layout_constraintEnd_toEndOf="parent"
             androidprv:layout_constraintStart_toStartOf="parent"
-
-            androidprv:layout_constraintTop_toTopOf="parent"
             androidprv:layout_constraintBottom_toTopOf="@id/key1"
             androidprv:layout_constraintVertical_bias="0.0">
 

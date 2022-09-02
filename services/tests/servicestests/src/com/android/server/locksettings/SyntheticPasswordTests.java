@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.PasswordMetrics;
+import android.app.PropertyInvalidatedCache;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -49,6 +50,7 @@ import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationRe
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -67,6 +69,11 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 55};
     public static final byte[] PAYLOAD2 = new byte[] {2, 3, -2, -3, 44, 1};
+
+    @Before
+    public void disableProcessCaches() {
+        PropertyInvalidatedCache.disableForTestMode();
+    }
 
     @Test
     public void testPasswordBasedSyntheticPassword() throws RemoteException {
@@ -250,7 +257,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         flushHandlerTasks();
         final PasswordMetrics metric = PasswordMetrics.computeForCredential(pattern);
         assertEquals(metric, mService.getUserPasswordMetrics(PRIMARY_USER_ID));
-        verify(mDevicePolicyManager).reportPasswordChanged(PRIMARY_USER_ID);
+        verify(mDevicePolicyManager).reportPasswordChanged(metric, PRIMARY_USER_ID);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 pattern, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
@@ -461,18 +468,18 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     @Test
     public void testPasswordData_serializeDeserialize() {
         PasswordData data = new PasswordData();
-        data.scryptN = 11;
-        data.scryptR = 22;
-        data.scryptP = 33;
+        data.scryptLogN = 11;
+        data.scryptLogR = 22;
+        data.scryptLogP = 33;
         data.credentialType = CREDENTIAL_TYPE_PASSWORD;
         data.salt = PAYLOAD;
         data.passwordHandle = PAYLOAD2;
 
         PasswordData deserialized = PasswordData.fromBytes(data.toBytes());
 
-        assertEquals(11, deserialized.scryptN);
-        assertEquals(22, deserialized.scryptR);
-        assertEquals(33, deserialized.scryptP);
+        assertEquals(11, deserialized.scryptLogN);
+        assertEquals(22, deserialized.scryptLogR);
+        assertEquals(33, deserialized.scryptLogP);
         assertEquals(CREDENTIAL_TYPE_PASSWORD, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
@@ -484,9 +491,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // wire format.
         byte[] serialized = new byte[] {
                 0, 0, 0, 2, /* CREDENTIAL_TYPE_PASSWORD_OR_PIN */
-                11, /* scryptN */
-                22, /* scryptR */
-                33, /* scryptP */
+                11, /* scryptLogN */
+                22, /* scryptLogR */
+                33, /* scryptLogP */
                 0, 0, 0, 5, /* salt.length */
                 1, 2, -1, -2, 55, /* salt */
                 0, 0, 0, 6, /* passwordHandle.length */
@@ -494,9 +501,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         };
         PasswordData deserialized = PasswordData.fromBytes(serialized);
 
-        assertEquals(11, deserialized.scryptN);
-        assertEquals(22, deserialized.scryptR);
-        assertEquals(33, deserialized.scryptP);
+        assertEquals(11, deserialized.scryptLogN);
+        assertEquals(22, deserialized.scryptLogR);
+        assertEquals(33, deserialized.scryptLogP);
         assertEquals(CREDENTIAL_TYPE_PASSWORD_OR_PIN, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
@@ -565,6 +572,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 fail("Orphaned state left: " + file.getName());
             }
         }
+    }
+
+    @Test
+    public void testHexEncodingIsUppercase() {
+        final byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF };
+        final byte[] expected = new byte[] { 'A', 'B', 'C', 'D', 'E', 'F' };
+        assertArrayEquals(expected, SyntheticPasswordManager.bytesToHex(raw));
     }
 
     // b/62213311

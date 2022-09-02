@@ -60,14 +60,15 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             PersistableBundle options,
             SharedMemory sharedMemory,
             HotwordDetector.Callback callback) {
-        super(managerService, callback);
+        super(managerService, callback, DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
 
         mManagerService = managerService;
         mAudioFormat = audioFormat;
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
         updateStateLocked(options, sharedMemory,
-                new InitializationStateListener(mHandler, mCallback));
+                new InitializationStateListener(mHandler, mCallback),
+                DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
     }
 
     @RequiresPermission(RECORD_AUDIO)
@@ -76,7 +77,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-
+        throwIfDetectorIsNoLongerActive();
         maybeCloseExistingSession();
 
         try {
@@ -99,6 +100,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
+        throwIfDetectorIsNoLongerActive();
 
         try {
             mManagerService.stopListeningFromMic();
@@ -107,6 +109,19 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         }
 
         return true;
+    }
+
+    @Override
+    public void destroy() {
+        stopRecognition();
+        maybeCloseExistingSession();
+
+        try {
+            mManagerService.shutdownHotwordDetectionService();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+        super.destroy();
     }
 
     private void maybeCloseExistingSession() {
@@ -134,8 +149,31 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             mHandler.sendMessage(obtainMessage(
                     HotwordDetector.Callback::onDetected,
                     mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload(
-                            audioFormat, hotwordDetectedResult, audioStream)));
+                    new AlwaysOnHotwordDetector.EventPayload.Builder()
+                            .setCaptureAudioFormat(audioFormat)
+                            .setAudioStream(audioStream)
+                            .setHotwordDetectedResult(hotwordDetectedResult)
+                            .build()));
+        }
+
+        /** Called when the detection fails due to an error. */
+        @Override
+        public void onError() {
+            Slog.v(TAG, "BinderCallback#onError");
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onError,
+                    mCallback));
+        }
+
+        @Override
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+            if (result == null) {
+                result = new HotwordRejectedResult.Builder().build();
+            }
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onRejected,
+                    mCallback,
+                    result));
         }
     }
 

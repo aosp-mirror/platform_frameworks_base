@@ -271,7 +271,7 @@ public class VoiceInteractionService extends Service {
         // It's still guaranteed to have been stopped.
         // This helps with cases where the voice interaction implementation is changed
         // by the user.
-        safelyShutdownHotwordDetector();
+        safelyShutdownAllHotwordDetectors();
     }
 
     /**
@@ -380,11 +380,13 @@ public class VoiceInteractionService extends Service {
         }
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
-            safelyShutdownHotwordDetector();
+            safelyShutdownAllHotwordDetectors();
             mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
                     mKeyphraseEnrollmentInfo, mSystemService,
                     getApplicationContext().getApplicationInfo().targetSdkVersion,
                     supportHotwordDetectionService, options, sharedMemory);
+            mHotwordDetector.registerOnDestroyListener((detector) -> onDspHotwordDetectorDestroyed(
+                    (AlwaysOnHotwordDetector) detector));
         }
         return mHotwordDetector;
     }
@@ -433,10 +435,13 @@ public class VoiceInteractionService extends Service {
         }
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
-            safelyShutdownHotwordDetector();
+            safelyShutdownAllHotwordDetectors();
             mSoftwareHotwordDetector =
                     new SoftwareHotwordDetector(
                             mSystemService, null, options, sharedMemory, callback);
+            mSoftwareHotwordDetector.registerOnDestroyListener(
+                    (detector) -> onMicrophoneHotwordDetectorDestroyed(
+                            (SoftwareHotwordDetector) detector));
         }
         return mSoftwareHotwordDetector;
     }
@@ -482,51 +487,36 @@ public class VoiceInteractionService extends Service {
         return mKeyphraseEnrollmentInfo.getKeyphraseMetadata(keyphrase, locale) != null;
     }
 
-    private void safelyShutdownHotwordDetector() {
+    private void safelyShutdownAllHotwordDetectors() {
         synchronized (mLock) {
-            shutdownDspHotwordDetectorLocked();
-            shutdownMicrophoneHotwordDetectorLocked();
+            if (mHotwordDetector != null) {
+                try {
+                    mHotwordDetector.destroy();
+                } catch (Exception ex) {
+                    Log.i(TAG, "exception destroying AlwaysOnHotwordDetector", ex);
+                }
+            }
+
+            if (mSoftwareHotwordDetector != null) {
+                try {
+                    mSoftwareHotwordDetector.destroy();
+                } catch (Exception ex) {
+                    Log.i(TAG, "exception destroying SoftwareHotwordDetector", ex);
+                }
+            }
         }
     }
 
-    private void shutdownDspHotwordDetectorLocked() {
-        if (mHotwordDetector == null) {
-            return;
+    private void onDspHotwordDetectorDestroyed(@NonNull AlwaysOnHotwordDetector detector) {
+        synchronized (mLock) {
+            mHotwordDetector = null;
         }
-
-        try {
-            mHotwordDetector.stopRecognition();
-        } catch (Exception ex) {
-            // Ignore.
-        }
-
-        try {
-            mHotwordDetector.invalidate();
-        } catch (Exception ex) {
-            // Ignore.
-        }
-
-        mHotwordDetector = null;
     }
 
-    private void shutdownMicrophoneHotwordDetectorLocked() {
-        if (mSoftwareHotwordDetector == null) {
-            return;
+    private void onMicrophoneHotwordDetectorDestroyed(@NonNull SoftwareHotwordDetector detector) {
+        synchronized (mLock) {
+            mSoftwareHotwordDetector = null;
         }
-
-        try {
-            mSoftwareHotwordDetector.stopRecognition();
-        } catch (Exception ex) {
-            // Ignore.
-        }
-
-        try {
-            mSystemService.shutdownHotwordDetectionService();
-        } catch (Exception ex) {
-            // Ignore.
-        }
-
-        mSoftwareHotwordDetector = null;
     }
 
     /**

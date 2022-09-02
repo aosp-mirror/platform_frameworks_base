@@ -17,36 +17,62 @@
 package com.android.server.biometrics.sensors;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Objects;
 
 @Presubmit
 @SmallTest
 public class CompositeCallbackTest {
 
+    @Mock
+    private BaseClientMonitor mClientMonitor;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @Test
-    public void testNullCallback() {
-        BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
-        BaseClientMonitor.Callback callback2 = mock(BaseClientMonitor.Callback.class);
-        BaseClientMonitor.Callback callback3 = null;
+    public void testCallbacks() {
+        testCallbacks(mock(ClientMonitorCallback.class), mock(ClientMonitorCallback.class));
+    }
 
-        BaseClientMonitor.CompositeCallback callback = new BaseClientMonitor.CompositeCallback(
-                callback1, callback2, callback3);
+    @Test
+    public void testNullCallbacks() {
+        testCallbacks(null, mock(ClientMonitorCallback.class),
+                null, mock(ClientMonitorCallback.class));
+    }
 
-        BaseClientMonitor clientMonitor = mock(BaseClientMonitor.class);
+    private void testCallbacks(ClientMonitorCallback... callbacks) {
+        final ClientMonitorCallback[] expected = Arrays.stream(callbacks)
+                .filter(Objects::nonNull).toArray(ClientMonitorCallback[]::new);
 
-        callback.onClientStarted(clientMonitor);
-        verify(callback1).onClientStarted(eq(clientMonitor));
-        verify(callback2).onClientStarted(eq(clientMonitor));
+        ClientMonitorCompositeCallback callback = new ClientMonitorCompositeCallback(callbacks);
 
-        callback.onClientFinished(clientMonitor, true /* success */);
-        verify(callback1).onClientFinished(eq(clientMonitor), eq(true));
-        verify(callback2).onClientFinished(eq(clientMonitor), eq(true));
+        callback.onClientStarted(mClientMonitor);
+        final InOrder order = inOrder((Object[]) expected);
+        for (ClientMonitorCallback cb : expected) {
+            order.verify(cb).onClientStarted(eq(mClientMonitor));
+        }
+
+        callback.onClientFinished(mClientMonitor, true /* success */);
+        Collections.reverse(Arrays.asList(expected));
+        for (ClientMonitorCallback cb : expected) {
+            order.verify(cb).onClientFinished(eq(mClientMonitor), eq(true));
+        }
     }
 }

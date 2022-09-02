@@ -85,7 +85,7 @@
          Contract: Pixel with fillColor blended over backgroundColor blended over translucent should
          equal to singleToneColor blended over translucent. -->
     <declare-styleable name="TonedIcon">
-        <attr name="backgroundColor" format="integer" />
+        <attr name="iconBackgroundColor" format="integer" />
         <attr name="fillColor" format="integer" />
         <attr name="singleToneColor" format="integer" />
         <attr name="homeHandleColor" format="integer" />
@@ -112,13 +112,6 @@
         <attr name="hybridNotificationStyle" format="reference" />
         <attr name="hybridNotificationTitleStyle" format="reference" />
         <attr name="hybridNotificationTextStyle" format="reference" />
-    </declare-styleable>
-
-    <declare-styleable name="AutoSizingList">
-        <!-- Whether AutoSizingList will show only as many items as fit on screen and
-             remove extra items instead of scrolling. -->
-        <attr name="enableAutoSizing" format="boolean" />
-        <attr name="itemHeight" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="PluginInflateContainer">
@@ -161,10 +154,6 @@
         <attr name="showAirplaneMode" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="CaptionsToggleImageButton">
-        <attr name="optedOut" format="boolean" />
-    </declare-styleable>
-
     <declare-styleable name="IlluminationDrawable">
         <attr name="highlight" format="integer" />
         <attr name="cornerRadius" format="dimension" />
@@ -199,10 +188,10 @@
         <attr name="borderColor" format="color" />
     </declare-styleable>
 
-    <declare-styleable name="DualHeightHorizontalLinearLayout">
-        <attr name="singleLineHeight" format="dimension" />
-        <attr name="singleLineVerticalPadding" format="dimension" />
-        <attr name="textViewId" format="reference" />
+    <attr name="overlayButtonTextColor" format="color" />
+
+    <declare-styleable name="DreamOverlayDotImageView">
+        <attr name="dotColor" format="color" />
     </declare-styleable>
 </resources>
 

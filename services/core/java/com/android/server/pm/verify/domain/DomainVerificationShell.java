@@ -32,6 +32,7 @@ import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.server.pm.Computer;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -39,7 +40,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 
 public class DomainVerificationShell {
 
@@ -103,7 +103,6 @@ public class DomainVerificationShell {
         pw.println("      <DOMAINS>: space separated list of domains to change, or \"all\" to");
         pw.println("        change every domain.");
         pw.println("  set-app-links-allowed --user <USER_ID> [--package <PACKAGE>] <ALLOWED>");
-        pw.println("      <ENABLED> <DOMAINS>...");
         pw.println("    Toggle the auto verified link handling setting for a package.");
         pw.println("      --user <USER_ID>: the user to change selections for");
         pw.println("      --package <PACKAGE>: the package to set, or \"all\" to set all packages");
@@ -599,8 +598,8 @@ public class DomainVerificationShell {
         void verifyPackages(@Nullable List<String> packageNames, boolean reVerify);
 
         /**
-         * @see DomainVerificationManagerInternal#printState(IndentingPrintWriter, String, Integer,
-         * Function)
+         * @see DomainVerificationManagerInternal#printState(Computer, IndentingPrintWriter, String,
+         * Integer)
          */
         void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
                 @Nullable @UserIdInt Integer userId) throws NameNotFoundException;

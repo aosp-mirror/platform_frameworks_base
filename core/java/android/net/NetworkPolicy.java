@@ -142,8 +142,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     }
 
     private NetworkPolicy(Parcel source) {
-        template = source.readParcelable(null);
-        cycleRule = source.readParcelable(null);
+        template = source.readParcelable(null, android.net.NetworkTemplate.class);
+        cycleRule = source.readParcelable(null, android.util.RecurrenceRule.class);
         warningBytes = source.readLong();
         limitBytes = source.readLong();
         lastWarningSnooze = source.readLong();
@@ -396,7 +396,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
                 return true;
             case MATCH_CARRIER:
             case MATCH_MOBILE:
-                return !template.getSubscriberIds().isEmpty();
+                return !template.getSubscriberIds().isEmpty()
+                        && template.getMeteredness() == METERED_YES;
             case MATCH_WIFI:
                 if (template.getWifiNetworkKeys().isEmpty()
                         && template.getSubscriberIds().isEmpty()) {

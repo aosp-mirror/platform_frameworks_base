@@ -15,6 +15,8 @@
  */
 package com.android.server.hdmi;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 
 import com.google.common.testing.EqualsTester;
@@ -25,6 +27,7 @@ import org.junit.runners.JUnit4;
 
 /** Tests for {@link HdmiCecMessage} class. */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class HdmiCecMessageTest {
 
@@ -38,12 +41,12 @@ public class HdmiCecMessageTest {
 
         new EqualsTester()
                 .addEqualityGroup(
-                        new HdmiCecMessage(source, destination, opcode, params1),
-                        new HdmiCecMessage(source, destination, opcode, params1))
-                .addEqualityGroup(new HdmiCecMessage(source, destination, opcode, params2))
-                .addEqualityGroup(new HdmiCecMessage(source + 1, destination, opcode, params1))
-                .addEqualityGroup(new HdmiCecMessage(source, destination + 1, opcode, params1))
-                .addEqualityGroup(new HdmiCecMessage(source, destination, opcode + 1, params1))
+                        HdmiCecMessage.build(source, destination, opcode, params1),
+                        HdmiCecMessage.build(source, destination, opcode, params1))
+                .addEqualityGroup(HdmiCecMessage.build(source, destination, opcode, params2))
+                .addEqualityGroup(HdmiCecMessage.build(source + 1, destination, opcode, params1))
+                .addEqualityGroup(HdmiCecMessage.build(source, destination + 1, opcode, params1))
+                .addEqualityGroup(HdmiCecMessage.build(source, destination, opcode + 1, params1))
                 .testEquals();
     }
 }

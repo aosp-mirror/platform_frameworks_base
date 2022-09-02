@@ -55,15 +55,32 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition(eachRun = true, stringExtras = emptyMap()) {
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            setupAndTeardown(this)
+            setup {
+                eachRun {
+                    pipApp.launchViaIntent(wmHelper)
+                }
+            }
+            teardown {
+                eachRun {
+                    pipApp.exit(wmHelper)
+                }
+            }
             transitions {
                 pipApp.clickEnterPipButton(wmHelper)
             }
         }
+
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     /**
      * Checks [pipApp] window remains visible throughout the animation
@@ -94,8 +111,8 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -106,8 +123,8 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Presubmit
     @Test
     fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -153,13 +170,14 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     }
 
     /**
-     * Checks the focus doesn't change during the animation
+     * Checks that the focus changes between the [pipApp] window and the launcher when
+     * closing the pip window
      */
-    @FlakyTest
+    @Presubmit
     @Test
-    fun focusDoesNotChange() {
+    fun focusChanges() {
         testSpec.assertEventLog {
-            this.focusDoesNotChange()
+            this.focusChanges(pipApp.`package`, "NexusLauncherActivity")
         }
     }
 
@@ -175,7 +193,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 5)
+                    repetitions = 3)
         }
     }
 }

@@ -43,9 +43,13 @@ per-file android_os_HwParcel* = file:platform/system/libhwbinder:/OWNERS
 per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
 per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
 
+# Sensor
+per-file android_hardware_SensorManager* = arthuri@google.com, bduddie@google.com, stange@google.com
+
 per-file *Zygote* = file:/ZYGOTE_OWNERS
+per-file core_jni_helpers.* = file:/ZYGOTE_OWNERS
 per-file fd_utils.* = file:/ZYGOTE_OWNERS
-per-file Android.bp = file:platform/build/soong:/OWNERS
+per-file Android.bp = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
 per-file android_animation_* = file:/core/java/android/animation/OWNERS
 per-file android_app_admin_* = file:/core/java/android/app/admin/OWNERS
 per-file android_hardware_Usb* = file:/services/usb/OWNERS
@@ -56,6 +60,7 @@ per-file android_media_* = file:/media/java/android/media/OWNERS
 per-file android_media_midi_* = file:/media/java/android/media/midi/OWNERS
 per-file android_opengl_* = file:/opengl/java/android/opengl/OWNERS
 per-file android_os_storage_* = file:/core/java/android/os/storage/OWNERS
+per-file android_os_Trace* = file:/TRACE_OWNERS
 per-file android_se_* = file:/omapi/java/android/se/OWNERS
 per-file android_security_* = file:/core/java/android/security/OWNERS
 per-file android_view_* = file:/core/java/android/view/OWNERS
@@ -63,8 +68,9 @@ per-file com_android_internal_net_* = file:/services/core/java/com/android/serve
 
 ### Graphics ###
 per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
-per-file android_hardware_HardwareBuffer.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file *HardwareBuffer* = file:/graphics/java/android/graphics/OWNERS
 per-file android_hardware_SyncFence.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file android_os_GraphicsEnvironment.cpp = file:platform/frameworks/native:/opengl/OWNERS
 
 ### Text ###
 per-file android_text_* = file:/core/java/android/text/OWNERS
@@ -80,7 +86,7 @@ per-file LayoutlibLoader.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file LayoutlibLoader.cpp = diegoperez@google.com, jgaillard@google.com
 
 # Verity
-per-file com_android_internal_security_Verity* = ebiggers@google.com, victorhsieh@google.com
+per-file com_android_internal_security_Verity* = file:platform/system/security:/fsverity/OWNERS
 
 # VINTF
 per-file android_os_VintfObject* = file:platform/system/libvintf:/OWNERS
@@ -89,3 +95,7 @@ per-file android_os_VintfRuntimeInfo* = file:platform/system/libvintf:/OWNERS
 # Battery
 per-file com_android_internal_os_Kernel* = file:/BATTERY_STATS_OWNERS
 per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNERS
+
+# PM
+per-file com_android_internal_content_* = file:/PACKAGE_MANAGER_OWNERS
+

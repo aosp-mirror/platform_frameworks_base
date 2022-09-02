@@ -24,18 +24,17 @@
     <!-- Flags enabling default window features. See Window.java -->
     <bool name="config_defaultWindowFeatureOptionsPanel">false</bool>
 
-    <!-- The percentage of the screen width to use for the default width or height of
-         picture-in-picture windows. Regardless of the percent set here, calculated size will never
-         be smaller than @dimen/default_minimal_size_pip_resizable_task. -->
-    <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.14</item>
+    <!-- The maximum height of the expanded horizontal picture-in-picture window -->
+    <item name="config_pictureInPictureExpandedHorizontalHeight"
+          format="dimension" type="dimen">110dp</item>
 
-    <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
-         These values are in DPs and will be converted to pixel sizes internally. -->
-    <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">56x27</string>
+    <!-- The maximum width of the expanded vertical picture-in-picture window -->
+    <item name="config_pictureInPictureExpandedVerticalWidth"
+          format="dimension" type="dimen">110dp</item>
 
-    <!-- The default gravity for the picture-in-picture window.
-         Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
-    <integer name="config_defaultPictureInPictureGravity">0x55</integer>
+    <!-- The behavior when an activity has not specified a preference to dock big overlays or not.
+         Docking puts the activity side-by-side next to the big overlay windows. -->
+    <bool name="config_dockBigOverlayWindows">true</bool>
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">false</bool>
@@ -45,5 +44,24 @@
 
     <!-- Component name of the activity used to inform a user about a sensory being blocked because
      of privacy settings. -->
-    <string name="config_sensorUseStartedActivity">com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity</string>
+    <string name="config_sensorUseStartedActivity" translatable="false">
+        com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
+    </string>
+
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of hardware privacy switches. -->
+    <string name="config_sensorUseStartedActivity_hwToggle" translatable="false">
+        com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
+    </string>
+
+    <!-- Component name of the activity that shows the request for access to a usb device. -->
+    <string name="config_usbPermissionActivity" translatable="false">
+        com.android.systemui/com.android.systemui.usb.tv.TvUsbPermissionActivity
+    </string>
+
+    <!-- Component name of the activity that confirms the activity to start when a usb device is
+     plugged in. -->
+    <string name="config_usbConfirmActivity" translatable="false">
+        com.android.systemui/com.android.systemui.usb.tv.TvUsbConfirmActivity
+    </string>
 </resources>

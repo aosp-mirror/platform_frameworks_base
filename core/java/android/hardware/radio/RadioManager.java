@@ -436,7 +436,8 @@ public class RadioManager {
             mNumAudioSources = in.readInt();
             mIsInitializationRequired = in.readInt() == 1;
             mIsCaptureSupported = in.readInt() == 1;
-            Parcelable[] tmp = in.readParcelableArray(BandDescriptor.class.getClassLoader());
+            Parcelable[] tmp = in.readParcelableArray(BandDescriptor.class.getClassLoader(),
+                    BandDescriptor.class);
             mBands = new BandDescriptor[tmp.length];
             for (int i = 0; i < tmp.length; i++) {
                 mBands[i] = (BandDescriptor) tmp[i];
@@ -504,7 +505,8 @@ public class RadioManager {
         public int hashCode() {
             return Objects.hash(mId, mServiceName, mClassId, mImplementor, mProduct, mVersion,
                 mSerial, mNumTuners, mNumAudioSources, mIsInitializationRequired,
-                mIsCaptureSupported, mBands, mIsBgScanSupported, mDabFrequencyTable, mVendorInfo);
+                mIsCaptureSupported, Arrays.hashCode(mBands), mIsBgScanSupported,
+                mDabFrequencyTable, mVendorInfo);
         }
 
         @Override
@@ -524,7 +526,7 @@ public class RadioManager {
             if (mNumAudioSources != other.mNumAudioSources) return false;
             if (mIsInitializationRequired != other.mIsInitializationRequired) return false;
             if (mIsCaptureSupported != other.mIsCaptureSupported) return false;
-            if (!Objects.equals(mBands, other.mBands)) return false;
+            if (!Arrays.equals(mBands, other.mBands)) return false;
             if (mIsBgScanSupported != other.mIsBgScanSupported) return false;
             if (!Objects.equals(mDabFrequencyTable, other.mDabFrequencyTable)) return false;
             if (!Objects.equals(mVendorInfo, other.mVendorInfo)) return false;

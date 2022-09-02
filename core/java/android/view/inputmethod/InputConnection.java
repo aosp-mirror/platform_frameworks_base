@@ -274,10 +274,7 @@ public interface InputConnection {
      *
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
-     * @return the text that is currently selected, if any, or null if
-     * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
-     * later, returns false when the target application does not implement
-     * this method.
+     * @return the text that is currently selected, if any, or {@code null} if no text is selected.
      */
     CharSequence getSelectedText(int flags);
 
@@ -483,8 +480,9 @@ public interface InputConnection {
      *        If this is greater than the number of existing characters between the cursor and
      *        the end of the text, then this method does not fail but deletes all the characters in
      *        that range.
-     * @return true on success, false if the input connection is no longer valid.  Returns
-     * {@code false} when the target application does not implement this method.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Before Android {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned
+     *         {@code false} when the target application does not implement this method.
      */
     boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
 
@@ -547,6 +545,33 @@ public interface InputConnection {
     boolean setComposingText(CharSequence text, int newCursorPosition);
 
     /**
+     * The variant of {@link #setComposingText(CharSequence, int)}. This method is
+     * used to allow the IME to provide extra information while setting up composing text.
+     *
+     * @param text The composing text with styles if necessary. If no style
+     *        object attached to the text, the default style for composing text
+     *        is used. See {@link android.text.Spanned} for how to attach style
+     *        object to the text. {@link android.text.SpannableString} and
+     *        {@link android.text.SpannableStringBuilder} are two
+     *        implementations of the interface {@link android.text.Spanned}.
+     * @param newCursorPosition The new cursor position around the text. If
+     *        > 0, this is relative to the end of the text - 1; if <= 0, this
+     *        is relative to the start of the text. So a value of 1 will
+     *        always advance you to the position after the full text being
+     *        inserted. Note that this means you can't position the cursor
+     *        within the text, because the editor can make modifications to
+     *        the text you are providing so it is not possible to correctly
+     *        specify locations there.
+     * @param textAttribute The extra information about the text.
+     * @return true on success, false if the input connection is no longer
+     *
+     */
+    default boolean setComposingText(@NonNull CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return setComposingText(text, newCursorPosition);
+    }
+
+    /**
      * Mark a certain region of text as composing text. If there was a
      * composing region, the characters are left as they were and the
      * composing span removed, as if {@link #finishComposingText()}
@@ -573,11 +598,28 @@ public interface InputConnection {
      *
      * @param start the position in the text at which the composing region begins
      * @param end the position in the text at which the composing region ends
-     * @return true on success, false if the input connection is no longer
-     * valid. In {@link android.os.Build.VERSION_CODES#N} and later, false is returned when the
-     * target application does not implement this method.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
      */
     boolean setComposingRegion(int start, int end);
+
+    /**
+     * The variant of {@link InputConnection#setComposingRegion(int, int)}. This method is
+     * used to allow the IME to provide extra information while setting up text.
+     *
+     * @param start the position in the text at which the composing region begins
+     * @param end the position in the text at which the composing region ends
+     * @param textAttribute The extra information about the text.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
+     */
+    default boolean setComposingRegion(int start, int end, @Nullable TextAttribute textAttribute) {
+        return setComposingRegion(start, end);
+    }
 
     /**
      * Have the text editor finish whatever composing text is
@@ -635,6 +677,28 @@ public interface InputConnection {
     boolean commitText(CharSequence text, int newCursorPosition);
 
     /**
+     * The variant of {@link InputConnection#commitText(CharSequence, int)}. This method is
+     * used to allow the IME to provide extra information while setting up text.
+     *
+     * @param text The text to commit. This may include styles.
+     * @param newCursorPosition The new cursor position around the text,
+     *        in Java characters. If > 0, this is relative to the end
+     *        of the text - 1; if <= 0, this is relative to the start
+     *        of the text. So a value of 1 will always advance the cursor
+     *        to the position after the full text being inserted. Note that
+     *        this means you can't position the cursor within the text,
+     *        because the editor can make modifications to the text
+     *        you are providing so it is not possible to correctly specify
+     *        locations there.
+     * @param textAttribute The extra information about the text.
+     * @return true on success, false if the input connection is no longer
+     */
+    default boolean commitText(@NonNull CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return commitText(text, newCursorPosition);
+    }
+
+    /**
      * Commit a completion the user has selected from the possible ones
      * previously reported to {@link InputMethodSession#displayCompletions
      * InputMethodSession#displayCompletions(CompletionInfo[])} or
@@ -686,9 +750,10 @@ public interface InputConnection {
      * in progress.</p>
      *
      * @param correctionInfo Detailed information about the correction.
-     * @return true on success, false if the input connection is no longer valid.
-     * In {@link android.os.Build.VERSION_CODES#N} and later, returns false
-     * when the target application does not implement this method.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
      */
     boolean commitCorrection(CorrectionInfo correctionInfo);
 
@@ -726,8 +791,9 @@ public interface InputConnection {
      * associated with the action.</p>
      *
      * @param editorAction This must be one of the action constants for
-     * {@link EditorInfo#imeOptions EditorInfo.editorType}, such as
-     * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}.
+     * {@link EditorInfo#imeOptions EditorInfo.imeOptions}, such as
+     * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}, or the value of
+     * {@link EditorInfo#actionId EditorInfo.actionId} if a custom action is available.
      * @return true on success, false if the input connection is no longer
      * valid.
      */
@@ -848,9 +914,14 @@ public interface InputConnection {
     /**
      * Called back when the connected IME switches between fullscreen and normal modes.
      *
-     * <p>Note: On {@link android.os.Build.VERSION_CODES#O} and later devices, input methods are no
-     * longer allowed to directly call this method at any time. To signal this event in the target
-     * application, input methods should always call
+     * <p><p><strong>Editor authors:</strong> There is a bug on
+     * {@link android.os.Build.VERSION_CODES#O} and later devices that this method is called back
+     * on the main thread even when {@link #getHandler()} is overridden.  This bug is fixed in
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU}.</p>
+     *
+     * <p><p><strong>IME authors:</strong> On {@link android.os.Build.VERSION_CODES#O} and later
+     * devices, input methods are no longer allowed to directly call this method at any time.
+     * To signal this event in the target application, input methods should always call
      * {@link InputMethodService#updateFullscreenMode()} instead. This approach should work on API
      * {@link android.os.Build.VERSION_CODES#N_MR1} and prior devices.</p>
      *
@@ -901,6 +972,13 @@ public interface InputConnection {
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} at
      * once, as soon as possible, regardless of cursor/anchor position changes. This flag can be
      * used together with {@link #CURSOR_UPDATE_MONITOR}.
+     * <p>
+     * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS} and
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} are included but specifying them can
+     * filter-out others.
+     * It can be CPU intensive to include all, filtering specific info is recommended.
+     * </p>
      */
     int CURSOR_UPDATE_IMMEDIATE = 1 << 0;
 
@@ -912,34 +990,138 @@ public interface InputConnection {
      * <p>
      * This flag can be used together with {@link #CURSOR_UPDATE_IMMEDIATE}.
      * </p>
+     * <p>
+     * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS} and
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} are included but specifying them can
+     * filter-out others.
+     * It can be CPU intensive to include all, filtering specific info is recommended.
+     * </p>
      */
     int CURSOR_UPDATE_MONITOR = 1 << 1;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new {@link EditorBoundsInfo} whenever cursor/anchor position is changed. To disable
+     * monitoring, call {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+     * <p>
+     * This flag can be used together with filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
+     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 1 << 2;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new character bounds {@link CursorAnchorInfo#getCharacterBounds(int)} whenever
+     * cursor/anchor position is changed. To disable
+     * monitoring, call {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+     * <p>
+     * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
+     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 1 << 3;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new Insertion marker info {@link CursorAnchorInfo#getInsertionMarkerFlags()},
+     * {@link CursorAnchorInfo#getInsertionMarkerBaseline()}, etc whenever cursor/anchor position is
+     * changed. To disable monitoring, call {@link InputConnection#requestCursorUpdates(int)} again
+     * with this flag off.
+     * <p>
+     * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS} and update flags {@link #CURSOR_UPDATE_IMMEDIATE}
+     * and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 1 << 4;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {CURSOR_UPDATE_IMMEDIATE, CURSOR_UPDATE_MONITOR}, flag = true,
+            prefix = { "CURSOR_UPDATE_" })
+    @interface CursorUpdateMode{}
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {CURSOR_UPDATE_FILTER_EDITOR_BOUNDS, CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS,
+            CURSOR_UPDATE_FILTER_INSERTION_MARKER}, flag = true,
+            prefix = { "CURSOR_UPDATE_FILTER_" })
+    @interface CursorUpdateFilter{}
 
     /**
      * Called by the input method to ask the editor for calling back
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
      * notify cursor/anchor locations.
      *
-     * @param cursorUpdateMode {@link #CURSOR_UPDATE_IMMEDIATE} and/or
-     * {@link #CURSOR_UPDATE_MONITOR}. Pass {@code 0} to disable the effect of
-     * {@link #CURSOR_UPDATE_MONITOR}.
+     * @param cursorUpdateMode any combination of update modes and filters:
+     * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}, and date filters:
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}.
+     * Pass {@code 0} to disable them. However, if an unknown flag is provided, request will be
+     * rejected and method will return {@code false}.
      * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
-     * application will not call
-     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
-     * In {@link android.os.Build.VERSION_CODES#N} and later, returns {@code false} also when the
-     * target application does not implement this method.
+     *         application will not call {@link InputMethodManager#updateCursorAnchorInfo(
+     *         android.view.View, CursorAnchorInfo)}.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
      */
     boolean requestCursorUpdates(int cursorUpdateMode);
 
     /**
-     * Called by the {@link InputMethodManager} to enable application developers to specify a
-     * dedicated {@link Handler} on which incoming IPC method calls from input methods will be
-     * dispatched.
+     * Called by the input method to ask the editor for calling back
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
+     * notify cursor/anchor locations.
      *
-     * <p>Note: This does nothing when called from input methods.</p>
+     * @param cursorUpdateMode combination of update modes:
+     * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}
+     * @param cursorUpdateFilter any combination of data filters:
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}.
+     *
+     * <p>Pass {@code 0} to disable them. However, if an unknown flag is provided, request will be
+     * rejected and method will return {@code false}.</p>
+     * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
+     *         application will not call {@link InputMethodManager#updateCursorAnchorInfo(
+     *         android.view.View, CursorAnchorInfo)}.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
+     */
+    default boolean requestCursorUpdates(@CursorUpdateMode int cursorUpdateMode,
+            @CursorUpdateFilter int cursorUpdateFilter) {
+        if (cursorUpdateFilter == 0) {
+            return requestCursorUpdates(cursorUpdateMode);
+        }
+        return false;
+    }
+
+    /**
+     * Called by the system to enable application developers to specify a dedicated thread on which
+     * {@link InputConnection} methods are called back.
+     *
+     * <p><strong>Editor authors</strong>: although you can return your custom subclasses of
+     * {@link Handler}, the system only uses {@link android.os.Looper} returned from
+     * {@link Handler#getLooper()}.  You cannot intercept or cancel {@link InputConnection}
+     * callbacks by implementing this method.</p>
+     *
+     * <p><strong>IME authors</strong>: This method is not intended to be called from the IME.  You
+     * will always receive {@code null}.</p>
      *
      * @return {@code null} to use the default {@link Handler}.
      */
+    @Nullable
     Handler getHandler();
 
     /**
@@ -1025,5 +1207,28 @@ public interface InputConnection {
      */
     default boolean setImeConsumesInput(boolean imeConsumesInput) {
         return false;
+    }
+
+    /**
+     * Called by the system when it needs to take a snapshot of multiple text-related data in an
+     * atomic manner.
+     *
+     * <p><strong>Editor authors</strong>: Supporting this method is strongly encouraged. Atomically
+     * taken {@link TextSnapshot} is going to be really helpful for the system when optimizing IPCs
+     * in a safe and deterministic manner.  Return {@code null} if an atomically taken
+     * {@link TextSnapshot} is unavailable.  The system continues supporting such a scenario
+     * gracefully.</p>
+     *
+     * <p><strong>IME authors</strong>: Currently IMEs cannot call this method directly and always
+     * receive {@code null} as the result.</p>
+     *
+     * @return {@code null} if {@link TextSnapshot} is unavailable and/or this API is called from
+     *         IMEs.
+     */
+    @Nullable
+    default TextSnapshot takeSnapshot() {
+        // Returning null by default because the composing text range cannot be retrieved from
+        // existing APIs.
+        return null;
     }
 }

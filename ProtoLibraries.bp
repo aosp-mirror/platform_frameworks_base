@@ -14,7 +14,6 @@
 
 gensrcs {
     name: "framework-javastream-protos",
-    depfile: true,
 
     tools: [
         "aprotoc",
@@ -22,10 +21,13 @@ gensrcs {
         "soong_zip",
     ],
 
+    tool_files: [
+        ":libprotobuf-internal-protos",
+    ],
+
     cmd: "mkdir -p $(genDir)/$(in) " +
         "&& $(location aprotoc) " +
         "  --plugin=$(location protoc-gen-javastream) " +
-        "  --dependency_out=$(depfile) " +
         "  --javastream_out=$(genDir)/$(in) " +
         "  -Iexternal/protobuf/src " +
         "  -I . " +
@@ -40,24 +42,26 @@ gensrcs {
         ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     output_extension: "srcjar",
 }
 
 gensrcs {
     name: "framework-cppstream-protos",
-    depfile: true,
 
     tools: [
         "aprotoc",
         "protoc-gen-cppstream",
     ],
 
+    tool_files: [
+        ":libprotobuf-internal-protos",
+    ],
+
     cmd: "mkdir -p $(genDir) " +
         "&& $(location aprotoc) " +
         "  --plugin=$(location protoc-gen-cppstream) " +
-        "  --dependency_out=$(depfile) " +
         "  --cppstream_out=$(genDir) " +
         "  -Iexternal/protobuf/src " +
         "  -I . " +
@@ -70,7 +74,7 @@ gensrcs {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
 
     output_extension: "proto.h",
@@ -90,7 +94,7 @@ java_library_host {
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     proto: {
         include_dirs: [
@@ -101,7 +105,7 @@ java_library_host {
     },
     // Protos have lots of MissingOverride and similar.
     errorprone: {
-        javacflags: ["-XepDisableAllChecks"],
+        enabled: false,
     },
 }
 
@@ -126,8 +130,12 @@ java_library {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        enabled: false,
+    },
 }
 
 // ====  java proto device library (for test only)  ==============================
@@ -145,7 +153,7 @@ java_library {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
     exclude_srcs: [
         "core/proto/android/privacy.proto",
@@ -155,7 +163,7 @@ java_library {
     sdk_version: "core_current",
     // Protos have lots of MissingOverride and similar.
     errorprone: {
-        javacflags: ["-XepDisableAllChecks"],
+        enabled: false,
     },
 }
 
@@ -182,7 +190,7 @@ cc_defaults {
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
-        ":service-permission-protos",
+        ":service-permission-streaming-proto-sources",
     ],
 }
 

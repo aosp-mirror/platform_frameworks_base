@@ -19,7 +19,10 @@ package android.security.identity;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.security.GenerateRkpKey;
+import android.security.keymaster.KeymasterDefs;
 
 class CredstoreIdentityCredentialStore extends IdentityCredentialStore {
 
@@ -104,6 +107,16 @@ class CredstoreIdentityCredentialStore extends IdentityCredentialStore {
         try {
             IWritableCredential wc;
             wc = mStore.createCredential(credentialName, docType);
+            try {
+                GenerateRkpKey keyGen = new GenerateRkpKey(mContext);
+                // We don't know what the security level is for the backing keymint, so go ahead and
+                // poke the provisioner for both TEE and SB.
+                keyGen.notifyKeyGenerated(KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT);
+                keyGen.notifyKeyGenerated(KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX);
+            } catch (RemoteException e) {
+                // Not really an error state. Does not apply at all if RKP is unsupported or
+                // disabled on a given device.
+            }
             return new CredstoreWritableIdentityCredential(mContext, credentialName, docType, wc);
         } catch (android.os.RemoteException e) {
             throw new RuntimeException("Unexpected RemoteException ", e);

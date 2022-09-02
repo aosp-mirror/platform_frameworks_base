@@ -16,14 +16,23 @@
 
 package android.permission;
 
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
 
 import android.Manifest;
 import android.annotation.CheckResult;
+import android.annotation.DurationMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -31,12 +40,14 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -79,6 +90,56 @@ import java.util.Set;
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
     private static final String LOG_TAG = PermissionManager.class.getName();
+
+    /**
+     * The permission is granted.
+     */
+    public static final int PERMISSION_GRANTED = 0;
+
+    /**
+     * The permission is denied. Applicable only to runtime and app op permissions.
+     * <p>
+     * The app isn't expecting the permission to be denied so that a "no-op" action should be taken,
+     * such as returning an empty result.
+     */
+    public static final int PERMISSION_SOFT_DENIED = 1;
+
+    /**
+     * The permission is denied.
+     * <p>
+     * The app should receive a {@code SecurityException}, or an error through a relevant callback.
+     */
+    public static final int PERMISSION_HARD_DENIED = 2;
+
+    /**
+     * The set of flags that indicate that a permission state has been explicitly set
+     *
+     * @hide
+     */
+    public static final int EXPLICIT_SET_FLAGS = FLAG_PERMISSION_USER_SET
+            | FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_POLICY_FIXED
+            | FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_GRANTED_BY_DEFAULT
+            | FLAG_PERMISSION_GRANTED_BY_ROLE;
+
+    /**
+     * Activity action: Launch UI to review permission decisions.
+     * <p>
+     * <strong>Important:</strong>You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_REVIEW_PERMISSION_DECISIONS} permission to ensure
+     * that only the system can launch this activity. The system will not launch activities that are
+     * not properly protected.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.START_REVIEW_PERMISSION_DECISIONS)
+    public static final String ACTION_REVIEW_PERMISSION_DECISIONS =
+            "android.permission.action.REVIEW_PERMISSION_DECISIONS";
+
 
     /** @hide */
     public static final String LOG_TAG_TRACE_GRANTS = "PermissionGrantTrace";
@@ -131,6 +192,17 @@ public final class PermissionManager {
      */
     public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
 
+    /**
+     * Intent extra: List of PermissionGroupUsages
+     * <p>
+     * Type: {@code List<PermissionGroupUsage>}
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PERMISSION_USAGES =
+            "android.permission.extra.PERMISSION_USAGES";
+
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
@@ -159,6 +231,153 @@ public final class PermissionManager {
         mPermissionManager = IPermissionManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
                 "permissionmgr"));
         mLegacyPermissionManager = context.getSystemService(LegacyPermissionManager.class);
+    }
+
+    /**
+     * Checks whether a given data access chain described by the given {@link AttributionSource}
+     * has a given permission.
+     *
+     * <strong>NOTE:</strong> Use this method only for permission checks at the
+     * point where you will deliver the permission protected data to clients.
+     *
+     * <p>For example, if an app registers a location listener it should have the location
+     * permission but no data is actually sent to the app at the moment of registration
+     * and you should use {@link #checkPermissionForPreflight(String, AttributionSource)}
+     * to determine if the app has or may have location permission (if app has only foreground
+     * location the grant state depends on the app's fg/gb state) and this check will not
+     * leave a trace that permission protected data was delivered. When you are about to
+     * deliver the location data to a registered listener you should use this method which
+     * will evaluate the permission access based on the current fg/bg state of the app and
+     * leave a record that the data was accessed.
+     *
+     * <p>Requires the start of the AttributionSource chain to have the UPDATE_APP_OPS_STATS
+     * permission for the app op accesses to be given the TRUSTED_PROXY/PROXIED flags, otherwise the
+     * accesses will have the UNTRUSTED flags.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity
+     * @param message A message describing the reason the permission was checked
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     *
+     * @see #checkPermissionForPreflight(String, AttributionSource)
+     */
+    @PermissionCheckerManager.PermissionResult
+    @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
+    public int checkPermissionForDataDelivery(@NonNull String permission,
+            @NonNull AttributionSource attributionSource, @Nullable String message) {
+        return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
+                // FIXME(b/199526514): PID should be passed inside AttributionSource.
+                PermissionChecker.PID_UNKNOWN, attributionSource, message);
+    }
+
+    /**
+     *
+     * Similar to checkPermissionForDataDelivery, except it results in an app op start, rather than
+     * a note. If this method is used, then {@link #finishDataDelivery(String, AttributionSource)}
+     * must be used when access is finished.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity
+     * @param message A message describing the reason the permission was checked
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     *
+     * <p>Requires the start of the AttributionSource chain to have the UPDATE_APP_OPS_STATS
+     * permission for the app op accesses to be given the TRUSTED_PROXY/PROXIED flags, otherwise the
+     * accesses will have the UNTRUSTED flags.
+     *
+     * @see #checkPermissionForDataDelivery(String, AttributionSource, String)
+     */
+    @PermissionCheckerManager.PermissionResult
+    @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
+    public int checkPermissionForStartDataDelivery(@NonNull String permission,
+            @NonNull AttributionSource attributionSource, @Nullable String message) {
+        return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
+                // FIXME(b/199526514): PID should be passed inside AttributionSource.
+                PermissionChecker.PID_UNKNOWN, attributionSource, message, true);
+    }
+
+    /**
+     * Indicate that usage has finished for an {@link AttributionSource} started with
+     * {@link #checkPermissionForStartDataDelivery(String, AttributionSource, String)}
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity to finish
+     */
+    public void finishDataDelivery(@NonNull String permission,
+            @NonNull AttributionSource attributionSource) {
+        PermissionChecker.finishDataDelivery(mContext, AppOpsManager.permissionToOp(permission),
+                attributionSource);
+    }
+
+    /**
+     * Checks whether a given data access chain described by the given {@link AttributionSource}
+     * has a given permission. Call this method if you are the datasource which would not blame you
+     * for access to the data since you are the data. Use this API if you are the datasource of the
+     * protected state.
+     *
+     * <strong>NOTE:</strong> Use this method only for permission checks at the
+     * point where you will deliver the permission protected data to clients.
+     *
+     * <p>For example, if an app registers a location listener it should have the location
+     * permission but no data is actually sent to the app at the moment of registration
+     * and you should use {@link #checkPermissionForPreflight(String, AttributionSource)}
+     * to determine if the app has or may have location permission (if app has only foreground
+     * location the grant state depends on the app's fg/gb state) and this check will not
+     * leave a trace that permission protected data was delivered. When you are about to
+     * deliver the location data to a registered listener you should use this method which
+     * will evaluate the permission access based on the current fg/bg state of the app and
+     * leave a record that the data was accessed.
+     *
+     * <p>Requires the start of the AttributionSource chain to have the UPDATE_APP_OPS_STATS
+     * permission for the app op accesses to be given the TRUSTED_PROXY/PROXIED flags, otherwise the
+     * accesses will have the UNTRUSTED flags.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity
+     * @param message A message describing the reason the permission was checked
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     *
+     * @see #checkPermissionForPreflight(String, AttributionSource)
+     */
+    @PermissionCheckerManager.PermissionResult
+    @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
+    public int checkPermissionForDataDeliveryFromDataSource(@NonNull String permission,
+            @NonNull AttributionSource attributionSource, @Nullable String message) {
+        return PermissionChecker.checkPermissionForDataDeliveryFromDataSource(mContext, permission,
+                PermissionChecker.PID_UNKNOWN, attributionSource, message);
+    }
+
+    /**
+     * Checks whether a given data access chain described by the given {@link AttributionSource}
+     * has a given permission.
+     *
+     * <strong>NOTE:</strong> Use this method only for permission checks at the
+     * preflight point where you will not deliver the permission protected data
+     * to clients but schedule permission data delivery, apps register listeners,
+     * etc.
+     *
+     * <p>For example, if an app registers a data listener it should have the required
+     * permission but no data is actually sent to the app at the moment of registration
+     * and you should use this method to determine if the app has or may have the
+     * permission and this check will not leave a trace that permission protected data
+     * was delivered. When you are about to deliver the protected data to a registered
+     * listener you should use {@link #checkPermissionForDataDelivery(String,
+     * AttributionSource, String)} which will evaluate the permission access based
+     * on the current fg/bg state of the app and leave a record that the data was accessed.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource The identity for which to check the permission.
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     */
+    @PermissionCheckerManager.PermissionResult
+    public int checkPermissionForPreflight(@NonNull String permission,
+            @NonNull AttributionSource attributionSource) {
+        return PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                attributionSource);
     }
 
     /**
@@ -901,7 +1120,7 @@ public final class PermissionManager {
     @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
-    public List<PermGroupUsage> getIndicatorAppOpUsageData() {
+    public List<PermissionGroupUsage> getIndicatorAppOpUsageData() {
         return getIndicatorAppOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
@@ -915,7 +1134,7 @@ public final class PermissionManager {
     @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
-    public List<PermGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
+    public List<PermissionGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
         // Lazily initialize the usage helper
         initializeUsageHelper();
         return mUsageHelper.getOpUsageData(micMuted);
@@ -1092,6 +1311,22 @@ public final class PermissionManager {
     }
 
     /**
+     * Starts a one-time permission session for a given package.
+     * @see #startOneTimePermissionSession(String, long, long, int, int)
+     * @hide
+     * @deprecated Use {@link #startOneTimePermissionSession(String, long, long, int, int)} instead
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
+    public void startOneTimePermissionSession(@NonNull String packageName, long timeoutMillis,
+            @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
+            @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
+        startOneTimePermissionSession(packageName, timeoutMillis, -1,
+                importanceToResetTimer, importanceToKeepSessionAlive);
+    }
+
+    /**
      * Starts a one-time permission session for a given package. A one-time permission session is
      * ended if app becomes inactive. Inactivity is defined as the package's uid importance level
      * staying > importanceToResetTimer for timeoutMillis milliseconds. If the package's uid
@@ -1111,25 +1346,33 @@ public final class PermissionManager {
      * {@link PermissionControllerService#onOneTimePermissionSessionTimeout(String)} is invoked.
      * </p>
      * <p>
-     * Note that if there is currently an active session for a package a new one isn't created and
-     * the existing one isn't changed.
+     * Note that if there is currently an active session for a package a new one isn't created but
+     * each parameter of the existing one will be updated to the more aggressive of both sessions.
+     * This means that durations will be set to the shortest parameter and importances will be set
+     * to the lowest one.
      * </p>
      * @param packageName The package to start a one-time permission session for
      * @param timeoutMillis Number of milliseconds for an app to be in an inactive state
+     * @param revokeAfterKilledDelayMillis Number of milliseconds to wait before revoking on the
+     *                                     event an app is terminated. Set to -1 to use default
+     *                                     value for the device.
      * @param importanceToResetTimer The least important level to uid must be to reset the timer
      * @param importanceToKeepSessionAlive The least important level the uid must be to keep the
-     *                                    session alive
+     *                                     session alive
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
-    public void startOneTimePermissionSession(@NonNull String packageName, long timeoutMillis,
+    public void startOneTimePermissionSession(@NonNull String packageName,
+            @DurationMillisLong long timeoutMillis,
+            @DurationMillisLong long revokeAfterKilledDelayMillis,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
         try {
             mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
-                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
+                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
+                    importanceToKeepSessionAlive);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -1222,6 +1465,31 @@ public final class PermissionManager {
         return false;
     }
 
+    /**
+     * Revoke the POST_NOTIFICATIONS permission, without killing the app. This method must ONLY BE
+     * USED in CTS or local tests.
+     *
+     * @param packageName The package to be revoked
+     * @param userId The user for which to revoke
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL)
+    public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String packageName,
+            int userId) {
+        try {
+            mPermissionManager.revokePostNotificationPermissionWithoutKillForTest(packageName,
+                    userId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    // Only warn once for assuming that root or system UID has a permission
+    // to reduce duplicate logcat output.
+    private static volatile boolean sShouldWarnMissingActivityManager = true;
+
     /* @hide */
     private static int checkPermissionUncached(@Nullable String permission, int pid, int uid) {
         final IActivityManager am = ActivityManager.getService();
@@ -1231,8 +1499,11 @@ public final class PermissionManager {
             // permission this is.
             final int appId = UserHandle.getAppId(uid);
             if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
-                Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
-                        + permission);
+                if (sShouldWarnMissingActivityManager) {
+                    Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
+                            + permission);
+                    sShouldWarnMissingActivityManager = false;
+                }
                 return PackageManager.PERMISSION_GRANTED;
             }
             Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
@@ -1240,6 +1511,7 @@ public final class PermissionManager {
             return PackageManager.PERMISSION_DENIED;
         }
         try {
+            sShouldWarnMissingActivityManager = true;
             return am.checkPermission(permission, pid, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1307,7 +1579,7 @@ public final class PermissionManager {
             new PropertyInvalidatedCache<PermissionQuery, Integer>(
                     2048, CACHE_KEY_PACKAGE_INFO, "checkPermission") {
                 @Override
-                protected Integer recompute(PermissionQuery query) {
+                public Integer recompute(PermissionQuery query) {
                     return checkPermissionUncached(query.permission, query.pid, query.uid);
                 }
             };
@@ -1334,6 +1606,7 @@ public final class PermissionManager {
     private static final class PackageNamePermissionQuery {
         final String permName;
         final String pkgName;
+        @UserIdInt
         final int userId;
 
         PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName,
@@ -1389,9 +1662,13 @@ public final class PermissionManager {
             new PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>(
                     16, CACHE_KEY_PACKAGE_INFO, "checkPackageNamePermission") {
                 @Override
-                protected Integer recompute(PackageNamePermissionQuery query) {
+                public Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(
                             query.permName, query.pkgName, query.userId);
+                }
+                @Override
+                public boolean bypass(PackageNamePermissionQuery query) {
+                    return query.userId < 0;
                 }
             };
 

@@ -2812,7 +2812,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glDeleteBuffers(int n, int[] buffers, int offset) {
         begin("glDeleteBuffers");
         arg("n", n);
-        arg("buffers", buffers.toString());
+        arg("buffers", Arrays.toString(buffers));
         arg("offset", offset);
         end();
         mgl11.glDeleteBuffers(n, buffers, offset);
@@ -2831,7 +2831,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGenBuffers(int n, int[] buffers, int offset) {
         begin("glGenBuffers");
         arg("n", n);
-        arg("buffers", buffers.toString());
+        arg("buffers", Arrays.toString(buffers));
         arg("offset", offset);
         end();
         mgl11.glGenBuffers(n, buffers, offset);
@@ -2850,7 +2850,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGetBooleanv(int pname, boolean[] params, int offset) {
         begin("glGetBooleanv");
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetBooleanv(pname, params, offset);
@@ -2871,7 +2871,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetBufferParameteriv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetBufferParameteriv(target, pname, params, offset);
@@ -2891,7 +2891,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGetClipPlanef(int pname, float[] eqn, int offset) {
         begin("glGetClipPlanef");
         arg("pname", pname);
-        arg("eqn", eqn.toString());
+        arg("eqn", Arrays.toString(eqn));
         arg("offset", offset);
         end();
         mgl11.glGetClipPlanef(pname, eqn, offset);
@@ -2910,7 +2910,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGetClipPlanex(int pname, int[] eqn, int offset) {
         begin("glGetClipPlanex");
         arg("pname", pname);
-        arg("eqn", eqn.toString());
+        arg("eqn", Arrays.toString(eqn));
         arg("offset", offset);
         end();
         mgl11.glGetClipPlanex(pname, eqn, offset);
@@ -2928,7 +2928,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGetFixedv(int pname, int[] params, int offset) {
         begin("glGetFixedv");
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetFixedv(pname, params, offset);
@@ -2946,7 +2946,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGetFloatv(int pname, float[] params, int offset) {
         begin("glGetFloatv");
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetFloatv(pname, params, offset);
@@ -2965,7 +2965,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetLightfv");
         arg("light", light);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetLightfv(light, pname, params, offset);
@@ -2986,7 +2986,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetLightxv");
         arg("light", light);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetLightxv(light, pname, params, offset);
@@ -3008,7 +3008,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetMaterialfv");
         arg("face", face);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetMaterialfv(face, pname, params, offset);
@@ -3029,7 +3029,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetMaterialxv");
         arg("face", face);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetMaterialxv(face, pname, params, offset);
@@ -3050,7 +3050,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexEnviv");
         arg("env", env);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetTexEnviv(env, pname, params, offset);
@@ -3071,7 +3071,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexEnviv");
         arg("env", env);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetTexEnviv(env, pname, params, offset);
@@ -3092,7 +3092,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexParameterfv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetTexParameterfv(target, pname, params, offset);
@@ -3113,7 +3113,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexParameteriv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetTexEnviv(target, pname, params, offset);
@@ -3135,7 +3135,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexParameterxv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glGetTexParameterxv(target, pname, params, offset);
@@ -3191,7 +3191,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glPointParameterfv(int pname, float[] params, int offset) {
         begin("glPointParameterfv");
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glPointParameterfv(pname, params, offset);
@@ -3219,7 +3219,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glPointParameterxv(int pname, int[] params, int offset) {
         begin("glPointParameterxv");
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glPointParameterxv(pname, params, offset);
@@ -3259,7 +3259,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glTexEnviv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glTexEnviv(target, pname, params, offset);
@@ -3281,7 +3281,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glTexParameterfv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glTexParameterfv( target, pname, params, offset);
@@ -3313,7 +3313,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glTexParameterxv");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11.glTexParameterxv(target, pname, params, offset);
@@ -3356,7 +3356,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGetPointerv(int pname, Buffer[] params) {
         begin("glGetPointerv");
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         end();
         mgl11.glGetPointerv(pname, params);
         checkError();
@@ -3513,7 +3513,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glDeleteFramebuffersOES(int n, int[] framebuffers, int offset) {
         begin("glDeleteFramebuffersOES");
         arg("n", n);
-        arg("framebuffers", framebuffers.toString());
+        arg("framebuffers", Arrays.toString(framebuffers));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glDeleteFramebuffersOES(n, framebuffers, offset);
@@ -3534,7 +3534,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glDeleteRenderbuffersOES(int n, int[] renderbuffers, int offset) {
         begin("glDeleteRenderbuffersOES");
         arg("n", n);
-        arg("renderbuffers", renderbuffers.toString());
+        arg("renderbuffers", Arrays.toString(renderbuffers));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glDeleteRenderbuffersOES(n, renderbuffers, offset);
@@ -3591,7 +3591,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGenFramebuffersOES(int n, int[] framebuffers, int offset) {
         begin("glGenFramebuffersOES");
         arg("n", n);
-        arg("framebuffers", framebuffers.toString());
+        arg("framebuffers", Arrays.toString(framebuffers));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGenFramebuffersOES(n, framebuffers, offset);
@@ -3612,7 +3612,7 @@ class GLLogWrapper extends GLWrapperBase {
     public void glGenRenderbuffersOES(int n, int[] renderbuffers, int offset) {
         begin("glGenRenderbuffersOES");
         arg("n", n);
-        arg("renderbuffers", renderbuffers.toString());
+        arg("renderbuffers", Arrays.toString(renderbuffers));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGenRenderbuffersOES(n, renderbuffers, offset);
@@ -3636,7 +3636,7 @@ class GLLogWrapper extends GLWrapperBase {
         arg("target", target);
         arg("attachment", attachment);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params, offset);
@@ -3662,7 +3662,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetRenderbufferParameterivOES");
         arg("target", target);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGetRenderbufferParameterivOES(target, pname, params, offset);
@@ -3686,7 +3686,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexGenfv");
         arg("coord", coord);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGetTexGenfv(coord, pname, params, offset);
@@ -3709,7 +3709,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexGeniv");
         arg("coord", coord);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGetTexGeniv(coord, pname, params, offset);
@@ -3732,7 +3732,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glGetTexGenxv");
         arg("coord", coord);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glGetTexGenxv(coord, pname, params, offset);
@@ -3799,7 +3799,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glTexGenfv");
         arg("coord", coord);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glTexGenfv(coord, pname, params, offset);
@@ -3833,7 +3833,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glTexGeniv");
         arg("coord", coord);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glTexGeniv(coord, pname, params, offset);
@@ -3867,7 +3867,7 @@ class GLLogWrapper extends GLWrapperBase {
         begin("glTexGenxv");
         arg("coord", coord);
         arg("pname", pname);
-        arg("params", params.toString());
+        arg("params", Arrays.toString(params));
         arg("offset", offset);
         end();
         mgl11ExtensionPack.glTexGenxv(coord, pname, params, offset);

@@ -56,6 +56,7 @@ import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.testharness.TestHarnessModeService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -151,6 +152,14 @@ public class AdbService extends IAdbManager.Stub {
         }
 
         @Override
+        public void notifyKeyFilesUpdated() {
+            if (mDebuggingManager == null) {
+                return;
+            }
+            mDebuggingManager.notifyKeyFilesUpdated();
+        }
+
+        @Override
         public void startAdbdForTransport(byte transportType) {
             FgThread.getHandler().sendMessage(obtainMessage(
                     AdbService::setAdbdEnabledForTransport, AdbService.this, true, transportType));
@@ -163,18 +172,8 @@ public class AdbService extends IAdbManager.Stub {
         }
     }
 
-    private void initAdbState() {
+    private void registerContentObservers() {
         try {
-            /*
-             * Use the normal bootmode persistent prop to maintain state of adb across
-             * all boot modes.
-             */
-            mIsAdbUsbEnabled = containsFunction(
-                    SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY, ""),
-                    UsbManager.USB_FUNCTION_ADB);
-            mIsAdbWifiEnabled = "1".equals(
-                    SystemProperties.get(WIFI_PERSISTENT_CONFIG_PROPERTY, "0"));
-
             // register observer to listen for settings changes
             mObserver = new AdbSettingsObserver();
             mContentResolver.registerContentObserver(
@@ -184,7 +183,7 @@ public class AdbService extends IAdbManager.Stub {
                     Settings.Global.getUriFor(Settings.Global.ADB_WIFI_ENABLED),
                     false, mObserver);
         } catch (Exception e) {
-            Slog.e(TAG, "Error in initAdbState", e);
+            Slog.e(TAG, "Error in registerContentObservers", e);
         }
     }
 
@@ -248,7 +247,7 @@ public class AdbService extends IAdbManager.Stub {
         mContentResolver = context.getContentResolver();
         mDebuggingManager = new AdbDebuggingManager(context);
 
-        initAdbState();
+        registerContentObservers();
         LocalServices.addService(AdbManagerInternal.class, new AdbManagerInternalImpl());
     }
 
@@ -259,10 +258,23 @@ public class AdbService extends IAdbManager.Stub {
     public void systemReady() {
         if (DEBUG) Slog.d(TAG, "systemReady");
 
+        /*
+         * Use the normal bootmode persistent prop to maintain state of adb across
+         * all boot modes.
+         */
+        mIsAdbUsbEnabled = containsFunction(
+                SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY, ""),
+                UsbManager.USB_FUNCTION_ADB);
+        boolean shouldEnableAdbUsb = mIsAdbUsbEnabled
+                || SystemProperties.getBoolean(
+                        TestHarnessModeService.TEST_HARNESS_MODE_PROPERTY, false);
+        mIsAdbWifiEnabled = "1".equals(
+                SystemProperties.get(WIFI_PERSISTENT_CONFIG_PROPERTY, "0"));
+
         // make sure the ADB_ENABLED setting value matches the current state
         try {
             Settings.Global.putInt(mContentResolver,
-                    Settings.Global.ADB_ENABLED, mIsAdbUsbEnabled ? 1 : 0);
+                    Settings.Global.ADB_ENABLED, shouldEnableAdbUsb ? 1 : 0);
             Settings.Global.putInt(mContentResolver,
                     Settings.Global.ADB_WIFI_ENABLED, mIsAdbWifiEnabled ? 1 : 0);
         } catch (SecurityException e) {
@@ -272,7 +284,7 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     /**
-     * Callend in response to {@code SystemService.PHASE_BOOT_COMPLETED} from {@code SystemServer}.
+     * Called in response to {@code SystemService.PHASE_BOOT_COMPLETED} from {@code SystemServer}.
      */
     public void bootCompleted() {
         if (DEBUG) Slog.d(TAG, "boot completed");
@@ -311,14 +323,15 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     /**
-     * @return true if the device supports secure ADB over Wi-Fi.
+     * @return true if the device supports secure ADB over Wi-Fi or Ethernet.
      * @hide
      */
     @Override
     public boolean isAdbWifiSupported() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.MANAGE_DEBUGGING, "AdbService");
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI) ||
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_ETHERNET);
     }
 
     /**
@@ -459,7 +472,7 @@ public class AdbService extends IAdbManager.Stub {
                 ? AdbManager.WIRELESS_STATUS_CONNECTED
                 : AdbManager.WIRELESS_STATUS_DISCONNECTED);
         intent.putExtra(AdbManager.WIRELESS_DEBUG_PORT_EXTRA, port);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
         Slog.i(TAG, "sent port broadcast port=" + port);
     }
 

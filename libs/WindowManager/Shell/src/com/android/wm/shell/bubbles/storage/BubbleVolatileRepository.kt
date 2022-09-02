@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.bubbles.storage
 
+import android.annotation.UserIdInt
 import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.util.SparseArray
@@ -95,9 +96,67 @@ class BubbleVolatileRepository(private val launcherApps: LauncherApps) {
     }
 
     @Synchronized
-    fun removeBubbles(userId: Int, bubbles: List<BubbleEntity>) =
+    fun removeBubbles(@UserIdInt userId: Int, bubbles: List<BubbleEntity>) =
             uncache(bubbles.filter { b: BubbleEntity ->
                 getEntities(userId).removeIf { e: BubbleEntity -> b.key == e.key } })
+
+    /**
+     * Removes all the bubbles associated with the provided userId.
+     * @return whether bubbles were removed or not.
+     */
+    @Synchronized
+    fun removeBubblesForUser(@UserIdInt userId: Int, @UserIdInt parentUserId: Int): Boolean {
+        if (parentUserId != -1) {
+            return removeBubblesForUserWithParent(userId, parentUserId)
+        } else {
+            val entities = entitiesByUser.get(userId)
+            entitiesByUser.remove(userId)
+            return entities != null
+        }
+    }
+
+    /**
+     * Removes all the bubbles associated with the provided userId when that userId is part of
+     * a profile (e.g. managed account).
+     *
+     * @return whether bubbles were removed or not.
+     */
+    @Synchronized
+    private fun removeBubblesForUserWithParent(
+        @UserIdInt userId: Int,
+        @UserIdInt parentUserId: Int
+    ): Boolean {
+        if (entitiesByUser.get(parentUserId) != null) {
+            return entitiesByUser.get(parentUserId).removeIf {
+                b: BubbleEntity -> b.userId == userId }
+        }
+        return false
+    }
+
+    /**
+     * Goes through all the persisted bubbles and removes them if the user is not in the active
+     * list of users.
+     *
+     * @return whether the list of bubbles changed or not (i.e. was a removal made).
+     */
+    @Synchronized
+    fun sanitizeBubbles(activeUsers: List<Int>): Boolean {
+        for (i in 0 until entitiesByUser.size()) {
+            // First check if the user is a parent / top-level user
+            val parentUserId = entitiesByUser.keyAt(i)
+            if (!activeUsers.contains(parentUserId)) {
+                entitiesByUser.remove(parentUserId)
+                return true
+            } else if (entitiesByUser.get(parentUserId) != null) {
+                // Then check if each of the bubbles in the top-level user, still has a valid user
+                // as it could belong to a profile and have a different id from the parent.
+                return entitiesByUser.get(parentUserId).removeIf { b: BubbleEntity ->
+                    !activeUsers.contains(b.userId)
+                }
+            }
+        }
+        return false
+    }
 
     private fun cache(bubbles: List<BubbleEntity>) {
         bubbles.groupBy { ShortcutKey(it.userId, it.packageName) }.forEach { (key, bubbles) ->

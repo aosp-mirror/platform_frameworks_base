@@ -80,6 +80,7 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -151,8 +152,6 @@ public class StorageManager {
     public static final String PROP_HAS_RESERVED = "vold.has_reserved";
     /** {@hide} */
     public static final String PROP_ADOPTABLE = "persist.sys.adoptable";
-    /** {@hide} */
-    public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
     /** {@hide} */
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
@@ -257,13 +256,11 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_ADOPTABLE_FORCE_OFF = 1 << 1;
     /** {@hide} */
-    public static final int DEBUG_EMULATE_FBE = 1 << 2;
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 3;
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
-    /** {@hide} */
-    public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
@@ -271,6 +268,18 @@ public class StorageManager {
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
     /** {@hide} */
     public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
+    /** @hide */
+    public static final int FLAG_STORAGE_SDK = IInstalld.FLAG_STORAGE_SDK;
+
+    /** {@hide} */
+    @IntDef(prefix = "FLAG_STORAGE_",  value = {
+            FLAG_STORAGE_DE,
+            FLAG_STORAGE_CE,
+            FLAG_STORAGE_EXTERNAL,
+            FLAG_STORAGE_SDK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StorageFlags {}
 
     /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 8;
@@ -280,6 +289,8 @@ public class StorageManager {
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
     /** {@hide} */
     public static final int FLAG_INCLUDE_RECENT = 1 << 11;
+    /** {@hide} */
+    public static final int FLAG_INCLUDE_SHARED_PROFILE = 1 << 12;
 
     /** {@hide} */
     public static final int FSTRIM_FLAG_DEEP = IVold.FSTRIM_FLAG_DEEP_TRIM;
@@ -1297,6 +1308,25 @@ public class StorageManager {
     }
 
     /**
+     * Return the list of shared/external storage volumes currently available to
+     * the calling user and the user it shares media with. Please refer to
+     * <a href="https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support">
+     *     multi-user support</a> for more details.
+     *
+     * <p>
+     * This is similar to {@link StorageManager#getStorageVolumes()} except that the result also
+     * includes the volumes belonging to any user it shares media with
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+    public @NonNull List<StorageVolume> getStorageVolumesIncludingSharedProfiles() {
+        final ArrayList<StorageVolume> res = new ArrayList<>();
+        Collections.addAll(res,
+                getVolumeList(mContext.getUserId(),
+                        FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE | FLAG_INCLUDE_SHARED_PROFILE));
+        return res;
+    }
+
+    /**
      * Return the list of shared/external storage volumes both currently and
      * recently available to the calling user.
      * <p>
@@ -1370,13 +1400,7 @@ public class StorageManager {
                 }
                 packageName = packageNames[0];
             }
-            final int uid = ActivityThread.getPackageManager().getPackageUid(packageName,
-                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
-            if (uid <= 0) {
-                Log.w(TAG, "Missing UID; no storage volumes available");
-                return new StorageVolume[0];
-            }
-            return storageManager.getVolumeList(uid, packageName, flags);
+            return storageManager.getVolumeList(userId, packageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1413,11 +1437,47 @@ public class StorageManager {
         throw new IllegalStateException("Missing primary storage");
     }
 
-    private static final int DEFAULT_THRESHOLD_PERCENTAGE = 5;
-    private static final long DEFAULT_THRESHOLD_MAX_BYTES = DataUnit.MEBIBYTES.toBytes(500);
+    /**
+     * Devices having above STORAGE_THRESHOLD_PERCENT_HIGH of total space free are considered to be
+     * in high free space category.
+     *
+     * @hide
+     */
+    public static final int DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH = 20;
+    /** {@hide} */
+    @TestApi
+    public static final String
+            STORAGE_THRESHOLD_PERCENT_HIGH_KEY = "storage_threshold_percent_high";
+    /**
+     * Devices having below STORAGE_THRESHOLD_PERCENT_LOW of total space free are considered to be
+     * in low free space category and can be configured via
+     * Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE.
+     *
+     * @hide
+     */
+    public static final int DEFAULT_STORAGE_THRESHOLD_PERCENT_LOW = 5;
+    /**
+     * For devices in high free space category, CACHE_RESERVE_PERCENT_HIGH percent of total space is
+     * allocated for cache.
+     *
+     * @hide
+     */
+    public static final int DEFAULT_CACHE_RESERVE_PERCENT_HIGH = 10;
+    /** {@hide} */
+    @TestApi
+    public static final String CACHE_RESERVE_PERCENT_HIGH_KEY = "cache_reserve_percent_high";
+    /**
+     * For devices in low free space category, CACHE_RESERVE_PERCENT_LOW percent of total space is
+     * allocated for cache.
+     *
+     * @hide
+     */
+    public static final int DEFAULT_CACHE_RESERVE_PERCENT_LOW = 2;
+    /** {@hide} */
+    @TestApi
+    public static final String CACHE_RESERVE_PERCENT_LOW_KEY = "cache_reserve_percent_low";
 
-    private static final int DEFAULT_CACHE_PERCENTAGE = 10;
-    private static final long DEFAULT_CACHE_MAX_BYTES = DataUnit.GIBIBYTES.toBytes(5);
+    private static final long DEFAULT_THRESHOLD_MAX_BYTES = DataUnit.MEBIBYTES.toBytes(500);
 
     private static final long DEFAULT_FULL_THRESHOLD_BYTES = DataUnit.MEBIBYTES.toBytes(1);
 
@@ -1441,7 +1501,8 @@ public class StorageManager {
     @UnsupportedAppUsage
     public long getStorageLowBytes(File path) {
         final long lowPercent = Settings.Global.getInt(mResolver,
-                Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE, DEFAULT_THRESHOLD_PERCENTAGE);
+                Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                DEFAULT_STORAGE_THRESHOLD_PERCENT_LOW);
         final long lowBytes = (path.getTotalSpace() * lowPercent) / 100;
 
         final long maxLowBytes = Settings.Global.getLong(mResolver,
@@ -1451,28 +1512,66 @@ public class StorageManager {
     }
 
     /**
+     * Compute the minimum number of bytes of storage on the device that could
+     * be reserved for cached data depending on the device state which is then passed on
+     * to getStorageCacheBytes.
+     *
+     * Input File path must point to a storage volume.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    @SuppressLint("StreamFiles")
+    public long computeStorageCacheBytes(@NonNull File path) {
+        final int storageThresholdPercentHigh = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                STORAGE_THRESHOLD_PERCENT_HIGH_KEY, DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH);
+        final int cacheReservePercentHigh = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                CACHE_RESERVE_PERCENT_HIGH_KEY, DEFAULT_CACHE_RESERVE_PERCENT_HIGH);
+        final int cacheReservePercentLow = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                CACHE_RESERVE_PERCENT_LOW_KEY, DEFAULT_CACHE_RESERVE_PERCENT_LOW);
+        final long totalBytes = path.getTotalSpace();
+        final long usableBytes = path.getUsableSpace();
+        final long storageThresholdHighBytes = totalBytes * storageThresholdPercentHigh / 100;
+        final long storageThresholdLowBytes = getStorageLowBytes(path);
+        long result;
+        if (usableBytes > storageThresholdHighBytes) {
+            // If free space is >storageThresholdPercentHigh of total space,
+            // reserve cacheReservePercentHigh of total space
+            result = totalBytes * cacheReservePercentHigh / 100;
+        } else if (usableBytes < storageThresholdLowBytes) {
+            // If free space is <min(storageThresholdPercentLow of total space, 500MB),
+            // reserve cacheReservePercentLow of total space
+            result = totalBytes * cacheReservePercentLow / 100;
+        } else {
+            // Else, linearly interpolate the amount of space to reserve
+            double slope = (cacheReservePercentHigh - cacheReservePercentLow) * totalBytes
+                    / (100.0 * (storageThresholdHighBytes - storageThresholdLowBytes));
+            double intercept = totalBytes * cacheReservePercentLow / 100.0
+                    - storageThresholdLowBytes * slope;
+            result = Math.round(slope * usableBytes + intercept);
+        }
+        return result;
+    }
+
+    /**
      * Return the minimum number of bytes of storage on the device that should
      * be reserved for cached data.
      *
      * @hide
      */
-    public long getStorageCacheBytes(File path, @AllocateFlags int flags) {
-        final long cachePercent = Settings.Global.getInt(mResolver,
-                Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE, DEFAULT_CACHE_PERCENTAGE);
-        final long cacheBytes = (path.getTotalSpace() * cachePercent) / 100;
-
-        final long maxCacheBytes = Settings.Global.getLong(mResolver,
-                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES, DEFAULT_CACHE_MAX_BYTES);
-
-        final long result = Math.min(cacheBytes, maxCacheBytes);
+    public long getStorageCacheBytes(@NonNull File path, @AllocateFlags int flags) {
         if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
             return 0;
         } else if ((flags & StorageManager.FLAG_ALLOCATE_DEFY_ALL_RESERVED) != 0) {
             return 0;
         } else if ((flags & StorageManager.FLAG_ALLOCATE_DEFY_HALF_RESERVED) != 0) {
-            return result / 2;
+            return computeStorageCacheBytes(path) / 2;
         } else {
-            return result;
+            return computeStorageCacheBytes(path);
         }
     }
 
@@ -1578,30 +1677,23 @@ public class StorageManager {
     }
 
     /** {@hide}
-     * Is this device encryptable or already encrypted?
-     * @return true for encryptable or encrypted
-     *         false not encrypted and not encryptable
-     */
-    public static boolean isEncryptable() {
-        return RoSystemProperties.CRYPTO_ENCRYPTABLE;
-    }
-
-    /** {@hide}
-     * Is this device already encrypted?
-     * @return true for encrypted. (Implies isEncryptable() == true)
-     *         false not encrypted
+     * Is this device encrypted?
+     * <p>
+     * Note: all devices launching with Android 10 (API level 29) or later are
+     * required to be encrypted.  This should only ever return false for
+     * in-development devices on which encryption has not yet been configured.
+     *
+     * @return true if encrypted, false if not encrypted
      */
     public static boolean isEncrypted() {
         return RoSystemProperties.CRYPTO_ENCRYPTED;
     }
 
     /** {@hide}
-     * Is this device file encrypted?
-     * @return true for file encrypted. (Implies isEncrypted() == true)
-     *         false not encrypted or block encrypted
+     * Does this device have file-based encryption (FBE) enabled?
+     * @return true if the device has file-based encryption enabled.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static boolean isFileEncryptedNativeOnly() {
+    public static boolean isFileEncrypted() {
         if (!isEncrypted()) {
             return false;
         }
@@ -1609,65 +1701,20 @@ public class StorageManager {
     }
 
     /** {@hide}
-     * Is this device block encrypted?
-     * @return true for block encrypted. (Implies isEncrypted() == true)
-     *         false not encrypted or file encrypted
+     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
      */
-    public static boolean isBlockEncrypted() {
-        return false;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
+    public static boolean isFileEncryptedNativeOnly() {
+        return isFileEncrypted();
     }
 
     /** {@hide}
-     * Is this device block encrypted with credentials?
-     * @return true for crediential block encrypted.
-     *         (Implies isBlockEncrypted() == true)
-     *         false not encrypted, file encrypted or default block encrypted
+     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
      */
-    public static boolean isNonDefaultBlockEncrypted() {
-        return false;
-    }
-
-    /** {@hide}
-     * Is this device in the process of being block encrypted?
-     * @return true for encrypting.
-     *         false otherwise
-     * Whether device isEncrypted at this point is undefined
-     * Note that only system services and CryptKeeper will ever see this return
-     * true - no app will ever be launched in this state.
-     * Also note that this state will not change without a teardown of the
-     * framework, so no service needs to check for changes during their lifespan
-     */
-    public static boolean isBlockEncrypting() {
-        return false;
-    }
-
-    /** {@hide}
-     * Is this device non default block encrypted and in the process of
-     * prompting for credentials?
-     * @return true for prompting for credentials.
-     *         (Implies isNonDefaultBlockEncrypted() == true)
-     *         false otherwise
-     * Note that only system services and CryptKeeper will ever see this return
-     * true - no app will ever be launched in this state.
-     * Also note that this state will not change without a teardown of the
-     * framework, so no service needs to check for changes during their lifespan
-     */
-    public static boolean inCryptKeeperBounce() {
-        return false;
-    }
-
-    /** {@hide} */
-    public static boolean isFileEncryptedEmulatedOnly() {
-        return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
-    }
-
-    /** {@hide}
-     * Is this device running in a file encrypted mode, either native or emulated?
-     * @return true for file encrypted, false otherwise
-     */
+    @Deprecated
     public static boolean isFileEncryptedNativeOrEmulated() {
-        return isFileEncryptedNativeOnly()
-               || isFileEncryptedEmulatedOnly();
+        return isFileEncrypted();
     }
 
     /** {@hide} */
@@ -2862,6 +2909,43 @@ public class StorageManager {
         Objects.requireNonNull(volumeUuid);
         try {
             return mStorageManager.isAppIoBlocked(convert(volumeUuid), uid, tid, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify the system of the current cloud media provider.
+     *
+     * This can only be called by the {@link android.service.storage.ExternalStorageService}
+     * holding the {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
+     *
+     * @param authority the authority of the content provider
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void setCloudMediaProvider(@Nullable String authority) {
+        try {
+            mStorageManager.setCloudMediaProvider(authority);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the authority of the current cloud media provider that was set by the
+     * {@link android.service.storage.ExternalStorageService} holding the
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission via
+     * {@link #setCloudMediaProvider(String)}.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public String getCloudMediaProvider() {
+        try {
+            return mStorageManager.getCloudMediaProvider();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

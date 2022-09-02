@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"要卸载此应用吗？"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"要为"<b>"所有"</b>"用户卸载此应用吗？系统将为设备上的"<b>"所有"</b>"用户移除此应用及其数据。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"要为用户<xliff:g id="USERNAME">%1$s</xliff:g>卸载此应用吗？"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"您想从您的工作资料中卸载此应用吗？"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"要将此应用替换为出厂版本吗？这样会移除所有数据。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要将此应用替换为出厂版本吗？这样会移除所有数据，并会影响此设备的所有用户（包括已设置工作资料的用户）。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留 <xliff:g id="SIZE">%1$s</xliff:g> 的应用数据。"</string>
@@ -82,7 +83,7 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"未知"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"出于安全考虑，目前已禁止您的平板电脑安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"出于安全考虑，目前已禁止您的电视安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"出于安全考虑，目前已禁止您的手机安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"出于安全考虑，您的手机目前不允许安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"来历不明的应用很可能会损害您的手机和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何手机损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"来历不明的应用很可能会损害您的平板电脑和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何平板电脑损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"来历不明的应用很可能会损害您的电视和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何电视损坏或数据丢失情况，您负有全部责任。"</string>

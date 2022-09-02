@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> yüklenemedi. Boş alan açın ve yeniden deneyin."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Uygulama bulunamadı"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Uygulama, yüklü uygulamalar listesinde bulunamadı."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"İzin verilmiyor"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"İzin verilmeyenler"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Geçerli kullanıcının bu yüklemeyi kaldırma izni yok."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Hata"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Uygulamanın yüklemesi kaldırılamadı."</string>
@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bu uygulamanın yüklemesini kaldırmak istiyor musunuz?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Bu uygulamanın yüklemesini "<b>"tüm"</b>" kullanıcılar için kaldırmak istiyor musunuz? Uygulama ve verileri cihazdan "<b>"tüm"</b>" kullanıcılar için kaldırılacaktır."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> adlı kullanıcı için bu uygulamanın yüklemesini kaldırmak istiyor musunuz?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bu uygulamanın iş profilinizdeki yüklemesini kaldırmak istiyor musunuz?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Bu uygulamayı fabrika sürümüyle değiştirmek istiyor musunuz? Tüm veriler silinecektir."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Bu uygulamayı fabrika sürümüyle değiştirmek istiyor musunuz? Tüm veriler silinecektir. Bu, çalışma profilleri olan kullanıcılar da dahil olmak üzere cihazı kullanan tüm kullanıcıları etkiler."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Uygulama verilerinin <xliff:g id="SIZE">%1$s</xliff:g> kadarını sakla."</string>

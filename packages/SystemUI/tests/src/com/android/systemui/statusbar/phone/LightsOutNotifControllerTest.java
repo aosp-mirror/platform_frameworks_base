@@ -16,14 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,13 +32,13 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 
+import androidx.lifecycle.Observer;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotifLiveData;
+import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,18 +57,19 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     private static final int LIGHTS_ON = 0;
     private static final int LIGHTS_OUT = APPEARANCE_LOW_PROFILE_BARS;
 
-    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotifLiveData<Boolean> mHasActiveNotifs;
+    @Mock private NotifLiveDataStore mNotifLiveDataStore;
     @Mock private CommandQueue mCommandQueue;
     @Mock private WindowManager mWindowManager;
     @Mock private Display mDisplay;
 
-    @Captor private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
+    @Captor private ArgumentCaptor<Observer<Boolean>> mObserverCaptor;
     @Captor private ArgumentCaptor<CommandQueue.Callbacks> mCallbacksCaptor;
 
     private View mLightsOutView;
     private LightsOutNotifController mLightsOutNotifController;
     private int mDisplayId;
-    private NotificationEntryListener mEntryListener;
+    private Observer<Boolean> mHaActiveNotifsObserver;
     private CommandQueue.Callbacks mCallbacks;
 
     @Before
@@ -80,14 +79,20 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
         mLightsOutView = new View(mContext);
         when(mWindowManager.getDefaultDisplay()).thenReturn(mDisplay);
         when(mDisplay.getDisplayId()).thenReturn(mDisplayId);
+        when(mNotifLiveDataStore.getHasActiveNotifs()).thenReturn(mHasActiveNotifs);
+        when(mHasActiveNotifs.getValue()).thenReturn(false);
 
-        mLightsOutNotifController = new LightsOutNotifController(mWindowManager, mEntryManager,
+        mLightsOutNotifController = new LightsOutNotifController(
+                mLightsOutView,
+                mWindowManager,
+                mNotifLiveDataStore,
                 mCommandQueue);
-        mLightsOutNotifController.setLightsOutNotifView(mLightsOutView);
+        mLightsOutNotifController.init();
+        mLightsOutNotifController.onViewAttached();
 
         // Capture the entry listener object so we can simulate events in tests below
-        verify(mEntryManager).addNotificationEntryListener(mListenerCaptor.capture());
-        mEntryListener = Objects.requireNonNull(mListenerCaptor.getValue());
+        verify(mHasActiveNotifs).addSyncObserver(mObserverCaptor.capture());
+        mHaActiveNotifsObserver = Objects.requireNonNull(mObserverCaptor.getValue());
 
         // Capture the callback object so we can simulate callback events in tests below
         verify(mCommandQueue).addCallback(mCallbacksCaptor.capture());
@@ -137,7 +142,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testLightsOut_withNotifs_onSystemBarAttributesChanged() {
         // GIVEN active visible notifications
-        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
+        when(mHasActiveNotifs.getValue()).thenReturn(true);
 
         // WHEN lights out
         mCallbacks.onSystemBarAttributesChanged(
@@ -157,7 +162,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testLightsOut_withoutNotifs_onSystemBarAttributesChanged() {
         // GIVEN no active visible notifications
-        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
+        when(mHasActiveNotifs.getValue()).thenReturn(false);
 
         // WHEN lights out
         mCallbacks.onSystemBarAttributesChanged(
@@ -177,7 +182,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testLightsOn_afterLightsOut_onSystemBarAttributesChanged() {
         // GIVEN active visible notifications
-        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
+        when(mHasActiveNotifs.getValue()).thenReturn(true);
 
         // WHEN lights on
         mCallbacks.onSystemBarAttributesChanged(
@@ -197,15 +202,15 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testEntryAdded() {
         // GIVEN no visible notifications and lights out
-        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
+        when(mHasActiveNotifs.getValue()).thenReturn(false);
         mLightsOutNotifController.mAppearance = LIGHTS_OUT;
         mLightsOutNotifController.updateLightsOutView();
         assertIsShowingDot(false);
 
         // WHEN an active notification is added
-        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
+        when(mHasActiveNotifs.getValue()).thenReturn(true);
         assertTrue(mLightsOutNotifController.shouldShowDot());
-        mEntryListener.onNotificationAdded(mock(NotificationEntry.class));
+        mHaActiveNotifsObserver.onChanged(true);
 
         // THEN we should see the dot view
         assertIsShowingDot(true);
@@ -214,36 +219,18 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Test
     public void testEntryRemoved() {
         // GIVEN a visible notification and lights out
-        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
+        when(mHasActiveNotifs.getValue()).thenReturn(true);
         mLightsOutNotifController.mAppearance = LIGHTS_OUT;
         mLightsOutNotifController.updateLightsOutView();
         assertIsShowingDot(true);
 
         // WHEN all active notifications are removed
-        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
+        when(mHasActiveNotifs.getValue()).thenReturn(false);
         assertFalse(mLightsOutNotifController.shouldShowDot());
-        mEntryListener.onEntryRemoved(
-                mock(NotificationEntry.class), null, false, REASON_CANCEL_ALL);
+        mHaActiveNotifsObserver.onChanged(false);
 
         // THEN we shouldn't see the dot view
         assertIsShowingDot(false);
-    }
-
-    @Test
-    public void testEntryUpdated() {
-        // GIVEN no visible notifications and lights out
-        when(mEntryManager.hasActiveNotifications()).thenReturn(false);
-        mLightsOutNotifController.mAppearance = LIGHTS_OUT;
-        mLightsOutNotifController.updateLightsOutView();
-        assertIsShowingDot(false);
-
-        // WHEN an active notification is added
-        when(mEntryManager.hasActiveNotifications()).thenReturn(true);
-        assertTrue(mLightsOutNotifController.shouldShowDot());
-        mEntryListener.onPostEntryUpdated(mock(NotificationEntry.class));
-
-        // THEN we should see the dot view
-        assertIsShowingDot(true);
     }
 
     private void assertIsShowingDot(boolean isShowing) {

@@ -17,6 +17,7 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -24,7 +25,11 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitTestUtils.createMockSurface;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 
@@ -39,7 +44,6 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
@@ -60,13 +64,13 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -85,6 +89,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
+    @Mock private DisplayController mDisplayController;
     @Mock private DisplayImeController mDisplayImeController;
     @Mock private DisplayInsetsController mDisplayInsetsController;
     @Mock private TransactionPool mTransactionPool;
@@ -92,6 +97,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SurfaceSession mSurfaceSession;
     @Mock private SplitscreenEventLogger mLogger;
     @Mock private IconProvider mIconProvider;
+    @Mock private ShellExecutor mMainExecutor;
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -119,9 +125,9 @@ public class SplitTransitionTests extends ShellTestCase {
                 mIconProvider, null);
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
-                mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
+                mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
-                mTransactionPool, mLogger, Optional.empty(), Optional::empty);
+                mTransactionPool, mLogger, mMainExecutor, Optional.empty(), Optional::empty);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());
@@ -133,6 +139,42 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
+    public void testLaunchToSide() {
+        ActivityManager.RunningTaskInfo newTask = new TestRunningTaskInfoBuilder()
+                .setParentTaskId(mSideStage.mRootTaskInfo.taskId).build();
+        ActivityManager.RunningTaskInfo reparentTask = new TestRunningTaskInfoBuilder()
+                .setParentTaskId(mMainStage.mRootTaskInfo.taskId).build();
+
+        // Create a request to start a new task in side stage
+        TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_TO_FRONT, newTask, null);
+        IBinder transition = mock(IBinder.class);
+        WindowContainerTransaction result =
+                mStageCoordinator.handleRequest(transition, request);
+
+        // it should handle the transition to enter split screen.
+        assertNotNull(result);
+        assertTrue(containsSplitEnter(result));
+
+        // simulate the transition
+        TransitionInfo.Change openChange = createChange(TRANSIT_OPEN, newTask);
+        TransitionInfo.Change reparentChange = createChange(TRANSIT_CHANGE, reparentTask);
+
+        TransitionInfo info = new TransitionInfo(TRANSIT_TO_FRONT, 0);
+        info.addChange(openChange);
+        info.addChange(reparentChange);
+        mSideStage.onTaskAppeared(newTask, createMockSurface());
+        mMainStage.onTaskAppeared(reparentTask, createMockSurface());
+        boolean accepted = mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
+        assertTrue(accepted);
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
+    }
+
+    @Test
+    @UiThreadTest
     public void testLaunchPair() {
         TransitionInfo info = createEnterPairInfo();
 
@@ -155,6 +197,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testMonitorInSplit() {
         enterSplit();
 
@@ -211,18 +254,21 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
-    public void testDismissToHome() {
+    @UiThreadTest
+    public void testEnterRecents() {
         enterSplit();
 
         ActivityManager.RunningTaskInfo homeTask = new TestRunningTaskInfoBuilder()
-                .setActivityType(ACTIVITY_TYPE_HOME).build();
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setActivityType(ACTIVITY_TYPE_HOME)
+                .build();
 
         // Create a request to bring home forward
         TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_TO_FRONT, homeTask, null);
         IBinder transition = mock(IBinder.class);
         WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
 
-        assertTrue(containsSplitExit(result));
+        assertTrue(result.isEmpty());
 
         // make sure we haven't made any local changes yet (need to wait until transition is ready)
         assertTrue(mStageCoordinator.isSplitScreenVisible());
@@ -242,10 +288,71 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 mock(Transitions.TransitionFinishCallback.class));
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testDismissFromBeingOccluded() {
+        enterSplit();
+
+        ActivityManager.RunningTaskInfo normalTask = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .build();
+
+        // Create a request to bring a normal task forward
+        TransitionRequestInfo request =
+                new TransitionRequestInfo(TRANSIT_TO_FRONT, normalTask, null);
+        IBinder transition = mock(IBinder.class);
+        WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
+
+        assertTrue(containsSplitExit(result));
+
+        // make sure we haven't made any local changes yet (need to wait until transition is ready)
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
+
+        // simulate the transition
+        TransitionInfo.Change normalChange = createChange(TRANSIT_TO_FRONT, normalTask);
+        TransitionInfo.Change mainChange = createChange(TRANSIT_TO_BACK, mMainChild);
+        TransitionInfo.Change sideChange = createChange(TRANSIT_TO_BACK, mSideChild);
+
+        TransitionInfo info = new TransitionInfo(TRANSIT_TO_FRONT, 0);
+        info.addChange(normalChange);
+        info.addChange(mainChange);
+        info.addChange(sideChange);
+        mMainStage.onTaskVanished(mMainChild);
+        mSideStage.onTaskVanished(mSideChild);
+        mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
         assertFalse(mStageCoordinator.isSplitScreenVisible());
     }
 
     @Test
+    @UiThreadTest
+    public void testDismissFromMultiWindowSupport() {
+        enterSplit();
+
+        // simulate the transition
+        TransitionInfo.Change mainChange = createChange(TRANSIT_TO_BACK, mMainChild);
+        TransitionInfo.Change sideChange = createChange(TRANSIT_TO_BACK, mSideChild);
+        TransitionInfo info = new TransitionInfo(TRANSIT_TO_BACK, 0);
+        info.addChange(mainChange);
+        info.addChange(sideChange);
+        IBinder transition = mSplitScreenTransitions.startDismissTransition(null,
+                new WindowContainerTransaction(), mStageCoordinator,
+                EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW, STAGE_TYPE_SIDE);
+        boolean accepted = mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
+        assertTrue(accepted);
+        assertFalse(mStageCoordinator.isSplitScreenVisible());
+    }
+
+    @Test
+    @UiThreadTest
     public void testDismissSnap() {
         enterSplit();
 
@@ -256,8 +363,9 @@ public class SplitTransitionTests extends ShellTestCase {
         TransitionInfo info = new TransitionInfo(TRANSIT_TO_BACK, 0);
         info.addChange(mainChange);
         info.addChange(sideChange);
-        IBinder transition = mStageCoordinator.onSnappedToDismissTransition(
-                false /* mainStageToTop */);
+        IBinder transition = mSplitScreenTransitions.startDismissTransition(null,
+                new WindowContainerTransaction(), mStageCoordinator, EXIT_REASON_DRAG_DIVIDER,
+                STAGE_TYPE_SIDE);
         mMainStage.onTaskVanished(mMainChild);
         mSideStage.onTaskVanished(mSideChild);
         boolean accepted = mStageCoordinator.startAnimation(transition, info,
@@ -269,6 +377,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromAppFinish() {
         enterSplit();
 
@@ -320,8 +429,18 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 mock(Transitions.TransitionFinishCallback.class));
-        mMainStage.activate(new Rect(0, 0, 100, 100), new WindowContainerTransaction(),
-                true /* includingTopTask */);
+        mMainStage.activate(new WindowContainerTransaction(), true /* includingTopTask */);
+    }
+
+    private boolean containsSplitEnter(@NonNull WindowContainerTransaction wct) {
+        for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
+            WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
+            if (op.getType() == HIERARCHY_OP_TYPE_REORDER
+                    && op.getContainer() == mStageCoordinator.mRootTaskInfo.token.asBinder()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean containsSplitExit(@NonNull WindowContainerTransaction wct) {

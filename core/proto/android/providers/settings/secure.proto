@@ -85,6 +85,9 @@ message SecureSettingsProto {
         optional SettingProto accessibility_floating_menu_icon_type = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_opacity = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_fade_enabled = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto odi_captions_volume_ui_enabled = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Setting for accessibility magnification for following typing.
+        optional SettingProto accessibility_magnification_follow_typing_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
 
@@ -382,6 +385,18 @@ message SecureSettingsProto {
 
     optional SettingProto multi_press_timeout = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    message NavBar {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // Nav bar is forced to always be visible, even in immersive mode.
+        optional SettingProto nav_bar_force_visible = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Indicates whether the device is in kids nav mode.
+        optional SettingProto nav_bar_kids_mode = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional NavBar nav_bar = 92;
+    reserved 91; // Formerly nav_bar_kids_mode
+    reserved "nav_bar_kids_mode"; // Moved to message NavBar
+
     optional SettingProto navigation_mode = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message NfcPayment {
@@ -664,5 +679,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 91;
+    // Next tag = 93;
 }
