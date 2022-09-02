@@ -113,7 +113,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     // Set the default locale, which is required for e.g. SQLite's 'COLLATE UNICODE'.
     auto stringLanguageTag =
             (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("icu.languageTag"),
+                                                 env->NewStringUTF(
+                                                         "robolectric.nativeruntime.languageTag"),
                                                  env->NewStringUTF(""));
     int languageTagLength = env->GetStringLength(stringLanguageTag);
     const char* languageTag = env->GetStringUTFChars(stringLanguageTag, 0);
