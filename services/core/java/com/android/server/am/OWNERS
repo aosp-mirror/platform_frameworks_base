@@ -40,3 +40,7 @@ per-file SettingsToPropertiesMapper.java = omakoto@google.com, svetoslavganov@go
 per-file CarUserSwitchingDialog.java = keunyoung@google.com, felipeal@google.com, gurunagarajan@google.com
 
 per-file ContentProviderHelper.java = varunshah@google.com, omakoto@google.com, jsharkey@google.com, yamasani@google.com
+
+# Multiuser
+per-file User* = file:/MULTIUSER_OWNERS
+
