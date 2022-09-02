@@ -127,6 +127,7 @@ message VibrationProto {
         IGNORED_FOR_RINGER_MODE = 23;
         IGNORED_FOR_SETTINGS = 24;
         IGNORED_SUPERSEDED = 25;
+        IGNORED_FROM_VIRTUAL_DEVICE = 26;
     }
 }
 
