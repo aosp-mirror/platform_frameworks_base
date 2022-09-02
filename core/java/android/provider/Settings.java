@@ -7407,6 +7407,13 @@ public final class Settings {
                 "trust_agents_initialized";
 
         /**
+         * Set to 1 by the system after the list of known trust agents have been initialized.
+         * @hide
+         */
+        public static final String KNOWN_TRUST_AGENTS_INITIALIZED =
+                "known_trust_agents_initialized";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
