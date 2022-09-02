@@ -8457,6 +8457,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * accurately supplying the semantics of their UI.
      * They should not need to specify what exactly is announced to users.
      *
+     * <p>
+     * In general, only announce transitions and don’t generate a confirmation message for simple
+     * actions like a button press. Label your controls concisely and precisely instead, and for
+     * significant UI changes like window changes, use
+     * {@link android.app.Activity#setTitle(CharSequence)} and
+     * {@link View#setAccessibilityPaneTitle(CharSequence)}.
+     *
+     * <p>
+     * Use {@link View#setAccessibilityLiveRegion(int)} to inform the user of changes to critical
+     * views within the user interface. These should still be used sparingly as they may generate
+     * announcements every time a View is updated.
+     *
      * @param text The announcement text.
      */
     public void announceForAccessibility(CharSequence text) {

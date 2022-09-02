@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import com.android.internal.util.BitUtils;
 
@@ -519,6 +520,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Represents the event of an application making an announcement.
+     * <p>
+     * In general, follow the practices described in
+     * {@link View#announceForAccessibility(CharSequence)}.
      */
     public static final int TYPE_ANNOUNCEMENT = 0x00004000;
 
