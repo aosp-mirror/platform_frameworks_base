@@ -95,7 +95,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
@@ -4974,13 +4973,6 @@ public class UserManagerService extends IUserManager.Stub {
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             @UserIdInt int userId) {
         checkSystemOrRoot("set application restrictions");
-        String validationResult = validateName(packageName);
-        if (validationResult != null) {
-            if (packageName.contains("../")) {
-                EventLog.writeEvent(0x534e4554, "239701237", -1, "");
-            }
-            throw new IllegalArgumentException("Invalid package name: " + validationResult);
-        }
         if (restrictions != null) {
             restrictions.setDefusable(true);
         }
@@ -5005,39 +4997,6 @@ public class UserManagerService extends IUserManager.Stub {
         changeIntent.setPackage(packageName);
         changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(changeIntent, UserHandle.of(userId));
-    }
-
-    /**
-     * Check if the given name is valid.
-     *
-     * Note: the logic is taken from FrameworkParsingPackageUtils in master, edited to remove
-     * unnecessary parts. Copied here for a security fix.
-     *
-     * @param name The name to check.
-     * @return null if it's valid, error message if not
-     */
-    @VisibleForTesting
-    static String validateName(String name) {
-        final int n = name.length();
-        boolean front = true;
-        for (int i = 0; i < n; i++) {
-            final char c = name.charAt(i);
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-                front = false;
-                continue;
-            }
-            if (!front) {
-                if ((c >= '0' && c <= '9') || c == '_') {
-                    continue;
-                }
-                if (c == '.') {
-                    front = true;
-                    continue;
-                }
-            }
-            return "bad character '" + c + "'";
-        }
-        return null;
     }
 
     private int getUidForPackage(String packageName) {
