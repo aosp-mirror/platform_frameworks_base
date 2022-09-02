@@ -79,6 +79,7 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY;
@@ -8818,9 +8819,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns the min aspect ratio of this activity.
      */
     float getMinAspectRatio() {
-        if (info.applicationInfo == null || !info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO) || (
-                info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
-                        && !ActivityInfo.isFixedOrientationPortrait(getRequestedOrientation()))) {
+        if (info.applicationInfo == null) {
+            return info.getMinAspectRatio();
+        }
+
+        if (!info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO)) {
+            return info.getMinAspectRatio();
+        }
+
+        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
+                && !ActivityInfo.isFixedOrientationPortrait(getRequestedOrientation())) {
+            return info.getMinAspectRatio();
+        }
+
+        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN)
+                && getParent().getConfiguration().orientation == ORIENTATION_PORTRAIT
+                && getParent().getWindowConfiguration().getWindowingMode()
+                        == WINDOWING_MODE_FULLSCREEN) {
+            // We are using the parent configuration here as this is the most recent one that gets
+            // passed to onConfigurationChanged when a relevant change takes place
             return info.getMinAspectRatio();
         }
 
