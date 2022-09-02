@@ -895,7 +895,7 @@ public class Watchdog implements Dumpable {
         StringWriter tracesFileException = new StringWriter();
         final File stack = ActivityManagerService.dumpStackTraces(
                 pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
-                tracesFileException, subject, criticalEvents);
+                tracesFileException, subject, criticalEvents, /* latencyTracker= */null);
         // Give some extra time to make sure the stack traces get written.
         // The system's been hanging for a whlie, another second or two won't hurt much.
         SystemClock.sleep(5000);

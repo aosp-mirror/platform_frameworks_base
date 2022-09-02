@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -64,47 +65,55 @@ class AnrController {
 
     void notifyAppUnresponsive(InputApplicationHandle applicationHandle,
             TimeoutRecord timeoutRecord) {
-        preDumpIfLockTooSlow();
-        final ActivityRecord activity;
-        synchronized (mService.mGlobalLock) {
-            activity = ActivityRecord.forTokenLocked(applicationHandle.token);
-            if (activity == null) {
-                Slog.e(TAG_WM, "Unknown app appToken:" + applicationHandle.name
-                        + ". Dropping notifyNoFocusedWindowAnr request");
-                return;
-            }
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyAppUnresponsive()");
+            preDumpIfLockTooSlow();
+            final ActivityRecord activity;
+            timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
+            synchronized (mService.mGlobalLock) {
+                timeoutRecord.mLatencyTracker.waitingOnGlobalLockEnded();
+                activity = ActivityRecord.forTokenLocked(applicationHandle.token);
+                if (activity == null) {
+                    Slog.e(TAG_WM, "Unknown app appToken:" + applicationHandle.name
+                            + ". Dropping notifyNoFocusedWindowAnr request");
+                    return;
+                }
 
-            // App is unresponsive, but we are actively trying to give focus to a window.
-            // Blame the window if possible since the window may not belong to the app.
-            DisplayContent display = mService.mRoot.getDisplayContent(activity.getDisplayId());
-            IBinder focusToken = display == null ? null : display.getInputMonitor().mInputFocus;
-            InputTarget focusTarget = mService.getInputTargetFromToken(focusToken);
+                // App is unresponsive, but we are actively trying to give focus to a window.
+                // Blame the window if possible since the window may not belong to the app.
+                DisplayContent display = mService.mRoot.getDisplayContent(activity.getDisplayId());
+                IBinder focusToken =
+                        display == null ? null : display.getInputMonitor().mInputFocus;
+                InputTarget focusTarget = mService.getInputTargetFromToken(focusToken);
 
-            if (focusTarget != null) {
-                // Check if we have a recent focus request, newer than the dispatch timeout, then
-                // ignore the focus request.
-                WindowState targetWindowState = focusTarget.getWindowState();
-                boolean requestIsValid = SystemClock.uptimeMillis()
-                        - display.getInputMonitor().mInputFocusRequestTimeMillis
-                        >= getInputDispatchingTimeoutMillisLocked(
-                                targetWindowState.getActivityRecord());
+                if (focusTarget != null) {
+                    // Check if we have a recent focus request, newer than the dispatch timeout,
+                    // then ignore the focus request.
+                    WindowState targetWindowState = focusTarget.getWindowState();
+                    boolean requestIsValid = SystemClock.uptimeMillis()
+                            - display.getInputMonitor().mInputFocusRequestTimeMillis
+                            >= getInputDispatchingTimeoutMillisLocked(
+                                    targetWindowState.getActivityRecord());
 
-                if (requestIsValid) {
-                    if (notifyWindowUnresponsive(focusToken, timeoutRecord)) {
-                        Slog.i(TAG_WM, "Blamed " + focusTarget.getWindowState().getName()
-                                + " using pending focus request. Focused activity: "
-                                + activity.getName());
-                        return;
+                    if (requestIsValid) {
+                        if (notifyWindowUnresponsive(focusToken, timeoutRecord)) {
+                            Slog.i(TAG_WM, "Blamed " + focusTarget.getWindowState().getName()
+                                    + " using pending focus request. Focused activity: "
+                                    + activity.getName());
+                            return;
+                        }
                     }
                 }
+
+                Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: "
+                        + timeoutRecord.mReason);
+                dumpAnrStateLocked(activity, null /* windowState */, timeoutRecord.mReason);
+                mUnresponsiveAppByDisplay.put(activity.getDisplayId(), activity);
             }
-
-
-            Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: " + timeoutRecord.mReason);
-            dumpAnrStateLocked(activity, null /* windowState */, timeoutRecord.mReason);
-            mUnresponsiveAppByDisplay.put(activity.getDisplayId(), activity);
+            activity.inputDispatchingTimedOut(timeoutRecord, INVALID_PID);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-        activity.inputDispatchingTimedOut(timeoutRecord, INVALID_PID);
     }
 
 
@@ -117,14 +126,20 @@ class AnrController {
      */
     void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
             @NonNull TimeoutRecord timeoutRecord) {
-        if (notifyWindowUnresponsive(token, timeoutRecord)) {
-            return;
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyWindowUnresponsive()");
+            if (notifyWindowUnresponsive(token, timeoutRecord)) {
+                return;
+            }
+            if (!pid.isPresent()) {
+                Slog.w(TAG_WM, "Failed to notify that window token=" + token
+                        + " was unresponsive.");
+                return;
+            }
+            notifyWindowUnresponsive(pid.getAsInt(), timeoutRecord);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-        if (!pid.isPresent()) {
-            Slog.w(TAG_WM, "Failed to notify that window token=" + token + " was unresponsive.");
-            return;
-        }
-        notifyWindowUnresponsive(pid.getAsInt(), timeoutRecord);
     }
 
     /**
@@ -139,7 +154,9 @@ class AnrController {
         final int pid;
         final boolean aboveSystem;
         final ActivityRecord activity;
+        timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
         synchronized (mService.mGlobalLock) {
+            timeoutRecord.mLatencyTracker.waitingOnGlobalLockEnded();
             InputTarget target = mService.getInputTargetFromToken(inputToken);
             if (target == null) {
                 return false;
@@ -168,7 +185,9 @@ class AnrController {
     private void notifyWindowUnresponsive(int pid, TimeoutRecord timeoutRecord) {
         Slog.i(TAG_WM,
                 "ANR in input window owned by pid=" + pid + ". Reason: " + timeoutRecord.mReason);
+        timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
         synchronized (mService.mGlobalLock) {
+            timeoutRecord.mLatencyTracker.waitingOnGlobalLockEnded();
             dumpAnrStateLocked(null /* activity */, null /* windowState */, timeoutRecord.mReason);
         }
 
@@ -254,68 +273,83 @@ class AnrController {
         if (mLastPreDumpTimeMs > 0 && now - mLastPreDumpTimeMs < PRE_DUMP_MIN_INTERVAL_MS) {
             return;
         }
-
-        final boolean[] shouldDumpSf = { true };
-        final ArrayMap<String, Runnable> monitors = new ArrayMap<>(2);
-        monitors.put(TAG_WM, mService::monitor);
-        monitors.put("ActivityManager", mService.mAmInternal::monitor);
-        final CountDownLatch latch = new CountDownLatch(monitors.size());
-        // The pre-dump will execute if one of the monitors doesn't complete within the timeout.
-        for (int i = 0; i < monitors.size(); i++) {
-            final String name = monitors.keyAt(i);
-            final Runnable monitor = monitors.valueAt(i);
-            // Always create new thread to avoid noise of existing threads. Suppose here won't
-            // create too many threads because it means that watchdog will be triggered first.
-            new Thread() {
-                @Override
-                public void run() {
-                    monitor.run();
-                    latch.countDown();
-                    final long elapsed = SystemClock.uptimeMillis() - now;
-                    if (elapsed > PRE_DUMP_MONITOR_TIMEOUT_MS) {
-                        Slog.i(TAG_WM, "Pre-dump acquired " + name + " in " + elapsed + "ms");
-                    } else if (TAG_WM.equals(name)) {
-                        // Window manager is the main client of SurfaceFlinger. If window manager
-                        // is responsive, the stack traces of SurfaceFlinger may not be important.
-                        shouldDumpSf[0] = false;
-                    }
-                };
-            }.start();
-        }
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "preDumpIfLockTooSlow()");
         try {
-            if (latch.await(PRE_DUMP_MONITOR_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                return;
+            final boolean[] shouldDumpSf = { true };
+            final ArrayMap<String, Runnable> monitors = new ArrayMap<>(2);
+            monitors.put(TAG_WM, mService::monitor);
+            monitors.put("ActivityManager", mService.mAmInternal::monitor);
+            final CountDownLatch latch = new CountDownLatch(monitors.size());
+            // The pre-dump will execute if one of the monitors doesn't complete within
+            // the timeout.
+            for (int i = 0; i < monitors.size(); i++) {
+                final String name = monitors.keyAt(i);
+                final Runnable monitor = monitors.valueAt(i);
+                // Always create new thread to avoid noise of existing threads. Suppose here won't
+                // create too many threads because it means that watchdog will be triggered first.
+                new Thread() {
+                    @Override
+                    public void run() {
+                        monitor.run();
+                        latch.countDown();
+                        final long elapsed = SystemClock.uptimeMillis() - now;
+                        if (elapsed > PRE_DUMP_MONITOR_TIMEOUT_MS) {
+                            Slog.i(TAG_WM, "Pre-dump acquired " + name + " in " + elapsed + "ms");
+                        } else if (TAG_WM.equals(name)) {
+                            // Window manager is the main client of SurfaceFlinger.
+                            // If window manager is responsive, the stack traces
+                            // of SurfaceFlinger may not be important.
+                            shouldDumpSf[0] = false;
+                        }
+                    };
+                }.start();
             }
-        } catch (InterruptedException ignored) { }
-        mLastPreDumpTimeMs = now;
-        Slog.i(TAG_WM, "Pre-dump for unresponsive");
+            try {
+                if (latch.await(PRE_DUMP_MONITOR_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                    return;
+                }
+            } catch (InterruptedException ignored) { }
+            mLastPreDumpTimeMs = now;
+            Slog.i(TAG_WM, "Pre-dump for unresponsive");
 
-        final ArrayList<Integer> firstPids = new ArrayList<>(1);
-        firstPids.add(WindowManagerService.MY_PID);
-        ArrayList<Integer> nativePids = null;
-        final int[] pids = shouldDumpSf[0]
-                ? Process.getPidsForCommands(new String[] { "/system/bin/surfaceflinger" })
-                : null;
-        if (pids != null) {
-            nativePids = new ArrayList<>(1);
-            for (int pid : pids) {
-                nativePids.add(pid);
+            final ArrayList<Integer> firstPids = new ArrayList<>(1);
+            firstPids.add(WindowManagerService.MY_PID);
+            ArrayList<Integer> nativePids = null;
+            final int[] pids = shouldDumpSf[0]
+                    ? Process.getPidsForCommands(new String[] { "/system/bin/surfaceflinger" })
+                    : null;
+            if (pids != null) {
+                nativePids = new ArrayList<>(1);
+                for (int pid : pids) {
+                    nativePids.add(pid);
+                }
             }
+
+            String criticalEvents =
+                    CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
+            final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
+                    null /* processCpuTracker */, null /* lastPids */, nativePids,
+                    null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents,
+                    null/* AnrLatencyTracker */);
+            if (tracesFile != null) {
+                tracesFile.renameTo(
+                        new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
 
-        String criticalEvents = CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
-        final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
-                null /* processCpuTracker */, null /* lastPids */, nativePids,
-                null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents);
-        if (tracesFile != null) {
-            tracesFile.renameTo(new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));
-        }
     }
 
     private void dumpAnrStateLocked(ActivityRecord activity, WindowState windowState,
                                     String reason) {
-        mService.saveANRStateLocked(activity, windowState, reason);
-        mService.mAtmService.saveANRState(reason);
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "dumpAnrStateLocked()");
+            mService.saveANRStateLocked(activity, windowState, reason);
+            mService.mAtmService.saveANRState(reason);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
     }
 
     private boolean isWindowAboveSystem(@NonNull WindowState windowState) {

@@ -51,6 +51,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TimeoutRecord;
+import com.android.internal.os.anr.AnrLatencyTracker;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
@@ -258,11 +259,15 @@ class ProcessErrorStateRecord {
             boolean aboveSystem, TimeoutRecord timeoutRecord,
             boolean onlyDumpSelf) {
         String annotation = timeoutRecord.mReason;
+        AnrLatencyTracker latencyTracker = timeoutRecord.mLatencyTracker;
+
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseArray<Boolean> lastPids = new SparseArray<>(20);
 
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
+            latencyTracker.waitingOnAMSLockStarted();
             synchronized (mService) {
+                latencyTracker.waitingOnAMSLockEnded();
                 // Store annotation here as instance below races with this killLocked.
                 setAnrAnnotation(annotation);
                 mApp.killLocked("anr", ApplicationExitInfo.REASON_ANR, true);
@@ -271,37 +276,48 @@ class ProcessErrorStateRecord {
 
         long anrTime = SystemClock.uptimeMillis();
         if (isMonitorCpuUsage()) {
+            latencyTracker.updateCpuStatsNowCalled();
             mService.updateCpuStatsNow();
+            latencyTracker.updateCpuStatsNowReturned();
         }
 
         final boolean isSilentAnr;
         final int pid = mApp.getPid();
         final UUID errorId;
+        latencyTracker.waitingOnAMSLockStarted();
         synchronized (mService) {
+            latencyTracker.waitingOnAMSLockEnded();
             // Store annotation here as instance above will not be hit on all paths.
             setAnrAnnotation(annotation);
 
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mService.mAtmInternal.isShuttingDown()) {
                 Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
+                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
                 return;
             } else if (isNotResponding()) {
                 Slog.i(TAG, "Skipping duplicate ANR: " + this + " " + annotation);
+                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
                 return;
             } else if (isCrashing()) {
                 Slog.i(TAG, "Crashing app skipping ANR: " + this + " " + annotation);
+                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
                 return;
             } else if (mApp.isKilledByAm()) {
                 Slog.i(TAG, "App already killed by AM skipping ANR: " + this + " " + annotation);
+                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
                 return;
             } else if (mApp.isKilled()) {
                 Slog.i(TAG, "Skipping died app ANR: " + this + " " + annotation);
+                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
                 return;
             }
 
             // In case we come through here for the same app before completing
             // this one, mark as anring now so we will bail out.
+            latencyTracker.waitingOnProcLockStarted();
             synchronized (mProcLock) {
+                latencyTracker.waitingOnProcLockEnded();
                 setNotResponding(true);
             }
 
@@ -361,9 +377,11 @@ class ProcessErrorStateRecord {
         }
 
         // Get critical event log before logging the ANR so that it doesn't occur in the log.
+        latencyTracker.criticalEventLogStarted();
         final String criticalEventLog =
                 CriticalEventLog.getInstance().logLinesForTraceFile(
                         mApp.getProcessClassEnum(), mApp.processName, mApp.uid);
+        latencyTracker.criticalEventLogEnded();
         CriticalEventLog.getInstance().logAnr(annotation, mApp.getProcessClassEnum(),
                 mApp.processName, mApp.uid, mApp.mPid);
 
@@ -405,9 +423,14 @@ class ProcessErrorStateRecord {
         }
 
         StringBuilder report = new StringBuilder();
-        report.append(ResourcePressureUtil.currentPsiState());
+
+        latencyTracker.currentPsiStateCalled();
+        String currentPsiState = ResourcePressureUtil.currentPsiState();
+        latencyTracker.currentPsiStateReturned();
+        report.append(currentPsiState);
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
+        latencyTracker.nativePidCollectionStarted();
         // don't dump native PIDs for background ANRs unless it is the process of interest
         String[] nativeProcs = null;
         if (isSilentAnr || onlyDumpSelf) {
@@ -430,7 +453,7 @@ class ProcessErrorStateRecord {
                 nativePids.add(i);
             }
         }
-
+        latencyTracker.nativePidCollectionEnded();
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
         StringWriter tracesFileException = new StringWriter();
@@ -438,7 +461,8 @@ class ProcessErrorStateRecord {
         final long[] offsets = new long[2];
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
-                nativePids, tracesFileException, offsets, annotation, criticalEventLog);
+                nativePids, tracesFileException, offsets, annotation, criticalEventLog,
+                latencyTracker);
 
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();

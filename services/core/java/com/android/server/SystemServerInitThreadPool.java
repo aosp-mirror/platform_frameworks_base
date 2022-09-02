@@ -192,8 +192,10 @@ public final class SystemServerInitThreadPool implements Dumpable {
     private static void dumpStackTraces() {
         final ArrayList<Integer> pids = new ArrayList<>();
         pids.add(Process.myPid());
-        ActivityManagerService.dumpStackTraces(pids, null, null,
-                Watchdog.getInterestingNativePids(), null, null, null);
+        ActivityManagerService.dumpStackTraces(pids, /* processCpuTracker= */null,
+                /* lastPids= */null, Watchdog.getInterestingNativePids(),
+                /* logExceptionCreatingFile= */null, /* subject= */null,
+                /* criticalEventSection= */null, /* latencyTracker= */null);
     }
 
     @Override
