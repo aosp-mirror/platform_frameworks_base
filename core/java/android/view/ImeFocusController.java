@@ -328,14 +328,23 @@ public final class ImeFocusController {
         return mNextServedView;
     }
 
-    // TODO(b/244504062): Remove this method dependency from InputMethodManager.
-    public void setServedViewLocked(View view) {
-        mServedView = view;
-    }
-
-    // TODO(b/244504062): Remove this method dependency from InputMethodManager.
-    public void setNextServedViewLocked(View view) {
-        mNextServedView = view;
+    /**
+     * Clears the served & the next served view when the controller triggers
+     * {@link InputMethodManagerDelegate#finishInput()} or
+     * {@link InputMethodManagerDelegate#finishInputAndReportToIme()}.
+     * Note that this method requires to be called inside {@code InputMethodManager#mH} lock for
+     * data consistency.
+     *
+     * @return The {@code mServedView} that has cleared, or {@code null} means nothing to clear.
+     */
+    public View clearServedViewsLocked() {
+        View clearedView = null;
+        mNextServedView = null;
+        if (mServedView != null) {
+            clearedView = mServedView;
+            mServedView = null;
+        }
+        return clearedView;
     }
 
     /**

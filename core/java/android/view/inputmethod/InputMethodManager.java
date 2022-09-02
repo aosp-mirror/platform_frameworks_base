@@ -933,20 +933,6 @@ public final class InputMethodManager {
                 : null;
     }
 
-    @GuardedBy("mH")
-    private void setServedViewLocked(View view) {
-        if (mCurRootView != null) {
-            mCurRootView.getImeFocusController().setServedViewLocked(view);
-        }
-    }
-
-    @GuardedBy("mH")
-    private void setNextServedViewLocked(View view) {
-        if (mCurRootView != null) {
-            mCurRootView.getImeFocusController().setNextServedViewLocked(view);
-        }
-    }
-
     private ImeFocusController getFocusController() {
         synchronized (mH) {
             if (mCurRootView != null) {
@@ -1793,13 +1779,13 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     void finishInputLocked() {
         mVirtualDisplayToScreenMatrix = null;
-        setNextServedViewLocked(null);
-        if (getServedViewLocked() != null) {
+        final ImeFocusController controller = getFocusController();
+        final View clearedView = controller != null ? controller.clearServedViewsLocked() : null;
+        if (clearedView != null) {
             if (DEBUG) {
                 Log.v(TAG, "FINISH INPUT: mServedView="
-                        + InputMethodDebug.dumpViewInfo(getServedViewLocked()));
+                        + InputMethodDebug.dumpViewInfo(clearedView));
             }
-            setServedViewLocked(null);
             mCompletions = null;
             mServedConnecting = false;
             clearConnectionLocked();
