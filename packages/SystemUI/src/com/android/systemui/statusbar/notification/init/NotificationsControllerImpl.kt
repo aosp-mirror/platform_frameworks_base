@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
+import com.android.systemui.ForegroundServiceNotificationListener
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
@@ -26,7 +27,6 @@ import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.AnimatedImageNotificationManager
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.NotificationClicker
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
-import java.io.PrintWriter
 import java.util.Optional
 import javax.inject.Inject
 
@@ -57,7 +56,6 @@ import javax.inject.Inject
 @SysUISingleton
 class NotificationsControllerImpl @Inject constructor(
     private val notificationListener: NotificationListener,
-    private val entryManager: NotificationEntryManager,
     private val commonNotifCollection: Lazy<CommonNotifCollection>,
     private val notifPipeline: Lazy<NotifPipeline>,
     private val notifLiveDataStore: NotifLiveDataStore,
@@ -72,6 +70,7 @@ class NotificationsControllerImpl @Inject constructor(
     private val animatedImageNotificationManager: AnimatedImageNotificationManager,
     private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
     private val bubblesOptional: Optional<Bubbles>,
+    private val fgsNotifListener: ForegroundServiceNotificationListener,
 ) : NotificationsController {
 
     override fun initialize(
@@ -112,23 +111,10 @@ class NotificationsControllerImpl @Inject constructor(
         notificationsMediaManager.setUpWithPresenter(presenter)
         notificationLogger.setUpWithContainer(listContainer)
         peopleSpaceWidgetManager.attach(notificationListener)
-    }
-
-    override fun dump(
-        pw: PrintWriter,
-        args: Array<String>,
-        dumpTruck: Boolean
-    ) {
-        if (dumpTruck) {
-            entryManager.dump(pw, "  ")
-        }
+        fgsNotifListener.init()
     }
 
     // TODO: Convert all functions below this line into listeners instead of public methods
-
-    override fun requestNotificationUpdate(reason: String) {
-        entryManager.updateNotifications(reason)
-    }
 
     override fun resetUserExpandedStates() {
         // TODO: this is a view thing that should be done through the views, but that means doing it
