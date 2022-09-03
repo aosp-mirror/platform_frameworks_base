@@ -98,7 +98,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -298,10 +297,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     final Point mLastSurfaceSize = new Point();
 
-    private final Rect mTmpInsets = new Rect();
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpFullBounds = new Rect();
+    /** For calculating screenWidthDp and screenWidthDp, i.e. the area without the system bars. */
     private final Rect mTmpStableBounds = new Rect();
+    /** For calculating app bounds, i.e. the area without the nav bar and display cutout. */
     private final Rect mTmpNonDecorBounds = new Rect();
 
     //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
@@ -2202,21 +2202,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             DisplayInfo displayInfo) {
         outNonDecorBounds.set(bounds);
         outStableBounds.set(bounds);
-        final Task rootTask = getRootTaskFragment().asTask();
-        if (rootTask == null || rootTask.mDisplayContent == null) {
+        if (mDisplayContent == null) {
             return;
         }
         mTmpBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
-        final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        final WmDisplayCutout cutout =
-                rootTask.mDisplayContent.calculateDisplayCutoutForRotation(displayInfo.rotation);
-        final DisplayFrames displayFrames = policy.getSimulatedDisplayFrames(displayInfo.rotation,
-                displayInfo.logicalWidth, displayInfo.logicalHeight, cutout);
-        policy.getNonDecorInsetsWithSimulatedFrame(displayFrames, mTmpInsets);
-        intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, mTmpInsets);
-        policy.getStableInsetsWithSimulatedFrame(displayFrames, mTmpInsets);
-        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        final DisplayPolicy.DecorInsets.Info info = policy.getDecorInsetsInfo(
+                displayInfo.rotation, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, info.mNonDecorInsets);
+        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mConfigInsets);
     }
 
     /**

@@ -52,6 +52,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsState;
@@ -62,8 +63,6 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -164,8 +163,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         // Apply the fixed transform
         Configuration config = new Configuration();
         final DisplayInfo info = dc.computeScreenConfiguration(config, Surface.ROTATION_0);
-        final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(Surface.ROTATION_0);
-        final DisplayFrames displayFrames = new DisplayFrames(dc.getDisplayId(), new InsetsState(),
+        final DisplayCutout cutout = dc.calculateDisplayCutoutForRotation(Surface.ROTATION_0);
+        final DisplayFrames displayFrames = new DisplayFrames(new InsetsState(),
                 info, cutout, RoundedCorners.NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
         wallpaperWindow.mToken.applyFixedRotationTransform(info, displayFrames, config);
 
