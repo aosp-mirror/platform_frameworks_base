@@ -99,7 +99,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
                 WINDOWING_MODE_FREEFORM)).thenReturn(displayWct);
 
         // The test
-        mController.updateDesktopModeEnabled(true);
+        mController.updateDesktopModeActive(true);
 
         ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
@@ -144,7 +144,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
                 WINDOWING_MODE_FULLSCREEN)).thenReturn(displayWct);
 
         // The test
-        mController.updateDesktopModeEnabled(false);
+        mController.updateDesktopModeActive(false);
 
         ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);

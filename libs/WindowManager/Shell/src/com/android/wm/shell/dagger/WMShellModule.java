@@ -49,7 +49,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.desktopmode.DesktopModeConstants;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -72,9 +72,9 @@ import com.android.wm.shell.pip.PipTransition;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.pip.phone.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipController;
-import com.android.wm.shell.pip.phone.PipKeepClearAlgorithm;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -320,7 +320,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipKeepClearAlgorithm pipKeepClearAlgorithm,
+            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
             PipBoundsState pipBoundsState,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
@@ -357,15 +357,17 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static PipKeepClearAlgorithm providePipKeepClearAlgorithm() {
-        return new PipKeepClearAlgorithm();
+    static PhonePipKeepClearAlgorithm providePhonePipKeepClearAlgorithm(Context context) {
+        return new PhonePipKeepClearAlgorithm(context);
     }
 
     @WMSingleton
     @Provides
     static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
-            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm) {
-        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm);
+            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
+            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm) {
+        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
+                pipKeepClearAlgorithm);
     }
 
     // Handler is used by Icon.loadDrawableAsync
@@ -597,7 +599,7 @@ public abstract class WMShellModule {
             RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
             @ShellMainThread Handler mainHandler
     ) {
-        if (DesktopModeConstants.IS_FEATURE_ENABLED) {
+        if (DesktopMode.IS_SUPPORTED) {
             return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
                     rootDisplayAreaOrganizer,
                     mainHandler));

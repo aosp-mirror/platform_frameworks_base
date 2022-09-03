@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, ഫിംഗർപ്രിന്റ് സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"നിർദ്ദേശിച്ചവ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ഒറ്റത്തവണ ആക്‌സസ് അനുവദിക്കുക"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"അനുവദിക്കരുത്"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ഉപകരണ ലോഗുകൾ നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, എല്ലാ ഉപകരണ ലോഗുകളും ആക്സസ് ചെയ്യാനുള്ള അനുമതി നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകൾക്ക് മാത്രം നൽകുക. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാനുള്ള അനുവാദം നൽകിയില്ലെങ്കിലും, ഈ ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും. നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിന് തുടർന്നും നിങ്ങളുടെ ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ ആക്‌സസ് ചെയ്യാനായേക്കും."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"എഡിറ്റ് ചെയ്യുക"</string>

@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingerprint operation cancelled."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingerprint operation cancelled by user."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Too many attempts. Try again later."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Too many attempts. Fingerprint sensor disabled."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Try again."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No fingerprints enrolled."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"This device does not have a fingerprint sensor."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Region preference"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Type language name"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggested"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Suggested"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"All languages"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"All regions"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Search"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Allow <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> to access all device logs?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Allow one-time access"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don’t allow"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps that you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Don’t show again"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wants to show <xliff:g id="APP_2">%2$s</xliff:g> slices"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>

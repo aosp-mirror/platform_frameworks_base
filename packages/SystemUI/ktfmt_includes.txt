@@ -39,6 +39,7 @@
 -packages/SystemUI/src-release/com/android/systemui/flags/FlagsModule.kt
 -packages/SystemUI/src/com/android/keyguard/ActiveUnlockConfig.kt
 -packages/SystemUI/src/com/android/keyguard/BouncerPanelExpansionCalculator.kt
+-packages/SystemUI/src/com/android/keyguard/ClockEventController.kt
 -packages/SystemUI/src/com/android/keyguard/KeyguardBiometricLockoutLogger.kt
 -packages/SystemUI/src/com/android/keyguard/KeyguardListenModel.kt
 -packages/SystemUI/src/com/android/keyguard/KeyguardListenQueue.kt
@@ -156,6 +157,8 @@
 -packages/SystemUI/src/com/android/systemui/controls/ui/ToggleRangeBehavior.kt
 -packages/SystemUI/src/com/android/systemui/controls/ui/TouchBehavior.kt
 -packages/SystemUI/src/com/android/systemui/dagger/SystemUICoreStartableModule.kt
+-packages/SystemUI/src/com/android/systemui/decor/CutoutDecorProviderFactory.kt
+-packages/SystemUI/src/com/android/systemui/decor/CutoutDecorProviderImpl.kt
 -packages/SystemUI/src/com/android/systemui/decor/DecorProvider.kt
 -packages/SystemUI/src/com/android/systemui/decor/DecorProviderFactory.kt
 -packages/SystemUI/src/com/android/systemui/decor/FaceScanningProviderFactory.kt
@@ -246,6 +249,7 @@
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/receiver/ReceiverChipRippleView.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/ChipStateSender.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttChipControllerSender.kt
+-packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttChipRootView.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttSenderLogger.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/sender/MediaTttSenderUiEventLogger.kt
 -packages/SystemUI/src/com/android/systemui/navigationbar/gestural/BackPanel.kt
@@ -575,6 +579,7 @@
 -packages/SystemUI/src/com/android/systemui/volume/VolumePanelFactory.kt
 -packages/SystemUI/tests/src/com/android/keyguard/ActiveUnlockConfigTest.kt
 -packages/SystemUI/tests/src/com/android/keyguard/BouncerPanelExpansionCalculatorTest.kt
+-packages/SystemUI/tests/src/com/android/keyguard/ClockEventControllerTest.kt
 -packages/SystemUI/tests/src/com/android/keyguard/KeyguardBiometricLockoutLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/keyguard/KeyguardListenQueueTest.kt
 -packages/SystemUI/tests/src/com/android/keyguard/KeyguardPasswordViewControllerTest.kt
@@ -633,6 +638,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/controls/management/TestControlsRequestDialog.kt
 -packages/SystemUI/tests/src/com/android/systemui/controls/ui/ControlViewHolderTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/controls/ui/DetailDialogTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/decor/CutoutDecorProviderFactoryTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/decor/OverlayWindowTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/decor/PrivacyDotDecorProviderFactoryTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/decor/RoundedCornerDecorProviderFactoryTest.kt
@@ -720,6 +726,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/screenrecord/ScreenRecordDialogTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/screenshot/ImageCaptureImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/screenshot/RequestProcessorTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/screenshot/ScreenshotPolicyImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/screenshot/TakeScreenshotServiceTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/settings/UserFileManagerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/settings/UserTrackerImplTest.kt

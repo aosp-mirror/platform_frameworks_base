@@ -419,6 +419,10 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"ಶೀರ್ಷಿಕೆಗಳ ಓವರ್‌ಲೇ"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <!-- no translation found for sound_settings (8874581353127418308) -->
+    <skip />
+    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"ಆ್ಯಪ್ ಅನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕಿಸಿ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ."</string>

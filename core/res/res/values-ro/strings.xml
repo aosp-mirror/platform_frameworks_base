@@ -609,7 +609,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operațiunea privind amprenta a fost anulată."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operațiunea privind amprenta a fost anulată de utilizator."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Prea multe încercări. Încercați din nou mai târziu."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Prea multe încercări. Senzorul de amprentă este dezactivat."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Încercați din nou."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nu au fost înregistrate amprente."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dispozitivul nu are senzor de amprentă."</string>
@@ -968,7 +969,7 @@
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Pentru a debloca, conectați-vă folosind Contul Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nume de utilizator (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Parolă"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Conectați-vă"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Conectează-te"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Nume de utilizator sau parolă nevalide."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Ați uitat numele de utilizator sau parola?\nAccesați "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Se verifică..."</string>
@@ -1656,7 +1657,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"Pentru a debloca, conectați-vă cu Contul dvs. Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nume de utilizator (e-mail)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Parolă"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"Conectați-vă"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"Conectează-te"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Nume de utilizator sau parolă nevalide."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Ați uitat numele de utilizator sau parola?\nAccesați "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Se verifică contul…"</string>
@@ -1927,8 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Regiunea preferată"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Numele limbii"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugerate"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugerate"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Toate limbile"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Toate regiunile"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Căutați"</string>
@@ -2051,8 +2051,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permiteți ca <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> să acceseze toate jurnalele dispozitivului?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permiteți accesul o dată"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nu permiteți"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Jurnalele dispozitivului înregistrează activitatea de pe dispozitivul tău. Aplicațiile pot folosi aceste jurnale pentru a identifica și a remedia probleme.\n\nUnele jurnale pot să conțină informații sensibile, prin urmare permite accesul la toate jurnalele dispozitivului doar aplicațiilor în care ai încredere. \n\nDacă nu permiți accesul aplicației la toate jurnalele dispozitivului, aceasta poate în continuare să acceseze propriile jurnale. Este posibil ca producătorul dispozitivului să acceseze în continuare unele jurnale sau informații de pe dispozitiv."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nu mai afișa"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vrea să afișeze porțiuni din <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editați"</string>

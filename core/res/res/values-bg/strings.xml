@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операцията за отпечатък е анулирана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Операцията за удостоверяване чрез отпечатък бе анулирана от потребителя."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Твърде много опити. Пробвайте отново по-късно."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Твърде много опити. Сензорът за отпечатъци е деактивиран."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Опитайте отново."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Няма регистрирани отпечатъци."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Това устройство няма сензор за отпечатъци."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Предпочитание за региона"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Въведете име на език"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Предложени"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Предложени"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Всички езици"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Всички региони"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Търсене"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Да се разреши ли на <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> достъп до всички регистрационни файлове за устройството?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Разрешаване на еднократен достъп"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Забраняване"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"В регистрационните файлове за устройството се записва какво се извършва на него. Приложенията могат да използват тези регистрационни файлове, за да откриват и отстраняват проблеми.\n\nНякои регистрационни файлове за устройството може да съдържат поверителна информация, затова разрешавайте достъп до всички тях само на приложения, на които имате доверие. \n\nАко не разрешите на това приложение достъп до всички регистрационни файлове за устройството, то пак може да осъществява достъп до собствените си регистрационни файлове. Производителят на устройството пак може да има достъп до някои регистрационни файлове или информация на устройството ви."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Да не се показва пак"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> иска да показва части от <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редактиране"</string>
@@ -2292,7 +2291,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете активните приложения"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Няма достъп до камерата на телефона от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Няма достъп до камерата на таблета от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"До това съдържание не може да се осъществи достъп при поточно предаване. Вместо това опитайте от телефона си."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандартно за системата"</string>
 </resources>
