@@ -339,8 +339,7 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hızlı şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Yavaş şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
-    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Kullanıcı değiştirme"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"açılır menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bu oturumdaki tüm uygulamalar ve veriler silinecek."</string>
@@ -420,6 +419,10 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Altyazı yer paylaşımı"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"etkinleştir"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"devre dışı bırak"</string>
+    <!-- no translation found for sound_settings (8874581353127418308) -->
+    <skip />
+    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Uygulama sabitlendi"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Genel Bakış\'a dokunup basılı tutun."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Ana sayfaya dokunup basılı tutun."</string>
@@ -576,7 +579,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Klavye Kısayolları"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Klavye düzenini değiştir"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Uygulamalar"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Asist"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Asistan"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Tarayıcı"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kişiler"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"E-posta"</string>

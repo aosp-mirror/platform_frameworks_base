@@ -607,6 +607,13 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(mockConstraintsChanges.largeScreenConstraintsChanges)!!.invoke(any())
     }
 
+    @Test
+    fun alarmIconNotIgnored() {
+        verify(statusIcons, never()).addIgnoredSlot(
+                context.getString(com.android.internal.R.string.status_bar_alarm_clock)
+        )
+    }
+
     private fun createWindowInsets(
         topCutout: Rect? = Rect()
     ): WindowInsets {

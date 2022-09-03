@@ -94,6 +94,7 @@ public class VibrationThreadTest {
 
     private static final int TEST_TIMEOUT_MILLIS = 900;
     private static final int UID = Process.ROOT_UID;
+    private static final int DISPLAY_ID = 10;
     private static final int VIBRATOR_ID = 1;
     private static final String PACKAGE_NAME = "package";
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder().build();
@@ -1584,7 +1585,8 @@ public class VibrationThreadTest {
     }
 
     private Vibration createVibration(long id, CombinedVibration effect) {
-        return new Vibration(mVibrationToken, (int) id, effect, ATTRS, UID, PACKAGE_NAME, "reason");
+        return new Vibration(mVibrationToken, (int) id, effect, ATTRS, UID, DISPLAY_ID,
+                PACKAGE_NAME, "reason");
     }
 
     private SparseArray<VibratorController> createVibratorControllers() {

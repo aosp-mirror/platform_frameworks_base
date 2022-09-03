@@ -58,6 +58,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -378,9 +379,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @Override // Binder call
-    public void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
+    public void vibrate(int uid, int displayId, String opPkg, @NonNull CombinedVibration effect,
             @Nullable VibrationAttributes attrs, String reason, IBinder token) {
-        vibrateInternal(uid, opPkg, effect, attrs, reason, token);
+        vibrateInternal(uid, displayId, opPkg, effect, attrs, reason, token);
     }
 
     /**
@@ -389,8 +390,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @Nullable
     @VisibleForTesting
-    Vibration vibrateInternal(int uid, String opPkg, @NonNull CombinedVibration effect,
-            @Nullable VibrationAttributes attrs, String reason, IBinder token) {
+    Vibration vibrateInternal(int uid, int displayId, String opPkg,
+            @NonNull CombinedVibration effect, @Nullable VibrationAttributes attrs,
+            String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.VIBRATE, "vibrate");
@@ -406,7 +408,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             attrs = fixupVibrationAttributes(attrs, effect);
             // Create Vibration.Stats as close to the received request as possible, for tracking.
             Vibration vib = new Vibration(token, mNextVibrationId.getAndIncrement(), effect, attrs,
-                    uid, opPkg, reason);
+                    uid, displayId, opPkg, reason);
             fillVibrationFallbacks(vib, effect);
 
             if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
@@ -424,7 +426,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 Vibration.Status status = null;
 
                 // Check if user settings or DnD is set to ignore this vibration.
-                status = shouldIgnoreVibrationLocked(vib.uid, vib.opPkg, vib.attrs);
+                status = shouldIgnoreVibrationLocked(vib.uid, vib.displayId, vib.opPkg, vib.attrs);
 
                 // Check if something has external control, assume it's more important.
                 if ((status == null) && (mCurrentExternalVibration != null)) {
@@ -629,7 +631,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             Vibration vib = mCurrentVibration.getVibration();
             Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
-                    vib.uid, vib.opPkg, vib.attrs);
+                    vib.uid, vib.displayId, vib.opPkg, vib.attrs);
 
             if (inputDevicesChanged || (ignoreStatus != null)) {
                 if (DEBUG) {
@@ -659,7 +661,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 continue;
             }
             Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
-                    vib.uid, vib.opPkg, vib.attrs);
+                    vib.uid, Display.DEFAULT_DISPLAY, vib.opPkg, vib.attrs);
             if (ignoreStatus == null) {
                 effect = mVibrationScaler.scale(effect, vib.attrs.getUsage());
             } else {
@@ -780,6 +782,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             + attrs);
                 }
                 break;
+            case IGNORED_FROM_VIRTUAL_DEVICE:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration because it came from a virtual"
+                            + " device, attrs= " + attrs);
+                }
+                break;
             default:
                 if (DEBUG) {
                     Slog.d(TAG, "Vibration for uid=" + uid + " and with attrs=" + attrs
@@ -894,9 +902,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @GuardedBy("mLock")
     @Nullable
-    private Vibration.Status shouldIgnoreVibrationLocked(int uid, String opPkg,
+    private Vibration.Status shouldIgnoreVibrationLocked(int uid, int displayId, String opPkg,
             VibrationAttributes attrs) {
-        Vibration.Status statusFromSettings = mVibrationSettings.shouldIgnoreVibration(uid, attrs);
+        Vibration.Status statusFromSettings = mVibrationSettings.shouldIgnoreVibration(uid,
+                displayId, attrs);
         if (statusFromSettings != null) {
             return statusFromSettings;
         }
@@ -1442,6 +1451,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return new Vibration.DebugInfo(
                     mStatus, stats, /* effect= */ null, /* originalEffect= */ null, scale,
                     externalVibration.getVibrationAttributes(), externalVibration.getUid(),
+                    // TODO(b/243604888): propagating displayID from IExternalVibration instead of
+                    // using INVALID_DISPLAY for all external vibrations.
+                    Display.INVALID_DISPLAY,
                     externalVibration.getPackage(), /* reason= */ null);
         }
 
@@ -1647,8 +1659,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             boolean alreadyUnderExternalControl = false;
             boolean waitForCompletion = false;
             synchronized (mLock) {
+                // TODO(b/243604888): propagating displayID from IExternalVibration instead of
+                // using INVALID_DISPLAY for all external vibrations.
                 Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
-                        vib.getUid(), vib.getPackage(), attrs);
+                        vib.getUid(), Display.INVALID_DISPLAY, vib.getPackage(), attrs);
                 if (ignoreStatus != null) {
                     vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
                     // Failed to start the vibration, end it and report metrics right away.
@@ -1840,8 +1854,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // only cancel background vibrations.
             IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
                     : mShellCallbacksToken;
-            Vibration vib = vibrateInternal(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combined,
-                    attrs, commonOptions.description, deathBinder);
+            Vibration vib = vibrateInternal(Binder.getCallingUid(), Display.DEFAULT_DISPLAY,
+                    SHELL_PACKAGE_NAME, combined, attrs, commonOptions.description, deathBinder);
             if (vib != null && !commonOptions.background) {
                 try {
                     vib.waitForEnd();

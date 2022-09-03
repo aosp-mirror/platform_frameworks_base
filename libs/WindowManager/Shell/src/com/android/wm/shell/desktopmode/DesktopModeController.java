@@ -65,8 +65,8 @@ public class DesktopModeController {
     }
 
     @VisibleForTesting
-    void updateDesktopModeEnabled(boolean enabled) {
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "updateDesktopModeState: enabled=%s", enabled);
+    void updateDesktopModeActive(boolean active) {
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "updateDesktopModeActive: active=%s", active);
 
         int displayId = mContext.getDisplayId();
 
@@ -75,7 +75,7 @@ public class DesktopModeController {
         // container value)
         wct.merge(mShellTaskOrganizer.prepareClearFreeformForTasks(displayId), true /* transfer */);
         int targetWindowingMode;
-        if (enabled) {
+        if (active) {
             targetWindowingMode = WINDOWING_MODE_FREEFORM;
         } else {
             targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
@@ -118,20 +118,8 @@ public class DesktopModeController {
         }
 
         private void desktopModeSettingChanged() {
-            boolean enabled = isDesktopModeEnabled();
-            updateDesktopModeEnabled(enabled);
-        }
-
-        private boolean isDesktopModeEnabled() {
-            try {
-                int result = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.DESKTOP_MODE, UserHandle.USER_CURRENT);
-                ProtoLog.d(WM_SHELL_DESKTOP_MODE, "isDesktopModeEnabled=%s", result);
-                return result != 0;
-            } catch (Settings.SettingNotFoundException e) {
-                ProtoLog.e(WM_SHELL_DESKTOP_MODE, "Failed to read DESKTOP_MODE setting %s", e);
-                return false;
-            }
+            boolean enabled = DesktopMode.isActive(mContext);
+            updateDesktopModeActive(enabled);
         }
     }
 }

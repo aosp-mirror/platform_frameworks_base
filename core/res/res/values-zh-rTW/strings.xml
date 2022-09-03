@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋作業已取消。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"使用者已取消指紋驗證作業。"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"嘗試次數過多，請稍後再試。"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"嘗試次數過多，指紋感應器已停用。"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"請再試一次。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"未登錄任何指紋。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"這個裝置沒有指紋感應器。"</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議的語言"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有語言"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"所有地區"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"搜尋"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"要允許「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」存取所有裝置記錄嗎？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允許一次性存取"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允許"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"系統會透過裝置記錄記下裝置上的活動。應用程式可以根據這些記錄找出問題並進行修正。\n\n某些記錄可能含有機密資訊，因此請勿讓不信任的應用程式存取所有裝置記錄。\n\n即使你不允許這個應用程式存取所有裝置記錄，這個應用程式仍能存取自己的記錄，而且裝置製造商或許仍可存取裝置的某些記錄或資訊。"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不要再顯示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」想要顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編輯"</string>

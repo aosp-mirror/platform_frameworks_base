@@ -205,6 +205,7 @@ public final class ProfcollectForwardingService extends SystemService {
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
                     .setPeriodic(BG_PROCESS_PERIOD)
+                    .setPriority(JobInfo.PRIORITY_MIN)
                     .build());
         }
 

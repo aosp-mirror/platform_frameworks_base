@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ફિંગરપ્રિન્ટ ઓપરેશન રદ કર્યું."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ફિંગરપ્રિન્ટ ચકાસવાની પ્રક્રિયા વપરાશકર્તાએ રદ કરી."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ઘણા બધા પ્રયત્નો. પછીથી ફરી પ્રયાસ કરો."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ઘણા વધુ પ્રયત્નો. ફિંગરપ્રિન્ટ સેન્સર અક્ષમ કરવામાં આવ્યું છે."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"કોઈ ફિંગરપ્રિન્ટની નોંધણી કરવામાં આવી નથી."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
@@ -1427,7 +1428,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"અન્વેષણ કરો"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"આઉટપુટ સ્વિચ કરો"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> ખૂટે છે"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"ફરીથી ઉપકરણ દાખલ કરો"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"ફરીથી ડિવાઇસ દાખલ કરો"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> ખસેડી રહ્યાં છીએ"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"ડેટાને ખસેડી રહ્યાં છીએ"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"કન્ટેન્ટ ટ્રાન્સફર કરવાનું પૂર્ણ થયું"</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ભાષાનું નામ ટાઇપ કરો"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"સૂચવેલી ભાષા"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"સૂચવેલા"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"શોધ"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"એક-વખતના ઍક્સેસની મંજૂરી આપો"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"મંજૂરી આપશો નહીં"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nજો તમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી ન આપો, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજુ પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ફરીથી બતાવશો નહીં"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>એ <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવા માગે છે"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ફેરફાર કરો"</string>
@@ -2292,7 +2291,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ફોનના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ટૅબ્લેટના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"સ્ટ્રીમ કરતી વખતે આ ઍક્સેસ કરી શકાતું નથી. તેના બદલે તમારા ફોન પર પ્રયાસ કરો."</string>
     <string name="system_locale_title" msgid="711882686834677268">"સિસ્ટમ ડિફૉલ્ટ"</string>
 </resources>
