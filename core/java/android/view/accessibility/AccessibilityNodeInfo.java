@@ -84,7 +84,7 @@ import java.util.Objects;
  * <p>
  * Once an accessibility node info is delivered to an accessibility service it is
  * made immutable and calling a state mutation method generates an error. See
- * {@link #enableQueryFromAppProcess(View)} if you would like to inspect the
+ * {@link #setQueryFromAppProcessEnabled} if you would like to inspect the
  * node tree from the app process for testing or debugging tools.
  * </p>
  * <p>
@@ -1175,7 +1175,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child node.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #enableQueryFromAppProcess(View)}.
+     *                               calling {@link #setQueryFromAppProcessEnabled}.
      */
     public AccessibilityNodeInfo getChild(int index) {
         return getChild(index, FLAG_PREFETCH_DESCENDANTS_HYBRID);
@@ -1190,7 +1190,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child node.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #enableQueryFromAppProcess(View)}.
+     *                               calling {@link #setQueryFromAppProcessEnabled}.
      *
      * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
      */
@@ -1914,7 +1914,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The parent.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #enableQueryFromAppProcess(View)}.
+     *                               calling {@link #setQueryFromAppProcessEnabled}.
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
@@ -1943,7 +1943,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The parent.
      *
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
-     *                               calling {@link #enableQueryFromAppProcess(View)}.
+     *                               calling {@link #setQueryFromAppProcessEnabled}.
      *
      * @see #FLAG_PREFETCH_ANCESTORS
      * @see #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
@@ -3690,19 +3690,26 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <p>
      * This is intended for short-lived inspections from testing or debugging tools in the app
      * process, as operations on this node tree will only succeed as long as the associated
-     * view hierarchy remains attached to a window. Since {@link AccessibilityNodeInfo} objects can
-     * quickly become out of sync with their corresponding {@link View} objects there is
-     * intentionally no "disable" method: if you wish to inspect a changed or different view
-     * hierarchy then create a new node from any view in that hierarchy and call this method on that
-     * node.
+     * view hierarchy remains attached to a window. {@link AccessibilityNodeInfo} objects can
+     * quickly become out of sync with their corresponding {@link View} objects; if you wish to
+     * inspect a changed or different view hierarchy then create a new node from any view in that
+     * hierarchy and call this method on that new node, instead of disabling & re-enabling the
+     * connection on the previous node.
      * </p>
      *
      * @param view The view that generated this node, or any view in the same view-root hierarchy.
+     * @param enabled Whether to enable (true) or disable (false) querying from the app process.
      * @throws IllegalStateException If called from an {@link AccessibilityService}, or if provided
      *                               a {@link View} that is not attached to a window.
      */
-    public void enableQueryFromAppProcess(@NonNull View view) {
+    public void setQueryFromAppProcessEnabled(@NonNull View view, boolean enabled) {
         enforceNotSealed();
+
+        if (!enabled) {
+            setConnectionId(UNDEFINED_CONNECTION_ID);
+            return;
+        }
+
         if (mConnectionId != UNDEFINED_CONNECTION_ID) {
             return;
         }

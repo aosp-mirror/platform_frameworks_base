@@ -292,9 +292,6 @@ final class VibrationThread extends Thread {
                 boolean readyToRun = mExecutingConductor.waitUntilNextStepIsDue();
                 // If we waited, don't run the next step, but instead re-evaluate status.
                 if (readyToRun) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Play vibration consuming next step...");
-                    }
                     // Run the step without holding the main lock, to avoid HAL interactions from
                     // blocking the thread.
                     mExecutingConductor.runNextStep();

@@ -1036,7 +1036,13 @@ class UserController implements Handler.Callback {
         if (uss.state != UserState.STATE_STOPPING
                 && uss.state != UserState.STATE_SHUTDOWN) {
             uss.setState(UserState.STATE_STOPPING);
-            mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+            UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
+            userManagerInternal.setUserState(userId, uss.state);
+            // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
+            // we'll need to remove this call and handle that as part of the user state workflow
+            // instead.
+            userManagerInternal.unassignUserFromDisplay(userId);
+
             updateStartedUserArrayLU();
 
             final boolean allowDelayedLockingCopied = allowDelayedLocking;
@@ -1076,12 +1082,6 @@ class UserController implements Handler.Callback {
                         Binder.getCallingPid(), UserHandle.USER_ALL);
             });
         }
-
-        // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
-        // we'll need to remove this call and handle that as part of the user state workflow
-        // instead.
-        // TODO(b/240613396) also check if multi-display is supported
-        mInjector.getUserManagerInternal().assignUserToDisplay(userId, Display.INVALID_DISPLAY);
     }
 
     private void finishUserStopping(final int userId, final UserState uss,
@@ -1391,7 +1391,6 @@ class UserController implements Handler.Callback {
                 && !user.isQuietModeEnabled();
     }
 
-    // TODO(b/239982558): might need to infer the display id based on parent user
     /**
      * Starts a user only if it's a profile, with a more relaxed permission requirement:
      * {@link android.Manifest.permission#MANAGE_USERS} or
@@ -1420,6 +1419,7 @@ class UserController implements Handler.Callback {
             return false;
         }
 
+        // TODO(b/239982558): pass proper displayId
         return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, /* foreground= */ false,
                 /* unlockListener= */ null);
     }
@@ -1477,7 +1477,7 @@ class UserController implements Handler.Callback {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
                 MANAGE_USERS, CREATE_USERS);
 
-        // DEFAULT_DISPLAY is used for "regular" start user operations
+        // DEFAULT_DISPLAY is used for the current foreground user only
         Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
                 "Cannot use DEFAULT_DISPLAY");
 
@@ -1510,27 +1510,13 @@ class UserController implements Handler.Callback {
                     foreground ? " in foreground" : "");
         }
 
-        // TODO(b/239982558): move logic below to a different class (like DisplayAssignmentManager)
         if (displayId != Display.DEFAULT_DISPLAY) {
-            // This is called by startUserOnSecondaryDisplay()
-            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
-                // TODO(b/239824814): add CTS test and/or unit test for all exceptional cases
-                throw new UnsupportedOperationException("Not supported by device");
-            }
-
-            // TODO(b/239982558): call DisplayManagerInternal to check if display is valid instead
-            Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
-            Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
-                    + " on secondary display (%d)", displayId);
             Preconditions.checkArgument(!foreground, "Cannot start user %d in foreground AND "
                     + "on secondary display (%d)", userId, displayId);
-
-            // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
-            // we'll need to remove this call and handle that as part of the user state workflow
-            // instead.
-            mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
         }
+        mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
 
+        // TODO(b/239982558): log display id (or use a new event)
         EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId);
 
         final int callingUid = Binder.getCallingUid();

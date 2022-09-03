@@ -813,12 +813,14 @@ public final class ProcessList {
                                                 < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
                                             return false;
                                         }
-                                        Pair<Integer, Integer> temp = getNumForegroundServices();
-                                        final int totalForegroundServices = temp.first;
-                                        final int procsWithForegroundServices = temp.second;
+                                        // Note: directly access
+                                        // ActiveServices.sNumForegroundServices, do not try to
+                                        // hold AMS lock here, otherwise it is a potential deadlock.
+                                        Pair<Integer, Integer> foregroundServices =
+                                                ActiveServices.sNumForegroundServices.get();
                                         LmkdStatsReporter.logKillOccurred(inputData,
-                                                totalForegroundServices,
-                                                procsWithForegroundServices);
+                                                foregroundServices.first,
+                                                foregroundServices.second);
                                         return true;
                                     case LMK_STATE_CHANGED:
                                         if (receivedLen
@@ -3724,6 +3726,10 @@ public final class ProcessList {
                 ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.getPid(), app.getPackageList());
+                if (app.getPkgDeps() != null) {
+                    final int size = app.getPkgDeps().size();
+                    currApp.pkgDeps = app.getPkgDeps().toArray(new String[size]);
+                }
                 fillInProcMemInfoLOSP(app, currApp, clientTargetSdk);
                 if (state.getAdjSource() instanceof ProcessRecord) {
                     currApp.importanceReasonPid = ((ProcessRecord) state.getAdjSource()).getPid();

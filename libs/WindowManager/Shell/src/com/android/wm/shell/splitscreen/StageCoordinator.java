@@ -69,11 +69,11 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
@@ -85,7 +85,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Choreographer;
 import android.view.IRemoteAnimationFinishedCallback;
-import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -531,133 +530,135 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
             int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
             float splitRatio, RemoteAnimationAdapter adapter) {
-        startWithLegacyTransition(mainTaskId, sideTaskId, null /* pendingIntent */,
-                null /* fillInIntent */, mainOptions, sideOptions, sidePosition, splitRatio,
-                adapter);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (sideOptions == null) sideOptions = new Bundle();
+        addActivityOptions(sideOptions, mSideStage);
+        wct.startTask(sideTaskId, sideOptions);
+
+        startWithLegacyTransition(wct, mainTaskId, mainOptions, sidePosition, splitRatio, adapter);
     }
 
     /** Start an intent and a task ordered by {@code intentFirst}. */
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
             int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
             @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter) {
-        startWithLegacyTransition(taskId, INVALID_TASK_ID, pendingIntent, fillInIntent,
-                mainOptions, sideOptions, sidePosition, splitRatio, adapter);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (sideOptions == null) sideOptions = new Bundle();
+        addActivityOptions(sideOptions, mSideStage);
+        wct.sendPendingIntent(pendingIntent, fillInIntent, sideOptions);
+
+        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter);
     }
 
-    private void startWithLegacyTransition(int mainTaskId, int sideTaskId,
-            @Nullable PendingIntent pendingIntent, @Nullable Intent fillInIntent,
-            @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
+    void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
+            int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
             @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter) {
-        final boolean withIntent = pendingIntent != null && fillInIntent != null;
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (sideOptions == null) sideOptions = new Bundle();
+        addActivityOptions(sideOptions, mSideStage);
+        wct.startShortcut(mContext.getPackageName(), shortcutInfo, sideOptions);
+
+        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter);
+    }
+
+    private void startWithLegacyTransition(WindowContainerTransaction sideWct, int mainTaskId,
+            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
+            RemoteAnimationAdapter adapter) {
         // Init divider first to make divider leash for remote animation target.
         mSplitLayout.init();
+        mSplitLayout.setDivideRatio(splitRatio);
+
         // Set false to avoid record new bounds with old task still on top;
         mShouldUpdateRecents = false;
         mIsDividerRemoteAnimating = true;
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
-        prepareEvictChildTasks(SPLIT_POSITION_TOP_OR_LEFT, evictWct);
-        prepareEvictChildTasks(SPLIT_POSITION_BOTTOM_OR_RIGHT, evictWct);
-        // Need to add another wrapper here in shell so that we can inject the divider bar
-        // and also manage the process elevation via setRunningRemote
-        IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
+
+        LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
             @Override
-            public void onAnimationStart(@WindowManager.TransitionOldType int transit,
-                    RemoteAnimationTarget[] apps,
-                    RemoteAnimationTarget[] wallpapers,
-                    RemoteAnimationTarget[] nonApps,
-                    final IRemoteAnimationFinishedCallback finishedCallback) {
-                RemoteAnimationTarget[] augmentedNonApps =
-                        new RemoteAnimationTarget[nonApps.length + 1];
-                for (int i = 0; i < nonApps.length; ++i) {
-                    augmentedNonApps[i] = nonApps[i];
+            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                    IRemoteAnimationFinishedCallback finishedCallback,
+                    SurfaceControl.Transaction t) {
+                if (apps == null || apps.length == 0) {
+                    onRemoteAnimationFinished(apps);
+                    t.apply();
+                    try {
+                        adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error starting remote animation", e);
+                    }
+                    return;
                 }
-                augmentedNonApps[augmentedNonApps.length - 1] = getDividerBarLegacyTarget();
+
+                // The surfaces of splitting tasks were placed with window bounds when preparing the
+                // transition, so update divider surface separately.
+                final RemoteAnimationTarget dividerTarget = getDividerBarLegacyTarget();
+                mSplitLayout.getRefDividerBounds(mTempRect1);
+                t.setLayer(dividerTarget.leash, Integer.MAX_VALUE)
+                        .setPosition(dividerTarget.leash, mTempRect1.left, mTempRect1.top);
+                setDividerVisibility(true, t);
+
+                for (int i = 0; i < apps.length; ++i) {
+                    if (apps[i].mode == MODE_OPENING) {
+                        t.show(apps[i].leash);
+                    }
+                }
+                t.apply();
 
                 IRemoteAnimationFinishedCallback wrapCallback =
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
-                                onRemoteAnimationFinishedOrCancelled(false /* cancel */, evictWct);
+                                onRemoteAnimationFinished(apps);
                                 finishedCallback.onAnimationFinished();
                             }
                         };
                 Transitions.setRunningRemoteTransitionDelegate(adapter.getCallingApplication());
                 try {
                     adapter.getRunner().onAnimationStart(transit, apps, wallpapers,
-                            augmentedNonApps, wrapCallback);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error starting remote animation", e);
-                }
-            }
-
-            @Override
-            public void onAnimationCancelled(boolean isKeyguardOccluded) {
-                onRemoteAnimationFinishedOrCancelled(true /* cancel */, evictWct);
-                try {
-                    adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
+                            ArrayUtils.appendElement(RemoteAnimationTarget.class, nonApps,
+                                    dividerTarget), wrapCallback);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
             }
         };
-        RemoteAnimationAdapter wrappedAdapter = new RemoteAnimationAdapter(
-                wrapper, adapter.getDuration(), adapter.getStatusBarTransitionDelay());
 
-        if (mainOptions == null) {
-            mainOptions = ActivityOptions.makeRemoteAnimation(wrappedAdapter).toBundle();
-        } else {
-            ActivityOptions mainActivityOptions = ActivityOptions.fromBundle(mainOptions);
-            mainActivityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
-            mainOptions = mainActivityOptions.toBundle();
-        }
-
-        sideOptions = sideOptions != null ? sideOptions : new Bundle();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         setSideStagePosition(sidePosition, wct);
-
-        mSplitLayout.setDivideRatio(splitRatio);
         if (!mMainStage.isActive()) {
-            // Build a request WCT that will launch both apps such that task 0 is on the main stage
-            // while task 1 is on the side stage.
             mMainStage.activate(wct, false /* reparent */);
         }
+
+        if (mainOptions == null) mainOptions = new Bundle();
+        addActivityOptions(mainOptions, mMainStage);
+        wct.startTask(mainTaskId, mainOptions);
+        wct.merge(sideWct, true);
+
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
         wct.setForceTranslucent(mRootTaskInfo.token, false);
 
-        // Make sure the launch options will put tasks in the corresponding split roots
-        addActivityOptions(mainOptions, mMainStage);
-        addActivityOptions(sideOptions, mSideStage);
-
-        // Add task launch requests
-        wct.startTask(mainTaskId, mainOptions);
-        if (withIntent) {
-            wct.sendPendingIntent(pendingIntent, fillInIntent, sideOptions);
-        } else {
-            wct.startTask(sideTaskId, sideOptions);
-        }
-
-        mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> {
-            setDividerVisibility(true, t);
-            updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
-        });
+        mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
-    private void onRemoteAnimationFinishedOrCancelled(boolean cancel,
-            WindowContainerTransaction evictWct) {
+    private void onRemoteAnimationFinished(RemoteAnimationTarget[] apps) {
         mIsDividerRemoteAnimating = false;
         mShouldUpdateRecents = true;
-        // If any stage has no child after animation finished, it means that split will display
-        // nothing, such status will happen if task and intent is same app but not support
-        // multi-instance, we should exit split and expand that app as full screen.
-        if (!cancel && (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0)) {
-            mMainExecutor.execute(() ->
-                    exitSplitScreen(mMainStage.getChildCount() == 0
-                        ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
-        } else {
-            mSyncQueue.queue(evictWct);
+        if (apps == null || apps.length == 0) return;
+
+        // If any stage has no child after finished animation, that side of the split will display
+        // nothing. This might happen if starting the same app on the both sides while not
+        // supporting multi-instance. Exit the split screen and expand that app to full screen.
+        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+            mMainExecutor.execute(() -> exitSplitScreen(mMainStage.getChildCount() == 0
+                    ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+            return;
         }
+
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        prepareEvictNonOpeningChildTasks(SPLIT_POSITION_TOP_OR_LEFT, apps, evictWct);
+        prepareEvictNonOpeningChildTasks(SPLIT_POSITION_BOTTOM_OR_RIGHT, apps, evictWct);
+        mSyncQueue.queue(evictWct);
     }
 
     /**

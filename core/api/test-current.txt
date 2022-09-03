@@ -288,7 +288,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setScreensaverEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setSystemDreamComponent(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream();
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
 
@@ -2380,6 +2381,16 @@ package android.service.dreams {
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
     method public final boolean shouldShowComplications();
+  }
+
+  public class DreamService extends android.app.Service implements android.view.Window.Callback {
+    method @Nullable public static android.service.dreams.DreamService.DreamMetadata getDreamMetadata(@NonNull android.content.Context, @Nullable android.content.pm.ServiceInfo);
+  }
+
+  public static final class DreamService.DreamMetadata {
+    field @Nullable public final android.graphics.drawable.Drawable previewImage;
+    field @Nullable public final android.content.ComponentName settingsActivity;
+    field @NonNull public final boolean showComplications;
   }
 
 }

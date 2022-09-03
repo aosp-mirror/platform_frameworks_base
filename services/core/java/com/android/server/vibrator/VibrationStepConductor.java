@@ -281,6 +281,14 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         // to run it before processing callbacks as the window is tiny.
         Step nextStep = pollNext();
         if (nextStep != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Playing vibration id " + getVibration().id
+                        + ((nextStep instanceof AbstractVibratorStep)
+                        ? " on vibrator " + ((AbstractVibratorStep) nextStep).getVibratorId() : "")
+                        + " " + nextStep.getClass().getSimpleName()
+                        + (nextStep.isCleanUp() ? " (cleanup)" : ""));
+            }
+
             List<Step> nextSteps = nextStep.play();
             if (nextStep.getVibratorOnDuration() > 0) {
                 mSuccessfulVibratorOnSteps++;

@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.phone.fragment
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.CollapsedSbFragmentLog
-import com.android.systemui.statusbar.DisableFlagsLogger
+import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import javax.inject.Inject
 
 /** Used by [CollapsedStatusBarFragment] to log messages to a [LogBuffer]. */

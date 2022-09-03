@@ -192,6 +192,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 public final class ActiveServices {
@@ -221,6 +222,11 @@ public final class ActiveServices {
                     | ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
                     | ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                     | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+
+    // Keep track of number of foreground services and number of apps that have foreground
+    // services in the device. This field is made to be directly accessed without holding AMS lock.
+    static final AtomicReference<Pair<Integer, Integer>> sNumForegroundServices =
+            new AtomicReference(new Pair<>(0, 0));
 
     // Foreground service is stopped for unknown reason.
     static final int FGS_STOP_REASON_UNKNOWN = 0;
@@ -456,6 +462,7 @@ public final class ActiveServices {
         final ArrayList<ServiceRecord> mStartingBackground = new ArrayList<>();
 
         final ArrayMap<String, ActiveForegroundApp> mActiveForegroundApps = new ArrayMap<>();
+
         boolean mActiveForegroundAppsChanged;
 
         static final int MSG_BG_START_TIMEOUT = 1;
@@ -2027,6 +2034,7 @@ public final class ActiveServices {
                         logFGSStateChangeLocked(r,
                                 FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
                                 0, FGS_STOP_REASON_UNKNOWN);
+                        updateNumForegroundServicesLocked();
                     }
                     // Even if the service is already a FGS, we need to update the notification,
                     // so we need to call it again.
@@ -2118,6 +2126,7 @@ public final class ActiveServices {
                     mAm.updateLruProcessLocked(r.app, false, null);
                     updateServiceForegroundLocked(r.app.mServices, true);
                 }
+                updateNumForegroundServicesLocked();
             }
         }
     }
@@ -4836,6 +4845,7 @@ public final class ActiveServices {
         }
 
         smap.ensureNotStartingBackgroundLocked(r);
+        updateNumForegroundServicesLocked();
     }
 
     private void dropFgsNotificationStateLocked(ServiceRecord r) {
@@ -7038,6 +7048,10 @@ public final class ActiveServices {
                 durationMs,
                 r.mStartForegroundCount,
                 fgsStopReasonToString(fgsStopReason));
+    }
+
+    private void updateNumForegroundServicesLocked() {
+        sNumForegroundServices.set(mAm.mProcessList.getNumForegroundServices());
     }
 
     boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,

@@ -109,6 +109,7 @@ class AccessibilityUserState {
     private boolean mIsAudioDescriptionByDefaultRequested;
     private boolean mIsAutoclickEnabled;
     private boolean mIsDisplayMagnificationEnabled;
+    private boolean mIsSoftwareCursorEnabled;
     private boolean mIsFilterKeyEventsEnabled;
     private boolean mIsPerformGesturesEnabled;
     private boolean mAccessibilityFocusOnlyInActiveWindow;
@@ -208,6 +209,7 @@ class AccessibilityUserState {
         mRequestTwoFingerPassthrough = false;
         mSendMotionEventsEnabled = false;
         mIsDisplayMagnificationEnabled = false;
+        mIsSoftwareCursorEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
@@ -509,6 +511,8 @@ class AccessibilityUserState {
         pw.append(", sendMotionEventsEnabled").append(String.valueOf(mSendMotionEventsEnabled));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
                 mIsDisplayMagnificationEnabled));
+        pw.append(", softwareCursorEnabled=").append(String.valueOf(
+                mIsSoftwareCursorEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
@@ -617,6 +621,14 @@ class AccessibilityUserState {
 
     public void setDisplayMagnificationEnabledLocked(boolean enabled) {
         mIsDisplayMagnificationEnabled = enabled;
+    }
+
+    public boolean isSoftwareCursorEnabledLocked() {
+        return mIsSoftwareCursorEnabled;
+    }
+
+    public void setSoftwareCursorEnabledLocked(boolean enabled) {
+        mIsSoftwareCursorEnabled = enabled;
     }
 
     public boolean isFilterKeyEventsEnabledLocked() {

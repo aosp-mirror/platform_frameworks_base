@@ -313,8 +313,21 @@ public abstract class UserManagerInternal {
      */
     public abstract @Nullable UserProperties getUserProperties(@UserIdInt int userId);
 
-    /** TODO(b/239982558): add javadoc / mention invalid_id is used to unassing */
+    /**
+     * Assigns a user to a display.
+     *
+     * <p>On most devices this call will be a no-op, but it will be used on devices that support
+     * multiple users on multiple displays (like automotives with passenger displays).
+     */
     public abstract void assignUserToDisplay(@UserIdInt int userId, int displayId);
+
+    /**
+     * Unassigns a user from its current display.
+     *
+     * <p>On most devices this call will be a no-op, but it will be used on devices that support
+     * multiple users on multiple displays (like automotives with passenger displays).
+     */
+    public abstract void unassignUserFromDisplay(@UserIdInt int userId);
 
     /**
      * Returns {@code true} if the user is visible (as defined by

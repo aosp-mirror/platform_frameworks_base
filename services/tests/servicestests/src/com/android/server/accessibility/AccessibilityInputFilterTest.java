@@ -24,6 +24,7 @@ import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEA
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_FILTER_KEY_EVENTS;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
+import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_SOFTWARE_CURSOR;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
 
@@ -52,6 +53,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
+import com.android.server.accessibility.cursor.SoftwareCursorGestureHandler;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
@@ -83,6 +85,7 @@ public class AccessibilityInputFilterTest {
     private final ArrayList<Display> mDisplayList = new ArrayList<>();
     private final int mFeatures = FLAG_FEATURE_AUTOCLICK
             | FLAG_FEATURE_TOUCH_EXPLORATION
+            | FLAG_FEATURE_SOFTWARE_CURSOR
             | FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER
             | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER
             | FLAG_FEATURE_INJECT_MOTION_EVENTS
@@ -91,8 +94,8 @@ public class AccessibilityInputFilterTest {
     // The expected order of EventStreamTransformations.
     private final Class[] mExpectedEventHandlerTypes =
             {KeyboardInterceptor.class, MotionEventInjector.class,
-                    FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
-                    AutoclickController.class, AccessibilityInputFilter.class};
+                    SoftwareCursorGestureHandler.class, FullScreenMagnificationGestureHandler.class,
+                    TouchExplorer.class, AutoclickController.class, AccessibilityInputFilter.class};
 
     @Mock private WindowManagerInternal.AccessibilityControllerInternal mMockA11yController;
     @Mock private WindowManagerInternal mMockWindowManagerService;
