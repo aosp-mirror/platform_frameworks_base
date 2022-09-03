@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> üçün operator tərəfindən müvəqqəti olaraq deaktiv edildi"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobil şəbəkəyə daxil olmaq mümkün deyil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Tərcih edilən şəbəkəni dəyişin. Dəyişmək üçün klikləyin."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Təcili zəng əlçatan deyil"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi vasitəsilə təcili zənglər etmək mümkün deyil"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Təcili zənglər əlçatan olmaya bilər"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi üzərindən təcili zəngləri dəstəkləmir. Detallar üçün toxunun."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Siqnallar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Zəng yönləndirmə"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Təcili geriyə zəng rejimi"</string>

@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Midlertidig deaktivert av operatøren din for SIM-kortet <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Får ikke kontakt med mobilnettverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prøv å endre foretrukket nettverk. Trykk for å endre."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Nødanrop er utilgjengelig"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Kan ikke ringe nødnumre via Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Nødanrop kan være utilgjengelig"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> støtter ikke nødanrop via Wi-Fi. Trykk for å se mer informasjon."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Varsler"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Viderekobling"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modusen nødsamtale-tilbakeringing"</string>
@@ -134,7 +134,7 @@
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wifi-anrop | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wifi-anrop"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wifi-anrop"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
@@ -1296,7 +1296,7 @@
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Byttet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"mobildata"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
+    <item msgid="5520925862115353992">"Wifi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>

@@ -82,8 +82,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏השירות הושבת באופן זמני על ידי הספק עבור SIM‏ <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"לא ניתן להתחבר לרשת הסלולרית"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"אפשר לנסות לשנות את הרשת המועדפת. יש להקיש כדי לשנות אותה."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"שיחות חירום לא זמינות"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏לא ניתן לבצע שיחות חירום דרך Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"יכול להיות ששיחות חירום לא יהיו זמינות"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"‏ב‑<xliff:g id="SPN">%s</xliff:g> אין תמיכה בשיחות חירום באמצעות Wi‑Fi. יש להקיש לקבלת פרטים."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"התראות"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"העברת שיחות"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"מצב \'התקשרות חזרה בחירום\'"</string>

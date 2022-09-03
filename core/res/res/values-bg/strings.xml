@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Временно е изключено от оператора ви за SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Не може да се установи връзка с мобилната мрежа"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Изберете друга предпочитана мрежа. Докоснете за промяна."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Няма достъп до спешните обаждания"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не може да се извършват спешни обаждания през Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Спешните обаждания може да не са налице"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не поддържа спешните обаждания през Wi-Fi. Докоснете за подробности."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сигнали"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пренасочване на обаждания"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим на обратно обаждане при спешност"</string>
@@ -1691,8 +1691,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
-    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим за работа с една ръка"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Допълнително затъмняване"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Работа с една ръка"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Доп. затъмн."</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"За да използвате <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натиснете двата бутона за силата на звука и ги задръжте за 3 секунди"</string>

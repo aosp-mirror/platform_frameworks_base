@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 暫時遭電信業者停用"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"無法連上行動網路"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"請嘗試變更偏好的網路。輕觸即可變更。"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"無法撥打緊急電話"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"無法透過 Wi‑Fi 撥打緊急電話"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"可能無法撥打緊急電話"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"「<xliff:g id="SPN">%s</xliff:g>」不支援透過 Wi-Fi 撥打緊急電話。輕觸即可瞭解詳情。"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"快訊"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"來電轉接"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"緊急回撥模式"</string>
@@ -2272,8 +2272,8 @@
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"某個應用程式正在耗用大量電力"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"某個應用程式目前仍在運作"</string>
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"「<xliff:g id="APP">%1$s</xliff:g>」正在背景運作。輕觸即可管理電池用量。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式可能會影響電池續航力。輕觸即可查看使用中的應用程式。"</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的應用程式"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式可能會影響電池續航力，輕觸即可查看運作中的應用程式。"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看運作中的應用程式"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>

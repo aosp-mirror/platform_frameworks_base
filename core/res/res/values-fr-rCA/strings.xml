@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Temporairement désactivé par votre fournisseur de services pour la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossible de joindre le réseau cellulaire"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Essayez de changer de réseau préféré. Touchez l\'écran pour changer."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Le service d\'appel d\'urgence n\'est pas accessible"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Impossible d\'effectuer des appels d\'urgence par Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Les appels d\'urgence peuvent ne pas être disponibles"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne prend pas en charge les appels d\'urgence par Wi-Fi. Touchez pour en savoir plus."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transfert d\'appel"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de rappel d\'urgence"</string>
@@ -298,7 +298,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accéder à la position de cet appareil"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"Messagerie texte"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"Messages texte"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et afficher des messages texte"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Fichiers"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"accéder aux fichiers sur votre appareil"</string>
@@ -1412,7 +1412,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Ne pas retirer"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"Découvrir"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Explorer"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage <xliff:g id="NAME">%s</xliff:g> manquante"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez l\'appareil de nouveau"</string>
@@ -1692,7 +1692,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversion des couleurs"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correction des couleurs"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode Une main"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Réduction supplémentaire de la luminosité"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Très sombre"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume maintenues enfoncées. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume maintenues enfoncées. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Maintenez les deux touches de volume enfoncées pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>

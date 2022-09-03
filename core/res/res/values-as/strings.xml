@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"আপোনাৰ বাহকে <xliff:g id="SIMNUMBER">%d</xliff:g> ছিমৰ বাবে সাময়িকভাৱে অফ কৰিছে"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ম’বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ৱাই-ফাইৰ জৰিয়তে জৰুৰীকালীন কল কৰিব নোৱাৰি"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"জৰুৰীকালীন কল কৰাৰ সুবিধাটো উপলব্ধ নহ’ব পাৰে"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>এ ৱাই-ফাইৰ জৰিয়তে জৰুৰীকালীন কল কৰাটো সমৰ্থন নকৰে। সবিশেষ জানিবলৈ টিপক।"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফৰৱাৰ্ডিং"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"জৰুৰীকালীন ক\'লবেক ম\'ড"</string>

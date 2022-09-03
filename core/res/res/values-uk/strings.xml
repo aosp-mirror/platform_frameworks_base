@@ -82,8 +82,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Оператор тимчасово вимкнув службу для SIM-карти <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Не вдається під’єднатися до мобільної мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Спробуйте змінити вибрану мережу. Торкніться, щоб це зробити."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Екстрені виклики недоступні"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не можна здійснювати екстрені виклики через Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Екстрені виклики можуть бути недоступні"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не підтримує екстрені виклики через Wi-Fi. Натисніть, щоб дізнатися більше."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сповіщення"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресація виклику"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим екстреного зворотного виклику"</string>
@@ -638,8 +638,8 @@
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Тримайте телефон ближче до обличчя."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Тримайте телефон вище."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Тримайте телефон нижче."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Тримайте телефон лівіше."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Тримайте телефон правіше."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Посуньте телефон лівіше."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Посуньте телефон правіше."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Дивіться просто на пристрій."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Тримайте телефон просто перед обличчям."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
@@ -2069,7 +2069,7 @@
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
-    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про програму"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим енергозбереження"</string>

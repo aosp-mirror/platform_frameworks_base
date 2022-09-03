@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ปิดชั่วคราวโดยผู้ให้บริการของซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"เชื่อมต่อเครือข่ายมือถือไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ลองเปลี่ยนเครือข่ายที่ต้องการ แตะเพื่อเปลี่ยน"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"โทรหาหมายเลขฉุกเฉินไม่ได้"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"โทรหาหมายเลขฉุกเฉินผ่าน Wi‑Fi ไม่ได้"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"หมายเลขฉุกเฉินอาจไม่สามารถใช้งานได้"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ไม่รองรับการโทรไปยังหมายเลขฉุกเฉินผ่าน Wi-Fi แตะเพื่อดูรายละเอียด"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"การโอนสาย"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"โหมดติดต่อกลับฉุกเฉิน"</string>
@@ -1414,7 +1414,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"นำอุปกรณ์ออก"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"สำรวจ"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"เปลี่ยนเอาต์พุต"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"ไม่มี <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"ไม่มี<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"ใส่อุปกรณ์อีกครั้ง"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"กำลังย้าย <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"กำลังย้ายข้อมูล"</string>

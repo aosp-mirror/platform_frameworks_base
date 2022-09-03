@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"சிம் <xliff:g id="SIMNUMBER">%d</xliff:g>ஐ, உங்கள் மொபைல் நிறுவனம் தற்காலிகமாக ஆஃப் செய்துள்ளது"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"மொபைல் நெட்வொர்க் கிடைக்கவில்லை"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"விருப்ப நெட்வொர்க்கை மாற்றவும். மாற்ற, தட்டவும்."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"அவசர அழைப்பைச் செய்ய முடியாது"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"வைஃபை மூலம் அவசர அழைப்புகளைச் செய்ய முடியாது"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"அவசர அழைப்புகளை மேற்கொள்ள முடியாமல் போகலாம்"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> இல் வைஃபை மூலம் அவசர அழைப்புகளை மேற்கொள்ள முடியாது. விவரங்களைப் பார்க்க தட்டவும்."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"அழைப்பு திருப்பிவிடுதல்"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"அவசரகாலத் திரும்ப அழைக்கும் பயன்முறை"</string>

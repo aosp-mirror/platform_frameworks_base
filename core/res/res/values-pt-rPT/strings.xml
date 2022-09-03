@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Serviço temporariamente desativado pelo operador no SIM <xliff:g id="SIMNUMBER">%d</xliff:g>."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Não é possível estabelecer ligação à rede móvel."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Experimente alterar a rede preferida. Toque para alterar."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chamadas de emergência indisponíveis"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Não é possível efetuar chamadas de emergência através de Wi‑Fi."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"As chamadas de emergência podem estar indisponíveis"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> não suporta chamadas de emergência através de Wi-Fi. Toque para obter detalhes."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Reencaminhamento de chamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de chamada de retorno de emergência"</string>
@@ -1415,7 +1415,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"Explorar"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Saída do interruptor"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> em falta"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Volte a inserir o dispositivo."</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Volte a inserir o dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"A mover <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"A mover dados"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Transf. de conteúdo concluída"</string>

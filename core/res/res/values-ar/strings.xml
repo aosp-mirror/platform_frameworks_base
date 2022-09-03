@@ -84,8 +84,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏أجرى مشغّل شبكة الجوّال إيقافًا مؤقتًا للخدمة لشريحة SIM رقم <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"يتعذّر الوصول إلى شبكة الجوّال."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"حاول تغيير الشبكة المفضلة. انقر لتغييرها."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"لا تتوفر إمكانية الاتصال في حالات الطوارئ."</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏يتعذّر إجراء مكالمات طوارئ عبر Wi‑Fi."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"قد لا تكون مكالمات الطوارئ متوفرة."</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"‏لا تعمل خدمة مكالمات الطوارئ على شبكة Wi-Fi في <xliff:g id="SPN">%s</xliff:g>. يُرجى النقر للحصول على التفاصيل."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"التنبيهات"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"إعادة توجيه المكالمة"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"وضع معاودة الاتصال بالطوارئ"</string>
@@ -1415,7 +1415,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"جارٍ إخراج <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"عدم الإزالة"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"إعداد"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"إلغاء"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"إخراج"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"استكشاف"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"تبديل جهاز إخراج الصوت"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> مفقود"</string>

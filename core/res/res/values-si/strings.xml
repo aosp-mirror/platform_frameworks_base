@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> සඳහා ඔබේ වාහකය විසින් තාවකාලිකව ක්‍රියාවිරහිත කරන ලදී"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ජංගම ජාලය වෙත ළඟා විය නොහැකිය"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"කැමති ජාලය වෙනස් කිරීමට උත්සාහ කරන්න. වෙනස් කිරීමට තට්ටු කරන්න."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi-Fi හරහා හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"හදිසි ඇමතුම් ලබා ගත නොහැකි වීමට ඉඩ ඇත"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi හරහා හදිසි ඇමතුම් සඳහා සහාය නොදක්වයි. විස්තර සඳහා තට්ටු කරන්න."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ඇඟවීම්"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ඇමතුම ප්‍රතියොමු කිරීම"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"හදිසි අවස්ථා පසු ඇමතුම් ප්‍රකාරය"</string>
