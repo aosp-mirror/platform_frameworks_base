@@ -14838,7 +14838,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (!Build.IS_DEBUGGABLE && callingUid != ROOT_UID && callingUid != SHELL_UID
-                    && callingUid != SYSTEM_UID) {
+                    && callingUid != SYSTEM_UID && !hasActiveInstrumentationLocked(callingPid)) {
                 // If it's not debug build and not called from root/shell/system uid, reject it.
                 final String msg = "Permission Denial: instrumentation test "
                         + className + " from pid=" + callingPid + ", uid=" + callingUid
@@ -14943,6 +14943,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return true;
+    }
+
+    @GuardedBy("this")
+    private boolean hasActiveInstrumentationLocked(int pid) {
+        if (pid == 0) {
+            return false;
+        }
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord process = mPidsSelfLocked.get(pid);
+            return process != null && process.getActiveInstrumentation() != null;
+        }
     }
 
     @GuardedBy("this")
