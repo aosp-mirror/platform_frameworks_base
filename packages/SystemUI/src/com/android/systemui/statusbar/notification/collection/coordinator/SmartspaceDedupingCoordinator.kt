@@ -20,11 +20,9 @@ import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
@@ -44,14 +42,10 @@ import javax.inject.Inject
  * In addition, notifications that have recently alerted aren't filtered. Tracking this in a way
  * that involves the fewest pipeline invalidations requires some unfortunately complex logic.
  */
-// This class is a singleton so that the same instance can be accessed by both the old and new
-// pipelines
 @CoordinatorScope
 class SmartspaceDedupingCoordinator @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val smartspaceController: LockscreenSmartspaceController,
-    private val notificationEntryManager: NotificationEntryManager,
-    private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
     private val notifPipeline: NotifPipeline,
     @Main private val executor: DelayableExecutor,
     private val clock: SystemClock
@@ -132,7 +126,6 @@ class SmartspaceDedupingCoordinator @Inject constructor(
 
         if (changed) {
             filter.invalidateList("onNewSmartspaceTargets")
-            notificationEntryManager.updateNotifications("Smartspace targets changed")
         }
 
         trackedSmartspaceTargets = newMap
@@ -169,7 +162,6 @@ class SmartspaceDedupingCoordinator @Inject constructor(
                 target.cancelTimeoutRunnable = null
                 target.shouldFilter = true
                 filter.invalidateList("updateAlertException: ${entry.logKey}")
-                notificationEntryManager.updateNotifications("deduping timeout expired")
             }, alertExceptionExpires - now)
         }
     }
