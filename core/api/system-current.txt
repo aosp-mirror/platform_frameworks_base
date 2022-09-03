@@ -145,6 +145,7 @@ package android {
     field public static final String INTERACT_ACROSS_USERS_FULL = "android.permission.INTERACT_ACROSS_USERS_FULL";
     field public static final String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
+    field public static final String KILL_ALL_BACKGROUND_PROCESSES = "android.permission.KILL_ALL_BACKGROUND_PROCESSES";
     field public static final String KILL_UID = "android.permission.KILL_UID";
     field public static final String LAUNCH_DEVICE_MANAGER_SETUP = "android.permission.LAUNCH_DEVICE_MANAGER_SETUP";
     field public static final String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";

@@ -3139,12 +3139,29 @@
 
     <!-- Allows an application to call
         {@link android.app.ActivityManager#killBackgroundProcesses}.
+        <p>As of Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+        the {@link android.app.ActivityManager#killBackgroundProcesses} is no longer available to
+        third party applications. For backwards compatibility, the background processes of the
+        caller's own package will still be killed when calling this API. If the caller has
+        the system permission {@code KILL_ALL_BACKGROUND_PROCESSES}, other processes will be
+        killed too.
+
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"
         android:label="@string/permlab_killBackgroundProcesses"
         android:description="@string/permdesc_killBackgroundProcesses"
         android:protectionLevel="normal" />
+
+    <!-- @SystemApi @hide Allows an application to call
+        {@link android.app.ActivityManager#killBackgroundProcesses}
+        to kill background processes of other apps.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.KILL_ALL_BACKGROUND_PROCESSES"
+        android:label="@string/permlab_killBackgroundProcesses"
+        android:description="@string/permdesc_killBackgroundProcesses"
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi @hide Allows an application to query process states and current
          OOM adjustment scores.

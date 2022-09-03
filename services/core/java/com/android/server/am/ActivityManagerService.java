@@ -3961,8 +3961,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
+        final boolean hasKillAllPermission = checkCallingPermission(
+                android.Manifest.permission.KILL_ALL_BACKGROUND_PROCESSES) == PERMISSION_GRANTED;
+        final int callingUid = Binder.getCallingUid();
+        final int callingAppId = UserHandle.getAppId(callingUid);
 
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid,
                 userId, true, ALLOW_FULL_ONLY, "killBackgroundProcesses", null);
         final int[] userIds = mUserController.expandUserId(userId);
 
@@ -3977,7 +3981,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     targetUserId));
                 } catch (RemoteException e) {
                 }
-                if (appId == -1) {
+                if (appId == -1 || (!hasKillAllPermission && appId != callingAppId)) {
                     Slog.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
@@ -3996,11 +4000,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void killAllBackgroundProcesses() {
-        if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
+        if (checkCallingPermission(android.Manifest.permission.KILL_ALL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED) {
             final String msg = "Permission Denial: killAllBackgroundProcesses() from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
+                    + " requires " + android.Manifest.permission.KILL_ALL_BACKGROUND_PROCESSES;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -4036,11 +4040,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      *                     processes, or {@code -1} to ignore the process state
      */
     void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState) {
-        if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
+        if (checkCallingPermission(android.Manifest.permission.KILL_ALL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED) {
             final String msg = "Permission Denial: killAllBackgroundProcessesExcept() from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
+                    + " requires " + android.Manifest.permission.KILL_ALL_BACKGROUND_PROCESSES;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
