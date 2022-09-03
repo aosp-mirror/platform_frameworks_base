@@ -331,6 +331,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final String DUMP_RECENTS_CMD = "recents";
     public static final String DUMP_RECENTS_SHORT_CMD = "r";
     public static final String DUMP_TOP_RESUMED_ACTIVITY = "top-resumed";
+    public static final String DUMP_VISIBLE_ACTIVITIES = "visible";
 
     /** This activity is not being relaunched, or being relaunched for a non-resize reason. */
     public static final int RELAUNCH_REASON_NONE = 0;
@@ -4054,6 +4055,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    void dumpVisibleActivitiesLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER VISIBLE ACTIVITIES (dumpsys activity visible)");
+        ArrayList<ActivityRecord> activities =
+                mRootWindowContainer.getDumpActivities("all", /* dumpVisibleRootTasksOnly */ true,
+                        /* dumpFocusedRootTaskOnly */ false, UserHandle.USER_ALL);
+        boolean needSeparator = false;
+        for (int i = activities.size() - 1; i >= 0; i--) {
+            ActivityRecord activity = activities.get(i);
+            if (!activity.isVisible()) {
+                continue;
+            }
+            if (needSeparator) {
+                pw.println();
+            }
+            activity.dump(pw, "", true);
+            needSeparator = true;
+        }
+    }
+
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage,
@@ -6286,6 +6306,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 } else if (DUMP_TOP_RESUMED_ACTIVITY.equals(cmd)) {
                     dumpTopResumedActivityLocked(pw);
+                } else if (DUMP_VISIBLE_ACTIVITIES.equals(cmd)) {
+                    dumpVisibleActivitiesLocked(pw);
                 }
             }
         }
