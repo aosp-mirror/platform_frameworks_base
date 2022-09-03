@@ -23,7 +23,7 @@
     <string name="pip_fullscreen" msgid="7278047353591302554">"Pantalla completa"</string>
     <string name="pip_move" msgid="158770205886688553">"Mover"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Mostrar"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"Ocultar"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"Contraer"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" Pulsa dos veces "<annotation icon="home_icon">"INICIO"</annotation>" para ver los controles"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menú de imagen en imagen."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Mover hacia la izquierda"</string>
