@@ -42354,6 +42354,7 @@ package android.telephony {
     field public static final int IRAT_HANDOVER_FAILED = 2194; // 0x892
     field public static final int IS707B_MAX_ACCESS_PROBES = 2089; // 0x829
     field public static final int IWLAN_AUTHORIZATION_REJECTED = 9003; // 0x232b
+    field public static final int IWLAN_CONGESTION = 15500; // 0x3c8c
     field public static final int IWLAN_DNS_RESOLUTION_NAME_FAILURE = 16388; // 0x4004
     field public static final int IWLAN_DNS_RESOLUTION_TIMEOUT = 16389; // 0x4005
     field public static final int IWLAN_IKEV2_AUTH_FAILURE = 16385; // 0x4001

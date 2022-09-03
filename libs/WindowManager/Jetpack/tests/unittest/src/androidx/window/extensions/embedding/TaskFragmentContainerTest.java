@@ -316,6 +316,25 @@ public class TaskFragmentContainerTest {
         assertEquals(activity, container.getBottomMostActivity());
     }
 
+    @Test
+    public void testOnActivityDestroyed() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+        container.addPendingAppearedActivity(mActivity);
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.hasActivity(mActivity.getActivityToken()));
+
+        taskContainer.onActivityDestroyed(mActivity);
+
+        // It should not contain the destroyed Activity.
+        assertFalse(container.hasActivity(mActivity.getActivityToken()));
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         final Activity activity = mock(Activity.class);

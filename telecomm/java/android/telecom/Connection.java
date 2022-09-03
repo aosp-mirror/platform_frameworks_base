@@ -2763,6 +2763,12 @@ public abstract class Connection extends Conferenceable {
      * @param isVoip True if the audio mode is VOIP.
      */
     public final void setAudioModeIsVoip(boolean isVoip) {
+        if (!isVoip && (mConnectionProperties & PROPERTY_SELF_MANAGED) == PROPERTY_SELF_MANAGED) {
+            Log.i(this,
+                    "setAudioModeIsVoip: Ignored request to set a self-managed connection's"
+                            + " audioModeIsVoip to false. Doing so can cause unwanted behavior.");
+            return;
+        }
         checkImmutable();
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {

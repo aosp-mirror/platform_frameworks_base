@@ -986,7 +986,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
-                if (w.isFocused() && mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
+
+                if (w.getWindowingMode() != WINDOWING_MODE_PINNED
+                        && mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
                         && preferredModeId != 0) {
                     mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
                 }

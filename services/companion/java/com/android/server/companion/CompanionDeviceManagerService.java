@@ -233,7 +233,7 @@ public class CompanionDeviceManagerService extends SystemService {
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
                 /* cdmService */this, mAssociationStore);
         mCompanionAppController = new CompanionApplicationController(
-                context, mApplicationControllerCallback);
+                context, mAssociationStore, mDevicePresenceMonitor);
         mTransportManager = new CompanionTransportManager(context);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
@@ -387,25 +387,6 @@ public class CompanionDeviceManagerService extends SystemService {
         mCompanionAppController.unbindCompanionApplication(userId, packageName);
     }
 
-    private boolean onCompanionApplicationBindingDiedInternal(
-            @UserIdInt int userId, @NonNull String packageName) {
-        for (AssociationInfo ai :
-                mAssociationStore.getAssociationsForPackage(userId, packageName)) {
-            final int associationId = ai.getId();
-            if (ai.isSelfManaged()
-                    && mDevicePresenceMonitor.isDevicePresent(associationId)) {
-                mDevicePresenceMonitor.onSelfManagedDeviceReporterBinderDied(associationId);
-            }
-        }
-        // TODO(b/218613015): implement.
-        return false;
-    }
-
-    private void onRebindCompanionApplicationTimeoutInternal(
-            @UserIdInt int userId, @NonNull String packageName) {
-        // TODO(b/218613015): implement.
-    }
-
     /**
      * @return whether the package should be bound (i.e. at least one of the devices associated with
      *         the package is currently present).
@@ -498,6 +479,10 @@ public class CompanionDeviceManagerService extends SystemService {
                 mAssociationStore.getAssociationsForPackage(userId, packageName);
         for (AssociationInfo association : associationsForPackage) {
             mAssociationStore.removeAssociation(association.getId());
+        }
+        // Clear role holders
+        for (AssociationInfo association : associationsForPackage) {
+            maybeRemoveRoleHolderForAssociation(association);
         }
 
         mCompanionAppController.onPackagesChanged(userId);
@@ -1284,19 +1269,6 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void onDeviceDisappeared(int associationId) {
             onDeviceDisappearedInternal(associationId);
-        }
-    };
-
-    private final CompanionApplicationController.Callback mApplicationControllerCallback =
-            new CompanionApplicationController.Callback() {
-        @Override
-        public boolean onCompanionApplicationBindingDied(int userId, @NonNull String packageName) {
-            return onCompanionApplicationBindingDiedInternal(userId, packageName);
-        }
-
-        @Override
-        public void onRebindCompanionApplicationTimeout(int userId, @NonNull String packageName) {
-            onRebindCompanionApplicationTimeoutInternal(userId, packageName);
         }
     };
 

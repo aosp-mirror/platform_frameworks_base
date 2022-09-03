@@ -19,12 +19,11 @@ package com.android.systemui.statusbar.notification.collection.inflation;
 import android.annotation.NonNull;
 
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 
 /**
- * Used by the {@link NotificationEntryManager}. When notifications are added or updated, the binder
+ * Used by the {@link NotifInflater}. When notifications are added or updated, the binder
  * is asked to (re)inflate and prepare their views. This inflation must occur off the main thread.
  */
 public interface NotificationRowBinder {

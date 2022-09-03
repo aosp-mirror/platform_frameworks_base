@@ -48,7 +48,8 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
     /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */
     interface Listener {
-        void onBindingDied(@UserIdInt int userId, @NonNull String packageName);
+        void onBindingDied(@UserIdInt int userId, @NonNull String packageName,
+                @NonNull CompanionDeviceServiceConnector serviceConnector);
     }
 
     private final @UserIdInt int mUserId;
@@ -57,6 +58,7 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
     // installs a listener to the primary ServiceConnector), hence we should always null-check the
     // reference before calling on it.
     private @Nullable Listener mListener;
+    private boolean mIsPrimary;
 
     /**
      * Create a CompanionDeviceServiceConnector instance.
@@ -74,17 +76,20 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * service importance level should be higher than 125.
      */
     static CompanionDeviceServiceConnector newInstance(@NonNull Context context,
-            @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged) {
+            @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged,
+            boolean isPrimary) {
         final int bindingFlags = isSelfManaged ? BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
                 : BIND_ALMOST_PERCEPTIBLE;
-        return new CompanionDeviceServiceConnector(context, userId, componentName, bindingFlags);
+        return new CompanionDeviceServiceConnector(
+                context, userId, componentName, bindingFlags, isPrimary);
     }
 
     private CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
-            @NonNull ComponentName componentName, int bindingFlags) {
+            @NonNull ComponentName componentName, int bindingFlags, boolean isPrimary) {
         super(context, buildIntent(componentName), bindingFlags, userId, null);
         mUserId = userId;
         mComponentName = componentName;
+        mIsPrimary = isPrimary;
     }
 
     void setListener(@Nullable Listener listener) {
@@ -110,6 +115,14 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         post(it -> unbind());
     }
 
+    boolean isPrimary() {
+        return mIsPrimary;
+    }
+
+    ComponentName getComponentName() {
+        return mComponentName;
+    }
+
     @Override
     protected void onServiceConnectionStatusChanged(
             @NonNull ICompanionDeviceService service, boolean isConnected) {
@@ -117,16 +130,6 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
             Log.d(TAG, "onServiceConnection_StatusChanged() " + mComponentName.toShortString()
                     + " connected=" + isConnected);
         }
-    }
-
-    // This method is only called when app is force-closed via settings,
-    // but does not handle crashes. Binder death should be handled in #binderDied()
-    @Override
-    public void onBindingDied(@NonNull ComponentName name) {
-        // IMPORTANT: call super! this will also invoke binderDied()
-        super.onBindingDied(name);
-
-        if (DEBUG) Log.d(TAG, "onBindingDied() " + mComponentName.toShortString());
     }
 
     @Override
@@ -137,7 +140,7 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
         // Handle primary process being killed
         if (mListener != null) {
-            mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+            mListener.onBindingDied(mUserId, mComponentName.getPackageName(), this);
         }
     }
 

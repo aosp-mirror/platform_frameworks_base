@@ -165,7 +165,7 @@ public class StatusBarManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Disable2Flags {}
-    // LINT.ThenChange(frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/DisableFlagsLogger.kt)
+    // LINT.ThenChange(frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/disableflags/DisableFlagsLogger.kt)
 
     /**
      * Default disable flags for setup

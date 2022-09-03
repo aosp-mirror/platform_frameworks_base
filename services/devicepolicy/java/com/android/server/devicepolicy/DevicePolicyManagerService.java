@@ -671,6 +671,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT = 165573442L;
 
+    /**
+     * For Admin Apps targeting U+
+     * If {@link android.security.IKeyChainService#setGrant} is called with an alias with no
+     * existing key, throw IllegalArgumentException.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static final long THROW_EXCEPTION_WHEN_KEY_MISSING = 175101461L;
+
     private static final String CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG =
             "The alias provided must be contained in the aliases specified in the credential "
                     + "management app's authentication policy";
@@ -5654,8 +5663,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(canChooseCertificates(caller));
-
-        return setKeyChainGrantInternal(alias, hasGrant, Process.WIFI_UID, caller.getUserHandle());
+        try {
+            return setKeyChainGrantInternal(
+                    alias, hasGrant, Process.WIFI_UID, caller.getUserHandle());
+        } catch (IllegalArgumentException e) {
+            if (mInjector.isChangeEnabled(THROW_EXCEPTION_WHEN_KEY_MISSING, caller.getPackageName(),
+                    caller.getUserId())) {
+                throw e;
+            }
+            return false;
+        }
     }
 
     @Override
@@ -5705,8 +5722,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } catch (RemoteException e) {
             throw new IllegalStateException("Failure getting grantee uid", e);
         }
-
-        return setKeyChainGrantInternal(alias, hasGrant, granteeUid, caller.getUserHandle());
+        try {
+            return setKeyChainGrantInternal(alias, hasGrant, granteeUid, caller.getUserHandle());
+        } catch (IllegalArgumentException e) {
+            if (mInjector.isChangeEnabled(THROW_EXCEPTION_WHEN_KEY_MISSING, packageName,
+                    caller.getUserId())) {
+                throw e;
+            }
+            return false;
+        }
     }
 
     private boolean setKeyChainGrantInternal(String alias, boolean hasGrant, int granteeUid,
@@ -14680,12 +14704,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final UserHandle parentUser = mUserManager.getProfileParent(UserHandle.of(userId));
             if (parentUser == null) {
                 throw new IllegalStateException(String.format("User %d is not a profile", userId));
-            }
-            if (!parentUser.isSystem()) {
-                throw new IllegalStateException(
-                        String.format("Only the profile owner of a managed profile on the"
-                                + " primary user can be granted access to device identifiers, not"
-                                + " on user %d", parentUser.getIdentifier()));
             }
 
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,

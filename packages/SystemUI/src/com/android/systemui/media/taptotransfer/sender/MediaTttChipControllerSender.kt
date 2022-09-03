@@ -22,25 +22,21 @@ import android.media.MediaRoute2Info
 import android.os.PowerManager
 import android.util.Log
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import com.android.internal.statusbar.IUndoMediaTransferCallback
-import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ViewHierarchyAnimator
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -62,9 +58,7 @@ class MediaTttChipControllerSender @Inject constructor(
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-        private val uiEventLogger: MediaTttSenderUiEventLogger,
-        private val falsingManager: FalsingManager,
-        private val falsingCollector: FalsingCollector,
+        private val uiEventLogger: MediaTttSenderUiEventLogger
 ) : MediaTttChipControllerCommon<ChipSenderInfo>(
         context,
         logger,
@@ -76,9 +70,6 @@ class MediaTttChipControllerSender @Inject constructor(
         powerManager,
         R.layout.media_ttt_chip,
 ) {
-
-    private lateinit var parent: MediaTttChipRootView
-
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
     }
@@ -130,15 +121,6 @@ class MediaTttChipControllerSender @Inject constructor(
 
         val chipState = newChipInfo.state
 
-        // Detect falsing touches on the chip.
-        parent = currentChipView as MediaTttChipRootView
-        parent.touchHandler = object : Gefingerpoken {
-            override fun onTouchEvent(ev: MotionEvent?): Boolean {
-                falsingCollector.onTouchEvent(ev)
-                return false
-            }
-        }
-
         // App icon
         val iconName = setIcon(currentChipView, newChipInfo.routeInfo.clientPackageName)
 
@@ -154,11 +136,7 @@ class MediaTttChipControllerSender @Inject constructor(
         // Undo
         val undoView = currentChipView.requireViewById<View>(R.id.undo)
         val undoClickListener = chipState.undoClickListener(
-                this,
-                newChipInfo.routeInfo,
-                newChipInfo.undoCallback,
-                uiEventLogger,
-                falsingManager,
+                this, newChipInfo.routeInfo, newChipInfo.undoCallback, uiEventLogger
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()

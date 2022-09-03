@@ -15,5 +15,5 @@
   -->
 
 <dream xmlns:android="http://schemas.android.com/apk/res/android"
-       android:settingsActivity="com.android.server.dreams/.TestDreamSettingsActivity"
+       android:settingsActivity="com.android.frameworks.servicestests/.TestDreamSettingsActivity"
        android:showClockAndComplications="false" />

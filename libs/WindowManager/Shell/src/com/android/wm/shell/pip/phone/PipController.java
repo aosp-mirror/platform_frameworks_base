@@ -43,6 +43,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Pair;
@@ -79,6 +80,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipKeepClearAlgorithm;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -109,6 +111,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         RemoteCallable<PipController>, ConfigurationChangeListener, KeyguardChangeListener,
         UserChangeListener {
     private static final String TAG = "PipController";
+
+    private boolean mEnablePipKeepClearAlgorithm =
+            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", false);
+
+    @VisibleForTesting
+    void setEnablePipKeepClearAlgorithm(boolean value) {
+        mEnablePipKeepClearAlgorithm = value;
+    }
 
     private Context mContext;
     protected ShellExecutor mMainExecutor;
@@ -262,7 +272,17 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
                         Set<Rect> unrestricted) {
                     if (mPipBoundsState.getDisplayId() == displayId) {
-                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                        if (mEnablePipKeepClearAlgorithm) {
+                            mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                            // only move if already in pip, other transitions account for keep clear
+                            // areas
+                            if (mPipTransitionState.hasEnteredPip()) {
+                                Rect destBounds = mPipKeepClearAlgorithm.adjust(mPipBoundsState,
+                                        mPipBoundsAlgorithm);
+                                mPipTaskOrganizer.scheduleAnimateResizePip(destBounds,
+                                        mEnterAnimationDuration, null);
+                            }
+                        }
                     }
                 }
             };
@@ -759,8 +779,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams,
-            int launcherRotation, int shelfHeight) {
-        setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
+            int launcherRotation, Rect hotseatKeepClearArea) {
+
+        if (mEnablePipKeepClearAlgorithm) {
+            // pre-emptively add the keep clear area for Hotseat, so that it is taken into account
+            // when calculating the entry destination bounds of PiP window
+            mPipBoundsState.getRestrictedKeepClearAreas().add(hotseatKeepClearArea);
+        } else {
+            int shelfHeight = hotseatKeepClearArea.height();
+            setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
+        }
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
         final Rect entryBounds = mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
                 pictureInPictureParams);
@@ -1059,12 +1087,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
                 PictureInPictureParams pictureInPictureParams, int launcherRotation,
-                int shelfHeight) {
+                Rect keepClearArea) {
             Rect[] result = new Rect[1];
             executeRemoteCallWithTaskPermission(mController, "startSwipePipToHome",
                     (controller) -> {
                         result[0] = controller.startSwipePipToHome(componentName, activityInfo,
-                                pictureInPictureParams, launcherRotation, shelfHeight);
+                                pictureInPictureParams, launcherRotation, keepClearArea);
                     }, true /* blocking */);
             return result[0];
         }

@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -190,6 +191,19 @@ class TaskFragmentContainer {
         // Remove the pending activity from other TaskFragments.
         mTaskContainer.cleanupPendingAppearedActivity(pendingAppearedActivity);
         mPendingAppearedActivities.add(pendingAppearedActivity);
+        updateActivityClientRecordTaskFragmentToken(pendingAppearedActivity);
+    }
+
+    /**
+     * Updates the {@link ActivityThread.ActivityClientRecord#mTaskFragmentToken} for the
+     * activity. This makes sure the token is up-to-date if the activity is relaunched later.
+     */
+    private void updateActivityClientRecordTaskFragmentToken(@NonNull Activity activity) {
+        final ActivityThread.ActivityClientRecord record = ActivityThread
+                .currentActivityThread().getActivityClient(activity.getActivityToken());
+        if (record != null) {
+            record.mTaskFragmentToken = mToken;
+        }
     }
 
     void removePendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
@@ -197,8 +211,29 @@ class TaskFragmentContainer {
     }
 
     void clearPendingAppearedActivities() {
+        final List<Activity> cleanupActivities = new ArrayList<>(mPendingAppearedActivities);
+        // Clear mPendingAppearedActivities so that #getContainerWithActivity won't return the
+        // current TaskFragment.
         mPendingAppearedActivities.clear();
         mPendingAppearedIntent = null;
+
+        // For removed pending activities, we need to update the them to their previous containers.
+        for (Activity activity : cleanupActivities) {
+            final TaskFragmentContainer curContainer = mController.getContainerWithActivity(
+                    activity);
+            if (curContainer != null) {
+                curContainer.updateActivityClientRecordTaskFragmentToken(activity);
+            }
+        }
+    }
+
+    /** Called when the activity is destroyed. */
+    void onActivityDestroyed(@NonNull Activity activity) {
+        removePendingAppearedActivity(activity);
+        if (mInfo != null) {
+            // Remove the activity now because there can be a delay before the server callback.
+            mInfo.getActivities().remove(activity.getActivityToken());
+        }
     }
 
     @Nullable

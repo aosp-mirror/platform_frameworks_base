@@ -16,7 +16,6 @@
 
 package android.view.stylus;
 
-import static android.provider.Settings.Global.STYLUS_HANDWRITING_ENABLED;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -33,7 +32,6 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings;
 import android.view.HandwritingInitiator;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -45,14 +43,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.compatibility.common.util.PollingCheck;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link HandwritingInitiator}
@@ -69,8 +62,6 @@ public class HandwritingInitiatorTest {
     private static final int HW_BOUNDS_OFFSETS_TOP_PX = 20;
     private static final int HW_BOUNDS_OFFSETS_RIGHT_PX = 30;
     private static final int HW_BOUNDS_OFFSETS_BOTTOM_PX = 40;
-    private static final int SETTING_VALUE_ON = 1;
-    private static final int SETTING_VALUE_OFF = 0;
     private int mHandwritingSlop = 4;
 
     private static final Rect sHwArea = new Rect(100, 200, 500, 500);
@@ -78,28 +69,11 @@ public class HandwritingInitiatorTest {
     private HandwritingInitiator mHandwritingInitiator;
     private View mTestView;
     private Context mContext;
-    private int mHwInitialState;
-    private boolean mShouldRestoreInitialHwState;
 
     @Before
     public void setup() throws Exception {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         mContext = instrumentation.getTargetContext();
-
-        mHwInitialState = Settings.Global.getInt(mContext.getContentResolver(),
-                STYLUS_HANDWRITING_ENABLED, SETTING_VALUE_OFF);
-        if (mHwInitialState != SETTING_VALUE_ON) {
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    STYLUS_HANDWRITING_ENABLED, SETTING_VALUE_ON);
-            mShouldRestoreInitialHwState = true;
-        }
-        String imeId = HandwritingImeService.getImeId();
-        instrumentation.getUiAutomation().executeShellCommand("ime enable " + imeId);
-        instrumentation.getUiAutomation().executeShellCommand("ime set " + imeId);
-        PollingCheck.check("Check that stylus handwriting is available",
-                TimeUnit.SECONDS.toMillis(10),
-                () -> mContext.getSystemService(InputMethodManager.class)
-                        .isStylusHandwritingAvailable());
 
         final ViewConfiguration viewConfiguration = ViewConfiguration.get(mContext);
         mHandwritingSlop = viewConfiguration.getScaledHandwritingSlop();
@@ -108,23 +82,13 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator =
                 spy(new HandwritingInitiator(viewConfiguration, inputMethodManager));
 
-        mTestView = createView(sHwArea, true,
+        mTestView = createView(sHwArea, true /* autoHandwritingEnabled */,
+                true /* isStylusHandwritingAvailable */,
                 HW_BOUNDS_OFFSETS_LEFT_PX,
                 HW_BOUNDS_OFFSETS_TOP_PX,
                 HW_BOUNDS_OFFSETS_RIGHT_PX,
                 HW_BOUNDS_OFFSETS_BOTTOM_PX);
         mHandwritingInitiator.updateHandwritingAreasForView(mTestView);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (mShouldRestoreInitialHwState) {
-            mShouldRestoreInitialHwState = false;
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    STYLUS_HANDWRITING_ENABLED, mHwInitialState);
-        }
-        InstrumentationRegistry.getInstrumentation().getUiAutomation()
-                .executeShellCommand("ime reset");
     }
 
     @Test
@@ -244,17 +208,15 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
-    public void onTouchEvent_notStartHandwriting_whenHandwritingNotAvailable() throws Exception {
-        InstrumentationRegistry.getInstrumentation().getUiAutomation()
-                .executeShellCommand("ime reset");
-        PollingCheck.check("Check that stylus handwriting is unavailable",
-                TimeUnit.SECONDS.toMillis(10),
-                () -> !mContext.getSystemService(InputMethodManager.class)
-                        .isStylusHandwritingAvailable());
+    public void onTouchEvent_notStartHandwriting_whenHandwritingNotAvailable() {
+        final Rect rect = new Rect(600, 600, 900, 900);
+        final View testView = createView(rect, true /* autoHandwritingEnabled */,
+                false /* isStylusHandwritingAvailable */);
+        mHandwritingInitiator.updateHandwritingAreasForView(testView);
 
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        mHandwritingInitiator.onInputConnectionCreated(testView);
+        final int x1 = (rect.left + rect.right) / 2;
+        final int y1 = (rect.top + rect.bottom) / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -356,7 +318,8 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void autoHandwriting_whenDisabled_wontStartHW() {
-        View mockView = createView(sHwArea, false);
+        View mockView = createView(sHwArea, false /* autoHandwritingEnabled */,
+                true /* isStylusHandwritingAvailable */);
         mHandwritingInitiator.onInputConnectionCreated(mockView);
         final int x1 = (sHwArea.left + sHwArea.right) / 2;
         final int y1 = (sHwArea.top + sHwArea.bottom) / 2;

@@ -583,7 +583,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         if (!isOnReparent && getContainerWithActivity(activity) == null
-                && getInitialTaskFragmentToken(activity) != null) {
+                && getTaskFragmentTokenFromActivityClientRecord(activity) != null) {
             // We can't find the new launched activity in any recorded container, but it is
             // currently placed in an embedded TaskFragment. This can happen in two cases:
             // 1. the activity is embedded in another app.
@@ -866,11 +866,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @VisibleForTesting
+    @GuardedBy("mLock")
     void onActivityDestroyed(@NonNull Activity activity) {
         // Remove any pending appeared activity, as the server won't send finished activity to the
         // organizer.
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            mTaskContainers.valueAt(i).cleanupPendingAppearedActivity(activity);
+            mTaskContainers.valueAt(i).onActivityDestroyed(activity);
         }
         // We didn't trigger the callback if there were any pending appeared activities, so check
         // again after the pending is removed.
@@ -1605,15 +1606,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Gets the token of the initial TaskFragment that embedded this activity. Do not rely on it
-     * after creation because the activity could be reparented.
+     * Gets the token of the TaskFragment that embedded this activity. It is available as soon as
+     * the activity is created and attached, so it can be used during {@link #onActivityCreated}
+     * before the server notifies the organizer to avoid racing condition.
      */
     @VisibleForTesting
     @Nullable
-    IBinder getInitialTaskFragmentToken(@NonNull Activity activity) {
+    IBinder getTaskFragmentTokenFromActivityClientRecord(@NonNull Activity activity) {
         final ActivityThread.ActivityClientRecord record = ActivityThread.currentActivityThread()
                 .getActivityClient(activity.getActivityToken());
-        return record != null ? record.mInitialTaskFragmentToken : null;
+        return record != null ? record.mTaskFragmentToken : null;
     }
 
     /**
@@ -1691,7 +1693,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 @Nullable Bundle savedInstanceState) {
             synchronized (mLock) {
                 final IBinder activityToken = activity.getActivityToken();
-                final IBinder initialTaskFragmentToken = getInitialTaskFragmentToken(activity);
+                final IBinder initialTaskFragmentToken =
+                        getTaskFragmentTokenFromActivityClientRecord(activity);
                 // If the activity is not embedded, then it will not have an initial task fragment
                 // token so no further action is needed.
                 if (initialTaskFragmentToken == null) {

@@ -48,6 +48,13 @@ public final class AutomaticZenRule implements Parcelable {
     private String mPkg;
 
     /**
+     * The maximum string length for any string contained in this automatic zen rule. This pertains
+     * both to fields in the rule itself (such as its name) and items with sub-fields.
+     * @hide
+     */
+    public static final int MAX_STRING_LENGTH = 1000;
+
+    /**
      * Creates an automatic zen rule.
      *
      * @param name The name of the rule.
@@ -93,10 +100,10 @@ public final class AutomaticZenRule implements Parcelable {
     public AutomaticZenRule(@NonNull String name, @Nullable ComponentName owner,
             @Nullable ComponentName configurationActivity, @NonNull Uri conditionId,
             @Nullable ZenPolicy policy, int interruptionFilter, boolean enabled) {
-        this.name = name;
-        this.owner = owner;
-        this.configurationActivity = configurationActivity;
-        this.conditionId = conditionId;
+        this.name = getTrimmedString(name);
+        this.owner = getTrimmedComponentName(owner);
+        this.configurationActivity = getTrimmedComponentName(configurationActivity);
+        this.conditionId = getTrimmedUri(conditionId);
         this.interruptionFilter = interruptionFilter;
         this.enabled = enabled;
         this.mZenPolicy = policy;
@@ -115,12 +122,14 @@ public final class AutomaticZenRule implements Parcelable {
     public AutomaticZenRule(Parcel source) {
         enabled = source.readInt() == ENABLED;
         if (source.readInt() == ENABLED) {
-            name = source.readString();
+            name = getTrimmedString(source.readString());
         }
         interruptionFilter = source.readInt();
-        conditionId = source.readParcelable(null, android.net.Uri.class);
-        owner = source.readParcelable(null, android.content.ComponentName.class);
-        configurationActivity = source.readParcelable(null, android.content.ComponentName.class);
+        conditionId = getTrimmedUri(source.readParcelable(null, android.net.Uri.class));
+        owner = getTrimmedComponentName(
+                source.readParcelable(null, android.content.ComponentName.class));
+        configurationActivity = getTrimmedComponentName(
+                source.readParcelable(null, android.content.ComponentName.class));
         creationTime = source.readLong();
         mZenPolicy = source.readParcelable(null, android.service.notification.ZenPolicy.class);
         mModified = source.readInt() == ENABLED;
@@ -196,7 +205,7 @@ public final class AutomaticZenRule implements Parcelable {
      * Sets the representation of the state that causes this rule to become active.
      */
     public void setConditionId(Uri conditionId) {
-        this.conditionId = conditionId;
+        this.conditionId = getTrimmedUri(conditionId);
     }
 
     /**
@@ -211,7 +220,7 @@ public final class AutomaticZenRule implements Parcelable {
      * Sets the name of this rule.
      */
     public void setName(String name) {
-        this.name = name;
+        this.name = getTrimmedString(name);
     }
 
     /**
@@ -243,7 +252,7 @@ public final class AutomaticZenRule implements Parcelable {
      * that are not backed by {@link android.service.notification.ConditionProviderService}.
      */
     public void setConfigurationActivity(@Nullable ComponentName componentName) {
-        this.configurationActivity = componentName;
+        this.configurationActivity = getTrimmedComponentName(componentName);
     }
 
     /**
@@ -333,4 +342,35 @@ public final class AutomaticZenRule implements Parcelable {
             return new AutomaticZenRule[size];
         }
     };
+
+    /**
+     * If the package or class name of the provided ComponentName are longer than MAX_STRING_LENGTH,
+     * return a trimmed version that truncates each of the package and class name at the max length.
+     */
+    private static ComponentName getTrimmedComponentName(ComponentName cn) {
+        if (cn == null) return null;
+        return new ComponentName(getTrimmedString(cn.getPackageName()),
+                getTrimmedString(cn.getClassName()));
+    }
+
+    /**
+     * Returns a truncated copy of the string if the string is longer than MAX_STRING_LENGTH.
+     */
+    private static String getTrimmedString(String input) {
+        if (input != null && input.length() > MAX_STRING_LENGTH) {
+            return input.substring(0, MAX_STRING_LENGTH);
+        }
+        return input;
+    }
+
+    /**
+     * Returns a truncated copy of the Uri by trimming the string representation to the maximum
+     * string length.
+     */
+    private static Uri getTrimmedUri(Uri input) {
+        if (input != null && input.toString().length() > MAX_STRING_LENGTH) {
+            return Uri.parse(getTrimmedString(input.toString()));
+        }
+        return input;
+    }
 }

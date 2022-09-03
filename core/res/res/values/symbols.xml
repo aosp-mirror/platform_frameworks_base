@@ -282,6 +282,7 @@
   <java-symbol type="integer" name="config_audio_notif_vol_steps" />
   <java-symbol type="integer" name="config_audio_ring_vol_default" />
   <java-symbol type="integer" name="config_audio_ring_vol_steps" />
+  <java-symbol type="bool" name="config_spatial_audio_head_tracking_enabled_default" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
   <java-symbol type="bool" name="config_bluetooth_address_validation" />
   <java-symbol type="integer" name="config_chooser_max_targets_per_row" />
@@ -4852,6 +4853,5 @@
 
   <java-symbol type="dimen" name="status_bar_height_default" />
 
-  <java-symbol type="bool" name="system_server_plays_face_haptics" />
   <java-symbol type="string" name="default_card_name"/>
 </resources>

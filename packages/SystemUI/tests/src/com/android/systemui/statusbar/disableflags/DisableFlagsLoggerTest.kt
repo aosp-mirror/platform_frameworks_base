@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar
+package com.android.systemui.statusbar.disableflags
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -113,7 +113,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
 
     @Test
     fun getDisableFlagsString_newAfterLocalModificationSameAsNew_localModNotLogged() {
-        val newState =  DisableFlagsLogger.DisableState(
+        val newState = DisableFlagsLogger.DisableState(
                 0b001, // abC
                 0b10 // mn
         )

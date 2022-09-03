@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
@@ -1124,7 +1125,8 @@ public class DreamService extends Service implements Window.Callback {
      * @hide
      */
     @Nullable
-    public static DreamMetadata getDreamMetadata(Context context,
+    @TestApi
+    public static DreamMetadata getDreamMetadata(@NonNull Context context,
             @Nullable ServiceInfo serviceInfo) {
         if (serviceInfo == null) return null;
 
@@ -1183,7 +1185,8 @@ public class DreamService extends Service implements Window.Callback {
         }
     }
 
-    private static ComponentName convertToComponentName(String flattenedString,
+    @Nullable
+    private static ComponentName convertToComponentName(@Nullable String flattenedString,
             ServiceInfo serviceInfo) {
         if (flattenedString == null) {
             return null;
@@ -1193,7 +1196,17 @@ public class DreamService extends Service implements Window.Callback {
             return new ComponentName(serviceInfo.packageName, flattenedString);
         }
 
-        return ComponentName.unflattenFromString(flattenedString);
+        // Ensure that the component is from the same package as the dream service. If not,
+        // treat the component as invalid and return null instead.
+        final ComponentName cn = ComponentName.unflattenFromString(flattenedString);
+        if (cn == null) return null;
+        if (!cn.getPackageName().equals(serviceInfo.packageName)) {
+            Log.w(TAG,
+                    "Inconsistent package name in component: " + cn.getPackageName()
+                            + ", should be: " + serviceInfo.packageName);
+            return null;
+        }
+        return cn;
     }
 
     /**
@@ -1489,6 +1502,7 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @hide
      */
+    @TestApi
     public static final class DreamMetadata {
         @Nullable
         public final ComponentName settingsActivity;

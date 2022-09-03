@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import java.io.PrintWriter
 import javax.inject.Inject
 
 /**
@@ -48,9 +47,6 @@ class NotificationsControllerStub @Inject constructor(
         notificationListener.registerAsSystemService()
     }
 
-    override fun requestNotificationUpdate(reason: String) {
-    }
-
     override fun resetUserExpandedStates() {
     }
 
@@ -59,15 +55,5 @@ class NotificationsControllerStub @Inject constructor(
 
     override fun getActiveNotificationsCount(): Int {
         return 0
-    }
-
-    override fun dump(
-        pw: PrintWriter,
-        args: Array<String>,
-        dumpTruck: Boolean
-    ) {
-        pw.println()
-        pw.println("Notification handling disabled")
-        pw.println()
     }
 }

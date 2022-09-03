@@ -297,4 +297,23 @@ public class SingleKeyGestureTests {
         pressKey(KEYCODE_BACK, mLongPressTime);
         assertTrue(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
+
+    @Test
+    public void testAddRemove() throws InterruptedException {
+        final SingleKeyGestureDetector.SingleKeyRule rule =
+                new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER) {
+                    @Override
+                    void onPress(long downTime) {
+                        mShortPressed.countDown();
+                    }
+                };
+
+        mDetector.removeRule(rule);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        assertFalse(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+
+        mDetector.addRule(rule);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+    }
 }

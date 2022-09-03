@@ -98,6 +98,11 @@ public final class UsbDirectMidiDevice implements Closeable {
 
     private UsbMidiPacketConverter mUsbMidiPacketConverter;
 
+    private PowerBoostSetter mPowerBoostSetter = null;
+
+    private static final byte MESSAGE_TYPE_MIDI_1_CHANNEL_VOICE = 0x02;
+    private static final byte MESSAGE_TYPE_MIDI_2_CHANNEL_VOICE = 0x04;
+
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
         @Override
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
@@ -251,6 +256,8 @@ public final class UsbDirectMidiDevice implements Closeable {
         for (int port = 0; port < numOutputs; port++) {
             mMidiInputPortReceivers[port] = new InputReceiverProxy();
         }
+
+        mPowerBoostSetter = new PowerBoostSetter();
     }
 
     private int calculateDefaultMidiProtocol() {
@@ -418,6 +425,15 @@ public final class UsbDirectMidiDevice implements Closeable {
                                     }
                                     outputReceivers[portFinal].send(convertedArray, 0,
                                             convertedArray.length, timestamp);
+
+                                    // Boost power if there seems to be a voice message.
+                                    // For legacy devices, boost when message is more than size 1.
+                                    // For UMP devices, boost for channel voice messages.
+                                    if ((mPowerBoostSetter != null && convertedArray.length > 1)
+                                            && (!mIsUniversalMidiDevice
+                                            || isChannelVoiceMessage(convertedArray))) {
+                                        mPowerBoostSetter.boostPower();
+                                    }
                                 }
                             }
                         } catch (IOException e) {
@@ -720,5 +736,11 @@ public final class UsbDirectMidiDevice implements Closeable {
         }
 
         dump.end(token);
+    }
+
+    private boolean isChannelVoiceMessage(byte[] umpMessage) {
+        byte messageType = (byte) ((umpMessage[0] >> 4) & 0x0f);
+        return messageType == MESSAGE_TYPE_MIDI_1_CHANNEL_VOICE
+                || messageType == MESSAGE_TYPE_MIDI_2_CHANNEL_VOICE;
     }
 }
