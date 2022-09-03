@@ -647,7 +647,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"আপনার মাথা একটু কম ঝোঁকান।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"আপনার মাথাটি সামান্য ঘোরান।"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার ফেসকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার মুখকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ব্ল্যাক বার সহ আপনার স্ক্রিনের উপরের অংশ মুছে ফেলুন"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1059,7 +1059,7 @@
     <string name="menu_shift_shortcut_label" msgid="5443936876111232346">"Shift+"</string>
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
-    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"স্পেস"</string>
+    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"মুছুন"</string>
     <string name="search_go" msgid="2141477624421347086">"সার্চ"</string>
