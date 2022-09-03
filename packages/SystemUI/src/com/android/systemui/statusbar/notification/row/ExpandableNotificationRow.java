@@ -3455,6 +3455,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print("visibility: " + getVisibility());
             pw.print(", alpha: " + getAlpha());
             pw.print(", translation: " + getTranslation());
+            pw.print(", Entry isDismissable: " + mEntry.isDismissable());
+            pw.print(", mOnUserInteractionCallback null: " + (mOnUserInteractionCallback == null));
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
             NotificationContentView showingLayout = getShowingLayout();

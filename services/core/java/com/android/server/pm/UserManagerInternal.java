@@ -331,6 +331,12 @@ public abstract class UserManagerInternal {
 
     /**
      * Returns {@code true} if the user is visible (as defined by
+     * {@link UserManager#isUserVisible()}.
+     */
+    public abstract boolean isUserVisible(@UserIdInt int userId);
+
+    /**
+     * Returns {@code true} if the user is visible (as defined by
      * {@link UserManager#isUserVisible()} in the given display.
      */
     public abstract boolean isUserVisible(@UserIdInt int userId, int displayId);
