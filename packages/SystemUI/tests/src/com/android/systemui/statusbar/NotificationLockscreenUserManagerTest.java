@@ -21,7 +21,6 @@ import static android.content.Intent.ACTION_USER_SWITCHED;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -54,7 +53,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -84,8 +82,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock
     private NotificationVisibilityProvider mVisibilityProvider;
     @Mock
-    private NotificationEntryManager mEntryManager;
-    @Mock
     private CommonNotifCollection mNotifCollection;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
@@ -114,7 +110,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
 
         int currentUserId = ActivityManager.getCurrentUser();
         mSettings = new FakeSettings();
@@ -146,12 +141,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
-    }
-
-    @Test
-    public void testLockScreenShowNotificationsChangeUpdatesNotifications() {
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        verify(mEntryManager, times(1)).updateNotifications(anyString());
     }
 
     @Test
@@ -294,13 +283,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         // THEN the secondary profile notification still needs to be redacted because the current
         // user's setting takes precedence
         assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
-    }
-
-    @Test
-    public void testSettingsObserverUpdatesNotifications() {
-        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        mLockscreenUserManager.getSettingsObserverForTest().onChange(false);
-        verify(mEntryManager, times(1)).updateNotifications(anyString());
     }
 
     @Test

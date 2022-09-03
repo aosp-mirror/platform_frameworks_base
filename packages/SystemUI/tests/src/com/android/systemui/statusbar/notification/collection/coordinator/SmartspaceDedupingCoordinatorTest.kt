@@ -23,11 +23,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -46,7 +44,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -60,10 +57,6 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
     private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock
     private lateinit var smartspaceController: LockscreenSmartspaceController
-    @Mock
-    private lateinit var notificationEntryManager: NotificationEntryManager
-    @Mock
-    private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @Mock
     private lateinit var notifPipeline: NotifPipeline
     @Mock
@@ -99,12 +92,10 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
         deduper = SmartspaceDedupingCoordinator(
                 statusBarStateController,
                 smartspaceController,
-                notificationEntryManager,
-                notificationLockscreenUserManager,
                 notifPipeline,
                 executor,
                 clock
-                )
+        )
 
         // Attach the deduper and capture the listeners/filters that it registers
         deduper.attach(notifPipeline)
@@ -352,7 +343,6 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
         // THEN the new pipeline is invalidated (but the old one isn't because it's not
         // necessary) because the notif should no longer be filtered out
         verify(pluggableListener).onPluggableInvalidated(eq(filter), any())
-        verify(notificationEntryManager, never()).updateNotifications(anyString())
         assertFalse(filter.shouldFilterOut(entry2HasNotRecentlyAlerted, now))
     }
 
@@ -390,7 +380,6 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
 
     private fun verifyPipelinesInvalidated() {
         verify(pluggableListener).onPluggableInvalidated(eq(filter), any())
-        verify(notificationEntryManager).updateNotifications(anyString())
     }
 
     private fun assertExecutorIsClear() {
@@ -399,12 +388,10 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
 
     private fun verifyPipelinesNotInvalidated() {
         verify(pluggableListener, never()).onPluggableInvalidated(eq(filter), any())
-        verify(notificationEntryManager, never()).updateNotifications(anyString())
     }
 
     private fun clearPipelineInvocations() {
         clearInvocations(pluggableListener)
-        clearInvocations(notificationEntryManager)
     }
 }
 

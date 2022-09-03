@@ -36,8 +36,6 @@ import com.android.systemui.shade.NotifPanelEventsModule;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
@@ -105,14 +103,6 @@ public interface NotificationsModule {
 
     @Binds
     StackScrollAlgorithm.BypassController bindBypassController(KeyguardBypassController impl);
-
-    /** Provides an instance of {@link NotificationEntryManager} */
-    @SysUISingleton
-    @Provides
-    static NotificationEntryManager provideNotificationEntryManager(
-            NotificationEntryManagerLogger logger) {
-        return new NotificationEntryManager(logger);
-    }
 
     /** Provides an instance of {@link NotificationGutsManager} */
     @SysUISingleton
