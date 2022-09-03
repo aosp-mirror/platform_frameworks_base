@@ -225,8 +225,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     boolean isShadeDisabled();
 
-    void requestNotificationUpdate(String reason);
-
     void requestFaceAuth(boolean userInitiatedRequest);
 
     @Override
