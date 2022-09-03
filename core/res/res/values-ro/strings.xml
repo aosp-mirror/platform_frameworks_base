@@ -960,7 +960,7 @@
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Pentru a debloca, conectați-vă folosind Contul Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nume de utilizator (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Parolă"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Conectați-vă"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Conectează-te"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Nume de utilizator sau parolă nevalide."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Ați uitat numele de utilizator sau parola?\nAccesați "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Se verifică..."</string>
@@ -1649,7 +1649,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"Pentru a debloca, conectați-vă cu Contul dvs. Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nume de utilizator (e-mail)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Parolă"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"Conectați-vă"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"Conectează-te"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Nume de utilizator sau parolă nevalide."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Ați uitat numele de utilizator sau parola?\nAccesați "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Se verifică contul…"</string>

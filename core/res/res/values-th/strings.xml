@@ -1419,7 +1419,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"นำอุปกรณ์ออก"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"สำรวจ"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"เปลี่ยนเอาต์พุต"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"ไม่มี <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"ไม่มี<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"ใส่อุปกรณ์อีกครั้ง"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"กำลังย้าย <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"กำลังย้ายข้อมูล"</string>

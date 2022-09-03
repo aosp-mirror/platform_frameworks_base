@@ -242,7 +242,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Stäng av"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Strömbrytare"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Av/på"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Starta om"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Nödsituation"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Felrapport"</string>
@@ -1242,11 +1242,11 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Appar startas."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Uppgraderingen är klar."</string>
     <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vill du fortsätta med konfigureringen?"</string>
-    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du tryckte på strömbrytaren, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt när du konfigurerar fingeravtrycket."</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du tryckte på av/på-knappen, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt när du konfigurerar fingeravtrycket."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Stäng av skärmen"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Fortsätt konfigurera"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vill du verifiera ditt fingeravtryck?"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du tryckte på strömbrytaren, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt för att verifiera ditt fingeravtryck."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du tryckte på av/på-knappen, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt för att verifiera ditt fingeravtryck."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Stäng av skärmen"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsätt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>

@@ -1397,7 +1397,7 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Жөндөө үчүн таптаңыз"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Жөндөө үчүн тандаңыз"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Түзмөктү форматташыңыз керек болушу мүмкүн. Чыгаруу үчүн таптап коюңуз."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Сүрөттөрдү жана медиа өткөрүү үчүн"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Сүрөттөрдү жана башка файлдарды өткөрүү үчүн"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Медиа файлдарды серептөө"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> түзмөгүндө бир маселе бар"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> иштебей жатат"</string>

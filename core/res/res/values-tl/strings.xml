@@ -1420,7 +1420,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"I-explore"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Ilipat ang output"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Nawawala ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Ikabit muli ang device"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Ikabit ulit ang device"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Inililipat ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Naglilipat ng data"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Tapos na ang paglipat ng content"</string>

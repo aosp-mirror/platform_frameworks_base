@@ -1397,7 +1397,7 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेट करण्यासाठी टॅप करा"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"सेट अप करण्यासाठी निवडा"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"तुम्हाला डिव्हाइस पुन्हा फॉरमॅट करावे लागू शकते. बाहेर काढण्यासाठी टॅप करा."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फोटो आणि मीडिया स्थानांतरित करण्‍यासाठी"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फोटो आणि मीडिया ट्रान्सफर करण्‍यासाठी"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"मीडिया फाइल ब्राउझ करा"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> सह समस्या"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> काम करत नाही"</string>

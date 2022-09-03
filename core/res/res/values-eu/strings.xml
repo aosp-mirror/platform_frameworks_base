@@ -57,7 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEIa"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Sarrerako deien identifikazio-zerbitzua"</string>
-    <string name="ClirMmi" msgid="6752346475055446417">"Ezkutatu irteerako deitzailearen IDa"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"Ezkutatu irteerako deitzailearen identitatea"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"Konektatutako linearen IDa"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Konektatutako linearen ID murriztapena"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Dei-desbideratzea"</string>
