@@ -56,6 +56,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.location.ClientBrokerProto;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -471,7 +472,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
         } else {
-            Log.e(TAG, "Failed to send message to nanoapp: client connection is closed");
+            String messageString = Base64.getEncoder().encodeToString(message.getMessageBody());
+            Log.e(TAG, String.format(
+                    "Failed to send message (connection closed): hostEndpointId= %1$d payload %2$s",
+                    mHostEndPointId, messageString));
             result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
         }
 
