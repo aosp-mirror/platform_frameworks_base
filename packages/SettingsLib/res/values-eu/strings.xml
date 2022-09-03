@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Gaitu GPUaren arazketa-geruzak"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Eman GPUaren arazketa-geruzak kargatzeko baimena arazketa-aplikazioei"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Gaitu saltzaileen erregistro xehatuak"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sartu gailuaren berariazko saltzaileen erregistro gehigarriak akatsen txostenetan; baliteke haiek informazio pribatua izatea, bateria gehiago erabiltzea edo biltegiratzeko toki gehiago hartzea."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sartu gailuaren berariazko saltzaileen erregistro gehigarriak akatsen txostenetan; baliteke haiek informazio pribatua izatea, bateria gehiago erabiltzea eta/edo biltegiratzeko toki gehiago hartzea."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Trantsizioen animazio-eskala"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatzailearen iraupen-eskala"</string>
@@ -552,7 +552,7 @@
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
     <string name="storage_category" msgid="2287342585424631813">"Biltegiratzea"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Datu partekatuak"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu partekatutako datuak"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu datu partekatuak"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Ez dago erabiltzaile honen datu partekaturik."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Errore bat gertatu da datu partekatuak eskuratzean. Saiatu berriro."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Partekatutako datuen IDa: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -583,7 +583,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profileko informazioa"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Profil murriztua sortu aurretik, aplikazioak eta datu pertsonalak babesteko, pantaila blokeatzeko metodo bat konfiguratu beharko duzu."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ezarri blokeoa"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Aldatu <xliff:g id="USER_NAME">%s</xliff:g> erabiltzailera"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Aldatu \"<xliff:g id="USER_NAME">%s</xliff:g>\" erabiltzailera"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Beste erabiltzaile bat sortzen…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Beste gonbidatu bat sortzen…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Ezin izan da sortu erabiltzailea"</string>

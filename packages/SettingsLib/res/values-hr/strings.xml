@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Potvrdi aplikacije putem USB-a"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite uzrokuju li aplikacije instalirane putem ADB-a/ADT-a poteškoće"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Prikazivat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, kao što su neprihvatljiva glasnoća ili nepostojanje kontrole"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, primjerice, zvuk je pretjerano glasan ili se ne može kontrolirati."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Omogućuje nizove značajke Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Omogućuje značajku Poboljšana povezivost."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokalni terminal"</string>
@@ -657,6 +657,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiranje aplikacije <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promjena izlaza"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka s predviđanjem"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogući animacije sustava za pokret povratka s predviđanjem."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogući animaciju kad korisnik napravi povratnu kretnju."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ova postavka omogućuje animacije sustava za animaciju pokreta s predviđanjem. Zahtijeva postavljanje dopuštenja enableOnBackInvokedCallback po aplikaciji na True u datoteci manifesta."</string>
 </resources>
