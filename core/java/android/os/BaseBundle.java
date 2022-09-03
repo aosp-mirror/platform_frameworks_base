@@ -438,8 +438,11 @@ public class BaseBundle {
             map.ensureCapacity(count);
         }
         try {
+            // recycleParcel being false implies that we do not own the parcel. In this case, do
+            // not use lazy values to be safe, as the parcel could be recycled outside of our
+            // control.
             recycleParcel &= parcelledData.readArrayMap(map, count, !parcelledByNative,
-                    /* lazy */ true, mClassLoader);
+                    /* lazy */ recycleParcel, mClassLoader);
         } catch (BadParcelableException e) {
             if (sShouldDefuse) {
                 Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
@@ -1845,7 +1848,6 @@ public class BaseBundle {
             // bundle immediately; neither of which is obvious.
             synchronized (this) {
                 initializeFromParcelLocked(parcel, /*recycleParcel=*/ false, isNativeBundle);
-                unparcel(/* itemwise */ true);
             }
             return;
         }
