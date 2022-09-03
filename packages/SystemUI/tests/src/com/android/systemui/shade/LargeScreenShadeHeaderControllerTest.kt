@@ -191,4 +191,11 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         verify(date).setTextAppearance(R.style.TextAppearance_QS_Status)
         verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
     }
+
+    @Test
+    fun alarmIconIgnored() {
+        verify(statusIcons).addIgnoredSlot(
+                context.getString(com.android.internal.R.string.status_bar_alarm_clock)
+        )
+    }
 }

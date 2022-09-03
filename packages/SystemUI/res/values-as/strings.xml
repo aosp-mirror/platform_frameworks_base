@@ -300,7 +300,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"অৱলোকন ট’গল কৰক"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্মৰ বাহিৰে আন কোনো ধ্বনি আৰু কম্পনৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
-    <string name="zen_priority_customize_button" msgid="4119213187257195047">"নিজৰ উপযোগিতা অনুসৰি"</string>
+    <string name="zen_priority_customize_button" msgid="4119213187257195047">"কাষ্টমাইজ কৰক"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"এই কার্যই এলার্ম, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আটাইবোৰৰ বাবে ধ্বনি আৰু কম্পন অৱৰোধ কৰিব। আপুনি ফ\'ন কল তথাপি কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"এই কার্যই এলার্ম, মিউজিক, ভিডিঅ\' আৰু গেইমকে ধৰি আটাইবোৰৰ ধ্বনি আৰু কম্পন অৱৰোধ কৰে।"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"খুলিবলৈ পুনৰাই টিপক"</string>
@@ -339,8 +339,7 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • দ্ৰুতগতিৰে চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • লাহে লাহে চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
-    <!-- no translation found for keyguard_indication_charging_time_dock (3149328898931741271) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যৱহাৰকাৰী সলনি কৰক"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"পুল-ডাউনৰ মেনু"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
@@ -420,6 +419,10 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"কেপশ্বন অভাৰলে’"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"সক্ষম কৰক"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"অক্ষম কৰক"</string>
+    <!-- no translation found for sound_settings (8874581353127418308) -->
+    <skip />
+    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"এপ্‌টো পিন কৰা আছে"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'পিছলৈ যাওক\' আৰু \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
@@ -529,7 +532,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ খোলা অৱস্থাত আছে"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ বন্ধ অৱস্থাত আছে"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"অধিক ছেটিং"</string>
-    <string name="notification_app_settings" msgid="8963648463858039377">"নিজৰ উপযোগিতা অনুসৰি"</string>
+    <string name="notification_app_settings" msgid="8963648463858039377">"কাষ্টমাইজ কৰক"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"বাবল হিচাপে দেখুৱাওক"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Bubbles আঁতৰাওক"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>

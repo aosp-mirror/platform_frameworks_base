@@ -419,6 +419,10 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"कॅप्शन ओव्हरले करा"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"सुरू करा"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"बंद करा"</string>
+    <!-- no translation found for sound_settings (8874581353127418308) -->
+    <skip />
+    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"ॲप पिन केले आहे"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तुम्ही अनपिन करेर्यंत हे त्याला दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी मागे आणि होम वर स्पर्श करा आणि धरून ठेवा."</string>

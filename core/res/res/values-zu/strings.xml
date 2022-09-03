@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Ukusebenza kwezigxivizo zeminwe kukhanseliwe."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Umsebenzi wezigxivizo zomunwe ukhanselwe umsebenzisi."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Imizamo eminingi kakhulu. Zama futhi emuva kwesikhathi."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Imizamo eminingi kakhulu. Inzwa yezigxivizo zeminwe ikhutshaziwe."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Zama futhi."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Azikho izigxivizo zeminwe ezibhalisiwe."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Le divayisi ayinayo inzwa yezigxivizo zeminwe."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Okuncamelayo kwesifunda"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Thayipha igama lolimi"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Okuphakanyisiwe"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Okuphakanyisiwe"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Zonke izilimi"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Zonke izifunda"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Sesha"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vumela i-<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ukuba ifinyelele wonke amalogu edivayisi?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Vumela ukufinyelela kwesikhathi esisodwa"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ungavumeli"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Amalogu edivayisi arekhoda okwenzekayo kudivayisi yakho. Ama-app angasebenzisa lawa malogu ukuze athole futhi alungise izinkinga.\n\nAmanye amalogu angase aqukathe ulwazi olubucayi, ngakho vumela ama-app owathembayo kuphela ukuthi afinyelele wonke amalogu edivayisi. \n\nUma ungayivumeli le app ukuthi ifinyelele wonke amalogu wedivayisi, isengakwazi ukufinyelela amalogu wayo. Umkhiqizi wedivayisi yakho usengakwazi ukufinyelela amanye amalogu noma ulwazi kudivayisi yakho."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ungabonisi futhi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"I-<xliff:g id="APP_0">%1$s</xliff:g> ifuna ukubonisa izingcezu ze-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Hlela"</string>

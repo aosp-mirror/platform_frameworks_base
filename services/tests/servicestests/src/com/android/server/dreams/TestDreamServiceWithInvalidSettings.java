@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.desktopmode;
+package com.android.server.dreams;
 
-import android.os.SystemProperties;
+import android.service.dreams.DreamService;
 
 /**
- * Constants for desktop mode feature
+ * Dream service implementation for unit testing, where the settings activity is invalid.
  */
-public class DesktopModeConstants {
-
-    /**
-     * Flag to indicate whether desktop mode is available on the device
-     */
-    public static final boolean IS_FEATURE_ENABLED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode", false);
+public class TestDreamServiceWithInvalidSettings extends DreamService {
 }

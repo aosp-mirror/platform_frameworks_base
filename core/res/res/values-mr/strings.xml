@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"खूप प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"खूप प्रयत्न करून झाले. फिंगरप्रिंट सेन्सर बंद आहे."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोणत्याही फिंगरप्रिंटची नोंद झाली नाही"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"या डिव्हाइसमध्ये फिंगरप्रिंट सेन्सर नाही."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा नाव टाइप करा"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"सुचवलेल्या भाषा"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"सुचवलेले"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"सर्व भाषा"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"सर्व प्रदेश"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"शोध"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्यायची आहे का?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"एक वेळ अ‍ॅक्सेसची अनुमती द्या"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमती देऊ नका"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"तुमच्या डिव्हाइसवर काय होते ते डिव्हाइस लॉग रेकॉर्ड करते. समस्या शोधण्यासाठी आणि त्यांचे निराकरण करण्याकरिता ॲप्स हे लॉग वापरू शकतात.\n\nकाही लॉगमध्ये संवेदनशील माहिती असू शकते, त्यामुळे फक्त तुमचा विश्वास असलेल्या ॲप्सना सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्या. \n\nतुम्ही या ॲपला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती न दिल्यास, ते तरीही त्याचा स्वतःचा लॉग अ‍ॅक्सेस करू शकते. तुमच्या डिव्हाइसचा उत्पादक तरीही काही लॉग किंवा तुमच्या डिव्हाइसवरील माहिती अ‍ॅक्सेस करू शकतो."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"पुन्हा दाखवू नका"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ला <xliff:g id="APP_2">%2$s</xliff:g> चे तुकडे दाखवायचे आहेत"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"संपादित करा"</string>

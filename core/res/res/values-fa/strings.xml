@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"تلاش‌های بسیاری زیادی انجام شده است. حسگر اثر انگشت غیرفعال شد."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"دوباره امتحان کنید."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"اثر انگشتی ثبت نشده است."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادی"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"پیشنهادی"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"همه زبان‌ها"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"همه منطقه‌ها"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"جستجو"</string>

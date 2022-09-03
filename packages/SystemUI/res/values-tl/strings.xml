@@ -419,6 +419,10 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Overlay ng mga caption"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"i-enable"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"i-disable"</string>
+    <!-- no translation found for sound_settings (8874581353127418308) -->
+    <skip />
+    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Naka-pin ang app"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Home upang mag-unpin."</string>

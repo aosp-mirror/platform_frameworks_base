@@ -2060,6 +2060,10 @@
     <!-- The default volume for the ring stream -->
     <integer name="config_audio_ring_vol_default">5</integer>
 
+    <!-- The default value for whether head tracking for
+         spatial audio is enabled for a newly connected audio device -->
+    <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
+
     <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>

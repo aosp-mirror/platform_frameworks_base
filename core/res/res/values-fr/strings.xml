@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Opération d\'authentification par empreinte digitale annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Trop de tentatives. Veuillez réessayer plus tard."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Trop de tentatives. Lecteur d\'empreinte digitale désactivé."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Veuillez réessayer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Aucune empreinte digitale enregistrée."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aucun lecteur d\'empreinte digitale n\'est installé sur cet appareil."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Saisissez la langue"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggestions"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Suggestions"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Rechercher"</string>
@@ -2292,7 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vérifier les applis actives"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Impossible d\'accéder à cela pendant le streaming. Essayez plutôt sur votre téléphone."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
 </resources>

@@ -608,7 +608,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Thao tác dùng dấu vân tay bị hủy."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Người dùng đã hủy thao tác dùng dấu vân tay."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Quá nhiều lần thử. Hãy thử lại sau."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Quá nhiều lần thử. Cảm biến vân tay đã bị tắt."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Thử lại."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Chưa đăng ký vân tay."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Thiết bị này không có cảm biến vân tay."</string>
@@ -1926,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Tùy chọn khu vực"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Nhập tên ngôn ngữ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Đề xuất"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Ðề xuất"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tất cả ngôn ngữ"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Tất cả khu vực"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Tìm kiếm"</string>
@@ -2292,7 +2292,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Xem các ứng dụng đang hoạt động"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Không truy cập được vào máy ảnh trên điện thoại từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Không truy cập được vào máy ảnh trên máy tính bảng từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Bạn không thể truy cập vào nội dung này trong khi phát trực tuyến. Hãy thử trên điện thoại."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Theo chế độ mặc định của hệ thống"</string>
 </resources>
