@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -101,8 +100,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
     @Mock
     private AssistManager mAssistManager;
-    @Mock
-    private NotificationEntryManager mEntryManager;
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
