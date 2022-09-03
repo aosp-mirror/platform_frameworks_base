@@ -57,11 +57,9 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.coordinator.BubbleCoordinator;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
@@ -460,11 +458,6 @@ public class BubblesManager {
         mBubbles.onNotificationChannelModified(pkg, user, channel, modificationType);
     }
 
-    /**
-     * Gets the DismissedByUserStats used by {@link NotificationEntryManager}.
-     * Will not be necessary when using the new notification pipeline's {@link NotifCollection}.
-     * Instead, this is taken care of by {@link BubbleCoordinator}.
-     */
     private DismissedByUserStats getDismissedByUserStats(
             NotificationEntry entry,
             boolean isVisible) {

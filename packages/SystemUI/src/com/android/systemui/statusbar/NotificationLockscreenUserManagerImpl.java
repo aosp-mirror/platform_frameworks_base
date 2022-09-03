@@ -51,7 +51,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -85,9 +84,6 @@ public class NotificationLockscreenUserManagerImpl implements
     private final SecureSettings mSecureSettings;
     private final Object mLock = new Object();
 
-    // Lazy
-    private NotificationEntryManager mEntryManager;
-
     private final Lazy<NotificationVisibilityProvider> mVisibilityProviderLazy;
     private final Lazy<CommonNotifCollection> mCommonNotifCollectionLazy;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -119,7 +115,6 @@ public class NotificationLockscreenUserManagerImpl implements
                     isCurrentProfile(getSendingUserId())) {
                 mUsersAllowingPrivateNotifications.clear();
                 updateLockscreenNotificationSetting();
-                getEntryManager().updateNotifications("ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED");
                 // TODO(b/231976036): Consolidate pipeline invalidations related to this event
                 // notifyNotificationStateChanged();
             }
@@ -140,10 +135,6 @@ public class NotificationLockscreenUserManagerImpl implements
 
                     updateLockscreenNotificationSetting();
                     updatePublicMode();
-                    // The filtering needs to happen before the update call below in order to
-                    // make sure
-                    // the presenter has the updated notifications from the new user
-                    getEntryManager().reapplyFilterAndSort("user switched");
                     mPresenter.onUserSwitched(mCurrentUserId);
 
                     for (UserChangedListener listener : mListeners) {
@@ -200,13 +191,6 @@ public class NotificationLockscreenUserManagerImpl implements
     protected ContentObserver mSettingsObserver;
     private boolean mHideSilentNotificationsOnLockscreen;
 
-    private NotificationEntryManager getEntryManager() {
-        if (mEntryManager == null) {
-            mEntryManager = Dependency.get(NotificationEntryManager.class);
-        }
-        return mEntryManager;
-    }
-
     @Inject
     public NotificationLockscreenUserManagerImpl(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -253,8 +237,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 mUsersAllowingNotifications.clear();
                 // ... and refresh all the notifications
                 updateLockscreenNotificationSetting();
-                getEntryManager().updateNotifications("LOCK_SCREEN_SHOW_NOTIFICATIONS,"
-                        + " or LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS change");
                 notifyNotificationStateChanged();
             }
         };
@@ -264,8 +246,6 @@ public class NotificationLockscreenUserManagerImpl implements
             public void onChange(boolean selfChange) {
                 updateLockscreenNotificationSetting();
                 if (mDeviceProvisionedController.isDeviceProvisioned()) {
-                    getEntryManager().updateNotifications("LOCK_SCREEN_ALLOW_REMOTE_INPUT"
-                            + " or ZEN_MODE change");
                     // TODO(b/231976036): Consolidate pipeline invalidations related to this event
                     // notifyNotificationStateChanged();
                 }
@@ -596,7 +576,6 @@ public class NotificationLockscreenUserManagerImpl implements
             setLockscreenPublicMode(isProfilePublic, userId);
             mUsersWithSeparateWorkChallenge.put(userId, needsSeparateChallenge);
         }
-        getEntryManager().updateNotifications("NotificationLockscreenUserManager.updatePublicMode");
         // TODO(b/234738798): Migrate KeyguardNotificationVisibilityProvider to use this listener
         if (!mLockscreenPublicMode.equals(oldPublicModes)
                 || !mUsersWithSeparateWorkChallenge.equals(oldWorkChallenges)) {

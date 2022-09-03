@@ -81,7 +81,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -155,7 +154,6 @@ public class NotificationStackScrollLayoutController {
     private final ScrimController mScrimController;
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
-    private final NotificationEntryManager mNotificationEntryManager;
     private final UiEventLogger mUiEventLogger;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final ShadeController mShadeController;
@@ -307,7 +305,6 @@ public class NotificationStackScrollLayoutController {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
-                    mNotificationEntryManager.updateNotifications("CentralSurfaces state changed");
                 }
             };
 
@@ -634,7 +631,6 @@ public class NotificationStackScrollLayoutController {
             @SilentHeader SectionHeaderController silentHeaderController,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
-            NotificationEntryManager notificationEntryManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             ShadeTransitionController shadeTransitionController,
             UiEventLogger uiEventLogger,
@@ -676,7 +672,6 @@ public class NotificationStackScrollLayoutController {
         mSilentHeaderController = silentHeaderController;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
-        mNotificationEntryManager = notificationEntryManager;
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
         mShadeController = shadeController;

@@ -58,7 +58,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -119,7 +118,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private SectionHeaderController mSilentHeaderController;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotifCollection mNotifCollection;
-    @Mock private NotificationEntryManager mEntryManager;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
@@ -168,7 +166,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSilentHeaderController,
                 mNotifPipeline,
                 mNotifCollection,
-                mEntryManager,
                 mLockscreenShadeTransitionController,
                 mShadeTransitionController,
                 mUiEventLogger,

@@ -161,7 +161,6 @@ import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
@@ -518,7 +517,6 @@ public final class NotificationPanelViewController extends PanelViewController {
                 }
             }).setCustomInterpolator(
                     mPanelAlphaAnimator.getProperty(), Interpolators.ALPHA_IN);
-    private final NotificationEntryManager mEntryManager;
 
     private final CommandQueue mCommandQueue;
     private final UserManager mUserManager;
@@ -709,7 +707,6 @@ public final class NotificationPanelViewController extends PanelViewController {
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController, FalsingManager falsingManager,
             FalsingCollector falsingCollector,
-            NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarWindowStateController statusBarWindowStateController,
@@ -867,7 +864,6 @@ public final class NotificationPanelViewController extends PanelViewController {
         });
         mBottomAreaShadeAlphaAnimator.setDuration(160);
         mBottomAreaShadeAlphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
-        mEntryManager = notificationEntryManager;
         mConversationNotificationManager = conversationNotificationManager;
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
@@ -4729,7 +4725,6 @@ public final class NotificationPanelViewController extends PanelViewController {
     public void showAodUi() {
         setDozing(true /* dozing */, false /* animate */);
         mStatusBarStateController.setUpcomingState(KEYGUARD);
-        mEntryManager.updateNotifications("showAodUi");
         mStatusBarStateListener.onStateChanged(KEYGUARD);
         mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
         setExpandedFraction(1f);
