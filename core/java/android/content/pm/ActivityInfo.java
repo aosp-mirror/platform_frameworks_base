@@ -1119,6 +1119,16 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN = 208648326L;
 
     /**
+     * Overrides the min aspect ratio restriction in portrait fullscreen in order to use all
+     * available screen space.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN = 218959984L;
+
+    /**
      * Compares activity window layout min width/height with require space for multi window to
      * determine if it can be put into multi window mode.
      */

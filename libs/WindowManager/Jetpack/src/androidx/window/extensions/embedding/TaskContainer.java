@@ -137,6 +137,13 @@ class TaskContainer {
         return mContainers.isEmpty() && mFinishedContainer.isEmpty();
     }
 
+    /** Called when the activity is destroyed. */
+    void onActivityDestroyed(@NonNull Activity activity) {
+        for (TaskFragmentContainer container : mContainers) {
+            container.onActivityDestroyed(activity);
+        }
+    }
+
     /** Removes the pending appeared activity from all TaskFragments in this Task. */
     void cleanupPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
         for (TaskFragmentContainer container : mContainers) {

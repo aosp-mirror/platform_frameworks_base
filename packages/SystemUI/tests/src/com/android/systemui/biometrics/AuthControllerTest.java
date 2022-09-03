@@ -20,6 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -156,11 +158,13 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
     @Captor
-    ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
+    private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
     @Captor
-    ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
+    private ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
     @Captor
-    ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
+    private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
+    @Captor
+    private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefullnessObserverCaptor;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -224,7 +228,9 @@ public class AuthControllerTest extends SysuiTestCase {
                 mAuthenticatorsRegisteredCaptor.capture());
 
         when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
+        verify(mWakefulnessLifecycle).addObserver(mWakefullnessObserverCaptor.capture());
 
         mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
 
@@ -721,16 +727,37 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testForwardsDozeEvent() throws RemoteException {
+    public void testForwardsDozeEvents() throws RemoteException {
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
         mAuthController.setBiometicContextListener(mContextListener);
 
-        mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
         mStatusBarStateListenerCaptor.getValue().onDozingChanged(true);
+        mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
 
         InOrder order = inOrder(mContextListener);
-        // invoked twice since the initial state is false
-        order.verify(mContextListener, times(2)).onDozeChanged(eq(false));
-        order.verify(mContextListener).onDozeChanged(eq(true));
+        order.verify(mContextListener, times(2)).onDozeChanged(eq(true), eq(true));
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(true));
+        order.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testForwardsWakeEvents() throws RemoteException {
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
+        mAuthController.setBiometicContextListener(mContextListener);
+
+        mWakefullnessObserverCaptor.getValue().onStartedGoingToSleep();
+        mWakefullnessObserverCaptor.getValue().onFinishedGoingToSleep();
+        mWakefullnessObserverCaptor.getValue().onStartedWakingUp();
+        mWakefullnessObserverCaptor.getValue().onFinishedWakingUp();
+        mWakefullnessObserverCaptor.getValue().onPostFinishedWakingUp();
+
+        InOrder order = inOrder(mContextListener);
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(true));
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(false));
+        order.verify(mContextListener).onDozeChanged(eq(false), eq(true));
+        order.verifyNoMoreInteractions();
     }
 
     @Test

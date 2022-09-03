@@ -75,7 +75,7 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 import java.io.PrintWriter;
 import java.util.List;
 
-abstract class PanelViewController {
+public abstract class PanelViewController {
     public static final String TAG = NotificationPanelView.class.getSimpleName();
     public static final float FLING_MAX_LENGTH_SECONDS = 0.6f;
     public static final float FLING_SPEED_UP_FACTOR = 0.6f;
@@ -397,7 +397,7 @@ abstract class PanelViewController {
         mInitialOffsetOnTouch = expandedHeight;
         mInitialExpandY = newY;
         mInitialExpandX = newX;
-        mInitialTouchFromKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        mInitialTouchFromKeyguard = mKeyguardStateController.isShowing();
         if (startTracking) {
             mTouchSlopExceeded = true;
             setExpandedHeight(mInitialOffsetOnTouch);
@@ -416,9 +416,7 @@ abstract class PanelViewController {
             float vectorVel = (float) Math.hypot(
                     mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 
-            final boolean onKeyguard =
-                    mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
-
+            final boolean onKeyguard = mKeyguardStateController.isShowing();
             final boolean expand;
             if (mKeyguardStateController.isKeyguardFadingAway()
                     || (mInitialTouchFromKeyguard && !onKeyguard)) {

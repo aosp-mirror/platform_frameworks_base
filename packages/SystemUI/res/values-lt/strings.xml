@@ -419,6 +419,10 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Subtitrų perdanga"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"įgalinti"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"išjungti"</string>
+    <!-- no translation found for sound_settings (8874581353127418308) -->
+    <skip />
+    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Programa prisegta"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Tai bus rodoma, kol atsegsite. Palieskite ir palaikykite „Atgal“ ir „Apžvalga“, kad atsegtumėte."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Tai bus rodoma, kol atsegsite. Palieskite ir palaikykite „Atgal“ ir „Pagrindinis ekranas“, kad atsegtumėte."</string>

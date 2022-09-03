@@ -1640,6 +1640,75 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN})
+    public void testOverrideMinAspectRatioExcludePortraitFullscreen() {
+        setUpDisplaySizeWithApp(2600, 1600);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(1.33f);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        // Non-resizable portrait activity
+        prepareUnresizable(activity, 0f, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        // At first, OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_FULLSCREEN does not apply, because the
+        // display is in landscape
+        assertEquals(1600, activity.getBounds().height());
+        assertEquals(1600 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                activity.getBounds().width(), 0.5);
+
+        rotateDisplay(activity.mDisplayContent, ROTATION_90);
+        prepareUnresizable(activity, /* maxAspect */ 0, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Now the display is in portrait fullscreen, so the override is applied making the content
+        // fullscreen
+        assertEquals(activity.getBounds(), activity.mDisplayContent.getBounds());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN})
+    public void testOverrideMinAspectRatioExcludePortraitFullscreenNotApplied() {
+        // In this test, the activity is not in fullscreen, so the override is not applied
+        setUpDisplaySizeWithApp(2600, 1600);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(1.33f);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, activity.getDisplayContent());
+
+        // Move first activity to split screen which takes half of the screen.
+        organizer.mPrimary.setBounds(0, 0, 1300, 1600);
+        organizer.putTaskToPrimary(mTask, true);
+
+        // Non-resizable portrait activity
+        prepareUnresizable(activity, /* maxAspect */ 0, SCREEN_ORIENTATION_PORTRAIT);
+
+        // OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_FULLSCREEN does not apply here because the
+        // display is not in fullscreen, so OVERRIDE_MIN_ASPECT_RATIO_LARGE applies instead
+        assertEquals(1600, activity.getBounds().height());
+        assertEquals(1600 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                activity.getBounds().width(), 0.5);
+    }
+
+    @Test
     public void testSplitAspectRatioForUnresizableLandscapeApps() {
         // Set up a display in portrait and ignoring orientation request.
         int screenWidth = 1400;
