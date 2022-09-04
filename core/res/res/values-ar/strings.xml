@@ -1428,7 +1428,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"جارٍ إخراج <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"عدم الإزالة"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"إعداد"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"إلغاء"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"إخراج"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"استكشاف"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"تبديل جهاز إخراج الصوت"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> مفقود"</string>
@@ -2054,8 +2054,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"هل تريد السماح لتطبيق <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> بالوصول إلى جميع سجلّات الجهاز؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنِّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>

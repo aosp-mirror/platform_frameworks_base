@@ -1427,7 +1427,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Parcourir"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Support \"<xliff:g id="NAME">%s</xliff:g>\" manquant"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez le périphérique"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Déplacement des données en cours"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Autoriser <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> à accéder à tous les journaux de l\'appareil ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>

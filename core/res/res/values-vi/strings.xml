@@ -1424,7 +1424,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"Đang ngắt kết nối <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Không tháo"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Thiết lập"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Tháo"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Ngắt kết nối"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Khám phá"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Chuyển đổi đầu ra"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> bị thiếu"</string>
@@ -2050,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Cho phép <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> truy cập vào tất cả các nhật ký thiết bị?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Cho phép truy cập một lần"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Không cho phép"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị. Các ứng dụng có thể dùng nhật ký này để tìm và khắc phục sự cố.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào toàn bộ nhật ký thiết bị cho những ứng dụng mà mình tin cậy. \n\nNếu bạn không cho phép ứng dụng này truy cập vào toàn bộ nhật ký thiết bị, thì ứng dụng vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Không hiện lại"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> muốn hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Chỉnh sửa"</string>
