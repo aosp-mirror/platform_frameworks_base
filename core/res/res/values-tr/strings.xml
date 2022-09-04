@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Parmak izi işlemi iptal edildi."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Çok fazla deneme yapıldı. Parmak izi sensörü devre dışı bırakıldı."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Tekrar deneyin."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"işaretli değil"</string>
     <string name="selected" msgid="6614607926197755875">"seçili"</string>
     <string name="not_selected" msgid="410652016565864475">"seçili değil"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} üzerinden bir yıldız}other{{max} üzerinden # yıldız}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"devam ediyor"</string>
     <string name="whichApplication" msgid="5432266899591255759">"İşlemi şunu kullanarak tamamla"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"İşlemi %1$s kullanarak tamamla"</string>
@@ -1594,7 +1594,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Geçerlilik:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Yayınlanma tarihi:"</string>
     <string name="expires_on" msgid="1623640879705103121">"Sona erme tarihi:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Seri numara:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Seri numarası:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Parmak izleri:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 parmak izi:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 parmak izi:"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Bölge tercihi"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Dil adını yazın"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Önerilen"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Önerilen"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Önerilen diller"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Önerilen bölgeler"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tüm diller"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uygulamasının tüm cihaz günlüklerine erişmesine izin verilsin mi?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tek seferlik erişim izni ver"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İzin verme"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Bir daha gösterme"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Düzenle"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Etkin uygulamaları kontrol edin"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına erişilemiyor"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan tabletin kamerasına erişilemiyor"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Canlı oynatılırken bu içeriğe erişilemez. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistem varsayılanı"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

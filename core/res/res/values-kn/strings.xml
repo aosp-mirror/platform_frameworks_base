@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ಬಳಕೆದಾರರು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಪಡಿಸಿದ್ದಾರೆ."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳು. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ಯಾವುದೇ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ ಅನ್ನು ನೋಂದಣಿ ಮಾಡಿಲ್ಲ."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ಈ ಸಾಧನವು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಹೊಂದಿಲ್ಲ."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="selected" msgid="6614607926197755875">"ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="not_selected" msgid="410652016565864475">"ಆಯ್ಕೆಮಾಡಲಾಗಿಲ್ಲ"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} ರಲ್ಲಿ ಒಂದು ನಕ್ಷತ್ರ}one{{max} ರಲ್ಲಿ # ನಕ್ಷತ್ರಗಳು}other{{max} ರಲ್ಲಿ # ನಕ್ಷತ್ರಗಳು}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ಪ್ರಗತಿಯಲ್ಲಿದೆ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ಬಳಸಿಕೊಂಡು ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ಪ್ರದೇಶ ಪ್ರಾಶಸ್ತ್ಯ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ಭಾಷೆ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ಸೂಚಿತ ಭಾಷೆ"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ಸೂಚಿಸಲಾಗಿರುವುದು"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ಸೂಚಿಸಲಾದ ಭಾಷೆಗಳು"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"ಸೂಚಿಸಲಾದ ಪ್ರದೇಶಗಳು"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ಎಲ್ಲಾ ಭಾಷೆಗಳು"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ಒಂದು ಬಾರಿಯ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ಅನುಮತಿಸಬೇಡಿ"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಸಾಧನದ ಲಾಗ್‌ಗಳು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತವೆ. ಸಮಸ್ಯೆಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ಪರಿಹರಿಸಲು ಆ್ಯಪ್‌ಗಳು ಈ ಲಾಗ್ ಅನ್ನು ಬಳಸಬಹುದು.\n\nಕೆಲವು ಲಾಗ್‌ಗಳು ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು, ಆದ್ದರಿಂದ ನಿಮ್ಮ ವಿಶ್ವಾಸಾರ್ಹ ಆ್ಯಪ್‌ಗಳಿಗೆ ಮಾತ್ರ ಸಾಧನದ ಎಲ್ಲಾ ಲಾಗ್‌ಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ. \n\nಎಲ್ಲಾ ಸಾಧನ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ನೀವು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸದಿದ್ದರೆ, ಅದು ಆಗಲೂ ತನ್ನದೇ ಆದ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ನಿಮ್ಮ ಸಾಧನ ತಯಾರಕರಿಗೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕೆಲವು ಲಾಗ್‌ಗಳು ಅಥವಾ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು ಈಗಲೂ ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸಬೇಡಿ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ಸ್ಲೈಸ್‌ಗಳನ್ನು <xliff:g id="APP_0">%1$s</xliff:g> ತೋರಿಸಲು ಬಯಸಿದೆ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ಎಡಿಟ್"</string>

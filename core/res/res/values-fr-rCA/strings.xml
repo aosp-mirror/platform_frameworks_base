@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale numérique annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'opération d\'empreinte digitale a été annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Trop de tentatives. Veuillez réessayer plus tard."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Trop de tentatives. Capteur d\'empreintes digitales désactivé."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Réessayer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Aucune empreinte digitale enregistrée."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Cet appareil ne possède pas de capteur d\'empreintes digitales."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"non coché"</string>
     <string name="selected" msgid="6614607926197755875">"sélectionné"</string>
     <string name="not_selected" msgid="410652016565864475">"non sélectionné"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Une étoile sur {max}}one{# étoile sur {max}}other{# étoiles sur {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"en cours"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Continuer avec"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Continuer avec %1$s"</string>
@@ -1423,7 +1423,7 @@
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Ne pas retirer"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"Découvrir"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Explorer"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage <xliff:g id="NAME">%s</xliff:g> manquante"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez l\'appareil de nouveau"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Entrez la langue"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggestions"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Suggestions"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Langues suggérées"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Régions suggérées"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Toutes les langues"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Autoriser <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> à accéder à l\'ensemble des journaux de l\'appareil?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Les journaux de l\'appareil enregistrent ce qui se passe sur celui-ci. Les applications peuvent utiliser ces journaux pour trouver et résoudre des problèmes.\n\nCertains journaux peuvent contenir des renseignements confidentiels. N\'autorisez donc que les applications auxquelles vous faites confiance puisque celles-ci pourront accéder à l\'ensemble des journaux de l\'appareil. \n\nMême si vous n\'autorisez pas cette application à accéder à l\'ensemble des journaux de l\'appareil, elle aura toujours accès à ses propres journaux. Le fabricant de votre appareil pourrait toujours être en mesure d\'accéder à certains journaux ou renseignements sur votre appareil."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher <xliff:g id="APP_2">%2$s</xliff:g> tranches"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>

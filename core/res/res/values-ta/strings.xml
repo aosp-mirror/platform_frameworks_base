@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"கைரேகை செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"பயனர், கைரேகை உறுதிப்படுத்துதலை ரத்துசெய்தார்."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"அதிகமான முயற்சிகள். பிறகு முயற்சிக்கவும்."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"பலமுறை முயன்றுவிட்டீர்கள். கைரேகை சென்சார் முடக்கப்பட்டது."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"மீண்டும் முயற்சிக்கவும்."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"கைரேகைப் பதிவுகள் எதுவும் இல்லை."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"இந்தச் சாதனத்தில் கைரேகை சென்சார் இல்லை."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"முடக்கப்பட்டுள்ளது"</string>
     <string name="selected" msgid="6614607926197755875">"தேர்ந்தெடுக்கப்பட்டது"</string>
     <string name="not_selected" msgid="410652016565864475">"தேர்ந்தெடுக்கப்படவில்லை"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ஒரு நட்சத்திரம்/{max}}other{# நட்சத்திரங்கள்/{max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"செயலிலுள்ளது"</string>
     <string name="whichApplication" msgid="5432266899591255759">"இதைப் பயன்படுத்தி செயலை நிறைவுசெய்"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ஐப் பயன்படுத்தி செயலை முடிக்கவும்"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"மண்டல விருப்பம்"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"மொழி பெயரை உள்ளிடுக"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"பரிந்துரைகள்"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"பரிந்துரைக்கப்படுபவை"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"பரிந்துரைக்கப்படும் மொழிகள்"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"பரிந்துரைக்கப்படும் பகுதிகள்"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"எல்லா மொழிகளும்"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"சாதனப் பதிவுகள் அனைத்தையும் <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> அணுக அனுமதிக்கவா?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ஒருமுறை அணுகலை அனுமதி"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"அனுமதிக்க வேண்டாம்"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸ் இந்தப் பதிவுகளைப் பயன்படுத்தலாம்.\n\nபாதுகாக்கப்பட வேண்டிய தகவல்கள் சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக நீங்கள் நம்பும் ஆப்ஸை மட்டும் அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளை அதனால் அணுக முடியும். உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ சாதன உற்பத்தியாளரால் தொடர்ந்து அணுக முடியும்."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"மீண்டும் காட்டாதே"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"திருத்து"</string>

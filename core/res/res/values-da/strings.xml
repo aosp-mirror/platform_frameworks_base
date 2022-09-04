@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeraftrykshandlingen blev annulleret."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeraftrykshandlingen blev annulleret af brugeren."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Du har prøvet for mange gange. Prøv igen senere."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Du har brugt for mange forsøg. Fingeraftrykslæseren er deaktiveret."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Prøv igen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Der er ikke registreret nogen fingeraftryk."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Denne enhed har ingen fingeraftrykslæser."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"slået fra"</string>
     <string name="selected" msgid="6614607926197755875">"valgt"</string>
     <string name="not_selected" msgid="410652016565864475">"ikke valgt"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{En stjerne ud af {max}}one{# stjerne ud af {max}}other{# stjerner ud af {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"i gang"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Brug"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Gennemfør handling ved hjælp af %1$s"</string>
@@ -1566,7 +1566,7 @@
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Intern delt lagerplads"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD-kort"</string>
-    <string name="storage_sd_card_label" msgid="7526153141147470509">"SD-kort fra <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
+    <string name="storage_sd_card_label" msgid="7526153141147470509">"SD-kort (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-drev"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"USB-drev fra <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB-lager"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Områdeindstilling"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Angiv sprog"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Foreslået"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Forslag"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Foreslåede sprog"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Foreslåede områder"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle sprog"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vil du give <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> adgang til alle enhedslogs?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tillad engangsadgang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tillad ikke"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Enhedslogs registrerer, hvad der sker på din enhed. Apps kan bruge disse logs til at finde og løse problemer.\n\nNogle logs kan indeholde følsomme oplysninger, så giv kun apps, du har tillid til, adgang til alle enhedslogs. \n\nSelvom du ikke giver denne app adgang til alle enhedslogs, kan den stadig tilgå sine egne logs. Producenten af din enhed kan muligvis fortsat tilgå visse logs eller oplysninger på din enhed."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Vis ikke igen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> anmoder om tilladelse til at vise eksempler fra <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Rediger"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tjek aktive apps"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kameraet på din telefon kan ikke tilgås via din <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kameraet på din tablet kan ikke tilgås via din <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Der er ikke adgang til dette indhold under streaming. Prøv på din telefon i stedet."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemstandard"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

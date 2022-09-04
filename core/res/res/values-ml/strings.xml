@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, ഫിംഗർപ്രിന്റ് സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"പരിശോധിക്കാത്തത്"</string>
     <string name="selected" msgid="6614607926197755875">"തിരഞ്ഞെടുത്തു"</string>
     <string name="not_selected" msgid="410652016565864475">"തിരഞ്ഞെടുത്തിട്ടില്ല"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}-ൽ ഒരു നക്ഷത്ര ചിഹ്നം}other{{max}-ൽ # നക്ഷത്ര ചിഹ്നം}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"പുരോഗതിയിലാണ്"</string>
     <string name="whichApplication" msgid="5432266899591255759">"പൂർണ്ണമായ പ്രവർത്തനം ഉപയോഗിക്കുന്നു"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ഉപയോഗിച്ച് പ്രവർത്തനം പൂർത്തിയാക്കുക"</string>
@@ -1422,7 +1422,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> ഒഴിവാക്കുന്നു"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"നീക്കം ചെയ്യരുത്"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"സജ്ജമാക്കുക"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"നിരസിക്കുക"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"ഒഴിവാക്കുക"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"അടുത്തറിയുക"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"ഔട്ട്പുട്ട് മാറുക"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> കാണുന്നില്ല"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"നിർദ്ദേശിച്ചവ"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"നിർദ്ദേശിച്ച ഭാഷകൾ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"നിർദ്ദേശിച്ച പ്രദേശങ്ങൾ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ഒറ്റത്തവണ ആക്‌സസ് അനുവദിക്കുക"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"അനുവദിക്കരുത്"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ഉപകരണ ലോഗുകൾ നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, എല്ലാ ഉപകരണ ലോഗുകളും ആക്സസ് ചെയ്യാനുള്ള അനുമതി നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകൾക്ക് മാത്രം നൽകുക. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാനുള്ള അനുവാദം നൽകിയില്ലെങ്കിലും, ഈ ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും. നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിന് തുടർന്നും നിങ്ങളുടെ ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ ആക്‌സസ് ചെയ്യാനായേക്കും."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"എഡിറ്റ് ചെയ്യുക"</string>

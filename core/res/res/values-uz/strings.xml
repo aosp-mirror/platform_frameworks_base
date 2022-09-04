@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Barmoq izi tekshiruvi bekor qilindi."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Barmoq izi amali foydalanuvchi tomonidan bekor qilindi"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Urinishlar soni ko‘payib ketdi. Keyinroq qayta urinib ko‘ring."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Urinishlar soni ko‘payib ketdi. Barmoq izi skaneri bloklandi."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Hech qanday barmoq izi qayd qilinmagan."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu qurilmada barmoq izi skaneri mavjud emas."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"belgilanmadi"</string>
     <string name="selected" msgid="6614607926197755875">"tanlangan"</string>
     <string name="not_selected" msgid="410652016565864475">"tanlanmagan"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Maksimal {max} ta yulduzdan 1 yulduz}other{Maksimal {max} ta yulduzdan # yulduz}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"bajarilmoqda"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Nima ishlatilsin?"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"“%1$s” bilan ochish"</string>
@@ -1423,10 +1423,10 @@
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Chiqarib olinmasin"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Sozlash"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Chiqarish"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"O‘rganish"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Ochish"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Audio chiqishni almashtirish"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> topilmadi"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Qurilmani yana ulang"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Qurilmani qayta ulang"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> ko‘chirib o‘tkazilmoqda"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Ma’lumotlar ko‘chirilmoqda"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Kontent ko‘chirildi"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Hudud sozlamalari"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Til nomini kiriting"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Taklif etiladi"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Tavsiya etiladi"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Tavsiya etilgan tillar"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Tavsiya etilgan mintaqalar"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Barcha tillar"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasining qurilmadagi barcha jurnallarga kirishiga ruxsat berilsinmi?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Boshqa chiqmasin"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ilovasi <xliff:g id="APP_2">%2$s</xliff:g> ilovasidan fragmentlar ko‘rsatish uchun ruxsat so‘ramoqda"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Tahrirlash"</string>
