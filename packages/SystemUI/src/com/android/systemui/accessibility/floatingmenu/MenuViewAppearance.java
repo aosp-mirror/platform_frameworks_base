@@ -193,6 +193,15 @@ class MenuViewAppearance {
         return new int[]{left, 0, right, 0};
     }
 
+    int[] getMenuMovingStateInsets() {
+        return new int[]{0, 0, 0, 0};
+    }
+
+    float[] getMenuMovingStateRadii() {
+        final float radius = getMenuRadius(mTargetFeaturesSize);
+        return new float[]{radius, radius, radius, radius, radius, radius, radius, radius};
+    }
+
     int getMenuStrokeWidth() {
         return mStrokeWidth;
     }

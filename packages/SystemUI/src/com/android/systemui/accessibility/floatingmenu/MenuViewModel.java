@@ -50,6 +50,10 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
         mSizeTypeData.setValue(newSizeType);
     }
 
+    void updateMenuSavingPosition(Position percentagePosition) {
+        mInfoRepository.updateMenuSavingPosition(percentagePosition);
+    }
+
     LiveData<Position> getPercentagePositionData() {
         mInfoRepository.loadMenuPosition(mPercentagePositionData::setValue);
         return mPercentagePositionData;

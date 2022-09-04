@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The container view displays the accessibility features.
+ * The menu view displays the accessibility features.
  */
 @SuppressLint("ViewConstructor")
 class MenuView extends FrameLayout implements
@@ -65,10 +65,15 @@ class MenuView extends FrameLayout implements
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
         mMenuAnimationController = new MenuAnimationController(this);
+
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
+        final MenuListViewTouchHandler menuListViewTouchHandler =
+                new MenuListViewTouchHandler(mMenuAnimationController);
+        addOnItemTouchListenerToList(menuListViewTouchHandler);
+
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         // Avoid drawing out of bounds of the parent view
         setClipToOutline(true);
@@ -93,6 +98,10 @@ class MenuView extends FrameLayout implements
         mTargetFeaturesView.setOverScrollMode(mMenuViewAppearance.getMenuScrollMode());
     }
 
+    void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
+        mTargetFeaturesView.addOnItemTouchListener(listener);
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void onItemSizeChanged() {
         mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
@@ -108,6 +117,16 @@ class MenuView extends FrameLayout implements
         final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
         layoutParams.height = mMenuViewAppearance.getMenuHeight();
         setLayoutParams(layoutParams);
+    }
+
+    void onEdgeChangedIfNeeded() {
+        final Rect draggableBounds = mMenuViewAppearance.getMenuDraggableBounds();
+        if (getTranslationX() != draggableBounds.left
+                && getTranslationX() != draggableBounds.right) {
+            return;
+        }
+
+        onEdgeChanged();
     }
 
     private void onEdgeChanged() {
@@ -159,6 +178,17 @@ class MenuView extends FrameLayout implements
         onPositionChanged();
     }
 
+    Rect getMenuDraggableBounds() {
+        return mMenuViewAppearance.getMenuDraggableBounds();
+    }
+
+    void persistPositionAndUpdateEdge(Position percentagePosition) {
+        mMenuViewModel.updateMenuSavingPosition(percentagePosition);
+        mMenuViewAppearance.setPercentagePosition(percentagePosition);
+
+        onEdgeChangedIfNeeded();
+    }
+
     void show() {
         mMenuViewModel.getPercentagePositionData().observeForever(mPercentagePositionObserver);
         mMenuViewModel.getTargetFeaturesData().observeForever(mTargetFeaturesObserver);
@@ -178,6 +208,15 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.unregisterContentObservers();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
+    }
+
+    void onDraggingStart() {
+        final int[] insets = mMenuViewAppearance.getMenuMovingStateInsets();
+        getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
+                insets[3]);
+
+        final GradientDrawable gradientDrawable = getContainerViewGradient();
+        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
     }
 
     void onBoundsInParentChanged(int newLeft, int newTop) {
