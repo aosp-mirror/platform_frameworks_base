@@ -16,10 +16,12 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.systemui.accessibility.floatingmenu.MenuViewAppearance.MenuSizeType.SMALL;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -29,6 +31,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -49,6 +52,16 @@ class MenuInfoRepository {
                 }
             };
 
+    @VisibleForTesting
+    final ContentObserver mMenuSizeContentObserver =
+            new ContentObserver(mHandler) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    mSettingsContentsCallback.onSizeTypeChanged(
+                            getMenuSizeTypeFromSettings(mContext));
+                }
+            };
+
     MenuInfoRepository(Context context, OnSettingsContentsChanged settingsContentsChanged) {
         mContext = context;
         mSettingsContentsCallback = settingsContentsChanged;
@@ -56,6 +69,10 @@ class MenuInfoRepository {
 
     void loadMenuTargetFeatures(OnInfoReady<List<AccessibilityTarget>> callback) {
         callback.onReady(getTargets(mContext, ACCESSIBILITY_BUTTON));
+    }
+
+    void loadMenuSizeType(OnInfoReady<Integer> callback) {
+        callback.onReady(getMenuSizeTypeFromSettings(mContext));
     }
 
     void registerContentObservers() {
@@ -67,17 +84,29 @@ class MenuInfoRepository {
                 Settings.Secure.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
                 /* notifyForDescendants */ false,
                 mMenuTargetFeaturesContentObserver, UserHandle.USER_CURRENT);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
+                /* notifyForDescendants */ false, mMenuSizeContentObserver,
+                UserHandle.USER_CURRENT);
     }
 
     void unregisterContentObservers() {
         mContext.getContentResolver().unregisterContentObserver(mMenuTargetFeaturesContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(mMenuSizeContentObserver);
     }
 
     interface OnSettingsContentsChanged {
         void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures);
+
+        void onSizeTypeChanged(int newSizeType);
     }
 
     interface OnInfoReady<T> {
         void onReady(T info);
+    }
+
+    private static int getMenuSizeTypeFromSettings(Context context) {
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                ACCESSIBILITY_FLOATING_MENU_SIZE, SMALL, UserHandle.USER_CURRENT);
     }
 }

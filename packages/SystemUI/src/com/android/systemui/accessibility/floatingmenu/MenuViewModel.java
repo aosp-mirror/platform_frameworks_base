@@ -32,6 +32,7 @@ import java.util.List;
 class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     private final MutableLiveData<List<AccessibilityTarget>> mTargetFeaturesData =
             new MutableLiveData<>();
+    private final MutableLiveData<Integer> mSizeTypeData = new MutableLiveData<>();
     private final MenuInfoRepository mInfoRepository;
 
     MenuViewModel(Context context) {
@@ -41,6 +42,16 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     @Override
     public void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures) {
         mTargetFeaturesData.setValue(newTargetFeatures);
+    }
+
+    @Override
+    public void onSizeTypeChanged(int newSizeType) {
+        mSizeTypeData.setValue(newSizeType);
+    }
+
+    LiveData<Integer> getSizeTypeData() {
+        mInfoRepository.loadMenuSizeType(mSizeTypeData::setValue);
+        return mSizeTypeData;
     }
 
     LiveData<List<AccessibilityTarget>> getTargetFeaturesData() {

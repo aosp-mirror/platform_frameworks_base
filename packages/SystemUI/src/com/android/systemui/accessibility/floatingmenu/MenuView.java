@@ -43,6 +43,7 @@ class MenuView extends FrameLayout {
     private final AccessibilityTargetAdapter mAdapter;
     private final MenuViewModel mMenuViewModel;
     private final RecyclerView mTargetFeaturesView;
+    private final Observer<Integer> mSizeTypeObserver = this::onSizeTypeChanged;
     private final Observer<List<AccessibilityTarget>> mTargetFeaturesObserver =
             this::onTargetFeaturesChanged;
     private final MenuViewAppearance mMenuViewAppearance;
@@ -57,6 +58,8 @@ class MenuView extends FrameLayout {
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+        // Avoid drawing out of bounds of the parent view
+        setClipToOutline(true);
         loadLayoutResources();
 
         addView(mTargetFeaturesView);
@@ -76,6 +79,12 @@ class MenuView extends FrameLayout {
         mAdapter.notifyDataSetChanged();
     }
 
+    private void onSizeChanged() {
+        final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
+        layoutParams.height = mMenuViewAppearance.getMenuHeight();
+        setLayoutParams(layoutParams);
+    }
+
     private void onEdgeChanged() {
         final int[] insets = mMenuViewAppearance.getMenuInsets();
         getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
@@ -88,6 +97,17 @@ class MenuView extends FrameLayout {
     }
 
     @SuppressLint("NotifyDataSetChanged")
+    private void onSizeTypeChanged(int newSizeType) {
+        mMenuViewAppearance.setSizeType(newSizeType);
+
+        mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
+        mAdapter.setIconWidthHeight(mMenuViewAppearance.getMenuIconSize());
+        mAdapter.notifyDataSetChanged();
+
+        onSizeChanged();
+        onEdgeChanged();
+    }
+
     private void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures) {
         // TODO(b/252756133): Should update specific item instead of the whole list
         mTargetFeatures.clear();
@@ -95,11 +115,13 @@ class MenuView extends FrameLayout {
         mMenuViewAppearance.setTargetFeaturesSize(mTargetFeatures.size());
         mAdapter.notifyDataSetChanged();
 
+        onSizeChanged();
         onEdgeChanged();
     }
 
     void show() {
         mMenuViewModel.getTargetFeaturesData().observeForever(mTargetFeaturesObserver);
+        mMenuViewModel.getSizeTypeData().observeForever(mSizeTypeObserver);
         setVisibility(VISIBLE);
         mMenuViewModel.registerContentObservers();
     }
@@ -107,6 +129,7 @@ class MenuView extends FrameLayout {
     void hide() {
         setVisibility(GONE);
         mMenuViewModel.getTargetFeaturesData().removeObserver(mTargetFeaturesObserver);
+        mMenuViewModel.getSizeTypeData().removeObserver(mSizeTypeObserver);
         mMenuViewModel.unregisterContentObservers();
     }
 
@@ -116,6 +139,7 @@ class MenuView extends FrameLayout {
         setBackground(mMenuViewAppearance.getMenuBackground());
         setElevation(mMenuViewAppearance.getMenuElevation());
         onItemSizeChanged();
+        onSizeChanged();
         onEdgeChanged();
     }
 
