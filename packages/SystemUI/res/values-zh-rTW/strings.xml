@@ -161,6 +161,10 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"無法辨識臉孔，請改用指紋完成驗證。"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
+    <skip />
+    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"藍牙連線已建立。"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電池電量不明。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已連線至<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
@@ -419,10 +423,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕重疊顯示"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"啟用"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
-    <!-- no translation found for sound_settings (8874581353127418308) -->
-    <skip />
-    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
-    <skip />
+    <string name="sound_settings" msgid="8874581353127418308">"音效與震動"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"應用程式已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主畫面按鈕即可取消固定。"</string>
