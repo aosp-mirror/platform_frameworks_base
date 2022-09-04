@@ -201,9 +201,9 @@
     <string name="tts_engine_network_required" msgid="8722087649733906851">"या भाषेस टेक्‍स्‍ट टू स्‍पीचसाठी एका नेटवर्क कनेक्शनची आवश्यकता आहे."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"हे उच्चार संश्लेषणाचे एक उदाहरण आहे"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"डीफॉल्ट भाषा स्थिती"</string>
-    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> पूर्णपणे समर्थित आहे"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> ला पूर्ण सपोर्ट आहे"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> ला नेटवर्क कनेक्शनची आवश्यकता आहे"</string>
-    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> समर्थित नाही"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> ला सपोर्ट नाही"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"तपासत आहे..."</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> साठी सेटिंग्ज"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"इंजीन सेटिंग्ज लाँच करा"</string>
