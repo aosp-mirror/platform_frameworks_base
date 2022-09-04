@@ -574,7 +574,7 @@
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Lisätäänkö käyttäjä nyt?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi ottaa laitteen nyt ja määrittää oman tilansa."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Määritetäänkö profiilin asetukset nyt?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Määritä nyt"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Ota käyttöön nyt"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ei nyt"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"Lisää"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Uusi käyttäjä"</string>
@@ -649,7 +649,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fyysinen näppäimistö"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Valitse näppäimistöasettelu"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Oletus"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Käynnistä näyttö"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Näytön käynnistys"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön käynnistäminen"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen käynnistää näyttö. Jos sovellus saa luvan, se voi käynnistää näytön itsenäisesti milloin tahansa."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Lopetetaanko <xliff:g id="APP_NAME">%1$s</xliff:g>-sovelluksen lähettäminen?"</string>
