@@ -623,7 +623,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Appuyez pour supprimer votre empreinte faciale, puis ajoutez de nouveau votre visage"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser Face Unlock, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser le déverrouillage par reconnaissance faciale, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Appuyez pour ajouter une empreinte digitale"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Déverrouillage par empreinte digitale"</string>
@@ -1414,7 +1414,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Parcourir"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Support \"<xliff:g id="NAME">%s</xliff:g>\" manquant"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez le périphérique"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Déplacement des données en cours"</string>
