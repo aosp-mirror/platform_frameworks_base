@@ -25,6 +25,7 @@ import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Size;
 
@@ -108,6 +109,12 @@ public class LocalImageResolver {
                 }
                 break;
             case Icon.TYPE_RESOURCE:
+                if (!(TextUtils.isEmpty(icon.getResPackage())
+                        || context.getPackageName().equals(icon.getResPackage()))) {
+                    // We can't properly resolve icons from other packages here, so fall back.
+                    return icon.loadDrawable(context);
+                }
+
                 Drawable result = resolveImage(icon.getResId(), context, maxWidth, maxHeight);
                 if (result != null) {
                     return tintDrawable(icon, result);

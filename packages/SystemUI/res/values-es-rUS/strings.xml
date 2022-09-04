@@ -223,7 +223,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Giro automático"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar la pantalla automáticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a la cámara"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al mic."</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
@@ -241,8 +241,8 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Red Wi-Fi no conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversión de color"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de colores"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corregir colores"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuración del usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
@@ -285,7 +285,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Grabación de pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
-    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo de una mano"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo una mano"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Quieres desbloquear el micrófono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"¿Quieres desbloquear la cámara del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"¿Quieres desbloquear la cámara y el micrófono del dispositivo?"</string>

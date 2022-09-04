@@ -183,21 +183,21 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ተጠቃሚ፦ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"አንዳንድ ነባሪዎ ተዘጋጅተዋል"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"ምንም ነባሪዎች አልተዘጋጁም"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"ፅሁፍ-ወደ-ንግግር ቅንብሮች"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"ጽሁፍ-ወደ-ንግግር ቅንብሮች"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"የፅሁፍ- ወደ- ንግግር ውፅዓት"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">" የንግግር ደረጃ"</string>
-    <string name="tts_default_rate_summary" msgid="3781937042151716987">"የተነገረበትን ፅሁፍ አፍጥን"</string>
+    <string name="tts_default_rate_summary" msgid="3781937042151716987">"የተነገረበትን ጽሁፍ አፍጥን"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ቅላፄ"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"በሲንተሲስ በተሠራው ድምፅ ላይ ተፅዕኖ ያሳድራል"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"ቋንቋ"</string>
     <string name="tts_lang_use_system" msgid="6312945299804012406">"የስርዓት ቋንቋ ተጠቀም"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"ቋንቋ አልተመረጠም"</string>
-    <string name="tts_default_lang_summary" msgid="9042620014800063470">"ለሚነገረው ፅሁፍ ቋንቋ-ተኮር ድምፅ አዘጋጅ"</string>
+    <string name="tts_default_lang_summary" msgid="9042620014800063470">"ለሚነገረው ጽሁፍ ቋንቋ-ተኮር ድምፅ አዘጋጅ"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"ምሳሌውን አዳምጥ"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"አጭር የንግግር ልምምድ ማሳያ አጫውት"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"የድምፅ ውሂብ ጫን"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"ለንግግር ልምምድ የሚጠየቀውን የድምፅ ውሂብ ጫን"</string>
-    <string name="tts_engine_security_warning" msgid="3372432853837988146">"ይህ የንግግር ልምምድ አንቀሳቃሽ የሚነገረውን ፅሁፍ ሁሉ  እንደ ይለፍ ቃል እና የዱቤ ካርድ ቁጥሮች፣ የግል ውሂብ ጨምሮ ለመሰብሰብ ይችል ይሆናል።  ከ <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> አንቀሳቃሽ ይመጣል። የዚህን የንግግር ልምምድ አንቀሳቃሽ አጠቃቀም ይንቃ?"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"ይህ የንግግር ልምምድ አንቀሳቃሽ የሚነገረውን ጽሁፍ ሁሉ  እንደ ይለፍ ቃል እና የዱቤ ካርድ ቁጥሮች፣ የግል ውሂብ ጨምሮ ለመሰብሰብ ይችል ይሆናል።  ከ <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> አንቀሳቃሽ ይመጣል። የዚህን የንግግር ልምምድ አንቀሳቃሽ አጠቃቀም ይንቃ?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"ይህ ቋንቋ የጽሑፍ-ወደ-ንግግር ውጽዓት እንዲኖረው የሚሰራ የአውታረ መረብ ግንኙነት ያስፈልገዋል።"</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ይህ የተሰራ ንግግር ምሳሌ ነው"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"የነባሪ ቋንቋ ሁኔታ"</string>
@@ -513,7 +513,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"የገባሪ ግቤት ዘዴ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"የሥርዓት ቋንቋዎችን ይጠቀሙ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"የ<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ቅንብሮች መክፈት አልተሳካም"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"ይህ ግቤት ስልት የሚትተይበውን ፅሁፍ ሁሉ፣  እንደይለፍ ቃል እና የብድር ካርድ ጨምሮ የግል ውሂብ ምናልባት መሰብሰብ ይችላል። ከትግበራው ይመጣል። <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ይህን ግቤት ስልትይጠቀም?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"ይህ ግቤት ስልት የሚትተይበውን ጽሁፍ ሁሉ፣  እንደይለፍ ቃል እና የብድር ካርድ ጨምሮ የግል ውሂብ ምናልባት መሰብሰብ ይችላል። ከትግበራው ይመጣል። <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ይህን ግቤት ስልትይጠቀም?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ማስታወሻ፦ እንደገና ከማስነሳት በኋላ ይህ መተግበሪያ ስልክዎን እስከሚከፍቱት ድረስ ሊጀምር አይችልም"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"የIMS ምዝገባ ቀን"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"የተመዘገበ"</string>

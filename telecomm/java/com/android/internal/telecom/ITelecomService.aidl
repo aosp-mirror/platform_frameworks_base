@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.telecom.PhoneAccount;
+import android.content.pm.ParceledListSlice;
 
 /**
  * Interface used to interact with Telecom. Mostly this is used by TelephonyManager for passing
@@ -57,31 +58,31 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
-    List<PhoneAccountHandle> getCallCapablePhoneAccounts(
+    ParceledListSlice<PhoneAccountHandle> getCallCapablePhoneAccounts(
             boolean includeDisabledAccounts, String callingPackage, String callingFeatureId);
 
     /**
      * @see TelecomServiceImpl#getSelfManagedPhoneAccounts
      */
-    List<PhoneAccountHandle> getSelfManagedPhoneAccounts(String callingPackage,
+    ParceledListSlice<PhoneAccountHandle> getSelfManagedPhoneAccounts(String callingPackage,
             String callingFeatureId);
 
     /**
      * @see TelecomServiceImpl#getOwnSelfManagedPhoneAccounts
      */
-    List<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts(String callingPackage,
+    ParceledListSlice<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts(String callingPackage,
             String callingFeatureId);
 
     /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
      */
-    List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,
+    ParceledListSlice<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,
             String callingPackage);
 
     /**
      * @see TelecomManager#getPhoneAccountsForPackage
      */
-    List<PhoneAccountHandle> getPhoneAccountsForPackage(in String packageName);
+    ParceledListSlice<PhoneAccountHandle> getPhoneAccountsForPackage(in String packageName);
 
     /**
      * @see TelecomManager#getPhoneAccount
@@ -96,12 +97,12 @@ interface ITelecomService {
     /**
      * @see TelecomManager#getAllPhoneAccounts
      */
-    List<PhoneAccount> getAllPhoneAccounts();
+    ParceledListSlice<PhoneAccount> getAllPhoneAccounts();
 
     /**
      * @see TelecomManager#getAllPhoneAccountHandles
      */
-    List<PhoneAccountHandle> getAllPhoneAccountHandles();
+    ParceledListSlice<PhoneAccountHandle> getAllPhoneAccountHandles();
 
     /**
      * @see TelecomServiceImpl#getSimCallManager

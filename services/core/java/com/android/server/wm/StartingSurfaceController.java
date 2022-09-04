@@ -220,6 +220,11 @@ public class StartingSurfaceController {
         // Attempt to add starting window from the top-most activity.
         for (int i = mDeferringAddStartActivities.size() - 1; i >= 0; --i) {
             final DeferringStartingWindowRecord next = mDeferringAddStartActivities.get(i);
+            if (next.mDeferring.getTask() == null) {
+                Slog.e(TAG, "No task exists: " + next.mDeferring.shortComponentName
+                        + " parent: " + next.mDeferring.getParent());
+                continue;
+            }
             next.mDeferring.showStartingWindow(next.mPrev, mInitNewTask, mInitTaskSwitch,
                     mInitProcessRunning, true /* startActivity */, next.mSource, topOptions);
             // If one succeeds, it is done.

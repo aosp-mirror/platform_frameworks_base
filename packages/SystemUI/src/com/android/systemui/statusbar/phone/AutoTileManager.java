@@ -428,7 +428,7 @@ public class AutoTileManager implements UserAwareController {
             if (isSafetyCenterEnabled && !mAutoTracker.isAdded(mSafetySpec)) {
                 initSafetyTile();
             } else if (!isSafetyCenterEnabled && mAutoTracker.isAdded(mSafetySpec)) {
-                mHost.removeTile(CustomTile.getComponentFromSpec(mSafetySpec));
+                mHost.removeTile(mSafetySpec);
                 mHost.unmarkTileAsAutoAdded(mSafetySpec);
             }
         }

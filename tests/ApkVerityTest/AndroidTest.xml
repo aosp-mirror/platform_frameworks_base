@@ -31,8 +31,16 @@
 
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
-        <option name="push" value="block_device_writer->/data/local/tmp/block_device_writer" />
         <option name="push" value="ApkVerityTestCert.der->/data/local/tmp/ApkVerityTestCert.der" />
+    </target_preparer>
+
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <!-- The build system produces both 32 and 64 bit variants with bitness suffix. Let
+             FilePusher find the filename with bitness and push to a remote name without bitness.
+        -->
+        <option name="append-bitness" value="true" />
+        <option name="cleanup" value="true" />
+        <option name="push" value="block_device_writer->/data/local/tmp/block_device_writer" />
     </target_preparer>
 
     <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >

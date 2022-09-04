@@ -233,10 +233,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"このユーザーはテザリング設定を利用できません"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"このユーザーはアクセスポイント名設定を利用できません"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB デバッグ"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB 接続時はデバッグモードにする"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB 接続時にデバッグモードにする"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB デバッグの許可の取り消し"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ワイヤレス デバッグ"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時はデバッグモードにする"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時にデバッグモードにする"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"エラー"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ワイヤレス デバッグ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグを ON にしてください"</string>

@@ -102,7 +102,7 @@
     <item msgid="2553206901068987657">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="926809261293414607">"Folosiți selectarea sistemului (prestabilit)"</item>
+    <item msgid="926809261293414607">"Folosește selectarea sistemului (prestabilit)"</item>
     <item msgid="8003118270854840095">"44,1 kHz"</item>
     <item msgid="3208896645474529394">"48,0 kHz"</item>
     <item msgid="8420261949134022577">"88,2 kHz"</item>
@@ -128,7 +128,7 @@
     <item msgid="3836844909491316925">"32 biți/eșantion"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="3014194562841654656">"Folosiți selectarea sistemului (prestabilit)"</item>
+    <item msgid="3014194562841654656">"Folosește selectarea sistemului (prestabilit)"</item>
     <item msgid="5982952342181788248">"Mono"</item>
     <item msgid="927546067692441494">"Stereo"</item>
   </string-array>
