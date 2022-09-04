@@ -118,3 +118,17 @@ inline fun <reified T : Any> kotlinArgumentCaptor(): KotlinArgumentCaptor<T> =
  */
 inline fun <reified T : Any> withArgCaptor(block: KotlinArgumentCaptor<T>.() -> Unit): T =
         kotlinArgumentCaptor<T>().apply { block() }.value
+
+/**
+ * Variant of [withArgCaptor] for capturing multiple arguments.
+ *
+ *    val captor = argumentCaptor<Foo>()
+ *    verify(...).someMethod(captor.capture())
+ *    val captured: List<Foo> = captor.allValues
+ *
+ * becomes:
+ *
+ *    val capturedList = captureMany<Foo> { verify(...).someMethod(capture()) }
+ */
+inline fun <reified T : Any> captureMany(block: KotlinArgumentCaptor<T>.() -> Unit): List<T> =
+        kotlinArgumentCaptor<T>().apply{ block() }.allValues
