@@ -16,8 +16,7 @@
 
 package com.android.mediaroutertest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.content.res.Resources;
 import android.media.MediaRoute2Info;
@@ -62,39 +61,39 @@ public class RoutingSessionInfoTest {
         RoutingSessionInfo sessionInfoWithProviderId = new RoutingSessionInfo.Builder(sessionInfo)
                 .setProviderId(TEST_PROVIDER_ID).build();
 
-        assertNotEquals(sessionInfo.getSelectedRoutes(),
-                sessionInfoWithProviderId.getSelectedRoutes());
-        assertNotEquals(sessionInfo.getSelectableRoutes(),
-                sessionInfoWithProviderId.getSelectableRoutes());
-        assertNotEquals(sessionInfo.getDeselectableRoutes(),
-                sessionInfoWithProviderId.getDeselectableRoutes());
-        assertNotEquals(sessionInfo.getTransferableRoutes(),
-                sessionInfoWithProviderId.getTransferableRoutes());
+        assertThat(sessionInfoWithProviderId.getSelectedRoutes())
+                .isNotEqualTo(sessionInfo.getSelectedRoutes());
+        assertThat(sessionInfoWithProviderId.getSelectableRoutes())
+                .isNotEqualTo(sessionInfo.getSelectableRoutes());
+        assertThat(sessionInfoWithProviderId.getDeselectableRoutes())
+                .isNotEqualTo(sessionInfo.getDeselectableRoutes());
+        assertThat(sessionInfoWithProviderId.getTransferableRoutes())
+                .isNotEqualTo(sessionInfo.getTransferableRoutes());
 
         RoutingSessionInfo sessionInfoWithOtherProviderId =
                 new RoutingSessionInfo.Builder(sessionInfoWithProviderId)
                         .setProviderId(TEST_OTHER_PROVIDER_ID).build();
 
-        assertNotEquals(sessionInfoWithOtherProviderId.getSelectedRoutes(),
-                sessionInfoWithProviderId.getSelectedRoutes());
-        assertNotEquals(sessionInfoWithOtherProviderId.getSelectableRoutes(),
-                sessionInfoWithProviderId.getSelectableRoutes());
-        assertNotEquals(sessionInfoWithOtherProviderId.getDeselectableRoutes(),
-                sessionInfoWithProviderId.getDeselectableRoutes());
-        assertNotEquals(sessionInfoWithOtherProviderId.getTransferableRoutes(),
-                sessionInfoWithProviderId.getTransferableRoutes());
+        assertThat(sessionInfoWithOtherProviderId.getSelectedRoutes())
+                .isNotEqualTo(sessionInfoWithProviderId.getSelectedRoutes());
+        assertThat(sessionInfoWithOtherProviderId.getSelectableRoutes())
+                .isNotEqualTo(sessionInfoWithProviderId.getSelectableRoutes());
+        assertThat(sessionInfoWithOtherProviderId.getDeselectableRoutes())
+                .isNotEqualTo(sessionInfoWithProviderId.getDeselectableRoutes());
+        assertThat(sessionInfoWithOtherProviderId.getTransferableRoutes())
+                .isNotEqualTo(sessionInfoWithProviderId.getTransferableRoutes());
 
         RoutingSessionInfo sessionInfoWithProviderId2 =
                 new RoutingSessionInfo.Builder(sessionInfoWithProviderId).build();
 
-        assertEquals(sessionInfoWithProviderId2.getSelectedRoutes(),
-                sessionInfoWithProviderId.getSelectedRoutes());
-        assertEquals(sessionInfoWithProviderId2.getSelectableRoutes(),
-                sessionInfoWithProviderId.getSelectableRoutes());
-        assertEquals(sessionInfoWithProviderId2.getDeselectableRoutes(),
-                sessionInfoWithProviderId.getDeselectableRoutes());
-        assertEquals(sessionInfoWithProviderId2.getTransferableRoutes(),
-                sessionInfoWithProviderId.getTransferableRoutes());
+        assertThat(sessionInfoWithProviderId2.getSelectedRoutes())
+                .isEqualTo(sessionInfoWithProviderId.getSelectedRoutes());
+        assertThat(sessionInfoWithProviderId2.getSelectableRoutes())
+                .isEqualTo(sessionInfoWithProviderId.getSelectableRoutes());
+        assertThat(sessionInfoWithProviderId2.getDeselectableRoutes())
+                .isEqualTo(sessionInfoWithProviderId.getDeselectableRoutes());
+        assertThat(sessionInfoWithProviderId2.getTransferableRoutes())
+                .isEqualTo(sessionInfoWithProviderId.getTransferableRoutes());
     }
 
     @Test
@@ -114,6 +113,6 @@ public class RoutingSessionInfoTest {
                 ? MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE :
                 MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 
-        assertEquals(sessionInfo.getVolumeHandling(), expectedResult);
+        assertThat(sessionInfo.getVolumeHandling()).isEqualTo(expectedResult);
     }
 }
