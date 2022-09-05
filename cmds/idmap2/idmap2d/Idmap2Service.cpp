@@ -312,6 +312,8 @@ Status Idmap2Service::acquireFabricatedOverlayIterator() {
 Status Idmap2Service::releaseFabricatedOverlayIterator() {
   if (!frro_iter_.has_value()) {
     LOG(WARNING) << "no active ffro iterator to release";
+  } else {
+      frro_iter_ = std::nullopt;
   }
   return ok();
 }
