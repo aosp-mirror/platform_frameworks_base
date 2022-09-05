@@ -1416,7 +1416,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> հիշասարքն անջատվում է"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Չհեռացնեք սարքը"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Կարգավորել"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Անջատել"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Հանել"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Ուսումնասիրել"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Աուդիոելքի սարքի փոխարկում"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g>-ը տեղադրված չէ"</string>

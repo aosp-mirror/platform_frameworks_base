@@ -1560,7 +1560,7 @@
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Intern delt lagerplads"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD-kort"</string>
-    <string name="storage_sd_card_label" msgid="7526153141147470509">"SD-kort fra <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
+    <string name="storage_sd_card_label" msgid="7526153141147470509">"SD-kort (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-drev"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"USB-drev fra <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB-lager"</string>

@@ -1419,7 +1419,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Parcourir"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Support \"<xliff:g id="NAME">%s</xliff:g>\" manquant"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez le périphérique"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Déplacement des données en cours"</string>

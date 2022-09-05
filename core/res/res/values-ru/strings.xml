@@ -1421,7 +1421,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Извлечь"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Обзор"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Сменить устройство вывода"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> не найден"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Устройство \"<xliff:g id="NAME">%s</xliff:g>\" не найдено"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Подключите накопитель снова."</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Перенос приложения <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Перенос данных"</string>
