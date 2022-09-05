@@ -477,15 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Да поўнай зарадкі засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – да поўнай зарадкі засталося: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (6971664137170239141) -->
-    <skip />
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Зарадка прыпынена"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Невядома"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарадка"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хуткая зарадка"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Павольная зарадка"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Бесправадная зарадка"</string>
-    <!-- no translation found for battery_info_status_charging_dock (8573274094093364791) -->
-    <skip />
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Ідзе зарадка"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не зараджаецца"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Падключана, не зараджаецца"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Зараджаны"</string>
