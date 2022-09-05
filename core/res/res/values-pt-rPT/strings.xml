@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operação de impressão digital cancelada."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operação de impressão digital cancelada pelo utilizador."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Demasiadas tentativas. Tente novamente mais tarde."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Demasiadas tentativas. Sensor de impressões digitais desativado."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Tente novamente."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nenhuma impressão digital registada."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem sensor de impressões digitais."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"não selecionado"</string>
     <string name="selected" msgid="6614607926197755875">"selecionado"</string>
     <string name="not_selected" msgid="410652016565864475">"não selecionado"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Uma estrela de {max}}other{# estrelas de {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"em curso"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Concluir ação utilizando"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Concluir ação utilizando %1$s"</string>
@@ -1426,7 +1426,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"Explorar"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Saída do interruptor"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> em falta"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Volte a inserir o dispositivo."</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Volte a inserir o dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"A mover <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"A mover dados"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Transf. de conteúdo concluída"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Intr. nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugeridas"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Regiões sugeridas"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Todos os idiomas"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permitir que a app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aceda a todos os registos do dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acesso único"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Não permitir"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais e, por isso, o acesso a todos os registos do dispositivo deve apenas ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, esta pode ainda assim aceder aos próprios registos. O fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Não mostrar de novo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A app <xliff:g id="APP_0">%1$s</xliff:g> pretende mostrar partes da app <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>

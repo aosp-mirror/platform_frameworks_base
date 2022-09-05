@@ -606,7 +606,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Radnja sa otiskom prsta je otkazana."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Korisnik je otkazao radnju sa otiskom prsta."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Previše pokušaja. Probajte ponovo kasnije."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Previše pokušaja. Senzor za otisak prsta je onemogućen."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Probajte ponovo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nije registrovan nijedan otisak prsta."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ovaj uređaj nema senzor za otisak prsta."</string>
@@ -1168,8 +1169,7 @@
     <string name="not_checked" msgid="7972320087569023342">"nije označeno"</string>
     <string name="selected" msgid="6614607926197755875">"izabrano"</string>
     <string name="not_selected" msgid="410652016565864475">"nije izabrano"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Jedna zvezdica od {max}}one{# zvezdica od {max}}few{# zvezdice od {max}}other{# zvezdica od {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"u toku"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Dovrši radnju preko"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Završite radnju pomoću aplikacije %1$s"</string>
@@ -1926,8 +1926,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Podešavanje regiona"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Unesite naziv jezika"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Predloženi"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Predloženo"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Predloženi jezici"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Predloženi regioni"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Svi jezici"</string>
@@ -2052,8 +2051,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Želite da dozvolite aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim evidencijama uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratan pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne dozvoli"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Evidencije uređaja registruju šta se dešava na uređaju. Aplikacije mogu da koriste te evidencije da bi pronašle i rešile probleme.\n\nNeke evidencije mogu da sadrže osetljive informacije, pa pristup svim evidencijama uređaja treba da dozvoljavate samo aplikacijama u koje imate poverenja. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim evidencijama uređaja, ona i dalje može da pristupa sopstvenim evidencijama. Proizvođač uređaja će možda i dalje moći da pristupa nekim evidencijama ili informacijama na uređaju."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi da prikazuje isečke iz aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Izmeni"</string>

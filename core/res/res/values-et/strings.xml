@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Sõrmejälje toiming tühistati."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kasutaja tühistas sõrmejälje kasutamise."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Liiga palju katseid. Sõrmejäljeandur on keelatud."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Proovige uuesti."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ühtegi sõrmejälge pole registreeritud."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Selles seadmes pole sõrmejäljeandurit."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"märkimata"</string>
     <string name="selected" msgid="6614607926197755875">"valitud"</string>
     <string name="not_selected" msgid="410652016565864475">"pole valitud"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 tärn {max}-st}other{# tärni {max}-st}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"pooleli"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Lõpetage toiming rakendusega"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Toimingu lõpetamine, kasutades rakendust %1$s"</string>
@@ -1422,8 +1422,8 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"Üksuse <xliff:g id="NAME">%s</xliff:g> väljutamine …"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Ärge eemaldage"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Seadistus"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Eemaldamine"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"Avastamine"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Eemalda"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Avasta"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Vahetage väljundit"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Üksust <xliff:g id="NAME">%s</xliff:g> pole"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Sisestage seade uuesti"</string>
@@ -1566,9 +1566,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Sisemine jagatud mäluruum"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD-kaart"</string>
-    <string name="storage_sd_card_label" msgid="7526153141147470509">"Tootja <xliff:g id="MANUFACTURER">%s</xliff:g> SD-kaart"</string>
+    <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD-kaart"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-ketas"</string>
-    <string name="storage_usb_drive_label" msgid="6631740655876540521">"Tootja <xliff:g id="MANUFACTURER">%s</xliff:g> USB-ketas"</string>
+    <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-ketas"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB-mäluseade"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Muuda"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Andmekasutuse hoiatus"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Piirkonnaeelistus"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sisestage keele nimi"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Soovitatud"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Soovitatud"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Soovitatud keeled"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Soovitatud piirkonnad"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Kõik keeled"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Kas anda rakendusele <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> juurdepääs kõigile seadmelogidele?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Luba ühekordne juurdepääs"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ära luba"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ära kuva uuesti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Rakendus <xliff:g id="APP_0">%1$s</xliff:g> soovib näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muuda"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vaadake aktiivseid rakendusi"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Sellele ei pääse voogesituse ajal juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KAART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

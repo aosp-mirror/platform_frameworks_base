@@ -609,7 +609,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"تم إلغاء تشغيل بصمة الإصبع."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"تم إلغاء تشغيل بصمة الإصبع بواسطة المستخدم."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تم إجراء عدد كبير من المحاولات. أعد المحاولة لاحقًا."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"تم إجراء عدد كبير جدًا من المحاولات. لذا تم إيقاف جهاز استشعار بصمات الإصبع."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"أعد المحاولة."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ليست هناك بصمات إصبع مسجَّلة."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"لا يحتوي هذا الجهاز على مستشعِر بصمات إصبع."</string>
@@ -1171,8 +1172,7 @@
     <string name="not_checked" msgid="7972320087569023342">"لم يتم وضع علامة"</string>
     <string name="selected" msgid="6614607926197755875">"محدّد"</string>
     <string name="not_selected" msgid="410652016565864475">"غير محدّد"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{نجمة واحدة من {max}}zero{# نجمة من {max}}two{نجمتان من {max}}few{# نجوم من {max}}many{# نجمة من {max}}other{# نجمة من {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"قيد التقدّم"</string>
     <string name="whichApplication" msgid="5432266899591255759">"إكمال الإجراء باستخدام"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏إكمال الإجراء باستخدام %1$s"</string>
@@ -1426,7 +1426,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"جارٍ إخراج <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"عدم الإزالة"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"إعداد"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"إلغاء"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"إخراج"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"استكشاف"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"تبديل جهاز إخراج الصوت"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> مفقود"</string>
@@ -1929,8 +1929,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"اللغات المقترَحة"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"الاقتراحات"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"اللغات المُقترَحة"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"المناطق المُقترَحة"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"جميع اللغات"</string>
@@ -2055,8 +2054,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"هل تريد السماح لتطبيق <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> بالوصول إلى جميع سجلّات الجهاز؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنِّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>
@@ -2297,8 +2295,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"التحقّق من التطبيقات النشطة"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"يتعذّر الوصول إلى كاميرا الهاتف من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"لا يمكن الوصول إلى هذا المحتوى أثناء البث. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
     <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
     <string name="default_card_name" msgid="9198284935962911468">"‏رقم البطاقة ‎<xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

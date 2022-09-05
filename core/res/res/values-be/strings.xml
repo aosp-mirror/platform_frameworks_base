@@ -607,7 +607,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Аперацыя з адбіткамі пальцаў скасавана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Занадта шмат спроб. Сканер адбіткаў пальцаў выключаны."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Паўтарыце спробу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
@@ -1169,8 +1170,7 @@
     <string name="not_checked" msgid="7972320087569023342">"не пазначана"</string>
     <string name="selected" msgid="6614607926197755875">"выбраны"</string>
     <string name="not_selected" msgid="410652016565864475">"не выбраны"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Адна зорка з {max}}one{# зорка з {max}}few{# зоркі з {max}}many{# зорак з {max}}other{# зоркі з {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"выконваецца"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Завяршыць дзеянне з дапамогай"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завяршыць дзеянне з дапамогай %1$s"</string>
@@ -1927,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Параметры рэгіёна"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Увядзіце назву мовы"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Прапанаваныя"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Прапанавана"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Прапанаваныя мовы"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Прапанаваныя рэгіёны"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Усе мовы"</string>
@@ -2053,8 +2052,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Дазволіць праграме \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" мець доступ да ўсіх журналаў прылады?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Дазволіць аднаразовы доступ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дазваляць"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Журналы прылад запісваюць усё, што адбываецца на вашай прыладзе. Праграмы выкарыстоўваюць гэтыя журналы для пошуку і выпраўлення памылак.\n\nУ некаторых журналах можа ўтрымлівацца канфідэнцыяльная інфармацыя, таму давайце доступ да ўсіх журналаў прылады толькі тым праграмам, якім вы давяраеце. \n\nКалі вы не дасце гэтай праграме доступу да ўсіх журналаў прылад, у яе ўсё роўна застанецца доступ да ўласных журналаў. Для вытворцы вашай прылады будуць даступнымі некаторыя журналы і інфармацыя на вашай прыладзе."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больш не паказваць"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Праграма <xliff:g id="APP_0">%1$s</xliff:g> запытвае дазвол на паказ зрэзаў праграмы <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Рэдагаваць"</string>
@@ -2295,8 +2293,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Праверце актыўныя праграмы"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не ўдалося атрымаць доступ да камеры тэлефона з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не ўдалося атрымаць доступ да камеры планшэта з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Не ўдаецца атрымаць доступ у час перадачы плынню. Паспрабуйце скарыстаць тэлефон."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандартная сістэмная налада"</string>
     <string name="default_card_name" msgid="9198284935962911468">"КАРТА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -607,7 +607,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Zbyt wiele prób. Czytnik linii papilarnych został wyłączony."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Spróbuj ponownie."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nie zarejestrowano odcisków palców."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"To urządzenie nie jest wyposażone w czytnik linii papilarnych."</string>
@@ -1169,8 +1170,7 @@
     <string name="not_checked" msgid="7972320087569023342">"nie wybrano"</string>
     <string name="selected" msgid="6614607926197755875">"wybrano"</string>
     <string name="not_selected" msgid="410652016565864475">"nie wybrano"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 gwiazdka na {max}}few{# gwiazdki na {max}}many{# gwiazdek na {max}}other{# gwiazdki na {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"w toku"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Wykonaj czynność przez..."</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Wykonaj czynność w aplikacji %1$s"</string>
@@ -1927,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Ustawienie regionu"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Wpisz nazwę języka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugerowane"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugerowane"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Sugerowane języki"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Sugerowane regiony"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Wszystkie języki"</string>
@@ -2053,8 +2052,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Zezwól na jednorazowy dostęp"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nie zezwalaj"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników na urządzeniu."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nie pokazuj ponownie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacja <xliff:g id="APP_0">%1$s</xliff:g> chce pokazywać wycinki z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edytuj"</string>
@@ -2295,8 +2293,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sprawdź aktywne aplikacje"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nie można korzystać z aparatu telefonu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nie można korzystać z aparatu tabletu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Nie można z tego skorzystać podczas strumieniowania. Użyj telefonu."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Ustawienie domyślne systemu"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

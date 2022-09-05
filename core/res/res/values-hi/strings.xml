@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फ़िंगरप्रिंट ऑपरेशन रोक दिया गया."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"उपयोगकर्ता ने फिंगरप्रिंट की पुष्टि की कार्रवाई रद्द कर दी है."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"बहुत ज़्यादा प्रयास कर लिए गए हैं. बाद में फिर से प्रयास करें."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"बहुत ज़्यादा कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"फिर से कोशिश करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"बंद है"</string>
     <string name="selected" msgid="6614607926197755875">"चुना गया"</string>
     <string name="not_selected" msgid="410652016565864475">"नहीं चुना गया"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} में से एक स्टार}one{{max} में से # स्टार}other{{max} में से # स्टार}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"जारी है"</string>
     <string name="whichApplication" msgid="5432266899591255759">"इसका इस्तेमाल करके कार्रवाई को पूरा करें"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s का उपयोग करके कार्रवाई पूरी करें"</string>
@@ -1425,7 +1425,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"निकालें"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"एक्सप्लोर करें"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"आउटपुट बदलें"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> गुम है"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> नहीं मिल रहा है"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"डिवाइस को दोबारा लगाएं"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> को ले जाया जा रहा है"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"डेटा ले जाया जा रहा है"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा का नाम लिखें"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"दिए गए सुझाव"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"सुझाए गए देश/इलाके"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"सुझाई गई भाषाएं"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"सुझाए गए इलाके"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"सभी भाषाएं"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"क्या <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग का ऐक्सेस देना है?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति न दें"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"डिवाइस लॉग में, आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए करते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर अपने लॉग को ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी अब भी डिवाइस के कुछ लॉग या जानकारी को ऐक्सेस कर सकती है."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फिर से न दिखाएं"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
