@@ -1640,7 +1640,7 @@ class Task extends TaskFragment {
      * or {@code null} if none was found.
      */
     private ActivityRecord clearTopActivities(ActivityRecord newR, int launchFlags) {
-        final ActivityRecord r = findActivityInHistory(newR.mActivityComponent);
+        final ActivityRecord r = findActivityInHistory(newR.mActivityComponent, newR.mUserId);
         if (r == null) return null;
 
         final PooledPredicate f = PooledLambda.obtainPredicate(Task::finishActivityAbove,
@@ -1756,17 +1756,18 @@ class Task extends TaskFragment {
      * Find the activity in the history task within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.
      */
-    ActivityRecord findActivityInHistory(ComponentName component) {
+    ActivityRecord findActivityInHistory(ComponentName component, int userId) {
         final PooledPredicate p = PooledLambda.obtainPredicate(Task::matchesActivityInHistory,
-                PooledLambda.__(ActivityRecord.class), component);
+                PooledLambda.__(ActivityRecord.class), component, userId);
         final ActivityRecord r = getActivity(p);
         p.recycle();
         return r;
     }
 
     private static boolean matchesActivityInHistory(
-            ActivityRecord r, ComponentName activityComponent) {
-        return !r.finishing && r.mActivityComponent.equals(activityComponent);
+            ActivityRecord r, ComponentName activityComponent, int userId) {
+        return !r.finishing && r.mActivityComponent.equals(activityComponent)
+                && r.mUserId == userId;
     }
 
     /** Updates the last task description values. */
