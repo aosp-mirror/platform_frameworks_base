@@ -60,6 +60,7 @@ status_t Visualizer::set(int32_t priority,
             SL_IID_VISUALIZATION, nullptr, priority, cbf, user, sessionId, io, device, probe);
     if (status == NO_ERROR || status == ALREADY_EXISTS) {
         initCaptureSize();
+        initSampleRate();
     }
     return status;
 }
@@ -411,6 +412,16 @@ uint32_t Visualizer::initCaptureSize()
     ALOGV("initCaptureSize size %d status %d", mCaptureSize, status);
 
     return size;
+}
+
+void Visualizer::initSampleRate()
+{
+    audio_config_base_t inputConfig, outputConfig;
+    status_t status = getConfigs(&inputConfig, &outputConfig);
+    if (status == NO_ERROR) {
+        mSampleRate = outputConfig.sample_rate * 1000;
+    }
+    ALOGV("%s sample rate %d status %d", __func__, mSampleRate, status);
 }
 
 void Visualizer::controlStatusChanged(bool controlGranted) {

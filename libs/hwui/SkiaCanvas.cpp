@@ -51,6 +51,49 @@ namespace android {
 
 using uirenderer::PaintUtils;
 
+class SkiaCanvas::Clip {
+public:
+    Clip(const SkRect& rect, SkClipOp op, const SkMatrix& m)
+            : mType(Type::Rect), mOp(op), mMatrix(m), mRRect(SkRRect::MakeRect(rect)) {}
+    Clip(const SkRRect& rrect, SkClipOp op, const SkMatrix& m)
+            : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
+    Clip(const SkPath& path, SkClipOp op, const SkMatrix& m)
+            : mType(Type::Path), mOp(op), mMatrix(m), mPath(std::in_place, path) {}
+
+    void apply(SkCanvas* canvas) const {
+        canvas->setMatrix(mMatrix);
+        switch (mType) {
+            case Type::Rect:
+                // Don't anti-alias rectangular clips
+                canvas->clipRect(mRRect.rect(), mOp, false);
+                break;
+            case Type::RRect:
+                // Ensure rounded rectangular clips are anti-aliased
+                canvas->clipRRect(mRRect, mOp, true);
+                break;
+            case Type::Path:
+                // Ensure path clips are anti-aliased
+                canvas->clipPath(mPath.value(), mOp, true);
+                break;
+        }
+    }
+
+private:
+    enum class Type {
+        Rect,
+        RRect,
+        Path,
+    };
+
+    Type mType;
+    SkClipOp mOp;
+    SkMatrix mMatrix;
+
+    // These are logically a union (tracked separately due to non-POD path).
+    std::optional<SkPath> mPath;
+    SkRRect mRRect;
+};
+
 Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
     return new SkiaCanvas(bitmap);
 }
@@ -193,49 +236,6 @@ void SkiaCanvas::restoreUnclippedLayer(int restoreCount, const Paint& paint) {
         this->restore();
     }
 }
-
-class SkiaCanvas::Clip {
-public:
-    Clip(const SkRect& rect, SkClipOp op, const SkMatrix& m)
-            : mType(Type::Rect), mOp(op), mMatrix(m), mRRect(SkRRect::MakeRect(rect)) {}
-    Clip(const SkRRect& rrect, SkClipOp op, const SkMatrix& m)
-            : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
-    Clip(const SkPath& path, SkClipOp op, const SkMatrix& m)
-            : mType(Type::Path), mOp(op), mMatrix(m), mPath(std::in_place, path) {}
-
-    void apply(SkCanvas* canvas) const {
-        canvas->setMatrix(mMatrix);
-        switch (mType) {
-            case Type::Rect:
-                // Don't anti-alias rectangular clips
-                canvas->clipRect(mRRect.rect(), mOp, false);
-                break;
-            case Type::RRect:
-                // Ensure rounded rectangular clips are anti-aliased
-                canvas->clipRRect(mRRect, mOp, true);
-                break;
-            case Type::Path:
-                // Ensure path clips are anti-aliased
-                canvas->clipPath(mPath.value(), mOp, true);
-                break;
-        }
-    }
-
-private:
-    enum class Type {
-        Rect,
-        RRect,
-        Path,
-    };
-
-    Type mType;
-    SkClipOp mOp;
-    SkMatrix mMatrix;
-
-    // These are logically a union (tracked separately due to non-POD path).
-    std::optional<SkPath> mPath;
-    SkRRect mRRect;
-};
 
 const SkiaCanvas::SaveRec* SkiaCanvas::currentSaveRec() const {
     const SaveRec* rec = mSaveStack ? static_cast<const SaveRec*>(mSaveStack->back()) : nullptr;

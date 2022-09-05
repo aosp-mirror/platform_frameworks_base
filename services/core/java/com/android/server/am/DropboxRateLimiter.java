@@ -19,11 +19,13 @@ package com.android.server.am;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
 /** Rate limiter for adding errors into dropbox. */
 public class DropboxRateLimiter {
+    private static final String TAG = "DropboxRateLimiter";
     // After RATE_LIMIT_ALLOWED_ENTRIES have been collected (for a single breakdown of
     // process/eventType) further entries will be rejected until RATE_LIMIT_BUFFER_DURATION has
     // elapsed, after which the current count for this breakdown will be reset.
@@ -103,6 +105,15 @@ public class DropboxRateLimiter {
         }
 
         mLastMapCleanUp = now;
+    }
+
+    /** Resets the rate limiter memory. */
+    void reset() {
+        synchronized (mErrorClusterRecords) {
+            mErrorClusterRecords.clear();
+        }
+        mLastMapCleanUp = 0L;
+        Slog.i(TAG, "Rate limiter reset.");
     }
 
     String errorKey(String eventType, String processName) {

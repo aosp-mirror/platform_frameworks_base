@@ -74,7 +74,7 @@
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"आपकी प्रोफ़ाइल के लिए यह ऐप्लिकेशन ज़रूरी है और उसे अनइंस्टॉल नहीं किया जा सकता."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"आपके डिवाइस एडमिन के लिए यह ऐप्लिकेशन ज़रूरी है और इसे अनइंस्टॉल नहीं किया जा सकता."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"डिवाइस एडमिन ऐप्लिकेशन प्रबंधित करें"</string>
-    <string name="manage_users" msgid="1243995386982560813">"उपयोगकर्ताओं को प्रबंधित करें"</string>
+    <string name="manage_users" msgid="1243995386982560813">"उपयोगकर्ताओं को मैनेज करें"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> को अनइंस्‍टॉल नहीं किया जा सका."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"पैकेज को पार्स करने में कोई समस्‍या थी."</string>
     <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>

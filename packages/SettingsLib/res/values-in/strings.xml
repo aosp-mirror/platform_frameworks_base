@@ -232,7 +232,7 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Setelan VPN tidak tersedia untuk pengguna ini"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Setelan Penambatan tidak tersedia untuk pengguna ini"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Setelan Nama Titik Akses tidak tersedia untuk pengguna ini"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"Debugging USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Proses debug USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Mode debug ketika USB terhubung"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Cabut otorisasi debug USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Proses debug nirkabel"</string>

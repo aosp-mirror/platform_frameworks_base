@@ -286,8 +286,8 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Pretende desbloquear o microfone do dispositivo?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Pretende desbloquear a câmara do dispositivo?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Pretende desbloquear a câmara e o microfone?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar o seu microfone."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar a sua câmara."</string>

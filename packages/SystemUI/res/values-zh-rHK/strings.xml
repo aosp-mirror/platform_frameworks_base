@@ -132,8 +132,8 @@
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"請再試一次"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"輕按即可取消驗證"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"請再試一次"</string>
-    <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"正在尋找您的臉孔"</string>
-    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"臉孔已經驗證"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"正在尋找您的面孔"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"面孔已經驗證"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已確認"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕按 [確定] 以完成"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"已使用面孔解鎖。按解鎖圖示即可繼續。"</string>
