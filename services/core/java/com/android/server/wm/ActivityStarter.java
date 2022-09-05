@@ -2379,7 +2379,8 @@ class ActivityStarter {
             // already be running somewhere in the history, and we want to shuffle it to
             // the front of the root task if so.
             final ActivityRecord act =
-                    targetTask.findActivityInHistory(mStartActivity.mActivityComponent);
+                    targetTask.findActivityInHistory(mStartActivity.mActivityComponent,
+                            mStartActivity.mUserId);
             if (act != null) {
                 final Task task = act.getTask();
                 task.moveActivityToFrontLocked(act);
