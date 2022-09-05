@@ -19,19 +19,15 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.TYPE_INTERNAL;
-import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_MANDATORY_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -107,7 +103,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
@@ -132,8 +127,6 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
-import android.view.PrivacyIndicatorBounds;
-import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
@@ -151,7 +144,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ForceShowNavBarSettingsObserver;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
@@ -166,7 +158,6 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -242,6 +233,8 @@ public class DisplayPolicy {
 
     private final SystemGesturesPointerEventListener mSystemGestures;
 
+    final DecorInsets mDecorInsets;
+
     private volatile int mLidState = LID_ABSENT;
     private volatile int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private volatile boolean mHdmiPlugged;
@@ -266,7 +259,6 @@ public class DisplayPolicy {
 
     private WindowState mStatusBar = null;
     private volatile WindowState mNotificationShade;
-    private final int[] mStatusBarHeightForRotation = new int[4];
     private WindowState mNavigationBar = null;
     @NavigationBarPosition
     private int mNavigationBarPosition = NAV_BAR_BOTTOM;
@@ -353,7 +345,6 @@ public class DisplayPolicy {
 
     private static final Rect sTmpRect = new Rect();
     private static final Rect sTmpRect2 = new Rect();
-    private static final Rect sTmpLastParentFrame = new Rect();
     private static final Rect sTmpDisplayCutoutSafe = new Rect();
     private static final ClientWindowFrames sTmpClientFrames = new ClientWindowFrames();
 
@@ -390,16 +381,6 @@ public class DisplayPolicy {
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
-
-    // TODO (b/235842600): Use public type once we can treat task bar as navigation bar.
-    private static final int[] STABLE_TYPES = new int[]{
-            ITYPE_TOP_DISPLAY_CUTOUT, ITYPE_RIGHT_DISPLAY_CUTOUT, ITYPE_BOTTOM_DISPLAY_CUTOUT,
-            ITYPE_LEFT_DISPLAY_CUTOUT, ITYPE_NAVIGATION_BAR, ITYPE_STATUS_BAR, ITYPE_CLIMATE_BAR
-    };
-    private static final int[] NON_DECOR_TYPES = new int[]{
-            ITYPE_TOP_DISPLAY_CUTOUT, ITYPE_RIGHT_DISPLAY_CUTOUT, ITYPE_BOTTOM_DISPLAY_CUTOUT,
-            ITYPE_LEFT_DISPLAY_CUTOUT, ITYPE_NAVIGATION_BAR
-    };
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
@@ -444,6 +425,7 @@ public class DisplayPolicy {
                 : service.mAtmService.mSystemThread
                         .getSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
+        mDecorInsets = new DecorInsets(displayContent);
         mLock = service.getWindowManagerLock();
 
         final int displayId = displayContent.getDisplayId();
@@ -1226,7 +1208,7 @@ public class DisplayPolicy {
                                     Math.max(displayFrames.mDisplayCutoutSafe.left, 0);
                             inOutFrame.left = 0;
                             inOutFrame.top = 0;
-                            inOutFrame.bottom = displayFrames.mDisplayHeight;
+                            inOutFrame.bottom = displayFrames.mHeight;
                             inOutFrame.right = leftSafeInset + mLeftGestureInset;
                         });
                 mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
@@ -1236,8 +1218,8 @@ public class DisplayPolicy {
                                             displayFrames.mUnrestricted.right);
                             inOutFrame.left = rightSafeInset - mRightGestureInset;
                             inOutFrame.top = 0;
-                            inOutFrame.bottom = displayFrames.mDisplayHeight;
-                            inOutFrame.right = displayFrames.mDisplayWidth;
+                            inOutFrame.bottom = displayFrames.mHeight;
+                            inOutFrame.right = displayFrames.mWidth;
                         });
                 mDisplayContent.setInsetProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT, win,
                         (displayFrames, windowContainer, inOutFrame) -> {
@@ -1426,11 +1408,6 @@ public class DisplayPolicy {
             statusBarHeight = 0;
         }
         return Math.max(statusBarHeight, displayFrames.mDisplayCutoutSafe.top);
-    }
-
-    @VisibleForTesting
-    int getStatusBarHeightForRotation(@Surface.Rotation int rotation) {
-        return SystemBarUtils.getStatusBarHeightForRotation(mUiContext, rotation);
     }
 
     WindowState getStatusBar() {
@@ -1928,25 +1905,11 @@ public class DisplayPolicy {
 
         final Resources res = getCurrentUserResources();
         final int portraitRotation = displayRotation.getPortraitRotation();
-        final int upsideDownRotation = displayRotation.getUpsideDownRotation();
-        final int landscapeRotation = displayRotation.getLandscapeRotation();
-        final int seascapeRotation = displayRotation.getSeascapeRotation();
 
         if (hasStatusBar()) {
-            mStatusBarHeightForRotation[portraitRotation] =
-                    mStatusBarHeightForRotation[upsideDownRotation] =
-                            getStatusBarHeightForRotation(portraitRotation);
-            mStatusBarHeightForRotation[landscapeRotation] =
-                    getStatusBarHeightForRotation(landscapeRotation);
-            mStatusBarHeightForRotation[seascapeRotation] =
-                    getStatusBarHeightForRotation(seascapeRotation);
             mDisplayCutoutTouchableRegionSize = res.getDimensionPixelSize(
                     R.dimen.display_cutout_touchable_region_size);
         } else {
-            mStatusBarHeightForRotation[portraitRotation] =
-                    mStatusBarHeightForRotation[upsideDownRotation] =
-                            mStatusBarHeightForRotation[landscapeRotation] =
-                                    mStatusBarHeightForRotation[seascapeRotation] = 0;
             mDisplayCutoutTouchableRegionSize = 0;
         }
 
@@ -2052,33 +2015,9 @@ public class DisplayPolicy {
     }
 
     /**
-     * Return the display frame available after excluding any screen decorations that could never be
-     * removed in Honeycomb. That is, system bar or button bar.
-     *
-     * @return display frame excluding all non-decor insets.
-     */
-    Rect getNonDecorDisplayFrame(int fullWidth, int fullHeight, int rotation,
-            WmDisplayCutout cutout) {
-        final DisplayFrames displayFrames =
-                getSimulatedDisplayFrames(rotation, fullWidth, fullHeight, cutout);
-        return getNonDecorDisplayFrameWithSimulatedFrame(displayFrames);
-    }
-
-    Rect getNonDecorDisplayFrameWithSimulatedFrame(DisplayFrames displayFrames) {
-        final Rect nonDecorInsets =
-                getInsetsWithInternalTypes(displayFrames, NON_DECOR_TYPES).toRect();
-        final Rect displayFrame = new Rect(displayFrames.mInsetsState.getDisplayFrame());
-        displayFrame.inset(nonDecorInsets);
-        return displayFrame;
-    }
-
-    /**
      * Get the Navigation Bar Frame height. This dimension is the height of the navigation bar that
      * is used for spacing to show additional buttons on the navigation bar (such as the ime
-     * switcher when ime is visible) while {@link #getNavigationBarHeight} is used for the visible
-     * height that we send to the app as content insets that can be smaller.
-     * <p>
-     * In car mode it will return the same height as {@link #getNavigationBarHeight}
+     * switcher when ime is visible).
      *
      * @param rotation specifies rotation to return dimension from
      * @return navigation bar frame height
@@ -2088,26 +2027,6 @@ public class DisplayPolicy {
             return 0;
         }
         return mNavigationBar.mAttrs.forRotation(rotation).height;
-    }
-
-    /**
-     * Return the available screen size that we should report for the
-     * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayFrame(int, int, int, DisplayCutout)}; it may be smaller
-     * than that to account for more transient decoration like a status bar.
-     */
-    public Point getConfigDisplaySize(int fullWidth, int fullHeight, int rotation,
-            WmDisplayCutout wmDisplayCutout) {
-        final DisplayFrames displayFrames = getSimulatedDisplayFrames(rotation, fullWidth,
-                fullHeight, wmDisplayCutout);
-        return getConfigDisplaySizeWithSimulatedFrame(displayFrames);
-    }
-
-    Point getConfigDisplaySizeWithSimulatedFrame(DisplayFrames displayFrames) {
-        final Insets insets = getInsetsWithInternalTypes(displayFrames, STABLE_TYPES);
-        Rect configFrame = new Rect(displayFrames.mInsetsState.getDisplayFrame());
-        configFrame.inset(insets);
-        return new Point(configFrame.width(), configFrame.height());
     }
 
     /**
@@ -2125,89 +2044,152 @@ public class DisplayPolicy {
         return mShowingDream;
     }
 
-    /**
-     * Calculates the stable insets if we already have the non-decor insets.
-     *
-     * @param inOutInsets The known non-decor insets. It will be modified to stable insets.
-     * @param rotation The current display rotation.
-     */
-    void convertNonDecorInsetsToStableInsets(Rect inOutInsets, int rotation) {
-        inOutInsets.top = Math.max(inOutInsets.top, mStatusBarHeightForRotation[rotation]);
+    /** The latest insets and frames for screen configuration calculation. */
+    static class DecorInsets {
+        static class Info {
+            /**
+             * The insets for the areas that could never be removed, i.e. display cutout and
+             * navigation bar. Note that its meaning is actually "decor insets". The "non" is just
+             * because it is used to calculate {@link #mNonDecorFrame}.
+             */
+            final Rect mNonDecorInsets = new Rect();
+
+            /**
+             * The stable insets that can affect configuration. The sources are usually from
+             * display cutout, navigation bar, and status bar.
+             */
+            final Rect mConfigInsets = new Rect();
+
+            /** The display frame available after excluding {@link #mNonDecorInsets}. */
+            final Rect mNonDecorFrame = new Rect();
+
+            /**
+             * The available (stable) screen size that we should report for the configuration.
+             * This must be no larger than {@link #mNonDecorFrame}; it may be smaller than that
+             * to account for more transient decoration like a status bar.
+             */
+            final Rect mConfigFrame = new Rect();
+
+            private boolean mNeedUpdate = true;
+
+            void update(DisplayContent dc, int rotation, int w, int h) {
+                final DisplayFrames df = new DisplayFrames();
+                dc.updateDisplayFrames(df, rotation, w, h);
+                dc.getDisplayPolicy().simulateLayoutDisplay(df);
+                final InsetsState insetsState = df.mInsetsState;
+                final Rect displayFrame = insetsState.getDisplayFrame();
+                final Insets decor = calculateDecorInsetsWithInternalTypes(insetsState);
+                final Insets statusBar = insetsState.calculateInsets(displayFrame,
+                        Type.statusBars(), true /* ignoreVisibility */);
+                mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
+                mConfigInsets.set(Math.max(statusBar.left, decor.left),
+                        Math.max(statusBar.top, decor.top),
+                        Math.max(statusBar.right, decor.right),
+                        Math.max(statusBar.bottom, decor.bottom));
+                mNonDecorFrame.set(displayFrame);
+                mNonDecorFrame.inset(mNonDecorInsets);
+                mConfigFrame.set(displayFrame);
+                mConfigFrame.inset(mConfigInsets);
+                mNeedUpdate = false;
+            }
+
+            void set(Info other) {
+                mNonDecorInsets.set(other.mNonDecorInsets);
+                mConfigInsets.set(other.mConfigInsets);
+                mNonDecorFrame.set(other.mNonDecorFrame);
+                mConfigFrame.set(other.mConfigFrame);
+                mNeedUpdate = false;
+            }
+
+            @Override
+            public String toString() {
+                return "{nonDecorInsets=" + mNonDecorInsets
+                        + ", configInsets=" + mConfigInsets
+                        + ", nonDecorFrame=" + mNonDecorFrame
+                        + ", configFrame=" + mConfigFrame + '}';
+            }
+        }
+
+        // TODO (b/235842600): Use public type once we can treat task bar as navigation bar.
+        static final int[] INTERNAL_DECOR_TYPES;
+        static {
+            final ArraySet<Integer> decorTypes = InsetsState.toInternalType(
+                    Type.displayCutout() | Type.navigationBars());
+            decorTypes.remove(ITYPE_EXTRA_NAVIGATION_BAR);
+            INTERNAL_DECOR_TYPES = new int[decorTypes.size()];
+            for (int i = 0; i < INTERNAL_DECOR_TYPES.length; i++) {
+                INTERNAL_DECOR_TYPES[i] = decorTypes.valueAt(i);
+            }
+        }
+
+        private final DisplayContent mDisplayContent;
+        private final Info[] mInfoForRotation = new Info[4];
+        final Info mTmpInfo = new Info();
+
+        DecorInsets(DisplayContent dc) {
+            mDisplayContent = dc;
+            for (int i = mInfoForRotation.length - 1; i >= 0; i--) {
+                mInfoForRotation[i] = new Info();
+            }
+        }
+
+        Info get(int rotation, int w, int h) {
+            final Info info = mInfoForRotation[rotation];
+            if (info.mNeedUpdate) {
+                info.update(mDisplayContent, rotation, w, h);
+            }
+            return info;
+        }
+
+        /** Called when the screen decor insets providers have changed. */
+        void invalidate() {
+            for (Info info : mInfoForRotation) {
+                info.mNeedUpdate = true;
+            }
+        }
+
+        // TODO (b/235842600): Remove this method once we can treat task bar as navigation bar.
+        private static Insets calculateDecorInsetsWithInternalTypes(InsetsState state) {
+            final Rect frame = state.getDisplayFrame();
+            Insets insets = Insets.NONE;
+            for (int i = INTERNAL_DECOR_TYPES.length - 1; i >= 0; i--) {
+                final InsetsSource source = state.peekSource(INTERNAL_DECOR_TYPES[i]);
+                if (source != null) {
+                    insets = Insets.max(source.calculateInsets(frame, true /* ignoreVisibility */),
+                            insets);
+                }
+            }
+            return insets;
+        }
     }
 
     /**
-     * Calculates the stable insets without running a layout.
-     *
-     * @param displayRotation the current display rotation
-     * @param displayWidth full display width
-     * @param displayHeight full display height
-     * @param displayCutout the current display cutout
-     * @param outInsets the insets to return
+     * If the decor insets changes, the display configuration may be affected. The caller should
+     * call {@link DisplayContent#sendNewConfiguration()} if this method returns {@code true}.
      */
-    public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            WmDisplayCutout displayCutout, Rect outInsets) {
-        final DisplayFrames displayFrames = getSimulatedDisplayFrames(displayRotation,
-                displayWidth, displayHeight, displayCutout);
-        getStableInsetsWithSimulatedFrame(displayFrames, outInsets);
+    boolean updateDecorInsetsInfoIfNeeded(WindowState win) {
+        if (!win.providesNonDecorInsets()) {
+            return false;
+        }
+        final DisplayFrames displayFrames = mDisplayContent.mDisplayFrames;
+        final int rotation = displayFrames.mRotation;
+        final int dw = displayFrames.mWidth;
+        final int dh = displayFrames.mHeight;
+        final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
+        newInfo.update(mDisplayContent, rotation, dw, dh);
+        final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
+        if (newInfo.mNonDecorFrame.equals(currentInfo.mNonDecorFrame)) {
+            return false;
+        }
+        mDecorInsets.invalidate();
+        mDecorInsets.mInfoForRotation[rotation].set(newInfo);
+        // If the device is booting, let the boot procedure trigger the new configuration.
+        // Otherwise the display configuration needs to be recomputed now.
+        return mService.mDisplayEnabled;
     }
 
-    void getStableInsetsWithSimulatedFrame(DisplayFrames displayFrames, Rect outInsets) {
-        // Navigation bar, status bar, and cutout.
-        outInsets.set(getInsetsWithInternalTypes(displayFrames, STABLE_TYPES).toRect());
-    }
-
-    /**
-     * Calculates the insets for the areas that could never be removed in Honeycomb, i.e. system
-     * bar or button bar. See {@link #getNonDecorDisplayFrame}.
-     *
-     * @param displayRotation the current display rotation
-     * @param fullWidth the width of the display, including all insets
-     * @param fullHeight the height of the display, including all insets
-     * @param cutout the current display cutout
-     * @param outInsets the insets to return
-     */
-    public void getNonDecorInsetsLw(int displayRotation, int fullWidth, int fullHeight,
-            WmDisplayCutout cutout, Rect outInsets) {
-        final DisplayFrames displayFrames =
-                getSimulatedDisplayFrames(displayRotation, fullWidth, fullHeight, cutout);
-        getNonDecorInsetsWithSimulatedFrame(displayFrames, outInsets);
-    }
-
-    void getNonDecorInsetsWithSimulatedFrame(DisplayFrames displayFrames, Rect outInsets) {
-        outInsets.set(getInsetsWithInternalTypes(displayFrames, NON_DECOR_TYPES).toRect());
-    }
-
-    DisplayFrames getSimulatedDisplayFrames(int displayRotation, int fullWidth,
-            int fullHeight, WmDisplayCutout cutout) {
-        final DisplayInfo info = new DisplayInfo(mDisplayContent.getDisplayInfo());
-        info.rotation = displayRotation;
-        info.logicalWidth = fullWidth;
-        info.logicalHeight = fullHeight;
-        info.displayCutout = cutout.getDisplayCutout();
-        final RoundedCorners roundedCorners =
-                mDisplayContent.calculateRoundedCornersForRotation(displayRotation);
-        final PrivacyIndicatorBounds indicatorBounds =
-                mDisplayContent.calculatePrivacyIndicatorBoundsForRotation(displayRotation);
-        final DisplayFrames displayFrames = new DisplayFrames(getDisplayId(), new InsetsState(),
-                info, cutout, roundedCorners, indicatorBounds);
-        simulateLayoutDisplay(displayFrames);
-        return displayFrames;
-    }
-
-    @VisibleForTesting
-    Insets getInsets(DisplayFrames displayFrames, @InsetsType int type) {
-        final InsetsState state = displayFrames.mInsetsState;
-        final Insets insets = state.calculateInsets(state.getDisplayFrame(), type,
-                true /* ignoreVisibility */);
-        return insets;
-    }
-
-    Insets getInsetsWithInternalTypes(DisplayFrames displayFrames,
-            @InternalInsetsType int[] types) {
-        final InsetsState state = displayFrames.mInsetsState;
-        final Insets insets = state.calculateInsetsWithInternalTypes(state.getDisplayFrame(), types,
-                true /* ignoreVisibility */);
-        return insets;
+    DecorInsets.Info getDecorInsetsInfo(int rotation, int w, int h) {
+        return mDecorInsets.get(rotation, w, h);
     }
 
     @NavigationBarPosition
@@ -2850,6 +2832,11 @@ public class DisplayPolicy {
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
         pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars=");
         pw.println(mDisplayContent.getInsetsPolicy().getRemoteInsetsControllerControlsSystemBars());
+        pw.print(prefix); pw.println("mDecorInsetsInfo:");
+        for (int rotation = 0; rotation < mDecorInsets.mInfoForRotation.length; rotation++) {
+            final DecorInsets.Info info = mDecorInsets.mInfoForRotation[rotation];
+            pw.println(prefixInner + Surface.rotationToString(rotation) + "=" + info);
+        }
         mSystemGestures.dump(pw, prefix);
 
         pw.print(prefix); pw.println("Looper state:");
