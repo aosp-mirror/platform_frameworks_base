@@ -59,6 +59,8 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
                 }
             }
         }
+
+        logMsg("Initialize Completed: ${entryMap.size} entries in ${pageToEntryListMap.size} pages")
     }
 
     fun printAllPages() {
