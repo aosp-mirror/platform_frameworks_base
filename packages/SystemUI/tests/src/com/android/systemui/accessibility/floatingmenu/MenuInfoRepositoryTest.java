@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
@@ -25,6 +26,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,13 +44,24 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
     @Mock
     private MenuInfoRepository.OnSettingsContentsChanged mMockSettingsContentsChanged;
 
+    private MenuInfoRepository mMenuInfoRepository;
+
+    @Before
+    public void setUp() {
+        mMenuInfoRepository = new MenuInfoRepository(mContext, mMockSettingsContentsChanged);
+    }
+
     @Test
     public void menuSizeTypeChanged_verifyOnSizeTypeChanged() {
-        final MenuInfoRepository menuInfoRepository =
-                new MenuInfoRepository(mContext,  mMockSettingsContentsChanged);
-
-        menuInfoRepository.mMenuSizeContentObserver.onChange(true);
+        mMenuInfoRepository.mMenuSizeContentObserver.onChange(true);
 
         verify(mMockSettingsContentsChanged).onSizeTypeChanged(anyInt());
+    }
+
+    @Test
+    public void menuOpacityChanged_verifyOnFadeEffectChanged() {
+        mMenuInfoRepository.mMenuFadeOutContentObserver.onChange(true);
+
+        verify(mMockSettingsContentsChanged).onFadeEffectInfoChanged(any(MenuFadeEffectInfo.class));
     }
 }

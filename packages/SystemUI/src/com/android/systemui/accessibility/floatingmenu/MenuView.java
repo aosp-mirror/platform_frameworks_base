@@ -53,6 +53,8 @@ class MenuView extends FrameLayout implements
     private final RecyclerView mTargetFeaturesView;
     private final ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
             this::updateSystemGestureExcludeRects;
+    private final Observer<MenuFadeEffectInfo> mFadeEffectInfoObserver =
+            this::onMenuFadeEffectInfoChanged;
     private final Observer<Position> mPercentagePositionObserver = this::onPercentagePosition;
     private final Observer<Integer> mSizeTypeObserver = this::onSizeTypeChanged;
     private final Observer<List<AccessibilityTarget>> mTargetFeaturesObserver =
@@ -154,6 +156,8 @@ class MenuView extends FrameLayout implements
 
     @SuppressLint("NotifyDataSetChanged")
     private void onSizeTypeChanged(int newSizeType) {
+        mMenuAnimationController.fadeInNowIfEnabled();
+
         mMenuViewAppearance.setSizeType(newSizeType);
 
         mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
@@ -163,10 +167,14 @@ class MenuView extends FrameLayout implements
         onSizeChanged();
         onEdgeChanged();
         onPositionChanged();
+
+        mMenuAnimationController.fadeOutIfEnabled();
     }
 
     private void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures) {
         // TODO(b/252756133): Should update specific item instead of the whole list
+        mMenuAnimationController.fadeInNowIfEnabled();
+
         mTargetFeatures.clear();
         mTargetFeatures.addAll(newTargetFeatures);
         mMenuViewAppearance.setTargetFeaturesSize(mTargetFeatures.size());
@@ -176,6 +184,13 @@ class MenuView extends FrameLayout implements
         onSizeChanged();
         onEdgeChanged();
         onPositionChanged();
+
+        mMenuAnimationController.fadeOutIfEnabled();
+    }
+
+    private void onMenuFadeEffectInfoChanged(MenuFadeEffectInfo fadeEffectInfo) {
+        mMenuAnimationController.updateOpacityWith(fadeEffectInfo.isFadeEffectEnabled(),
+                fadeEffectInfo.getOpacity());
     }
 
     Rect getMenuDraggableBounds() {
@@ -191,6 +206,7 @@ class MenuView extends FrameLayout implements
 
     void show() {
         mMenuViewModel.getPercentagePositionData().observeForever(mPercentagePositionObserver);
+        mMenuViewModel.getFadeEffectInfoData().observeForever(mFadeEffectInfoObserver);
         mMenuViewModel.getTargetFeaturesData().observeForever(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().observeForever(mSizeTypeObserver);
         setVisibility(VISIBLE);
@@ -203,6 +219,7 @@ class MenuView extends FrameLayout implements
         setVisibility(GONE);
         mBoundsInParent.setEmpty();
         mMenuViewModel.getPercentagePositionData().removeObserver(mPercentagePositionObserver);
+        mMenuViewModel.getFadeEffectInfoData().removeObserver(mFadeEffectInfoObserver);
         mMenuViewModel.getTargetFeaturesData().removeObserver(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().removeObserver(mSizeTypeObserver);
         mMenuViewModel.unregisterContentObservers();

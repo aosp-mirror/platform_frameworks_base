@@ -16,8 +16,13 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static java.util.Objects.requireNonNull;
+
+import android.animation.ValueAnimator;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
@@ -39,13 +44,20 @@ class MenuAnimationController {
     private static final boolean DEBUG = false;
     private static final float MIN_PERCENT = 0.0f;
     private static final float MAX_PERCENT = 1.0f;
+    private static final float COMPLETELY_OPAQUE = 1.0f;
     private static final float FLING_FRICTION_SCALAR = 1.9f;
     private static final float DEFAULT_FRICTION = 4.2f;
     private static final float SPRING_AFTER_FLING_DAMPING_RATIO = 0.85f;
     private static final float SPRING_STIFFNESS = 700f;
     private static final float ESCAPE_VELOCITY = 750f;
 
+    private static final int FADE_OUT_DURATION_MS = 1000;
+    private static final int FADE_EFFECT_DURATION_MS = 3000;
+
     private final MenuView mMenuView;
+    private final ValueAnimator mFadeOutAnimator;
+    private final Handler mHandler;
+    private boolean mIsFadeEffectEnabled;
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
     // DynamicAnimation.TRANSLATION_Y} to be well controlled by the touch handler
@@ -54,6 +66,12 @@ class MenuAnimationController {
 
     MenuAnimationController(MenuView menuView) {
         mMenuView = menuView;
+
+        mHandler = createUiHandler();
+        mFadeOutAnimator = new ValueAnimator();
+        mFadeOutAnimator.setDuration(FADE_OUT_DURATION_MS);
+        mFadeOutAnimator.addUpdateListener(
+                (animation) -> menuView.setAlpha((float) animation.getAnimatedValue()));
     }
 
     void moveToPosition(PointF position) {
@@ -208,6 +226,43 @@ class MenuAnimationController {
                 ? MIN_PERCENT
                 : Math.min(MAX_PERCENT, position.y / draggableBounds.height());
         mMenuView.persistPositionAndUpdateEdge(new Position(percentageX, percentageY));
+    }
+
+    void updateOpacityWith(boolean isFadeEffectEnabled, float newOpacityValue) {
+        mIsFadeEffectEnabled = isFadeEffectEnabled;
+
+        mHandler.removeCallbacksAndMessages(/* token= */ null);
+        mFadeOutAnimator.cancel();
+        mFadeOutAnimator.setFloatValues(COMPLETELY_OPAQUE, newOpacityValue);
+        mHandler.post(() -> mMenuView.setAlpha(
+                mIsFadeEffectEnabled ? newOpacityValue : COMPLETELY_OPAQUE));
+    }
+
+    void fadeInNowIfEnabled() {
+        if (!mIsFadeEffectEnabled) {
+            return;
+        }
+
+        cancelAndRemoveCallbacksAndMessages();
+        mHandler.post(() -> mMenuView.setAlpha(COMPLETELY_OPAQUE));
+    }
+
+    void fadeOutIfEnabled() {
+        if (!mIsFadeEffectEnabled) {
+            return;
+        }
+
+        cancelAndRemoveCallbacksAndMessages();
+        mHandler.postDelayed(mFadeOutAnimator::start, FADE_EFFECT_DURATION_MS);
+    }
+
+    private void cancelAndRemoveCallbacksAndMessages() {
+        mFadeOutAnimator.cancel();
+        mHandler.removeCallbacksAndMessages(/* token= */ null);
+    }
+
+    private Handler createUiHandler() {
+        return new Handler(requireNonNull(Looper.myLooper(), "looper must not be null"));
     }
 
     static class MenuPositionProperty

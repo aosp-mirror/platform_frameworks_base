@@ -55,6 +55,7 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
 
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                mMenuAnimationController.fadeInNowIfEnabled();
                 mTouchSlop = ViewConfiguration.get(recyclerView.getContext()).getScaledTouchSlop();
                 mDown.set(motionEvent.getRawX(), motionEvent.getRawY());
                 mMenuTranslationDown.set(menuView.getTranslationX(), menuView.getTranslationY());
