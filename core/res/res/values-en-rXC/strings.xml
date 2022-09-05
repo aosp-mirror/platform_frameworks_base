@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎Fingerprint operation canceled.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎Fingerprint operation canceled by user.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‎Too many attempts. Try again later.‎‏‎‎‏‎"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‏‎‏‏‎‏‎‎‎‏‎‏‏‎‎‎‏‏‎‏‏‏‏‏‎‏‎‎‎‏‏‎‎‎‎‏‎‏‏‎Too many attempts. Use screen lock instead.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‏‏‎‏‏‎‏‏‎‏‎‏‎‏‏‎‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‎‎Try again.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‎‎‏‏‏‎‏‏‎‏‏‎‏‎‎‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‏‏‏‎‎‎‎‏‎‏‏‎‎‏‏‎‏‏‎No fingerprints enrolled.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‎‏‎‎‎‏‎‏‏‎‏‏‏‏‎‎‎‏‎‎‎‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‎‎‎‎‎‏‏‎‎‏‎‏‏‎‎This device does not have a fingerprint sensor.‎‏‎‎‏‎"</string>
