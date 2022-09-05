@@ -42,7 +42,7 @@ internal class TogglePermissionAppListPageProvider(
 ) : SettingsPageProvider {
     override val name = NAME
 
-    override val arguments = listOf(
+    override val parameter = listOf(
         navArgument(PERMISSION) { type = NavType.StringType },
     )
 
@@ -81,6 +81,7 @@ internal class TogglePermissionAppListPageProvider(
          * Expose route to enable enter from non-SPA pages.
          */
         internal fun getRoute(permissionType: String) = "$NAME/$permissionType"
+
         @Composable
         internal fun navigator(permissionType: String) = navigator(route = getRoute(permissionType))
     }
