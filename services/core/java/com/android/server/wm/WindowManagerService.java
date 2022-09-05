@@ -319,7 +319,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -1857,7 +1856,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
 
             if ((win.isVisibleRequestedOrAdding() && displayContent.updateOrientation())
-                    || win.providesNonDecorInsets()) {
+                    || displayPolicy.updateDecorInsetsInfoIfNeeded(win)) {
                 displayContent.sendNewConfiguration();
             }
 
@@ -2254,7 +2253,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Arrays.fill(outActiveControls, null);
         }
         int result = 0;
-        boolean configChanged;
+        boolean configChanged = false;
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -2321,9 +2320,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 flagChanges = win.mAttrs.flags ^ attrs.flags;
                 privateFlagChanges = win.mAttrs.privateFlags ^ attrs.privateFlags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
-                if ((attrChanges & (WindowManager.LayoutParams.LAYOUT_CHANGED
-                        | WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED)) != 0) {
+                final boolean layoutChanged =
+                        (attrChanges & WindowManager.LayoutParams.LAYOUT_CHANGED) != 0;
+                if (layoutChanged || (attrChanges
+                        & WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED) != 0) {
                     win.mLayoutNeeded = true;
+                }
+                if (layoutChanged) {
+                    configChanged = displayPolicy.updateDecorInsetsInfoIfNeeded(win);
                 }
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
@@ -2534,7 +2538,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: updateOrientation");
-            configChanged = displayContent.updateOrientation();
+            configChanged |= displayContent.updateOrientation();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
             if (toBeDisplayed && win.mIsWallpaper) {
@@ -7177,9 +7181,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
-            final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(di.rotation);
-            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    cutout, outInsets);
+            outInsets.set(dc.getDisplayPolicy().getDecorInsetsInfo(
+                    di.rotation, di.logicalWidth, di.logicalHeight).mConfigInsets);
         }
     }
 

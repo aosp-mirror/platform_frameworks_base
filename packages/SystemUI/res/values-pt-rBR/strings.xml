@@ -161,6 +161,10 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Não foi possível reconhecer o rosto Use a impressão digital."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
+    <skip />
+    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth conectado."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentagem da bateria desconhecida."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -419,10 +423,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Sobreposição de legendas"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ativar"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desativar"</string>
-    <!-- no translation found for sound_settings (8874581353127418308) -->
-    <skip />
-    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
-    <skip />
+    <string name="sound_settings" msgid="8874581353127418308">"Som e vibração"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Configurações"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"O app está fixado"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Visão geral e mantenha essas opções pressionadas para liberar."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Início e mantenha essas opções pressionadas para liberar."</string>
