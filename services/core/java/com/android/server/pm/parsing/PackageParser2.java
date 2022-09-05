@@ -34,6 +34,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.PackageImpl;
@@ -151,6 +152,12 @@ public class PackageParser2 implements AutoCloseable {
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches,
             List<File> frameworkSplits) throws PackageManagerException {
+        var files = packageFile.listFiles();
+        // Apk directory is directly nested under the current directory
+        if (ArrayUtils.size(files) == 1 && files[0].isDirectory()) {
+            packageFile = files[0];
+        }
+
         if (useCaches && mCacher != null) {
             ParsedPackage parsed = mCacher.getCachedResult(packageFile, flags);
             if (parsed != null) {
