@@ -1778,6 +1778,43 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @VisibleForTesting
+    int getUserAssignedToDisplay(int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return getCurrentUserId();
+        }
+
+        if (!mUsersOnSecondaryDisplaysEnabled) {
+            int currentUserId = getCurrentUserId();
+            Slogf.w(LOG_TAG, "getUsersAssignedToDisplay(%d) called with non-DEFAULT_DISPLAY on "
+                    + "system that doesn't support that; returning current user (%d)", displayId,
+                    currentUserId);
+            return currentUserId;
+        }
+
+        synchronized (mUsersOnSecondaryDisplays) {
+            for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
+                if (mUsersOnSecondaryDisplays.valueAt(i) != displayId) {
+                    continue;
+                }
+                int userId = mUsersOnSecondaryDisplays.keyAt(i);
+                if (!isProfileUnchecked(userId)) {
+                    return userId;
+                } else if (DBG_MUMD) {
+                    Slogf.d(LOG_TAG, "getUserAssignedToDisplay(%d): skipping user %d because it's "
+                            + "a profile", displayId, userId);
+                }
+            }
+        }
+
+        int currentUserId = getCurrentUserId();
+        if (DBG_MUMD) {
+            Slogf.d(LOG_TAG, "getUserAssignedToDisplay(%d): no user assigned to display, returning "
+                    + "current user (%d) instead", displayId, currentUserId);
+        }
+        return currentUserId;
+    }
+
     /**
      * Gets the current user id, calling {@link ActivityManagerInternal} directly (and without
      * performing any permission check).
@@ -6826,6 +6863,11 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public int getDisplayAssignedToUser(int userId) {
             return UserManagerService.this.getDisplayAssignedToUser(userId);
+        }
+
+        @Override
+        public int getUserAssignedToDisplay(int displayId) {
+            return UserManagerService.this.getUserAssignedToDisplay(displayId);
         }
     } // class LocalService
 
