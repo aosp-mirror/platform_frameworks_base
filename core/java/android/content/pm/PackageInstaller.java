@@ -3153,7 +3153,7 @@ public class PackageInstaller {
         }
 
         /**
-         * Returns the set of session IDs that will be committed when this session is commited if
+         * Returns the set of session IDs that will be committed when this session is committed if
          * this session is a multi-package session.
          */
         @NonNull

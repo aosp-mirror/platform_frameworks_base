@@ -283,7 +283,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#R} before getting the
      * target sdk version from a validated apk in {@link #validateApkInstallLocked()}, the compared
      * result will not trigger any user action in
-     * {@link #checkUserActionRequirement(PackageInstallerSession)}.
+     * {@link #checkUserActionRequirement(PackageInstallerSession, IntentSender)}.
      */
     private static final int INVALID_TARGET_SDK_VERSION = Integer.MAX_VALUE;
 
@@ -887,7 +887,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (snapshot.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid,
                 userId)) {
-            // show the installer to account for device poslicy or unknown sources use cases
+            // show the installer to account for device policy or unknown sources use cases
             return USER_ACTION_REQUIRED;
         }
 
@@ -1044,7 +1044,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = progress;
             info.sealed = mSealed;
-            info.isCommitted = mCommitted.get();
+            info.isCommitted = isCommitted();
             info.isPreapprovalRequested = isPreapprovalRequested();
             info.active = mActiveCount.get() > 0;
 
@@ -1162,7 +1162,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void assertPreparedAndNotCommittedOrDestroyedLocked(String cookie) {
         assertPreparedAndNotDestroyedLocked(cookie);
-        if (mCommitted.get()) {
+        if (isCommitted()) {
             throw new SecurityException(cookie + " not allowed after commit");
         }
     }
@@ -1203,7 +1203,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mProgressLock")
     private void computeProgressLocked(boolean forcePublish) {
-        if (!isIncrementalInstallation() || !mCommitted.get()) {
+        if (!isIncrementalInstallation() || !isCommitted()) {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
@@ -1230,7 +1230,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCallerIsOwnerRootOrVerifier();
         synchronized (mLock) {
             assertPreparedAndNotDestroyedLocked("getNames");
-            if (!mCommitted.get()) {
+            if (!isCommitted()) {
                 return getNamesLocked();
             } else {
                 return getStageDirContentsLocked();
@@ -1670,11 +1670,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
-        if (hasParentSessionId()) {
-            throw new IllegalStateException(
-                    "Session " + sessionId + " is a child of multi-package session "
-                            + getParentSessionId() +  " and may not be committed directly.");
-        }
+        assertNotChild("commit");
 
         if (!markAsSealed(statusReceiver, forTransfer)) {
             return;
@@ -1879,7 +1875,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         //             single / child sessions.
         try {
             synchronized (mLock) {
-                if (mCommitted.get()) {
+                if (isCommitted()) {
                     return true;
                 }
                 // Read transfers from the original owner stay open, but as the session's data
@@ -3722,7 +3718,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mDestroyed = true;
             r = () -> {
                 assertNotLocked("abandonStaged");
-                if (isStaged() && mCommitted.get()) {
+                if (isStaged() && isCommitted()) {
                     mStagingManager.abortCommittedSession(mStagedSession);
                 }
                 destroy();
@@ -4066,7 +4062,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean canBeAddedAsChild(int parentCandidate) {
         synchronized (mLock) {
             return (!hasParentSessionId() || mParentSessionId == parentCandidate)
-                    && !mCommitted.get()
+                    && !isCommitted()
                     && !mDestroyed;
         }
     }
@@ -4640,7 +4636,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_CID, stageCid);
             }
             writeBooleanAttribute(out, ATTR_PREPARED, mPrepared);
-            writeBooleanAttribute(out, ATTR_COMMITTED, mCommitted.get());
+            writeBooleanAttribute(out, ATTR_COMMITTED, isCommitted());
             writeBooleanAttribute(out, ATTR_DESTROYED, mDestroyed);
             writeBooleanAttribute(out, ATTR_SEALED, mSealed);
 
