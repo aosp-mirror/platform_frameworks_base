@@ -22,7 +22,6 @@ import android.hardware.Sensor
 import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
 import com.android.keyguard.ActiveUnlockConfig
-import com.android.keyguard.FaceAuthApiRequestReason
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
@@ -72,10 +71,7 @@ class KeyguardLiftController @Inject constructor(
             // Not listening anymore since trigger events unregister themselves
             isListening = false
             updateListeningState()
-            keyguardUpdateMonitor.requestFaceAuth(
-                true,
-                FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
-            )
+            keyguardUpdateMonitor.requestFaceAuth(true)
             keyguardUpdateMonitor.requestActiveUnlock(
                 ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.WAKE,
                 "KeyguardLiftController")
