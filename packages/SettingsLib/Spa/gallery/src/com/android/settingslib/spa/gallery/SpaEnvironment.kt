@@ -25,6 +25,7 @@ import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
@@ -40,6 +41,7 @@ object SpaEnvironment {
                 PreferenceMainPageProvider,
                 PreferencePageProvider,
                 SwitchPreferencePageProvider,
+                MainSwitchPreferencePageProvider,
                 TwoTargetSwitchPreferencePageProvider,
                 ArgumentPageProvider,
                 SliderPageProvider,
