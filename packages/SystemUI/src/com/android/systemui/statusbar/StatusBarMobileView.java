@@ -38,6 +38,7 @@ import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 
 import java.util.ArrayList;
@@ -64,6 +65,15 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
 
     /**
      * Designated constructor
+     *
+     * This view is special, in that it is the only view in SystemUI that allows for a configuration
+     * override on a MCC/MNC-basis. This means that for every mobile view inflated, we have to
+     * construct a context with that override, since the resource system doesn't have a way to
+     * handle this for us.
+     *
+     * @param context A context with resources configured by MCC/MNC
+     * @param slot The string key defining which slot this icon refers to. Always "mobile" for the
+     *             mobile icon
      */
     public static StatusBarMobileView fromContext(
             Context context,

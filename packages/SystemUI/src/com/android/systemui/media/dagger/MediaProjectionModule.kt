@@ -18,8 +18,10 @@ package com.android.systemui.media.dagger
 
 import android.app.Activity
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
+import com.android.systemui.util.AsyncActivityLauncher
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
@@ -29,7 +31,17 @@ abstract class MediaProjectionModule {
     @Binds
     @IntoMap
     @ClassKey(MediaProjectionAppSelectorActivity::class)
-    abstract fun provideMediaProjectionAppSelectorActivity(
+    abstract fun bindMediaProjectionAppSelectorActivity(
         activity: MediaProjectionAppSelectorActivity): Activity
 
+    companion object {
+        @Provides
+        fun provideMediaProjectionAppSelectorActivity(
+            activityLauncher: AsyncActivityLauncher
+        ): MediaProjectionAppSelectorActivity {
+            return MediaProjectionAppSelectorActivity(
+                activityLauncher
+            )
+        }
+    }
 }

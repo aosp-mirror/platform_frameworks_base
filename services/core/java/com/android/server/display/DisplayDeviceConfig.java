@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.os.Environment;
@@ -149,12 +150,22 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      </quirks>
  *
  *      <autoBrightness>
- *           <brighteningLightDebounceMillis>
+ *          <brighteningLightDebounceMillis>
  *              2000
- *           </brighteningLightDebounceMillis>
+ *          </brighteningLightDebounceMillis>
  *          <darkeningLightDebounceMillis>
  *              1000
  *          </darkeningLightDebounceMillis>
+ *          <displayBrightnessMapping>
+ *              <displayBrightnessPoint>
+ *                  <lux>50</lux>
+ *                  <nits>45.32</nits>
+ *              </displayBrightnessPoint>
+ *              <displayBrightnessPoint>
+ *                  <lux>80</lux>
+ *                  <nits>75.43</nits>
+ *              </displayBrightnessPoint>
+ *          </displayBrightnessMapping>
  *      </autoBrightness>
  *
  *      <screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease>
@@ -267,6 +278,34 @@ public class DisplayDeviceConfig {
     // Purely an array that covers the ranges of values 0.0 - 1.0, indicating the system brightness
     // for the corresponding values above
     private float[] mBrightness;
+
+
+    /**
+     * Array of desired screen brightness in nits corresponding to the lux values
+     * in the mBrightnessLevelsLux array. The display brightness is defined as the
+     * measured brightness of an all-white image. The brightness values must be non-negative and
+     * non-decreasing. This must be overridden in platform specific overlays
+     */
+    private float[] mBrightnessLevelsNits;
+
+    /**
+     * Array of light sensor lux values to define our levels for auto backlight
+     * brightness support.
+
+     * The N + 1 entries of this array define N control points defined in mBrightnessLevelsNits,
+     * with first value always being 0 lux
+
+     * The control points must be strictly increasing.  Each control point
+     * corresponds to an entry in the brightness backlight values arrays.
+     * For example, if lux == level[1] (second element of the levels array)
+     * then the brightness will be determined by value[0] (first element
+     * of the brightness values array).
+     *
+     * Spline interpolation is used to determine the auto-brightness
+     * backlight values for lux levels between these control points.
+     *
+     */
+    private float[] mBrightnessLevelsLux;
 
     private float mBacklightMinimum = Float.NaN;
     private float mBacklightMaximum = Float.NaN;
@@ -661,6 +700,20 @@ public class DisplayDeviceConfig {
         return mAutoBrightnessBrighteningLightDebounce;
     }
 
+    /**
+     * @return Auto brightness brightening ambient lux levels
+     */
+    public float[] getAutoBrightnessBrighteningLevelsLux() {
+        return mBrightnessLevelsLux;
+    }
+
+    /**
+     * @return Auto brightness brightening nits levels
+     */
+    public float[] getAutoBrightnessBrighteningLevelsNits() {
+        return mBrightnessLevelsNits;
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -703,6 +756,8 @@ public class DisplayDeviceConfig {
                 + mAutoBrightnessBrighteningLightDebounce
                 + ", mAutoBrightnessDarkeningLightDebounce= "
                 + mAutoBrightnessDarkeningLightDebounce
+                + ", mBrightnessLevelsLux= " + Arrays.toString(mBrightnessLevelsLux)
+                + ", mBrightnessLevelsNits= " + Arrays.toString(mBrightnessLevelsNits)
                 + "}";
     }
 
@@ -779,6 +834,7 @@ public class DisplayDeviceConfig {
         loadBrightnessRampsFromConfigXml();
         loadAmbientLightSensorFromConfigXml();
         setProxSensorUnspecified();
+        loadAutoBrightnessConfigsFromConfigXml();
         mLoadedFrom = "<config.xml>";
     }
 
@@ -991,6 +1047,7 @@ public class DisplayDeviceConfig {
     private void loadAutoBrightnessConfigValues(DisplayConfiguration config) {
         loadAutoBrightnessBrighteningLightDebounce(config.getAutoBrightness());
         loadAutoBrightnessDarkeningLightDebounce(config.getAutoBrightness());
+        loadAutoBrightnessDisplayBrightnessMapping(config.getAutoBrightness());
     }
 
     /**
@@ -1020,6 +1077,35 @@ public class DisplayDeviceConfig {
         } else {
             mAutoBrightnessDarkeningLightDebounce =
                     autoBrightnessConfig.getDarkeningLightDebounceMillis().intValue();
+        }
+    }
+
+    /**
+     * Loads the auto-brightness display brightness mappings. Internally, this takes care of
+     * loading the value from the display config, and if not present, falls back to config.xml.
+     */
+    private void loadAutoBrightnessDisplayBrightnessMapping(AutoBrightness autoBrightnessConfig) {
+        if (autoBrightnessConfig == null
+                || autoBrightnessConfig.getDisplayBrightnessMapping() == null) {
+            mBrightnessLevelsNits = getFloatArray(mContext.getResources()
+                    .obtainTypedArray(com.android.internal.R.array
+                            .config_autoBrightnessDisplayValuesNits), PowerManager
+                    .BRIGHTNESS_OFF_FLOAT);
+            mBrightnessLevelsLux = getLuxLevels(mContext.getResources()
+                    .getIntArray(com.android.internal.R.array
+                            .config_autoBrightnessLevels));
+        } else {
+            final int size = autoBrightnessConfig.getDisplayBrightnessMapping()
+                    .getDisplayBrightnessPoint().size();
+            mBrightnessLevelsNits = new float[size];
+            // The first control point is implicit and always at 0 lux.
+            mBrightnessLevelsLux = new float[size + 1];
+            for (int i = 0; i < size; i++) {
+                mBrightnessLevelsNits[i] = autoBrightnessConfig.getDisplayBrightnessMapping()
+                        .getDisplayBrightnessPoint().get(i).getNits().floatValue();
+                mBrightnessLevelsLux[i + 1] = autoBrightnessConfig.getDisplayBrightnessMapping()
+                        .getDisplayBrightnessPoint().get(i).getLux().floatValue();
+            }
         }
     }
 
@@ -1248,6 +1334,10 @@ public class DisplayDeviceConfig {
                 com.android.internal.R.string.config_displayLightSensorType);
     }
 
+    private void loadAutoBrightnessConfigsFromConfigXml() {
+        loadAutoBrightnessDisplayBrightnessMapping(null /*AutoBrightnessConfig*/);
+    }
+
     private void loadAmbientLightSensorFromDdc(DisplayConfiguration config) {
         final SensorDetails sensorDetails = config.getLightSensor();
         if (sensorDetails != null) {
@@ -1388,6 +1478,31 @@ public class DisplayDeviceConfig {
         if (configShortHorizon != null) {
             mAmbientHorizonShort = configShortHorizon.intValue();
         }
+    }
+
+    /**
+     * Extracts a float array from the specified {@link TypedArray}.
+     *
+     * @param array The array to convert.
+     * @return the given array as a float array.
+     */
+    public static float[] getFloatArray(TypedArray array, float defaultValue) {
+        final int n = array.length();
+        float[] vals = new float[n];
+        for (int i = 0; i < n; i++) {
+            vals[i] = array.getFloat(i, defaultValue);
+        }
+        array.recycle();
+        return vals;
+    }
+
+    private static float[] getLuxLevels(int[] lux) {
+        // The first control point is implicit and always at 0 lux.
+        float[] levels = new float[lux.length + 1];
+        for (int i = 0; i < lux.length; i++) {
+            levels[i + 1] = (float) lux[i];
+        }
+        return levels;
     }
 
     static class SensorData {

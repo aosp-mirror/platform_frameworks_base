@@ -63,6 +63,7 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -146,6 +147,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -281,6 +283,7 @@ public class ChooserActivity extends ResolverActivity implements
     private long mQueriedSharingShortcutsTimeMs;
 
     private int mCurrAvailableWidth = 0;
+    private Insets mLastAppliedInsets = null;
     private int mLastNumberOfChildren = -1;
     private int mMaxTargetsPerRow = 1;
 
@@ -1619,6 +1622,8 @@ public class ChooserActivity extends ResolverActivity implements
         if (mChooserMultiProfilePagerAdapter.getInactiveListAdapter() != null) {
             mChooserMultiProfilePagerAdapter.getInactiveListAdapter().destroyAppPredictor();
         }
+        mPersonalAppPredictor = null;
+        mWorkAppPredictor = null;
     }
 
     @Override // ResolverListCommunicator
@@ -2531,7 +2536,11 @@ public class ChooserActivity extends ResolverActivity implements
                 || gridAdapter.calculateChooserTargetWidth(availableWidth)
                 || recyclerView.getAdapter() == null
                 || availableWidth != mCurrAvailableWidth;
+
+        boolean insetsChanged = !Objects.equals(mLastAppliedInsets, mSystemWindowInsets);
+
         if (isLayoutUpdated
+                || insetsChanged
                 || mLastNumberOfChildren != recyclerView.getChildCount()) {
             mCurrAvailableWidth = availableWidth;
             if (isLayoutUpdated) {
@@ -2552,7 +2561,7 @@ public class ChooserActivity extends ResolverActivity implements
                 return;
             }
 
-            if (mLastNumberOfChildren == recyclerView.getChildCount()) {
+            if (mLastNumberOfChildren == recyclerView.getChildCount() && !insetsChanged) {
                 return;
             }
 
@@ -2563,6 +2572,7 @@ public class ChooserActivity extends ResolverActivity implements
                 int offset = calculateDrawerOffset(top, bottom, recyclerView, gridAdapter);
                 mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
                 mEnterTransitionAnimationDelegate.markOffsetCalculated();
+                mLastAppliedInsets = mSystemWindowInsets;
             });
         }
     }
@@ -3055,7 +3065,12 @@ public class ChooserActivity extends ResolverActivity implements
             mChooserMultiProfilePagerAdapter.setupContainerPadding(
                     getActiveEmptyStateView().findViewById(R.id.resolver_empty_state_container));
         }
-        return super.onApplyWindowInsets(v, insets);
+
+        WindowInsets result = super.onApplyWindowInsets(v, insets);
+        if (mResolverDrawerLayout != null) {
+            mResolverDrawerLayout.requestLayout();
+        }
+        return result;
     }
 
     private void setHorizontalScrollingEnabled(boolean enabled) {
