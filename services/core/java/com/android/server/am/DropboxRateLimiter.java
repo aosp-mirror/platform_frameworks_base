@@ -108,7 +108,7 @@ public class DropboxRateLimiter {
     }
 
     /** Resets the rate limiter memory. */
-    void reset() {
+    public void reset() {
         synchronized (mErrorClusterRecords) {
             mErrorClusterRecords.clear();
         }
