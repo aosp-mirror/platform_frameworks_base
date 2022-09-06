@@ -1306,6 +1306,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
+        if (mLeash == null || !mLeash.isValid()) {
+            Log.e(TAG, String.format("scheduleFinishResizePip with null leash! mState=%d",
+                  mPipTransitionState.getTransitionState()));
+            return;
+        }
+
         finishResize(createFinishResizeSurfaceTransaction(destinationBounds), destinationBounds,
                 direction, -1);
         if (updateBoundsCallback != null) {
