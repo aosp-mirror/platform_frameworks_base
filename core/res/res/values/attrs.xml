@@ -4509,6 +4509,8 @@
         </attr>
     </declare-styleable>
     <declare-styleable name="EditText">
+        <!-- Enables styling shortcuts, e.g. Ctrl+B for bold. This is off by default.  -->
+        <attr name="enableTextStylingShortcuts" format="boolean" />
     </declare-styleable>
     <declare-styleable name="FastScroll">
         <!-- Drawable used for the scroll bar thumb. -->
