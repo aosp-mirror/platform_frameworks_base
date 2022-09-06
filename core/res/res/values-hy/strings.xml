@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Իսկորոշումը մատնահետքի միջոցով չեղարկվեց:"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Մատնահետքով նույնականացման գործողությունը չեղարկվել է օգտատիրոջ կողմից:"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Չափից շատ փորձ եք կատարել: Փորձեք նորից քիչ հետո:"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Չափից շատ փորձ եք կատարել: Մատնահետքերի սկաներն անջատվել է:"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Փորձեք նորից:"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Գրանցված մատնահետք չկա:"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Այս սարքը չունի մատնահետքերի սկաներ։"</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"նշված չէ"</string>
     <string name="selected" msgid="6614607926197755875">"ընտրված է"</string>
     <string name="not_selected" msgid="410652016565864475">"ընտրված չէ"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Մեկ աստղ՝ {max}-ից}one{# աստղ՝ {max}-ից}other{# աստղ՝ {max}-ից}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ընթացքում է"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Ավարտել գործողությունը` օգտագործելով"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
@@ -1422,7 +1422,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> հիշասարքն անջատվում է"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Չհեռացնեք սարքը"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Կարգավորել"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Անջատել"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Հանել"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Ուսումնասիրել"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Աուդիոելքի սարքի փոխարկում"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g>-ը տեղադրված չէ"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Նախընտրելի տարածաշրջան"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Մուտքագրեք լեզուն"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Առաջարկվող"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Առաջարկվող"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Առաջարկվող լեզուներ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Առաջարկվող տարածաշրջաններ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Բոլոր լեզուները"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Հասանելի դարձնե՞լ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> հավելվածին սարքի բոլոր մատյանները"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Թույլատրել մեկանգամյա մուտքը"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Չթույլատրել"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Այլևս ցույց չտալ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ստուգել ակտիվ հավելվածները"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Հնարավոր չէ օգտագործել հեռախոսի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Հնարավոր չէ օգտագործել պլանշետի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Այս բովանդակությունը հասանելի չէ հեռարձակման ընթացքում։ Օգտագործեք ձեր հեռախոսը։"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Կանխադրված"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ՔԱՐՏ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

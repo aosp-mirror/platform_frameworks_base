@@ -3133,8 +3133,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     private static void resizeDisplay(DisplayContent displayContent, int width, int height) {
-        displayContent.mBaseDisplayWidth = width;
-        displayContent.mBaseDisplayHeight = height;
+        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
+                displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
         final Configuration c = new Configuration();
         displayContent.computeScreenConfiguration(c);
         displayContent.onRequestedOverrideConfigurationChanged(c);

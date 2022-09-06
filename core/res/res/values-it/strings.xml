@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operazione associata all\'impronta annullata."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operazione di autenticazione dell\'impronta annullata dall\'utente."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Troppi tentativi. Sensore di impronte disattivato."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Riprova."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nessuna impronta digitale registrata."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Questo dispositivo non dispone di sensore di impronte."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"deselezionato"</string>
     <string name="selected" msgid="6614607926197755875">"selezionato"</string>
     <string name="not_selected" msgid="410652016565864475">"non selezionato"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Una stella su {max}}other{# stelle su {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"In corso"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'azione con"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completamento azione con %1$s"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Regione preferita"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Digita nome lingua"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggerite"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Suggerite"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Lingue suggerite"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Regioni consigliate"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tutte le lingue"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Consentire all\'app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> di accedere a tutti i log del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Consenti accesso una tantum"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Non consentire"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"I log del dispositivo registrano tutto ciò che succede sul tuo dispositivo. Le app possono usare questi log per individuare problemi e correggerli.\n\nAlcuni log potrebbero contenere informazioni sensibili, quindi concedi l\'accesso a tutti i log del dispositivo soltanto alle app attendibili. \n\nSe le neghi l\'accesso a tutti i log del dispositivo, questa app può comunque accedere ai propri log. Il produttore del tuo dispositivo potrebbe essere comunque in grado di accedere ad alcuni log o informazioni sul dispositivo."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Non mostrare più"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"L\'app <xliff:g id="APP_0">%1$s</xliff:g> vuole mostrare porzioni dell\'app <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifica"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verifica le app attive"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossibile accedere alla fotocamera del telefono dal tuo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossibile accedere alla fotocamera del tablet dal tuo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Impossibile accedere a questi contenuti durante lo streaming. Prova a usare il telefono."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predefinita di sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SCHEDA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"පරිශීලක විසින් ඇඟිලි සලකුණු මෙහෙයුම අවසන් කරන ලදී."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඇඟිලි සලකුණු සංවේදකය අබල කරන ලදී."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"පරීක්ෂා කර නැත"</string>
     <string name="selected" msgid="6614607926197755875">"තෝරන ලදි"</string>
     <string name="not_selected" msgid="410652016565864475">"තෝරා නොමැත"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}න් එක තරුවක්}one{{max}න් තරු #ක්}other{{max}න් තරු #ක්}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"සිදු වෙමින් පවතී"</string>
     <string name="whichApplication" msgid="5432266899591255759">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ප්‍රදේශ මනාපය"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"භාෂා නම ටයිප් කරන්න"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"යෝජිත"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"යෝජිත"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"යෝජිත භාෂා"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"යෝජිත කලාප"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"සියලු භාෂා"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> හට සියලු උපාංග ලොග ප්‍රවේශ වීමට ඉඩ දෙන්නද?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"එක් වරක් ප්‍රවේශය ඉඩ දෙන්න"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ඉඩ නොදෙන්න"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"උපාංග ලොග ඔබේ උපාංගයෙහි සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ නිරාකරණයට යෙදුම්වලට මෙම ලොග භාවිතා කළ හැක.\n\nසමහර ලොගවල සංවේදී තතු අඩංගු විය හැකි බැවින්, ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැක. ඔබේ උපාංග නිෂ්පාදකයාට තවමත් ඔබේ උපාංගයෙහි සමහර ලොග හෝ තතු වෙත ප්‍රවේශ විය හැක."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"නැවත නොපෙන්වන්න"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"සංස්කරණය"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"සක්‍රිය යෙදුම් පරීක්ෂා කරන්න"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් දුරකථනයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් ටැබ්ලටයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"ප්‍රවාහය කරන අතරේ මෙයට ප්‍රවේශ විය නොහැක. ඒ වෙනුවට ඔබේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
     <string name="system_locale_title" msgid="711882686834677268">"පද්ධති පෙරනිමිය"</string>
     <string name="default_card_name" msgid="9198284935962911468">"කාඩ්පත <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -19,6 +19,9 @@ package com.android.settingslib.spa.framework.common
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 
+const val INJECT_ENTRY_NAME = "INJECT"
+const val ROOT_ENTRY_NAME = "ROOT"
+
 /**
  * Defines data of one Settings entry for Settings search.
  */
@@ -32,17 +35,21 @@ data class UiData(val title: String = "")
 /**
  * Defines data to identify a Settings page.
  */
-data class SettingsPage(val name: String = "", val args: Bundle = Bundle.EMPTY)
+data class SettingsPage(val name: String = "", val args: Bundle? = null) {
+    override fun toString(): String {
+       return name + args?.toString()
+    }
+}
 
 /**
  * Defines data of a Settings entry.
  */
 data class SettingsEntry(
+    // The unique id of this entry
+    val id: String,
+
     val name: String,
     val owner: SettingsPage,
-
-    // Generates the unique id of this entry
-    val uniqueId: String,
 
     // Defines linking of Settings entries
     val fromPage: SettingsPage? = null,
@@ -80,39 +87,13 @@ data class SettingsEntry(
      * use each entries' UI rendering function in the page instead.
      */
     val uiLayout: (@Composable () -> Unit) = {},
-)
-
-/**
- * The helper to build a Settings Page instance.
- */
-class SettingsPageBuilder(private val name: String) {
-    private val arguments = Bundle()
-
-    fun pushArgs(args: Bundle?): SettingsPageBuilder {
-        if (args != null) arguments.putAll(args)
-        return this
-    }
-
-    fun pushArg(argName: String, argValue: String?): SettingsPageBuilder {
-        if (argValue != null) this.arguments.putString(argName, argValue)
-        return this
-    }
-
-    fun pushArg(argName: String, argValue: Int?): SettingsPageBuilder {
-        if (argValue != null) this.arguments.putInt(argName, argValue)
-        return this
-    }
-
-    fun build(): SettingsPage {
-        return SettingsPage(name, arguments)
-    }
-
-    companion object {
-        fun create(name: String, args: Bundle? = null): SettingsPageBuilder {
-            return SettingsPageBuilder(name).apply {
-                pushArgs(args)
-            }
-        }
+) {
+    override fun toString(): String {
+        return listOf(
+            name,
+            owner.toString(),
+            "(${fromPage?.toString()}-${toPage?.toString()})"
+        ).joinToString("-")
     }
 }
 
@@ -130,9 +111,9 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
     fun build(): SettingsEntry {
         return SettingsEntry(
+            id = computeUniqueId(),
             name = name,
             owner = owner,
-            uniqueId = computeUniqueId(),
 
             // linking data
             fromPage = fromPage,
@@ -171,22 +152,27 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
-    private fun computeUniqueId(): String = uniqueId ?: (name + owner.toString())
+    private fun computeUniqueId(): String =
+        uniqueId ?: name + owner.toString() + fromPage?.toString() + toPage?.toString()
 
     private fun computeSearchable(): Boolean = isAllowSearch ?: false
 
     companion object {
+        fun create(entryName: String, owner: SettingsPage): SettingsEntryBuilder {
+            return SettingsEntryBuilder(entryName, owner)
+        }
+
         fun create(
             entryName: String,
             ownerPageName: String,
             ownerPageArgs: Bundle? = null
         ): SettingsEntryBuilder {
-            val owner = SettingsPageBuilder.create(ownerPageName, ownerPageArgs)
-            return SettingsEntryBuilder(entryName, owner.build())
+            val owner = SettingsPage(ownerPageName, ownerPageArgs)
+            return create(entryName, owner)
         }
 
-        fun create(entryName: String, owner: SettingsPage): SettingsEntryBuilder {
-            return SettingsEntryBuilder(entryName, owner)
+        fun createLinkTo(entryName: String, owner: SettingsPage): SettingsEntryBuilder {
+            return create(entryName, owner).setLink(toPage = owner)
         }
 
         fun createLinkTo(
@@ -194,12 +180,19 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             ownerPageName: String,
             ownerPageArgs: Bundle? = null
         ): SettingsEntryBuilder {
-            val owner = SettingsPageBuilder.create(ownerPageName, ownerPageArgs)
-            return SettingsEntryBuilder(entryName, owner.build()).setLink(toPage = owner.build())
+            val owner = SettingsPage(ownerPageName, ownerPageArgs)
+            return createLinkTo(entryName, owner)
         }
 
-        fun createLinkTo(entryName: String, owner: SettingsPage): SettingsEntryBuilder {
-            return SettingsEntryBuilder(entryName, owner).setLink(toPage = owner)
+        fun createInject(
+            ownerPageName: String,
+            ownerPageArgs: Bundle? = null
+        ): SettingsEntryBuilder {
+            return createLinkTo(INJECT_ENTRY_NAME, ownerPageName, ownerPageArgs)
+        }
+
+        fun createRoot(page: SettingsPage): SettingsEntryBuilder {
+            return createLinkTo(ROOT_ENTRY_NAME, page)
         }
     }
 }

@@ -16,10 +16,13 @@
 
 package com.android.settingslib.spa.gallery
 
+import com.android.settingslib.spa.framework.common.SettingsEntryRepository
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
+import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
@@ -28,20 +31,40 @@ import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvid
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 
-val galleryPageProviders = SettingsPageProviderRepository(
-    allPagesList = listOf(
-        HomePageProvider,
-        PreferenceMainPageProvider,
-        PreferencePageProvider,
-        SwitchPreferencePageProvider,
-        TwoTargetSwitchPreferencePageProvider,
-        ArgumentPageProvider,
-        SliderPageProvider,
-        SpinnerPageProvider,
-        SettingsPagerPageProvider,
-        FooterPageProvider,
-    ),
-    rootPages = listOf(HomePageProvider.name)
-)
+object SpaEnvironment {
+    val PageProviderRepository: SettingsPageProviderRepository by
+    lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        SettingsPageProviderRepository(
+            allPagesList = listOf(
+                HomePageProvider,
+                PreferenceMainPageProvider,
+                PreferencePageProvider,
+                SwitchPreferencePageProvider,
+                TwoTargetSwitchPreferencePageProvider,
+                ArgumentPageProvider,
+                SliderPageProvider,
+                SpinnerPageProvider,
+                SettingsPagerPageProvider,
+                FooterPageProvider,
+                IllustrationPageProvider,
+            ),
+            rootPageData = listOf(
+                SettingsPage(HomePageProvider.name),
+                SettingsPage(
+                    ArgumentPageProvider.name,
+                    ArgumentPageProvider.buildArgument("foo")
+                ),
+                SettingsPage(
+                    ArgumentPageProvider.name,
+                    ArgumentPageProvider.buildArgument("bar")
+                ),
+            )
+        )
+    }
 
-// TODO: add other environment setup here.
+    val EntryRepository: SettingsEntryRepository by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        SettingsEntryRepository(PageProviderRepository)
+    }
+
+    // TODO: add other environment setup here.
+}

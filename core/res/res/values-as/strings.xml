@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ফিংগাৰপ্ৰিণ্ট কাৰ্য বাতিল কৰা হ’ল।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্ট ক্ৰিয়া বাতিল কৰিছে।"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"অত্যধিক ভুল প্ৰয়াস। কিছুসময়ৰ পাছত আকৌ চেষ্টা কৰক।"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"অত্যধিক প্ৰয়াস। ফিংগাৰপ্ৰিণ্ট ছেন্সৰ অক্ষম কৰা হ’ল।"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"আকৌ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"টিক চিহ্ন দিয়া হোৱা নাই"</string>
     <string name="selected" msgid="6614607926197755875">"বাছনি কৰা"</string>
     <string name="not_selected" msgid="410652016565864475">"বাছনি কৰা হোৱা নাই"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} টাৰ ভিতৰত ১ টা তৰা}one{{max} টাৰ ভিতৰত # টা তৰা}other{{max} টাৰ ভিতৰত # টা তৰা}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"চলি আছে"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এয়া ব্যৱহাৰ কৰি কার্য সম্পূর্ণ কৰক"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যৱহাৰ কৰি কাৰ্যটো সম্পূৰ্ণ কৰক"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"অঞ্চলৰ অগ্ৰাধিকাৰ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ভাষাৰ নাম লিখক"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"প্ৰস্তাৱিত"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"পৰামৰ্শিত"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"পৰামৰ্শিত ভাষাসমূহ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"চুপাৰিছ কৰা অঞ্চলসমূহ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"সকলো ভাষা"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি প্ৰদান কৰিবনে?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"কেৱল এবাৰ এক্সেছ কৰাৰ অনুমতি দিয়ক"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি নিদিব"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"পুনৰ নেদেখুৱাব"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>এ <xliff:g id="APP_2">%2$s</xliff:g>ৰ অংশ দেখুওৱাব খুজিছে"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"সম্পাদনা কৰক"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা টেবলেটটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"ষ্ট্ৰীম কৰি থকাৰ সময়ত এইটো এক্সেছ কৰিব নোৱাৰি। তাৰ পৰিৱৰ্তে আপোনাৰ ফ’নত চেষ্টা কৰি চাওক।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ছিষ্টেম ডিফ’ল্ট"</string>
     <string name="default_card_name" msgid="9198284935962911468">"কাৰ্ড <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

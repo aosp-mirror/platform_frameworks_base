@@ -211,15 +211,17 @@
     <string name="tts_general_section_title" msgid="8919671529502364567">"Général"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Réinitialiser la hauteur de la voix du texte"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Rétablir la hauteur normale à laquelle le texte est énoncé."</string>
-    <!-- no translation found for tts_rate_entries:0 (4563475121751694801) -->
-    <!-- no translation found for tts_rate_entries:1 (6323184326270638754) -->
-    <!-- no translation found for tts_rate_entries:2 (2569200872125313769) -->
-    <!-- no translation found for tts_rate_entries:3 (9010794089704942570) -->
-    <!-- no translation found for tts_rate_entries:4 (4634010129655810634) -->
-    <!-- no translation found for tts_rate_entries:5 (8929490998534497543) -->
-    <!-- no translation found for tts_rate_entries:6 (8442352376763286772) -->
-    <!-- no translation found for tts_rate_entries:7 (4446831566506165093) -->
-    <!-- no translation found for tts_rate_entries:8 (6946761421234586000) -->
+  <string-array name="tts_rate_entries">
+    <item msgid="4563475121751694801">"60 %"</item>
+    <item msgid="6323184326270638754">"80 %"</item>
+    <item msgid="2569200872125313769">"100 %"</item>
+    <item msgid="9010794089704942570">"150 %"</item>
+    <item msgid="4634010129655810634">"200 %"</item>
+    <item msgid="8929490998534497543">"250 %"</item>
+    <item msgid="8442352376763286772">"300 %"</item>
+    <item msgid="4446831566506165093">"350 %"</item>
+    <item msgid="6946761421234586000">"400 %"</item>
+  </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
     <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>

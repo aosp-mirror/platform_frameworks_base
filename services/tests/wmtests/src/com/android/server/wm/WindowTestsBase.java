@@ -26,6 +26,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
@@ -69,6 +70,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
@@ -84,6 +86,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsVisibilities;
@@ -417,6 +420,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
     private WindowToken createWallpaperToken(DisplayContent dc) {
         return new WallpaperWindowToken(mWm, mock(IBinder.class), true /* explicit */, dc,
                 true /* ownerCanManageAppTokens */);
+    }
+
+    WindowState createNavBarWithProvidedInsets(DisplayContent dc) {
+        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, dc, "navbar");
+        navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR, Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
+        };
+        dc.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
+        return navbar;
     }
 
     WindowState createAppWindow(Task task, int type, String name) {

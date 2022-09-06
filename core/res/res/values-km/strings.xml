@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ប្រតិបត្តិការ​ស្នាម​ម្រាម​ដៃ​ត្រូវ​បាន​បោះ​បង់​ដោយ​អ្នក​ប្រើប្រាស់។"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ព្យាយាមចូលច្រើនដងពេកហើយ។ ឧបករណ៍ចាប់ស្នាមម្រាមដៃត្រូវ​បានបិទ។"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"មិន​មាន​ការ​ចុះឈ្មោះស្នាម​ម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ។"</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"មិន​បាន​ធីក​"</string>
     <string name="selected" msgid="6614607926197755875">"បាន​ជ្រើសរើស"</string>
     <string name="not_selected" msgid="410652016565864475">"មិនបានជ្រើសរើសទេ"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ផ្កាយមួយ​ក្នុងចំណោមផ្កាយ {max}}other{ផ្កាយ # ក្នុងចំណោមផ្កាយ {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"កំពុងដំណើរការ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
@@ -1425,7 +1425,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"ដកចេញ"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"រុករក"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"លទ្ធផល Switch"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"បាត់ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"បាត់<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"បញ្ចូល​ឧបករណ៍​ម្តងទៀត"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"កំពុងផ្លាស់ទី <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"កំពុងផ្លាស់ទីទិន្នន័យ…"</string>
@@ -1565,7 +1565,7 @@
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"ទំហំផ្ទុករួមខាងក្នុង"</string>
-    <string name="storage_sd_card" msgid="3404740277075331881">"កាត​អេសឌី"</string>
+    <string name="storage_sd_card" msgid="3404740277075331881">"កាត SD"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"កាត SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ចំណូលចិត្តតំបន់"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"បាន​ណែនាំ"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"បាន​ណែនាំ"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ភាសា​ដែល​បាន​ណែ​នាំ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"តំបន់​ដែល​បាន​ណែនាំ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ភាសាទាំងអស់"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"អនុញ្ញាតឱ្យ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ឬ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"អនុញ្ញាតឱ្យចូលប្រើ​ម្ដង"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"មិនអនុញ្ញាត"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"កំណត់ហេតុឧបករណ៍កត់ត្រាអ្វីដែលកើតឡើងនៅលើឧបករណ៍របស់អ្នក។ កម្មវិធីអាចប្រើកំណត់ហេតុទាំងនេះដើម្បីស្វែងរក និងដោះស្រាយបញ្ហាបាន។\n\nកំណត់ហេតុមួយចំនួនអាចមានព័ត៌មានរសើប ដូច្នេះគួរអនុញ្ញាតឱ្យចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់សម្រាប់តែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ \n\nប្រសិនបើអ្នកមិនអនុញ្ញាតឱ្យកម្មវិធីនេះចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ទេ វានៅតែអាចចូលប្រើកំណត់ហេតុរបស់វាផ្ទាល់បាន។ ក្រុមហ៊ុន​ផលិត​ឧបករណ៍របស់អ្នក​ប្រហែលជា​នៅតែអាចចូលប្រើ​កំណត់ហេតុ ឬព័ត៌មានមួយចំនួន​នៅលើឧបករណ៍​របស់អ្នក​បានដដែល។"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"កុំ​បង្ហាញ​ម្ដង​ទៀត"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"កែ"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"មិន​អាច​ចូល​ប្រើប្រាស់​ខ្លឹមសារ​នេះ​បាន​ទេ ពេល​ផ្សាយ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
     <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"កាត <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

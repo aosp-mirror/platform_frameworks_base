@@ -27,10 +27,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.settingslib.spa.R
-import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.util.navRoute
 
 open class BrowseActivity(
     private val sppRepository: SettingsPageProviderRepository,
@@ -55,8 +55,8 @@ open class BrowseActivity(
             NavHost(navController, sppRepository.getDefaultStartPageName()) {
                 for (page in sppRepository.getAllProviders()) {
                     composable(
-                        route = page.route,
-                        arguments = page.arguments,
+                        route = page.name + page.parameter.navRoute(),
+                        arguments = page.parameter,
                     ) { navBackStackEntry ->
                         page.Page(navBackStackEntry.arguments)
                     }
@@ -74,9 +74,6 @@ open class BrowseActivity(
             }
         }
     }
-
-    private val SettingsPageProvider.route: String
-        get() = name + arguments.joinToString("") { argument -> "/{${argument.name}}" }
 
     companion object {
         const val KEY_DESTINATION = "spa:SpaActivity:destination"

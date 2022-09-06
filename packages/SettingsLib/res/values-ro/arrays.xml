@@ -120,13 +120,13 @@
     <item msgid="8946330945963372966">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2574107108483219051">"Folosiți selectarea sistemului (prestabilit)"</item>
+    <item msgid="2574107108483219051">"Folosește selectarea sistemului (prestabilit)"</item>
     <item msgid="4671992321419011165">"16 biți/eșantion"</item>
     <item msgid="1933898806184763940">"24 biți/eșantion"</item>
     <item msgid="1212577207279552119">"32 biți/eșantion"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"Folosiți selectarea sistemului (prestabilit)"</item>
+    <item msgid="9196208128729063711">"Folosește selectarea sistemului (prestabilit)"</item>
     <item msgid="1084497364516370912">"16 biți/eșantion"</item>
     <item msgid="2077889391457961734">"24 biți/eșantion"</item>
     <item msgid="3836844909491316925">"32 biți/eșantion"</item>
@@ -137,7 +137,7 @@
     <item msgid="927546067692441494">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"Folosiți selectarea sistemului (prestabilit)"</item>
+    <item msgid="1997302811102880485">"Folosește selectarea sistemului (prestabilit)"</item>
     <item msgid="8005696114958453588">"Mono"</item>
     <item msgid="1333279807604675720">"Stereo"</item>
   </string-array>

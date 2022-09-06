@@ -16,7 +16,9 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -32,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
 import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
+import com.android.settingslib.spa.widget.ui.Spinner
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
@@ -53,15 +56,19 @@ fun <T : AppRecord> AppListPage(
     ) { paddingValues ->
         Spacer(Modifier.padding(paddingValues))
         WorkProfilePager { userInfo ->
-            // TODO: Add a Spinner here.
-            AppList(
-                userInfo = userInfo,
-                listModel = listModel,
-                showSystem = showSystem,
-                option = stateOf(0),
-                searchQuery = stateOf(""),
-                appItem = appItem,
-            )
+            Column(Modifier.fillMaxSize()) {
+                val options = remember { listModel.getSpinnerOptions() }
+                val selectedOption = rememberSaveable { mutableStateOf(0) }
+                Spinner(options, selectedOption.value) { selectedOption.value = it }
+                AppList(
+                    userInfo = userInfo,
+                    listModel = listModel,
+                    showSystem = showSystem,
+                    option = selectedOption,
+                    searchQuery = stateOf(""),
+                    appItem = appItem,
+                )
+            }
         }
     }
 }
