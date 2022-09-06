@@ -2550,7 +2550,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // on bouncer if both fp and fingerprint are enrolled.
         final boolean awakeKeyguardExcludingBouncerShowing = mKeyguardIsVisible
                 && mDeviceInteractive && !mGoingToSleep
-                && !statusBarShadeLocked && !mBouncerFullyShown;
+                && !statusBarShadeLocked && !mBouncerIsOrWillBeShowing;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
         final boolean isLockDown =
@@ -2619,6 +2619,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     becauseCannotSkipBouncer,
                     biometricEnabledForUser,
                     mBouncerFullyShown,
+                    mBouncerIsOrWillBeShowing,
                     faceAuthenticated,
                     faceDisabledForUser,
                     mGoingToSleep,
@@ -3192,7 +3193,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     cb.onKeyguardBouncerStateChanged(mBouncerIsOrWillBeShowing);
                 }
             }
-            updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+            updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
         }
 
         if (wasBouncerFullyShown != mBouncerFullyShown) {
