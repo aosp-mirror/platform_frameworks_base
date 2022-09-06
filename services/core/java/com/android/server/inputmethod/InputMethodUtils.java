@@ -20,11 +20,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.UserHandle;
@@ -999,5 +1001,17 @@ final class InputMethodUtils {
             return new int[]{};
         }
         return new int[]{sourceUserId};
+    }
+
+    /**
+     * Convert the input method ID to a component name
+     *
+     * @param id A unique ID for this input method.
+     * @return The component name of the input method.
+     * @see InputMethodInfo#computeId(ResolveInfo)
+     */
+    @Nullable
+    public static ComponentName convertIdToComponentName(@NonNull String id) {
+        return ComponentName.unflattenFromString(id);
     }
 }
