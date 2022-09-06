@@ -42,7 +42,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
-import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.media.dagger.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
@@ -94,7 +93,6 @@ import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.dagger.DynamicOverride;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -244,21 +242,6 @@ public abstract class SystemUIModule {
                 notifPipeline,
                 sysUiState,
                 sysuiMainExecutor));
-    }
-
-    @BindsOptionalOf
-    @DynamicOverride
-    abstract LowLightClockController optionalLowLightClockController();
-
-    @SysUISingleton
-    @Provides
-    static Optional<LowLightClockController> provideLowLightClockController(
-            @DynamicOverride Optional<LowLightClockController> optionalController) {
-        if (optionalController.isPresent() && optionalController.get().isLowLightClockEnabled()) {
-            return optionalController;
-        } else {
-            return Optional.empty();
-        }
     }
 
     @Binds
