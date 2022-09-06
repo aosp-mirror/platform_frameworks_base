@@ -589,17 +589,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     return;
                 }
 
-                // The surfaces of splitting tasks were placed with window bounds when preparing the
-                // transition, so update divider surface separately.
-                final RemoteAnimationTarget dividerTarget = getDividerBarLegacyTarget();
-                mSplitLayout.getRefDividerBounds(mTempRect1);
-                t.setLayer(dividerTarget.leash, Integer.MAX_VALUE)
-                        .setPosition(dividerTarget.leash, mTempRect1.left, mTempRect1.top);
-                setDividerVisibility(true, t);
+                // Wrap the divider bar into non-apps target to animate together.
+                nonApps = ArrayUtils.appendElement(RemoteAnimationTarget.class, nonApps,
+                        getDividerBarLegacyTarget());
 
+                updateSurfaceBounds(mSplitLayout, t, false);
+                setDividerVisibility(true, t);
                 for (int i = 0; i < apps.length; ++i) {
                     if (apps[i].mode == MODE_OPENING) {
                         t.show(apps[i].leash);
+                        // Reset the surface position of the opening app to prevent double-offset.
+                        t.setPosition(apps[i].leash, 0, 0);
                     }
                 }
                 t.apply();
@@ -614,9 +614,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         };
                 Transitions.setRunningRemoteTransitionDelegate(adapter.getCallingApplication());
                 try {
-                    adapter.getRunner().onAnimationStart(transit, apps, wallpapers,
-                            ArrayUtils.appendElement(RemoteAnimationTarget.class, nonApps,
-                                    dividerTarget), wrapCallback);
+                    adapter.getRunner().onAnimationStart(
+                            transit, apps, wallpapers, nonApps, wrapCallback);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
