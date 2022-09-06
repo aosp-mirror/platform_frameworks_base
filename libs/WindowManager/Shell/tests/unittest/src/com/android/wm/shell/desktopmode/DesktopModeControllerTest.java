@@ -88,8 +88,8 @@ public class DesktopModeControllerTest extends ShellTestCase {
         WindowContainerTransaction taskWct = new WindowContainerTransaction();
         MockToken taskMockToken = new MockToken();
         taskWct.setWindowingMode(taskMockToken.token(), WINDOWING_MODE_UNDEFINED);
-        when(mShellTaskOrganizer.prepareClearFreeformForTasks(mContext.getDisplayId())).thenReturn(
-                taskWct);
+        when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(
+                mContext.getDisplayId())).thenReturn(taskWct);
 
         // Create a fake WCT to simulate setting display windowing mode to freeform
         WindowContainerTransaction displayWct = new WindowContainerTransaction();
@@ -126,15 +126,15 @@ public class DesktopModeControllerTest extends ShellTestCase {
         WindowContainerTransaction taskWmWct = new WindowContainerTransaction();
         MockToken taskWmMockToken = new MockToken();
         taskWmWct.setWindowingMode(taskWmMockToken.token(), WINDOWING_MODE_UNDEFINED);
-        when(mShellTaskOrganizer.prepareClearFreeformForTasks(mContext.getDisplayId())).thenReturn(
-                taskWmWct);
+        when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(
+                mContext.getDisplayId())).thenReturn(taskWmWct);
 
         // Create a fake WCT to simulate clearing task bounds
         WindowContainerTransaction taskBoundsWct = new WindowContainerTransaction();
         MockToken taskBoundsMockToken = new MockToken();
         taskBoundsWct.setBounds(taskBoundsMockToken.token(), null);
-        when(mShellTaskOrganizer.prepareClearBoundsForTasks(mContext.getDisplayId())).thenReturn(
-                taskBoundsWct);
+        when(mShellTaskOrganizer.prepareClearBoundsForStandardTasks(
+                mContext.getDisplayId())).thenReturn(taskBoundsWct);
 
         // Create a fake WCT to simulate setting display windowing mode to fullscreen
         WindowContainerTransaction displayWct = new WindowContainerTransaction();
