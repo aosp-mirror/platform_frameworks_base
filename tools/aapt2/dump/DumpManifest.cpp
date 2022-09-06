@@ -2845,7 +2845,9 @@ bool ManifestExtractor::DumpProto(pb::Badging* out_badging) {
   supports_screen_->ToProtoScreens(out_badging, target_sdk_);
 
   for (auto& config : locales_) {
-    if (!config.first.empty()) {
+    if (config.first.empty()) {
+      out_badging->add_locales("--_--");
+    } else {
       out_badging->add_locales(config.first);
     }
   }
