@@ -97,7 +97,6 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
@@ -2352,7 +2351,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0) {
-            mCentralSurfaces.requestFaceAuth(false, FaceAuthApiRequestReason.QS_EXPANDED);
+            mCentralSurfaces.requestFaceAuth(false);
         }
     }
 
@@ -3529,8 +3528,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                             && !mUpdateMonitor.isFaceDetectionRunning()
                             && !mUpdateMonitor.getUserCanSkipBouncer(
                             KeyguardUpdateMonitor.getCurrentUser())) {
-                        mUpdateMonitor.requestFaceAuth(true,
-                                FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
+                        mUpdateMonitor.requestFaceAuth(true);
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
                                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);

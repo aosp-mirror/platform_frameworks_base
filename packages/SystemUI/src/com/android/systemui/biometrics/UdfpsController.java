@@ -52,7 +52,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.dagger.BiometricsBackground;
@@ -853,9 +852,7 @@ public class UdfpsController implements DozeReceiver {
             playStartHaptic();
 
             if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
-                mKeyguardUpdateMonitor.requestFaceAuth(
-                        /* userInitiatedRequest */ false,
-                        FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+                mKeyguardUpdateMonitor.requestFaceAuth(/* userInitiatedRequest */ false);
             }
         }
         mOnFingerDown = true;
