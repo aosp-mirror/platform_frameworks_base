@@ -73,14 +73,15 @@ public class DesktopModeController {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // Reset freeform windowing mode that is set per task level (tasks should inherit
         // container value)
-        wct.merge(mShellTaskOrganizer.prepareClearFreeformForTasks(displayId), true /* transfer */);
+        wct.merge(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(displayId),
+                true /* transfer */);
         int targetWindowingMode;
         if (active) {
             targetWindowingMode = WINDOWING_MODE_FREEFORM;
         } else {
             targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
             // Clear any resized bounds
-            wct.merge(mShellTaskOrganizer.prepareClearBoundsForTasks(displayId),
+            wct.merge(mShellTaskOrganizer.prepareClearBoundsForStandardTasks(displayId),
                     true /* transfer */);
         }
         wct.merge(mRootDisplayAreaOrganizer.prepareWindowingModeChange(displayId,
