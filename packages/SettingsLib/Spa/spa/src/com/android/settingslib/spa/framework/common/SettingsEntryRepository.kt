@@ -19,7 +19,7 @@ package com.android.settingslib.spa.framework.common
 import android.util.Log
 import java.util.LinkedList
 
-const val MAX_ENTRY_SIZE = 5000
+private const val MAX_ENTRY_SIZE = 5000
 
 /**
  * The repository to maintain all Settings entries

@@ -49,16 +49,8 @@ object SpaEnvironment {
                 IllustrationPageProvider,
             ),
             rootPageData = listOf(
-                SettingsPage(HomePageProvider.name),
-                SettingsPage(
-                    ArgumentPageProvider.name,
-                    ArgumentPageProvider.buildArgument("foo")
-                ),
-                SettingsPage(
-                    ArgumentPageProvider.name,
-                    ArgumentPageProvider.buildArgument("bar")
-                ),
-            )
+                SettingsPage(HomePageProvider.name)
+            ) + ArgumentPageProvider.buildRootPages()
         )
     }
 
