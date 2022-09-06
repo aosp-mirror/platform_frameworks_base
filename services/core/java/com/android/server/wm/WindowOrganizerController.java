@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_FINISH_ACTIVITY;
@@ -850,6 +851,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 effects |= setAdjacentRootsHierarchyOp(hop);
                 break;
             }
+            case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: {
+                effects |= clearAdjacentRootsHierarchyOp(hop);
+                break;
+            }
             case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT: {
                 final TaskFragmentCreationParams taskFragmentCreationOptions =
                         hop.getTaskFragmentCreationOptions();
@@ -1486,6 +1491,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 
+    private int clearAdjacentRootsHierarchyOp(WindowContainerTransaction.HierarchyOp hop) {
+        final TaskFragment root = WindowContainer.fromBinder(hop.getContainer()).asTaskFragment();
+        if (!root.mCreatedByOrganizer) {
+            throw new IllegalArgumentException("clearAdjacentRootsHierarchyOp: Not created by"
+                    + " organizer root=" + root);
+        }
+
+        root.resetAdjacentTaskFragment();
+        return TRANSACT_EFFECTS_LIFECYCLE;
+    }
+
     private void sanitizeWindowContainer(WindowContainer wc) {
         if (!(wc instanceof TaskFragment) && !(wc instanceof DisplayArea)) {
             throw new RuntimeException("Invalid token in task fragment or displayArea transaction");
@@ -1649,6 +1665,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     enforceTaskFragmentOrganized(func,
                             WindowContainer.fromBinder(hop.getAdjacentRoot()),
                             organizer);
+                    break;
+                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS:
+                    enforceTaskFragmentOrganized(func,
+                            WindowContainer.fromBinder(hop.getContainer()), organizer);
                     break;
                 case HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT:
                     // We are allowing organizer to create TaskFragment. We will check the
