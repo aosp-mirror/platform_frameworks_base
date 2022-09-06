@@ -59,7 +59,8 @@ public class InstallStart extends Activity {
         String callingAttributionTag = null;
 
         final boolean isSessionInstall =
-                PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction());
+                PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(intent.getAction())
+                        || PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction());
 
         // If the activity was started via a PackageInstaller session, we retrieve the calling
         // package from that session

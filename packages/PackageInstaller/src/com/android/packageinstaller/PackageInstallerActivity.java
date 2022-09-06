@@ -39,9 +39,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
@@ -151,7 +153,7 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     /**
-     * Replace any dialog shown by the dialog with the one for the given {@link #createDialog id}.
+     * Replace any dialog shown by the dialog with the one for the given {@link #createDialog(int)}.
      *
      * @param id The dialog type to add
      */
@@ -296,6 +298,14 @@ public class PackageInstallerActivity extends AlertActivity {
                 ? RESULT_OK : RESULT_FIRST_USER, result);
     }
 
+    private static PackageInfo generateStubPackageInfo(String packageName) {
+        final PackageInfo info = new PackageInfo();
+        final ApplicationInfo aInfo = new ApplicationInfo();
+        info.applicationInfo = aInfo;
+        info.packageName = info.applicationInfo.packageName = packageName;
+        return info;
+    }
+
     @Override
     protected void onCreate(Bundle icicle) {
         if (mLocalLOGV) Log.i(TAG, "creating for user " + getUserId());
@@ -315,6 +325,7 @@ public class PackageInstallerActivity extends AlertActivity {
         mUserManager = (UserManager) getSystemService(Context.USER_SERVICE);
 
         final Intent intent = getIntent();
+        final String action = intent.getAction();
 
         mCallingPackage = intent.getStringExtra(EXTRA_CALLING_PACKAGE);
         mCallingAttributionTag = intent.getStringExtra(EXTRA_CALLING_ATTRIBUTION_TAG);
@@ -324,11 +335,11 @@ public class PackageInstallerActivity extends AlertActivity {
         mOriginatingPackage = (mOriginatingUid != PackageInstaller.SessionParams.UID_UNKNOWN)
                 ? getPackageNameForUid(mOriginatingUid) : null;
 
-        final Uri packageUri;
-
-        if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction())) {
-            final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1);
-            final PackageInstaller.SessionInfo info = mInstaller.getSessionInfo(sessionId);
+        final Object packageSource;
+        if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(action)) {
+            final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
+                    -1 /* defaultValue */);
+            final SessionInfo info = mInstaller.getSessionInfo(sessionId);
             if (info == null || !info.sealed || info.resolvedBaseCodePath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
@@ -336,18 +347,32 @@ public class PackageInstallerActivity extends AlertActivity {
             }
 
             mSessionId = sessionId;
-            packageUri = Uri.fromFile(new File(info.resolvedBaseCodePath));
+            packageSource = Uri.fromFile(new File(info.resolvedBaseCodePath));
+            mOriginatingURI = null;
+            mReferrerURI = null;
+        } else if (PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(action)) {
+            final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
+                    -1 /* defaultValue */);
+            final SessionInfo info = mInstaller.getSessionInfo(sessionId);
+            if (info == null || !info.isPreapprovalRequested) {
+                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                finish();
+                return;
+            }
+
+            mSessionId = sessionId;
+            packageSource = info;
             mOriginatingURI = null;
             mReferrerURI = null;
         } else {
             mSessionId = -1;
-            packageUri = intent.getData();
+            packageSource = intent.getData();
             mOriginatingURI = intent.getParcelableExtra(Intent.EXTRA_ORIGINATING_URI);
             mReferrerURI = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
         }
 
         // if there's nothing to do, quietly slip into the ether
-        if (packageUri == null) {
+        if (packageSource == null) {
             Log.w(TAG, "Unspecified source");
             setPmResult(PackageManager.INSTALL_FAILED_INVALID_URI);
             finish();
@@ -359,7 +384,7 @@ public class PackageInstallerActivity extends AlertActivity {
             return;
         }
 
-        boolean wasSetUp = processPackageUri(packageUri);
+        final boolean wasSetUp = processAppSnippet(packageSource);
         if (mLocalLOGV) Log.i(TAG, "wasSetUp: " + wasSetUp);
 
         if (!wasSetUp) {
@@ -617,6 +642,39 @@ public class PackageInstallerActivity extends AlertActivity {
         }
 
         return true;
+    }
+
+    /**
+     * Use the SessionInfo and set up the installer for pre-commit install session.
+     *
+     * @param info The SessionInfo to compose
+     *
+     * @return {@code true} iff the installer could be set up
+     */
+    private boolean processSessionInfo(@NonNull SessionInfo info) {
+        mPkgInfo = generateStubPackageInfo(info.appPackageName);
+        mAppSnippet = new PackageUtil.AppSnippet(info.appLabel,
+                info.appIcon != null ? new BitmapDrawable(getResources(), info.appIcon)
+                        : getPackageManager().getDefaultActivityIcon());
+        return true;
+    }
+
+    /**
+     * Parse the Uri (post-commit install session) or use the SessionInfo (pre-commit install
+     * session) to set up the installer for this install.
+     *
+     * @param source The source of package URI or SessionInfo
+     *
+     * @return {@code true} iff the installer could be set up
+     */
+    private boolean processAppSnippet(@NonNull Object source) {
+        if (source instanceof Uri) {
+            return processPackageUri((Uri) source);
+        } else if (source instanceof SessionInfo) {
+            return processSessionInfo((SessionInfo) source);
+        }
+
+        return false;
     }
 
     @Override
