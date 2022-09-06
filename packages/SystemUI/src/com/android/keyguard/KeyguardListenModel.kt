@@ -52,6 +52,7 @@ data class KeyguardFaceListenModel(
     val becauseCannotSkipBouncer: Boolean,
     val biometricSettingEnabledForUser: Boolean,
     val bouncerFullyShown: Boolean,
+    val bouncerIsOrWillShow: Boolean,
     val faceAuthenticated: Boolean,
     val faceDisabled: Boolean,
     val goingToSleep: Boolean,
