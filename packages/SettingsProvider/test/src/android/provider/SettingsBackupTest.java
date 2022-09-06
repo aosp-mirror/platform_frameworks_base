@@ -849,8 +849,6 @@ public class SettingsBackupTest {
                         Settings.Secure.AMBIENT_CONTEXT_CONSENT_COMPONENT,
                         Settings.Secure.AMBIENT_CONTEXT_EVENT_ARRAY_EXTRA_KEY,
                         Settings.Secure.AMBIENT_CONTEXT_PACKAGE_NAME_EXTRA_KEY,
-                        Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
-                        Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
                         Settings.Secure.AUTO_REVOKE_DISABLED,
                         Settings.Secure.BIOMETRIC_APP_ENABLED,
                         Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED,
