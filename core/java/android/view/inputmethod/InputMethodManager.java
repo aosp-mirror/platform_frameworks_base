@@ -446,6 +446,7 @@ public final class InputMethodManager {
      * {@code true} if next {@link ImeFocusController#onPostWindowFocus} needs to
      * restart input.
      */
+    @GuardedBy("mH")
     private boolean mRestartOnNextWindowFocus = true;
 
     /**
@@ -495,8 +496,11 @@ public final class InputMethodManager {
     private CompletionInfo[] mCompletions;
 
     // Cursor position on the screen.
+    @GuardedBy("mH")
     @UnsupportedAppUsage
     Rect mTmpCursorRect = new Rect();
+
+    @GuardedBy("mH")
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
 
@@ -545,6 +549,7 @@ public final class InputMethodManager {
      * @deprecated New code should use {@code mCurBindState.mImeId}.
      */
     @Deprecated
+    @GuardedBy("mH")
     @UnsupportedAppUsage
     String mCurId;
 
@@ -586,6 +591,7 @@ public final class InputMethodManager {
      * @deprecated This is kept for {@link UnsupportedAppUsage}.  Must not be used.
      */
     @Deprecated
+    @GuardedBy("mH")
     private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
     /**
@@ -594,7 +600,9 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private ImeInsetsSourceConsumer mImeInsetsConsumer;
 
+    @GuardedBy("mH")
     private final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
+    @GuardedBy("mH")
     private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
 
     private final DelegateImpl mDelegate = new DelegateImpl();
@@ -841,11 +849,13 @@ public final class InputMethodManager {
          */
         @Override
         public boolean isRestartOnNextWindowFocus(boolean reset) {
-            final boolean result = mRestartOnNextWindowFocus;
-            if (reset) {
-                mRestartOnNextWindowFocus = false;
+            synchronized (mH) {
+                final boolean result = mRestartOnNextWindowFocus;
+                if (reset) {
+                    mRestartOnNextWindowFocus = false;
+                }
+                return result;
             }
-            return result;
         }
 
         /**
