@@ -305,6 +305,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private PackageManagerInternal mPmInternal;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
+    private ActivityManagerInternal mAmInternal;
 
     /** Indicates that this is the 1st boot after the system user mode was changed by emulation. */
     private boolean mUpdatingSystemUserMode;
@@ -383,7 +384,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @GuardedBy("mUsersLock")
-    private final SparseArray<UserData> mUsers = new SparseArray<>();
+    private final SparseArray<UserData> mUsers;
 
     /**
      * Map of user type names to their corresponding {@link UserTypeDetails}.
@@ -626,8 +627,6 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUserStates")
     private final WatchedUserStates mUserStates = new WatchedUserStates();
 
-
-
     /**
      * Set on on devices that support background users (key) running on secondary displays (value).
      */
@@ -707,10 +706,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    // TODO b/28848102 Add support for test dependencies injection
+    // TODO(b/28848102) Add support for test dependencies injection
     @VisibleForTesting
     UserManagerService(Context context) {
-        this(context, null, null, new Object(), context.getCacheDir());
+        this(context, /* pm= */ null, /* userDataPreparer= */ null,
+                /* packagesLock= */ new Object(), context.getCacheDir(), /* users= */ null);
     }
 
     /**
@@ -720,14 +720,18 @@ public class UserManagerService extends IUserManager.Stub {
      */
     UserManagerService(Context context, PackageManagerService pm, UserDataPreparer userDataPreparer,
             Object packagesLock) {
-        this(context, pm, userDataPreparer, packagesLock, Environment.getDataDirectory());
+        this(context, pm, userDataPreparer, packagesLock, Environment.getDataDirectory(),
+                /* users= */ null);
     }
 
-    private UserManagerService(Context context, PackageManagerService pm,
-            UserDataPreparer userDataPreparer, Object packagesLock, File dataDir) {
+    @VisibleForTesting
+    UserManagerService(Context context, PackageManagerService pm,
+            UserDataPreparer userDataPreparer, Object packagesLock, File dataDir,
+            SparseArray<UserData> users) {
         mContext = context;
         mPm = pm;
         mPackagesLock = packagesLock;
+        mUsers = users != null ? users : new SparseArray<>();
         mHandler = new MainHandler();
         mUserDataPreparer = userDataPreparer;
         mUserTypes = UserTypeFactory.getUserTypes();
@@ -1088,8 +1092,19 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getProfileParentId(@UserIdInt int userId) {
         checkManageUsersPermission("get the profile parent");
-        return mLocalService.getProfileParentId(userId);
+        return getProfileParentIdUnchecked(userId);
     }
+
+    private @UserIdInt int getProfileParentIdUnchecked(@UserIdInt int userId) {
+        synchronized (mUsersLock) {
+            UserInfo profileParent = getProfileParentLU(userId);
+            if (profileParent == null) {
+                return userId;
+            }
+            return profileParent.id;
+        }
+    }
+
 
     @GuardedBy("mUsersLock")
     private UserInfo getProfileParentLU(@UserIdInt int userId) {
@@ -1702,8 +1717,7 @@ public class UserManagerService extends IUserManager.Stub {
                     + ") is running in the foreground");
         }
 
-        int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
-        return currentUser == userId;
+        return userId == getCurrentUserId();
     }
 
     @Override
@@ -1751,15 +1765,39 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
-        int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+    /**
+     * Gets the current user id, calling {@link ActivityManagerInternal} directly (and without
+     * performing any permission check).
+     *
+     * @return id of current foreground user, or {@link UserHandle#USER_NULL} if
+     * {@link ActivityManagerInternal} is not available yet.
+     */
+    @VisibleForTesting
+    int getCurrentUserId() {
+        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
+        if (activityManagerInternal == null) {
+            Slog.w(LOG_TAG, "getCurrentUserId() called too early, ActivityManagerInternal"
+                    + " is not set yet");
+            return UserHandle.USER_NULL;
+        }
+        return activityManagerInternal.getCurrentUserId();
+    }
+
+    /**
+     * Gets whether the user is the current foreground user or a started profile of that user.
+     *
+     * <p>Doesn't perform any permission check.
+     */
+    @VisibleForTesting
+    boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
+        int currentUserId = getCurrentUserId();
 
         if (currentUserId == userId) {
             return true;
         }
 
-        if (isProfile(userId)) {
-            int parentId = Binder.withCleanCallingIdentity(() -> getProfileParentId(userId));
+        if (isProfileUnchecked(userId)) {
+            int parentId = getProfileParentIdUnchecked(userId);
             if (parentId == currentUserId) {
                 return isUserRunning(userId);
             }
@@ -5080,7 +5118,7 @@ public class UserManagerService extends IUserManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
-            int currentUser = ActivityManager.getCurrentUser();
+            int currentUser = getCurrentUserId();
             if (currentUser == userId) {
                 Slog.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
@@ -5208,7 +5246,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
 
                 // Attempt to immediately remove a non-current user
-                final int currentUser = ActivityManager.getCurrentUser();
+                final int currentUser = getCurrentUserId();
                 if (currentUser != userId) {
                     // Attempt to remove the user. This will fail if the user is the current user
                     if (removeUserUnchecked(userId)) {
@@ -6009,11 +6047,10 @@ public class UserManagerService extends IUserManager.Stub {
             return;
         }
 
-        final ActivityManagerInternal amInternal = LocalServices
-                .getService(ActivityManagerInternal.class);
+        final int currentUserId = getCurrentUserId();
         pw.print("Current user: ");
-        if (amInternal != null) {
-            pw.println(amInternal.getCurrentUserId());
+        if (currentUserId != UserHandle.USER_NULL) {
+            pw.println(currentUserId);
         } else {
             pw.println("N/A");
         }
@@ -6140,13 +6177,13 @@ public class UserManagerService extends IUserManager.Stub {
     private void dumpUser(PrintWriter pw, @UserIdInt int userId, StringBuilder sb, long now,
             long nowRealtime) {
         if (userId == UserHandle.USER_CURRENT) {
-            final ActivityManagerInternal amInternal = LocalServices
-                    .getService(ActivityManagerInternal.class);
-            if (amInternal == null) {
+            final int currentUserId = getCurrentUserId();
+            pw.print("Current user: ");
+            if (currentUserId == UserHandle.USER_NULL) {
                 pw.println("Cannot determine current user");
                 return;
             }
-            userId = amInternal.getCurrentUserId();
+            userId = currentUserId;
         }
 
         synchronized (mUsersLock) {
@@ -6392,7 +6429,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public void removeAllUsers() {
-            if (UserHandle.USER_SYSTEM == ActivityManager.getCurrentUser()) {
+            if (UserHandle.USER_SYSTEM == getCurrentUserId()) {
                 // Remove the non-system users straight away.
                 removeNonSystemUsers();
             } else {
@@ -6574,13 +6611,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public int getProfileParentId(@UserIdInt int userId) {
-            synchronized (mUsersLock) {
-                UserInfo profileParent = getProfileParentLU(userId);
-                if (profileParent == null) {
-                    return userId;
-                }
-                return profileParent.id;
-            }
+            return getProfileParentIdUnchecked(userId);
         }
 
         @Override
@@ -6908,5 +6939,13 @@ public class UserManagerService extends IUserManager.Stub {
                     LocalServices.getService(DevicePolicyManagerInternal.class);
         }
         return mDevicePolicyManagerInternal;
+    }
+
+    /** Returns the internal activity manager interface. */
+    private @Nullable ActivityManagerInternal getActivityManagerInternal() {
+        if (mAmInternal == null) {
+            mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        }
+        return mAmInternal;
     }
 }
