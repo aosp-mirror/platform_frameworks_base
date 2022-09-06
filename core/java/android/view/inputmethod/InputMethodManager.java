@@ -2012,10 +2012,11 @@ public final class InputMethodManager {
     private boolean showSoftInput(View view, @Nullable ImeTracker.Token statsToken, int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         if (statsToken == null) {
-            statsToken = ImeTracker.get().onRequestShow(null /* component */,
+            statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason);
         }
-
+        ImeTracker.forLatency().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
+                reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this,
                 null /* icProto */);
         // Re-dispatch if there is a context mismatch.
@@ -2027,12 +2028,15 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view)) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onShowFailed(
+                        statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED,
+                        ActivityThread::currentApplication);
                 Log.w(TAG, "Ignoring showSoftInput() as view=" + view + " is not served.");
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
             // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2062,20 +2066,20 @@ public final class InputMethodManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         synchronized (mH) {
-            final ImeTracker.Token statsToken = ImeTracker.get().onRequestShow(null /* component */,
-                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
+            final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestShow(
+                    null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
                     SoftInputShowHideReason.SHOW_SOFT_INPUT);
 
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
                     + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
                     + " please update to version 26.0 or newer version.");
             if (mCurRootView == null || mCurRootView.getView() == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                 return;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
             // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2153,20 +2157,24 @@ public final class InputMethodManager {
 
     private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        final ImeTracker.Token statsToken = ImeTracker.get().onRequestHide(null /* component */,
-                Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
-
+        final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
+                null /* component */, Process.myUid(),
+                ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onHideFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
                     flags, resultReceiver, reason);
@@ -2802,18 +2810,22 @@ public final class InputMethodManager {
 
     @UnsupportedAppUsage
     void closeCurrentInput() {
-        final ImeTracker.Token statsToken = ImeTracker.get().onRequestHide(null /* component */,
-                Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+        final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
+                null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 SoftInputShowHideReason.HIDE_SOFT_INPUT);
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT, ActivityThread::currentApplication);
 
         synchronized (mH) {
             if (mCurRootView == null || mCurRootView.getView() == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onHideFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
                 Log.w(TAG, "No current root view, ignoring closeCurrentInput()");
                 return;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(
                     mClient,
@@ -2872,11 +2884,13 @@ public final class InputMethodManager {
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
+            ImeTracker.forLogging().onProgress(statsToken,
+                    ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
 
             showSoftInput(servedView, statsToken, 0 /* flags */, null /* resultReceiver */,
                     SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
@@ -2894,21 +2908,25 @@ public final class InputMethodManager {
      */
     public void notifyImeHidden(IBinder windowToken, @Nullable ImeTracker.Token statsToken) {
         if (statsToken == null) {
-            statsToken = ImeTracker.get().onRequestHide(null /* component */,
+            statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
         }
-
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
+                ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this,
                 null /* icProto */);
         synchronized (mH) {
             if (!isImeSessionAvailableLocked() || mCurRootView == null
                     || mCurRootView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onHideFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
                 return;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
                     0 /* flags */, null /* resultReceiver */,

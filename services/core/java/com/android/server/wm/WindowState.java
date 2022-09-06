@@ -4001,12 +4001,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void showInsets(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
         try {
-            ImeTracker.get().onProgress(statsToken,
+            ImeTracker.forLogging().onProgress(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_SHOW_INSETS);
             mClient.showInsets(types, fromIme, statsToken);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver showInsets", e);
-            ImeTracker.get().onFailed(statsToken,
+            ImeTracker.forLogging().onFailed(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_SHOW_INSETS);
         }
     }
@@ -4015,12 +4015,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void hideInsets(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
         try {
-            ImeTracker.get().onProgress(statsToken,
+            ImeTracker.forLogging().onProgress(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_HIDE_INSETS);
             mClient.hideInsets(types, fromIme, statsToken);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver hideInsets", e);
-            ImeTracker.get().onFailed(statsToken,
+            ImeTracker.forLogging().onFailed(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_HIDE_INSETS);
         }
     }

@@ -136,14 +136,14 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
             @ImeVisibilityStateComputer.VisibilityState int state, int reason) {
         switch (state) {
             case STATE_SHOW_IME:
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 // Send to window manager to show IME after IME layout finishes.
                 mWindowManagerInternal.showImePostLayout(windowToken, statsToken);
                 break;
             case STATE_HIDE_IME:
                 if (mService.mCurFocusedWindowClient != null) {
-                    ImeTracker.get().onProgress(statsToken,
+                    ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                     // IMMS only knows of focused window, not the actual IME target.
                     // e.g. it isn't aware of any window that has both
@@ -154,7 +154,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                     mWindowManagerInternal.hideIme(windowToken,
                             mService.mCurFocusedWindowClient.mSelfReportedDisplayId, statsToken);
                 } else {
-                    ImeTracker.get().onFailed(statsToken,
+                    ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 }
                 break;

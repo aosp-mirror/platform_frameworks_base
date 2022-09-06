@@ -2277,7 +2277,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mCurClient.mSessionRequestedForAccessibility = false;
             mCurClient = null;
             mCurVirtualDisplayToScreenMatrix = null;
-            ImeTracker.get().onFailed(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
+            ImeTracker.forLogging().onFailed(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = null;
 
             mMenuController.hideInputMethodMenuLocked();
@@ -3263,7 +3263,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 "InputMethodManagerService#showSoftInput");
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken)) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+                ImeTracker.forLogging().onFailed(
+                        statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -3363,7 +3364,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // TODO(b/261565259): to avoid using null, add package name in ClientState
             final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
             final int uid = mCurClient != null ? mCurClient.mUid : -1;
-            statsToken = ImeTracker.get().onRequestShow(packageName, uid,
+            statsToken = ImeTracker.forLogging().onRequestShow(packageName, uid,
                     ImeTracker.ORIGIN_SERVER_START_INPUT, reason);
         }
 
@@ -3372,19 +3373,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (!mSystemReady) {
-            ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_SYSTEM_READY);
+            ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_SERVER_SYSTEM_READY);
             return false;
         }
-        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_SYSTEM_READY);
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_SYSTEM_READY);
 
         mVisibilityStateComputer.requestImeVisibility(windowToken, true);
 
         // Ensure binding the connection when IME is going to show.
         mBindingController.setCurrentMethodVisible();
         final IInputMethodInvoker curMethod = getCurMethodLocked();
-        ImeTracker.get().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
+        ImeTracker.forLogging().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
         if (curMethod != null) {
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
             mCurStatsToken = null;
 
             if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
@@ -3395,7 +3396,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mVisibilityStateComputer.setInputShown(true);
             return true;
         } else {
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = statsToken;
         }
         return false;
@@ -3411,9 +3412,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken)) {
                 if (isInputShown()) {
-                    ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+                    ImeTracker.forLogging().onFailed(
+                            statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
                 } else {
-                    ImeTracker.get().onCancelled(statsToken,
+                    ImeTracker.forLogging().onCancelled(statsToken,
                             ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
                 }
                 return false;
@@ -3446,7 +3448,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             } else {
                 uid = -1;
             }
-            statsToken = ImeTracker.get().onRequestHide(packageName, uid,
+            statsToken = ImeTracker.forLogging().onRequestHide(packageName, uid,
                     ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason);
         }
 
@@ -3472,15 +3474,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // delivered to the IME process as an IPC.  Hence the inconsistency between
             // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
             // the final state.
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
             mVisibilityApplier.performHideIme(windowToken, statsToken, resultReceiver, reason);
         } else {
-            ImeTracker.get().onCancelled(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
+            ImeTracker.forLogging().onCancelled(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
         }
         mBindingController.setCurrentMethodNotVisible();
         mVisibilityStateComputer.clearImeShowFlags();
         // Cancel existing statsToken for show IME as we got a hide request.
-        ImeTracker.get().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
+        ImeTracker.forLogging().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
         mCurStatsToken = null;
         return shouldHideSoftInput;
     }
@@ -3752,16 +3754,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // be made before input is started in it.
             final ClientState cs = mClients.get(client.asBinder());
             if (cs == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
                 throw new IllegalArgumentException("unknown client " + client.asBinder());
             }
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
             if (!isImeClientFocused(mCurFocusedWindow, cs)) {
                 Slog.w(TAG, String.format("Ignoring %s of uid %d : %s", methodName, uid, client));
                 return false;
             }
         }
-        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
         return true;
     }
 
@@ -4538,7 +4540,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
         synchronized (ImfLock.class) {
             if (!calledWithValidTokenLocked(token)) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 return;
             }
             final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(windowToken);
