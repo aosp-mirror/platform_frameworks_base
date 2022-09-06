@@ -1775,7 +1775,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     private TestDisplayContent createNewDisplayContent(int windowingMode) {
         final TestDisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        display.setWindowingMode(windowingMode);
+        display.getDefaultTaskDisplayArea().setWindowingMode(windowingMode);
         display.setBounds(DISPLAY_BOUNDS);
         display.getConfiguration().densityDpi = DENSITY_DEFAULT;
         display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;

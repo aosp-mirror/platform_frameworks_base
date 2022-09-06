@@ -172,6 +172,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     private final boolean mCanHostHomeTask;
 
+    private final Configuration mTempConfiguration = new Configuration();
+
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
                     int displayAreaFeature) {
         this(displayContent, service, name, displayAreaFeature, false /* createdByOrganizer */,
@@ -1888,6 +1890,15 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     void clearPreferredTopFocusableRootTask() {
         mPreferredTopFocusableRootTask = null;
+    }
+
+    @Override
+    public void setWindowingMode(int windowingMode) {
+        mTempConfiguration.setTo(getRequestedOverrideConfiguration());
+        WindowConfiguration tempRequestWindowConfiguration = mTempConfiguration.windowConfiguration;
+        tempRequestWindowConfiguration.setWindowingMode(windowingMode);
+        tempRequestWindowConfiguration.setDisplayWindowingMode(windowingMode);
+        onRequestedOverrideConfigurationChanged(mTempConfiguration);
     }
 
     @Override
