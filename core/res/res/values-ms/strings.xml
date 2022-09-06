@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Pengendalian cap jari dibatalkan."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Pengendalian cap jari dibatalkan oleh pengguna."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Terlalu banyak percubaan. Penderia cap jari dilumpuhkan."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Cuba lagi."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Tiada cap jari didaftarkan."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Peranti ini tiada penderia cap jari."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"tidak ditandai"</string>
     <string name="selected" msgid="6614607926197755875">"dipilih"</string>
     <string name="not_selected" msgid="410652016565864475">"tidak dipilih"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Satu daripada {max} bintang}other{# daripada {max} bintang}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"dalam proses"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Selesaikan tindakan menggunakan"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Selesaikan tindakan menggunakan %1$s"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Pilihan wilayah"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Taipkan nama bahasa"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Dicadangkan"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Dicadangkan"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Bahasa yang dicadangkan"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Rantau yang disyorkan"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Semua bahasa"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih dapat mengakses sesetengah log atau maklumat pada peranti anda."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> mahu menunjukkan <xliff:g id="APP_2">%2$s</xliff:g> hirisan"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Kandungan ini tidak boleh diakses semasa penstriman. Cuba pada telefon anda."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Lalai sistem"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KAD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

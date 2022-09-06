@@ -41,7 +41,6 @@ import static org.testng.Assert.expectThrows;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsState;
@@ -49,8 +48,6 @@ import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -123,7 +120,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private void updateDisplayFrames() {
         mFrames = createDisplayFrames(
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
-        mDisplayBounds.set(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight);
+        mDisplayBounds.set(0, 0, mFrames.mWidth, mFrames.mHeight);
         mDisplayContent.mDisplayFrames = mFrames;
         mDisplayContent.setBounds(mDisplayBounds);
         mDisplayPolicy.layoutWindowLw(mNavBarWindow, null, mFrames);
@@ -131,13 +128,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     private DisplayFrames createDisplayFrames(InsetsState insetsState) {
-        final Pair<DisplayInfo, WmDisplayCutout> info = displayInfoAndCutoutForRotation(mRotation,
+        final DisplayInfo info = displayInfoAndCutoutForRotation(mRotation,
                 mHasDisplayCutout, mIsLongEdgeDisplayCutout);
         final RoundedCorners roundedCorners = mHasRoundedCorners
                 ? mDisplayContent.calculateRoundedCornersForRotation(mRotation)
                 : RoundedCorners.NO_ROUNDED_CORNERS;
-        return new DisplayFrames(mDisplayContent.getDisplayId(),
-                insetsState, info.first, info.second, roundedCorners, new PrivacyIndicatorBounds());
+        return new DisplayFrames(insetsState, info,
+                info.displayCutout, roundedCorners, new PrivacyIndicatorBounds());
     }
 
     @Test

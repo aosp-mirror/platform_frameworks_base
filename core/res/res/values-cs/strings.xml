@@ -607,7 +607,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operace otisku prstu byla zrušena."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Uživatel operaci s otiskem prstu zrušil."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Příliš mnoho pokusů. Zkuste to později."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Příliš mnoho pokusů. Snímač otisků prstů byl deaktivován."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Zkuste to znovu."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nejsou zaregistrovány žádné otisky prstů."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Toto zařízení nemá snímač otisků prstů."</string>
@@ -1169,8 +1170,7 @@
     <string name="not_checked" msgid="7972320087569023342">"nevybráno"</string>
     <string name="selected" msgid="6614607926197755875">"vybráno"</string>
     <string name="not_selected" msgid="410652016565864475">"nevybráno"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Jedna hvězdička z {max}}few{# hvězdičky z {max}}many{# hvězdičky z {max}}other{# hvězdiček z {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"probíhá"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Dokončit akci pomocí aplikace"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Dokončit akci pomocí aplikace %1$s"</string>
@@ -1428,7 +1428,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"Otevřít"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Přepnout výstup"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> chybí"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Znovu vložte zařízení"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Vložte zařízení znovu"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Přesouvání aplikace <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Probíhá přesun dat"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Přenos obsahu je dokončen"</string>
@@ -1567,7 +1567,7 @@
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s – %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s – %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Interní sdílené úložiště"</string>
-    <string name="storage_sd_card" msgid="3404740277075331881">"Karta SD"</string>
+    <string name="storage_sd_card" msgid="3404740277075331881">"SD karta"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD karta <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"Jednotka USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"Jednotka USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
@@ -1927,8 +1927,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaná oblast"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Zadejte název jazyka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Navrženo"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Navrhované jazyky"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Navrhované oblasti"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Všechny jazyky"</string>
@@ -2053,8 +2052,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Povolit aplikaci <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> přístup ke všem protokolům zařízení?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Povolit jednorázový přístup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nepovolovat"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Do protokolů zařízení se zaznamenává, co se na zařízení děje. Aplikace tyto protokoly mohou používat k vyhledání a odstranění problémů.\n\nNěkteré protokoly mohou zahrnovat citlivé údaje. Přístup k protokolům zařízení proto povolte pouze aplikacím, kterým důvěřujete. \n\nPokud této aplikaci nepovolíte přístup ke všem protokolům zařízení, bude mít stále přístup ke svým vlastním protokolům. Výrobce zařízení může mít stále přístup k některým protokolům nebo informacím na vašem zařízení."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Příště nezobrazovat"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikace <xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovat ukázky z aplikace <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Upravit"</string>

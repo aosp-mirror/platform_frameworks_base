@@ -34,12 +34,10 @@ import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_I
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_VARIABLE_VOLUME;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.VOLUME_MAX;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 import android.Manifest;
 import android.app.UiAutomation;
@@ -206,9 +204,8 @@ public class MediaRouter2ManagerTest {
                 });
 
         mService.addRoutes(routes);
-        assertTrue(
-                "Added routes not found or onRoutesUpdated() never called.",
-                addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertWithMessage("Added routes not found or onRoutesUpdated() never called.")
+                .that(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         MediaRoute2Info newRoute2 =
                 new MediaRoute2Info.Builder(routes.get(1))
@@ -216,18 +213,16 @@ public class MediaRouter2ManagerTest {
                         .build();
         routes.set(1, newRoute2);
         mService.addRoute(routes.get(1));
-        assertTrue(
-                "Modified route not found or onRoutesUpdated() never called.",
-                changedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertWithMessage("Modified route not found or onRoutesUpdated() never called.")
+                .that(changedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<String> routeIds = new ArrayList<>();
         routeIds.add(routeId0);
         routeIds.add(routeId1);
 
         mService.removeRoutes(routeIds);
-        assertTrue(
-                "Removed routes not found or onRoutesUpdated() never called.",
-                removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertWithMessage("Removed routes not found or onRoutesUpdated() never called.")
+                .that(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     private static boolean checkRoutesMatch(
@@ -242,9 +237,10 @@ public class MediaRouter2ManagerTest {
             if (matchingRoute == null) {
                 return false;
             }
-            assertTrue(TextUtils.equals(expectedRoute.getName(), matchingRoute.getName()));
-            assertEquals(expectedRoute.getFeatures(), matchingRoute.getFeatures());
-            assertEquals(expectedRoute.getConnectionState(), matchingRoute.getConnectionState());
+            assertThat(TextUtils.equals(expectedRoute.getName(), matchingRoute.getName())).isTrue();
+            assertThat(matchingRoute.getFeatures()).isEqualTo(expectedRoute.getFeatures());
+            assertThat(matchingRoute.getConnectionState())
+                    .isEqualTo(expectedRoute.getConnectionState());
         }
 
         return true;
@@ -288,19 +284,19 @@ public class MediaRouter2ManagerTest {
 
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
-        assertNotNull(routeToRemove);
+        assertThat(routeToRemove).isNotNull();
 
         mService.removeRoute(ROUTE_ID2);
 
         // Wait until the route is removed.
-        assertTrue(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         Map<String, MediaRoute2Info> newRoutes = waitAndGetRoutesWithManager(FEATURES_ALL);
-        assertNull(newRoutes.get(ROUTE_ID2));
+        assertThat(newRoutes.get(ROUTE_ID2)).isNull();
 
         // Revert the removal.
         mService.addRoute(routeToRemove);
-        assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         mRouter2.unregisterRouteCallback(routeCallback);
     }
 
@@ -318,8 +314,8 @@ public class MediaRouter2ManagerTest {
             }
         }
 
-        assertEquals(1, routeCount);
-        assertNotNull(routes.get(ROUTE_ID_SPECIAL_FEATURE));
+        assertThat(routeCount).isEqualTo(1);
+        assertThat(routes.get(ROUTE_ID_SPECIAL_FEATURE)).isNotNull();
     }
 
     @Test
@@ -337,7 +333,7 @@ public class MediaRouter2ManagerTest {
             }
         }
 
-        assertEquals(0, remoteRouteCount);
+        assertThat(remoteRouteCount).isEqualTo(0);
     }
 
     @Test
@@ -355,7 +351,7 @@ public class MediaRouter2ManagerTest {
             }
         }
 
-        assertTrue(remoteRouteCount > 0);
+        assertThat(remoteRouteCount > 0).isTrue();
     }
 
     /**
@@ -384,11 +380,11 @@ public class MediaRouter2ManagerTest {
         });
 
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
-        assertNotNull(routeToSelect);
+        assertThat(routeToSelect).isNotNull();
 
         mManager.selectRoute(mPackageName, routeToSelect);
-        assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertEquals(1, mManager.getRemoteSessions().size());
+        assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(mManager.getRemoteSessions().size()).isEqualTo(1);
     }
 
     @Test
@@ -410,20 +406,20 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
+        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
 
         mManager.selectRoute(mPackageName, routeToSelect);
-        assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
-        assertEquals(2, sessions.size());
+        assertThat(sessions.size()).isEqualTo(2);
 
         RoutingSessionInfo sessionInfo = sessions.get(1);
         awaitOnRouteChangedManager(
                 () -> mManager.releaseSession(sessionInfo),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
-        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
+        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
     }
 
     @Test
@@ -437,7 +433,7 @@ public class MediaRouter2ManagerTest {
             @Override
             public void onTransferred(RoutingSessionInfo oldSessionInfo,
                     RoutingSessionInfo newSessionInfo) {
-                assertNotNull(newSessionInfo);
+                assertThat(newSessionInfo).isNotNull();
                 onSessionCreatedLatch.countDown();
             }
             @Override
@@ -452,8 +448,8 @@ public class MediaRouter2ManagerTest {
                 .build();
 
         mManager.transfer(mManager.getSystemRoutingSession(null), unknownRoute);
-        assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
-        assertTrue(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
+        assertThat(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
@@ -463,7 +459,7 @@ public class MediaRouter2ManagerTest {
 
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
-        assertNotNull(routeToSelect);
+        assertThat(routeToSelect).isNotNull();
 
         addRouterCallback(new RouteCallback() {});
         addManagerCallback(new MediaRouter2Manager.Callback() {
@@ -481,20 +477,20 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
-        assertEquals(1, mRouter2.getControllers().size());
+        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
+        assertThat(mRouter2.getControllers().size()).isEqualTo(1);
 
         mManager.transfer(mManager.getRoutingSessions(mPackageName).get(0), routeToSelect);
-        assertTrue(transferLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(transferLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
-        assertEquals(2, mManager.getRoutingSessions(mPackageName).size());
-        assertEquals(2, mRouter2.getControllers().size());
+        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(2);
+        assertThat(mRouter2.getControllers().size()).isEqualTo(2);
         mRouter2.getControllers().get(1).release();
 
-        assertTrue(releaseLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(releaseLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
-        assertEquals(1, mRouter2.getControllers().size());
-        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
+        assertThat(mRouter2.getControllers().size()).isEqualTo(1);
+        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
     }
 
     /**
@@ -511,7 +507,7 @@ public class MediaRouter2ManagerTest {
             @Override
             public void onTransferred(RoutingSessionInfo oldSessionInfo,
                     RoutingSessionInfo newSessionInfo) {
-                assertNotNull(newSessionInfo);
+                assertThat(newSessionInfo).isNotNull();
                 onSessionCreatedLatch.countDown();
             }
         });
@@ -519,11 +515,11 @@ public class MediaRouter2ManagerTest {
                 () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1)),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
-        assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
 
-        assertEquals(2, sessions.size());
+        assertThat(sessions.size()).isEqualTo(2);
         RoutingSessionInfo sessionInfo = sessions.get(1);
 
         awaitOnRouteChangedManager(
@@ -582,30 +578,33 @@ public class MediaRouter2ManagerTest {
 
         MediaRoute2Info route1 = routes.get(ROUTE_ID1);
         MediaRoute2Info route2 = routes.get(ROUTE_ID2);
-        assertNotNull(route1);
-        assertNotNull(route2);
+        assertThat(route1).isNotNull();
+        assertThat(route2).isNotNull();
 
         mManager.selectRoute(mPackageName, route1);
-        assertTrue(successLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(successLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         mManager.selectRoute(mPackageName, route2);
-        assertTrue(successLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(successLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         // onTransferFailed/onSessionReleased should not be called.
-        assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
-        assertFalse(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertThat(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
+        assertThat(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS))
+                .isFalse();
 
-        assertEquals(2, sessions.size());
+        assertThat(sessions.size()).isEqualTo(2);
         List<String> remoteSessionIds = mManager.getRemoteSessions().stream()
                 .map(RoutingSessionInfo::getId)
                 .collect(Collectors.toList());
         // The old session shouldn't appear on the session list.
-        assertFalse(remoteSessionIds.contains(sessions.get(0).getId()));
-        assertTrue(remoteSessionIds.contains(sessions.get(1).getId()));
+        assertThat(remoteSessionIds.contains(sessions.get(0).getId())).isFalse();
+        assertThat(remoteSessionIds.contains(sessions.get(1).getId())).isTrue();
 
-        assertFalse(serviceOnReleaseSessionLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertThat(serviceOnReleaseSessionLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS))
+                .isFalse();
         mManager.releaseSession(sessions.get(0));
-        assertTrue(serviceOnReleaseSessionLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertFalse(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertThat(serviceOnReleaseSessionLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS))
+                .isFalse();
     }
 
     @Test
@@ -633,9 +632,9 @@ public class MediaRouter2ManagerTest {
         RoutingSessionInfo targetSession = sessions.get(sessions.size() - 1);
         mManager.transfer(targetSession, routes.get(ROUTE_ID6_TO_BE_IGNORED));
 
-        assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
-        assertTrue(onFailedLatch.await(MediaRouter2Manager.TRANSFER_TIMEOUT_MS,
-                TimeUnit.MILLISECONDS));
+        assertThat(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
+        assertThat(onFailedLatch.await(MediaRouter2Manager.TRANSFER_TIMEOUT_MS,
+                TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
@@ -647,7 +646,7 @@ public class MediaRouter2ManagerTest {
                 mManager.getSystemRoutingSession(mPackageName).getSelectedRoutes().get(0));
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info volRoute = routes.get(selectedSystemRouteId);
-        assertNotNull(volRoute);
+        assertThat(volRoute).isNotNull();
 
         int originalVolume = volRoute.getVolume();
         int targetVolume = originalVolume == volRoute.getVolumeMax()
@@ -697,16 +696,16 @@ public class MediaRouter2ManagerTest {
             @Override
             public void onTransferred(RoutingSessionInfo oldSessionInfo,
                     RoutingSessionInfo newSessionInfo) {
-                assertNotNull(newSessionInfo);
+                assertThat(newSessionInfo).isNotNull();
                 onSessionCreatedLatch.countDown();
             }
         });
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
-        assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
-        assertEquals(2, sessions.size());
+        assertThat(sessions.size()).isEqualTo(2);
 
         // test setSessionVolume
         RoutingSessionInfo sessionInfo = sessions.get(1);
@@ -741,7 +740,7 @@ public class MediaRouter2ManagerTest {
         try {
             mRouter2.registerControllerCallback(mExecutor, controllerCallback);
             mManager.setSessionVolume(sessionInfo, targetVolume);
-            assertTrue(volumeChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            assertThat(volumeChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         } finally {
             mRouter2.unregisterControllerCallback(controllerCallback);
         }
@@ -768,8 +767,8 @@ public class MediaRouter2ManagerTest {
 
         addManagerCallback(new MediaRouter2Manager.Callback() {});
         mManager.setRouteVolume(volRoute, 0);
-        assertTrue(onSetRouteVolumeLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertFalse(requestIds.isEmpty());
+        assertThat(onSetRouteVolumeLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(requestIds.isEmpty()).isFalse();
 
         final int failureReason = REASON_REJECTED;
         final CountDownLatch onRequestFailedLatch = new CountDownLatch(1);
@@ -789,16 +788,17 @@ public class MediaRouter2ManagerTest {
 
         final long invalidRequestId = REQUEST_ID_NONE;
         mService.notifyRequestFailed(invalidRequestId, failureReason);
-        assertFalse(onRequestFailedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertThat(onRequestFailedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
 
         final long validRequestId = requestIds.get(0);
         mService.notifyRequestFailed(validRequestId, failureReason);
-        assertTrue(onRequestFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(onRequestFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         // Test calling notifyRequestFailed() multiple times with the same valid requestId.
         // onRequestFailed() shouldn't be called since the requestId has been already handled.
         mService.notifyRequestFailed(validRequestId, failureReason);
-        assertFalse(onRequestFailedSecondCallLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(onRequestFailedSecondCallLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS))
+                .isFalse();
     }
 
     @Test
@@ -808,9 +808,9 @@ public class MediaRouter2ManagerTest {
         MediaRoute2Info fixedVolumeRoute = routes.get(ROUTE_ID_FIXED_VOLUME);
         MediaRoute2Info variableVolumeRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
 
-        assertEquals(PLAYBACK_VOLUME_FIXED, fixedVolumeRoute.getVolumeHandling());
-        assertEquals(PLAYBACK_VOLUME_VARIABLE, variableVolumeRoute.getVolumeHandling());
-        assertEquals(VOLUME_MAX, variableVolumeRoute.getVolumeMax());
+        assertThat(fixedVolumeRoute.getVolumeHandling()).isEqualTo(PLAYBACK_VOLUME_FIXED);
+        assertThat(variableVolumeRoute.getVolumeHandling()).isEqualTo(PLAYBACK_VOLUME_VARIABLE);
+        assertThat(variableVolumeRoute.getVolumeMax()).isEqualTo(VOLUME_MAX);
     }
 
     @Test
@@ -819,7 +819,7 @@ public class MediaRouter2ManagerTest {
         addRouterCallback(new RouteCallback() {});
 
         MediaRoute2Info route = routes.get(ROUTE_ID1);
-        assertNotNull(route);
+        assertThat(route).isNotNull();
 
         final Bundle controllerHints = new Bundle();
         controllerHints.putString(TEST_KEY, TEST_VALUE);
@@ -837,13 +837,13 @@ public class MediaRouter2ManagerTest {
             @Override
             public void onTransferred(RoutingSessionInfo oldSession,
                     RoutingSessionInfo newSession) {
-                assertTrue(newSession.getSelectedRoutes().contains(route.getId()));
+                assertThat(newSession.getSelectedRoutes().contains(route.getId())).isTrue();
                 // The StubMediaRoute2ProviderService is supposed to set control hints
                 // with the given controllerHints.
                 Bundle controlHints = newSession.getControlHints();
-                assertNotNull(controlHints);
-                assertTrue(controlHints.containsKey(TEST_KEY));
-                assertEquals(TEST_VALUE, controlHints.getString(TEST_KEY));
+                assertThat(controlHints).isNotNull();
+                assertThat(controlHints.containsKey(TEST_KEY)).isTrue();
+                assertThat(controlHints.getString(TEST_KEY)).isEqualTo(TEST_VALUE);
 
                 successLatch.countDown();
             }
@@ -857,10 +857,10 @@ public class MediaRouter2ManagerTest {
 
         mRouter2.setOnGetControllerHintsListener(listener);
         mManager.selectRoute(mPackageName, route);
-        assertTrue(hintLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(hintLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
-        assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertThat(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
     }
 
     @Test
@@ -885,24 +885,24 @@ public class MediaRouter2ManagerTest {
             @Override
             public void onTransferred(RoutingSessionInfo oldSessionInfo,
                     RoutingSessionInfo newSessionInfo) {
-                assertNotNull(newSessionInfo);
+                assertThat(newSessionInfo).isNotNull();
                 List<String> selectedRoutes = mManager.getSelectedRoutes(newSessionInfo).stream()
                         .map(MediaRoute2Info::getId)
                         .collect(Collectors.toList());
                 for (MediaRoute2Info selectableRoute :
                         mManager.getSelectableRoutes(newSessionInfo)) {
-                    assertFalse(selectedRoutes.contains(selectableRoute.getId()));
+                    assertThat(selectedRoutes.contains(selectableRoute.getId())).isFalse();
                 }
                 for (MediaRoute2Info deselectableRoute :
                         mManager.getDeselectableRoutes(newSessionInfo)) {
-                    assertTrue(selectedRoutes.contains(deselectableRoute.getId()));
+                    assertThat(selectedRoutes.contains(deselectableRoute.getId())).isTrue();
                 }
                 onSessionCreatedLatch.countDown();
             }
         });
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID4_TO_SELECT_AND_DESELECT));
-        assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
@@ -984,7 +984,7 @@ public class MediaRouter2ManagerTest {
         mManager.registerCallback(mExecutor, callback);
         try {
             task.run();
-            assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         } finally {
             mManager.unregisterCallback(callback);
         }

@@ -18,22 +18,33 @@ package com.android.settingslib.spa.framework.common
 
 class SettingsPageProviderRepository(
     allPagesList: List<SettingsPageProvider>,
-    private val rootPages: List<String>
+    private val rootPages: List<String> = emptyList(),
+    // TODO: deprecate rootPages above
+    private val rootPageData: List<SettingsPage> = emptyList(),
 ) {
-    // Maintains all SPA page providers.
-    private val allPages: Map<String, SettingsPageProvider> = allPagesList.associateBy { it.name }
+    // Map of page name to its provider.
+    private val pageProviderMap: Map<String, SettingsPageProvider> =
+        allPagesList.associateBy { it.name }
 
     fun getDefaultStartPageName(): String {
-        return rootPages.getOrElse(0) {
-            return ""
+        if (rootPageData.isNotEmpty()) {
+            return rootPageData[0].name
+        } else {
+            return rootPages.getOrElse(0) {
+                return ""
+            }
         }
     }
 
+    fun getAllRootPages(): Collection<SettingsPage> {
+        return rootPageData
+    }
+
     fun getAllProviders(): Collection<SettingsPageProvider> {
-        return allPages.values
+        return pageProviderMap.values
     }
 
     fun getProviderOrNull(name: String): SettingsPageProvider? {
-        return allPages[name]
+        return pageProviderMap[name]
     }
 }

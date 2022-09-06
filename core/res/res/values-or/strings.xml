@@ -211,7 +211,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"ସାଇଲେଣ୍ଟ ମୋଡ୍"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"ୱେୟାରଲେସ୍‌କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"ୱେୟାରଲେସ୍‌କୁ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"ସ୍କ୍ରିନ ଲକ"</string>
     <string name="power_off" msgid="4111692782492232778">"ପାୱାର ବନ୍ଦ ଅଛି"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ରିଙ୍ଗର୍‍ ଅଫ୍‍ ଅଛି"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ରିଙ୍ଗର୍‍ କମ୍ପନ"</string>
@@ -235,7 +235,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"ଟାବଲେଟ ବିକଳ୍ପ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TVର ବିକଳ୍ପଗୁଡ଼ିକ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ଫୋନ ବିକଳ୍ପ"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"ସ୍କ୍ରିନ ଲକ"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର ବନ୍ଦ ଅଛି"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ପାୱାର"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରାଗଲା।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ଉପଯୋଗକର୍ତ୍ତା ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରିଛନ୍ତି।"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ବହୁତ ପ୍ରୟାସ କରାଗଲା। ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ବହୁଥର ପ୍ରୟାସ କରିଛନ୍ତି। ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"ଯାଞ୍ଚ ହୋଇନାହିଁ"</string>
     <string name="selected" msgid="6614607926197755875">"ଚୟନ କରାଯାଇଛି"</string>
     <string name="not_selected" msgid="410652016565864475">"ଚୟନ କରାଯାଇନାହିଁ"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}ଟିରୁ ଗୋଟିଏ ଷ୍ଟାର}other{{max}ଟିରୁ #ଟି ଷ୍ଟାର}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ଚାଲୁଅଛି"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ପ୍ରସ୍ତାବିତ ଭାଷାଗୁଡ଼ିକ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"ପ୍ରସ୍ତାବିତ ଅଞ୍ଚଳଗୁଡ଼ିକ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ସମସ୍ତ ଭାଷା"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ଗୋଟିଏ-ଥର ଆକ୍ସେସ ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ ଚାହେଁ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ଏଡିଟ କରନ୍ତୁ"</string>

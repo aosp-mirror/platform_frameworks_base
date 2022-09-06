@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ຍົກ​ເລີກ​ການ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ແລ້ວ."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ຜູ້ໃຊ້ໄດ້ຍົກເລີກຄຳສັ່ງລາຍນິ້ວມືແລ້ວ."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ມີ​ຄວາມ​ພະ​ຍາ​ຍາມ​ຫຼາຍ​ຄັ້ງ​ເກີນ​ໄປ. ລອງ​ໃໝ່​ພາຍ​ຫຼັງ."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ລະບົບປິດການເຮັດວຽກຂອງເຊັນເຊີລາຍນິ້ວມືແລ້ວ."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ລອງໃໝ່ອີກຄັ້ງ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ບໍ່ມີການລົງທະບຽນລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"ບໍ່ໄດ້ໝາຍຖືກ"</string>
     <string name="selected" msgid="6614607926197755875">"ເລືອກແລ້ວ"</string>
     <string name="not_selected" msgid="410652016565864475">"ບໍ່ໄດ້ເລືອກແລ້ວ"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ໜຶ່ງດາວຈາກເຕັມ {max} ດາວ}other{# ດາວຈາກເຕັມ {max} ດາວ}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ກຳລັງດຳເນີນການ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ດຳເນີນການໂດຍໃຊ້"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"ສຳ​ເລັດ​​​ການ​ດຳ​ເນີນ​ການ​ໂດຍ​ໃຊ້ %1$s"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ການຕັ້ງຄ່າພາກພື້ນ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ພິມຊື່ພາສາ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ແນະນຳ"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ແນະນຳ"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ພາສາທີ່ແນະນຳ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"ພາກ​ພື້ນ​ທີ່ແນະ​ນໍາ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ທຸກພາ​ສາ​"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ອະນຸຍາດໃຫ້ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດບໍ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ອະນຸຍາດການເຂົ້າເຖິງແບບເທື່ອດຽວ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ບໍ່ອະນຸຍາດ"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ບໍ່ຕ້ອງສະແດງອີກ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ຕ້ອງການສະແດງ <xliff:g id="APP_2">%2$s</xliff:g> ສະໄລ້"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ແກ້ໄຂ"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ກວດສອບແອັບທີ່ເຄື່ອນໄຫວ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງໂທລະສັບຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"ບໍ່ສາມາດເຂົ້າເຖິງເນື້ອຫານີ້ໄດ້ໃນຂະນະທີ່ຍັງສະຕຣີມຢູ່. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
     <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ບັດ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যবহারকারী আঙ্গুলের ছাপের অপারেশনটি বাতিল করেছেন।"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"অনেকবার প্রচেষ্টা করা হয়েছে৷ পরে আবার চেষ্টা করুন৷"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"বহুবার চেষ্টা করেছেন। আঙ্গুলের ছাপ নেওয়ার সেন্সর অক্ষম করা হয়েছে।"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"টিকচিহ্ন দেওয়া নেই"</string>
     <string name="selected" msgid="6614607926197755875">"বেছে নেওয়া হয়েছে"</string>
     <string name="not_selected" msgid="410652016565864475">"বেছে নেওয়া হয়নি"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}টির মধ্যে একটি স্টার}one{#টির মধ্যে {max}টি স্টার}other{#টির মধ্যে {max}টি স্টার}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"কাজ চলছে"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"পছন্দের অঞ্চল"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ভাষার নাম লিখুন"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"প্রস্তাবিত"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"সাজেস্ট করা অঞ্চল"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"সাজেস্ট করা ভাষা"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"সাজেস্ট করা অঞ্চল"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"সকল ভাষা"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেসের অনুমতি দিতে চান?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"এককালীন অ্যাক্সেসের অনুমতি দিন"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি দেবেন না"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজের লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারকও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"আর দেখতে চাই না"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> অ্যাপটি <xliff:g id="APP_2">%2$s</xliff:g> এর অংশ দেখাতে চায়"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"এডিট করুন"</string>

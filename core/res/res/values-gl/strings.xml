@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Cancelouse a operación da impresión dixital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"O usuario cancelou a operación da impresión dixital."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Demasiados intentos. Téntao de novo máis tarde."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Demasiados intentos. Desactivouse o sensor de impresión dixital."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Téntao de novo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Non se rexistraron impresións dixitais."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo non ten sensor de impresión dixital."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"non seleccionado"</string>
     <string name="selected" msgid="6614607926197755875">"elemento seleccionado"</string>
     <string name="not_selected" msgid="410652016565864475">"elemento non seleccionado"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 estrela de {max}}other{# estrelas de {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"en curso"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completar a acción usando"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completar a acción usando %1$s"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferencia de rexión"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Escribe o nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suxeridos"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Rexións suxeridas"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas suxeridos"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Rexións suxeridas"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Todos os idiomas"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Queres permitir que a aplicación <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos os rexistros do dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acceso unha soa vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Non permitir"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Os rexistros do dispositivo dan conta do que ocorre neste. As aplicacións poden usalos para buscar problemas e solucionalos.\n\nAlgúns poden conter información confidencial, polo que che recomendamos que só permitas que accedan a todos os rexistros do dispositivo as aplicacións nas que confíes. \n\nEsta aplicación pode acceder aos seus propios rexistros aínda que non lle permitas acceder a todos. É posible que o fabricante do dispositivo teña acceso a algúns rexistros ou á información do teu dispositivo."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Non amosar outra vez"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quere mostrar fragmentos de aplicación de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
@@ -2293,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Comprobar aplicacións activas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Non se puido acceder á cámara do teléfono desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Non se puido acceder á cámara da tableta desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Non se puido acceder a este contido durante a reprodución en tempo real. Téntao desde o teléfono."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Opción predeterminada do sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARXETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

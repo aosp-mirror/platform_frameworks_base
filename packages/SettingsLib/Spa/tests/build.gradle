@@ -31,6 +31,9 @@ android {
     }
 
     sourceSets {
+        main {
+            res.srcDirs = ["res"]
+        }
         androidTest {
             kotlin {
                 srcDir "src"

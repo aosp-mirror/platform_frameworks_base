@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర యాక్టివిటీ రద్దయింది."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేశారు."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"అనేకసార్లు ప్రయత్నించారు. వేలిముద్ర సెన్సార్ నిలిపివేయబడింది."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"ఎంచుకోలేదు"</string>
     <string name="selected" msgid="6614607926197755875">"ఎంచుకోబడింది"</string>
     <string name="not_selected" msgid="410652016565864475">"ఎంచుకోబడలేదు"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}కి ఒక స్టార్}other{{max}కి # స్టార్‌లు}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ప్రోగ్రెస్‌లో ఉంది"</string>
     <string name="whichApplication" msgid="5432266899591255759">"దీన్ని ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయి"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"భాష పేరును టైప్ చేయండి"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"సూచించినవి"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"సూచించబడినవి"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"సూచించిన భాషలు"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"సూచించిన ప్రాంతాలు"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"అన్ని భాషలు"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>‌ను అనుమతించాలా?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"వన్-టైమ్ యాక్సెస్‌ను అనుమతించండి"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"అనుమతించవద్దు"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"మీ పరికరంలో జరిగే దాన్ని పరికర లాగ్‌లు రికార్డ్ చేస్తాయి. సమస్యలను కనుగొని, పరిష్కరించడానికి యాప్‌లు ఈ లాగ్‌లను ఉపయోగిస్తాయి.\n\nకొన్ని లాగ్‌లలో గోప్యమైన సమాచారం ఉండవచ్చు, కాబట్టి మీరు విశ్వసించే యాప్‌లను మాత్రమే అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి అనుమతించండి. \n\nఅన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి మీరు ఈ యాప్‌ను అనుమతించకపోతే, అది తన స్వంత లాగ్‌లను ఇప్పటికి యాక్సెస్ చేయగలదు. మీ పరికర తయారీదారు ఇప్పటికీ మీ పరికరంలో కొన్ని లాగ్‌లు లేదా సమాచారాన్ని యాక్సెస్ చేయగలరు."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"మళ్లీ చూపవద్దు"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించాలనుకుంటోంది"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ఎడిట్ చేయండి"</string>

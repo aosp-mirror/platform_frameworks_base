@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Ujjlenyomattal kapcsolatos művelet megszakítva"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Az ujjlenyomattal kapcsolatos műveletet a felhasználó megszakította."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Túl sok próbálkozás. Próbálja újra később."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Túl sok próbálkozás. Ujjlenyomat-érzékelő letiltva."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Próbálkozzon újra."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nincsenek regisztrált ujjlenyomatok."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ez az eszköz nem rendelkezik ujjlenyomat-érzékelővel."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"nincs kiválasztva"</string>
     <string name="selected" msgid="6614607926197755875">"kiválasztva"</string>
     <string name="not_selected" msgid="410652016565864475">"nincs kiválasztva"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} csillagból egy}other{{max} csillagból #}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"folyamatban"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Művelet végrehajtása a következővel:"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Művelet elvégzése a(z) %1$s segítségével"</string>
@@ -1925,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Régió beállítása"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Adja meg a nyelvet"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Javasolt"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Javasolt"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Javasolt nyelvek"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Javasolt régiók"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Minden nyelv"</string>
@@ -2051,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Engedélyezi a(z) <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> számára, hogy hozzáférjen az összes eszköznaplóhoz?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Egyszeri hozzáférés engedélyezése"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tiltás"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók bizalmas adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz. Előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne jelenjen meg újra"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A(z) <xliff:g id="APP_0">%1$s</xliff:g> alkalmazás részleteket szeretne megjeleníteni a(z) <xliff:g id="APP_2">%2$s</xliff:g> alkalmazásból"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Szerkesztés"</string>

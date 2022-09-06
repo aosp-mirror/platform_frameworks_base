@@ -605,7 +605,8 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingerabdruckvorgang abgebrochen"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vorgang der Fingerabdruckauthentifizierung vom Nutzer abgebrochen."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Zu viele Versuche. Der Fingerabdrucksensor wurde deaktiviert."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Bitte versuche es noch einmal."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Keine Fingerabdrücke erfasst."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dieses Gerät hat keinen Fingerabdrucksensor."</string>
@@ -1167,8 +1168,7 @@
     <string name="not_checked" msgid="7972320087569023342">"deaktiviert"</string>
     <string name="selected" msgid="6614607926197755875">"ausgewählt"</string>
     <string name="not_selected" msgid="410652016565864475">"nicht ausgewählt"</string>
-    <!-- no translation found for rating_label (1837085249662154601) -->
-    <skip />
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Einer von {max} Sternen}other{# von {max} Sternen}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"Noch nicht abgeschlossen"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Aktion durchführen mit"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Aktion mit %1$s abschließen"</string>
@@ -1249,10 +1249,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (8997641910928785172) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (8351290204990805109) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Tippen, um Display auszuschalten"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Display ausschalten"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ausschalten"</string>
@@ -1927,8 +1925,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Region auswählen"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sprache eingeben"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Vorschläge"</string>
-    <!-- no translation found for language_picker_regions_section_suggested (6080131515268225316) -->
-    <skip />
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Vorschläge"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Vorgeschlagene Sprachen"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Vorgeschlagene Regionen"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle Sprachen"</string>
@@ -2053,8 +2050,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> den Zugriff auf alle Geräteprotokolle erlauben?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Einmaligen Zugriff zulassen"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nicht zulassen"</string>
-    <!-- no translation found for log_access_confirmation_body (1806692062668620735) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="1806692062668620735">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können diese Protokolle verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen, daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nicht mehr anzeigen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> möchte Teile von <xliff:g id="APP_2">%2$s</xliff:g> anzeigen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bearbeiten"</string>
@@ -2295,8 +2291,7 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
-    <!-- no translation found for vdm_secure_window (161700398158812314) -->
-    <skip />
+    <string name="vdm_secure_window" msgid="161700398158812314">"Während des Streamings ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
