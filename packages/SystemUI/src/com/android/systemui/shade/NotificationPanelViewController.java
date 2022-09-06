@@ -116,7 +116,6 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -139,7 +138,6 @@ import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -216,7 +214,6 @@ import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
-import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.PrintWriter;
@@ -324,9 +321,6 @@ public final class NotificationPanelViewController extends PanelViewController {
     private final FragmentService mFragmentService;
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
-    private final QuickAccessWalletController mQuickAccessWalletController;
-    private final QRCodeScannerController mQRCodeScannerController;
-    private final ControlsComponent mControlsComponent;
     private final NotificationRemoteInputManager mRemoteInputManager;
 
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
@@ -695,8 +689,8 @@ public final class NotificationPanelViewController extends PanelViewController {
     };
 
     private final CameraGestureHelper mCameraGestureHelper;
-    private final Provider<KeyguardBottomAreaViewModel> mKeyguardBottomAreaViewModelProvider;
-    private final Provider<KeyguardBottomAreaInteractor> mKeyguardBottomAreaInteractorProvider;
+    private final KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
+    private final KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -745,8 +739,6 @@ public final class NotificationPanelViewController extends PanelViewController {
             NavigationModeController navigationModeController,
             FragmentService fragmentService,
             ContentResolver contentResolver,
-            QuickAccessWalletController quickAccessWalletController,
-            QRCodeScannerController qrCodeScannerController,
             RecordingController recordingController,
             LargeScreenShadeHeaderController largeScreenShadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
@@ -754,7 +746,6 @@ public final class NotificationPanelViewController extends PanelViewController {
             PanelExpansionStateManager panelExpansionStateManager,
             NotificationRemoteInputManager remoteInputManager,
             Optional<SysUIUnfoldComponent> unfoldComponent,
-            ControlsComponent controlsComponent,
             InteractionJankMonitor interactionJankMonitor,
             QsFrameTranslateController qsFrameTranslateController,
             SysUiState sysUiState,
@@ -767,8 +758,8 @@ public final class NotificationPanelViewController extends PanelViewController {
             ShadeTransitionController shadeTransitionController,
             SystemClock systemClock,
             CameraGestureHelper cameraGestureHelper,
-            Provider<KeyguardBottomAreaViewModel> keyguardBottomAreaViewModelProvider,
-            Provider<KeyguardBottomAreaInteractor> keyguardBottomAreaInteractorProvider) {
+            KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
+            KeyguardBottomAreaInteractor keyguardBottomAreaInteractor) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -790,9 +781,6 @@ public final class NotificationPanelViewController extends PanelViewController {
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
         mPrivacyDotViewController = privacyDotViewController;
-        mQuickAccessWalletController = quickAccessWalletController;
-        mQRCodeScannerController = qrCodeScannerController;
-        mControlsComponent = controlsComponent;
         mMetricsLogger = metricsLogger;
         mConfigurationController = configurationController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
@@ -896,7 +884,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
         mQsFrameTranslateController = qsFrameTranslateController;
         updateUserSwitcherFlags();
-        mKeyguardBottomAreaViewModelProvider = keyguardBottomAreaViewModelProvider;
+        mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -950,7 +938,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                     }
                 });
         mCameraGestureHelper = cameraGestureHelper;
-        mKeyguardBottomAreaInteractorProvider = keyguardBottomAreaInteractorProvider;
+        mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
     }
 
     @VisibleForTesting
@@ -1275,17 +1263,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void initBottomArea() {
-        if (mFeatureFlags.isEnabled(Flags.MODERN_BOTTOM_AREA)) {
-            mKeyguardBottomArea.init(mKeyguardBottomAreaViewModelProvider.get(), mFalsingManager);
-        } else {
-            // TODO(b/235403546): remove this method call when the new implementation is complete
-            //  and these are not needed.
-            mKeyguardBottomArea.init(
-                    mFalsingManager,
-                    mQuickAccessWalletController,
-                    mControlsComponent,
-                    mQRCodeScannerController);
-        }
+        mKeyguardBottomArea.init(mKeyguardBottomAreaViewModel, mFalsingManager);
     }
 
     @VisibleForTesting
@@ -1402,7 +1380,6 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
 
         mNotificationStackScrollLayoutController.setIntrinsicPadding(stackScrollerPadding);
-        mKeyguardBottomArea.setAntiBurnInOffsetX(mClockPositionResult.clockX);
 
         mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
@@ -1452,7 +1429,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 mKeyguardStatusViewController.getClockBottom(mStatusBarHeaderHeightKeyguard),
                 mKeyguardStatusViewController.isClockTopAligned());
         mClockPositionAlgorithm.run(mClockPositionResult);
-        mKeyguardBottomAreaInteractorProvider.get().setClockPosition(
+        mKeyguardBottomAreaInteractor.setClockPosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = (animate || mAnimateNextPositionUpdate) && shouldAnimateClockChange;
@@ -3295,8 +3272,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;
-        mKeyguardBottomArea.setComponentAlphas(alpha);
-        mKeyguardBottomAreaInteractorProvider.get().setAlpha(alpha);
+        mKeyguardBottomAreaInteractor.setAlpha(alpha);
         mLockIconViewController.setAlpha(alpha);
     }
 
@@ -3495,8 +3471,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateDozingVisibilities(boolean animate) {
-        mKeyguardBottomArea.setDozing(mDozing, animate);
-        mKeyguardBottomAreaInteractorProvider.get().setAnimateDozingTransitions(animate);
+        mKeyguardBottomAreaInteractor.setAnimateDozingTransitions(animate);
         if (!mDozing && animate) {
             mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
         }
@@ -3797,8 +3772,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         mView.setDozing(dozing);
         mDozing = dozing;
         mNotificationStackScrollLayoutController.setDozing(mDozing, animate);
-        mKeyguardBottomArea.setDozing(mDozing, animate);
-        mKeyguardBottomAreaInteractorProvider.get().setAnimateDozingTransitions(animate);
+        mKeyguardBottomAreaInteractor.setAnimateDozingTransitions(animate);
         mKeyguardStatusBarViewController.setDozing(mDozing);
 
         if (dozing) {
@@ -3847,7 +3821,6 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     public void dozeTimeTick() {
         mLockIconViewController.dozeTimeTick();
-        mKeyguardBottomArea.dozeTimeTick();
         mKeyguardStatusViewController.dozeTimeTick();
         if (mInterpolatedDarkAmount > 0) {
             positionClockAndNotifications();
@@ -4670,7 +4643,6 @@ public final class NotificationPanelViewController extends PanelViewController {
         public void onDozeAmountChanged(float linearAmount, float amount) {
             mInterpolatedDarkAmount = amount;
             mLinearDarkAmount = linearAmount;
-            mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
             positionClockAndNotifications();
         }
     }
