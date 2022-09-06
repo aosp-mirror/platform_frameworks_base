@@ -16,28 +16,30 @@
 
 package com.android.settingslib.spa.framework.common
 
+import android.util.Log
+
 class SettingsPageProviderRepository(
-    allPagesList: List<SettingsPageProvider>,
-    private val rootPages: List<String> = emptyList(),
-    // TODO: deprecate rootPages above
-    private val rootPageData: List<SettingsPage> = emptyList(),
+    allPageProviders: List<SettingsPageProvider>,
+    private val rootPages: List<SettingsPage> = emptyList(),
 ) {
     // Map of page name to its provider.
-    private val pageProviderMap: Map<String, SettingsPageProvider> =
-        allPagesList.associateBy { it.name }
+    private val pageProviderMap: Map<String, SettingsPageProvider>
+
+    init {
+        pageProviderMap = allPageProviders.associateBy { it.name }
+        logMsg("Initialize Completed: ${pageProviderMap.size} spp")
+    }
 
     fun getDefaultStartPageName(): String {
-        if (rootPageData.isNotEmpty()) {
-            return rootPageData[0].name
+        return if (rootPages.isNotEmpty()) {
+            rootPages[0].name
         } else {
-            return rootPages.getOrElse(0) {
-                return ""
-            }
+            ""
         }
     }
 
     fun getAllRootPages(): Collection<SettingsPage> {
-        return rootPageData
+        return rootPages
     }
 
     fun getAllProviders(): Collection<SettingsPageProvider> {
@@ -47,4 +49,8 @@ class SettingsPageProviderRepository(
     fun getProviderOrNull(name: String): SettingsPageProvider? {
         return pageProviderMap[name]
     }
+}
+
+private fun logMsg(message: String) {
+    Log.d("SppRepo", message)
 }

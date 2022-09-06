@@ -35,7 +35,7 @@ object SpaEnvironment {
     val PageProviderRepository: SettingsPageProviderRepository by
     lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         SettingsPageProviderRepository(
-            allPagesList = listOf(
+            allPageProviders = listOf(
                 HomePageProvider,
                 PreferenceMainPageProvider,
                 PreferencePageProvider,
@@ -48,7 +48,7 @@ object SpaEnvironment {
                 FooterPageProvider,
                 IllustrationPageProvider,
             ),
-            rootPageData = listOf(
+            rootPages = listOf(
                 SettingsPage(HomePageProvider.name)
             ) + ArgumentPageProvider.buildRootPages()
         )
