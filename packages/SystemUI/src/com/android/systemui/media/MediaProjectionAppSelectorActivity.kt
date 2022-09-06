@@ -23,34 +23,46 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
 import android.os.ResultReceiver
-import android.view.View
+import android.os.UserHandle
+import android.widget.ImageView
 import com.android.internal.app.ChooserActivity
+import com.android.internal.app.ResolverListController
 import com.android.internal.app.chooser.NotSelectableTargetInfo
 import com.android.internal.app.chooser.TargetInfo
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.util.AsyncActivityLauncher
-import com.android.systemui.R;
-import javax.inject.Inject
+import com.android.systemui.R
+import com.android.internal.R as AndroidR
 
-class MediaProjectionAppSelectorActivity @Inject constructor(
-    private val activityLauncher: AsyncActivityLauncher
+class MediaProjectionAppSelectorActivity constructor(
+    private val activityLauncher: AsyncActivityLauncher,
+    /** This is used to override the dependency in a screenshot test */
+    @VisibleForTesting
+    private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)? = null
 ) : ChooserActivity() {
+
+    override fun getLayoutResource() =
+        R.layout.media_projection_app_selector
 
     public override fun onCreate(bundle: Bundle?) {
         val queryIntent = Intent(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_LAUNCHER)
         intent.putExtra(Intent.EXTRA_INTENT, queryIntent)
 
-        // TODO(b/235465652) Use resource lexeme
-        intent.putExtra(Intent.EXTRA_TITLE, "Record or cast an app")
+        // TODO(b/240939253): update copies
+        val title = getString(R.string.media_projection_dialog_service_title)
+        intent.putExtra(Intent.EXTRA_TITLE, title)
 
         super.onCreate(bundle)
 
-        // TODO(b/235465652) we should update VisD of the title and add an icon
-        findViewById<View>(R.id.title)?.visibility = View.VISIBLE
+        requireViewById<ImageView>(AndroidR.id.icon).setImageResource(R.drawable.ic_present_to_all)
     }
 
     override fun appliedThemeResId(): Int =
         R.style.Theme_SystemUI_MediaProjectionAppSelector
+
+    override fun createListController(userHandle: UserHandle): ResolverListController =
+        listControllerFactory?.invoke(userHandle) ?: super.createListController(userHandle)
 
     override fun startSelected(which: Int, always: Boolean, filtered: Boolean) {
         val currentListAdapter = mChooserMultiProfilePagerAdapter.activeListAdapter
