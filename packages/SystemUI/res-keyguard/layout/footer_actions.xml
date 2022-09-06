@@ -61,7 +61,7 @@
         </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-            android:id="@+id/settings_button_container"
+            android:id="@id/settings_button_container"
             android:layout_width="@dimen/qs_footer_action_button_size"
             android:layout_height="@dimen/qs_footer_action_button_size"
             android:background="@drawable/qs_footer_action_circle"
@@ -85,7 +85,7 @@
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:id="@+id/pm_lite"
+            android:id="@id/pm_lite"
             android:layout_width="@dimen/qs_footer_action_button_size"
             android:layout_height="@dimen/qs_footer_action_button_size"
             android:background="@drawable/qs_footer_action_circle_color"
