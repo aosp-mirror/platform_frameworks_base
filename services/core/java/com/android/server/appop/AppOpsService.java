@@ -267,6 +267,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             OP_CAMERA,
     };
 
+    private static final int[] WATCHABLE_NON_PERMISSION_OPS = {
+            OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+    };
+
     private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
@@ -4241,6 +4245,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     @Override
     public boolean shouldCollectNotes(int opCode) {
         Preconditions.checkArgumentInRange(opCode, 0, _NUM_OP - 1, "opCode");
+
+        if (ArrayUtils.contains(WATCHABLE_NON_PERMISSION_OPS, opCode)) {
+            return true;
+        }
 
         String perm = AppOpsManager.opToPermission(opCode);
         if (perm == null) {
