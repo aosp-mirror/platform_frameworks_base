@@ -21,6 +21,7 @@ import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.res.stringResource
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.framework.util.asyncMapItem
@@ -51,6 +52,10 @@ interface TogglePermissionAppListProvider {
     val permissionType: String
 
     fun createModel(context: Context): TogglePermissionAppListModel<out AppRecord>
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return TogglePermissionAppListPageProvider.buildInjectEntry(permissionType)
+    }
 
     @Composable
     fun EntryItem() {
