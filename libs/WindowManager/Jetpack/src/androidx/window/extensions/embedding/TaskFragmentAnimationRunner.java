@@ -213,10 +213,10 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
         for (RemoteAnimationTarget target : targets) {
             if (target.mode != MODE_CLOSING) {
                 openingTargets.add(target);
-                openingWholeScreenBounds.union(target.localBounds);
+                openingWholeScreenBounds.union(target.screenSpaceBounds);
             } else {
                 closingTargets.add(target);
-                closingWholeScreenBounds.union(target.localBounds);
+                closingWholeScreenBounds.union(target.screenSpaceBounds);
             }
         }
 
@@ -249,20 +249,8 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
             @NonNull BiFunction<RemoteAnimationTarget, Rect, Animation> animationProvider,
             @NonNull Rect wholeAnimationBounds) {
         final Animation animation = animationProvider.apply(target, wholeAnimationBounds);
-        final Rect targetBounds = target.localBounds;
-        if (targetBounds.left == wholeAnimationBounds.left
-                && targetBounds.right != wholeAnimationBounds.right) {
-            // This is the left split of the whole animation window.
-            return new TaskFragmentAnimationAdapter.SplitAdapter(animation, target,
-                    true /* isLeftHalf */, wholeAnimationBounds.width());
-        } else if (targetBounds.left != wholeAnimationBounds.left
-                && targetBounds.right == wholeAnimationBounds.right) {
-            // This is the right split of the whole animation window.
-            return new TaskFragmentAnimationAdapter.SplitAdapter(animation, target,
-                    false /* isLeftHalf */, wholeAnimationBounds.width());
-        }
-        // Open/close window that fills the whole animation.
-        return new TaskFragmentAnimationAdapter(animation, target);
+        return new TaskFragmentAnimationAdapter(animation, target, target.leash,
+                wholeAnimationBounds);
     }
 
     @NonNull
