@@ -68,6 +68,10 @@ platform_bootclasspath {
             module: "com.android.conscrypt-bootclasspath-fragment",
         },
         {
+            apex: "com.android.healthconnect",
+            module: "com.android.healthconnect-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.i18n",
             module: "i18n-bootclasspath-fragment",
         },
