@@ -27,6 +27,9 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
@@ -324,6 +327,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             mStatusBarWindow.mAttrs.setFitInsetsTypes(0);
+            mStatusBarWindow.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                    new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                    new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
+                    new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES)
+            };
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
             mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,

@@ -28,8 +28,6 @@ import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
-import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -118,7 +116,6 @@ import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsFlags;
@@ -1150,24 +1147,6 @@ public class DisplayPolicy {
                 break;
             case TYPE_STATUS_BAR:
                 mStatusBar = win;
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> gestureFrameProvider =
-                        (displayFrames, windowContainer, rect) -> {
-                            rect.bottom = rect.top + getStatusBarHeight(displayFrames);
-                            final DisplayCutout cutout =
-                                    displayFrames.mInsetsState.getDisplayCutout();
-                            if (cutout != null) {
-                                final Rect top = cutout.getBoundingRectTop();
-                                if (!top.isEmpty()) {
-                                    rect.bottom = Math.max(rect.bottom,
-                                            top.bottom + mDisplayCutoutTouchableRegionSize);
-                                }
-                            }
-                        };
-                mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, win, null);
-                mDisplayContent.setInsetProvider(
-                        ITYPE_TOP_MANDATORY_GESTURES, win, gestureFrameProvider);
-                mDisplayContent.setInsetProvider(ITYPE_TOP_TAPPABLE_ELEMENT, win, null);
-                mInsetsSourceWindowsExceptIme.add(win);
                 break;
             case TYPE_NAVIGATION_BAR:
                 mNavigationBar = win;
@@ -1185,7 +1164,8 @@ public class DisplayPolicy {
                                                 displayFrames.mUnrestricted,
                                                 win.getBounds(), displayFrames.mDisplayCutoutSafe,
                                                 inOutFrame, provider.source,
-                                                provider.insetsSize, lp.privateFlags);
+                                                provider.insetsSize, lp.privateFlags,
+                                                provider.minimalInsetsSizeInDisplayCutoutSafe);
                                     }
                                 }
                                 inOutFrame.inset(win.mGivenContentInsets);
@@ -1231,85 +1211,91 @@ public class DisplayPolicy {
                 mInsetsSourceWindowsExceptIme.add(win);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
-            default:
-                if (attrs.providedInsets != null) {
-                    for (int i = attrs.providedInsets.length - 1; i >= 0; i--) {
-                        final InsetsFrameProvider provider = attrs.providedInsets[i];
-                        switch (provider.type) {
-                            case ITYPE_STATUS_BAR:
-                                mStatusBarAlt = win;
-                                mStatusBarAltPosition = getAltBarPosition(attrs);
-                                break;
-                            case ITYPE_NAVIGATION_BAR:
-                                mNavigationBarAlt = win;
-                                mNavigationBarAltPosition = getAltBarPosition(attrs);
-                                break;
-                            case ITYPE_CLIMATE_BAR:
-                                mClimateBarAlt = win;
-                                mClimateBarAltPosition = getAltBarPosition(attrs);
-                                break;
-                            case ITYPE_EXTRA_NAVIGATION_BAR:
-                                mExtraNavBarAlt = win;
-                                mExtraNavBarAltPosition = getAltBarPosition(attrs);
-                                break;
+        }
+        // TODO(b/239145252): Temporarily skip the navigation bar as it is still with the hard-coded
+        // logic.
+        if (attrs.providedInsets != null && attrs.type != TYPE_NAVIGATION_BAR) {
+            for (int i = attrs.providedInsets.length - 1; i >= 0; i--) {
+                final InsetsFrameProvider provider = attrs.providedInsets[i];
+                switch (provider.type) {
+                    case ITYPE_STATUS_BAR:
+                        if (attrs.type != TYPE_STATUS_BAR) {
+                            mStatusBarAlt = win;
+                            mStatusBarAltPosition = getAltBarPosition(attrs);
                         }
-                        // The index of the provider and corresponding insets types cannot change at
-                        // runtime as ensured in WMS. Make use of the index in the provider directly
-                        // to access the latest provided size at runtime.
-                        final int index = i;
-                        final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
-                                provider.insetsSize != null
-                                        ? (displayFrames, windowContainer, inOutFrame) -> {
-                                            inOutFrame.inset(win.mGivenContentInsets);
+                        break;
+                    case ITYPE_NAVIGATION_BAR:
+                        if (attrs.type != TYPE_NAVIGATION_BAR) {
+                            mNavigationBarAlt = win;
+                            mNavigationBarAltPosition = getAltBarPosition(attrs);
+                        }
+                        break;
+                    case ITYPE_CLIMATE_BAR:
+                        mClimateBarAlt = win;
+                        mClimateBarAltPosition = getAltBarPosition(attrs);
+                        break;
+                    case ITYPE_EXTRA_NAVIGATION_BAR:
+                        mExtraNavBarAlt = win;
+                        mExtraNavBarAltPosition = getAltBarPosition(attrs);
+                        break;
+                }
+                // The index of the provider and corresponding insets types cannot change at
+                // runtime as ensured in WMS. Make use of the index in the provider directly
+                // to access the latest provided size at runtime.
+                final int index = i;
+                final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
+                        provider.insetsSize != null
+                                ? (displayFrames, windowContainer, inOutFrame) -> {
+                                    inOutFrame.inset(win.mGivenContentInsets);
+                                    final LayoutParams lp =
+                                            win.mAttrs.forRotation(displayFrames.mRotation);
+                                    final InsetsFrameProvider ifp =
+                                            win.mAttrs.forRotation(displayFrames.mRotation)
+                                                    .providedInsets[index];
+                                    InsetsFrameProvider.calculateInsetsFrame(
+                                            displayFrames.mUnrestricted,
+                                            windowContainer.getBounds(),
+                                            displayFrames.mDisplayCutoutSafe,
+                                            inOutFrame, ifp.source,
+                                            ifp.insetsSize, lp.privateFlags,
+                                            ifp.minimalInsetsSizeInDisplayCutoutSafe);
+                                } : null;
+                final InsetsFrameProvider.InsetsSizeOverride[] overrides =
+                        provider.insetsSizeOverrides;
+                final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+                        overrideProviders;
+                if (overrides != null) {
+                    overrideProviders = new SparseArray<>();
+                    for (int j = overrides.length - 1; j >= 0; j--) {
+                        final int overrideIndex = j;
+                        final TriConsumer<DisplayFrames, WindowContainer, Rect>
+                                overrideFrameProvider =
+                                        (displayFrames, windowContainer, inOutFrame) -> {
                                             final LayoutParams lp =
-                                                    win.mAttrs.forRotation(displayFrames.mRotation);
+                                                    win.mAttrs.forRotation(
+                                                            displayFrames.mRotation);
                                             final InsetsFrameProvider ifp =
-                                                    win.mAttrs.forRotation(displayFrames.mRotation)
-                                                            .providedInsets[index];
+                                                    win.mAttrs.providedInsets[index];
                                             InsetsFrameProvider.calculateInsetsFrame(
                                                     displayFrames.mUnrestricted,
                                                     windowContainer.getBounds(),
                                                     displayFrames.mDisplayCutoutSafe,
                                                     inOutFrame, ifp.source,
-                                                    ifp.insetsSize, lp.privateFlags);
-                                        } : null;
-                        final InsetsFrameProvider.InsetsSizeOverride[] overrides =
-                                provider.insetsSizeOverrides;
-                        final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
-                                overrideProviders;
-                        if (overrides != null) {
-                            overrideProviders = new SparseArray<>();
-                            for (int j = overrides.length - 1; j >= 0; j--) {
-                                final int overrideIndex = j;
-                                final TriConsumer<DisplayFrames, WindowContainer, Rect>
-                                        overrideFrameProvider =
-                                                (displayFrames, windowContainer, inOutFrame) -> {
-                                                    final LayoutParams lp =
-                                                            win.mAttrs.forRotation(
-                                                                    displayFrames.mRotation);
-                                                    final InsetsFrameProvider ifp =
-                                                            win.mAttrs.providedInsets[index];
-                                                    InsetsFrameProvider.calculateInsetsFrame(
-                                                            displayFrames.mUnrestricted,
-                                                            windowContainer.getBounds(),
-                                                            displayFrames.mDisplayCutoutSafe,
-                                                            inOutFrame, ifp.source,
-                                                            ifp.insetsSizeOverrides[
-                                                                    overrideIndex].insetsSize,
-                                                            lp.privateFlags);
-                                                };
-                                overrideProviders.put(overrides[j].windowType,
-                                        overrideFrameProvider);
-                            }
-                        } else {
-                            overrideProviders = null;
-                        }
-                        mDisplayContent.setInsetProvider(provider.type, win, frameProvider,
-                                overrideProviders);
-                        mInsetsSourceWindowsExceptIme.add(win);
+                                                    ifp.insetsSizeOverrides[
+                                                            overrideIndex].insetsSize,
+                                                    lp.privateFlags,
+                                                    null);
+                                        };
+                        overrideProviders.put(overrides[j].windowType,
+                                overrideFrameProvider);
                     }
+                } else {
+                    overrideProviders = null;
                 }
-                break;
+                mDisplayContent.setInsetProvider(provider.type, win, frameProvider,
+                        overrideProviders);
+                mInsetsSourceWindowsExceptIme.add(win);
+            }
         }
     }
 
