@@ -896,21 +896,25 @@ public final class InputMethodManager {
         return mDelegate.hasActiveConnection(view);
     }
 
+    @GuardedBy("mH")
     private View getServedViewLocked() {
         return mCurRootView != null ? mCurRootView.getImeFocusController().getServedView() : null;
     }
 
+    @GuardedBy("mH")
     private View getNextServedViewLocked() {
         return mCurRootView != null ? mCurRootView.getImeFocusController().getNextServedView()
                 : null;
     }
 
+    @GuardedBy("mH")
     private void setServedViewLocked(View view) {
         if (mCurRootView != null) {
             mCurRootView.getImeFocusController().setServedView(view);
         }
     }
 
+    @GuardedBy("mH")
     private void setNextServedViewLocked(View view) {
         if (mCurRootView != null) {
             mCurRootView.getImeFocusController().setNextServedView(view);
@@ -929,6 +933,7 @@ public final class InputMethodManager {
     /**
      * Returns {@code true} when the given view has been served by Input Method.
      */
+    @GuardedBy("mH")
     private boolean hasServedByInputMethodLocked(View view) {
         final View servedView = getServedViewLocked();
         return (servedView == view
@@ -3252,6 +3257,7 @@ public final class InputMethodManager {
         }
     }
 
+    @GuardedBy("mH")
     private void flushPendingEventsLocked() {
         mH.removeMessages(MSG_FLUSH_INPUT_EVENT);
 
@@ -3264,6 +3270,7 @@ public final class InputMethodManager {
         }
     }
 
+    @GuardedBy("mH")
     private PendingEvent obtainPendingEventLocked(InputEvent event, Object token,
             String inputMethodId, FinishedInputEventCallback callback, Handler handler) {
         PendingEvent p = mPendingEventPool.acquire();
@@ -3278,6 +3285,7 @@ public final class InputMethodManager {
         return p;
     }
 
+    @GuardedBy("mH")
     private void recyclePendingEventLocked(PendingEvent p) {
         p.recycle();
         mPendingEventPool.release(p);
@@ -3310,6 +3318,7 @@ public final class InputMethodManager {
         mServiceInvoker.showInputMethodPickerFromSystem(mClient, mode, displayId);
     }
 
+    @GuardedBy("mH")
     private void showInputMethodPickerLocked() {
         mServiceInvoker.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
     }
@@ -3844,6 +3853,7 @@ public final class InputMethodManager {
         }
     }
 
+    @GuardedBy("mH")
     private void forAccessibilitySessionsLocked(
             Consumer<IAccessibilityInputMethodSessionInvoker> consumer) {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
