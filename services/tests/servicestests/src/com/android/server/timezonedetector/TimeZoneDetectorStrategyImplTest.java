@@ -24,6 +24,7 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_M
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_HIGH;
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_HIGHEST;
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_LOW;
@@ -44,6 +45,7 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
 
+import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
 import org.junit.Before;
@@ -1024,7 +1026,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         expectedDeviceTimeZoneId = geolocationTimeZoneSuggestion.getZoneIds().get(0);
         script.simulateConfigurationInternalChange(expectedInternalConfig)
-                .verifyTimeZoneChangedAndReset(expectedDeviceTimeZoneId);
+                .verifyTimeZoneChangedAndReset(expectedDeviceTimeZoneId, TIME_ZONE_CONFIDENCE_HIGH);
         assertMetricsState(expectedInternalConfig, expectedDeviceTimeZoneId,
                 manualSuggestion, telephonySuggestion, geolocationTimeZoneSuggestion,
                 MetricsTimeZoneDetectorState.DETECTION_MODE_GEO);
@@ -1110,6 +1112,7 @@ public class TimeZoneDetectorStrategyImplTest {
     static class FakeEnvironment implements TimeZoneDetectorStrategyImpl.Environment {
 
         private final TestState<String> mTimeZoneId = new TestState<>();
+        private int mTimeZoneConfidence;
         private ConfigurationInternal mConfigurationInternal;
         private @ElapsedRealtimeLong long mElapsedRealtimeMillis;
         private ConfigurationChangeListener mConfigurationInternalChangeListener;
@@ -1141,18 +1144,20 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         @Override
-        public boolean isDeviceTimeZoneInitialized() {
-            return mTimeZoneId.getLatest() != null;
-        }
-
-        @Override
         public String getDeviceTimeZone() {
             return mTimeZoneId.getLatest();
         }
 
         @Override
-        public void setDeviceTimeZone(String zoneId) {
+        public int getDeviceTimeZoneConfidence() {
+            return mTimeZoneConfidence;
+        }
+
+        @Override
+        public void setDeviceTimeZoneAndConfidence(
+                String zoneId, @TimeZoneConfidence int confidence) {
             mTimeZoneId.set(zoneId);
+            mTimeZoneConfidence = confidence;
         }
 
         void simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
@@ -1164,10 +1169,11 @@ public class TimeZoneDetectorStrategyImplTest {
             mTimeZoneId.assertHasNotBeenSet();
         }
 
-        void assertTimeZoneChangedTo(String timeZoneId) {
+        void assertTimeZoneChangedTo(String timeZoneId, @TimeZoneConfidence int confidence) {
             mTimeZoneId.assertHasBeenSet();
             mTimeZoneId.assertChangeCount(1);
             mTimeZoneId.assertLatestEquals(timeZoneId);
+            assertEquals(confidence, mTimeZoneConfidence);
         }
 
         void commitAllChanges() {
@@ -1280,20 +1286,22 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         /** Verifies the device's time zone has been set and clears change tracking history. */
-        Script verifyTimeZoneChangedAndReset(String zoneId) {
-            mFakeEnvironment.assertTimeZoneChangedTo(zoneId);
+        Script verifyTimeZoneChangedAndReset(String zoneId, @TimeZoneConfidence int confidence) {
+            mFakeEnvironment.assertTimeZoneChangedTo(zoneId, confidence);
             mFakeEnvironment.commitAllChanges();
             return this;
         }
 
         Script verifyTimeZoneChangedAndReset(ManualTimeZoneSuggestion suggestion) {
-            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
+            mFakeEnvironment.assertTimeZoneChangedTo(
+                    suggestion.getZoneId(), TIME_ZONE_CONFIDENCE_HIGH);
             mFakeEnvironment.commitAllChanges();
             return this;
         }
 
         Script verifyTimeZoneChangedAndReset(TelephonyTimeZoneSuggestion suggestion) {
-            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
+            mFakeEnvironment.assertTimeZoneChangedTo(
+                    suggestion.getZoneId(), TIME_ZONE_CONFIDENCE_HIGH);
             mFakeEnvironment.commitAllChanges();
             return this;
         }
@@ -1301,7 +1309,8 @@ public class TimeZoneDetectorStrategyImplTest {
         Script verifyTimeZoneChangedAndReset(GeolocationTimeZoneSuggestion suggestion) {
             assertEquals("Only use this method with unambiguous geo suggestions",
                     1, suggestion.getZoneIds().size());
-            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneIds().get(0));
+            mFakeEnvironment.assertTimeZoneChangedTo(
+                    suggestion.getZoneIds().get(0), TIME_ZONE_CONFIDENCE_HIGH);
             mFakeEnvironment.commitAllChanges();
             return this;
         }

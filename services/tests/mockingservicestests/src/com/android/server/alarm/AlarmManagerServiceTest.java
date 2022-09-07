@@ -52,6 +52,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_ALLOW_LIST;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_COMPAT;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_NOT_APPLICABLE;
@@ -111,6 +112,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -323,7 +325,12 @@ public class AlarmManagerServiceTest {
         }
 
         @Override
-        void setKernelTimezone(int minutesWest) {
+        void setKernelTimeZoneOffset(int utcOffsetMillis) {
+            // Do nothing.
+        }
+
+        @Override
+        void syncKernelTimeZoneOffset() {
             // Do nothing.
         }
 
@@ -3421,12 +3428,13 @@ public class AlarmManagerServiceTest {
     public void setTimeZoneImpl() {
         final long durationMs = 20000L;
         when(mActivityManagerInternal.getBootTimeTempAllowListDuration()).thenReturn(durationMs);
-        mService.setTimeZoneImpl("UTC");
+        mService.setTimeZoneImpl("UTC", TIME_ZONE_CONFIDENCE_HIGH);
         final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMockContext).sendBroadcastAsUser(intentCaptor.capture(), eq(UserHandle.ALL),
                 isNull(), bundleCaptor.capture());
         assertEquals(Intent.ACTION_TIMEZONE_CHANGED, intentCaptor.getValue().getAction());
+        assertEquals("UTC", intentCaptor.getValue().getStringExtra(Intent.EXTRA_TIMEZONE));
         final BroadcastOptions bOptions = new BroadcastOptions(bundleCaptor.getValue());
         assertEquals(durationMs, bOptions.getTemporaryAppAllowlistDuration());
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
