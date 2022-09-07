@@ -24,6 +24,20 @@ package {
 android_test {
     name: "FlickerTestApp",
     srcs: ["**/*.java"],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.appcompat_appcompat",
+        "androidx-constraintlayout_constraintlayout",
+        "androidx.core_core",
+        "androidx.fragment_fragment",
+        "androidx.recyclerview_recyclerview",
+        "androidx.navigation_navigation-common-ktx",
+        "androidx.navigation_navigation-fragment-ktx",
+        "androidx.navigation_navigation-runtime-ktx",
+        "androidx.navigation_navigation-ui-ktx",
+        "kotlin-stdlib",
+        "kotlinx-coroutines-android",
+    ],
     sdk_version: "current",
     test_suites: ["device-tests"],
 }
