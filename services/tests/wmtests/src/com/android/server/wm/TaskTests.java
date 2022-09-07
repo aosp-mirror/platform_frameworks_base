@@ -263,7 +263,8 @@ public class TaskTests extends WindowTestsBase {
         // Detach from process so the activities can be removed from hierarchy when finishing.
         activity1.detachFromProcess();
         activity2.detachFromProcess();
-        assertTrue(task.performClearTop(activity1, 0 /* launchFlags */).finishing);
+        int[] finishCount = new int[1];
+        assertTrue(task.performClearTop(activity1, 0 /* launchFlags */, finishCount).finishing);
         assertFalse(task.hasChild());
         // In real case, the task should be preserved for adding new activity.
         assertTrue(task.isAttached());
@@ -277,7 +278,7 @@ public class TaskTests extends WindowTestsBase {
         doReturn(true).when(activityB).shouldBeVisibleUnchecked();
         doReturn(true).when(activityC).shouldBeVisibleUnchecked();
         activityA.getConfiguration().densityDpi += 100;
-        assertTrue(task.performClearTop(activityA, 0 /* launchFlags */).finishing);
+        assertTrue(task.performClearTop(activityA, 0 /* launchFlags */, finishCount).finishing);
         // The bottom activity should destroy directly without relaunch for config change.
         assertEquals(ActivityRecord.State.DESTROYING, activityA.getState());
         verify(activityA, never()).startRelaunching();
