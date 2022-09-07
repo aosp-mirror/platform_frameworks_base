@@ -407,6 +407,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return result;
     }
 
+    SplitscreenEventLogger getLogger() {
+        return mLogger;
+    }
+
     /** Launches an activity into split. */
     void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
@@ -499,7 +503,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts 2 tasks in one transition. */
     void startTasks(int mainTaskId, @Nullable Bundle mainOptions, int sideTaskId,
             @Nullable Bundle sideOptions, @SplitPosition int sidePosition, float splitRatio,
-            @Nullable RemoteTransition remoteTransition) {
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mainOptions = mainOptions != null ? mainOptions : new Bundle();
         sideOptions = sideOptions != null ? sideOptions : new Bundle();
@@ -528,46 +532,57 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         mSplitTransitions.startEnterTransition(
                 TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this, null);
+        setEnterInstanceId(instanceId);
     }
 
     /** Starts 2 tasks in one legacy transition. */
     void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
             int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
-            float splitRatio, RemoteAnimationAdapter adapter) {
+            float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (sideOptions == null) sideOptions = new Bundle();
         addActivityOptions(sideOptions, mSideStage);
         wct.startTask(sideTaskId, sideOptions);
 
-        startWithLegacyTransition(wct, mainTaskId, mainOptions, sidePosition, splitRatio, adapter);
+        startWithLegacyTransition(wct, mainTaskId, mainOptions, sidePosition, splitRatio, adapter,
+                instanceId);
     }
 
     /** Start an intent and a task ordered by {@code intentFirst}. */
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
             int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
-            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter) {
+            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (sideOptions == null) sideOptions = new Bundle();
         addActivityOptions(sideOptions, mSideStage);
         wct.sendPendingIntent(pendingIntent, fillInIntent, sideOptions);
 
-        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter);
+        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter,
+                instanceId);
     }
 
     void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
             int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
-            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter) {
+            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (sideOptions == null) sideOptions = new Bundle();
         addActivityOptions(sideOptions, mSideStage);
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, sideOptions);
 
-        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter);
+        startWithLegacyTransition(wct, taskId, mainOptions, sidePosition, splitRatio, adapter,
+                instanceId);
     }
 
+    /**
+     * @param instanceId if {@code null}, will not log. Otherwise it will be used in
+     *                   {@link SplitscreenEventLogger#logEnter(float, int, int, int, int, boolean)}
+     */
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
             @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
-            RemoteAnimationAdapter adapter) {
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         // Init divider first to make divider leash for remote animation target.
         mSplitLayout.init();
         mSplitLayout.setDivideRatio(splitRatio);
@@ -643,6 +658,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             setDividerVisibility(true, t);
             updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
         });
+
+        setEnterInstanceId(instanceId);
+    }
+
+    private void setEnterInstanceId(InstanceId instanceId) {
+        if (instanceId != null) {
+            mLogger.enterRequested(instanceId);
+        }
     }
 
     private void onRemoteAnimationFinishedOrCancelled(boolean cancel,

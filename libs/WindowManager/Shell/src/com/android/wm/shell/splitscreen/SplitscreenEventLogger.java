@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__ENTER_REASON__OVERVIEW;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__ENTER_REASON__LAUNCHER;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DEVICE_FOLDED;
@@ -59,7 +59,7 @@ public class SplitscreenEventLogger {
 
     // Drag info
     private @SplitPosition int mDragEnterPosition;
-    private InstanceId mDragEnterSessionId;
+    private InstanceId mEnterSessionId;
 
     // For deduping async events
     private int mLastMainStagePosition = -1;
@@ -82,9 +82,17 @@ public class SplitscreenEventLogger {
     /**
      * May be called before logEnter() to indicate that the session was started from a drag.
      */
-    public void enterRequestedByDrag(@SplitPosition int position, InstanceId dragSessionId) {
+    public void enterRequestedByDrag(@SplitPosition int position, InstanceId enterSessionId) {
         mDragEnterPosition = position;
-        mDragEnterSessionId = dragSessionId;
+        enterRequested(enterSessionId);
+    }
+
+    /**
+     * May be called before logEnter() to indicate that the session was started from launcher.
+     * This specifically is for all the scenarios where split started without a drag interaction
+     */
+    public void enterRequested(InstanceId enterSessionId) {
+        mEnterSessionId = enterSessionId;
     }
 
     /**
@@ -97,7 +105,7 @@ public class SplitscreenEventLogger {
         mLoggerSessionId = mIdSequence.newInstanceId();
         int enterReason = mDragEnterPosition != SPLIT_POSITION_UNDEFINED
                 ? getDragEnterReasonFromSplitPosition(mDragEnterPosition, isLandscape)
-                : SPLITSCREEN_UICHANGED__ENTER_REASON__OVERVIEW;
+                : SPLITSCREEN_UICHANGED__ENTER_REASON__LAUNCHER;
         updateMainStageState(getMainStagePositionFromSplitPosition(mainStagePosition, isLandscape),
                 mainStageUid);
         updateSideStageState(getSideStagePositionFromSplitPosition(sideStagePosition, isLandscape),
@@ -112,7 +120,7 @@ public class SplitscreenEventLogger {
                 mLastMainStageUid,
                 mLastSideStagePosition,
                 mLastSideStageUid,
-                mDragEnterSessionId != null ? mDragEnterSessionId.getId() : 0,
+                mEnterSessionId != null ? mEnterSessionId.getId() : 0,
                 mLoggerSessionId.getId());
     }
 
@@ -176,7 +184,7 @@ public class SplitscreenEventLogger {
         // Reset states
         mLoggerSessionId = null;
         mDragEnterPosition = SPLIT_POSITION_UNDEFINED;
-        mDragEnterSessionId = null;
+        mEnterSessionId = null;
         mLastMainStagePosition = -1;
         mLastMainStageUid = -1;
         mLastSideStagePosition = -1;
