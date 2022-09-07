@@ -466,6 +466,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     FACE_AUTH_TRIGGERED_TRUST_DISABLED);
         }
 
+        mLogger.logTrustChanged(wasTrusted, enabled, userId);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -486,6 +487,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         break;
                     }
                 }
+            }
+
+            if (message != null) {
+                mLogger.logShowTrustGrantedMessage(message.toString());
             }
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -743,6 +748,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mFingerprintCancelSignal = null;
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_FP_AUTHENTICATED);
+        mLogger.d("onFingerprintAuthenticated");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -986,6 +992,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mFaceCancelSignal = null;
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_ON_FACE_AUTHENTICATED);
+        mLogger.d("onFaceAuthenticated");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -3445,6 +3452,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mUserFaceAuthenticated.clear();
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FINGERPRINT, unlockedUser);
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FACE, unlockedUser);
+        mLogger.d("clearBiometricRecognized");
 
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -3694,6 +3702,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
+        pw.println("  getUserHasTrust()=" + getUserHasTrust(getCurrentUser()));
+        pw.println("  getUserUnlockedWithBiometric()="
+                + getUserUnlockedWithBiometric(getCurrentUser()));
         pw.println("  SIM States:");
         for (SimData data : mSimDatas.values()) {
             pw.println("    " + data.toString());
