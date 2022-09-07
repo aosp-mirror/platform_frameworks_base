@@ -171,7 +171,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         mPassword = password;
         mRsaPrivateKey = rsaPrivateKey;
         mUserCert = userCert;
-        mProxyInfo = new ProxyInfo(proxyInfo);
+        mProxyInfo = (proxyInfo == null) ? null : new ProxyInfo(proxyInfo);
 
         // UnmodifiableList doesn't make a defensive copy by default.
         mAllowedAlgorithms = Collections.unmodifiableList(new ArrayList<>(allowedAlgorithms));
