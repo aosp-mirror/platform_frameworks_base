@@ -120,7 +120,7 @@ enum class ChipStateSender(
                 // state, but that may take too long to go through the binder and the user may be
                 // confused ast o why the UI hasn't changed yet. So, we immediately change the UI
                 // here.
-                controllerSender.displayChip(
+                controllerSender.displayView(
                     ChipSenderInfo(
                         TRANSFER_TO_THIS_DEVICE_TRIGGERED, routeInfo, undoCallback
                     )
@@ -155,7 +155,7 @@ enum class ChipStateSender(
                 // state, but that may take too long to go through the binder and the user may be
                 // confused as to why the UI hasn't changed yet. So, we immediately change the UI
                 // here.
-                controllerSender.displayChip(
+                controllerSender.displayView(
                     ChipSenderInfo(
                         TRANSFER_TO_RECEIVER_TRIGGERED, routeInfo, undoCallback
                     )

@@ -178,7 +178,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
     @Test
     fun setIcon_isAppIcon_usesAppIconSize() {
-        controllerReceiver.displayChip(getChipReceiverInfo())
+        controllerReceiver.displayView(getChipReceiverInfo())
         val chipView = getChipView()
 
         controllerReceiver.setIcon(chipView, PACKAGE_NAME)
@@ -194,7 +194,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
     @Test
     fun setIcon_notAppIcon_usesGenericIconSize() {
-        controllerReceiver.displayChip(getChipReceiverInfo())
+        controllerReceiver.displayView(getChipReceiverInfo())
         val chipView = getChipView()
 
         controllerReceiver.setIcon(chipView, appPackageName = null)

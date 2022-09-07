@@ -44,11 +44,11 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 /**
  * A generic controller that can temporarily display a new view in a new window.
  *
- * Subclasses need to override and implement [updateChipView], which is where they can control what
+ * Subclasses need to override and implement [updateView], which is where they can control what
  * gets displayed to the user.
  *
  * The generic type T is expected to contain all the information necessary for the subclasses to
- * display the chip in a certain state, since they receive <T> in [updateChipView].
+ * display the view in a certain state, since they receive <T> in [updateView].
  *
  * TODO(b/245610654): Remove all the media-specific logic from this class.
  */
@@ -60,7 +60,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
     private val accessibilityManager: AccessibilityManager,
     private val configurationController: ConfigurationController,
     private val powerManager: PowerManager,
-    @LayoutRes private val chipLayoutRes: Int,
+    @LayoutRes private val viewLayoutRes: Int,
 ) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -85,31 +85,31 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
      */
     internal abstract val windowLayoutParams: WindowManager.LayoutParams
 
-    /** The chip view currently being displayed. Null if the chip is not being displayed. */
-    private var chipView: ViewGroup? = null
+    /** The view currently being displayed. Null if the view is not being displayed. */
+    private var view: ViewGroup? = null
 
-    /** The chip info currently being displayed. Null if the chip is not being displayed. */
-    internal var chipInfo: T? = null
+    /** The info currently being displayed. Null if the view is not being displayed. */
+    internal var info: T? = null
 
-    /** A [Runnable] that, when run, will cancel the pending timeout of the chip. */
-    private var cancelChipViewTimeout: Runnable? = null
+    /** A [Runnable] that, when run, will cancel the pending timeout of the view. */
+    private var cancelViewTimeout: Runnable? = null
 
     /**
-     * Displays the chip with the provided [newChipInfo].
+     * Displays the view with the provided [newInfo].
      *
-     * This method handles inflating and attaching the view, then delegates to [updateChipView] to
-     * display the correct information in the chip.
+     * This method handles inflating and attaching the view, then delegates to [updateView] to
+     * display the correct information in the view.
      */
-    fun displayChip(newChipInfo: T) {
-        val currentChipView = chipView
+    fun displayView(newInfo: T) {
+        val currentView = view
 
-        if (currentChipView != null) {
-            updateChipView(newChipInfo, currentChipView)
+        if (currentView != null) {
+            updateView(newInfo, currentView)
         } else {
-            // The chip is new, so set up all our callbacks and inflate the view
+            // The view is new, so set up all our callbacks and inflate the view
             configurationController.addCallback(displayScaleListener)
-            // Wake the screen if necessary so the user will see the chip. (Per b/239426653, we want
-            // the chip to show over the dream state, so we should only wake up if the screen is
+            // Wake the screen if necessary so the user will see the view. (Per b/239426653, we want
+            // the view to show over the dream state, so we should only wake up if the screen is
             // completely off.)
             if (!powerManager.isScreenOn) {
                 powerManager.wakeUp(
@@ -119,79 +119,79 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
                 )
             }
 
-            inflateAndUpdateChip(newChipInfo)
+            inflateAndUpdateView(newInfo)
         }
 
-        // Cancel and re-set the chip timeout each time we get a new state.
+        // Cancel and re-set the view timeout each time we get a new state.
         val timeout = accessibilityManager.getRecommendedTimeoutMillis(
-            newChipInfo.getTimeoutMs().toInt(),
-            // Not all chips have controls so FLAG_CONTENT_CONTROLS might be superfluous, but
+            newInfo.getTimeoutMs().toInt(),
+            // Not all views have controls so FLAG_CONTENT_CONTROLS might be superfluous, but
             // include it just to be safe.
             FLAG_CONTENT_ICONS or FLAG_CONTENT_TEXT or FLAG_CONTENT_CONTROLS
        )
-        cancelChipViewTimeout?.run()
-        cancelChipViewTimeout = mainExecutor.executeDelayed(
-            { removeChip(TemporaryDisplayRemovalReason.REASON_TIMEOUT) },
+        cancelViewTimeout?.run()
+        cancelViewTimeout = mainExecutor.executeDelayed(
+            { removeView(TemporaryDisplayRemovalReason.REASON_TIMEOUT) },
             timeout.toLong()
         )
     }
 
-    /** Inflates a new chip view, updates it with [newChipInfo], and adds the view to the window. */
-    private fun inflateAndUpdateChip(newChipInfo: T) {
-        val newChipView = LayoutInflater
+    /** Inflates a new view, updates it with [newInfo], and adds the view to the window. */
+    private fun inflateAndUpdateView(newInfo: T) {
+        val newView = LayoutInflater
                 .from(context)
-                .inflate(chipLayoutRes, null) as ViewGroup
-        chipView = newChipView
-        updateChipView(newChipInfo, newChipView)
-        windowManager.addView(newChipView, windowLayoutParams)
-        animateChipIn(newChipView)
+                .inflate(viewLayoutRes, null) as ViewGroup
+        view = newView
+        updateView(newInfo, newView)
+        windowManager.addView(newView, windowLayoutParams)
+        animateViewIn(newView)
     }
 
-    /** Removes then re-inflates the chip. */
-    private fun reinflateChip() {
-        val currentChipInfo = chipInfo
-        if (chipView == null || currentChipInfo == null) { return }
+    /** Removes then re-inflates the view. */
+    private fun reinflateView() {
+        val currentInfo = info
+        if (view == null || currentInfo == null) { return }
 
-        windowManager.removeView(chipView)
-        inflateAndUpdateChip(currentChipInfo)
+        windowManager.removeView(view)
+        inflateAndUpdateView(currentInfo)
     }
 
     private val displayScaleListener = object : ConfigurationController.ConfigurationListener {
         override fun onDensityOrFontScaleChanged() {
-            reinflateChip()
+            reinflateView()
         }
     }
 
     /**
-     * Hides the chip.
+     * Hides the view.
      *
-     * @param removalReason a short string describing why the chip was removed (timeout, state
+     * @param removalReason a short string describing why the view was removed (timeout, state
      *     change, etc.)
      */
-    open fun removeChip(removalReason: String) {
-        if (chipView == null) { return }
+    open fun removeView(removalReason: String) {
+        if (view == null) { return }
         logger.logChipRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
-        windowManager.removeView(chipView)
-        chipView = null
-        chipInfo = null
-        // No need to time the chip out since it's already gone
-        cancelChipViewTimeout?.run()
+        windowManager.removeView(view)
+        view = null
+        info = null
+        // No need to time the view out since it's already gone
+        cancelViewTimeout?.run()
     }
 
     /**
-     * A method implemented by subclasses to update [currentChipView] based on [newChipInfo].
+     * A method implemented by subclasses to update [currentView] based on [newInfo].
      */
     @CallSuper
-    open fun updateChipView(newChipInfo: T, currentChipView: ViewGroup) {
-        chipInfo = newChipInfo
+    open fun updateView(newInfo: T, currentView: ViewGroup) {
+        info = newInfo
     }
 
     /**
-     * A method that can be implemented by subclcasses to do custom animations for when the chip
+     * A method that can be implemented by subclasses to do custom animations for when the view
      * appears.
      */
-    open fun animateChipIn(chipView: ViewGroup) {}
+    open fun animateViewIn(view: ViewGroup) {}
 
     /**
      * Returns the size that the icon should be, or null if no size override is needed.
@@ -209,12 +209,12 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
      * @return the content description of the icon.
      */
     internal fun setIcon(
-        currentChipView: ViewGroup,
+        currentView: ViewGroup,
         appPackageName: String?,
         appIconDrawableOverride: Drawable? = null,
         appNameOverride: CharSequence? = null,
     ): CharSequence {
-        val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
+        val appIconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
         val iconInfo = getIconInfo(appPackageName)
 
         getIconSize(iconInfo.isAppIcon)?.let { size ->

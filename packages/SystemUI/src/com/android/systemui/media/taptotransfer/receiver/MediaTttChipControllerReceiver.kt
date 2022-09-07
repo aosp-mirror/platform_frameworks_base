@@ -116,18 +116,18 @@ class MediaTttChipControllerReceiver @Inject constructor(
         uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeChip(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
             return
         }
         if (appIcon == null) {
-            displayChip(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
+            displayView(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
             return
         }
 
         appIcon.loadDrawableAsync(
                 context,
                 Icon.OnDrawableLoadedListener { drawable ->
-                    displayChip(ChipReceiverInfo(routeInfo, drawable, appName))
+                    displayView(ChipReceiverInfo(routeInfo, drawable, appName))
                 },
                 // Notify the listener on the main handler since the listener will update
                 // the UI.
@@ -135,19 +135,19 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
     }
 
-    override fun updateChipView(newChipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
-        super.updateChipView(newChipInfo, currentChipView)
+    override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
+        super.updateView(newInfo, currentView)
         val iconName = setIcon(
-                currentChipView,
-                newChipInfo.routeInfo.clientPackageName,
-                newChipInfo.appIconDrawableOverride,
-                newChipInfo.appNameOverride
+                currentView,
+                newInfo.routeInfo.clientPackageName,
+                newInfo.appIconDrawableOverride,
+                newInfo.appNameOverride
         )
-        currentChipView.contentDescription = iconName
+        currentView.contentDescription = iconName
     }
 
-    override fun animateChipIn(chipView: ViewGroup) {
-        val appIconView = chipView.requireViewById<View>(R.id.app_icon)
+    override fun animateViewIn(view: ViewGroup) {
+        val appIconView = view.requireViewById<View>(R.id.app_icon)
         appIconView.animate()
                 .translationYBy(-1 * getTranslationAmount().toFloat())
                 .setDuration(30.frames)
@@ -157,8 +157,8 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 .setDuration(5.frames)
                 .start()
         // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
-        appIconView.postOnAnimation { chipView.requestAccessibilityFocus() }
-        startRipple(chipView.requireViewById(R.id.ripple))
+        appIconView.postOnAnimation { view.requestAccessibilityFocus() }
+        startRipple(view.requireViewById(R.id.ripple))
     }
 
     override fun getIconSize(isAppIcon: Boolean): Int? =

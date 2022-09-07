@@ -103,53 +103,52 @@ class MediaTttChipControllerSender @Inject constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            removeChip(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
+            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
         } else {
-            displayChip(ChipSenderInfo(chipState, routeInfo, undoCallback))
+            displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
         }
     }
 
-    /** Displays the chip view for the given state. */
-    override fun updateChipView(
-            newChipInfo: ChipSenderInfo,
-            currentChipView: ViewGroup
+    override fun updateView(
+        newInfo: ChipSenderInfo,
+        currentView: ViewGroup
     ) {
-        super.updateChipView(newChipInfo, currentChipView)
+        super.updateView(newInfo, currentView)
 
-        val chipState = newChipInfo.state
+        val chipState = newInfo.state
 
         // App icon
-        val iconName = setIcon(currentChipView, newChipInfo.routeInfo.clientPackageName)
+        val iconName = setIcon(currentView, newInfo.routeInfo.clientPackageName)
 
         // Text
-        val otherDeviceName = newChipInfo.routeInfo.name.toString()
+        val otherDeviceName = newInfo.routeInfo.name.toString()
         val chipText = chipState.getChipTextString(context, otherDeviceName)
-        currentChipView.requireViewById<TextView>(R.id.text).text = chipText
+        currentView.requireViewById<TextView>(R.id.text).text = chipText
 
         // Loading
-        currentChipView.requireViewById<View>(R.id.loading).visibility =
+        currentView.requireViewById<View>(R.id.loading).visibility =
             chipState.isMidTransfer.visibleIfTrue()
 
         // Undo
-        val undoView = currentChipView.requireViewById<View>(R.id.undo)
+        val undoView = currentView.requireViewById<View>(R.id.undo)
         val undoClickListener = chipState.undoClickListener(
-                this, newChipInfo.routeInfo, newChipInfo.undoCallback, uiEventLogger
+                this, newInfo.routeInfo, newInfo.undoCallback, uiEventLogger
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()
 
         // Failure
-        currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
+        currentView.requireViewById<View>(R.id.failure_icon).visibility =
             chipState.isTransferFailure.visibleIfTrue()
 
         // For accessibility
-        currentChipView.requireViewById<ViewGroup>(
+        currentView.requireViewById<ViewGroup>(
                 R.id.media_ttt_sender_chip_inner
         ).contentDescription = "$iconName $chipText"
     }
 
-    override fun animateChipIn(chipView: ViewGroup) {
-        val chipInnerView = chipView.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner)
+    override fun animateViewIn(view: ViewGroup) {
+        val chipInnerView = view.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner)
         ViewHierarchyAnimator.animateAddition(
             chipInnerView,
             ViewHierarchyAnimator.Hotspot.TOP,
@@ -162,14 +161,14 @@ class MediaTttChipControllerSender @Inject constructor(
         )
     }
 
-    override fun removeChip(removalReason: String) {
+    override fun removeView(removalReason: String) {
         // Don't remove the chip if we're mid-transfer since the user should still be able to
         // see the status of the transfer. (But do remove it if it's finally timed out.)
-        if (chipInfo?.state?.isMidTransfer == true &&
+        if (info?.state?.isMidTransfer == true &&
                 removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT) {
             return
         }
-        super.removeChip(removalReason)
+        super.removeView(removalReason)
     }
 
     private fun Boolean.visibleIfTrue(): Int {

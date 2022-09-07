@@ -107,43 +107,43 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_chipAdded() {
-        underTest.displayChip(getState())
+    fun displayView_viewAdded() {
+        underTest.displayView(getState())
 
         verify(windowManager).addView(any(), any())
     }
 
     @Test
-    fun displayChip_screenOff_screenWakes() {
+    fun displayView_screenOff_screenWakes() {
         whenever(powerManager.isScreenOn).thenReturn(false)
 
-        underTest.displayChip(getState())
+        underTest.displayView(getState())
 
         verify(powerManager).wakeUp(any(), any(), any())
     }
 
     @Test
-    fun displayChip_screenAlreadyOn_screenNotWoken() {
+    fun displayView_screenAlreadyOn_screenNotWoken() {
         whenever(powerManager.isScreenOn).thenReturn(true)
 
-        underTest.displayChip(getState())
+        underTest.displayView(getState())
 
         verify(powerManager, never()).wakeUp(any(), any(), any())
     }
 
     @Test
-    fun displayChip_twice_chipNotAddedTwice() {
-        underTest.displayChip(getState())
+    fun displayView_twice_viewNotAddedTwice() {
+        underTest.displayView(getState())
         reset(windowManager)
 
-        underTest.displayChip(getState())
+        underTest.displayView(getState())
         verify(windowManager, never()).addView(any(), any())
     }
 
     @Test
-    fun displayChip_chipDoesNotDisappearsBeforeTimeout() {
+    fun displayView_viewDoesNotDisappearsBeforeTimeout() {
         val state = getState()
-        underTest.displayChip(state)
+        underTest.displayView(state)
         reset(windowManager)
 
         fakeClock.advanceTime(TIMEOUT_MS - 1)
@@ -152,9 +152,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_chipDisappearsAfterTimeout() {
+    fun displayView_viewDisappearsAfterTimeout() {
         val state = getState()
-        underTest.displayChip(state)
+        underTest.displayView(state)
         reset(windowManager)
 
         fakeClock.advanceTime(TIMEOUT_MS + 1)
@@ -163,176 +163,176 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_calledAgainBeforeTimeout_timeoutReset() {
-        // First, display the chip
+    fun displayView_calledAgainBeforeTimeout_timeoutReset() {
+        // First, display the view
         val state = getState()
-        underTest.displayChip(state)
+        underTest.displayView(state)
 
-        // After some time, re-display the chip
+        // After some time, re-display the view
         val waitTime = 1000L
         fakeClock.advanceTime(waitTime)
-        underTest.displayChip(getState())
+        underTest.displayView(getState())
 
         // Wait until the timeout for the first display would've happened
         fakeClock.advanceTime(TIMEOUT_MS - waitTime + 1)
 
-        // Verify we didn't hide the chip
+        // Verify we didn't hide the view
         verify(windowManager, never()).removeView(any())
     }
 
     @Test
-    fun displayChip_calledAgainBeforeTimeout_eventuallyTimesOut() {
-        // First, display the chip
+    fun displayView_calledAgainBeforeTimeout_eventuallyTimesOut() {
+        // First, display the view
         val state = getState()
-        underTest.displayChip(state)
+        underTest.displayView(state)
 
-        // After some time, re-display the chip
+        // After some time, re-display the view
         fakeClock.advanceTime(1000L)
-        underTest.displayChip(getState())
+        underTest.displayView(getState())
 
-        // Ensure we still hide the chip eventually
+        // Ensure we still hide the view eventually
         fakeClock.advanceTime(TIMEOUT_MS + 1)
 
         verify(windowManager).removeView(any())
     }
 
     @Test
-    fun displayScaleChange_chipReinflatedWithMostRecentState() {
-        underTest.displayChip(getState(name = "First name"))
-        underTest.displayChip(getState(name = "Second name"))
+    fun displayScaleChange_viewReinflatedWithMostRecentState() {
+        underTest.displayView(getState(name = "First name"))
+        underTest.displayView(getState(name = "Second name"))
         reset(windowManager)
 
         getConfigurationListener().onDensityOrFontScaleChanged()
 
         verify(windowManager).removeView(any())
         verify(windowManager).addView(any(), any())
-        assertThat(underTest.mostRecentChipInfo?.name).isEqualTo("Second name")
+        assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("Second name")
     }
 
     @Test
-    fun removeChip_chipRemovedAndRemovalLogged() {
-        // First, add the chip
-        underTest.displayChip(getState())
+    fun removeView_viewRemovedAndRemovalLogged() {
+        // First, add the view
+        underTest.displayView(getState())
 
         // Then, remove it
         val reason = "test reason"
-        underTest.removeChip(reason)
+        underTest.removeView(reason)
 
         verify(windowManager).removeView(any())
         verify(logger).logChipRemoval(reason)
     }
 
     @Test
-    fun removeChip_noAdd_viewNotRemoved() {
-        underTest.removeChip("reason")
+    fun removeView_noAdd_viewNotRemoved() {
+        underTest.removeView("reason")
 
         verify(windowManager, never()).removeView(any())
     }
 
     @Test
     fun setIcon_nullAppIconDrawableAndNullPackageName_stillHasIcon() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
-        underTest.setIcon(chipView, appPackageName = null, appIconDrawableOverride = null)
+        underTest.setIcon(view, appPackageName = null, appIconDrawableOverride = null)
 
-        assertThat(chipView.getAppIconView().drawable).isNotNull()
+        assertThat(view.getAppIconView().drawable).isNotNull()
     }
 
     @Test
     fun setIcon_nullAppIconDrawableAndInvalidPackageName_stillHasIcon() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
         underTest.setIcon(
-            chipView, appPackageName = "fakePackageName", appIconDrawableOverride = null
+            view, appPackageName = "fakePackageName", appIconDrawableOverride = null
         )
 
-        assertThat(chipView.getAppIconView().drawable).isNotNull()
+        assertThat(view.getAppIconView().drawable).isNotNull()
     }
 
     @Test
     fun setIcon_nullAppIconDrawable_iconIsFromPackageName() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
-        underTest.setIcon(chipView, PACKAGE_NAME, appIconDrawableOverride = null, null)
+        underTest.setIcon(view, PACKAGE_NAME, appIconDrawableOverride = null, null)
 
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconFromPackageName)
+        assertThat(view.getAppIconView().drawable).isEqualTo(appIconFromPackageName)
     }
 
     @Test
     fun setIcon_hasAppIconDrawable_iconIsDrawable() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
         val drawable = context.getDrawable(R.drawable.ic_alarm)!!
-        underTest.setIcon(chipView, PACKAGE_NAME, drawable, null)
+        underTest.setIcon(view, PACKAGE_NAME, drawable, null)
 
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(drawable)
+        assertThat(view.getAppIconView().drawable).isEqualTo(drawable)
     }
 
     @Test
     fun setIcon_nullAppNameAndNullPackageName_stillHasContentDescription() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
-        underTest.setIcon(chipView, appPackageName = null, appNameOverride = null)
+        underTest.setIcon(view, appPackageName = null, appNameOverride = null)
 
-        assertThat(chipView.getAppIconView().contentDescription.toString()).isNotEmpty()
+        assertThat(view.getAppIconView().contentDescription.toString()).isNotEmpty()
     }
 
     @Test
     fun setIcon_nullAppNameAndInvalidPackageName_stillHasContentDescription() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
         underTest.setIcon(
-            chipView, appPackageName = "fakePackageName", appNameOverride = null
+            view, appPackageName = "fakePackageName", appNameOverride = null
         )
 
-        assertThat(chipView.getAppIconView().contentDescription.toString()).isNotEmpty()
+        assertThat(view.getAppIconView().contentDescription.toString()).isNotEmpty()
     }
 
     @Test
     fun setIcon_nullAppName_iconContentDescriptionIsFromPackageName() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
-        underTest.setIcon(chipView, PACKAGE_NAME, null, appNameOverride = null)
+        underTest.setIcon(view, PACKAGE_NAME, null, appNameOverride = null)
 
-        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
+        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
     }
 
     @Test
     fun setIcon_hasAppName_iconContentDescriptionIsAppNameOverride() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
         val appName = "Override App Name"
-        underTest.setIcon(chipView, PACKAGE_NAME, null, appName)
+        underTest.setIcon(view, PACKAGE_NAME, null, appName)
 
-        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(appName)
+        assertThat(view.getAppIconView().contentDescription).isEqualTo(appName)
     }
 
     @Test
     fun setIcon_iconSizeMatchesGetIconSize() {
-        underTest.displayChip(getState())
-        val chipView = getChipView()
+        underTest.displayView(getState())
+        val view = getView()
 
-        underTest.setIcon(chipView, PACKAGE_NAME)
-        chipView.measure(
+        underTest.setIcon(view, PACKAGE_NAME)
+        view.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(ICON_SIZE)
-        assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(ICON_SIZE)
+        assertThat(view.getAppIconView().measuredWidth).isEqualTo(ICON_SIZE)
+        assertThat(view.getAppIconView().measuredHeight).isEqualTo(ICON_SIZE)
     }
 
-    private fun getState(name: String = "name") = ChipInfo(name)
+    private fun getState(name: String = "name") = ViewInfo(name)
 
-    private fun getChipView(): ViewGroup {
+    private fun getView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         return viewCaptor.value as ViewGroup
@@ -354,7 +354,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-    ) : TemporaryViewDisplayController<ChipInfo>(
+    ) : TemporaryViewDisplayController<ViewInfo>(
         context,
         logger,
         windowManager,
@@ -364,17 +364,17 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         powerManager,
         R.layout.media_ttt_chip,
     ) {
-        var mostRecentChipInfo: ChipInfo? = null
+        var mostRecentViewInfo: ViewInfo? = null
 
         override val windowLayoutParams = commonWindowLayoutParams
-        override fun updateChipView(newChipInfo: ChipInfo, currentChipView: ViewGroup) {
-            super.updateChipView(newChipInfo, currentChipView)
-            mostRecentChipInfo = newChipInfo
+        override fun updateView(newInfo: ViewInfo, currentView: ViewGroup) {
+            super.updateView(newInfo, currentView)
+            mostRecentViewInfo = newInfo
         }
         override fun getIconSize(isAppIcon: Boolean): Int = ICON_SIZE
     }
 
-    inner class ChipInfo(val name: String) : TemporaryViewInfo {
+    inner class ViewInfo(val name: String) : TemporaryViewInfo {
         override fun getTimeoutMs() = 1L
     }
 }
