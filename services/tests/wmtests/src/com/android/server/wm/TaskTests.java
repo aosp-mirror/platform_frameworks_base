@@ -77,13 +77,14 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Assert;
 import org.junit.Before;

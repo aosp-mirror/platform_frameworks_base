@@ -41,13 +41,13 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SystemConfigFileCommitEventLogger;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.IoThread;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;

@@ -131,8 +131,6 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -152,6 +150,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;

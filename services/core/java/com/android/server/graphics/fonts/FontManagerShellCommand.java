@@ -34,10 +34,10 @@ import android.os.ShellCommand;
 import android.text.FontConfig;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.util.DumpUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

@@ -23,12 +23,13 @@ import static org.testng.Assert.assertThrows;
 import android.content.pm.UserProperties;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

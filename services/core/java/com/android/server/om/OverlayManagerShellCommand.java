@@ -35,8 +35,9 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.TypedValue;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

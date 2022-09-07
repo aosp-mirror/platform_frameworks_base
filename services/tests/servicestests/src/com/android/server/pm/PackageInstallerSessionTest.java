@@ -32,13 +32,13 @@ import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 

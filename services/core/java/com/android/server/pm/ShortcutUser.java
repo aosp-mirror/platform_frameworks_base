@@ -30,14 +30,14 @@ import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.FgThread;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;

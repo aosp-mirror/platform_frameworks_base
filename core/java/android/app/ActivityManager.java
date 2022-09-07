@@ -81,8 +81,6 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.window.TaskSnapshot;
 
 import com.android.internal.app.LocalePicker;
@@ -92,6 +90,8 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;

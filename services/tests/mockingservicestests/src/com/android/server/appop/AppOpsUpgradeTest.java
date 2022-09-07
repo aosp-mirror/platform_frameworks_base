@@ -36,12 +36,13 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.junit.Before;
 import org.junit.Test;

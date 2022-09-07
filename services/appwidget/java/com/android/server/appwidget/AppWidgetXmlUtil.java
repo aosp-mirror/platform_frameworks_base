@@ -23,8 +23,9 @@ import android.content.ComponentName;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.IOException;
 import java.util.Objects;

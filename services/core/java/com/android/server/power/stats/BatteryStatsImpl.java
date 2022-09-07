@@ -99,8 +99,6 @@ import android.util.SparseDoubleArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -130,6 +128,8 @@ import com.android.internal.power.MeasuredEnergyStats.StandardPowerBucket;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 

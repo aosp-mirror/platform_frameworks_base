@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util;
+package com.android.modules.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,8 +25,6 @@ import org.xmlpull.v1.XmlPullParserException;
 /**
  * Specialization of {@link XmlPullParser} which adds explicit methods to
  * support consistent and efficient conversion of primitive data types.
- *
- * @hide
  */
 public interface TypedXmlPullParser extends XmlPullParser {
     /**

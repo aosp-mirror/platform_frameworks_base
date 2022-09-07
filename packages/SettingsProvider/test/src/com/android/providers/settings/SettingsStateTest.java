@@ -17,8 +17,9 @@ package com.android.providers.settings;
 
 import android.os.Looper;
 import android.test.AndroidTestCase;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlSerializer;
 
 import com.google.common.base.Strings;
 

@@ -25,11 +25,12 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 

@@ -44,13 +44,13 @@ import android.os.LocaleList;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AtomicFile;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.After;

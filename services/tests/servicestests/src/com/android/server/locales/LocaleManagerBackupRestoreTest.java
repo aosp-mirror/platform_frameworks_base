@@ -45,14 +45,14 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SimpleClock;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.After;
 import org.junit.Before;
