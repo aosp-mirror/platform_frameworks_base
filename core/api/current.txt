@@ -48661,6 +48661,9 @@ package android.view {
     field public static final int KEYCODE_K = 39; // 0x27
     field public static final int KEYCODE_KANA = 218; // 0xda
     field public static final int KEYCODE_KATAKANA_HIRAGANA = 215; // 0xd7
+    field public static final int KEYCODE_KEYBOARD_BACKLIGHT_DOWN = 305; // 0x131
+    field public static final int KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE = 307; // 0x133
+    field public static final int KEYCODE_KEYBOARD_BACKLIGHT_UP = 306; // 0x132
     field public static final int KEYCODE_L = 40; // 0x28
     field public static final int KEYCODE_LANGUAGE_SWITCH = 204; // 0xcc
     field public static final int KEYCODE_LAST_CHANNEL = 229; // 0xe5
