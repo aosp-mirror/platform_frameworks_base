@@ -35,6 +35,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
@@ -137,13 +138,26 @@ class MediaTttChipControllerReceiver @Inject constructor(
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
         super.updateView(newInfo, currentView)
-        val iconName = setIcon(
-                currentView,
-                newInfo.routeInfo.clientPackageName,
-                newInfo.appIconDrawableOverride,
-                newInfo.appNameOverride
+
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context, newInfo.routeInfo.clientPackageName
         )
-        currentView.contentDescription = iconName
+        val iconDrawable = newInfo.appIconDrawableOverride ?: iconInfo.drawable
+        val iconContentDescription = newInfo.appNameOverride ?: iconInfo.contentDescription
+        val iconSize = context.resources.getDimensionPixelSize(
+            if (iconInfo.isAppIcon) {
+                R.dimen.media_ttt_icon_size_receiver
+            } else {
+                R.dimen.media_ttt_generic_icon_size_receiver
+            }
+        )
+
+        MediaTttUtils.setIcon(
+            currentView.requireViewById(R.id.app_icon),
+            iconDrawable,
+            iconContentDescription,
+            iconSize,
+        )
     }
 
     override fun animateViewIn(view: ViewGroup) {
@@ -160,15 +174,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
         appIconView.postOnAnimation { view.requestAccessibilityFocus() }
         startRipple(view.requireViewById(R.id.ripple))
     }
-
-    override fun getIconSize(isAppIcon: Boolean): Int? =
-        context.resources.getDimensionPixelSize(
-            if (isAppIcon) {
-                R.dimen.media_ttt_icon_size_receiver
-            } else {
-                R.dimen.media_ttt_generic_icon_size_receiver
-            }
-        )
 
     /** Returns the amount that the chip will be translated by in its intro animation. */
     private fun getTranslationAmount(): Int {

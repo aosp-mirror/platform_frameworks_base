@@ -17,15 +17,10 @@
 package com.android.systemui.temporarydisplay
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import android.os.PowerManager
-import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
-import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -42,9 +37,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -58,11 +51,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
 
-    private lateinit var appIconFromPackageName: Drawable
-    @Mock
-    private lateinit var packageManager: PackageManager
-    @Mock
-    private lateinit var applicationInfo: ApplicationInfo
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
@@ -77,17 +65,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        appIconFromPackageName = context.getDrawable(R.drawable.ic_cake)!!
-        whenever(packageManager.getApplicationIcon(PACKAGE_NAME)).thenReturn(appIconFromPackageName)
-        whenever(applicationInfo.loadLabel(packageManager)).thenReturn(APP_NAME)
-        whenever(packageManager.getApplicationInfo(
-            any(), any<PackageManager.ApplicationInfoFlags>()
-        )).thenThrow(PackageManager.NameNotFoundException())
-        whenever(packageManager.getApplicationInfo(
-            eq(PACKAGE_NAME), any<PackageManager.ApplicationInfoFlags>()
-        )).thenReturn(applicationInfo)
-        context.setMockPackageManager(packageManager)
 
         whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any()))
             .thenReturn(TIMEOUT_MS.toInt())
@@ -229,116 +206,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager, never()).removeView(any())
     }
 
-    @Test
-    fun setIcon_nullAppIconDrawableAndNullPackageName_stillHasIcon() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(view, appPackageName = null, appIconDrawableOverride = null)
-
-        assertThat(view.getAppIconView().drawable).isNotNull()
-    }
-
-    @Test
-    fun setIcon_nullAppIconDrawableAndInvalidPackageName_stillHasIcon() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(
-            view, appPackageName = "fakePackageName", appIconDrawableOverride = null
-        )
-
-        assertThat(view.getAppIconView().drawable).isNotNull()
-    }
-
-    @Test
-    fun setIcon_nullAppIconDrawable_iconIsFromPackageName() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(view, PACKAGE_NAME, appIconDrawableOverride = null, null)
-
-        assertThat(view.getAppIconView().drawable).isEqualTo(appIconFromPackageName)
-    }
-
-    @Test
-    fun setIcon_hasAppIconDrawable_iconIsDrawable() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        val drawable = context.getDrawable(R.drawable.ic_alarm)!!
-        underTest.setIcon(view, PACKAGE_NAME, drawable, null)
-
-        assertThat(view.getAppIconView().drawable).isEqualTo(drawable)
-    }
-
-    @Test
-    fun setIcon_nullAppNameAndNullPackageName_stillHasContentDescription() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(view, appPackageName = null, appNameOverride = null)
-
-        assertThat(view.getAppIconView().contentDescription.toString()).isNotEmpty()
-    }
-
-    @Test
-    fun setIcon_nullAppNameAndInvalidPackageName_stillHasContentDescription() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(
-            view, appPackageName = "fakePackageName", appNameOverride = null
-        )
-
-        assertThat(view.getAppIconView().contentDescription.toString()).isNotEmpty()
-    }
-
-    @Test
-    fun setIcon_nullAppName_iconContentDescriptionIsFromPackageName() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(view, PACKAGE_NAME, null, appNameOverride = null)
-
-        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
-    }
-
-    @Test
-    fun setIcon_hasAppName_iconContentDescriptionIsAppNameOverride() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        val appName = "Override App Name"
-        underTest.setIcon(view, PACKAGE_NAME, null, appName)
-
-        assertThat(view.getAppIconView().contentDescription).isEqualTo(appName)
-    }
-
-    @Test
-    fun setIcon_iconSizeMatchesGetIconSize() {
-        underTest.displayView(getState())
-        val view = getView()
-
-        underTest.setIcon(view, PACKAGE_NAME)
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-
-        assertThat(view.getAppIconView().measuredWidth).isEqualTo(ICON_SIZE)
-        assertThat(view.getAppIconView().measuredHeight).isEqualTo(ICON_SIZE)
-    }
-
     private fun getState(name: String = "name") = ViewInfo(name)
-
-    private fun getView(): ViewGroup {
-        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
-        verify(windowManager).addView(viewCaptor.capture(), any())
-        return viewCaptor.value as ViewGroup
-    }
-
-    private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 
     private fun getConfigurationListener(): ConfigurationListener {
         val callbackCaptor = argumentCaptor<ConfigurationListener>()
@@ -371,7 +239,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
             super.updateView(newInfo, currentView)
             mostRecentViewInfo = newInfo
         }
-        override fun getIconSize(isAppIcon: Boolean): Int = ICON_SIZE
     }
 
     inner class ViewInfo(val name: String) : TemporaryViewInfo {
@@ -379,7 +246,4 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 }
 
-private const val PACKAGE_NAME = "com.android.systemui"
-private const val APP_NAME = "Fake App Name"
 private const val TIMEOUT_MS = 10000L
-private const val ICON_SIZE = 47

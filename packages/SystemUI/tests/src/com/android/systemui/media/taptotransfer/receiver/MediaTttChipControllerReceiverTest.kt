@@ -177,33 +177,68 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun setIcon_isAppIcon_usesAppIconSize() {
-        controllerReceiver.displayView(getChipReceiverInfo())
+    fun updateView_noOverrides_usesInfoFromAppIcon() {
+        controllerReceiver.displayView(
+            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride = null)
+        )
+
+        val view = getChipView()
+        assertThat(view.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
+    }
+
+    @Test
+    fun updateView_appIconOverride_usesOverride() {
+        val drawableOverride = context.getDrawable(R.drawable.ic_celebration)!!
+
+        controllerReceiver.displayView(
+            ChipReceiverInfo(routeInfo, drawableOverride, appNameOverride = null)
+        )
+
+        val view = getChipView()
+        assertThat(view.getAppIconView().drawable).isEqualTo(drawableOverride)
+    }
+
+    @Test
+    fun updateView_appNameOverride_usesOverride() {
+        val appNameOverride = "Sweet New App"
+
+        controllerReceiver.displayView(
+            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride)
+        )
+
+        val view = getChipView()
+        assertThat(view.getAppIconView().contentDescription).isEqualTo(appNameOverride)
+    }
+
+    @Test
+    fun updateView_isAppIcon_usesAppIconSize() {
+        controllerReceiver.displayView(getChipReceiverInfo(packageName = PACKAGE_NAME))
         val chipView = getChipView()
 
-        controllerReceiver.setIcon(chipView, PACKAGE_NAME)
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        val expectedSize = controllerReceiver.getIconSize(isAppIcon = true)
+        val expectedSize =
+            context.resources.getDimensionPixelSize(R.dimen.media_ttt_icon_size_receiver)
         assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
         assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
     }
 
     @Test
-    fun setIcon_notAppIcon_usesGenericIconSize() {
-        controllerReceiver.displayView(getChipReceiverInfo())
+    fun updateView_notAppIcon_usesGenericIconSize() {
+        controllerReceiver.displayView(getChipReceiverInfo(packageName = null))
         val chipView = getChipView()
 
-        controllerReceiver.setIcon(chipView, appPackageName = null)
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        val expectedSize = controllerReceiver.getIconSize(isAppIcon = false)
+        val expectedSize =
+            context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_size_receiver)
         assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
         assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
     }
@@ -226,8 +261,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         return viewCaptor.value as ViewGroup
     }
 
-    private fun getChipReceiverInfo(): ChipReceiverInfo =
-        ChipReceiverInfo(routeInfo, null, null)
+    private fun getChipReceiverInfo(packageName: String?): ChipReceiverInfo {
+        val routeInfo = MediaRoute2Info.Builder("id", "Test route name")
+            .addFeature("feature")
+            .setClientPackageName(packageName)
+            .build()
+        return ChipReceiverInfo(routeInfo, null, null)
+    }
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 }

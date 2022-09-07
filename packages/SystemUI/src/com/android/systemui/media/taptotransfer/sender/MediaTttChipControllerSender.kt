@@ -34,6 +34,7 @@ import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
@@ -118,7 +119,14 @@ class MediaTttChipControllerSender @Inject constructor(
         val chipState = newInfo.state
 
         // App icon
-        val iconName = setIcon(currentView, newInfo.routeInfo.clientPackageName)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context, newInfo.routeInfo.clientPackageName
+        )
+        MediaTttUtils.setIcon(
+            currentView.requireViewById(R.id.app_icon),
+            iconInfo.drawable,
+            iconInfo.contentDescription
+        )
 
         // Text
         val otherDeviceName = newInfo.routeInfo.name.toString()
@@ -144,7 +152,7 @@ class MediaTttChipControllerSender @Inject constructor(
         // For accessibility
         currentView.requireViewById<ViewGroup>(
                 R.id.media_ttt_sender_chip_inner
-        ).contentDescription = "$iconName $chipText"
+        ).contentDescription = "${iconInfo.contentDescription} $chipText"
     }
 
     override fun animateViewIn(view: ViewGroup) {
