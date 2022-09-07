@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -82,6 +83,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -962,8 +964,17 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testTransientLaunch() {
         final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
+        final ArrayList<ActivityRecord> enteringAnimReports = new ArrayList<>();
         final TransitionController controller = new TransitionController(mAtm, snapshotController,
-                mock(TransitionTracer.class));
+                mock(TransitionTracer.class)) {
+            @Override
+            protected void dispatchLegacyAppTransitionFinished(ActivityRecord ar) {
+                if (ar.mEnteringAnimation) {
+                    enteringAnimReports.add(ar);
+                }
+                super.dispatchLegacyAppTransitionFinished(ar);
+            }
+        };
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1008,6 +1019,7 @@ public class TransitionTests extends WindowTestsBase {
 
         activity1.mVisibleRequested = false;
         activity2.mVisibleRequested = true;
+        activity2.setVisible(true);
 
         // Using abort to force-finish the sync (since we obviously can't wait for drawing).
         // We didn't call abort on the actual transition, so it will still run onTransactionReady
@@ -1018,9 +1030,11 @@ public class TransitionTests extends WindowTestsBase {
         // called until finish).
         verify(snapshotController, times(0)).recordTaskSnapshot(eq(task1), eq(false));
 
+        enteringAnimReports.clear();
         closeTransition.finishTransition();
 
         verify(snapshotController, times(1)).recordTaskSnapshot(eq(task1), eq(false));
+        assertTrue(enteringAnimReports.contains(activity2));
     }
 
     @Test
@@ -1165,6 +1179,42 @@ public class TransitionTests extends WindowTestsBase {
 
         assertTrue(transition.allReady());
         assertTrue(mSyncEngine.isReady(transition.getSyncId()));
+    }
+
+    @Test
+    public void testVisibleChange_snapshot() {
+        registerTestTransitionPlayer();
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
+                app.mTransitionController, mWm.mSyncEngine);
+        app.mTransitionController.moveToCollecting(transition, BLASTSyncEngine.METHOD_NONE);
+        final SurfaceControl mockSnapshot = mock(SurfaceControl.class);
+        transition.setContainerFreezer(new Transition.IContainerFreezer() {
+            @Override
+            public boolean freeze(@NonNull WindowContainer wc, @NonNull Rect bounds) {
+                Objects.requireNonNull(transition.mChanges.get(wc)).mSnapshot = mockSnapshot;
+                return true;
+            }
+
+            @Override
+            public void cleanUp(SurfaceControl.Transaction t) {
+            }
+        });
+        final Task task = app.getTask();
+        transition.collect(task);
+        final Rect bounds = new Rect(task.getBounds());
+        Configuration c = new Configuration(task.getRequestedOverrideConfiguration());
+        bounds.inset(10, 10);
+        c.windowConfiguration.setBounds(bounds);
+        task.onRequestedOverrideConfigurationChanged(c);
+
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                transition.mParticipants, transition.mChanges);
+        TransitionInfo info = Transition.calculateTransitionInfo(
+                TRANSIT_CHANGE, 0, targets, transition.mChanges, mMockT);
+        assertEquals(mockSnapshot,
+                info.getChange(task.mRemoteToken.toWindowContainerToken()).getSnapshot());
+        transition.abort();
     }
 
     private static void makeTaskOrganized(Task... tasks) {
