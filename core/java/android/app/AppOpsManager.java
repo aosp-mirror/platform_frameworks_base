@@ -1831,6 +1831,9 @@ public class AppOpsManager {
     })
     private @interface ShouldCollectNoteOp {}
 
+    /** Whether noting for an appop should be collected */
+    private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
+
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
             // RUNTIME PERMISSIONS
             // Contacts
@@ -2281,8 +2284,17 @@ public class AppOpsManager {
                 "ACCESS_RESTRICTED_SETTINGS").setDefaultMode(AppOpsManager.MODE_ALLOWED)
             .setDisableReset(true).setRestrictRead(true).build(),
         new AppOpInfo.Builder(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
-                "RECEIVE_SOUNDTRIGGER_AUDIO").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
+                "RECEIVE_SOUNDTRIGGER_AUDIO").setDefaultMode(AppOpsManager.MODE_ALLOWED)
+                .setForceCollectNotes(true).build()
     };
+
+    /**
+     * @hide
+     */
+    public static boolean shouldForceCollectNoteForOp(int op) {
+        Preconditions.checkArgumentInRange(op, 0, _NUM_OP - 1, "opCode");
+        return sAppOpInfos[op].forceCollectNotes;
+    }
 
     /**
      * Mapping from an app op name to the app op code.
@@ -2312,9 +2324,6 @@ public class AppOpsManager {
      */
     private static final ThreadLocal<ArrayMap<String, long[]>> sAppOpsNotedInThisBinderTransaction =
             new ThreadLocal<>();
-
-    /** Whether noting for an appop should be collected */
-    private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
 
     static {
         if (sAppOpInfos.length != _NUM_OP) {
