@@ -69,13 +69,25 @@ public class InputDeviceTest {
     }
 
     private void assertInputDeviceParcelUnparcel(KeyCharacterMap keyCharacterMap) {
-        final InputDevice device =
-                new InputDevice(DEVICE_ID, 0 /* generation */, 0 /* controllerNumber */, "name",
-                        0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
-                        0 /* sources */, 0 /* keyboardType */, keyCharacterMap,
-                        InputDeviceCountryCode.INTERNATIONAL, false /* hasVibrator */,
-                        false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                        true /* hasSensor */, false /* hasBattery */);
+        final InputDevice device = new InputDevice.Builder()
+                .setId(DEVICE_ID)
+                .setGeneration(42)
+                .setControllerNumber(43)
+                .setName("Test Device " + DEVICE_ID)
+                .setVendorId(44)
+                .setProductId(45)
+                .setDescriptor("descriptor")
+                .setExternal(true)
+                .setSources(InputDevice.SOURCE_HDMI)
+                .setKeyboardType(InputDevice.KEYBOARD_TYPE_NON_ALPHABETIC)
+                .setKeyCharacterMap(keyCharacterMap)
+                .setHasVibrator(true)
+                .setHasMicrophone(true)
+                .setHasButtonUnderPad(true)
+                .setHasSensor(true)
+                .setHasBattery(true)
+                .setCountryCode(InputDeviceCountryCode.INTERNATIONAL)
+                .build();
 
         Parcel parcel = Parcel.obtain();
         device.writeToParcel(parcel, 0);

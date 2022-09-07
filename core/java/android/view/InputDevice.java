@@ -460,10 +460,8 @@ public final class InputDevice implements Parcelable {
 
     /**
      * Called by native code
-     * @hide
      */
-    @VisibleForTesting
-    public InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
+    private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
             KeyCharacterMap keyCharacterMap, @InputDeviceCountryCode int countryCode,
             boolean hasVibrator, boolean hasMicrophone, boolean hasButtonUnderPad,
@@ -516,6 +514,142 @@ public final class InputDevice implements Parcelable {
         for (int i = 0; i < numRanges; i++) {
             addMotionRange(in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
                     in.readFloat(), in.readFloat(), in.readFloat());
+        }
+    }
+
+    /**
+     * InputDevice builder used to create an InputDevice for tests in Java.
+     * @hide
+     */
+    @VisibleForTesting
+    public static class Builder {
+        private int mId = 0;
+        private int mGeneration = 0;
+        private int mControllerNumber = 0;
+        private String mName = "";
+        private int mVendorId = 0;
+        private int mProductId = 0;
+        private String mDescriptor = "";
+        private boolean mIsExternal = false;
+        private int mSources = 0;
+        private int mKeyboardType = 0;
+        private KeyCharacterMap mKeyCharacterMap = null;
+        private boolean mHasVibrator = false;
+        private boolean mHasMicrophone = false;
+        private boolean mHasButtonUnderPad = false;
+        private boolean mHasSensor = false;
+        private boolean mHasBattery = false;
+        @InputDeviceCountryCode
+        private int mCountryCode = InputDeviceCountryCode.INVALID;
+
+        /** @see InputDevice#getId()  */
+        public Builder setId(int id) {
+            mId = id;
+            return this;
+        }
+
+        /** @see InputDevice#getGeneration()  */
+        public Builder setGeneration(int generation) {
+            mGeneration = generation;
+            return this;
+        }
+
+        /** @see InputDevice#getControllerNumber()  */
+        public Builder setControllerNumber(int controllerNumber) {
+            mControllerNumber = controllerNumber;
+            return this;
+        }
+
+        /** @see InputDevice#getName()  */
+        public Builder setName(String name) {
+            mName = name;
+            return this;
+        }
+
+        /** @see InputDevice#getVendorId()  */
+        public Builder setVendorId(int vendorId) {
+            mVendorId = vendorId;
+            return this;
+        }
+
+        /** @see InputDevice#getProductId()  */
+        public Builder setProductId(int productId) {
+            mProductId = productId;
+            return this;
+        }
+
+        /** @see InputDevice#getDescriptor()  */
+        public Builder setDescriptor(String descriptor) {
+            mDescriptor = descriptor;
+            return this;
+        }
+
+        /** @see InputDevice#isExternal()  */
+        public Builder setExternal(boolean external) {
+            mIsExternal = external;
+            return this;
+        }
+
+        /** @see InputDevice#getSources()  */
+        public Builder setSources(int sources) {
+            mSources = sources;
+            return this;
+        }
+
+        /** @see InputDevice#getKeyboardType()  */
+        public Builder setKeyboardType(int keyboardType) {
+            mKeyboardType = keyboardType;
+            return this;
+        }
+
+        /** @see InputDevice#getKeyCharacterMap()  */
+        public Builder setKeyCharacterMap(KeyCharacterMap keyCharacterMap) {
+            mKeyCharacterMap = keyCharacterMap;
+            return this;
+        }
+
+        /** @see InputDevice#getVibrator()  */
+        public Builder setHasVibrator(boolean hasVibrator) {
+            mHasVibrator = hasVibrator;
+            return this;
+        }
+
+        /** @see InputDevice#hasMicrophone()  */
+        public Builder setHasMicrophone(boolean hasMicrophone) {
+            mHasMicrophone = hasMicrophone;
+            return this;
+        }
+
+        /** @see InputDevice#hasButtonUnderPad()  */
+        public Builder setHasButtonUnderPad(boolean hasButtonUnderPad) {
+            mHasButtonUnderPad = hasButtonUnderPad;
+            return this;
+        }
+
+        /** @see InputDevice#hasSensor()  */
+        public Builder setHasSensor(boolean hasSensor) {
+            mHasSensor = hasSensor;
+            return this;
+        }
+
+        /** @see InputDevice#hasBattery()  */
+        public Builder setHasBattery(boolean hasBattery) {
+            mHasBattery = hasBattery;
+            return this;
+        }
+
+        /** @see InputDevice#getCountryCode()  */
+        public Builder setCountryCode(@InputDeviceCountryCode int countryCode) {
+            mCountryCode = countryCode;
+            return this;
+        }
+
+        /** Build {@link InputDevice}. */
+        public InputDevice build() {
+            return new InputDevice(mId, mGeneration, mControllerNumber, mName, mVendorId,
+                    mProductId, mDescriptor, mIsExternal, mSources, mKeyboardType, mKeyCharacterMap,
+                    mCountryCode, mHasVibrator, mHasMicrophone, mHasButtonUnderPad, mHasSensor,
+                    mHasBattery);
         }
     }
 

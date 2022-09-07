@@ -87,11 +87,13 @@ class BatteryControllerTests {
     }
 
     private fun createInputDevice(deviceId: Int): InputDevice =
-        InputDevice(deviceId, 0 /*generation*/, 0 /*controllerNumber*/,
-            "Device $deviceId" /*name*/, 0 /*vendorId*/, 0 /*productId*/, "descriptor$deviceId",
-            true /*isExternal*/, 0 /*sources*/, 0 /*keyboardType*/, null /*keyCharacterMap*/,
-            InputDeviceCountryCode.INVALID, false /*hasVibrator*/, false /*hasMicrophone*/,
-            false /*hasButtonUnderPad*/, false /*hasSensor*/, true /*hasBattery*/)
+        InputDevice.Builder()
+            .setId(deviceId)
+            .setName("Device $deviceId")
+            .setDescriptor("descriptor $deviceId")
+            .setExternal(true)
+            .setHasBattery(true)
+            .build()
 
     @After
     fun tearDown() {
