@@ -579,17 +579,16 @@ public class CarrierConfigManager {
      * List of network type constants which support only a single data connection at a time.
      * Some carriers do not support multiple PDP on UMTS.
      * @see TelephonyManager NETWORK_TYPE_*
+     * @see #KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY
      */
     public static final String
             KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY = "only_single_dc_allowed_int_array";
 
     /**
-     * List of network capabilities which, if requested, will exempt the request from single PDN
-     * connection checks.
+     * Only apply if {@link #KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY} specifies the network types that
+     * support a single data connection at a time. This key defines a list of network capabilities
+     * which, if requested, will exempt the request from single data connection checks.
      * @see NetworkCapabilities NET_CAPABILITY_*
-     * @see #KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY
-     *
-     * @hide
      */
     public static final String KEY_CAPABILITIES_EXEMPT_FROM_SINGLE_DC_CHECK_INT_ARRAY =
             "capabilities_exempt_from_single_dc_check_int_array";
