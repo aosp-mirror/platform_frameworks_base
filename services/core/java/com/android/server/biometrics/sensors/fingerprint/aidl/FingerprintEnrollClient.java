@@ -50,12 +50,14 @@ import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
+import com.android.server.biometrics.sensors.fingerprint.PowerPressHandler;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
 import java.util.function.Supplier;
 
-class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps {
+class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps,
+        PowerPressHandler {
 
     private static final String TAG = "FingerprintEnrollClient";
 
@@ -267,5 +269,11 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send UI ready", e);
         }
+    }
+
+    @Override
+    public void onPowerPressed() {
+        onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
+                0 /* vendorCode */);
     }
 }

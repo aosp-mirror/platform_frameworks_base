@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -249,6 +251,16 @@ public class FingerprintEnrollClientTest {
     @Test
     public void showHideOverlay_result() throws RemoteException {
         showHideOverlay(c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
+    }
+
+    @Test
+    public void testPowerPressForwardsAcquireMessage() throws RemoteException {
+        final FingerprintEnrollClient client = createClient();
+        client.start(mCallback);
+        client.onPowerPressed();
+
+        verify(mClientMonitorCallbackConverter).onAcquired(anyInt(),
+                eq(FINGERPRINT_ACQUIRED_POWER_PRESSED), anyInt());
     }
 
     private void showHideOverlay(Consumer<FingerprintEnrollClient> block)
