@@ -23,11 +23,8 @@ import android.hardware.location.NanoAppState;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -52,11 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
      * Maximum number of transaction requests that can be pending at a time
      */
     private static final int MAX_PENDING_REQUESTS = 10000;
-
-    /*
-     * The DateFormat for printing TransactionRecord.
-     */
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 
     /*
      * The proxy to talk to the Context Hub
@@ -112,7 +104,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
         @Override
         public String toString() {
-            return DATE_FORMAT.format(new Date(mTimestamp)) + " " + mTransaction;
+            return ContextHubServiceUtil.formatDateFromTimestamp(mTimestamp) + " " + mTransaction;
         }
     }
 
@@ -159,6 +151,13 @@ import java.util.concurrent.atomic.AtomicInteger;
                         ContextHubStatsLog
                             .CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_TYPE__TYPE_LOAD,
                         toStatsTransactionResult(result));
+
+                ContextHubEventLogger.getInstance().logNanoappLoad(
+                        contextHubId,
+                        nanoAppBinary.getNanoAppId(),
+                        nanoAppBinary.getNanoAppVersion(),
+                        nanoAppBinary.getBinary().length,
+                        result == ContextHubTransaction.RESULT_SUCCESS);
 
                 if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     // NOTE: The legacy JNI code used to do a query right after a load success
@@ -214,6 +213,11 @@ import java.util.concurrent.atomic.AtomicInteger;
                         ContextHubStatsLog
                             .CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_TYPE__TYPE_UNLOAD,
                         toStatsTransactionResult(result));
+
+                ContextHubEventLogger.getInstance().logNanoappUnload(
+                        contextHubId,
+                        nanoAppId,
+                        result == ContextHubTransaction.RESULT_SUCCESS);
 
                 if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     mNanoAppStateManager.removeNanoAppInstance(contextHubId, nanoAppId);

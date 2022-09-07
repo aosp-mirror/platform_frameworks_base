@@ -16,6 +16,7 @@
 <configuration description="Runs Tests for SystemUI.">
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
         <option name="test-file-name" value="SystemUITests.apk" />
+        <option name="install-arg" value="-t" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer">

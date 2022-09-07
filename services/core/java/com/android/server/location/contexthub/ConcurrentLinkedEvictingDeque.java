@@ -33,7 +33,7 @@ public class ConcurrentLinkedEvictingDeque<E> extends ConcurrentLinkedDeque<E> {
     @Override
     public boolean add(E elem) {
         synchronized (this) {
-            if (size() == mSize) {
+            if (size() == mSize) { // TODO(b/244459069): the size() method is not constant time
                 poll();
             }
 

@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -66,12 +67,27 @@ public class HearingAidProfileTest {
 
         mProfile = new HearingAidProfile(context, mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
-        mServiceListener.onServiceConnected(BluetoothProfile.HEADSET, mService);
     }
 
     @Test
     public void setActiveDevice_returnTrue() {
         assertThat(mProfile.setActiveDevice(null)).isTrue();
         assertThat(mProfile.setActiveDevice(mBluetoothDevice)).isTrue();
+    }
+
+    @Test
+    public void onServiceConnected_isProfileReady() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HEARING_AID, mService);
+
+        assertThat(mProfile.isProfileReady()).isTrue();
+        verify(mProfileManager).callServiceConnectedListeners();
+    }
+
+    @Test
+    public void onServiceDisconnected_profileNotReady() {
+        mServiceListener.onServiceDisconnected(BluetoothProfile.HEARING_AID);
+
+        assertThat(mProfile.isProfileReady()).isFalse();
+        verify(mProfileManager).callServiceDisconnectedListeners();
     }
 }

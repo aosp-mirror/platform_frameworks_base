@@ -49456,6 +49456,7 @@ package android.view {
   public class Surface implements android.os.Parcelable {
     ctor public Surface(@NonNull android.view.SurfaceControl);
     ctor public Surface(android.graphics.SurfaceTexture);
+    method public void clearFrameRate();
     method public int describeContents();
     method public boolean isValid();
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect) throws java.lang.IllegalArgumentException, android.view.Surface.OutOfResourcesException;
@@ -49513,6 +49514,7 @@ package android.view {
     ctor public SurfaceControl.Transaction();
     method @NonNull public android.view.SurfaceControl.Transaction addTransactionCommittedListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.SurfaceControl.TransactionCommittedListener);
     method public void apply();
+    method @NonNull public android.view.SurfaceControl.Transaction clearFrameRate(@NonNull android.view.SurfaceControl);
     method public void close();
     method public int describeContents();
     method @NonNull public android.view.SurfaceControl.Transaction merge(@NonNull android.view.SurfaceControl.Transaction);

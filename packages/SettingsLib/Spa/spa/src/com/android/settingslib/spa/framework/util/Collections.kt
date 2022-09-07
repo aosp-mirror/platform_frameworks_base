@@ -19,7 +19,23 @@ package com.android.settingslib.spa.framework.util
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
+/**
+ * Performs the given [action] on each element asynchronously.
+ */
+suspend inline fun <T> Iterable<T>.asyncForEach(crossinline action: (T) -> Unit) {
+    coroutineScope {
+        forEach {
+            launch { action(it) }
+        }
+    }
+}
+
+/**
+ * Returns a list containing the results of asynchronously applying the given [transform] function
+ * to each element in the original collection.
+ */
 suspend inline fun <R, T> Iterable<T>.asyncMap(crossinline transform: (T) -> R): List<R> =
     coroutineScope {
         map { item ->
@@ -27,6 +43,11 @@ suspend inline fun <R, T> Iterable<T>.asyncMap(crossinline transform: (T) -> R):
         }.awaitAll()
     }
 
+/**
+ * Returns a list containing only elements matching the given [predicate].
+ *
+ * The filter operation is done asynchronously.
+ */
 suspend inline fun <T> Iterable<T>.asyncFilter(crossinline predicate: (T) -> Boolean): List<T> =
     asyncMap { item -> item to predicate(item) }
         .filter { it.second }

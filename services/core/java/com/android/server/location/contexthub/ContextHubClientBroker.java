@@ -471,6 +471,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                         + mAttachedContextHubInfo.getId() + ")", e);
                 result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             }
+
+            ContextHubEventLogger.getInstance().logMessageToNanoapp(
+                    mAttachedContextHubInfo.getId(),
+                    message,
+                    result == ContextHubTransaction.RESULT_SUCCESS);
         } else {
             String messageString = Base64.getEncoder().encodeToString(message.getMessageBody());
             Log.e(TAG, String.format(

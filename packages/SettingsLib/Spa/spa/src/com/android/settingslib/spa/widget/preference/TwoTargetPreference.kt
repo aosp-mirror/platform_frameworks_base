@@ -67,6 +67,6 @@ private fun PreferenceDivider() {
         Modifier
             .padding(horizontal = SettingsDimension.itemPaddingEnd)
             .size(width = 1.dp, height = SettingsDimension.itemDividerHeight)
-            .background(color = MaterialTheme.colorScheme.onSurface.copy(SettingsOpacity.Disabled))
+            .background(color = MaterialTheme.colorScheme.onSurface.copy(SettingsOpacity.Divider))
     )
 }

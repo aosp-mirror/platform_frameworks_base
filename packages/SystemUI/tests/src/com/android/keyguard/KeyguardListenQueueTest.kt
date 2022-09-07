@@ -86,6 +86,7 @@ private fun faceModel(user: Int) = KeyguardFaceListenModel(
     becauseCannotSkipBouncer = false,
     biometricSettingEnabledForUser = false,
     bouncerFullyShown = false,
+    bouncerIsOrWillShow = false,
     onlyFaceEnrolled = false,
     faceAuthenticated = false,
     faceDisabled = false,

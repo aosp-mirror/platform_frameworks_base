@@ -79,6 +79,11 @@
   <java-symbol type="id" name="deny_button" />
   <java-symbol type="id" name="description" />
   <java-symbol type="id" name="divider" />
+  <java-symbol type="id" name="drag" />
+  <java-symbol type="id" name="profile_pager" />
+  <java-symbol type="id" name="chooser_header" />
+  <java-symbol type="id" name="content_preview_container" />
+  <java-symbol type="id" name="profile_tabhost" />
   <java-symbol type="id" name="edit_query" />
   <java-symbol type="id" name="edittext_container" />
   <java-symbol type="id" name="expand_activities_button" />

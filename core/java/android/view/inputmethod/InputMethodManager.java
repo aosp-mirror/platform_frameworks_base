@@ -439,6 +439,7 @@ public final class InputMethodManager {
     /**
      * True if this input method client is active, initially false.
      */
+    @GuardedBy("mH")
     private boolean mActive = false;
 
     /**
@@ -450,6 +451,7 @@ public final class InputMethodManager {
     /**
      * As reported by IME through InputConnection.
      */
+    @GuardedBy("mH")
     private boolean mFullscreenMode;
 
     // -----------------------------------------------------------
@@ -460,16 +462,20 @@ public final class InputMethodManager {
      */
     @GuardedBy("mH")
     ViewRootImpl mCurRootView;
+
     /**
      * This is set when we are in the process of connecting, to determine
      * when we have actually finished.
      */
+    @GuardedBy("mH")
     private boolean mServedConnecting;
+
     /**
      * This is non-null when we have connected the served view; it holds
      * the attributes that were last retrieved from the served view and given
      * to the input connection.
      */
+    @GuardedBy("mH")
     private EditorInfo mCurrentEditorInfo;
 
     @GuardedBy("mH")
@@ -479,10 +485,13 @@ public final class InputMethodManager {
     /**
      * The InputConnection that was last retrieved from the served view.
      */
+    @GuardedBy("mH")
     private RemoteInputConnectionImpl mServedInputConnection;
+
     /**
      * The completions that were last provided by the served view.
      */
+    @GuardedBy("mH")
     private CompletionInfo[] mCompletions;
 
     // Cursor position on the screen.
@@ -490,21 +499,30 @@ public final class InputMethodManager {
     Rect mTmpCursorRect = new Rect();
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
+
+    @GuardedBy("mH")
     private int mCursorSelStart;
+    @GuardedBy("mH")
     private int mCursorSelEnd;
+    @GuardedBy("mH")
     private int mCursorCandStart;
+    @GuardedBy("mH")
     private int mCursorCandEnd;
+    @GuardedBy("mH")
     private int mInitialSelStart;
+    @GuardedBy("mH")
     private int mInitialSelEnd;
 
     /**
      * Handler for {@link RemoteInputConnectionImpl#getInputConnection()}.
      */
+    @GuardedBy("mH")
     private Handler mServedInputConnectionHandler;
 
     /**
      * The instance that has previously been sent to the input method.
      */
+    @GuardedBy("mH")
     private CursorAnchorInfo mCursorAnchorInfo = null;
 
     /**
@@ -556,7 +574,9 @@ public final class InputMethodManager {
     private final SparseArray<IAccessibilityInputMethodSessionInvoker>
             mAccessibilityInputMethodSession = new SparseArray<>();
 
+    @GuardedBy("mH")
     private InputChannel mCurChannel;
+    @GuardedBy("mH")
     private ImeInputEventSender mCurSender;
 
     private static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE = 0x0;
@@ -571,6 +591,7 @@ public final class InputMethodManager {
     /**
      * Applies the IME visibility and listens for other state changes.
      */
+    @GuardedBy("mH")
     private ImeInsetsSourceConsumer mImeInsetsConsumer;
 
     private final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
@@ -785,8 +806,10 @@ public final class InputMethodManager {
          */
         @Override
         public void finishComposingText() {
-            if (mServedInputConnection != null) {
-                mServedInputConnection.finishComposingTextFromImm();
+            synchronized (mH) {
+                if (mServedInputConnection != null) {
+                    mServedInputConnection.finishComposingTextFromImm();
+                }
             }
         }
 
@@ -3154,6 +3177,7 @@ public final class InputMethodManager {
     }
 
     // Must be called on the main looper
+    @GuardedBy("mH")
     private int sendInputEventOnMainLooperLocked(PendingEvent p) {
         if (mCurChannel != null) {
             if (mCurSender == null) {
