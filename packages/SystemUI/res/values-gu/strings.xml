@@ -286,7 +286,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"એક-હાથે વાપરો મોડ"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ડિવાઇસના માઇક્રોફોનને કરીએ?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ડિવાઇસના માઇક્રોફોનને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ડિવાઇસના કૅમેરાને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ડિવાઇસના કૅમેરા અને માઇક્રોફોનને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"આ તમારા માઇક્રોફોનનો ઉપયોગ કરવાની મંજૂરી ધરાવતી તમામ ઍપ અને સેવાઓ માટે ઍક્સેસને અનબ્લૉક કરે છે."</string>
@@ -581,10 +581,10 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"ઍપ્લિકેશનો"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"સહાય"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"બ્રાઉઝર"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacts"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"સંપર્કો"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ઇમેઇલ"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
-    <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"સંગીત"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"મ્યુઝિક"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ખલેલ પાડશો નહીં"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"વૉલ્યૂમ બટન્સ શૉર્ટકટ"</string>
