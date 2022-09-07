@@ -305,7 +305,7 @@ public class OomAdjuster {
      */
     private final Handler mProcessGroupHandler;
 
-    private final ArraySet<BroadcastQueue> mTmpBroadcastQueue = new ArraySet();
+    private final int[] mTmpSchedGroup = new int[1];
 
     private final ActivityManagerService mService;
     private final ProcessList mProcessList;
@@ -1677,14 +1677,13 @@ public class OomAdjuster {
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making instrumentation: " + app);
             }
-        } else if (state.getCachedIsReceivingBroadcast(mTmpBroadcastQueue)) {
+        } else if (state.getCachedIsReceivingBroadcast(mTmpSchedGroup)) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground for OOM killer purposes.
             // It's placed in a sched group based on the nature of the
             // broadcast as reflected by which queue it's active in.
             adj = ProcessList.FOREGROUND_APP_ADJ;
-            schedGroup = (mTmpBroadcastQueue.contains(mService.mFgBroadcastQueue))
-                    ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
+            schedGroup = mTmpSchedGroup[0];
             state.setAdjType("broadcast");
             procState = ActivityManager.PROCESS_STATE_RECEIVER;
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {

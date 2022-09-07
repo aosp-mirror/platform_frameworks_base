@@ -317,11 +317,11 @@ public class MockingOomAdjusterTests {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
         doReturn(true).when(sService).isReceivingBroadcastLocked(any(ProcessRecord.class),
-                any(ArraySet.class));
+                any(int[].class));
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
         doReturn(false).when(sService).isReceivingBroadcastLocked(any(ProcessRecord.class),
-                any(ArraySet.class));
+                any(int[].class));
 
         assertProcStates(app, PROCESS_STATE_RECEIVER, FOREGROUND_APP_ADJ, SCHED_GROUP_BACKGROUND);
     }

@@ -2412,13 +2412,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mBroadcastQueues = new BroadcastQueue[4];
         mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "foreground", foreConstants, false);
+                "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
         mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "background", backConstants, true);
+                "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
         mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_bg", offloadConstants, true);
+                "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
         mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_fg", foreConstants, true);
+                "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
         mBroadcastQueues[2] = mBgOffloadBroadcastQueue;
@@ -3263,13 +3263,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (thread == null) {
             return null;
         }
+        return getRecordForAppLOSP(thread.asBinder());
+    }
 
-        ProcessRecord record = mProcessList.getLRURecordForAppLOSP(thread);
+    @GuardedBy(anyOf = {"this", "mProcLock"})
+    ProcessRecord getRecordForAppLOSP(IBinder threadBinder) {
+        if (threadBinder == null) {
+            return null;
+        }
+
+        ProcessRecord record = mProcessList.getLRURecordForAppLOSP(threadBinder);
         if (record != null) return record;
 
         // Validation: if it isn't in the LRU list, it shouldn't exist, but let's
         // double-check that.
-        final IBinder threadBinder = thread.asBinder();
         final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
                 mProcessList.getProcessNamesLOSP().getMap();
         for (int i = pmap.size()-1; i >= 0; i--) {
@@ -10649,7 +10656,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
-                pw.println("  Queue " + queue.toString() + ": " + queue.describeState());
+                pw.println("  Queue " + queue.toString() + ": " + queue.describeStateLocked());
             }
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -13370,7 +13377,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final BroadcastRecord r = rl.curBroadcast;
                     if (r != null) {
                         final boolean doNext = r.queue.finishReceiverLocked(
-                                receiver.asBinder(), r.resultCode, r.resultData, r.resultExtras,
+                                rl.app, r.resultCode, r.resultData, r.resultExtras,
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
@@ -14538,9 +14545,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void finishReceiver(IBinder who, int resultCode, String resultData,
+    public void finishReceiver(IBinder caller, int resultCode, String resultData,
             Bundle resultExtras, boolean resultAbort, int flags) {
-        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Finish receiver: " + who);
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Finish receiver: " + caller);
 
         // Refuse possible leaked file descriptors
         if (resultExtras != null && resultExtras.hasFileDescriptors()) {
@@ -14549,12 +14556,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long origId = Binder.clearCallingIdentity();
         try {
-            boolean doNext = false;
-            BroadcastRecord r;
-            BroadcastQueue queue;
             synchronized(this) {
-                queue = broadcastQueueForFlags(flags);
-                doNext = queue.finishReceiverLocked(who, resultCode,
+                final ProcessRecord callerApp = getRecordForAppLOSP(caller);
+                if (callerApp == null) {
+                    Slog.w(TAG, "finishReceiver: no app for " + caller);
+                    return;
+                }
+
+                final BroadcastQueue queue = broadcastQueueForFlags(flags);
+                queue.finishReceiverLocked(callerApp, resultCode,
                         resultData, resultExtras, resultAbort, true);
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
@@ -15106,30 +15116,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     // LIFETIME MANAGEMENT
     // =========================================================
 
-    // Returns whether the app is receiving broadcast.
-    // If receiving, fetch all broadcast queues which the app is
-    // the current [or imminent] receiver on.
-    boolean isReceivingBroadcastLocked(ProcessRecord app,
-            ArraySet<BroadcastQueue> receivingQueues) {
-        final ProcessReceiverRecord prr = app.mReceivers;
-        final int numOfReceivers = prr.numberOfCurReceivers();
-        if (numOfReceivers > 0) {
-            for (int i = 0; i < numOfReceivers; i++) {
-                receivingQueues.add(prr.getCurReceiverAt(i).queue);
-            }
-            return true;
-        }
-
-        // It's not the current receiver, but it might be starting up to become one
+    boolean isReceivingBroadcastLocked(ProcessRecord app, int[] outSchedGroup) {
+        int res = ProcessList.SCHED_GROUP_UNDEFINED;
         for (BroadcastQueue queue : mBroadcastQueues) {
-            final BroadcastRecord r = queue.getPendingBroadcastLocked();
-            if (r != null && r.curApp == app) {
-                // found it; report which queue it's in
-                receivingQueues.add(queue);
-            }
+            res = Math.max(res, queue.getPreferredSchedulingGroupLocked(app));
         }
-
-        return !receivingQueues.isEmpty();
+        outSchedGroup[0] = res;
+        return res != ProcessList.SCHED_GROUP_UNDEFINED;
     }
 
     Association startAssociationLocked(int sourceUid, String sourceProcess, int sourceState,
@@ -15237,7 +15230,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.isIdle()) {
+            if (!q.isIdleLocked()) {
                 return false;
             }
         }
@@ -17814,35 +17807,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void waitForBroadcastIdle(@Nullable PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
-        while (true) {
-            boolean idle = true;
-            synchronized (this) {
-                for (BroadcastQueue queue : mBroadcastQueues) {
-                    if (!queue.isIdle()) {
-                        final String msg = "Waiting for queue " + queue + " to become idle...";
-                        if (pw != null) {
-                            pw.println(msg);
-                            pw.println(queue.describeState());
-                            pw.flush();
-                        }
-                        Slog.v(TAG, msg);
-                        queue.flush();
-                        idle = false;
-                    }
-                }
-            }
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForIdle(pw);
+        }
+    }
 
-            if (idle) {
-                final String msg = "All broadcast queues are idle!";
-                if (pw != null) {
-                    pw.println(msg);
-                    pw.flush();
-                }
-                Slog.v(TAG, msg);
-                return;
-            } else {
-                SystemClock.sleep(1000);
-            }
+    public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForBarrier(pw);
         }
     }
 
