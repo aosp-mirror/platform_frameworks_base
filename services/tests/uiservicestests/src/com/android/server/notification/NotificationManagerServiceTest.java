@@ -6199,6 +6199,62 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCannotRemoveForegroundFlagWhenOverLimit_enqueued() {
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            Notification n = new Notification.Builder(mContext, "").build();
+            StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, i, null, mUid, 0,
+                    n, UserHandle.getUserHandleForUid(mUid), null, 0);
+            NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+            mService.addEnqueuedNotification(r);
+        }
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_FOREGROUND_SERVICE;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG,
+                NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+
+        mInternalService.removeForegroundServiceFlagFromNotification(
+                PKG, r.getSbn().getId(), r.getSbn().getUserId());
+
+        waitForIdle();
+
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCannotRemoveForegroundFlagWhenOverLimit_posted() {
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            Notification n = new Notification.Builder(mContext, "").build();
+            StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, i, null, mUid, 0,
+                    n, UserHandle.getUserHandleForUid(mUid), null, 0);
+            NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+            mService.addNotification(r);
+        }
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_FOREGROUND_SERVICE;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG,
+                NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addNotification(r);
+
+        mInternalService.removeForegroundServiceFlagFromNotification(
+                PKG, r.getSbn().getId(), r.getSbn().getUserId());
+
+        waitForIdle();
+
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
     public void testAllowForegroundCustomToasts() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
