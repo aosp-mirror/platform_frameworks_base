@@ -85,11 +85,13 @@ import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.wm.utils.RotationAnimationUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -281,9 +283,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (mContainerFreezer == null) {
             mContainerFreezer = new ScreenshotFreezer();
         }
-        mIsSeamlessRotation = true;
         final WindowState top = dc.getDisplayPolicy().getTopFullscreenOpaqueWindow();
         if (top != null) {
+            mIsSeamlessRotation = true;
             top.mSyncMethodOverride = BLASTSyncEngine.METHOD_BLAST;
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Override sync-method for %s "
                     + "because seamless rotating", top.getName());
@@ -1600,6 +1602,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 change.setEndAbsBounds(bounds);
             }
             change.setRotation(info.mRotation, endRotation);
+            if (info.mSnapshot != null) {
+                change.setSnapshot(info.mSnapshot, info.mSnapshotLuma);
+            }
 
             out.addChange(change);
         }
@@ -1754,6 +1759,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         /** These are just extra info. They aren't used for change-detection. */
         @Flag int mFlags = FLAG_NONE;
+
+        /** Snapshot surface and luma, if relevant. */
+        SurfaceControl mSnapshot;
+        float mSnapshotLuma;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mVisible = origState.isVisibleRequested();
@@ -2063,8 +2072,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     @VisibleForTesting
     private class ScreenshotFreezer implements IContainerFreezer {
-        /** Values are the screenshot "surfaces" or null if it was frozen via BLAST override. */
-        private final ArrayMap<WindowContainer, SurfaceControl> mSnapshots = new ArrayMap<>();
+        /** Keeps track of which windows are frozen. Not all frozen windows have snapshots. */
+        private final ArraySet<WindowContainer> mFrozen = new ArraySet<>();
 
         /** Takes a screenshot and puts it at the top of the container's surface. */
         @Override
@@ -2074,7 +2083,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             // Check if any parents have already been "frozen". If so, `wc` is already part of that
             // snapshot, so just skip it.
             for (WindowContainer p = wc; p != null; p = p.getParent()) {
-                if (mSnapshots.containsKey(p)) return false;
+                if (mFrozen.contains(p)) return false;
             }
 
             if (mIsSeamlessRotation) {
@@ -2083,7 +2092,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (top != null && (top == wc || top.isDescendantOf(wc))) {
                     // Don't use screenshots for seamless windows: these will use BLAST even if not
                     // BLAST mode.
-                    mSnapshots.put(wc, null);
+                    mFrozen.add(wc);
                     return true;
                 }
             }
@@ -2116,7 +2125,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     .setCallsite("Transition.ScreenshotSync")
                     .setBLASTLayer()
                     .build();
-            mSnapshots.put(wc, snapshotSurface);
+            mFrozen.add(wc);
+            final ChangeInfo changeInfo = Objects.requireNonNull(mChanges.get(wc));
+            changeInfo.mSnapshot = snapshotSurface;
+            if (wc.asDisplayContent() != null) {
+                // This isn't cheap, so only do it for rotations: assume display-level is rotate
+                // since most of the time it is.
+                changeInfo.mSnapshotLuma = RotationAnimationUtils.getMedianBorderLuma(
+                        screenshotBuffer.getHardwareBuffer(), screenshotBuffer.getColorSpace());
+            }
             SurfaceControl.Transaction t = wc.mWmService.mTransactionFactory.get();
 
             t.setBuffer(snapshotSurface, buffer);
@@ -2137,11 +2154,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         @Override
         public void cleanUp(SurfaceControl.Transaction t) {
-            for (int i = 0; i < mSnapshots.size(); ++i) {
-                SurfaceControl snap = mSnapshots.valueAt(i);
+            for (int i = 0; i < mFrozen.size(); ++i) {
+                SurfaceControl snap =
+                        Objects.requireNonNull(mChanges.get(mFrozen.valueAt(i))).mSnapshot;
                 // May be null if it was frozen via BLAST override.
                 if (snap == null) continue;
-                t.remove(snap);
+                t.reparent(snap, null /* newParent */);
             }
         }
     }
