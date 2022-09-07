@@ -20,16 +20,20 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.BatteryState.STATUS_CHARGING
 import android.hardware.BatteryState.STATUS_FULL
+import android.hardware.BatteryState.STATUS_UNKNOWN
 import android.hardware.input.IInputDeviceBatteryListener
+import android.hardware.input.IInputDevicesChangedListener
 import android.hardware.input.IInputManager
-import android.hardware.input.InputDeviceCountryCode
 import android.hardware.input.InputManager
 import android.os.Binder
 import android.os.IBinder
+import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.view.InputDevice
 import androidx.test.InstrumentationRegistry
+import com.android.server.input.BatteryController.UEventManager
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
@@ -39,14 +43,26 @@ import org.mockito.ArgumentMatchers.notNull
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
+
+private fun createInputDevice(deviceId: Int, hasBattery: Boolean = true): InputDevice =
+    InputDevice.Builder()
+        .setId(deviceId)
+        .setName("Device $deviceId")
+        .setDescriptor("descriptor $deviceId")
+        .setExternal(true)
+        .setHasBattery(hasBattery)
+        .setGeneration(0)
+        .build()
 
 /**
  * Tests for {@link InputDeviceBatteryController}.
@@ -60,6 +76,7 @@ class BatteryControllerTests {
         const val PID = 42
         const val DEVICE_ID = 13
         const val SECOND_DEVICE_ID = 11
+        const val TIMESTAMP = 123456789L
     }
 
     @get:Rule
@@ -69,13 +86,19 @@ class BatteryControllerTests {
     private lateinit var native: NativeInputManagerService
     @Mock
     private lateinit var iInputManager: IInputManager
+    @Mock
+    private lateinit var uEventManager: UEventManager
 
     private lateinit var batteryController: BatteryController
     private lateinit var context: Context
+    private lateinit var testLooper: TestLooper
+    private lateinit var devicesChangedListener: IInputDevicesChangedListener
+    private val deviceGenerationMap = mutableMapOf<Int /*deviceId*/, Int /*generation*/>()
 
     @Before
     fun setup() {
         context = spy(ContextWrapper(InstrumentationRegistry.getContext()))
+        testLooper = TestLooper()
         val inputManager = InputManager.resetInstance(iInputManager)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
         `when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID, SECOND_DEVICE_ID))
@@ -83,17 +106,18 @@ class BatteryControllerTests {
         `when`(iInputManager.getInputDevice(SECOND_DEVICE_ID))
             .thenReturn(createInputDevice(SECOND_DEVICE_ID))
 
-        batteryController = BatteryController(context, native)
+        batteryController = BatteryController(context, native, testLooper.looper, uEventManager)
+        batteryController.systemRunning()
+        val listenerCaptor = ArgumentCaptor.forClass(IInputDevicesChangedListener::class.java)
+        verify(iInputManager).registerInputDevicesChangedListener(listenerCaptor.capture())
+        devicesChangedListener = listenerCaptor.value
     }
 
-    private fun createInputDevice(deviceId: Int): InputDevice =
-        InputDevice.Builder()
-            .setId(deviceId)
-            .setName("Device $deviceId")
-            .setDescriptor("descriptor $deviceId")
-            .setExternal(true)
-            .setHasBattery(true)
-            .build()
+    private fun notifyDeviceChanged(deviceId: Int) {
+        deviceGenerationMap[deviceId] = deviceGenerationMap[deviceId]?.plus(1) ?: 1
+        val list = deviceGenerationMap.flatMap { listOf(it.key, it.value) }
+        devicesChangedListener.onInputDevicesChanged(list.toIntArray())
+    }
 
     @After
     fun tearDown() {
@@ -168,5 +192,69 @@ class BatteryControllerTests {
         batteryController.registerBatteryListener(SECOND_DEVICE_ID, listener, PID)
         verify(listener).onBatteryStateChanged(eq(SECOND_DEVICE_ID), eq(true /*isPresent*/),
             eq(STATUS_CHARGING), eq(0.78f), anyLong())
+    }
+
+    @Test
+    fun testListenersNotifiedOnUEventNotification() {
+        `when`(native.getBatteryDevicePath(DEVICE_ID)).thenReturn("/test/device1")
+        `when`(native.getBatteryStatus(DEVICE_ID)).thenReturn(STATUS_CHARGING)
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
+        val listener = createMockListener()
+        val uEventListener = ArgumentCaptor.forClass(UEventManager.UEventListener::class.java)
+        batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
+        verify(uEventManager).addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            eq(STATUS_CHARGING), eq(0.78f), anyLong())
+
+        // If the battery state has changed when an UEvent is sent, the listeners are notified.
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(80)
+        uEventListener.value!!.onUEvent(TIMESTAMP)
+        verify(listener).onBatteryStateChanged(DEVICE_ID, true /*isPresent*/, STATUS_CHARGING,
+            0.80f, TIMESTAMP)
+
+        // If the battery state has not changed when an UEvent is sent, the listeners are not
+        // notified.
+        clearInvocations(listener)
+        uEventListener.value!!.onUEvent(TIMESTAMP + 1)
+        verifyNoMoreInteractions(listener)
+
+        batteryController.unregisterBatteryListener(DEVICE_ID, listener, PID)
+        verify(uEventManager).removeListener(uEventListener.capture())
+        assertEquals("The same observer must be registered and unregistered",
+            uEventListener.allValues[0], uEventListener.allValues[1])
+    }
+
+    @Test
+    fun testBatteryPresenceChanged() {
+        `when`(native.getBatteryDevicePath(DEVICE_ID)).thenReturn("/test/device1")
+        `when`(native.getBatteryStatus(DEVICE_ID)).thenReturn(STATUS_CHARGING)
+        `when`(native.getBatteryCapacity(DEVICE_ID)).thenReturn(78)
+        val listener = createMockListener()
+        val uEventListener = ArgumentCaptor.forClass(UEventManager.UEventListener::class.java)
+        batteryController.registerBatteryListener(DEVICE_ID, listener, PID)
+        verify(uEventManager).addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            eq(STATUS_CHARGING), eq(0.78f), anyLong())
+
+        // If the battery presence for the InputDevice changes, the listener is notified.
+        `when`(iInputManager.getInputDevice(DEVICE_ID))
+            .thenReturn(createInputDevice(DEVICE_ID, hasBattery = false))
+        notifyDeviceChanged(DEVICE_ID)
+        testLooper.dispatchNext()
+        verify(listener).onBatteryStateChanged(eq(DEVICE_ID), eq(false /*isPresent*/),
+            eq(STATUS_UNKNOWN), eq(Float.NaN), anyLong())
+        // Since the battery is no longer present, the UEventListener should be removed.
+        verify(uEventManager).removeListener(uEventListener.value)
+
+        // If the battery becomes present again, the listener is notified.
+        `when`(iInputManager.getInputDevice(DEVICE_ID))
+            .thenReturn(createInputDevice(DEVICE_ID, hasBattery = true))
+        notifyDeviceChanged(DEVICE_ID)
+        testLooper.dispatchNext()
+        verify(listener, times(2)).onBatteryStateChanged(eq(DEVICE_ID), eq(true /*isPresent*/),
+            eq(STATUS_CHARGING), eq(0.78f), anyLong())
+        // Ensure that a new UEventListener was added.
+        verify(uEventManager, times(2))
+            .addListener(uEventListener.capture(), eq("DEVPATH=/test/device1"))
     }
 }
