@@ -139,38 +139,47 @@ class ScreenRotationAnimation {
                 .build();
 
         try {
-            SurfaceControl.LayerCaptureArgs args =
-                    new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
-                            .setCaptureSecureLayers(true)
-                            .setAllowProtected(true)
-                            .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
-                            .build();
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureLayers(args);
-            if (screenshotBuffer == null) {
-                Slog.w(TAG, "Unable to take screenshot of display");
-                return;
-            }
+            if (change.getSnapshot() != null) {
+                mScreenshotLayer = change.getSnapshot();
+                t.reparent(mScreenshotLayer, mAnimLeash);
+                mStartLuma = change.getSnapshotLuma();
+            } else {
+                SurfaceControl.LayerCaptureArgs args =
+                        new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
+                                .setCaptureSecureLayers(true)
+                                .setAllowProtected(true)
+                                .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
+                                .build();
+                SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                        SurfaceControl.captureLayers(args);
+                if (screenshotBuffer == null) {
+                    Slog.w(TAG, "Unable to take screenshot of display");
+                    return;
+                }
 
-            mScreenshotLayer = new SurfaceControl.Builder(session)
-                    .setParent(mAnimLeash)
-                    .setBLASTLayer()
-                    .setSecure(screenshotBuffer.containsSecureLayers())
-                    .setOpaque(true)
-                    .setCallsite("ShellRotationAnimation")
-                    .setName("RotationLayer")
-                    .build();
+                mScreenshotLayer = new SurfaceControl.Builder(session)
+                        .setParent(mAnimLeash)
+                        .setBLASTLayer()
+                        .setSecure(screenshotBuffer.containsSecureLayers())
+                        .setOpaque(true)
+                        .setCallsite("ShellRotationAnimation")
+                        .setName("RotationLayer")
+                        .build();
+
+                final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
+                final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+                t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
+                t.setBuffer(mScreenshotLayer, hardwareBuffer);
+                t.show(mScreenshotLayer);
+                if (!isCustomRotate()) {
+                    mStartLuma = getMedianBorderLuma(hardwareBuffer, colorSpace);
+                }
+            }
 
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
             t.show(mAnimLeash);
             // Crop the real content in case it contains a larger child layer, e.g. wallpaper.
             t.setCrop(mSurfaceControl, new Rect(0, 0, mEndWidth, mEndHeight));
-
-            final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
-            final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-            t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
-            t.setBuffer(mScreenshotLayer, hardwareBuffer);
-            t.show(mScreenshotLayer);
 
             if (!isCustomRotate()) {
                 mBackColorSurface = new SurfaceControl.Builder(session)
@@ -180,8 +189,6 @@ class ScreenRotationAnimation {
                         .setCallsite("ShellRotationAnimation")
                         .setName("BackColorSurface")
                         .build();
-
-                mStartLuma = getMedianBorderLuma(hardwareBuffer, colorSpace);
 
                 t.setLayer(mBackColorSurface, -1);
                 t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
