@@ -22,6 +22,8 @@ import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 import static android.media.MediaRoute2ProviderService.REASON_REJECTED;
 import static android.media.MediaRoute2ProviderService.REQUEST_ID_NONE;
 
+import static androidx.test.ext.truth.os.BundleSubject.assertThat;
+
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.FEATURE_SAMPLE;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.FEATURE_SPECIAL;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID1;
@@ -351,7 +353,7 @@ public class MediaRouter2ManagerTest {
             }
         }
 
-        assertThat(remoteRouteCount > 0).isTrue();
+        assertThat(remoteRouteCount).isGreaterThan(0);
     }
 
     /**
@@ -384,7 +386,7 @@ public class MediaRouter2ManagerTest {
 
         mManager.selectRoute(mPackageName, routeToSelect);
         assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
-        assertThat(mManager.getRemoteSessions().size()).isEqualTo(1);
+        assertThat(mManager.getRemoteSessions()).hasSize(1);
     }
 
     @Test
@@ -406,20 +408,20 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
+        assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
 
         mManager.selectRoute(mPackageName, routeToSelect);
         assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
-        assertThat(sessions.size()).isEqualTo(2);
+        assertThat(sessions).hasSize(2);
 
         RoutingSessionInfo sessionInfo = sessions.get(1);
         awaitOnRouteChangedManager(
                 () -> mManager.releaseSession(sessionInfo),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
-        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
+        assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
     }
 
     @Test
@@ -477,20 +479,20 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
-        assertThat(mRouter2.getControllers().size()).isEqualTo(1);
+        assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
+        assertThat(mRouter2.getControllers()).hasSize(1);
 
         mManager.transfer(mManager.getRoutingSessions(mPackageName).get(0), routeToSelect);
         assertThat(transferLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
-        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(2);
-        assertThat(mRouter2.getControllers().size()).isEqualTo(2);
+        assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(2);
+        assertThat(mRouter2.getControllers()).hasSize(2);
         mRouter2.getControllers().get(1).release();
 
         assertThat(releaseLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
-        assertThat(mRouter2.getControllers().size()).isEqualTo(1);
-        assertThat(mManager.getRoutingSessions(mPackageName).size()).isEqualTo(1);
+        assertThat(mRouter2.getControllers()).hasSize(1);
+        assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
     }
 
     /**
@@ -596,8 +598,8 @@ public class MediaRouter2ManagerTest {
                 .map(RoutingSessionInfo::getId)
                 .collect(Collectors.toList());
         // The old session shouldn't appear on the session list.
-        assertThat(remoteSessionIds.contains(sessions.get(0).getId())).isFalse();
-        assertThat(remoteSessionIds.contains(sessions.get(1).getId())).isTrue();
+        assertThat(remoteSessionIds).doesNotContain(sessions.get(0).getId());
+        assertThat(remoteSessionIds).contains(sessions.get(1).getId());
 
         assertThat(serviceOnReleaseSessionLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS))
                 .isFalse();
@@ -705,7 +707,7 @@ public class MediaRouter2ManagerTest {
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
-        assertThat(sessions.size()).isEqualTo(2);
+        assertThat(sessions).hasSize(2);
 
         // test setSessionVolume
         RoutingSessionInfo sessionInfo = sessions.get(1);
@@ -768,7 +770,7 @@ public class MediaRouter2ManagerTest {
         addManagerCallback(new MediaRouter2Manager.Callback() {});
         mManager.setRouteVolume(volRoute, 0);
         assertThat(onSetRouteVolumeLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
-        assertThat(requestIds.isEmpty()).isFalse();
+        assertThat(requestIds).isNotEmpty();
 
         final int failureReason = REASON_REJECTED;
         final CountDownLatch onRequestFailedLatch = new CountDownLatch(1);
@@ -837,13 +839,13 @@ public class MediaRouter2ManagerTest {
             @Override
             public void onTransferred(RoutingSessionInfo oldSession,
                     RoutingSessionInfo newSession) {
-                assertThat(newSession.getSelectedRoutes().contains(route.getId())).isTrue();
+                assertThat(newSession.getSelectedRoutes()).contains(route.getId());
                 // The StubMediaRoute2ProviderService is supposed to set control hints
                 // with the given controllerHints.
                 Bundle controlHints = newSession.getControlHints();
                 assertThat(controlHints).isNotNull();
-                assertThat(controlHints.containsKey(TEST_KEY)).isTrue();
-                assertThat(controlHints.getString(TEST_KEY)).isEqualTo(TEST_VALUE);
+                assertThat(controlHints).containsKey(TEST_KEY);
+                assertThat(controlHints).string(TEST_KEY).isEqualTo(TEST_VALUE);
 
                 successLatch.countDown();
             }
@@ -891,11 +893,11 @@ public class MediaRouter2ManagerTest {
                         .collect(Collectors.toList());
                 for (MediaRoute2Info selectableRoute :
                         mManager.getSelectableRoutes(newSessionInfo)) {
-                    assertThat(selectedRoutes.contains(selectableRoute.getId())).isFalse();
+                    assertThat(selectedRoutes).doesNotContain(selectableRoute.getId());
                 }
                 for (MediaRoute2Info deselectableRoute :
                         mManager.getDeselectableRoutes(newSessionInfo)) {
-                    assertThat(selectedRoutes.contains(deselectableRoute.getId())).isTrue();
+                    assertThat(selectedRoutes).contains(deselectableRoute.getId());
                 }
                 onSessionCreatedLatch.countDown();
             }
