@@ -212,6 +212,7 @@ android_library {
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "kotlinx_coroutines_test",
+        "kotlin-reflect",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
