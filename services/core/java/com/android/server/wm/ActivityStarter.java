@@ -203,6 +203,10 @@ class ActivityStarter {
     private TaskFragment mAddingToTaskFragment;
     @VisibleForTesting
     boolean mAddingToTask;
+    // Activity that was moved to the top of its task in situations where activity-order changes
+    // due to launch flags (eg. REORDER_TO_TOP).
+    @VisibleForTesting
+    ActivityRecord mMovedToTopActivity;
 
     private ActivityInfo mNewTaskInfo;
     private Intent mNewTaskIntent;
@@ -1763,7 +1767,9 @@ class ActivityStarter {
             // The activity is started new rather than just brought forward, so record it as an
             // existence change.
             transitionController.collectExistenceChange(started);
-        } else if (result == START_DELIVERED_TO_TOP && newTransition != null) {
+        } else if (result == START_DELIVERED_TO_TOP && newTransition != null
+                // An activity has changed order/visibility so this isn't just deliver-to-top
+                && mMovedToTopActivity == null) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -2343,10 +2349,15 @@ class ActivityStarter {
             // In this situation we want to remove all activities from the task up to the one
             // being started. In most cases this means we are resetting the task to its initial
             // state.
+            int[] finishCount = new int[1];
             final ActivityRecord clearTop = targetTask.performClearTop(mStartActivity,
-                    mLaunchFlags);
+                    mLaunchFlags, finishCount);
 
             if (clearTop != null && !clearTop.finishing) {
+                if (finishCount[0] > 0) {
+                    // Only record if actually moved to top.
+                    mMovedToTopActivity = clearTop;
+                }
                 if (clearTop.isRootOfTask()) {
                     // Activity aliases may mean we use different intents for the top activity,
                     // so make sure the task now has the identity of the new intent.
@@ -2383,7 +2394,11 @@ class ActivityStarter {
                             mStartActivity.mUserId);
             if (act != null) {
                 final Task task = act.getTask();
-                task.moveActivityToFrontLocked(act);
+                boolean actuallyMoved = task.moveActivityToFrontLocked(act);
+                if (actuallyMoved) {
+                    // Only record if the activity actually moved.
+                    mMovedToTopActivity = act;
+                }
                 act.updateOptionsLocked(mOptions);
                 deliverNewIntent(act, intentGrants);
                 act.getTaskFragment().clearLastPausedActivity();
