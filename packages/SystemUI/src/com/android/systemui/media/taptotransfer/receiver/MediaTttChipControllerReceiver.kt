@@ -34,15 +34,14 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
-import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
-import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -56,18 +55,16 @@ class MediaTttChipControllerReceiver @Inject constructor(
         context: Context,
         @MediaTttReceiverLogger logger: MediaTttLogger,
         windowManager: WindowManager,
-        viewUtil: ViewUtil,
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
-) : MediaTttChipControllerCommon<ChipReceiverInfo>(
+) : TemporaryViewDisplayController<ChipReceiverInfo>(
         context,
         logger,
         windowManager,
-        viewUtil,
         mainExecutor,
         accessibilityManager,
         configurationController,
@@ -216,7 +213,7 @@ data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,
     val appIconDrawableOverride: Drawable?,
     val appNameOverride: CharSequence?
-) : ChipInfoCommon {
+) : TemporaryViewInfo {
     override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
 }
 

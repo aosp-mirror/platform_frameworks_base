@@ -33,14 +33,13 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
-import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
-import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -53,17 +52,15 @@ class MediaTttChipControllerSender @Inject constructor(
         context: Context,
         @MediaTttSenderLogger logger: MediaTttLogger,
         windowManager: WindowManager,
-        viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         private val uiEventLogger: MediaTttSenderUiEventLogger
-) : MediaTttChipControllerCommon<ChipSenderInfo>(
+) : TemporaryViewDisplayController<ChipSenderInfo>(
         context,
         logger,
         windowManager,
-        viewUtil,
         mainExecutor,
         accessibilityManager,
         configurationController,
@@ -169,7 +166,7 @@ class MediaTttChipControllerSender @Inject constructor(
         // Don't remove the chip if we're mid-transfer since the user should still be able to
         // see the status of the transfer. (But do remove it if it's finally timed out.)
         if (chipInfo?.state?.isMidTransfer == true &&
-                removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
+                removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT) {
             return
         }
         super.removeChip(removalReason)
@@ -188,7 +185,7 @@ data class ChipSenderInfo(
     val state: ChipStateSender,
     val routeInfo: MediaRoute2Info,
     val undoCallback: IUndoMediaTransferCallback? = null
-) : ChipInfoCommon {
+) : TemporaryViewInfo {
     override fun getTimeoutMs() = state.timeout
 }
 

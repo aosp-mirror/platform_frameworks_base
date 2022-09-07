@@ -25,7 +25,7 @@ import androidx.annotation.StringRes
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
-import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
 
 /**
  * A class enumerating all the possible states of the media tap-to-transfer chip on the sender

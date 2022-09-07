@@ -42,7 +42,6 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -51,8 +50,8 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -74,8 +73,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var powerManager: PowerManager
     @Mock
     private lateinit var windowManager: WindowManager
-    @Mock
-    private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
@@ -110,7 +107,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             context,
             logger,
             windowManager,
-            viewUtil,
             fakeExecutor,
             accessibilityManager,
             configurationController,

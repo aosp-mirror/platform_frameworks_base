@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.common
+package com.android.systemui.temporarydisplay
 
 import android.annotation.LayoutRes
 import android.annotation.SuppressLint
@@ -37,30 +37,30 @@ import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.view.ViewUtil
 
 /**
- * A superclass controller that provides common functionality for showing chips on the sender device
- * and the receiver device.
+ * A generic controller that can temporarily display a new view in a new window.
  *
  * Subclasses need to override and implement [updateChipView], which is where they can control what
  * gets displayed to the user.
  *
  * The generic type T is expected to contain all the information necessary for the subclasses to
  * display the chip in a certain state, since they receive <T> in [updateChipView].
+ *
+ * TODO(b/245610654): Remove all the media-specific logic from this class.
  */
-abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
-        internal val context: Context,
-        internal val logger: MediaTttLogger,
-        internal val windowManager: WindowManager,
-        private val viewUtil: ViewUtil,
-        @Main private val mainExecutor: DelayableExecutor,
-        private val accessibilityManager: AccessibilityManager,
-        private val configurationController: ConfigurationController,
-        private val powerManager: PowerManager,
-        @LayoutRes private val chipLayoutRes: Int,
+abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
+    internal val context: Context,
+    internal val logger: MediaTttLogger,
+    internal val windowManager: WindowManager,
+    @Main private val mainExecutor: DelayableExecutor,
+    private val accessibilityManager: AccessibilityManager,
+    private val configurationController: ConfigurationController,
+    private val powerManager: PowerManager,
+    @LayoutRes private val chipLayoutRes: Int,
 ) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -131,7 +131,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
        )
         cancelChipViewTimeout?.run()
         cancelChipViewTimeout = mainExecutor.executeDelayed(
-            { removeChip(MediaTttRemovalReason.REASON_TIMEOUT) },
+            { removeChip(TemporaryDisplayRemovalReason.REASON_TIMEOUT) },
             timeout.toLong()
         )
     }
@@ -264,9 +264,9 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
 // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
-private val TAG = MediaTttChipControllerCommon::class.simpleName!!
+private val TAG = TemporaryViewDisplayController::class.simpleName!!
 
-object MediaTttRemovalReason {
+object TemporaryDisplayRemovalReason {
     const val REASON_TIMEOUT = "TIMEOUT"
     const val REASON_SCREEN_TAP = "SCREEN_TAP"
 }

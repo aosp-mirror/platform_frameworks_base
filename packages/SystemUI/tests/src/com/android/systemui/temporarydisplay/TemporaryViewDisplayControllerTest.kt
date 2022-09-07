@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.common
+package com.android.systemui.temporarydisplay
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -38,7 +39,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -52,8 +52,8 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-class MediaTttChipControllerCommonTest : SysuiTestCase() {
-    private lateinit var controllerCommon: TestControllerCommon
+class TemporaryViewDisplayControllerTest : SysuiTestCase() {
+    private lateinit var underTest: TestController
 
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
@@ -71,8 +71,6 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     private lateinit var configurationController: ConfigurationController
     @Mock
     private lateinit var windowManager: WindowManager
-    @Mock
-    private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var powerManager: PowerManager
 
@@ -97,11 +95,10 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
 
-        controllerCommon = TestControllerCommon(
+        underTest = TestController(
                 context,
                 logger,
                 windowManager,
-                viewUtil,
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,
@@ -111,7 +108,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun displayChip_chipAdded() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
 
         verify(windowManager).addView(any(), any())
     }
@@ -120,7 +117,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     fun displayChip_screenOff_screenWakes() {
         whenever(powerManager.isScreenOn).thenReturn(false)
 
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
 
         verify(powerManager).wakeUp(any(), any(), any())
     }
@@ -129,24 +126,24 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     fun displayChip_screenAlreadyOn_screenNotWoken() {
         whenever(powerManager.isScreenOn).thenReturn(true)
 
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
 
         verify(powerManager, never()).wakeUp(any(), any(), any())
     }
 
     @Test
     fun displayChip_twice_chipNotAddedTwice() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         reset(windowManager)
 
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         verify(windowManager, never()).addView(any(), any())
     }
 
     @Test
     fun displayChip_chipDoesNotDisappearsBeforeTimeout() {
         val state = getState()
-        controllerCommon.displayChip(state)
+        underTest.displayChip(state)
         reset(windowManager)
 
         fakeClock.advanceTime(TIMEOUT_MS - 1)
@@ -157,7 +154,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Test
     fun displayChip_chipDisappearsAfterTimeout() {
         val state = getState()
-        controllerCommon.displayChip(state)
+        underTest.displayChip(state)
         reset(windowManager)
 
         fakeClock.advanceTime(TIMEOUT_MS + 1)
@@ -169,12 +166,12 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     fun displayChip_calledAgainBeforeTimeout_timeoutReset() {
         // First, display the chip
         val state = getState()
-        controllerCommon.displayChip(state)
+        underTest.displayChip(state)
 
         // After some time, re-display the chip
         val waitTime = 1000L
         fakeClock.advanceTime(waitTime)
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
 
         // Wait until the timeout for the first display would've happened
         fakeClock.advanceTime(TIMEOUT_MS - waitTime + 1)
@@ -187,11 +184,11 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     fun displayChip_calledAgainBeforeTimeout_eventuallyTimesOut() {
         // First, display the chip
         val state = getState()
-        controllerCommon.displayChip(state)
+        underTest.displayChip(state)
 
         // After some time, re-display the chip
         fakeClock.advanceTime(1000L)
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
 
         // Ensure we still hide the chip eventually
         fakeClock.advanceTime(TIMEOUT_MS + 1)
@@ -201,25 +198,25 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun displayScaleChange_chipReinflatedWithMostRecentState() {
-        controllerCommon.displayChip(getState(name = "First name"))
-        controllerCommon.displayChip(getState(name = "Second name"))
+        underTest.displayChip(getState(name = "First name"))
+        underTest.displayChip(getState(name = "Second name"))
         reset(windowManager)
 
         getConfigurationListener().onDensityOrFontScaleChanged()
 
         verify(windowManager).removeView(any())
         verify(windowManager).addView(any(), any())
-        assertThat(controllerCommon.mostRecentChipInfo?.name).isEqualTo("Second name")
+        assertThat(underTest.mostRecentChipInfo?.name).isEqualTo("Second name")
     }
 
     @Test
     fun removeChip_chipRemovedAndRemovalLogged() {
         // First, add the chip
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
 
         // Then, remove it
         val reason = "test reason"
-        controllerCommon.removeChip(reason)
+        underTest.removeChip(reason)
 
         verify(windowManager).removeView(any())
         verify(logger).logChipRemoval(reason)
@@ -227,27 +224,27 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun removeChip_noAdd_viewNotRemoved() {
-        controllerCommon.removeChip("reason")
+        underTest.removeChip("reason")
 
         verify(windowManager, never()).removeView(any())
     }
 
     @Test
     fun setIcon_nullAppIconDrawableAndNullPackageName_stillHasIcon() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(chipView, appPackageName = null, appIconDrawableOverride = null)
+        underTest.setIcon(chipView, appPackageName = null, appIconDrawableOverride = null)
 
         assertThat(chipView.getAppIconView().drawable).isNotNull()
     }
 
     @Test
     fun setIcon_nullAppIconDrawableAndInvalidPackageName_stillHasIcon() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(
+        underTest.setIcon(
             chipView, appPackageName = "fakePackageName", appIconDrawableOverride = null
         )
 
@@ -256,41 +253,41 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun setIcon_nullAppIconDrawable_iconIsFromPackageName() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(chipView, PACKAGE_NAME, appIconDrawableOverride = null, null)
+        underTest.setIcon(chipView, PACKAGE_NAME, appIconDrawableOverride = null, null)
 
         assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconFromPackageName)
     }
 
     @Test
     fun setIcon_hasAppIconDrawable_iconIsDrawable() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
         val drawable = context.getDrawable(R.drawable.ic_alarm)!!
-        controllerCommon.setIcon(chipView, PACKAGE_NAME, drawable, null)
+        underTest.setIcon(chipView, PACKAGE_NAME, drawable, null)
 
         assertThat(chipView.getAppIconView().drawable).isEqualTo(drawable)
     }
 
     @Test
     fun setIcon_nullAppNameAndNullPackageName_stillHasContentDescription() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(chipView, appPackageName = null, appNameOverride = null)
+        underTest.setIcon(chipView, appPackageName = null, appNameOverride = null)
 
         assertThat(chipView.getAppIconView().contentDescription.toString()).isNotEmpty()
     }
 
     @Test
     fun setIcon_nullAppNameAndInvalidPackageName_stillHasContentDescription() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(
+        underTest.setIcon(
             chipView, appPackageName = "fakePackageName", appNameOverride = null
         )
 
@@ -299,31 +296,31 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun setIcon_nullAppName_iconContentDescriptionIsFromPackageName() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(chipView, PACKAGE_NAME, null, appNameOverride = null)
+        underTest.setIcon(chipView, PACKAGE_NAME, null, appNameOverride = null)
 
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
     }
 
     @Test
     fun setIcon_hasAppName_iconContentDescriptionIsAppNameOverride() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
         val appName = "Override App Name"
-        controllerCommon.setIcon(chipView, PACKAGE_NAME, null, appName)
+        underTest.setIcon(chipView, PACKAGE_NAME, null, appName)
 
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(appName)
     }
 
     @Test
     fun setIcon_iconSizeMatchesGetIconSize() {
-        controllerCommon.displayChip(getState())
+        underTest.displayChip(getState())
         val chipView = getChipView()
 
-        controllerCommon.setIcon(chipView, PACKAGE_NAME)
+        underTest.setIcon(chipView, PACKAGE_NAME)
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
@@ -349,20 +346,18 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         return callbackCaptor.value
     }
 
-    inner class TestControllerCommon(
+    inner class TestController(
         context: Context,
         logger: MediaTttLogger,
         windowManager: WindowManager,
-        viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-    ) : MediaTttChipControllerCommon<ChipInfo>(
+    ) : TemporaryViewDisplayController<ChipInfo>(
         context,
         logger,
         windowManager,
-        viewUtil,
         mainExecutor,
         accessibilityManager,
         configurationController,
@@ -379,7 +374,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         override fun getIconSize(isAppIcon: Boolean): Int = ICON_SIZE
     }
 
-    inner class ChipInfo(val name: String) : ChipInfoCommon {
+    inner class ChipInfo(val name: String) : TemporaryViewInfo {
         override fun getTimeoutMs() = 1L
     }
 }
