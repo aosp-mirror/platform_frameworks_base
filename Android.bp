@@ -255,7 +255,10 @@ filegroup {
 
 java_defaults {
     name: "framework-minus-apex-defaults",
-    defaults: ["framework-aidl-export-defaults"],
+    defaults: [
+        "framework-aidl-export-defaults",
+        "latest_android_hardware_soundtrigger3_java_static",
+    ],
     srcs: [
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
@@ -312,8 +315,6 @@ java_defaults {
     sdk_version: "core_platform",
     static_libs: [
         "android.hardware.common.fmq-V1-java",
-        // TODO(b/184162091)
-        "android.hardware.soundtrigger3-V1-java",
         "bouncycastle-repackaged-unbundled",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed

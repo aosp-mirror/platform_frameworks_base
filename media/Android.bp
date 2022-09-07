@@ -35,8 +35,8 @@ aidl_interface {
         "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
     ],
     imports: [
-        "android.media.audio.common.types-V1",
-        "android.media.soundtrigger.types-V1",
+        "android.media.audio.common.types",
+        "android.media.soundtrigger.types",
         "media_permission-aidl",
     ],
 }
@@ -52,6 +52,7 @@ aidl_interface {
     ],
     local_include_dir: "aidl",
     srcs: [
+        "aidl/android/media/audio/common/AudioAttributes.aidl",
         "aidl/android/media/audio/common/AudioChannelLayout.aidl",
         "aidl/android/media/audio/common/AudioConfig.aidl",
         "aidl/android/media/audio/common/AudioConfigBase.aidl",
@@ -63,6 +64,7 @@ aidl_interface {
         "aidl/android/media/audio/common/AudioEncapsulationMetadataType.aidl",
         "aidl/android/media/audio/common/AudioEncapsulationMode.aidl",
         "aidl/android/media/audio/common/AudioEncapsulationType.aidl",
+        "aidl/android/media/audio/common/AudioFlag.aidl",
         "aidl/android/media/audio/common/AudioFormatDescription.aidl",
         "aidl/android/media/audio/common/AudioFormatType.aidl",
         "aidl/android/media/audio/common/AudioGain.aidl",
@@ -122,8 +124,75 @@ aidl_interface {
             version: "1",
             imports: [],
         },
+        // IMPORTANT: Update latest_android_media_audio_common_types every time
+        // you add the latest frozen version to versions_with_info
     ],
 
+}
+
+// Note: This should always be one version ahead of the last frozen version
+latest_android_media_audio_common_types = "android.media.audio.common.types-V2"
+
+// Modules that depend on android.media.audio.common.types directly can include
+// the following cc_defaults to avoid explicitly managing dependency versions
+// across many scattered files.
+cc_defaults {
+    name: "latest_android_media_audio_common_types_cpp_shared",
+    shared_libs: [
+        latest_android_media_audio_common_types + "-cpp",
+    ],
+}
+
+cc_defaults {
+    name: "latest_android_media_audio_common_types_cpp_export_shared",
+    defaults: [
+        "latest_android_media_audio_common_types_cpp_shared",
+    ],
+    export_shared_lib_headers: [
+        latest_android_media_audio_common_types + "-cpp",
+    ],
+}
+
+cc_defaults {
+    name: "latest_android_media_audio_common_types_cpp_static",
+    static_libs: [
+        latest_android_media_audio_common_types + "-cpp",
+    ],
+}
+
+cc_defaults {
+    name: "latest_android_media_audio_common_types_cpp_export_static",
+    defaults: [
+        "latest_android_media_audio_common_types_cpp_static",
+    ],
+    export_static_lib_headers: [
+        latest_android_media_audio_common_types + "-cpp",
+    ],
+}
+
+cc_defaults {
+    name: "latest_android_media_audio_common_types_ndk_shared",
+    shared_libs: [
+        latest_android_media_audio_common_types + "-ndk",
+    ],
+}
+
+cc_defaults {
+    name: "latest_android_media_audio_common_types_ndk_static",
+    static_libs: [
+        latest_android_media_audio_common_types + "-ndk",
+    ],
+}
+
+cc_defaults {
+    name: "latest_android_media_audio_common_types_cpp_target_shared",
+    target: {
+        android: {
+            shared_libs: [
+                latest_android_media_audio_common_types + "-cpp",
+            ],
+        },
+    },
 }
 
 aidl_interface {
