@@ -4679,6 +4679,8 @@
 
   <java-symbol type="bool" name="config_volumeAdjustmentForRemoteGroupSessions" />
 
+  <java-symbol type="integer" name="config_mediaOutputSwitchDialogVersion" />
+
   <!-- List of shared library packages that should be loaded by the classloader after the
        code and resources provided by applications. -->
   <java-symbol type="array" name="config_sharedLibrariesLoadedAfterApp" />

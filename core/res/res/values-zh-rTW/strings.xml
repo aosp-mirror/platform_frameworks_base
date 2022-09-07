@@ -2277,8 +2277,8 @@
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"某個應用程式正在耗用大量電力"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"某個應用程式目前仍在運作"</string>
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"「<xliff:g id="APP">%1$s</xliff:g>」正在背景運作。輕觸即可管理電池用量。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式可能會影響電池續航力。輕觸即可查看使用中的應用程式。"</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的應用程式"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式可能會影響電池續航力，輕觸即可查看運作中的應用程式。"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看運作中的應用程式"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>

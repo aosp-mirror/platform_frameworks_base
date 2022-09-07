@@ -273,6 +273,8 @@ public abstract class MediaOutputBaseAdapter extends
         void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
             if (!mController.isVolumeControlEnabled(device)) {
                 disableSeekBar();
+            } else {
+                enableSeekBar();
             }
             mSeekBar.setMaxVolume(device.getMaxVolume());
             final int currentVolume = device.getCurrentVolume();
@@ -417,9 +419,14 @@ public abstract class MediaOutputBaseAdapter extends
             return drawable;
         }
 
-        private void disableSeekBar() {
+        protected void disableSeekBar() {
             mSeekBar.setEnabled(false);
             mSeekBar.setOnTouchListener((v, event) -> true);
+        }
+
+        private void enableSeekBar() {
+            mSeekBar.setEnabled(true);
+            mSeekBar.setOnTouchListener((v, event) -> false);
         }
 
         protected void setUpDeviceIcon(MediaDevice device) {
