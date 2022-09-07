@@ -34,7 +34,6 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -51,7 +50,6 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManage
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 
 import java.io.PrintWriter;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -88,7 +86,6 @@ public class NotificationShadeWindowViewController {
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
-    private final Optional<LowLightClockController> mLowLightClockController;
 
     private boolean mIsTrackingBarGesture = false;
 
@@ -106,7 +103,6 @@ public class NotificationShadeWindowViewController {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
-            Optional<LowLightClockController> lowLightClockController,
             CentralSurfaces centralSurfaces,
             NotificationShadeWindowController controller,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -125,7 +121,6 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
-        mLowLightClockController = lowLightClockController;
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -147,8 +142,6 @@ public class NotificationShadeWindowViewController {
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
         mGestureDetector = new GestureDetector(mView.getContext(), mPulsingGestureListener);
-
-        mLowLightClockController.ifPresent(controller -> controller.attachLowLightClockView(mView));
 
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
@@ -432,21 +425,6 @@ public class NotificationShadeWindowViewController {
 
     public void setStatusBarViewController(PhoneStatusBarViewController statusBarViewController) {
         mStatusBarViewController = statusBarViewController;
-    }
-
-    /**
-     * Tell the controller that dozing has begun or ended.
-     * @param dozing True if dozing has begun.
-     */
-    public void setDozing(boolean dozing) {
-        mLowLightClockController.ifPresent(controller -> controller.showLowLightClock(dozing));
-    }
-
-    /**
-     * Tell the controller to perform burn-in prevention.
-     */
-    public void dozeTimeTick() {
-        mLowLightClockController.ifPresent(LowLightClockController::dozeTimeTick);
     }
 
     @VisibleForTesting
