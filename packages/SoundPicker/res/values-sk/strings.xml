@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"Predvolený tón zvonenia"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"Predvolený zvuk upozornení"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"Predvolený zvuk budíkov"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"Predvolený zvuk budíka"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Pridať tón zvonenia"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"Pridať budík"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"Pridať upozornenie"</string>

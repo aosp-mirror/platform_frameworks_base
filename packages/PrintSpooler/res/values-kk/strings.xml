@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"Кешіріңіз, бұл нәтиже бермеді. Әрекетті қайталаңыз."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Қайталау"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Бұл принтер дәл қазір қол жетімді емес."</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"Бетті алдын ала қарау мүмкін емес"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"Алдын ала қарау дайындалуда…"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"Бетті алдын ала көру мүмкін емес"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Алдын ала көру дайындалуда…"</string>
 </resources>

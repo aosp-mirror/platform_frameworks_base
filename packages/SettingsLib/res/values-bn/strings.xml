@@ -274,7 +274,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM আনলক করার অনুমতি দিতে চান?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"সতর্কতা: এই ডিভাইসে সেটিংটি চালু থাকা অবস্থায় ডিভাইস সুরক্ষা বৈশিষ্ট্যগুলি কাজ করবে না৷"</string>
     <string name="mock_location_app" msgid="6269380172542248304">"অনুরূপ লোকেশন অ্যাপ বেছে নিন"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"কোনো অনুরূপ লোকেশন অ্যাপ্লিকেশান সেট করা নেই"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"কোনও অনুরূপ লোকেশন অ্যাপ সেট করা নেই"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"অনুরূপ লোকেশন অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
@@ -284,7 +284,7 @@
     <string name="mobile_data_always_on" msgid="8275958101875563572">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"চূড়ান্ত ভলিউম বন্ধ করুন"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ফিচার চালু করুন"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ব্লুটুথ AVRCP ভার্সন"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ব্লুটুথ AVRCP ভার্সন বেছে নিন"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB এর অ্যাপ্লিকেশনগুলি যাচাই করুন"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখানো হবে (শুধুমাত্র MAC অ্যাড্রেস)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য বন্ধ করে৷"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ব্লুটুথ Gabeldorche ফিচার স্ট্যাক চালু করে।"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"কানেক্টিভিটি ফিচার উন্নত করার বিষয়টি চালু করা হয়েছে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
