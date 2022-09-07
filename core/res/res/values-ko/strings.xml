@@ -649,9 +649,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"얼굴을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"얼굴의 위치를 조금 변경해 주세요."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더 똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더 똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더 똑바로 바라봐 주세요."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"전체 얼굴이 보여야 합니다."</string>
@@ -1421,7 +1421,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> 마운트 해제 중"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"외부 미디어를 제거하지 마세요."</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"설정"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"마운트 해제"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"꺼내기"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"둘러보기"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"출력 전환"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> 없음"</string>

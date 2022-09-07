@@ -1424,7 +1424,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Expulsar"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Explorar"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Cambiar salida"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"No se encuentra dispositivo <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Falta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Vuelve a insertar dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfiriendo la aplicación <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Transfiriendo los datos"</string>
