@@ -448,7 +448,12 @@ class ManifestExtractor {
   /** Recursively visit the xml element tree and return a processed badging element tree. */
   std::unique_ptr<Element> Visit(xml::Element* element);
 
-    /** Raises the target sdk value if the min target is greater than the current target. */
+  /** Resets target SDK to 0. */
+  void ResetTargetSdk() {
+    target_sdk_ = 0;
+  }
+
+  /** Raises the target sdk value if the min target is greater than the current target. */
   void RaiseTargetSdk(int32_t min_target) {
     if (min_target > target_sdk_) {
       target_sdk_ = min_target;
@@ -798,6 +803,10 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     max_sdk = GetAttributeInteger(FindAttribute(element, MAX_SDK_VERSION_ATTR));
     target_sdk = GetAttributeInteger(FindAttribute(element, TARGET_SDK_VERSION_ATTR));
     target_sdk_name = GetAttributeString(FindAttribute(element, TARGET_SDK_VERSION_ATTR));
+
+    // Resets target SDK first. This is required if APK contains multiple <uses-sdk> elements,
+    // we only need to take the latest values.
+    extractor()->ResetTargetSdk();
 
     // Detect the target sdk of the element
     if  ((min_sdk_name && *min_sdk_name == "Donut")
