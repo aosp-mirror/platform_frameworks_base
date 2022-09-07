@@ -125,8 +125,15 @@ public final class TransitionInfo implements Parcelable {
     /** The container attaches work profile thumbnail for cross profile animation. */
     public static final int FLAG_CROSS_PROFILE_WORK_THUMBNAIL = 1 << 13;
 
+    /**
+     * Whether the window is covered by an app starting window. This is different from
+     * {@link #FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT} which is only set on the Activity window
+     * that contains the starting window.
+     */
+    public static final int FLAG_IS_BEHIND_STARTING_WINDOW = 1 << 14;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 14;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 15;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -145,6 +152,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_WILL_IME_SHOWN,
             FLAG_CROSS_PROFILE_OWNER_THUMBNAIL,
             FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
+            FLAG_IS_BEHIND_STARTING_WINDOW,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -350,6 +358,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_FILLS_TASK) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FILLS_TASK");
+        }
+        if ((flags & FLAG_IS_BEHIND_STARTING_WINDOW) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_BEHIND_STARTING_WINDOW");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
