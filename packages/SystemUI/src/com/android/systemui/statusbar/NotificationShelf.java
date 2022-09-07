@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -88,6 +90,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @VisibleForTesting
+    public NotificationShelf(Context context, AttributeSet attrs, boolean showNotificationShelf) {
+        super(context, attrs);
+        mShowNotificationShelf = showNotificationShelf;
     }
 
     @Override
@@ -175,7 +183,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
             if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
                 float expansion = ambientState.getExpansionFraction();
-                viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                if (ambientState.isBouncerInTransit()) {
+                    viewState.alpha = aboutToShowBouncerProgress(expansion);
+                } else {
+                    viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+                }
             } else {
                 viewState.alpha = 1f - ambientState.getHideAmount();
             }
