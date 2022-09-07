@@ -17812,6 +17812,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForIdle(pw);
         }
+        if (pw != null) {
+            pw.println("All broadcast queues are idle!");
+            pw.flush();
+        }
     }
 
     public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
