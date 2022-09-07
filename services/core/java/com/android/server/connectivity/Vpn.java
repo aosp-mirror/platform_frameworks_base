@@ -2944,7 +2944,7 @@ public class Vpn {
                             // All the above failures are configuration errors, and are terminal
                             // TODO(b/230548427): Remove SDK check once VPN related stuff are
                             //  decoupled from ConnectivityServiceTest.
-                            if (SdkLevel.isAtLeastT()) {
+                            if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
                                 sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_IKE_ERROR,
                                         VpnManager.ERROR_CLASS_NOT_RECOVERABLE,
                                         ikeException.getErrorType(),
@@ -2962,7 +2962,7 @@ public class Vpn {
                             // All the above failures are configuration errors, and are terminal
                             // TODO(b/230548427): Remove SDK check once VPN related stuff are
                             //  decoupled from ConnectivityServiceTest.
-                            if (SdkLevel.isAtLeastT()) {
+                            if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
                                 sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_IKE_ERROR,
                                         VpnManager.ERROR_CLASS_RECOVERABLE,
                                         ikeException.getErrorType(),
@@ -2981,7 +2981,7 @@ public class Vpn {
                 } else if (exception instanceof IkeNetworkLostException) {
                     // TODO(b/230548427): Remove SDK check once VPN related stuff are
                     //  decoupled from ConnectivityServiceTest.
-                    if (SdkLevel.isAtLeastT()) {
+                    if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
                         sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
                                 VpnManager.ERROR_CLASS_RECOVERABLE,
                                 VpnManager.ERROR_CODE_NETWORK_LOST,
@@ -2996,7 +2996,7 @@ public class Vpn {
                     if (exception.getCause() instanceof UnknownHostException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
                         //  decoupled from ConnectivityServiceTest.
-                        if (SdkLevel.isAtLeastT()) {
+                        if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
                             sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
                                     VpnManager.ERROR_CLASS_RECOVERABLE,
                                     VpnManager.ERROR_CODE_NETWORK_UNKNOWN_HOST,
@@ -3010,7 +3010,7 @@ public class Vpn {
                     } else if (exception.getCause() instanceof IkeTimeoutException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
                         //  decoupled from ConnectivityServiceTest.
-                        if (SdkLevel.isAtLeastT()) {
+                        if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
                             sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
                                     VpnManager.ERROR_CLASS_RECOVERABLE,
                                     VpnManager.ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT,
@@ -3024,7 +3024,7 @@ public class Vpn {
                     } else if (exception.getCause() instanceof IOException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
                         //  decoupled from ConnectivityServiceTest.
-                        if (SdkLevel.isAtLeastT()) {
+                        if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
                             sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
                                     VpnManager.ERROR_CLASS_RECOVERABLE,
                                     VpnManager.ERROR_CODE_NETWORK_IO,
