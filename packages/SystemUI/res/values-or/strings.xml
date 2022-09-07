@@ -223,8 +223,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ଅଟୋ-ରୋଟେଟ୍"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ଅଟୋ-ରୋଟେଟ ସ୍କ୍ରିନ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ଲୋକେସନ"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"କ୍ୟାମେରା ଆକ୍ସେସ୍"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ମାଇକ୍ ଆକ୍ସେସ୍"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"କ୍ୟାମେରା ଆକ୍ସେସ"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ମାଇକ ଆକ୍ସେସ"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ଉପଲବ୍ଧ"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ବ୍ଲକ୍ କରାଯାଇଛି"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ମିଡିଆ ଡିଭାଇସ୍‌"</string>
@@ -235,7 +235,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"କୌଣସି ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ଅନ୍ ହେଉଛି…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ସ୍କ୍ରିନ୍ କାଷ୍ଟ"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ସ୍କ୍ରିନ କାଷ୍ଟ"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"କାଷ୍ଟିଙ୍ଗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ନାମହୀନ ଡିଭାଇସ୍‍"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -282,7 +282,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ସକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ସ୍କ୍ରିନ୍ ରେକର୍ଡ"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ସ୍କ୍ରିନ ରେକର୍ଡ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ଏକ-ହାତ ମୋଡ"</string>
@@ -433,7 +433,7 @@
     <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"କଲ୍ କରନ୍ତୁ"</string>
-    <string name="stream_system" msgid="7663148785370565134">"ସିଷ୍ଟମ୍‌"</string>
+    <string name="stream_system" msgid="7663148785370565134">"ସିଷ୍ଟମ"</string>
     <string name="stream_ring" msgid="7550670036738697526">"ରିଙ୍ଗ"</string>
     <string name="stream_music" msgid="2188224742361847580">"ମିଡିଆ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"ଆଲାରାମ୍"</string>
@@ -571,9 +571,9 @@
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"ନମ୍ବର ଲକ୍‍"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"ନମ୍ବରପ୍ୟାଡ୍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"ଆଟାଚମେଣ୍ଟ୍ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
-    <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"ସିଷ୍ଟମ୍‌"</string>
+    <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"ସିଷ୍ଟମ"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ହୋମ"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ସମ୍ପ୍ରତି"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ବର୍ତ୍ତମାନର"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"ଫେରନ୍ତୁ"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"କୀ\'ବୋର୍ଡ ସର୍ଟକଟ୍"</string>
@@ -593,7 +593,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"ହେଡଫୋନ୍‍ ସଂଯୁକ୍ତ"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"ହେଡସେଟ୍‍ ସଂଯୁକ୍ତ"</string>
-    <string name="data_saver" msgid="3484013368530820763">"ଡାଟା ସେଭର୍‍"</string>
+    <string name="data_saver" msgid="3484013368530820763">"ଡାଟା ସେଭର"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"ଡାଟା ସେଭର୍‌ ଅନ୍‌ ଅଛି"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"ଚାଲୁ ଅଛି"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ବନ୍ଦ ଅଛି"</string>
@@ -623,7 +623,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"ଡାହାଣ କୀ\'କୋଡ୍‍"</string>
     <string name="left_icon" msgid="5036278531966897006">"ବାମ ଆଇକନ୍‍"</string>
     <string name="right_icon" msgid="1103955040645237425">"ଡାହାଣ ଆଇକନ୍"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଗ କରିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଗ କରିବା ପାଇଁ ଦାବିଧରି ଡ୍ରାଗ କରନ୍ତୁ"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ୍‍ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ବାହାର କରିବାକୁ ଏଠାକୁ ଡ୍ରାଗ୍‍ କରନ୍ତୁ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ଆପଣଙ୍କର ଅତିକମ୍‌ରେ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>ଟି ଟାଇଲ୍ ଆବଶ୍ୟକ"</string>
@@ -840,7 +840,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g>ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ବିଚ୍ଛିନ୍ନ କରାଯାଇଛି)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ସ୍ୱିଚ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ନୂଆ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ନୂଆ ଡିଭାଇସକୁ ପେୟାର କରନ୍ତୁ"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ଏହି ସେସନକୁ କାଷ୍ଟ କରିବା ପାଇଁ, ଦୟାକରି ଆପ ଖୋଲନ୍ତୁ।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ଅଜଣା ଆପ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"କାଷ୍ଟ କରିବା ବନ୍ଦ କରନ୍ତୁ"</string>

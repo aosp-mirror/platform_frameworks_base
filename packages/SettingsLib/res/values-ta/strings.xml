@@ -283,7 +283,7 @@
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"வைஃபையில் MAC முகவரியை ரேண்டம் ஆக்குதல்"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"மொபைல் டேட்டாவை எப்போதும் இயக்கத்திலேயே வை"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"பெயர்கள் இல்லாத புளூடூத் சாதனங்களைக் காட்டு"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"பெயர்கள் இல்லாமல் புளூடூத் சாதனங்களைக் காட்டு"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheவை இயக்கு"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"புளூடூத் AVRCP பதிப்பு"</string>
@@ -337,7 +337,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"இந்த அமைப்பு மேம்பட்டப் பயன்பாட்டிற்காக மட்டுமே. உங்கள் சாதனம் மற்றும் அதில் உள்ள பயன்பாடுகளைச் சிதைக்கும் அல்லது தவறாகச் செயல்படும் வகையில் பாதிப்பை ஏற்படுத்தும்."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ஆப்ஸைச் சரிபார்"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"தீங்கு விளைவிக்கும் செயல்பாட்டை அறிய ADB/ADT மூலம் நிறுவப்பட்ட ஆப்ஸைச் சரிபார்."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"பெயர்கள் இல்லாத புளூடூத் சாதனங்கள் (MAC முகவரிகள் மட்டும்) காட்டப்படும்"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"பெயர்கள் இல்லாமல் புளூடூத் சாதனங்கள் (MAC முகவரிகள் மட்டும்) காட்டப்படும்"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"மிகவும் அதிகமான ஒலியளவு அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கும்."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"புளூடூத்தின் Gabeldorsche அம்சங்களை இயக்கும்."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"மேம்படுத்தப்பட்ட இணைப்புநிலை அம்சத்தை இயக்கும்."</string>
