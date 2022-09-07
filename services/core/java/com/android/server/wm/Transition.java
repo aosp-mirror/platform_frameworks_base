@@ -727,6 +727,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (mChanges.get(ar).mVisible != visibleAtTransitionEnd) {
                     // Legacy dispatch relies on this (for now).
                     ar.mEnteringAnimation = visibleAtTransitionEnd;
+                } else if (mTransientLaunches != null && mTransientLaunches.containsKey(ar)
+                        && ar.isVisible()) {
+                    // Transient launch was committed, so report enteringAnimation
+                    ar.mEnteringAnimation = true;
                 }
                 continue;
             }

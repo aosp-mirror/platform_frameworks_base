@@ -967,8 +967,17 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testTransientLaunch() {
         final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
+        final ArrayList<ActivityRecord> enteringAnimReports = new ArrayList<>();
         final TransitionController controller = new TransitionController(mAtm, snapshotController,
-                mock(TransitionTracer.class));
+                mock(TransitionTracer.class)) {
+            @Override
+            protected void dispatchLegacyAppTransitionFinished(ActivityRecord ar) {
+                if (ar.mEnteringAnimation) {
+                    enteringAnimReports.add(ar);
+                }
+                super.dispatchLegacyAppTransitionFinished(ar);
+            }
+        };
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1013,6 +1022,7 @@ public class TransitionTests extends WindowTestsBase {
 
         activity1.mVisibleRequested = false;
         activity2.mVisibleRequested = true;
+        activity2.setVisible(true);
 
         // Using abort to force-finish the sync (since we obviously can't wait for drawing).
         // We didn't call abort on the actual transition, so it will still run onTransactionReady
@@ -1023,9 +1033,11 @@ public class TransitionTests extends WindowTestsBase {
         // called until finish).
         verify(snapshotController, times(0)).recordTaskSnapshot(eq(task1), eq(false));
 
+        enteringAnimReports.clear();
         closeTransition.finishTransition();
 
         verify(snapshotController, times(1)).recordTaskSnapshot(eq(task1), eq(false));
+        assertTrue(enteringAnimReports.contains(activity2));
     }
 
     @Test
