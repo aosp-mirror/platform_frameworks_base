@@ -280,6 +280,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final Object mLock = new Object();
     private final Object mNonPersistentUsersLock = new Object();
+    private final Object mWtfLock = new Object();
 
     private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
 
@@ -444,10 +445,10 @@ public class ShortcutService extends IShortcutService.Stub {
     @interface ShortcutOperation {
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mWtfLock")
     private int mWtfCount = 0;
 
-    @GuardedBy("mLock")
+    @GuardedBy("mWtfLock")
     private Exception mLastWtfStacktrace;
 
     @GuardedBy("mLock")
@@ -4727,13 +4728,15 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 mStatLogger.dump(pw, "  ");
 
-                pw.println();
-                pw.print("  #Failures: ");
-                pw.println(mWtfCount);
+                synchronized (mWtfLock) {
+                    pw.println();
+                    pw.print("  #Failures: ");
+                    pw.println(mWtfCount);
 
-                if (mLastWtfStacktrace != null) {
-                    pw.print("  Last failure stack trace: ");
-                    pw.println(Log.getStackTraceString(mLastWtfStacktrace));
+                    if (mLastWtfStacktrace != null) {
+                        pw.print("  Last failure stack trace: ");
+                        pw.println(Log.getStackTraceString(mLastWtfStacktrace));
+                    }
                 }
 
                 pw.println();
@@ -5148,7 +5151,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (e == null) {
             e = new RuntimeException("Stacktrace");
         }
-        synchronized (mLock) {
+        synchronized (mWtfLock) {
             mWtfCount++;
             mLastWtfStacktrace = new Exception("Last failure was logged here:");
         }
