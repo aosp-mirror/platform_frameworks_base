@@ -2827,7 +2827,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             mDisplayContent.mTransitionController.collectVisibleChange(this);
-            // TODO(b/207070762): request shell transition for activityEmbedding change.
             return;
         }
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
