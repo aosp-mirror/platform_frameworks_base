@@ -50,7 +50,7 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
             val page = entry.toPage
             if (page == null || pageToEntryListMap.containsKey(page.toString())) continue
             val spp = sppRepository.getProviderOrNull(page.name) ?: continue
-            val newEntries = spp.buildEntry(page.args)
+            val newEntries = spp.buildEntry(page.arguments)
             pageToEntryListMap[page.toString()] = newEntries
             for (newEntry in newEntries) {
                 if (!entryMap.containsKey(newEntry.id)) {
