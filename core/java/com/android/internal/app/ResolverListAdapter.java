@@ -834,11 +834,7 @@ public class ResolverListAdapter extends BaseAdapter {
         void onHandlePackagesChanged(ResolverListAdapter listAdapter);
     }
 
-    /**
-     * A view holder.
-     */
-    @VisibleForTesting
-    public static class ViewHolder {
+    static class ViewHolder {
         public View itemView;
         public Drawable defaultItemViewBackground;
 
@@ -846,8 +842,7 @@ public class ResolverListAdapter extends BaseAdapter {
         public TextView text2;
         public ImageView icon;
 
-        @VisibleForTesting
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             itemView = view;
             defaultItemViewBackground = view.getBackground();
             text = (TextView) view.findViewById(com.android.internal.R.id.text1);
