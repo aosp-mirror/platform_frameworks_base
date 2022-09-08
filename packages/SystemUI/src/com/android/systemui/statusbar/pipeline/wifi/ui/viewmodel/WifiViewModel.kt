@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
 import androidx.annotation.DrawableRes
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
@@ -29,6 +30,7 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -46,7 +48,7 @@ class WifiViewModel @Inject constructor(
      * The drawable resource ID to use for the wifi icon. Null if we shouldn't display any icon.
      */
     @DrawableRes
-    val wifiIconResId: Flow<Int?> = interactor.wifiNetwork.map {
+    private val iconResId: Flow<Int?> = interactor.wifiNetwork.map {
         when (it) {
             is WifiNetworkModel.CarrierMerged -> null
             is WifiNetworkModel.Inactive -> WIFI_NO_NETWORK
@@ -59,6 +61,24 @@ class WifiViewModel @Inject constructor(
         }
     }
 
+    /**
+     * The wifi icon that should be displayed. Null if we shouldn't display any icon.
+     */
+    val wifiIcon: Flow<Icon?> = combine(
+            interactor.isForceHidden,
+            iconResId
+        ) { isForceHidden, iconResId ->
+            when {
+                isForceHidden ||
+                    iconResId == null ||
+                    iconResId <= 0 -> null
+                else -> Icon.Resource(iconResId)
+            }
+        }
+
+    /**
+     * True if the activity in icon should be displayed and false otherwise.
+     */
     val isActivityInVisible: Flow<Boolean>
         get() =
             if (!constants.shouldShowActivityConfig) {

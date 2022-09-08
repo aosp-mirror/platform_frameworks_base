@@ -250,7 +250,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
         // aware that the virtual display has a secure window on top.
         if ((windowFlags & FLAG_SECURE) != 0) {
-            mSecureWindowCallback.onSecureWindowShown(mDisplayId, activityInfo.applicationInfo.uid);
+            // Post callback on the main thread, so it doesn't block activity launching.
+            mHandler.post(() -> mSecureWindowCallback.onSecureWindowShown(mDisplayId,
+                    activityInfo.applicationInfo.uid));
         }
 
         if (!canContainActivity(activityInfo, windowFlags, systemWindowFlags)) {

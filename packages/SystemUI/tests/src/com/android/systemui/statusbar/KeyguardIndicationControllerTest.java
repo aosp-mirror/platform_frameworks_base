@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
@@ -65,7 +66,6 @@ import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
 import android.os.Looper;
@@ -602,7 +602,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         String message = mContext.getString(R.string.keyguard_unlock);
 
         mController.setVisible(true);
-        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+        mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
@@ -636,7 +636,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.isFaceEnrolled()).thenReturn(true);
 
         mController.setVisible(true);
-        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+        mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
         verify(mStatusBarKeyguardViewManager).showBouncerMessage(eq(message), any());
@@ -651,7 +651,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         mController.setVisible(true);
         mController.getKeyguardCallback().onBiometricError(
-                FaceManager.FACE_ERROR_TIMEOUT, message, BiometricSourceType.FACE);
+                FACE_ERROR_TIMEOUT, message, BiometricSourceType.FACE);
         verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
     }
 
@@ -698,8 +698,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
-                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT,
-                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT
         };
         for (int msgId : msgIds) {
             mKeyguardUpdateMonitorCallback.onBiometricHelp(
@@ -728,8 +727,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
-                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT,
-                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT
         };
         for (int msgId : msgIds) {
             final String numberedHelpString = helpString + msgId;
@@ -740,6 +738,64 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // THEN message shown for each call
         verifyIndicationMessages(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpStrings);
+    }
+
+    @Test
+    public void sendTooDarkFaceHelpMessages_onTimeout_noFpEnrolled() {
+        createController();
+
+        // GIVEN fingerprint NOT enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(false);
+
+        // WHEN help message received
+        final String helpString = "helpMsg";
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
+                helpString,
+                BiometricSourceType.FACE
+        );
+
+        // THEN help message not shown yet
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // WHEN face timeout error received
+        mKeyguardUpdateMonitorCallback.onBiometricError(FACE_ERROR_TIMEOUT, "face timeout",
+                BiometricSourceType.FACE);
+
+        // THEN the low light message shows with suggestion to swipe up to unlock
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpString);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void sendTooDarkFaceHelpMessages_onTimeout_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help message received
+        final String helpString = "helpMsg";
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
+                helpString,
+                BiometricSourceType.FACE
+        );
+
+        // THEN help message not shown yet
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // WHEN face timeout error received
+        mKeyguardUpdateMonitorCallback.onBiometricError(FACE_ERROR_TIMEOUT, "face timeout",
+                BiometricSourceType.FACE);
+
+        // THEN the low light message shows and suggests trying fingerprint
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpString);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
     }
 
     @Test

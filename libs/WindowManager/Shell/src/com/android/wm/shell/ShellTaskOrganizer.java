@@ -876,8 +876,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                     pkg = info.getTaskInfo().baseActivity.getPackageName();
                 }
                 Rect bounds = info.getTaskInfo().getConfiguration().windowConfiguration.getBounds();
+                boolean running = info.getTaskInfo().isRunning;
+                boolean visible = info.getTaskInfo().isVisible;
+                boolean focused = info.getTaskInfo().isFocused;
                 pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener
-                        + " wmMode=" + windowingMode + " pkg=" + pkg + " bounds=" + bounds);
+                        + " wmMode=" + windowingMode + " pkg=" + pkg + " bounds=" + bounds
+                        + " running=" + running + " visible=" + visible + " focused=" + focused);
             }
 
             pw.println();

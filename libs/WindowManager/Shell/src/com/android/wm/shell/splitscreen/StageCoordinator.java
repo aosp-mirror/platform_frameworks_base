@@ -69,6 +69,7 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -81,6 +82,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -244,7 +246,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     };
 
-    StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
+    protected StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
             ShellTaskOrganizer taskOrganizer, DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
@@ -579,8 +581,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
-                    onRemoteAnimationFinished(apps);
+                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+                    setDividerVisibility(true, t);
                     t.apply();
+                    onRemoteAnimationFinished(apps);
                     try {
                         adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
                     } catch (RemoteException e) {
@@ -593,7 +597,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 nonApps = ArrayUtils.appendElement(RemoteAnimationTarget.class, nonApps,
                         getDividerBarLegacyTarget());
 
-                updateSurfaceBounds(mSplitLayout, t, false);
+                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                 setDividerVisibility(true, t);
                 for (int i = 0; i < apps.length; ++i) {
                     if (apps[i].mode == MODE_OPENING) {
@@ -878,6 +882,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             WindowContainerTransaction wct, @ExitReason int exitReason) {
         if (!mMainStage.isActive() || mIsExiting) return;
 
+        onSplitScreenExit();
+
         mRecentTasks.ifPresent(recentTasks -> {
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
@@ -947,6 +953,47 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /**
+     * Overridden by child classes.
+     */
+    protected void onSplitScreenEnter() {
+    }
+
+    /**
+     * Overridden by child classes.
+     */
+    protected void onSplitScreenExit() {
+    }
+
+    /**
+     * Exits the split screen by finishing one of the tasks.
+     */
+    protected void exitStage(@SplitPosition int stageToClose) {
+        if (ENABLE_SHELL_TRANSITIONS) {
+            StageTaskListener stageToTop = mSideStagePosition == stageToClose
+                    ? mMainStage
+                    : mSideStage;
+            exitSplitScreen(stageToTop, EXIT_REASON_APP_FINISHED);
+        } else {
+            boolean toEnd = stageToClose == SPLIT_POSITION_BOTTOM_OR_RIGHT;
+            mSplitLayout.flingDividerToDismiss(toEnd, EXIT_REASON_APP_FINISHED);
+        }
+    }
+
+    /**
+     * Grants focus to the main or the side stages.
+     */
+    protected void grantFocusToStage(@SplitPosition int stageToFocus) {
+        IActivityTaskManager activityTaskManagerService = IActivityTaskManager.Stub.asInterface(
+                ServiceManager.getService(Context.ACTIVITY_TASK_SERVICE));
+        try {
+            activityTaskManagerService.setFocusedTask(getTaskId(stageToFocus));
+        } catch (RemoteException | NullPointerException e) {
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "%s: Unable to update focus on the chosen stage, %s", TAG, e);
+        }
+    }
+
+    /**
      * Returns whether the split pair in the recent tasks list should be broken.
      */
     private boolean shouldBreakPairedTaskInRecents(@ExitReason int exitReason) {
@@ -993,6 +1040,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable ActivityManager.RunningTaskInfo taskInfo, @SplitPosition int startPosition) {
         if (mMainStage.isActive()) return;
 
+        onSplitScreenEnter();
         if (taskInfo != null) {
             setSideStagePosition(startPosition, wct);
             mSideStage.addTask(taskInfo, wct);
@@ -1386,6 +1434,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
             // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
+            onSplitScreenEnter();
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             mSplitLayout.init();
             mSplitLayout.setDividerAtBorder(mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
