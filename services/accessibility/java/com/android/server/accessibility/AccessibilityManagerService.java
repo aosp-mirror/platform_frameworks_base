@@ -106,6 +106,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
+import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
@@ -1359,7 +1360,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    /** Send a motion event to the service to allow it to perform gesture detection. */
+    /** Send a motion event to the services. */
     public boolean sendMotionEventToListeningServices(MotionEvent event) {
         boolean result;
         event = MotionEvent.obtain(event);
@@ -1716,7 +1717,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityUserState state = getCurrentUserStateLocked();
             for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                 AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                if (service.isServiceDetectsGesturesEnabled(displayId)) {
+                if (service.wantsGenericMotionEvent(event)
+                        || (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+                        && service.isServiceDetectsGesturesEnabled(displayId))) {
                     service.notifyMotionEvent(event);
                     result = true;
                 }
@@ -2306,6 +2309,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isPerformGesturesEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
             }
+            int combinedGenericMotionEventSources = 0;
+            for (AccessibilityServiceConnection connection : userState.mBoundServices) {
+                combinedGenericMotionEventSources |= connection.mGenericMotionEventSources;
+            }
+            if (combinedGenericMotionEventSources != 0) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS;
+            }
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
@@ -2318,6 +2328,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     setInputFilter = true;
                 }
                 mInputFilter.setUserAndEnabledFeatures(userState.mUserId, flags);
+                mInputFilter.setCombinedGenericMotionEventSources(
+                        combinedGenericMotionEventSources);
             } else {
                 if (mHasInputFilter) {
                     mHasInputFilter = false;

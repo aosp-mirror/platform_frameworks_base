@@ -74,8 +74,10 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInfo;
@@ -199,6 +201,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     long mNotificationTimeout;
 
     final ComponentName mComponentName;
+
+    int mGenericMotionEventSources;
 
     // the events pending events to be dispatched to this service
     final SparseArray<AccessibilityEvent> mPendingEvents = new SparseArray<>();
@@ -362,6 +366,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         mNotificationTimeout = info.notificationTimeout;
         mIsDefault = (info.flags & DEFAULT) != 0;
+        mGenericMotionEventSources = info.getMotionEventSources();
 
         if (supportsFlagForNotImportantViews(info)) {
             if ((info.flags & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0) {
@@ -1749,6 +1754,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
             int resolvedWindowId) {
         return mSystemSupport.getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+    }
+
+    public boolean wantsGenericMotionEvent(MotionEvent event) {
+        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+        return (mGenericMotionEventSources & eventSourceWithoutClass) != 0;
     }
 
     /**
