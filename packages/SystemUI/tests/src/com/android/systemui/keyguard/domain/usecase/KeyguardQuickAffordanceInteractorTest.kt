@@ -36,6 +36,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,6 +111,10 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 .quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
                 .onEach { latest = it }
                 .launchIn(this)
+        // The interactor has an onStart { emit(Hidden) } to cover for upstream configs that don't
+        // produce an initial value. We yield to give the coroutine time to emit the first real
+        // value from our config.
+        yield()
 
         assertThat(latest).isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
         val visibleModel = latest as KeyguardQuickAffordanceModel.Visible
@@ -136,6 +141,10 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 .quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_END)
                 .onEach { latest = it }
                 .launchIn(this)
+        // The interactor has an onStart { emit(Hidden) } to cover for upstream configs that don't
+        // produce an initial value. We yield to give the coroutine time to emit the first real
+        // value from our config.
+        yield()
 
         assertThat(latest).isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
         val visibleModel = latest as KeyguardQuickAffordanceModel.Visible

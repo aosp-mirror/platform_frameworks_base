@@ -32,6 +32,7 @@ import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 
 @SysUISingleton
 class KeyguardQuickAffordanceInteractor
@@ -88,7 +89,15 @@ constructor(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceModel> {
         val configs = registry.getAll(position)
-        return combine(configs.map { config -> config.state }) { states ->
+        return combine(
+            configs.map { config ->
+                // We emit an initial "Hidden" value to make sure that there's always an initial
+                // value and avoid subtle bugs where the downstream isn't receiving any values
+                // because one config implementation is not emitting an initial value. For example,
+                // see b/244296596.
+                config.state.onStart { emit(KeyguardQuickAffordanceConfig.State.Hidden) }
+            }
+        ) { states ->
             val index = states.indexOfFirst { it is KeyguardQuickAffordanceConfig.State.Visible }
             if (index != -1) {
                 val visibleState = states[index] as KeyguardQuickAffordanceConfig.State.Visible
