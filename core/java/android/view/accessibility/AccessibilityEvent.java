@@ -1332,6 +1332,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Convenience method to obtain a {@link #TYPE_WINDOWS_CHANGED} event for a specific window and
      * change set.
      *
+     * @param displayId The ID of the display from which the event comes from
      * @param windowId The ID of the window that changed
      * @param windowChangeTypes The changes to populate
      * @return An instance of a TYPE_WINDOWS_CHANGED, populated with the requested fields and with
@@ -1340,8 +1341,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @hide
      */
     public static AccessibilityEvent obtainWindowsChangedEvent(
-            int windowId, int windowChangeTypes) {
+            int displayId, int windowId, int windowChangeTypes) {
         final AccessibilityEvent event = new AccessibilityEvent(TYPE_WINDOWS_CHANGED);
+        event.setDisplayId(displayId);
         event.setWindowId(windowId);
         event.setWindowChanges(windowChangeTypes);
         event.setImportantForAccessibility(true);
