@@ -282,7 +282,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * window like any other app. This can be true while [willUnlockWithSmartspaceTransition] is
      * false, if the smartspace is not available or was not ready in time.
      */
-    private var willUnlockWithInWindowLauncherAnimations: Boolean = false
+    @VisibleForTesting
+    var willUnlockWithInWindowLauncherAnimations: Boolean = false
 
     /**
      * Whether we decided in [prepareForInWindowLauncherAnimations] that we are able to and want to
@@ -484,8 +485,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
             // surface behind the keyguard to finish unlocking.
             if (keyguardStateController.isFlingingToDismissKeyguard) {
                 playCannedUnlockAnimation()
-            } else if (keyguardStateController.isDismissingFromSwipe
-                    && willUnlockWithInWindowLauncherAnimations) {
+            } else if (keyguardStateController.isDismissingFromSwipe &&
+                    willUnlockWithInWindowLauncherAnimations) {
                 // If we're swiping to unlock to the Launcher, and can play in-window animations,
                 // make the launcher surface fully visible and play the in-window unlock animation
                 // on the launcher icons. System UI will remain locked, using the swipe-to-unlock
@@ -574,7 +575,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // Now that the Launcher surface (with its smartspace positioned identically to ours) is
         // visible, hide our smartspace.
-        lockscreenSmartspace!!.visibility = View.INVISIBLE
+        lockscreenSmartspace?.visibility = View.INVISIBLE
 
         // As soon as the shade has animated out of the way, finish the keyguard exit animation. The
         // in-window animations in the Launcher window will end on their own.
@@ -727,8 +728,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // If we're dismissing via swipe to the Launcher, we'll play in-window scale animations, so
         // don't also scale the window.
-        if (keyguardStateController.isDismissingFromSwipe
-                && willUnlockWithInWindowLauncherAnimations) {
+        if (keyguardStateController.isDismissingFromSwipe &&
+                willUnlockWithInWindowLauncherAnimations) {
             scaleFactor = 1f
         }
 

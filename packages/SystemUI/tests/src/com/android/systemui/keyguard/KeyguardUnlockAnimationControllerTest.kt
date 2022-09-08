@@ -27,11 +27,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor.forClass
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -217,5 +217,19 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         assertFalse(keyguardUnlockAnimationController.canPerformInWindowLauncherAnimations())
         assertFalse(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+    }
+
+    @Test
+    fun playCannedUnlockAnimation_nullSmartspaceView_doesNotThrowExecption() {
+        keyguardUnlockAnimationController.lockscreenSmartspace = null
+        keyguardUnlockAnimationController.willUnlockWithInWindowLauncherAnimations = true
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+                remoteAnimationTarget,
+                0 /* startTime */,
+                false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        assertTrue(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
     }
 }
