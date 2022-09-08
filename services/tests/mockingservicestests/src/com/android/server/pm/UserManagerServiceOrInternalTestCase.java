@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -48,6 +49,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Base class for {@link UserManagerInternalTest} and {@link UserManagerInternalTest}.
@@ -90,7 +94,12 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
     /**
      * Id of a secondary display (i.e, not {@link android.view.Display.DEFAULT_DISPLAY}).
      */
-    private static final int SECONDARY_DISPLAY_ID = 42;
+    protected static final int SECONDARY_DISPLAY_ID = 42;
+
+    /**
+     * Id of another secondary display (i.e, not {@link android.view.Display.DEFAULT_DISPLAY}).
+     */
+    protected static final int OTHER_SECONDARY_DISPLAY_ID = 108;
 
     private final Object mPackagesLock = new Object();
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
@@ -426,26 +435,26 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
      * Change test fixtures to use a version that supports {@code MUMD} (Multiple Users on Multiple
      * Displays).
      */
-    protected void enableUsersOnSecondaryDisplays() {
+    protected final void enableUsersOnSecondaryDisplays() {
         setServiceFixtures(/* usersOnSecondaryDisplaysEnabled= */ true);
     }
 
-    protected void mockCurrentUser(@UserIdInt int userId) {
+    protected final void mockCurrentUser(@UserIdInt int userId) {
         mockGetLocalService(ActivityManagerInternal.class, mActivityManagerInternal);
 
         when(mActivityManagerInternal.getCurrentUserId()).thenReturn(userId);
     }
 
-    protected <T> void mockGetLocalService(Class<T> serviceClass, T service) {
+    protected final <T> void mockGetLocalService(Class<T> serviceClass, T service) {
         doReturn(service).when(() -> LocalServices.getService(serviceClass));
     }
 
-    protected void addDefaultProfileAndParent() {
+    protected final void addDefaultProfileAndParent() {
         addUser(PARENT_USER_ID);
         addProfile(PROFILE_USER_ID, PARENT_USER_ID);
     }
 
-    protected void addProfile(@UserIdInt int profileId, @UserIdInt int parentId) {
+    protected final void addProfile(@UserIdInt int profileId, @UserIdInt int parentId) {
         TestUserData profileData = new TestUserData(profileId);
         profileData.info.flags = UserInfo.FLAG_PROFILE;
         profileData.info.profileGroupId = parentId;
@@ -453,25 +462,53 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
         addUserData(profileData);
     }
 
-    protected void addUser(@UserIdInt int userId) {
+    protected final void addUser(@UserIdInt int userId) {
         TestUserData userData = new TestUserData(userId);
 
         addUserData(userData);
     }
 
-    protected void startDefaultProfile() {
+    protected final void startDefaultProfile() {
         setUserState(PROFILE_USER_ID, UserState.STATE_RUNNING_UNLOCKED);
     }
 
-    protected void stopDefaultProfile() {
+    protected final void stopDefaultProfile() {
         // TODO(b/244798930): should set it to STATE_STOPPING or STATE_SHUTDOWN instead
         removeUserState(PROFILE_USER_ID);
     }
 
     // NOTE: should only called by tests that indirectly needs to check user assignments (like
     // isUserVisible), not by tests for the user assignment methods per se.
-    protected void assignUserToDisplay(@UserIdInt int userId, int displayId) {
+    protected final void assignUserToDisplay(@UserIdInt int userId, int displayId) {
         mUsersOnSecondaryDisplays.put(userId, displayId);
+    }
+
+    protected final void assertNoUserAssignedToDisplay() {
+        assertWithMessage("mUsersOnSecondaryDisplays()").that(usersOnSecondaryDisplaysAsMap())
+                .isEmpty();
+    }
+
+    protected final void assertUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
+        assertWithMessage("mUsersOnSecondaryDisplays()").that(usersOnSecondaryDisplaysAsMap())
+                .containsExactly(userId, displayId);
+    }
+
+    @SafeVarargs
+    protected final void assertUsersAssignedToDisplays(@UserIdInt int userId, int displayId,
+            @SuppressWarnings("unchecked") Pair<Integer, Integer>... others) {
+        Object[] otherObjects = new Object[others.length * 2];
+        for (int i = 0; i < others.length; i++) {
+            Pair<Integer, Integer> other = others[i];
+            otherObjects[i * 2] = other.first;
+            otherObjects[i * 2 + 1] = other.second;
+
+        }
+        assertWithMessage("mUsersOnSecondaryDisplays()").that(usersOnSecondaryDisplaysAsMap())
+                .containsExactly(userId, displayId, otherObjects);
+    }
+
+    protected static Pair<Integer, Integer> pair(@UserIdInt int userId, int secondaryDisplayId) {
+        return new Pair<>(userId, secondaryDisplayId);
     }
 
     ///////////////////
@@ -506,6 +543,15 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
 
     private void removeUserState(@UserIdInt int userId) {
         mUmi.removeUserState(userId);
+    }
+
+    private Map<Integer, Integer> usersOnSecondaryDisplaysAsMap() {
+        int size = mUsersOnSecondaryDisplays.size();
+        Map<Integer, Integer> map = new LinkedHashMap<>(size);
+        for (int i = 0; i < size; i++) {
+            map.put(mUsersOnSecondaryDisplays.keyAt(i), mUsersOnSecondaryDisplays.valueAt(i));
+        }
+        return map;
     }
 
     private static final class TestUserData extends UserData {
