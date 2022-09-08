@@ -346,6 +346,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
     private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
     private static final int MSG_DISPATCH_DEVICE_VOLUME_BEHAVIOR = 47;
+    private static final int MSG_RESET_SPATIALIZER = 50;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -353,6 +354,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 100;
     private static final int MSG_INIT_STREAMS_VOLUMES = 101;
     private static final int MSG_INIT_SPATIALIZER = 102;
+
     // end of messages handled under wakelock
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
@@ -8165,6 +8167,10 @@ public class AudioService extends IAudioService.Stub
                     onPersistSpatialAudioDeviceSettings();
                     break;
 
+                case MSG_RESET_SPATIALIZER:
+                    mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
+                    break;
+
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive((String) msg.obj);
                     break;
@@ -9129,6 +9135,16 @@ public class AudioService extends IAudioService.Stub
     void postInitSpatializerHeadTrackingSensors() {
         sendMsg(mAudioHandler,
                 MSG_INIT_HEADTRACKING_SENSORS,
+                SENDMSG_REPLACE,
+                /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
+    }
+
+    /**
+     * post a message to schedule a reset of the spatializer state
+     */
+    void postResetSpatializer() {
+        sendMsg(mAudioHandler,
+                MSG_RESET_SPATIALIZER,
                 SENDMSG_REPLACE,
                 /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
     }
