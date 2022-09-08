@@ -71,7 +71,9 @@ public class Flags {
     public static final UnreleasedFlag NOTIFICATION_MEMORY_MONITOR_ENABLED = new UnreleasedFlag(112,
             false);
 
-    // next id: 112
+    public static final UnreleasedFlag NOTIFICATION_DISMISSAL_FADE = new UnreleasedFlag(113, true);
+
+    // next id: 114
 
     /***************************************/
     // 200 - keyguard/lockscreen
