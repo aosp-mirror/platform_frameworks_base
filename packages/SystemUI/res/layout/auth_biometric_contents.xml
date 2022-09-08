@@ -51,7 +51,7 @@
         android:id="@+id/biometric_icon_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center">
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/biometric_icon"
@@ -61,6 +61,13 @@
             android:contentDescription="@null"
             android:scaleType="fitXY" />
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/biometric_icon_overlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:scaleType="fitXY" />
     </FrameLayout>
 
     <!-- For sensors such as UDFPS, this view is used during custom measurement/layout to add extra
