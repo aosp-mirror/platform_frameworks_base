@@ -41,6 +41,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.NotifPanelEvents
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -401,9 +402,20 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     /**
-     * Is the doze animation currently Running
+     * Is the dream overlay currently active
      */
     private var dreamOverlayActive: Boolean = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                updateDesiredLocation(forceNoAnimation = true)
+            }
+        }
+
+    /**
+     * Is the dream media complication currently active
+     */
+    private var dreamMediaComplicationActive: Boolean = false
         private set(value) {
             if (field != value) {
                 field = value
@@ -500,6 +512,12 @@ class MediaHierarchyManager @Inject constructor(
         })
 
         dreamOverlayStateController.addCallback(object : DreamOverlayStateController.Callback {
+            override fun onComplicationsChanged() {
+                dreamMediaComplicationActive = dreamOverlayStateController.complications.any {
+                    it is MediaDreamComplication
+                }
+            }
+
             override fun onStateChanged() {
                 dreamOverlayStateController.isOverlayActive.also { dreamOverlayActive = it }
             }
@@ -1068,7 +1086,7 @@ class MediaHierarchyManager @Inject constructor(
         val onLockscreen = (!bypassController.bypassEnabled &&
             (statusbarState == StatusBarState.KEYGUARD))
         val location = when {
-            dreamOverlayActive -> LOCATION_DREAM_OVERLAY
+            dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
             (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
             !hasActiveMedia -> LOCATION_QS
