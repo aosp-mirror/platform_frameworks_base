@@ -57,8 +57,6 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     @Mock
     private lateinit var inflatedUserDetailItemView: KeyguardUserDetailItemView
     @Mock
-    private lateinit var userInfo: UserInfo
-    @Mock
     private lateinit var layoutInflater: LayoutInflater
     @Mock
     private lateinit var keyguardUserSwitcherController: KeyguardUserSwitcherController
@@ -188,7 +186,7 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
 
     private fun createUserRecord(isCurrentUser: Boolean, isGuestUser: Boolean) =
         UserRecord(
-            userInfo,
+            UserInfo(0 /* id */, "name", 0 /* flags */),
             picture,
             isGuestUser,
             isCurrentUser,

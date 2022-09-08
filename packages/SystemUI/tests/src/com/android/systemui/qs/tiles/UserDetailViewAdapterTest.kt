@@ -53,7 +53,6 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     @Mock private lateinit var mUserDetailItemView: UserDetailItemView
     @Mock private lateinit var mOtherView: View
     @Mock private lateinit var mInflatedUserDetailItemView: UserDetailItemView
-    @Mock private lateinit var mUserInfo: UserInfo
     @Mock private lateinit var mLayoutInflater: LayoutInflater
     private var falsingManagerFake: FalsingManagerFake = FalsingManagerFake()
     private lateinit var adapter: UserDetailView.Adapter
@@ -142,7 +141,7 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
 
     private fun createUserRecord(current: Boolean, guest: Boolean) =
         UserRecord(
-            mUserInfo,
+            UserInfo(0 /* id */, "name", 0 /* flags */),
             mPicture,
             guest,
             current,
