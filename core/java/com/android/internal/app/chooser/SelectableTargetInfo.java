@@ -37,7 +37,6 @@ import android.service.chooser.ChooserTarget;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.app.ResolverListAdapter.ActivityInfoPresentationGetter;
@@ -60,11 +59,8 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
     private final String mDisplayLabel;
     private final PackageManager mPm;
     private final SelectableTargetInfoCommunicator mSelectableTargetInfoCommunicator;
-    @GuardedBy("this")
-    private ShortcutInfo mShortcutInfo;
     private Drawable mBadgeIcon = null;
     private CharSequence mBadgeContentDescription;
-    @GuardedBy("this")
     private Drawable mDisplayIcon;
     private final Intent mFillInIntent;
     private final int mFillInFlags;
@@ -82,7 +78,6 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         mModifiedScore = modifiedScore;
         mPm = mContext.getPackageManager();
         mSelectableTargetInfoCommunicator = selectableTargetInfoComunicator;
-        mShortcutInfo = shortcutInfo;
         mIsPinned = shortcutInfo != null && shortcutInfo.isPinned();
         if (sourceInfo != null) {
             final ResolveInfo ri = sourceInfo.getResolveInfo();
@@ -97,6 +92,8 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
                 }
             }
         }
+        // TODO(b/121287224): do this in the background thread, and only for selected targets
+        mDisplayIcon = getChooserTargetIconDrawable(chooserTarget, shortcutInfo);
 
         if (sourceInfo != null) {
             mBackupResolveInfo = null;
@@ -121,10 +118,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         mChooserTarget = other.mChooserTarget;
         mBadgeIcon = other.mBadgeIcon;
         mBadgeContentDescription = other.mBadgeContentDescription;
-        synchronized (other) {
-            mShortcutInfo = other.mShortcutInfo;
-            mDisplayIcon = other.mDisplayIcon;
-        }
+        mDisplayIcon = other.mDisplayIcon;
         mFillInIntent = fillInIntent;
         mFillInFlags = flags;
         mModifiedScore = other.mModifiedScore;
@@ -145,25 +139,6 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
 
     public DisplayResolveInfo getDisplayResolveInfo() {
         return mSourceInfo;
-    }
-
-    /**
-     * Load display icon, if needed.
-     */
-    public void loadIcon() {
-        ShortcutInfo shortcutInfo;
-        Drawable icon;
-        synchronized (this) {
-            shortcutInfo = mShortcutInfo;
-            icon = mDisplayIcon;
-        }
-        if (icon == null && shortcutInfo != null) {
-            icon = getChooserTargetIconDrawable(mChooserTarget, shortcutInfo);
-            synchronized (this) {
-                mDisplayIcon = icon;
-                mShortcutInfo = null;
-            }
-        }
     }
 
     private Drawable getChooserTargetIconDrawable(ChooserTarget target,
@@ -295,7 +270,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
     }
 
     @Override
-    public synchronized Drawable getDisplayIcon(Context context) {
+    public Drawable getDisplayIcon(Context context) {
         return mDisplayIcon;
     }
 
