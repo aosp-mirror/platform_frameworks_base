@@ -1477,14 +1477,14 @@
          if their end is aligned with the parent end. Represented as the percentage over from the
          start of the parent container. -->
     <item name="dream_overlay_complication_guide_end_percent" format="float" type="dimen">
-        0.75
+        0.5
     </item>
 
     <!-- The position of the start guide, which dream overlay complications can align their end to
          if their start is aligned with the parent start. Represented as the percentage over from
          the start of the parent container. -->
     <item name="dream_overlay_complication_guide_start_percent" format="float" type="dimen">
-        0.25
+        0.5
     </item>
 
     <!-- The position of the bottom guide, which dream overlay complications can align their top to
