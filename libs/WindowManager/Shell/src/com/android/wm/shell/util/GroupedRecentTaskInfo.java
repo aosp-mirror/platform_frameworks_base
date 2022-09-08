@@ -114,7 +114,8 @@ public class GroupedRecentTaskInfo implements Parcelable {
     /**
      * Get all {@link ActivityManager.RecentTaskInfo}s grouped together.
      */
-    public List<ActivityManager.RecentTaskInfo> getAllTaskInfos() {
+    @NonNull
+    public List<ActivityManager.RecentTaskInfo> getTaskInfoList() {
         return Arrays.asList(mTasks);
     }
 
@@ -148,7 +149,7 @@ public class GroupedRecentTaskInfo implements Parcelable {
         if (mSplitBounds != null) {
             taskString.append(", SplitBounds: ").append(mSplitBounds);
         }
-        taskString.append(", Type=").append(mType);
+        taskString.append(", Type=");
         switch (mType) {
             case TYPE_SINGLE:
                 taskString.append("TYPE_SINGLE");
