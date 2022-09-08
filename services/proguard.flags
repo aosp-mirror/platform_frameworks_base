@@ -127,3 +127,7 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.usage.StorageStatsManagerLocal { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.internal.util.** { *; }
 -keep,allowoptimization,allowaccessmodification class android.os.** { *; }
+
+# CoverageService guards optional jacoco class references with a runtime guard, so we can safely
+# suppress build-time warnings.
+-dontwarn org.jacoco.agent.rt.*
