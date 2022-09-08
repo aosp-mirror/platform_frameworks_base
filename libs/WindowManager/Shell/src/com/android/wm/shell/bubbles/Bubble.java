@@ -170,7 +170,8 @@ public class Bubble implements BubbleViewProvider {
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
-            int taskId, @Nullable final String locus, Executor mainExecutor) {
+            int taskId, @Nullable final String locus, Executor mainExecutor,
+            final Bubbles.BubbleMetadataFlagListener listener) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mMetadataShortcutId = shortcutInfo.getId();
@@ -188,11 +189,12 @@ public class Bubble implements BubbleViewProvider {
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
         mTaskId = taskId;
+        mBubbleMetadataFlagListener = listener;
     }
 
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final BubbleEntry entry,
-            @Nullable final Bubbles.BubbleMetadataFlagListener listener,
+            final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
         mKey = entry.getKey();
@@ -830,6 +832,7 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
+        pw.print("  bubbleMetadataFlagListener null: " + (mBubbleMetadataFlagListener == null));
         if (mExpandedView != null) {
             mExpandedView.dump(pw);
         }

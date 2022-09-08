@@ -52,6 +52,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.media.MediaOutputConstants;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ public class VolumePanelDialog extends SystemUIDialog implements LifecycleOwner 
     private static final int DURATION_SLICE_BINDING_TIMEOUT_MS = 200;
     private static final int DEFAULT_SLICE_SIZE = 4;
 
+    private final ActivityStarter mActivityStarter;
     private RecyclerView mVolumePanelSlices;
     private VolumePanelSlicesAdapter mVolumePanelSlicesAdapter;
     private final LifecycleRegistry mLifecycleRegistry;
@@ -78,8 +80,10 @@ public class VolumePanelDialog extends SystemUIDialog implements LifecycleOwner 
     private boolean mSlicesReadyToLoad;
     private LocalBluetoothProfileManager mProfileManager;
 
-    public VolumePanelDialog(Context context, boolean aboveStatusBar) {
+    public VolumePanelDialog(Context context,
+            ActivityStarter activityStarter, boolean aboveStatusBar) {
         super(context);
+        mActivityStarter = activityStarter;
         mLifecycleRegistry = new LifecycleRegistry(this);
         if (!aboveStatusBar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
@@ -100,9 +104,11 @@ public class VolumePanelDialog extends SystemUIDialog implements LifecycleOwner 
         doneButton.setOnClickListener(v -> dismiss());
         Button settingsButton = dialogView.findViewById(R.id.settings_button);
         settingsButton.setOnClickListener(v -> {
-            getContext().startActivity(new Intent(Settings.ACTION_SOUND_SETTINGS).addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK));
             dismiss();
+
+            Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mActivityStarter.startActivity(intent, /* dismissShade= */ true);
         });
 
         LocalBluetoothManager localBluetoothManager = LocalBluetoothManager.getInstance(

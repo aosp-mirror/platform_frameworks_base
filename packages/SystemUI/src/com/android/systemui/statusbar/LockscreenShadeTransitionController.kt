@@ -2,7 +2,6 @@ package com.android.systemui.statusbar
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
@@ -880,15 +879,22 @@ class DragDownHelper(
         child.actualHeight = (child.collapsedHeight + rubberband).toInt()
     }
 
-    private fun cancelChildExpansion(child: ExpandableView) {
+    @VisibleForTesting
+    fun cancelChildExpansion(
+            child: ExpandableView,
+            animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS
+    ) {
         if (child.actualHeight == child.collapsedHeight) {
             expandCallback.setUserLockedChild(child, false)
             return
         }
-        val anim = ObjectAnimator.ofInt(child, "actualHeight",
-                child.actualHeight, child.collapsedHeight)
+        val anim = ValueAnimator.ofInt(child.actualHeight, child.collapsedHeight)
         anim.interpolator = Interpolators.FAST_OUT_SLOW_IN
-        anim.duration = SPRING_BACK_ANIMATION_LENGTH_MS
+        anim.duration = animationDuration
+        anim.addUpdateListener { animation: ValueAnimator ->
+            // don't use reflection, because the `actualHeight` field may be obfuscated
+            child.actualHeight = animation.animatedValue as Int
+        }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 expandCallback.setUserLockedChild(child, false)

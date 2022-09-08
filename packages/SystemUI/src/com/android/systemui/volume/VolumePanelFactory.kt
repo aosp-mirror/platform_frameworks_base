@@ -21,6 +21,7 @@ import android.util.Log
 import android.view.View
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
 private const val TAG = "VolumePanelFactory"
@@ -33,6 +34,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 @SysUISingleton
 class VolumePanelFactory @Inject constructor(
     private val context: Context,
+    private val activityStarter: ActivityStarter,
     private val dialogLaunchAnimator: DialogLaunchAnimator
 ) {
     companion object {
@@ -45,7 +47,7 @@ class VolumePanelFactory @Inject constructor(
             return
         }
 
-        val dialog = VolumePanelDialog(context, aboveStatusBar)
+        val dialog = VolumePanelDialog(context, activityStarter, aboveStatusBar)
         volumePanelDialog = dialog
 
         // Show the dialog.

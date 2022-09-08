@@ -28,12 +28,15 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * {@link ShellTaskOrganizer.TaskListener} for {@link
@@ -46,6 +49,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
     private static final String TAG = "FreeformTaskListener";
 
     private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final Optional<RecentTasksController> mRecentTasksOptional;
     private final WindowDecorViewModel<T> mWindowDecorationViewModel;
 
     private final SparseArray<State<T>> mTasks = new SparseArray<>();
@@ -60,9 +64,11 @@ public class FreeformTaskListener<T extends AutoCloseable>
     public FreeformTaskListener(
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
+            Optional<RecentTasksController> recentTasksController,
             WindowDecorViewModel<T> windowDecorationViewModel) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
+        mRecentTasksOptional = recentTasksController;
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
         }
@@ -82,6 +88,12 @@ public class FreeformTaskListener<T extends AutoCloseable>
             state.mWindowDecoration =
                     mWindowDecorationViewModel.createWindowDecoration(taskInfo, leash, t, t);
             t.apply();
+        }
+
+        if (DesktopMode.IS_SUPPORTED && taskInfo.isVisible) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                    "Adding active freeform task: #%d", taskInfo.taskId);
+            mRecentTasksOptional.ifPresent(rt -> rt.addActiveFreeformTask(taskInfo.taskId));
         }
     }
 
@@ -111,6 +123,12 @@ public class FreeformTaskListener<T extends AutoCloseable>
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
 
+        if (DesktopMode.IS_SUPPORTED) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                    "Removing active freeform task: #%d", taskInfo.taskId);
+            mRecentTasksOptional.ifPresent(rt -> rt.removeActiveFreeformTask(taskInfo.taskId));
+        }
+
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             // Save window decorations of closing tasks so that we can hand them over to the
             // transition system if this method happens before the transition. In case where the
@@ -130,6 +148,14 @@ public class FreeformTaskListener<T extends AutoCloseable>
                 taskInfo.taskId);
         if (state.mWindowDecoration != null) {
             mWindowDecorationViewModel.onTaskInfoChanged(state.mTaskInfo, state.mWindowDecoration);
+        }
+
+        if (DesktopMode.IS_SUPPORTED) {
+            if (taskInfo.isVisible) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                        "Adding active freeform task: #%d", taskInfo.taskId);
+                mRecentTasksOptional.ifPresent(rt -> rt.addActiveFreeformTask(taskInfo.taskId));
+            }
         }
     }
 
