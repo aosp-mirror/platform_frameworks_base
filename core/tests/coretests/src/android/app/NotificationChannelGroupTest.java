@@ -17,9 +17,11 @@
 package android.app;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 import android.os.Parcel;
 import android.test.AndroidTestCase;
+import android.text.TextUtils;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -69,5 +71,19 @@ public class NotificationChannelGroupTest {
         assertEquals(NotificationChannelGroup.MAX_TEXT_LENGTH, fromParcel.getName().length());
         assertEquals(NotificationChannelGroup.MAX_TEXT_LENGTH,
                 fromParcel.getDescription().length());
+    }
+
+    @Test
+    public void testNullableFields() {
+        NotificationChannelGroup group = new NotificationChannelGroup("my_group_01", null);
+
+        Parcel parcel = Parcel.obtain();
+        group.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        NotificationChannelGroup fromParcel =
+                NotificationChannelGroup.CREATOR.createFromParcel(parcel);
+        assertEquals(group.getId(), fromParcel.getId());
+        assertTrue(TextUtils.isEmpty(fromParcel.getName()));
     }
 }
