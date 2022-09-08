@@ -8085,7 +8085,8 @@ public final class ViewRootImpl implements ViewParent,
         final int measuredWidth = mView.getMeasuredWidth();
         final int measuredHeight = mView.getMeasuredHeight();
         final boolean relayoutAsync;
-        if (LOCAL_LAYOUT && !mFirst && viewVisibility == mViewVisibility
+        if (LOCAL_LAYOUT
+                && (mViewFrameInfo.flags & FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED) == 0
                 && mWindowAttributes.type != TYPE_APPLICATION_STARTING
                 && mSyncSeqId <= mLastSyncSeqId
                 && winConfigFromAm.diff(winConfigFromWm, false /* compareUndefined */) == 0) {
