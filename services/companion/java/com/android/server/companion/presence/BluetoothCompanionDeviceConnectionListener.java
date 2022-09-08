@@ -40,7 +40,7 @@ import java.util.Map;
 class BluetoothCompanionDeviceConnectionListener
         extends BluetoothAdapter.BluetoothConnectionCallback
         implements AssociationStore.OnChangeListener {
-    private static final String TAG = "CompanionDevice_PresenceMonitor_BT";
+    private static final String TAG = "CDM_BluetoothCompanionDeviceConnectionListener";
 
     interface Callback {
         void onBluetoothCompanionDeviceConnected(int associationId);

@@ -70,7 +70,7 @@ import java.util.Objects;
  */
 public class CompanionDeviceDiscoveryService extends Service {
     private static final boolean DEBUG = false;
-    private static final String TAG = CompanionDeviceDiscoveryService.class.getSimpleName();
+    private static final String TAG = "CDM_CompanionDeviceDiscoveryService";
 
     private static final String SYS_PROP_DEBUG_TIMEOUT = "debug.cdm.discovery_timeout";
     private static final long TIMEOUT_DEFAULT = 20_000L; // 20 seconds

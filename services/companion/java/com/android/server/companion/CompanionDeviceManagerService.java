@@ -124,7 +124,7 @@ import java.util.Set;
 
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService {
-    static final String TAG = "CompanionDeviceManagerService";
+    static final String TAG = "CDM_CompanionDeviceManagerService";
     static final boolean DEBUG = false;
 
     /** Range of Association IDs allocated for a user.*/

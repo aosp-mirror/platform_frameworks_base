@@ -66,7 +66,7 @@ import java.util.Map;
 @SuppressLint("LongLogTag")
 public class CompanionApplicationController {
     static final boolean DEBUG = false;
-    private static final String TAG = "CompanionDevice_ApplicationController";
+    private static final String TAG = "CDM_CompanionApplicationController";
 
     private static final long REBIND_TIMEOUT = 10 * 1000; // 10 sec
 
@@ -256,6 +256,9 @@ public class CompanionApplicationController {
             return;
         }
 
+        Log.i(TAG, "Calling onDeviceAppeared to userId=[" + userId + "] package=["
+                + packageName + "] associationId=[" + association.getId() + "]");
+
         primaryServiceConnector.postOnDeviceAppeared(association);
     }
 
@@ -277,6 +280,9 @@ public class CompanionApplicationController {
             }
             return;
         }
+
+        Log.i(TAG, "Calling onDeviceDisappeared to userId=[" + userId + "] package=["
+                + packageName + "] associationId=[" + association.getId() + "]");
 
         primaryServiceConnector.postOnDeviceDisappeared(association);
     }

@@ -63,7 +63,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SystemDataTransferProcessor {
 
-    private static final String LOG_TAG = SystemDataTransferProcessor.class.getSimpleName();
+    private static final String LOG_TAG = "CDM_SystemDataTransferProcessor";
 
     // Values from UI to SystemDataTransferProcessor via ResultReceiver
     private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED = 0;

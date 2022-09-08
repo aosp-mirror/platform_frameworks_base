@@ -107,7 +107,7 @@ import java.util.Set;
  */
 @SuppressLint("LongLogTag")
 class AssociationRequestsProcessor {
-    private static final String TAG = "CompanionDevice_AssociationRequestsProcessor";
+    private static final String TAG = "CDM_AssociationRequestsProcessor";
 
     private static final ComponentName ASSOCIATION_REQUEST_APPROVAL_ACTIVITY =
             createRelative(COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, ".CompanionDeviceActivity");

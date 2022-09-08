@@ -84,7 +84,7 @@ import java.util.List;
 public class CompanionDeviceActivity extends FragmentActivity implements
         CompanionVendorHelperDialogFragment.CompanionVendorHelperDialogListener {
     private static final boolean DEBUG = false;
-    private static final String TAG = CompanionDeviceActivity.class.getSimpleName();
+    private static final String TAG = "CDM_CompanionDeviceActivity";
 
     // Keep the following constants in sync with
     // frameworks/base/services/companion/java/

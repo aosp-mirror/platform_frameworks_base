@@ -99,7 +99,7 @@ import java.util.concurrent.Executor;
  */
 public abstract class CompanionDeviceService extends Service {
 
-    private static final String LOG_TAG = "CompanionDeviceService";
+    private static final String LOG_TAG = "CDM_CompanionDeviceService";
 
     /**
      * An intent action for a service to be bound whenever this app's companion device(s)

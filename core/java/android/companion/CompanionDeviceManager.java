@@ -81,7 +81,7 @@ import java.util.function.Consumer;
 public final class CompanionDeviceManager {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "CompanionDeviceManager";
+    private static final String LOG_TAG = "CDM_CompanionDeviceManager";
 
     /**
      * The result code to propagate back to the originating activity, indicates the association
@@ -709,27 +709,29 @@ public final class CompanionDeviceManager {
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
      *
-     * The provided device must be {@link #associate associated} with the calling app before
-     * calling this method.
+     * <p>The provided device must be {@link #associate associated} with the calling app before
+     * calling this method.</p>
      *
-     * Caller must implement a single {@link CompanionDeviceService} which will be bound to and
+     * <p>Caller must implement a single {@link CompanionDeviceService} which will be bound to and
      * receive callbacks to {@link CompanionDeviceService#onDeviceAppeared} and
      * {@link CompanionDeviceService#onDeviceDisappeared}.
-     * The app doesn't need to remain running in order to receive its callbacks.
+     * The app doesn't need to remain running in order to receive its callbacks.</p>
      *
-     * Calling app must declare uses-permission
-     * {@link android.Manifest.permission#REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE}.
+     * <p>Calling app must declare uses-permission
+     * {@link android.Manifest.permission#REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE}.</p>
      *
-     * Calling app must check for feature presence of
-     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     * <p>Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.</p>
      *
-     * For Bluetooth LE devices this is based on scanning for device with the given address.
-     * For Bluetooth classic devices this is triggered when the device connects/disconnects.
-     * WiFi devices are not supported.
+     * <p>For Bluetooth LE devices, this is based on scanning for device with the given address.
+     * The system will scan for the device when Bluetooth is ON or Bluetooth scanning is ON.</p>
      *
-     * If a Bluetooth LE device wants to use a rotating mac address, it is recommended to use
+     * <p>For Bluetooth classic devices this is triggered when the device connects/disconnects.
+     * WiFi devices are not supported.</p>
+     *
+     * <p>If a Bluetooth LE device wants to use a rotating mac address, it is recommended to use
      * Resolvable Private Address, and ensure the device is bonded to the phone so that android OS
-     * is able to resolve the address.
+     * is able to resolve the address.</p>
      *
      * @param deviceAddress a previously-associated companion device's address
      *
