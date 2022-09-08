@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.init
 import android.service.notification.StatusBarNotification
 import com.android.systemui.ForegroundServiceNotificationListener
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.NotificationListener
@@ -36,6 +38,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
+import com.android.systemui.statusbar.notification.logging.NotificationMemoryMonitor
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -68,6 +71,8 @@ class NotificationsControllerImpl @Inject constructor(
     private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
     private val bubblesOptional: Optional<Bubbles>,
     private val fgsNotifListener: ForegroundServiceNotificationListener,
+    private val memoryMonitor: Lazy<NotificationMemoryMonitor>,
+    private val featureFlags: FeatureFlags
 ) : NotificationsController {
 
     override fun initialize(
@@ -107,6 +112,9 @@ class NotificationsControllerImpl @Inject constructor(
 
         peopleSpaceWidgetManager.attach(notificationListener)
         fgsNotifListener.init()
+        if (featureFlags.isEnabled(Flags.NOTIFICATION_MEMORY_MONITOR_ENABLED)) {
+            memoryMonitor.get().init()
+        }
     }
 
     // TODO: Convert all functions below this line into listeners instead of public methods
