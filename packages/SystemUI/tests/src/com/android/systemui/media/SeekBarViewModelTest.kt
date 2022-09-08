@@ -26,13 +26,13 @@ import android.widget.SeekBar
 import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
 import androidx.test.filters.SmallTest
-
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.concurrency.FakeRepeatableExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -47,8 +47,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -70,6 +70,8 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
     @Mock private lateinit var mockController: MediaController
     @Mock private lateinit var mockTransport: MediaController.TransportControls
+    @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var mockBar: SeekBar
     private val token1 = MediaSession.Token(1, null)
     private val token2 = MediaSession.Token(2, null)
 
@@ -78,9 +80,10 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor))
+        viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor), falsingManager)
         viewModel.logSeek = { }
         whenever(mockController.sessionToken).thenReturn(token1)
+        whenever(mockBar.context).thenReturn(context)
 
         // LiveData to run synchronously
         ArchTaskExecutor.getInstance().setDelegate(taskExecutor)
@@ -451,6 +454,25 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
         // THEN then elapsed time should be updated
         verify(mockTransport).seekTo(eq(pos.toLong()))
+    }
+
+    @Test
+    fun onFalseTapOrTouch() {
+        whenever(mockController.getTransportControls()).thenReturn(mockTransport)
+        whenever(falsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).thenReturn(true)
+        whenever(falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)).thenReturn(true)
+        viewModel.updateController(mockController)
+        val pos = 169
+
+        viewModel.attachTouchHandlers(mockBar)
+        with(viewModel.seekBarListener) {
+            onStartTrackingTouch(mockBar)
+            onProgressChanged(mockBar, pos, true)
+            onStopTrackingTouch(mockBar)
+        }
+
+        // THEN transport controls should not be used
+        verify(mockTransport, never()).seekTo(pos.toLong())
     }
 
     @Test

@@ -20,6 +20,7 @@ package com.android.systemui.classifier;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
+import static com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
 import static com.android.systemui.classifier.Classifier.PULSE_EXPAND;
@@ -92,6 +93,10 @@ public class TypeClassifier extends FalsingClassifier {
                 break;
             case QS_SWIPE_NESTED:
                 wrongDirection = !vertical;
+                break;
+            case MEDIA_SEEKBAR:
+                confidence = 0;
+                wrongDirection = vertical;
                 break;
             default:
                 wrongDirection = true;

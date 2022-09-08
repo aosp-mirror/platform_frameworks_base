@@ -30,7 +30,10 @@ import androidx.annotation.WorkerThread
 import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.util.concurrency.RepeatableExecutor
 import javax.inject.Inject
@@ -72,7 +75,8 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 
 /** ViewModel for seek bar in QS media player. */
 class SeekBarViewModel @Inject constructor(
-    @Background private val bgExecutor: RepeatableExecutor
+    @Background private val bgExecutor: RepeatableExecutor,
+    private val falsingManager: FalsingManager,
 ) {
     private var _data = Progress(false, false, false, false, null, 0)
         set(value) {
@@ -275,7 +279,7 @@ class SeekBarViewModel @Inject constructor(
     /** Gets a listener to attach to the seek bar to handle seeking. */
     val seekBarListener: SeekBar.OnSeekBarChangeListener
         get() {
-            return SeekBarChangeListener(this)
+            return SeekBarChangeListener(this, falsingManager)
         }
 
     /** Attach touch handlers to the seek bar view. */
@@ -315,7 +319,8 @@ class SeekBarViewModel @Inject constructor(
     }
 
     private class SeekBarChangeListener(
-        val viewModel: SeekBarViewModel
+        val viewModel: SeekBarViewModel,
+        val falsingManager: FalsingManager,
     ) : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
             if (fromUser) {
@@ -328,6 +333,13 @@ class SeekBarViewModel @Inject constructor(
         }
 
         override fun onStopTrackingTouch(bar: SeekBar) {
+            // in addition to the normal functionality of both functions.
+            // isFalseTouch returns true if there is a real/false tap since it is not a move.
+            // isFalseTap returns true if there is a real/false move since it is not a tap.
+            if (falsingManager.isFalseTouch(MEDIA_SEEKBAR) &&
+                    falsingManager.isFalseTap(LOW_PENALTY)) {
+                viewModel.onSeekFalse()
+            }
             viewModel.onSeek(bar.progress.toLong())
         }
     }
@@ -340,7 +352,7 @@ class SeekBarViewModel @Inject constructor(
      */
     private class SeekBarTouchListener(
         private val viewModel: SeekBarViewModel,
-        private val bar: SeekBar
+        private val bar: SeekBar,
     ) : View.OnTouchListener, GestureDetector.OnGestureListener {
 
         // Gesture detector helps decide which touch events to intercept.
