@@ -71,7 +71,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,10 +170,6 @@ public class ContextHubService extends IContextHubService.Stub {
     private final SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
 
     private final Map<Integer, AtomicLong> mLastRestartTimestampMap = new HashMap<>();
-
-    private static final int MAX_NUM_OF_NANOAPP_MESSAGE_RECORDS = 10;
-    private final ConcurrentLinkedEvictingDeque<NanoAppMessage> mNanoAppMessageRecords =
-            new ConcurrentLinkedEvictingDeque<>(MAX_NUM_OF_NANOAPP_MESSAGE_RECORDS);
 
     /**
      * Class extending the callback to register with a Context Hub.
@@ -728,7 +723,6 @@ public class ContextHubService extends IContextHubService.Stub {
             NanoAppMessage message,
             List<String> nanoappPermissions,
             List<String> messagePermissions) {
-        mNanoAppMessageRecords.add(message);
         mClientManager.onMessageFromNanoApp(
                 contextHubId, hostEndpointId, message, nanoappPermissions, messagePermissions);
     }
@@ -790,6 +784,8 @@ public class ContextHubService extends IContextHubService.Stub {
                     ContextHubStatsLog.CONTEXT_HUB_RESTARTED,
                     TimeUnit.NANOSECONDS.toMillis(now - lastRestartTimeNs),
                     contextHubId);
+
+            ContextHubEventLogger.getInstance().logContextHubRestart(contextHubId);
 
             sendLocationSettingUpdate();
             sendWifiSettingUpdate(true /* forceUpdate */);
@@ -1049,19 +1045,16 @@ public class ContextHubService extends IContextHubService.Stub {
         mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
 
         pw.println("");
-        pw.println("=================== NANOAPPS MESSAGES ====================");
-        Iterator<NanoAppMessage> iterator = mNanoAppMessageRecords.descendingIterator();
-        while (iterator.hasNext()) {
-            pw.println(iterator.next());
-        }
-
-        pw.println("");
         pw.println("=================== CLIENTS ====================");
         pw.println(mClientManager);
 
         pw.println("");
         pw.println("=================== TRANSACTIONS ====================");
         pw.println(mTransactionManager);
+
+        pw.println("");
+        pw.println("=================== EVENTS ====================");
+        pw.println(ContextHubEventLogger.getInstance().dump());
 
         // dump eventLog
     }

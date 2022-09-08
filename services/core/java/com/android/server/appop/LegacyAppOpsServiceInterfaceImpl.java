@@ -25,6 +25,7 @@ import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.Mode;
@@ -70,7 +71,7 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     final SparseArray<SparseIntArray> mUidModes = new SparseArray<>();
 
     @GuardedBy("mLock")
-    final ArrayMap<String, SparseIntArray> mPackageModes = new ArrayMap<>();
+    final SparseArray<ArrayMap<String, SparseIntArray>> mUserPackageModes = new SparseArray<>();
 
     final SparseArray<ArraySet<OnOpModeChangedListener>> mOpModeWatchers = new SparseArray<>();
     final ArrayMap<String, ArraySet<OnOpModeChangedListener>> mPackageModeWatchers =
@@ -147,9 +148,13 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     }
 
     @Override
-    public int getPackageMode(String packageName, int op) {
+    public int getPackageMode(String packageName, int op, @UserIdInt int userId) {
         synchronized (mLock) {
-            SparseIntArray opModes = mPackageModes.getOrDefault(packageName, null);
+            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
+            if (packageModes == null) {
+                return AppOpsManager.opToDefaultMode(op);
+            }
+            SparseIntArray opModes = packageModes.getOrDefault(packageName, null);
             if (opModes == null) {
                 return AppOpsManager.opToDefaultMode(op);
             }
@@ -158,14 +163,19 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     }
 
     @Override
-    public void setPackageMode(String packageName, int op, @Mode int mode) {
+    public void setPackageMode(String packageName, int op, @Mode int mode, @UserIdInt int userId) {
         final int defaultMode = AppOpsManager.opToDefaultMode(op);
         synchronized (mLock) {
-            SparseIntArray opModes = mPackageModes.get(packageName);
+            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
+            if (packageModes == null) {
+                packageModes = new ArrayMap<>();
+                mUserPackageModes.put(userId, packageModes);
+            }
+            SparseIntArray opModes = packageModes.get(packageName);
             if (opModes == null) {
                 if (mode != defaultMode) {
                     opModes = new SparseIntArray();
-                    mPackageModes.put(packageName, opModes);
+                    packageModes.put(packageName, opModes);
                     opModes.put(op, mode);
                     mPersistenceScheduler.scheduleWriteLocked();
                 }
@@ -177,7 +187,7 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
                     opModes.delete(op);
                     if (opModes.size() <= 0) {
                         opModes = null;
-                        mPackageModes.remove(packageName);
+                        packageModes.remove(packageName);
                     }
                 } else {
                     opModes.put(op, mode);
@@ -208,17 +218,25 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     }
 
     @Override
-    public boolean arePackageModesDefault(String packageMode) {
+    public boolean arePackageModesDefault(String packageMode, @UserIdInt int userId) {
         synchronized (mLock) {
-            SparseIntArray opModes = mPackageModes.get(packageMode);
+            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
+            if (packageModes == null) {
+                return true;
+            }
+            SparseIntArray opModes = packageModes.get(packageMode);
             return (opModes == null || opModes.size() <= 0);
         }
     }
 
     @Override
-    public boolean removePackage(String packageName) {
+    public boolean removePackage(String packageName, @UserIdInt int userId) {
         synchronized (mLock) {
-            SparseIntArray ops = mPackageModes.remove(packageName);
+            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
+            if (packageModes == null) {
+                return false;
+            }
+            SparseIntArray ops = packageModes.remove(packageName);
             if (ops != null) {
                 mPersistenceScheduler.scheduleFastWriteLocked();
                 return true;
@@ -231,7 +249,7 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
     public void clearAllModes() {
         synchronized (mLock) {
             mUidModes.clear();
-            mPackageModes.clear();
+            mUserPackageModes.clear();
         }
     }
 
@@ -468,9 +486,11 @@ public class LegacyAppOpsServiceInterfaceImpl implements AppOpsServiceInterface 
 
     @Override
     public SparseBooleanArray evalForegroundPackageOps(String packageName,
-            SparseBooleanArray foregroundOps) {
+            SparseBooleanArray foregroundOps, @UserIdInt int userId) {
         synchronized (mLock) {
-            return evalForegroundOps(mPackageModes.get(packageName), foregroundOps);
+            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
+            return evalForegroundOps(packageModes == null ? null : packageModes.get(packageName),
+                    foregroundOps);
         }
     }
 

@@ -71,7 +71,6 @@ import java.util.List;
  */
 public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "TvPipMenuView";
-    private static final boolean DEBUG = TvPipController.DEBUG;
 
     private static final int FIRST_CUSTOM_ACTION_POSITION = 3;
 
@@ -448,10 +447,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void setIsExpanded(boolean expanded) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: setIsExpanded, expanded: %b", TAG, expanded);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: setIsExpanded, expanded: %b", TAG, expanded);
         mExpandButton.setImageResource(
                 expanded ? R.drawable.pip_ic_collapse : R.drawable.pip_ic_expand);
         mExpandButton.setTextAndDescription(
@@ -462,9 +459,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * @param gravity for the arrow hints
      */
     void showMoveMenu(int gravity) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
         mButtonMenuIsVisible = false;
         mMoveMenuIsVisible = true;
         showButtonsMenu(false);
@@ -476,11 +471,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void showButtonsMenu() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showButtonsMenu()", TAG);
-        }
-
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showButtonsMenu()", TAG);
         mButtonMenuIsVisible = true;
         mMoveMenuIsVisible = false;
         showButtonsMenu(true);
@@ -553,10 +545,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      */
     void setAdditionalActions(List<RemoteAction> actions, RemoteAction closeAction,
             Handler mainHandler) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: setAdditionalActions()", TAG);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: setAdditionalActions()", TAG);
 
         // Replace system close action with custom close action if available
         if (closeAction != null) {
@@ -707,10 +697,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Shows user hints for moving the PiP, e.g. arrows.
      */
     public void showMovementHints(int gravity) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showMovementHints(), position: %s", TAG, Gravity.toString(gravity));
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showMovementHints(), position: %s", TAG, Gravity.toString(gravity));
 
         animateAlphaTo(checkGravity(gravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
         animateAlphaTo(checkGravity(gravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
@@ -752,10 +740,9 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Hides user hints for moving the PiP, e.g. arrows.
      */
     public void hideMovementHints() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: hideMovementHints()", TAG);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: hideMovementHints()", TAG);
+
         animateAlphaTo(0, mArrowUp);
         animateAlphaTo(0, mArrowRight);
         animateAlphaTo(0, mArrowDown);
@@ -767,10 +754,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Show or hide the pip buttons menu.
      */
     public void showButtonsMenu(boolean show) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showUserActions: %b", TAG, show);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showUserActions: %b", TAG, show);
         if (show) {
             mActionButtonsContainer.setVisibility(VISIBLE);
             refocusPreviousButton();

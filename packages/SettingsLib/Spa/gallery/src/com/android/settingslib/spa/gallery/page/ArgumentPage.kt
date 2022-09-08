@@ -24,7 +24,6 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.framework.util.normalize
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
@@ -36,7 +35,7 @@ object ArgumentPageProvider : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         if (!ArgumentPageModel.isValidArgument(arguments)) return emptyList()
 
-        val owner = SettingsPage(name, parameter.normalize(arguments))
+        val owner = SettingsPage.create(name, parameter, arguments)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create("string_param", owner)
@@ -69,7 +68,7 @@ object ArgumentPageProvider : SettingsPageProvider {
     private fun buildInjectEntry(arguments: Bundle?): SettingsEntryBuilder? {
         if (!ArgumentPageModel.isValidArgument(arguments)) return null
 
-        return SettingsEntryBuilder.createInject(name, parameter.normalize(arguments))
+        return SettingsEntryBuilder.createInject(SettingsPage.create(name, parameter, arguments))
             // Set attributes
             .setIsAllowSearch(false)
             .setUiLayoutFn {
@@ -80,14 +79,8 @@ object ArgumentPageProvider : SettingsPageProvider {
 
     fun buildRootPages(): List<SettingsPage> {
         return listOf(
-            SettingsPage(
-                ArgumentPageModel.name,
-                ArgumentPageModel.buildArgument("foo")
-            ),
-            SettingsPage(
-                ArgumentPageModel.name,
-                ArgumentPageModel.buildArgument("bar")
-            ),
+            SettingsPage.create(name, parameter, ArgumentPageModel.buildArgument("foo")),
+            SettingsPage.create(name, parameter, ArgumentPageModel.buildArgument("bar")),
         )
     }
 

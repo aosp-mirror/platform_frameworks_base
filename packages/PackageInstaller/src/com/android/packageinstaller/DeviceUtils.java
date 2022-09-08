@@ -18,12 +18,10 @@ package com.android.packageinstaller;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 
 public class DeviceUtils {
     public static boolean isTelevision(Context context) {
-        int uiMode = context.getResources().getConfiguration().uiMode;
-        return (uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION;
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     public static boolean isWear(final Context context) {

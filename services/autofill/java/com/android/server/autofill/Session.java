@@ -68,6 +68,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -79,6 +80,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -3040,6 +3042,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mSessionFlags.mFillDialogDisabled = true;
                 }
                 mPresentationStatsEventLogger.startNewEvent();
+                mPresentationStatsEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
                 requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_SESSION, flags);
                 break;
             case ACTION_VALUE_CHANGED:
@@ -3129,6 +3132,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 mPresentationStatsEventLogger.startNewEvent();
+                mPresentationStatsEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
                 if (requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags)) {
                     return;
                 }
@@ -3373,7 +3377,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // shown, inflated, and filtered.
                     mPresentationStatsEventLogger.maybeSetCountShown(
                             response.getDatasets(), mCurrentViewId);
-                    mPresentationStatsEventLogger.maybeSetDisplayPresentationType(UI_TYPE_INLINE);
+                    mPresentationStatsEventLogger.maybeSetInlinePresentationAndSuggestionHostUid(
+                            mContext, userId);
                     return;
                 }
             }
@@ -4749,5 +4754,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             default:
                 return "UNKNOWN_SESSION_STATE_" + sessionState;
         }
+    }
+
+    private int getAutofillServiceUid() {
+        ServiceInfo serviceInfo = mService.getServiceInfo();
+        return serviceInfo == null ? Process.INVALID_UID : serviceInfo.applicationInfo.uid;
     }
 }
