@@ -66,26 +66,6 @@ class IllustrationTest {
     private var SemanticsPropertyReceiver.rawId by RawId
 
     @Test
-    fun lottie_displayed() {
-        val resId = R.raw.accessibility_shortcut_type_triple_tap
-        composeTestRule.setContent {
-            Illustration(
-                resId = resId,
-                resourceType = ResourceType.LOTTIE,
-                modifier = Modifier.semantics { rawId = resId }
-            )
-        }
-
-        fun hasRaw(@RawRes id: Int): SemanticsMatcher =
-            SemanticsMatcher.expectValue(RawId, id)
-
-        val isIllustrationNode = hasAnyAncestor(hasRaw(resId))
-        composeTestRule.onAllNodes(hasRaw(resId))
-            .filterToOne(isIllustrationNode)
-            .assertIsDisplayed()
-    }
-
-    @Test
     fun empty_lottie_not_displayed() {
         val resId = R.raw.empty
         composeTestRule.setContent {
