@@ -30,6 +30,7 @@ import android.app.ResultInfo;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.BaseBundle;
 import android.os.Bundle;
@@ -81,6 +82,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public void preExecute(ClientTransactionHandler client, IBinder token) {
         client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
+        CompatibilityInfo.applyOverrideScaleIfNeeded(mCurConfig);
+        CompatibilityInfo.applyOverrideScaleIfNeeded(mOverrideConfig);
         client.updatePendingConfiguration(mCurConfig);
         if (mActivityClientController != null) {
             ActivityClient.setActivityClientController(mActivityClientController);

@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -34,6 +35,7 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
 
     @Override
     public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+        CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         client.updatePendingConfiguration(mConfiguration);
     }
 

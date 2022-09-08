@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
+import android.app.Application;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.ResourcesManager;
@@ -46,6 +47,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -175,6 +177,85 @@ public class ActivityThreadTest {
             assertTrue("Custom intent must be preserved after recreate",
                     customIntent.filterEquals(lastActivity.getIntent()));
         });
+    }
+
+    @Test
+    public void testOverrideScale() throws Exception {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final Application app = activity.getApplication();
+        final ActivityThread activityThread = activity.getActivityThread();
+        final IApplicationThread appThread = activityThread.getApplicationThread();
+        final DisplayMetrics originalAppMetrics = new DisplayMetrics();
+        originalAppMetrics.setTo(app.getResources().getDisplayMetrics());
+        final Configuration originalAppConfig =
+                new Configuration(app.getResources().getConfiguration());
+        final DisplayMetrics originalActivityMetrics = new DisplayMetrics();
+        originalActivityMetrics.setTo(activity.getResources().getDisplayMetrics());
+        final Configuration originalActivityConfig =
+                new Configuration(activity.getResources().getConfiguration());
+
+        final Configuration newConfig = new Configuration(originalAppConfig);
+        newConfig.seq = BASE_SEQ + 1;
+        newConfig.smallestScreenWidthDp++;
+
+        final float originalScale = CompatibilityInfo.getOverrideInvertedScale();
+        float scale = 0.5f;
+        CompatibilityInfo.setOverrideInvertedScale(scale);
+        try {
+            // Send process level config change.
+            ClientTransaction transaction = newTransaction(activityThread, null);
+            transaction.addCallback(ConfigurationChangeItem.obtain(new Configuration(newConfig)));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertScreenScale(scale, app, originalAppConfig, originalAppMetrics);
+            // The activity's config doesn't change because ConfigurationChangeItem is process level
+            // that won't affect activity's override config.
+            assertEquals(originalActivityConfig.densityDpi,
+                    activity.getResources().getConfiguration().densityDpi);
+
+            scale = 0.8f;
+            CompatibilityInfo.setOverrideInvertedScale(scale);
+            // Send activity level config change.
+            newConfig.seq++;
+            newConfig.smallestScreenWidthDp++;
+            transaction = newTransaction(activityThread, activity.getActivityToken());
+            transaction.addCallback(ActivityConfigurationChangeItem.obtain(
+                    new Configuration(newConfig)));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
+        } finally {
+            CompatibilityInfo.setOverrideInvertedScale(originalScale);
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> restoreConfig(activityThread, originalAppConfig));
+        }
+        assertScreenScale(originalScale, app, originalAppConfig, originalAppMetrics);
+    }
+
+    private static void assertScreenScale(float scale, Context context,
+            Configuration origConfig, DisplayMetrics origMetrics) {
+        final int expectedDpi = (int) (origConfig.densityDpi * scale + .5f);
+        final float expectedDensity = origMetrics.density * scale;
+        final int expectedWidthPixels = (int) (origMetrics.widthPixels * scale + .5f);
+        final int expectedHeightPixels = (int) (origMetrics.heightPixels * scale + .5f);
+        final Configuration expectedConfig = new Configuration(origConfig);
+        CompatibilityInfo.scaleConfiguration(scale, expectedConfig);
+        final Rect expectedBounds = expectedConfig.windowConfiguration.getBounds();
+        final Rect expectedAppBounds = expectedConfig.windowConfiguration.getAppBounds();
+        final Rect expectedMaxBounds = expectedConfig.windowConfiguration.getMaxBounds();
+
+        final Configuration currentConfig = context.getResources().getConfiguration();
+        final DisplayMetrics currentMetrics = context.getResources().getDisplayMetrics();
+        assertEquals(expectedDpi, currentConfig.densityDpi);
+        assertEquals(expectedDpi, currentMetrics.densityDpi);
+        assertEquals(expectedDensity, currentMetrics.density, 0.001f);
+        assertEquals(expectedWidthPixels, currentMetrics.widthPixels);
+        assertEquals(expectedHeightPixels, currentMetrics.heightPixels);
+        assertEquals(expectedBounds, currentConfig.windowConfiguration.getBounds());
+        assertEquals(expectedAppBounds, currentConfig.windowConfiguration.getAppBounds());
+        assertEquals(expectedMaxBounds, currentConfig.windowConfiguration.getMaxBounds());
     }
 
     @Test
@@ -459,17 +540,15 @@ public class ActivityThreadTest {
             } finally {
                 // Make sure to reset the process config to prevent side effects to other
                 // tests.
-                Configuration activityThreadConfig = activityThread.getConfiguration();
-                activityThreadConfig.seq = originalAppConfig.seq - 1;
-
-                Configuration resourceManagerConfig = ResourcesManager.getInstance()
-                        .getConfiguration();
-                resourceManagerConfig.seq = originalAppConfig.seq - 1;
-
-                activityThread.updatePendingConfiguration(originalAppConfig);
-                activityThread.handleConfigurationChanged(originalAppConfig);
+                restoreConfig(activityThread, originalAppConfig);
             }
         });
+    }
+
+    private static void restoreConfig(ActivityThread thread, Configuration originalConfig) {
+        thread.getConfiguration().seq = originalConfig.seq - 1;
+        ResourcesManager.getInstance().getConfiguration().seq = originalConfig.seq - 1;
+        thread.handleConfigurationChanged(originalConfig);
     }
 
     @Test

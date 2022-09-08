@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
+import android.content.res.CompatibilityInfo;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
@@ -56,6 +57,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
+        CompatibilityInfo.applyOverrideScaleIfNeeded(mConfig);
         mActivityClientRecord = client.prepareRelaunchActivity(token, mPendingResults,
                 mPendingNewIntents, mConfigChanges, mConfig, mPreserveWindow);
     }
