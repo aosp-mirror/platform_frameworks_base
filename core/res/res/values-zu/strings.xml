@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Kuvalwe okwesikhashana inkampani yakho yenethiwekhi ku-SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ayikwazi ukufinyelela kunethiwekhi yeselula"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Zama ukushintsha inethiwekhi encanyelwayo. Thepha ukuze ushintshe."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ukushaya okuphuthumayo akutholakali"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ayikwazi ukwenza amakholi aphuthumayo nge-Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Amakholi aphuthumayo angase angatholakali"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"I-<xliff:g id="SPN">%s</xliff:g> ayisekeli amakholi aphuthumayo nge-Wi-Fi. Thepha ukuze uthole imininingwane"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Izexwayiso"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Ukudlulisa ikholi"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Imodi yokushayela yesimo esiphuthumayo"</string>

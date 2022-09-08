@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Привремено исклучена од вашиот оператор за SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобилната мрежа е недостапна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сменете ја претпочитаната мрежа. Допрете за промена."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Итните повици се недостапни"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не може да остваруваат итни повици преку Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Можно е итните повици да се недостапни"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не поддржува итни повици преку Wi-Fi. Допрете за детали."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Предупредувања"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Проследување повик"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим на итен повратен повик"</string>
@@ -1554,8 +1554,8 @@
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Внатрешен споделен капацитет"</string>
-    <string name="storage_sd_card" msgid="3404740277075331881">"СД картичка"</string>
-    <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> СД-картичка"</string>
+    <string name="storage_sd_card" msgid="3404740277075331881">"SD-картичка"</string>
+    <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD-картичка"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-меморија"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-меморија"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB меморија"</string>

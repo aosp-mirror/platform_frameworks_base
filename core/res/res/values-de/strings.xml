@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Von deinem Mobilfunkanbieter für SIM <xliff:g id="SIMNUMBER">%d</xliff:g> vorübergehend deaktiviert"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilfunknetz nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Versuche, das bevorzugte Netzwerk zu ändern. Tippe, um ein anderes auszuwählen."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Notrufe nicht möglich"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Notrufe über WLAN nicht möglich"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Notrufe sind eventuell nicht verfügbar"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> unterstützt keine Notrufe über WLAN. Weitere Informationen."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Warnmeldungen"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Anrufweiterleitung"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Notfallrückrufmodus"</string>
@@ -1009,9 +1009,9 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nMöchtest du diese Seite wirklich verlassen?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tipp: Zum Vergrößern und Verkleinern doppeltippen"</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"Automatisches Ausfüllen"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"Autom.Ausfüll.konf."</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"Mit <xliff:g id="SERVICENAME">%1$s</xliff:g> automatisch ausfüllen"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Autofill"</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Autofill einrichten"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"Autofill mit <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1132,7 +1132,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Text auswählen"</string>
     <string name="undo" msgid="3175318090002654673">"Rückgängig machen"</string>
     <string name="redo" msgid="7231448494008532233">"Wiederholen"</string>
-    <string name="autofill" msgid="511224882647795296">"Automatisches Ausfüllen"</string>
+    <string name="autofill" msgid="511224882647795296">"Autofill"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Textauswahl"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Zum Wörterbuch hinzufügen"</string>
     <string name="deleteText" msgid="4200807474529938112">"Löschen"</string>
@@ -1620,7 +1620,7 @@
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"Integrierter Bildschirm"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI-Bildschirm"</string>
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> × <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", sicher"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Muster vergessen"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Falsches Muster"</string>
@@ -1845,7 +1845,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte sowie manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Auch werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1981,11 +1981,11 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Uhrzeit eingeben"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"In den Texteingabemodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"In den Uhrzeitmodus wechseln, um die Uhrzeit einzugeben."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Optionen für automatisches Ausfüllen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für „Automatisches Ausfüllen“ speichern"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Autofill-Optionen"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für Autofill speichern"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Inhalte können nicht automatisch ausgefüllt werden"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Vorschläge für automatisches Ausfüllen"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Ein Vorschlag für automatisches Ausfüllen}other{# Vorschläge für automatisches Ausfüllen}}"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Autofill-Vorschläge"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 Autofill-Vorschlag}other{# Autofill-Vorschläge}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"In "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" speichern?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> in "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" speichern?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> und <xliff:g id="TYPE_1">%2$s</xliff:g> in "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" speichern?"</string>

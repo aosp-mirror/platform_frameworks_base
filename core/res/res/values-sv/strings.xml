@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tillfälligt avstängt av operatören för SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Det går inte att nå mobilnätverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Testa att byta föredraget nätverk. Tryck om du vill ändra."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Det går inte att ringa nödsamtal"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Det går inte att ringa nödsamtal via Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Nödsamtal kan vara otillgängligt"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> har inte stöd för nödsamtal via wifi. Tryck här för mer information."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Aviseringar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Vidarekoppla samtal"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Läget Återuppringning vid nödsamtal"</string>
@@ -237,7 +237,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Stäng av"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Strömbrytare"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Av/på"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Starta om"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Nödsituation"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Felrapport"</string>
@@ -632,7 +632,7 @@
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Det gick inte att fånga ansiktsdata. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta mobilen längre bort."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta telefonen längre bort."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"För mobilen närmare."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj mobilen."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk mobilen."</string>
@@ -1237,11 +1237,11 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Appar startas."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Uppgraderingen är klar."</string>
     <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vill du fortsätta med konfigureringen?"</string>
-    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du tryckte på strömbrytaren, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt när du konfigurerar fingeravtrycket."</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du tryckte på av/på-knappen, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt när du konfigurerar fingeravtrycket."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Stäng av skärmen"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Fortsätt konfigurera"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vill du verifiera ditt fingeravtryck?"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du tryckte på strömbrytaren, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt för att verifiera ditt fingeravtryck."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du tryckte på av/på-knappen, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt för att verifiera ditt fingeravtryck."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Stäng av skärmen"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsätt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
@@ -2260,7 +2260,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>

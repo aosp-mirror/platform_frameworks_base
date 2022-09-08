@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tu operador ha desactivado el servicio de la SIM <xliff:g id="SIMNUMBER">%d</xliff:g> de forma temporal"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"No se puede establecer conexión con la red móvil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Toca para cambiar la red preferida."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Servicio de llamadas de emergencia no disponible"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"No se pueden hacer llamadas de emergencia por Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Las llamadas de emergencia pueden no estar disponibles"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> no permite hacer llamadas de emergencia por Wi-Fi. Toca para ver información detallada."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desvío de llamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de devolución de llamada de emergencia"</string>

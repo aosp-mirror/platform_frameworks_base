@@ -82,8 +82,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Operater je začasno izklopil storitev za kartico SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilnega omrežja ni mogoče doseči"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Poskusite spremeniti prednostno omrežje. Dotaknite se, če ga želite spremeniti."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Klicanje v sili ni na voljo"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Klicev v sili ni mogoče opravljati prek omrežja Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Klici v sili morda niso na voljo."</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne podpira klicev v sili prek Wi-Fi-ja. Dotaknite se za podrobnosti."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Opozorila"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmerjanje klicev"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Način za povratni klic v sili"</string>
