@@ -792,7 +792,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             mUdfpsBounds = udfpsProp.getLocation().getRect();
             mUdfpsBounds.scale(mScaleFactor);
             mUdfpsController.updateOverlayParams(udfpsProp.sensorId,
-                    new UdfpsOverlayParams(mUdfpsBounds, mCachedDisplayInfo.getNaturalWidth(),
+                    new UdfpsOverlayParams(mUdfpsBounds, new Rect(
+                            0, mCachedDisplayInfo.getNaturalHeight() / 2,
+                            mCachedDisplayInfo.getNaturalWidth(),
+                            mCachedDisplayInfo.getNaturalHeight()),
+                            mCachedDisplayInfo.getNaturalWidth(),
                             mCachedDisplayInfo.getNaturalHeight(), mScaleFactor,
                             mCachedDisplayInfo.rotation));
             if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
