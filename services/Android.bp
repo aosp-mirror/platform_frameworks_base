@@ -57,6 +57,7 @@ system_optimized_java_defaults {
                 // retracing infra.
                 optimize: false,
                 shrink: true,
+                ignore_warnings: false,
                 proguard_flags_files: ["proguard.flags"],
             },
             // Note: Optimizations are disabled by default if unspecified in
@@ -175,6 +176,8 @@ java_library {
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
         "service-art.stubs.system_server",
+        "service-permission.stubs.system_server",
+        "service-sdksandbox.stubs.system_server",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
