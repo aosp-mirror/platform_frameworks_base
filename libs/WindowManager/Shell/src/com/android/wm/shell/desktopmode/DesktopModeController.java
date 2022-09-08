@@ -62,6 +62,9 @@ public class DesktopModeController {
     private void onInit() {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "Initialize DesktopModeController");
         mSettingsObserver.observe();
+        if (DesktopMode.isActive(mContext)) {
+            updateDesktopModeActive(true);
+        }
     }
 
     @VisibleForTesting

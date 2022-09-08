@@ -24,9 +24,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -54,6 +56,10 @@ class UserSwitcherActivityTest : SysuiTestCase() {
     private lateinit var userManager: UserManager
     @Mock
     private lateinit var userTracker: UserTracker
+    @Mock
+    private lateinit var flags: FeatureFlags
+    @Mock
+    private lateinit var viewModelFactoryLazy: dagger.Lazy<UserSwitcherViewModel.Factory>
 
     @Before
     fun setUp() {
@@ -61,11 +67,12 @@ class UserSwitcherActivityTest : SysuiTestCase() {
         activity = UserSwitcherActivity(
             userSwitcherController,
             broadcastDispatcher,
-            layoutInflater,
             falsingCollector,
             falsingManager,
             userManager,
-            userTracker
+            userTracker,
+            flags,
+            viewModelFactoryLazy,
         )
     }
 

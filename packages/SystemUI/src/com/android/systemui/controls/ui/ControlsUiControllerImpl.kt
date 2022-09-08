@@ -149,6 +149,19 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
+    override fun resolveActivity(): Class<*> {
+        val allStructures = controlsController.get().getFavorites()
+        val selectedStructure = getPreferredStructure(allStructures)
+
+        return if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
+            ControlsActivity::class.java
+        } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
+            ControlsProviderSelectorActivity::class.java
+        } else {
+            ControlsActivity::class.java
+        }
+    }
+
     override fun show(
         parent: ViewGroup,
         onDismiss: Runnable,

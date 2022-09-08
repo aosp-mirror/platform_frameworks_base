@@ -1804,7 +1804,7 @@
     <!-- Message shown during face acquisition when the image is too bright [CHAR LIMIT=50] -->
     <string name="face_acquired_too_bright">Too bright. Try gentler lighting.</string>
     <!-- Message shown during face acquisition when the image is too dark [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_dark">Try brighter lighting</string>
+    <string name="face_acquired_too_dark">Not enough light</string>
     <!-- Message shown during face acquisition when the user is too close to sensor [CHAR LIMIT=50] -->
     <string name="face_acquired_too_close">Move phone farther away</string>
     <!-- Message shown during face acquisition when the user is too far from sensor [CHAR LIMIT=50] -->
