@@ -667,7 +667,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         final String helpString = "helpString";
         final int[] msgIds = new int[]{
                 BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED,
-                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED
+                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK
         };
         Set<CharSequence> messages = new HashSet<>();
         for (int msgId : msgIds) {
@@ -698,8 +699,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
-                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT,
-                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT
         };
         for (int msgId : msgIds) {
             mKeyguardUpdateMonitorCallback.onBiometricHelp(
@@ -740,6 +740,28 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // THEN message shown for each call
         verifyIndicationMessages(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpStrings);
+    }
+
+    @Test
+    public void sendTooDarkFaceHelpMessages_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help message received
+        final String helpString = "helpMsg";
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
+                helpString,
+                BiometricSourceType.FACE
+        );
+
+        // THEN help message shown and try fingerprint message shown
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpString);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
     }
 
     @Test
