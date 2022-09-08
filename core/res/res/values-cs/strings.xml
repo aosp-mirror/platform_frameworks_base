@@ -1422,7 +1422,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"Otevřít"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Přepnout výstup"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> chybí"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Znovu vložte zařízení"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Vložte zařízení znovu"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Přesouvání aplikace <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Probíhá přesun dat"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Přenos obsahu je dokončen"</string>
@@ -1561,7 +1561,7 @@
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s – %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s – %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Interní sdílené úložiště"</string>
-    <string name="storage_sd_card" msgid="3404740277075331881">"Karta SD"</string>
+    <string name="storage_sd_card" msgid="3404740277075331881">"SD karta"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD karta <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"Jednotka USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"Jednotka USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
