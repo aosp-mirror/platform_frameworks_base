@@ -39,7 +39,6 @@ import java.util.function.Supplier;
  * Manages debouncing of PiP movements and scheduling of unstashing.
  */
 public class TvPipBoundsController {
-    private static final boolean DEBUG = false;
     private static final String TAG = "TvPipBoundsController";
 
     /**
@@ -133,11 +132,9 @@ public class TvPipBoundsController {
 
     private void schedulePinnedStackPlacement(@NonNull final Placement placement,
             int animationDuration) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: schedulePinnedStackPlacement() - pip bounds: %s",
-                    TAG, placement.getBounds().toShortString());
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: schedulePinnedStackPlacement() - pip bounds: %s",
+                TAG, placement.getBounds().toShortString());
 
         if (mPendingPlacement != null && Objects.equals(mPendingPlacement.getBounds(),
                 placement.getBounds())) {
@@ -171,10 +168,8 @@ public class TvPipBoundsController {
     }
 
     private void applyPendingPlacement() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: applyPendingPlacement()", TAG);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: applyPendingPlacement()", TAG);
         if (mPendingPlacement != null) {
             applyPlacement(mPendingPlacement, mPendingStash, mPendingPlacementAnimationDuration);
             mPendingStash = false;
@@ -226,10 +221,8 @@ public class TvPipBoundsController {
         }
 
         mPipTargetBounds = bounds;
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: movePipTo() - new pip bounds: %s", TAG, bounds.toShortString());
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: movePipTo() - new pip bounds: %s", TAG, bounds.toShortString());
 
         if (mListener != null) {
             mListener.onPipTargetBoundsChange(bounds, animationDuration);

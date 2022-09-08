@@ -23,6 +23,7 @@
     android:id="@+id/keyguard_clock_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
     android:layout_gravity="center_horizontal|top">
     <FrameLayout
         android:id="@+id/lockscreen_clock_view"
@@ -30,16 +31,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:paddingStart="@dimen/clock_padding_start">
-    </FrameLayout>
+        android:paddingStart="@dimen/clock_padding_start" />
     <FrameLayout
         android:id="@+id/lockscreen_clock_view_large"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/keyguard_slice_view"
-        android:paddingTop="@dimen/keyguard_large_clock_top_padding"
-        android:visibility="gone">
-    </FrameLayout>
+        android:layout_marginTop="@dimen/keyguard_large_clock_top_margin"
+        android:visibility="gone" />
 
     <!-- Not quite optimal but needed to translate these items as a group. The
          NotificationIconContainer has its own logic for translation. -->

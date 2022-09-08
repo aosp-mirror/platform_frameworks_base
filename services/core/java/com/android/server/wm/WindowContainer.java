@@ -1837,6 +1837,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    int getDistanceFromTop(WindowContainer child) {
+        int idx = mChildren.indexOf(child);
+        return idx < 0 ? -1 : mChildren.size() - 1 - idx;
+    }
+
     private ActivityRecord processGetActivityWithBoundary(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
             boolean[] boundaryFound, WindowContainer wc) {
@@ -2831,7 +2836,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             mDisplayContent.mTransitionController.collectVisibleChange(this);
-            // TODO(b/207070762): request shell transition for activityEmbedding change.
             return;
         }
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);

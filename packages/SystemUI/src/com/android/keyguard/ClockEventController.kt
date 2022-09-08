@@ -21,6 +21,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
 import android.text.format.DateFormat
+import android.util.TypedValue
+import android.view.View
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -41,7 +43,7 @@ import javax.inject.Inject
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
  * [KeyguardClockSwitchController]. Functionality is forked from [AnimatableClockController].
  */
-class ClockEventController @Inject constructor(
+open class ClockEventController @Inject constructor(
         private val statusBarStateController: StatusBarStateController,
         private val broadcastDispatcher: BroadcastDispatcher,
         private val batteryController: BatteryController,
@@ -74,18 +76,21 @@ class ClockEventController @Inject constructor(
 
     private val updateFun = object : RegionSamplingInstance.UpdateColorCallback {
         override fun updateColors() {
-            smallClockIsDark = smallRegionSamplingInstance.currentRegionDarkness()
-            largeClockIsDark = largeRegionSamplingInstance.currentRegionDarkness()
-
+            if (regionSamplingEnabled) {
+                smallClockIsDark = smallRegionSamplingInstance.currentRegionDarkness().isDark
+                largeClockIsDark = largeRegionSamplingInstance.currentRegionDarkness().isDark
+            } else {
+                val isLightTheme = TypedValue()
+                context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)
+                smallClockIsDark = isLightTheme.data == 0
+                largeClockIsDark = isLightTheme.data == 0
+            }
             clock?.events?.onColorPaletteChanged(resources, smallClockIsDark, largeClockIsDark)
         }
     }
 
     fun updateRegionSamplers(currentClock: Clock?) {
-        smallRegionSamplingInstance.stopRegionSampler()
-        largeRegionSamplingInstance.stopRegionSampler()
-
-        smallRegionSamplingInstance = RegionSamplingInstance(
+        smallRegionSamplingInstance = createRegionSampler(
                 currentClock?.smallClock,
                 mainExecutor,
                 bgExecutor,
@@ -93,7 +98,7 @@ class ClockEventController @Inject constructor(
                 updateFun
         )
 
-        largeRegionSamplingInstance = RegionSamplingInstance(
+        largeRegionSamplingInstance = createRegionSampler(
                 currentClock?.largeClock,
                 mainExecutor,
                 bgExecutor,
@@ -107,24 +112,26 @@ class ClockEventController @Inject constructor(
         updateFun.updateColors()
     }
 
-    var smallRegionSamplingInstance: RegionSamplingInstance = RegionSamplingInstance(
-            clock?.smallClock,
+    protected open fun createRegionSampler(
+            sampledView: View?,
+            mainExecutor: Executor?,
+            bgExecutor: Executor?,
+            regionSamplingEnabled: Boolean,
+            updateFun: RegionSamplingInstance.UpdateColorCallback
+    ): RegionSamplingInstance {
+        return RegionSamplingInstance(
+            sampledView,
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            updateFun
-    )
+            updateFun)
+    }
 
-    var largeRegionSamplingInstance: RegionSamplingInstance = RegionSamplingInstance(
-            clock?.largeClock,
-            mainExecutor,
-            bgExecutor,
-            regionSamplingEnabled,
-            updateFun
-    )
+    lateinit var smallRegionSamplingInstance: RegionSamplingInstance
+    lateinit var largeRegionSamplingInstance: RegionSamplingInstance
 
-    private var smallClockIsDark = smallRegionSamplingInstance.currentRegionDarkness()
-    private var largeClockIsDark = largeRegionSamplingInstance.currentRegionDarkness()
+    private var smallClockIsDark = true
+    private var largeClockIsDark = true
 
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onThemeChanged() {
@@ -179,7 +186,6 @@ class ClockEventController @Inject constructor(
 
     init {
         isDozing = statusBarStateController.isDozing
-        clock?.events?.onColorPaletteChanged(resources, smallClockIsDark, largeClockIsDark)
     }
 
     fun registerListeners() {

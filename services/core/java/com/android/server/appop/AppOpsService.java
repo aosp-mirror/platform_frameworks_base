@@ -267,6 +267,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             OP_CAMERA,
     };
 
+    private static final int[] WATCHABLE_NON_PERMISSION_OPS = {
+            OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+    };
+
     private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
@@ -574,7 +578,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             mAppOpsServiceInterface.removeUid(uid);
             if (pkgOps != null) {
                 for (String packageName : pkgOps.keySet()) {
-                    mAppOpsServiceInterface.removePackage(packageName);
+                    mAppOpsServiceInterface.removePackage(packageName, UserHandle.getUserId(uid));
                 }
             }
             pkgOps = null;
@@ -584,7 +588,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             boolean areAllPackageModesDefault = true;
             if (pkgOps != null) {
                 for (String packageName : pkgOps.keySet()) {
-                    if (!mAppOpsServiceInterface.arePackageModesDefault(packageName)) {
+                    if (!mAppOpsServiceInterface.arePackageModesDefault(packageName,
+                            UserHandle.getUserId(uid))) {
                         areAllPackageModesDefault = false;
                         break;
                     }
@@ -664,7 +669,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             if (pkgOps != null) {
                 for (int i = pkgOps.size() - 1; i >= 0; i--) {
                     foregroundOps = mAppOpsServiceInterface
-                            .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps);
+                            .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
+                                    UserHandle.getUserId(uid));
                 }
             }
             hasForegroundWatchers = false;
@@ -1467,10 +1473,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
 
         @Mode int getMode() {
-            return mAppOpsServiceInterface.getPackageMode(packageName, this.op);
+            return mAppOpsServiceInterface.getPackageMode(packageName, this.op,
+                    UserHandle.getUserId(this.uid));
         }
         void setMode(@Mode int mode) {
-            mAppOpsServiceInterface.setPackageMode(packageName, this.op, mode);
+            mAppOpsServiceInterface.setPackageMode(packageName, this.op, mode,
+                    UserHandle.getUserId(this.uid));
         }
 
         int evalMode() {
@@ -1814,7 +1822,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     if (uidState == null || uidState.pkgOps == null) {
                         return;
                     }
-                    mAppOpsServiceInterface.removePackage(pkgName);
+                    mAppOpsServiceInterface.removePackage(pkgName, UserHandle.getUserId(uid));
                     Ops removedOps = uidState.pkgOps.remove(pkgName);
                     if (removedOps != null) {
                         scheduleFastWriteLocked();
@@ -2041,7 +2049,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             // Remove any package state if such.
             if (uidState.pkgOps != null) {
                 removedOps = uidState.pkgOps.remove(packageName);
-                mAppOpsServiceInterface.removePackage(packageName);
+                mAppOpsServiceInterface.removePackage(packageName, UserHandle.getUserId(uid));
             }
 
             // If we just nuked the last package state check if the UID is valid.
@@ -2491,7 +2499,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
                     if (pkgOps != null) {
                         pkgOps.remove(ops.packageName);
-                        mAppOpsServiceInterface.removePackage(ops.packageName);
+                        mAppOpsServiceInterface.removePackage(ops.packageName,
+                                UserHandle.getUserId(uidState.uid));
                         if (pkgOps.isEmpty()) {
                             uidState.pkgOps = null;
                         }
@@ -2944,7 +2953,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     }
                     if (pkgOps.size() == 0) {
                         it.remove();
-                        mAppOpsServiceInterface.removePackage(packageName);
+                        mAppOpsServiceInterface.removePackage(packageName,
+                                UserHandle.getUserId(uidState.uid));
                     }
                 }
                 if (uidState.isDefault()) {
@@ -4241,6 +4251,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     @Override
     public boolean shouldCollectNotes(int opCode) {
         Preconditions.checkArgumentInRange(opCode, 0, _NUM_OP - 1, "opCode");
+
+        if (ArrayUtils.contains(WATCHABLE_NON_PERMISSION_OPS, opCode)) {
+            return true;
+        }
 
         String perm = AppOpsManager.opToPermission(opCode);
         if (perm == null) {
@@ -6646,7 +6660,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 return;
             }
             Ops removedOps = uidState.pkgOps.remove(packageName);
-            mAppOpsServiceInterface.removePackage(packageName);
+            mAppOpsServiceInterface.removePackage(packageName, UserHandle.getUserId(uid));
             if (removedOps != null) {
                 scheduleFastWriteLocked();
             }

@@ -73,7 +73,6 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.TimeoutRecord;
@@ -85,8 +84,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 /**
  * BROADCASTS
@@ -99,15 +98,13 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     private static final String TAG_MU = TAG + POSTFIX_MU;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
 
-    static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
-    static final int MAX_BROADCAST_SUMMARY_HISTORY
-            = ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
-
     /**
      * If true, we can delay broadcasts while waiting services to finish in the previous
      * receiver's process.
      */
     final boolean mDelayBehindServices;
+
+    final int mSchedGroup;
 
     /**
      * Lists of all active broadcasts that are to be executed immediately
@@ -131,29 +128,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
      */
     final SparseIntArray mSplitRefcounts = new SparseIntArray();
     private int mNextToken = 0;
-
-    /**
-     * Historical data of past broadcasts, for debugging.  This is a ring buffer
-     * whose last element is at mHistoryNext.
-     */
-    final BroadcastRecord[] mBroadcastHistory = new BroadcastRecord[MAX_BROADCAST_HISTORY];
-    int mHistoryNext = 0;
-
-    /**
-     * Summary of historical data of past broadcasts, for debugging.  This is a
-     * ring buffer whose last element is at mSummaryHistoryNext.
-     */
-    final Intent[] mBroadcastSummaryHistory = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
-    int mSummaryHistoryNext = 0;
-
-    /**
-     * Various milestone timestamps of entries in the mBroadcastSummaryHistory ring
-     * buffer, also tracked via the mSummaryHistoryNext index.  These are all in wall
-     * clock time, not elapsed.
-     */
-    final long[] mSummaryHistoryEnqueueTime = new  long[MAX_BROADCAST_SUMMARY_HISTORY];
-    final long[] mSummaryHistoryDispatchTime = new  long[MAX_BROADCAST_SUMMARY_HISTORY];
-    final long[] mSummaryHistoryFinishTime = new  long[MAX_BROADCAST_SUMMARY_HISTORY];
 
     /**
      * Set when we current have a BROADCAST_INTENT_MSG in flight.
@@ -211,17 +185,19 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
-            String name, BroadcastConstants constants, boolean allowDelayBehindServices) {
+            String name, BroadcastConstants constants, boolean allowDelayBehindServices,
+            int schedGroup) {
         this(service, handler, name, constants, new BroadcastSkipPolicy(service),
-                allowDelayBehindServices);
+                new BroadcastHistory(), allowDelayBehindServices, schedGroup);
     }
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, BroadcastSkipPolicy skipPolicy,
-            boolean allowDelayBehindServices) {
-        super(service, handler, name, constants, skipPolicy);
+            BroadcastHistory history, boolean allowDelayBehindServices, int schedGroup) {
+        super(service, handler, name, constants, skipPolicy, history);
         mHandler = new BroadcastHandler(handler.getLooper());
         mDelayBehindServices = allowDelayBehindServices;
+        mSchedGroup = schedGroup;
         mDispatcher = new BroadcastDispatcher(this, mConstants, mHandler, mService);
     }
 
@@ -240,6 +216,18 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     public BroadcastRecord getActiveBroadcastLocked() {
         return mDispatcher.getActiveBroadcastLocked();
+    }
+
+    public int getPreferredSchedulingGroupLocked(ProcessRecord app) {
+        final BroadcastRecord active = getActiveBroadcastLocked();
+        if (active != null && active.curApp == app) {
+            return mSchedGroup;
+        }
+        final BroadcastRecord pending = getPendingBroadcastLocked();
+        if (pending != null && pending.curApp == app) {
+            return mSchedGroup;
+        }
+        return ProcessList.SCHED_GROUP_UNDEFINED;
     }
 
     public void enqueueBroadcastLocked(BroadcastRecord r) {
@@ -369,7 +357,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             return;
         }
 
-        r.receiver = thread.asBinder();
         r.curApp = app;
         final ProcessReceiverRecord prr = app.mReceivers;
         prr.addCurReceiver(r);
@@ -407,7 +394,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             if (!started) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Process cur broadcast " + r + ": NOT STARTED!");
-                r.receiver = null;
                 r.curApp = null;
                 prr.removeCurReceiver(r);
             }
@@ -524,16 +510,16 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         mBroadcastsScheduled = true;
     }
 
-    public BroadcastRecord getMatchingOrderedReceiver(IBinder receiver) {
+    public BroadcastRecord getMatchingOrderedReceiver(ProcessRecord app) {
         BroadcastRecord br = mDispatcher.getActiveBroadcastLocked();
         if (br == null) {
             Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
                     + "] no active broadcast");
             return null;
         }
-        if (br.receiver != receiver) {
+        if (br.curApp != app) {
             Slog.w(TAG_BROADCAST, "getMatchingOrderedReceiver [" + mQueueName
-                    + "] active broadcast " + br.receiver + " doesn't match " + receiver);
+                    + "] active broadcast " + br.curApp + " doesn't match " + app);
             return null;
         }
         return br;
@@ -564,9 +550,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
     }
 
-    public boolean finishReceiverLocked(IBinder receiver, int resultCode,
+    public boolean finishReceiverLocked(ProcessRecord app, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
-        final BroadcastRecord r = getMatchingOrderedReceiver(receiver);
+        final BroadcastRecord r = getMatchingOrderedReceiver(app);
         if (r != null) {
             return finishReceiverLocked(r, resultCode,
                     resultData, resultExtras, resultAbort, waitForServices);
@@ -647,7 +633,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
         }
 
-        r.receiver = null;
         r.intent.setComponent(null);
         if (r.curApp != null && r.curApp.mReceivers.hasCurReceiver(r)) {
             r.curApp.mReceivers.removeCurReceiver(r);
@@ -674,7 +659,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // If we want to wait behind services *AND* we're finishing the head/
         // active broadcast on its queue
         if (waitForServices && r.curComponent != null && r.queue.isDelayBehindServices()
-                && r.queue.getActiveBroadcastLocked() == r) {
+                && ((BroadcastQueueImpl) r.queue).getActiveBroadcastLocked() == r) {
             ActivityInfo nextReceiver;
             if (r.nextReceiver < r.receivers.size()) {
                 Object obj = r.receivers.get(r.nextReceiver);
@@ -805,7 +790,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // don't want to touch the fields that keep track of the current
         // state of ordered broadcasts.
         if (ordered) {
-            r.receiver = filter.receiverList.receiver.asBinder();
             r.curFilter = filter;
             filter.receiverList.curBroadcast = r;
             r.state = BroadcastRecord.CALL_IN_RECEIVE;
@@ -869,7 +853,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
             // And BroadcastRecord state related to ordered delivery, if appropriate
             if (ordered) {
-                r.receiver = null;
                 r.curFilter = null;
                 filter.receiverList.curBroadcast = null;
             }
@@ -1289,12 +1272,13 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     + filter + ": " + r);
             r.mIsReceiverAppRunning = true;
             deliverToRegisteredReceiverLocked(r, filter, r.ordered, recIdx);
-            if (r.receiver == null || !r.ordered) {
+            if ((r.curReceiver == null && r.curFilter == null) || !r.ordered) {
                 // The receiver has already finished, so schedule to
                 // process the next one.
                 if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Quick finishing ["
-                        + mQueueName + "]: ordered="
-                        + r.ordered + " receiver=" + r.receiver);
+                        + mQueueName + "]: ordered=" + r.ordered
+                        + " curFilter=" + r.curFilter
+                        + " curReceiver=" + r.curReceiver);
                 r.state = BroadcastRecord.IDLE;
                 scheduleBroadcastsLocked();
             } else {
@@ -1346,7 +1330,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     "Skipping delivery of ordered [" + mQueueName + "] "
                     + r + " for reason described above");
             r.delivery[recIdx] = BroadcastRecord.DELIVERY_SKIPPED;
-            r.receiver = null;
             r.curFilter = null;
             r.state = BroadcastRecord.IDLE;
             r.manifestSkipCount++;
@@ -1636,8 +1619,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         final boolean debugging = (r.curApp != null && r.curApp.isDebugging());
 
         long timeoutDurationMs = now - r.receiverTime;
-        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
-                + ", started " + timeoutDurationMs + "ms ago");
+        Slog.w(TAG, "Timeout of broadcast " + r + " - curFilter=" + r.curFilter + " curReceiver="
+                + r.curReceiver + ", started " + timeoutDurationMs + "ms ago");
         r.receiverTime = now;
         if (!debugging) {
             r.anrCount++;
@@ -1689,13 +1672,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }
     }
 
-    private final int ringAdvance(int x, final int increment, final int ringSize) {
-        x += increment;
-        if (x < 0) return (ringSize - 1);
-        else if (x >= ringSize) return 0;
-        else return x;
-    }
-
     private final void addBroadcastToHistoryLocked(BroadcastRecord original) {
         if (original.callingUid < 0) {
             // This was from a registerReceiver() call; ignore it.
@@ -1716,18 +1692,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     original.callingUid, 0, callerPackage).sendToTarget();
         }
 
-        // Note sometimes (only for sticky broadcasts?) we reuse BroadcastRecords,
-        // So don't change the incoming record directly.
-        final BroadcastRecord historyRecord = original.maybeStripForHistory();
-
-        mBroadcastHistory[mHistoryNext] = historyRecord;
-        mHistoryNext = ringAdvance(mHistoryNext, 1, MAX_BROADCAST_HISTORY);
-
-        mBroadcastSummaryHistory[mSummaryHistoryNext] = historyRecord.intent;
-        mSummaryHistoryEnqueueTime[mSummaryHistoryNext] = historyRecord.enqueueClockTime;
-        mSummaryHistoryDispatchTime[mSummaryHistoryNext] = historyRecord.dispatchClockTime;
-        mSummaryHistoryFinishTime[mSummaryHistoryNext] = System.currentTimeMillis();
-        mSummaryHistoryNext = ringAdvance(mSummaryHistoryNext, 1, MAX_BROADCAST_SUMMARY_HISTORY);
+        mHistory.addBroadcastToHistoryLocked(original);
     }
 
     public boolean cleanupDisabledPackageReceiversLocked(
@@ -1781,13 +1746,72 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 record.intent == null ? "" : record.intent.getAction());
     }
 
-    public boolean isIdle() {
+    public boolean isIdleLocked() {
         return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
     }
 
-    public void flush() {
-        cancelDeferrals();
+    public boolean isBeyondBarrierLocked(long barrierTime) {
+        // If nothing active, we're beyond barrier
+        if (isIdleLocked()) return true;
+
+        // Check if active broadcast is beyond barrier
+        final BroadcastRecord active = getActiveBroadcastLocked();
+        if (active != null && active.enqueueTime > barrierTime) {
+            return true;
+        }
+
+        // Check if pending broadcast is beyond barrier
+        final BroadcastRecord pending = getPendingBroadcastLocked();
+        if (pending != null && pending.enqueueTime > barrierTime) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void waitForIdle(PrintWriter pw) {
+        waitFor(() -> isIdleLocked(), pw, "idle");
+    }
+
+    public void waitForBarrier(PrintWriter pw) {
+        final long barrierTime = SystemClock.uptimeMillis();
+        waitFor(() -> isBeyondBarrierLocked(barrierTime), pw, "barrier");
+    }
+
+    private void waitFor(BooleanSupplier condition, PrintWriter pw, String conditionName) {
+        long lastPrint = 0;
+        while (true) {
+            synchronized (mService) {
+                if (condition.getAsBoolean()) {
+                    final String msg = "Queue [" + mQueueName + "] reached " + conditionName
+                            + " condition";
+                    Slog.v(TAG, msg);
+                    if (pw != null) {
+                        pw.println(msg);
+                        pw.flush();
+                    }
+                    return;
+                }
+            }
+
+            // Print at most every second
+            final long now = SystemClock.uptimeMillis();
+            if (now >= lastPrint + 1000) {
+                lastPrint = now;
+                final String msg = "Queue [" + mQueueName + "] waiting for " + conditionName
+                        + " condition; state is " + describeStateLocked();
+                Slog.v(TAG, msg);
+                if (pw != null) {
+                    pw.println(msg);
+                    pw.flush();
+                }
+            }
+
+            // Push through any deferrals to try meeting our condition
+            cancelDeferrals();
+            SystemClock.sleep(100);
+        }
     }
 
     // Used by wait-for-broadcast-idle : fast-forward all current deferrals to
@@ -1799,11 +1823,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }
     }
 
-    public String describeState() {
-        synchronized (mService) {
-            return mParallelBroadcasts.size() + " parallel; "
-                    + mDispatcher.describeStateLocked();
-        }
+    public String describeStateLocked() {
+        return mParallelBroadcasts.size() + " parallel; "
+                + mDispatcher.describeStateLocked();
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -1818,37 +1840,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         if (mPendingBroadcast != null) {
             mPendingBroadcast.dumpDebug(proto, BroadcastQueueProto.PENDING_BROADCAST);
         }
-
-        int lastIndex = mHistoryNext;
-        int ringIndex = lastIndex;
-        do {
-            // increasing index = more recent entry, and we want to print the most
-            // recent first and work backwards, so we roll through the ring backwards.
-            ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_HISTORY);
-            BroadcastRecord r = mBroadcastHistory[ringIndex];
-            if (r != null) {
-                r.dumpDebug(proto, BroadcastQueueProto.HISTORICAL_BROADCASTS);
-            }
-        } while (ringIndex != lastIndex);
-
-        lastIndex = ringIndex = mSummaryHistoryNext;
-        do {
-            ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
-            Intent intent = mBroadcastSummaryHistory[ringIndex];
-            if (intent == null) {
-                continue;
-            }
-            long summaryToken = proto.start(BroadcastQueueProto.HISTORICAL_BROADCASTS_SUMMARY);
-            intent.dumpDebug(proto, BroadcastQueueProto.BroadcastSummary.INTENT,
-                    false, true, true, false);
-            proto.write(BroadcastQueueProto.BroadcastSummary.ENQUEUE_CLOCK_TIME_MS,
-                    mSummaryHistoryEnqueueTime[ringIndex]);
-            proto.write(BroadcastQueueProto.BroadcastSummary.DISPATCH_CLOCK_TIME_MS,
-                    mSummaryHistoryDispatchTime[ringIndex]);
-            proto.write(BroadcastQueueProto.BroadcastSummary.FINISH_CLOCK_TIME_MS,
-                    mSummaryHistoryFinishTime[ringIndex]);
-            proto.end(summaryToken);
-        } while (ringIndex != lastIndex);
+        mHistory.dumpDebug(proto);
         proto.end(token);
     }
 
@@ -1889,114 +1881,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 needSep = true;
             }
         }
-
         mConstants.dump(pw);
-
-        int i;
-        boolean printed = false;
-
-        i = -1;
-        int lastIndex = mHistoryNext;
-        int ringIndex = lastIndex;
-        do {
-            // increasing index = more recent entry, and we want to print the most
-            // recent first and work backwards, so we roll through the ring backwards.
-            ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_HISTORY);
-            BroadcastRecord r = mBroadcastHistory[ringIndex];
-            if (r == null) {
-                continue;
-            }
-
-            i++; // genuine record of some sort even if we're filtering it out
-            if (dumpPackage != null && !dumpPackage.equals(r.callerPackage)) {
-                continue;
-            }
-            if (!printed) {
-                if (needSep) {
-                    pw.println();
-                }
-                needSep = true;
-                pw.println("  Historical broadcasts [" + mQueueName + "]:");
-                printed = true;
-            }
-            if (dumpAll) {
-                pw.print("  Historical Broadcast " + mQueueName + " #");
-                        pw.print(i); pw.println(":");
-                r.dump(pw, "    ", sdf);
-            } else {
-                pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
-                pw.print("    ");
-                pw.println(r.intent.toShortString(false, true, true, false));
-                if (r.targetComp != null && r.targetComp != r.intent.getComponent()) {
-                    pw.print("    targetComp: "); pw.println(r.targetComp.toShortString());
-                }
-                Bundle bundle = r.intent.getExtras();
-                if (bundle != null) {
-                    pw.print("    extras: "); pw.println(bundle.toString());
-                }
-            }
-        } while (ringIndex != lastIndex);
-
-        if (dumpPackage == null) {
-            lastIndex = ringIndex = mSummaryHistoryNext;
-            if (dumpAll) {
-                printed = false;
-                i = -1;
-            } else {
-                // roll over the 'i' full dumps that have already been issued
-                for (int j = i;
-                        j > 0 && ringIndex != lastIndex;) {
-                    ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
-                    BroadcastRecord r = mBroadcastHistory[ringIndex];
-                    if (r == null) {
-                        continue;
-                    }
-                    j--;
-                }
-            }
-            // done skipping; dump the remainder of the ring. 'i' is still the ordinal within
-            // the overall broadcast history.
-            do {
-                ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
-                Intent intent = mBroadcastSummaryHistory[ringIndex];
-                if (intent == null) {
-                    continue;
-                }
-                if (!printed) {
-                    if (needSep) {
-                        pw.println();
-                    }
-                    needSep = true;
-                    pw.println("  Historical broadcasts summary [" + mQueueName + "]:");
-                    printed = true;
-                }
-                if (!dumpAll && i >= 50) {
-                    pw.println("  ...");
-                    break;
-                }
-                i++;
-                pw.print("  #"); pw.print(i); pw.print(": ");
-                pw.println(intent.toShortString(false, true, true, false));
-                pw.print("    ");
-                TimeUtils.formatDuration(mSummaryHistoryDispatchTime[ringIndex]
-                        - mSummaryHistoryEnqueueTime[ringIndex], pw);
-                pw.print(" dispatch ");
-                TimeUtils.formatDuration(mSummaryHistoryFinishTime[ringIndex]
-                        - mSummaryHistoryDispatchTime[ringIndex], pw);
-                pw.println(" finish");
-                pw.print("    enq=");
-                pw.print(sdf.format(new Date(mSummaryHistoryEnqueueTime[ringIndex])));
-                pw.print(" disp=");
-                pw.print(sdf.format(new Date(mSummaryHistoryDispatchTime[ringIndex])));
-                pw.print(" fin=");
-                pw.println(sdf.format(new Date(mSummaryHistoryFinishTime[ringIndex])));
-                Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    pw.print("    extras: "); pw.println(bundle.toString());
-                }
-            } while (ringIndex != lastIndex);
-        }
-
+        needSep = mHistory.dumpLocked(pw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
         return needSep;
     }
 }

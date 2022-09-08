@@ -17,6 +17,7 @@ package com.android.server.appop;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager.Mode;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
@@ -61,23 +62,27 @@ public interface AppOpsServiceInterface {
      * Returns default op mode if the op mode for the particular package is not set.
      * @param packageName package name for which we need the op mode.
      * @param op app-op for which we need the mode.
+     * @param userId user id associated with the package.
      * @return the mode of the app-op.
      */
-    int getPackageMode(@NonNull String packageName, int op);
+    int getPackageMode(@NonNull String packageName, int op, @UserIdInt int userId);
 
     /**
      * Sets the app-op mode for a particular package.
      * @param packageName package name for which we need to set the op mode.
      * @param op app-op for which we need to set the mode.
      * @param mode the mode of the app-op.
+     * @param userId user id associated with the package.
+     *
      */
-    void setPackageMode(@NonNull String packageName, int op, @Mode int mode);
+    void setPackageMode(@NonNull String packageName, int op, @Mode int mode, @UserIdInt int userId);
 
     /**
      * Stop tracking any app-op modes for a package.
      * @param packageName Name of the package for which we want to remove all mode tracking.
+     * @param userId user id associated with the package.
      */
-    boolean removePackage(@NonNull String packageName);
+    boolean removePackage(@NonNull String packageName,  @UserIdInt int userId);
 
     /**
      * Stop tracking any app-op modes for this uid.
@@ -96,8 +101,9 @@ public interface AppOpsServiceInterface {
      * Returns true if all package modes for this package name are
      * in default state.
      * @param packageName package name.
+     * @param userId user id associated with the package.
      */
-    boolean arePackageModesDefault(String packageName);
+    boolean arePackageModesDefault(String packageName, @UserIdInt int userId);
 
     /**
      * Stop tracking app-op modes for all uid and packages.
@@ -177,10 +183,11 @@ public interface AppOpsServiceInterface {
      * foregroundOps.
      * @param packageName for which the app-op's mode needs to be marked.
      * @param foregroundOps boolean array where app-ops that have MODE_FOREGROUND are marked true.
+     * @param userId user id associated with the package.
      * @return foregroundOps.
      */
     SparseBooleanArray evalForegroundPackageOps(String packageName,
-            SparseBooleanArray foregroundOps);
+            SparseBooleanArray foregroundOps, @UserIdInt int userId);
 
     /**
      * Dump op mode and package mode listeners and their details.

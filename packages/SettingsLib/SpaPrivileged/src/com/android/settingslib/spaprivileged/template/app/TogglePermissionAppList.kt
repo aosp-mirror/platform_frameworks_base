@@ -21,6 +21,7 @@ import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.res.stringResource
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.framework.util.asyncMapItem
@@ -29,21 +30,51 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Implement this interface to build an App List which toggles a permission on / off.
+ */
 interface TogglePermissionAppListModel<T : AppRecord> {
     val pageTitleResId: Int
     val switchTitleResId: Int
     val footerResId: Int
 
+    /**
+     * Loads the extra info for the App List, and generates the [AppRecord] List.
+     *
+     * Default is implemented by [transformItem]
+     */
     fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>): Flow<List<T>> =
         appListFlow.asyncMapItem(::transformItem)
 
+    /**
+     * Loads the extra info for one app, and generates the [AppRecord].
+     *
+     * This must be implemented, because when show the App Info page for single app, this will be
+     * used instead of [transform].
+     */
     fun transformItem(app: ApplicationInfo): T
+
+    /**
+     * Filters the [AppRecord] list.
+     *
+     * @return the [AppRecord] list which will be displayed.
+     */
     fun filter(userIdFlow: Flow<Int>, recordListFlow: Flow<List<T>>): Flow<List<T>>
 
+    /**
+     * Gets whether the permission is allowed for the given app.
+     */
     @Composable
     fun isAllowed(record: T): State<Boolean?>
 
+    /**
+     * Gets whether the permission on / off is changeable for the given app.
+     */
     fun isChangeable(record: T): Boolean
+
+    /**
+     * Sets whether the permission is allowed for the given app.
+     */
     fun setAllowed(record: T, newAllowed: Boolean)
 }
 
@@ -51,6 +82,10 @@ interface TogglePermissionAppListProvider {
     val permissionType: String
 
     fun createModel(context: Context): TogglePermissionAppListModel<out AppRecord>
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return TogglePermissionAppListPageProvider.buildInjectEntry(permissionType)
+    }
 
     @Composable
     fun EntryItem() {

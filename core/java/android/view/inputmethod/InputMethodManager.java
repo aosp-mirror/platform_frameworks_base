@@ -446,6 +446,7 @@ public final class InputMethodManager {
      * {@code true} if next {@link ImeFocusController#onPostWindowFocus} needs to
      * restart input.
      */
+    @GuardedBy("mH")
     private boolean mRestartOnNextWindowFocus = true;
 
     /**
@@ -495,8 +496,11 @@ public final class InputMethodManager {
     private CompletionInfo[] mCompletions;
 
     // Cursor position on the screen.
+    @GuardedBy("mH")
     @UnsupportedAppUsage
     Rect mTmpCursorRect = new Rect();
+
+    @GuardedBy("mH")
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
 
@@ -545,6 +549,7 @@ public final class InputMethodManager {
      * @deprecated New code should use {@code mCurBindState.mImeId}.
      */
     @Deprecated
+    @GuardedBy("mH")
     @UnsupportedAppUsage
     String mCurId;
 
@@ -586,6 +591,7 @@ public final class InputMethodManager {
      * @deprecated This is kept for {@link UnsupportedAppUsage}.  Must not be used.
      */
     @Deprecated
+    @GuardedBy("mH")
     private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
     /**
@@ -594,7 +600,9 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private ImeInsetsSourceConsumer mImeInsetsConsumer;
 
+    @GuardedBy("mH")
     private final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
+    @GuardedBy("mH")
     private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
 
     private final DelegateImpl mDelegate = new DelegateImpl();
@@ -841,11 +849,13 @@ public final class InputMethodManager {
          */
         @Override
         public boolean isRestartOnNextWindowFocus(boolean reset) {
-            final boolean result = mRestartOnNextWindowFocus;
-            if (reset) {
-                mRestartOnNextWindowFocus = false;
+            synchronized (mH) {
+                final boolean result = mRestartOnNextWindowFocus;
+                if (reset) {
+                    mRestartOnNextWindowFocus = false;
+                }
+                return result;
             }
-            return result;
         }
 
         /**
@@ -886,21 +896,25 @@ public final class InputMethodManager {
         return mDelegate.hasActiveConnection(view);
     }
 
+    @GuardedBy("mH")
     private View getServedViewLocked() {
         return mCurRootView != null ? mCurRootView.getImeFocusController().getServedView() : null;
     }
 
+    @GuardedBy("mH")
     private View getNextServedViewLocked() {
         return mCurRootView != null ? mCurRootView.getImeFocusController().getNextServedView()
                 : null;
     }
 
+    @GuardedBy("mH")
     private void setServedViewLocked(View view) {
         if (mCurRootView != null) {
             mCurRootView.getImeFocusController().setServedView(view);
         }
     }
 
+    @GuardedBy("mH")
     private void setNextServedViewLocked(View view) {
         if (mCurRootView != null) {
             mCurRootView.getImeFocusController().setNextServedView(view);
@@ -919,6 +933,7 @@ public final class InputMethodManager {
     /**
      * Returns {@code true} when the given view has been served by Input Method.
      */
+    @GuardedBy("mH")
     private boolean hasServedByInputMethodLocked(View view) {
         final View servedView = getServedViewLocked();
         return (servedView == view
@@ -3242,6 +3257,7 @@ public final class InputMethodManager {
         }
     }
 
+    @GuardedBy("mH")
     private void flushPendingEventsLocked() {
         mH.removeMessages(MSG_FLUSH_INPUT_EVENT);
 
@@ -3254,6 +3270,7 @@ public final class InputMethodManager {
         }
     }
 
+    @GuardedBy("mH")
     private PendingEvent obtainPendingEventLocked(InputEvent event, Object token,
             String inputMethodId, FinishedInputEventCallback callback, Handler handler) {
         PendingEvent p = mPendingEventPool.acquire();
@@ -3268,6 +3285,7 @@ public final class InputMethodManager {
         return p;
     }
 
+    @GuardedBy("mH")
     private void recyclePendingEventLocked(PendingEvent p) {
         p.recycle();
         mPendingEventPool.release(p);
@@ -3300,6 +3318,7 @@ public final class InputMethodManager {
         mServiceInvoker.showInputMethodPickerFromSystem(mClient, mode, displayId);
     }
 
+    @GuardedBy("mH")
     private void showInputMethodPickerLocked() {
         mServiceInvoker.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
     }
@@ -3834,6 +3853,7 @@ public final class InputMethodManager {
         }
     }
 
+    @GuardedBy("mH")
     private void forAccessibilitySessionsLocked(
             Consumer<IAccessibilityInputMethodSessionInvoker> consumer) {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {

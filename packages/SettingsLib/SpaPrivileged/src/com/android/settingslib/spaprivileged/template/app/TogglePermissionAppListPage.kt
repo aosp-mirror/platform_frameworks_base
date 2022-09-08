@@ -25,32 +25,54 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.os.bundleOf
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
+import com.android.settingslib.spa.framework.util.getStringArg
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import kotlinx.coroutines.flow.Flow
 
-private const val NAME = "TogglePermissionAppList"
+private const val ENTRY_NAME = "AppList"
 private const val PERMISSION = "permission"
+private const val PAGE_NAME = "TogglePermissionAppList"
+private val PAGE_PARAMETER = listOf(
+    navArgument(PERMISSION) { type = NavType.StringType },
+)
 
 internal class TogglePermissionAppListPageProvider(
     private val appListTemplate: TogglePermissionAppListTemplate,
 ) : SettingsPageProvider {
-    override val name = NAME
+    override val name = PAGE_NAME
 
-    override val parameter = listOf(
-        navArgument(PERMISSION) { type = NavType.StringType },
-    )
+    override val parameter = PAGE_PARAMETER
+
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val permissionType = parameter.getStringArg(PERMISSION, arguments)!!
+        val appListPage = SettingsPage.create(name, parameter, arguments)
+        val appInfoPage = TogglePermissionAppInfoPageProvider.buildPageId(permissionType)
+        val entryList = mutableListOf<SettingsEntry>()
+        // TODO: add more categories, such as personal, work, cloned, etc.
+        for (category in listOf("personal")) {
+            entryList.add(
+                SettingsEntryBuilder.createLinkFrom("${ENTRY_NAME}_$category", appListPage)
+                    .setLink(toPage = appInfoPage)
+                    .setIsAllowSearch(false)
+                    .build()
+            )
+        }
+        return entryList
+    }
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        checkNotNull(arguments)
-        val permissionType = checkNotNull(arguments.getString(PERMISSION))
-        TogglePermissionAppList(permissionType)
+        TogglePermissionAppList(arguments?.getString(PERMISSION)!!)
     }
 
     @Composable
@@ -80,10 +102,16 @@ internal class TogglePermissionAppListPageProvider(
          *
          * Expose route to enable enter from non-SPA pages.
          */
-        internal fun getRoute(permissionType: String) = "$NAME/$permissionType"
+        internal fun getRoute(permissionType: String) = "$PAGE_NAME/$permissionType"
 
         @Composable
         internal fun navigator(permissionType: String) = navigator(route = getRoute(permissionType))
+
+        internal fun buildInjectEntry(permissionType: String): SettingsEntryBuilder {
+            val appListPage = SettingsPage.create(
+                PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
+            return SettingsEntryBuilder.createInject(appListPage).setIsAllowSearch(false)
+        }
     }
 }
 

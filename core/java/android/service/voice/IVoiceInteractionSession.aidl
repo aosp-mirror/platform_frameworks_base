@@ -40,5 +40,5 @@ oneway interface IVoiceInteractionSession {
     void closeSystemDialogs();
     void onLockscreenShown();
     void destroy();
-    void updateVisibleActivityInfo(in VisibleActivityInfo visibleActivityInfo, int type);
+    void notifyVisibleActivityInfoChanged(in VisibleActivityInfo visibleActivityInfo, int type);
 }
