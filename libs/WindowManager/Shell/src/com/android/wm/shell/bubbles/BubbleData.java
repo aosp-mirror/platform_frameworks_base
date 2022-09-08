@@ -158,7 +158,6 @@ public class BubbleData {
     @Nullable
     private Listener mListener;
 
-    @Nullable
     private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
     private Bubbles.PendingIntentCanceledListener mCancelledListener;
 
