@@ -347,6 +347,14 @@ public class SpatializerHelper {
         mASA.getDevicesForAttributes(
                 DEFAULT_ATTRIBUTES, false /* forVolume */).toArray(ROUTING_DEVICES);
 
+        // check validity of routing information
+        if (ROUTING_DEVICES[0] == null) {
+            logloge("onRoutingUpdated: device is null, no Spatial Audio");
+            setDispatchAvailableState(false);
+            // not changing the spatializer level as this is likely a transient state
+            return;
+        }
+
         // is media routed to a new device?
         if (isWireless(ROUTING_DEVICES[0].getType())) {
             addWirelessDeviceIfNew(ROUTING_DEVICES[0]);
@@ -1093,7 +1101,7 @@ public class SpatializerHelper {
             }
         }
         // check current routing to see if it affects the headtracking mode
-        if (ROUTING_DEVICES[0].getType() == ada.getType()
+        if (ROUTING_DEVICES[0] != null && ROUTING_DEVICES[0].getType() == ada.getType()
                 && ROUTING_DEVICES[0].getAddress().equals(ada.getAddress())) {
             setDesiredHeadTrackingMode(enabled ? mDesiredHeadTrackingModeWhenEnabled
                     : Spatializer.HEAD_TRACKING_MODE_DISABLED);
@@ -1651,7 +1659,11 @@ public class SpatializerHelper {
 
     private int getHeadSensorHandleUpdateTracker() {
         int headHandle = -1;
-        UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(ROUTING_DEVICES[0]);
+        final AudioDeviceAttributes currentDevice = ROUTING_DEVICES[0];
+        if (currentDevice == null) {
+            return headHandle;
+        }
+        UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(currentDevice);
         // We limit only to Sensor.TYPE_HEAD_TRACKER here to avoid confusion
         // with gaming sensors. (Note that Sensor.TYPE_ROTATION_VECTOR
         // and Sensor.TYPE_GAME_ROTATION_VECTOR are supported internally by
@@ -1662,7 +1674,7 @@ public class SpatializerHelper {
             final UUID uuid = sensor.getUuid();
             if (uuid.equals(routingDeviceUuid)) {
                 headHandle = sensor.getHandle();
-                if (!setHasHeadTracker(ROUTING_DEVICES[0])) {
+                if (!setHasHeadTracker(currentDevice)) {
                     headHandle = -1;
                 }
                 break;
