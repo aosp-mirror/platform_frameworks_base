@@ -213,12 +213,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mShellController.addKeyguardChangeListener(this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
-            mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mTaskOrganizer, mDisplayController, mDisplayImeController,
-                    mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
-                    mIconProvider, mMainExecutor, mRecentTasksOptional);
+            mStageCoordinator = createStageCoordinator();
         }
         mDragAndDropController.setSplitScreenController(this);
+    }
+
+    protected StageCoordinator createStageCoordinator() {
+        return new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
+                mTaskOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
+                mIconProvider, mMainExecutor, mRecentTasksOptional);
     }
 
     @Override
