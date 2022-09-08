@@ -148,6 +148,9 @@ public final class SelectionActionModeHelper {
             startSelectionActionMode(null);
         } else {
             resetTextClassificationHelper();
+            if (mSmartSelectSprite != null && mSmartSelectSprite.isAnimationActive()) {
+                mSmartSelectSprite.cancelAnimation();
+            }
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
                     mTextView,
                     mTextClassificationHelper.getTimeoutDuration(),
