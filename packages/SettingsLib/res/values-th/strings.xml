@@ -288,8 +288,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"เปิดใช้ Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
-    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชัน MAP ของบลูทูธ"</string>
-    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชัน MAP ของบลูทูธ"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชันของบลูทูธ MAP"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชันของบลูทูธ MAP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"อัตราตัวอย่างเสียงบลูทูธ"</string>
@@ -585,7 +585,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"กำลังสร้างผู้เข้าร่วมใหม่…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"กำลังสร้างผู้ใช้ชั่วคราวใหม่…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"สร้างผู้เข้าร่วมใหม่ไม่สำเร็จ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ชื่อเล่น"</string>

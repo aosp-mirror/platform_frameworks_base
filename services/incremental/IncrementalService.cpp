@@ -1166,11 +1166,11 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
     if (!ifs) {
         return -EINVAL;
     }
-    if (data.size() > params.size) {
+    if ((IncFsSize)data.size() > params.size) {
         LOG(ERROR) << "Bad data size - bigger than file size";
         return -EINVAL;
     }
-    if (!data.empty() && data.size() != params.size) {
+    if (!data.empty() && (IncFsSize)data.size() != params.size) {
         // Writing a page is an irreversible operation, and it can't be updated with additional
         // data later. Check that the last written page is complete, or we may break the file.
         if (!isPageAligned(data.size())) {
@@ -3188,7 +3188,7 @@ binder::Status IncrementalService::IncrementalServiceConnector::setStorageParams
 }
 
 FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
-    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), metadata.size()});
+    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), (IncFsSize)metadata.size()});
 }
 
 } // namespace android::incremental
