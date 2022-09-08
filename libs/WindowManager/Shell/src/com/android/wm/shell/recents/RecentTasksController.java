@@ -43,6 +43,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
@@ -52,6 +53,7 @@ import com.android.wm.shell.util.SplitBounds;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +82,15 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * taskID mapping to it, leaving both for consistency with {@link #mSplitTasks} for now.
      */
     private final Map<Integer, SplitBounds> mTaskSplitBoundsMap = new HashMap<>();
+
+    /**
+     * Set of taskId's that have been launched in freeform mode.
+     * This includes tasks that are currently running, visible and in freeform mode. And also
+     * includes tasks that are running in the background, are no longer visible, but at some point
+     * were visible to the user.
+     * This is used to decide which freeform apps belong to the user's desktop.
+     */
+    private final HashSet<Integer> mActiveFreeformTasks = new HashSet<>();
 
     /**
      * Creates {@link RecentTasksController}, returns {@code null} if the feature is not
@@ -206,6 +217,22 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRecentTasksChanged();
     }
 
+    /**
+     * Mark a task with given {@code taskId} as active in freeform
+     */
+    public void addActiveFreeformTask(int taskId) {
+        mActiveFreeformTasks.add(taskId);
+        notifyRecentTasksChanged();
+    }
+
+    /**
+     * Remove task with given {@code taskId} from active freeform tasks
+     */
+    public void removeActiveFreeformTask(int taskId) {
+        mActiveFreeformTasks.remove(taskId);
+        notifyRecentTasksChanged();
+    }
+
     @VisibleForTesting
     void notifyRecentTasksChanged() {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Notify recent tasks changed");
@@ -273,6 +300,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
             rawMapping.put(taskInfo.taskId, taskInfo);
         }
 
+        boolean desktopModeActive = DesktopMode.isActive(mContext);
+        ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
+
         // Pull out the pairs as we iterate back in the list
         ArrayList<GroupedRecentTaskInfo> recentTasks = new ArrayList<>();
         for (int i = 0; i < rawList.size(); i++) {
@@ -282,16 +312,31 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
+            if (desktopModeActive && mActiveFreeformTasks.contains(taskInfo.taskId)) {
+                // Freeform tasks will be added as a separate entry
+                freeformTasks.add(taskInfo);
+                continue;
+            }
+
             final int pairedTaskId = mSplitTasks.get(taskInfo.taskId);
-            if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(pairedTaskId)) {
+            if (!desktopModeActive && pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
+                    pairedTaskId)) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);
-                recentTasks.add(new GroupedRecentTaskInfo(taskInfo, pairedTaskInfo,
+                recentTasks.add(GroupedRecentTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
-                recentTasks.add(new GroupedRecentTaskInfo(taskInfo));
+                recentTasks.add(GroupedRecentTaskInfo.forSingleTask(taskInfo));
             }
         }
+
+        // Add a special entry for freeform tasks
+        if (!freeformTasks.isEmpty()) {
+            // First task is added separately
+            recentTasks.add(0, GroupedRecentTaskInfo.forFreeformTasks(
+                    freeformTasks.toArray(new ActivityManager.RecentTaskInfo[0])));
+        }
+
         return recentTasks;
     }
 

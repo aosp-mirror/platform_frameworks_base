@@ -163,7 +163,7 @@ public class StackScrollAlgorithm {
                 // which is more expensive.
                 if (shelfState.hidden) {
                     // When the shelf is hidden, it won't clip views, so we don't hide rows
-                    return;
+                    continue;
                 }
 
                 final float shelfTop = shelfState.yTranslation;

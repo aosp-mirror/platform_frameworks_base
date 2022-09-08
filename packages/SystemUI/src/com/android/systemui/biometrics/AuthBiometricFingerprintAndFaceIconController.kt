@@ -29,8 +29,9 @@ import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMAT
 /** Face/Fingerprint combined icon animator for BiometricPrompt. */
 class AuthBiometricFingerprintAndFaceIconController(
         context: Context,
-        iconView: LottieAnimationView
-) : AuthBiometricFingerprintIconController(context, iconView) {
+        iconView: LottieAnimationView,
+        iconViewOverlay: LottieAnimationView
+) : AuthBiometricFingerprintIconController(context, iconView, iconViewOverlay) {
 
     override val actsAsConfirmButton: Boolean = true
 

@@ -309,6 +309,7 @@ public class BubbleController implements ConfigurationChangeListener {
     protected void onInit() {
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
+        mDataRepository.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
