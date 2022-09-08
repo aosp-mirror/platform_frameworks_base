@@ -579,8 +579,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
-                    onRemoteAnimationFinished(apps);
+                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+                    setDividerVisibility(true, t);
                     t.apply();
+                    onRemoteAnimationFinished(apps);
                     try {
                         adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
                     } catch (RemoteException e) {
@@ -593,7 +595,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 nonApps = ArrayUtils.appendElement(RemoteAnimationTarget.class, nonApps,
                         getDividerBarLegacyTarget());
 
-                updateSurfaceBounds(mSplitLayout, t, false);
+                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                 setDividerVisibility(true, t);
                 for (int i = 0; i < apps.length; ++i) {
                     if (apps[i].mode == MODE_OPENING) {
