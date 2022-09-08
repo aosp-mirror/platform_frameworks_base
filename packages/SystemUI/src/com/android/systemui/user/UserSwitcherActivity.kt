@@ -27,6 +27,7 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.UserManager
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -37,6 +38,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.constraintlayout.helper.widget.Flow
+import androidx.lifecycle.ViewModelProvider
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.util.UserIcons
 import com.android.settingslib.Utils
@@ -44,6 +46,8 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.settings.UserTracker
@@ -52,6 +56,9 @@ import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdap
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA
 import com.android.systemui.user.data.source.UserRecord
+import com.android.systemui.user.ui.binder.UserSwitcherViewBinder
+import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
+import dagger.Lazy
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -63,11 +70,12 @@ private const val USER_VIEW = "user_view"
 class UserSwitcherActivity @Inject constructor(
     private val userSwitcherController: UserSwitcherController,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val layoutInflater: LayoutInflater,
     private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
     private val userManager: UserManager,
-    private val userTracker: UserTracker
+    private val userTracker: UserTracker,
+    private val flags: FeatureFlags,
+    private val viewModelFactory: Lazy<UserSwitcherViewModel.Factory>,
 ) : ComponentActivity() {
 
     private lateinit var parent: UserSwitcherRootView
@@ -93,119 +101,31 @@ class UserSwitcherActivity @Inject constructor(
             false /* isAddSupervisedUser */
         )
 
-    private val adapter = object : BaseUserAdapter(userSwitcherController) {
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val item = getItem(position)
-            var view = convertView as ViewGroup?
-            if (view == null) {
-                view = layoutInflater.inflate(
-                    R.layout.user_switcher_fullscreen_item,
-                    parent,
-                    false
-                ) as ViewGroup
-            }
-            (view.getChildAt(0) as ImageView).apply {
-                setImageDrawable(getDrawable(item))
-            }
-            (view.getChildAt(1) as TextView).apply {
-                setText(getName(getContext(), item))
-            }
-
-            view.setEnabled(item.isSwitchToEnabled)
-            view.setAlpha(
-                if (view.isEnabled()) {
-                    USER_SWITCH_ENABLED_ALPHA
-                } else {
-                    USER_SWITCH_DISABLED_ALPHA
-                }
-            )
-            view.setTag(USER_VIEW)
-            return view
-        }
-
-        override fun getName(context: Context, item: UserRecord): String {
-            return if (item == manageUserRecord) {
-                getString(R.string.manage_users)
-            } else {
-                super.getName(context, item)
-            }
-        }
-
-        fun findUserIcon(item: UserRecord): Drawable {
-            if (item == manageUserRecord) {
-                return getDrawable(R.drawable.ic_manage_users)
-            }
-            if (item.info == null) {
-                return getIconDrawable(this@UserSwitcherActivity, item)
-            }
-            val userIcon = userManager.getUserIcon(item.info.id)
-            if (userIcon != null) {
-                return BitmapDrawable(userIcon)
-            }
-            return UserIcons.getDefaultUserIcon(resources, item.info.id, false)
-        }
-
-        fun getTotalUserViews(): Int {
-            return users.count { item ->
-                !doNotRenderUserView(item)
-            }
-        }
-
-        fun doNotRenderUserView(item: UserRecord): Boolean {
-            return item.isAddUser ||
-                    item.isAddSupervisedUser ||
-                    item.isGuest && item.info == null
-        }
-
-        private fun getDrawable(item: UserRecord): Drawable {
-            var drawable = if (item.isGuest) {
-                getDrawable(R.drawable.ic_account_circle)
-            } else {
-                findUserIcon(item)
-            }
-            drawable.mutate()
-
-            if (!item.isCurrent && !item.isSwitchToEnabled) {
-                drawable.setTint(
-                    resources.getColor(
-                        R.color.kg_user_switcher_restricted_avatar_icon_color,
-                        getTheme()
-                    )
-                )
-            }
-
-            val ld = getDrawable(R.drawable.user_switcher_icon_large).mutate()
-                as LayerDrawable
-            if (item == userSwitcherController.getCurrentUserRecord()) {
-                (ld.findDrawableByLayerId(R.id.ring) as GradientDrawable).apply {
-                    val stroke = resources
-                        .getDimensionPixelSize(R.dimen.user_switcher_icon_selected_width)
-                    val color = Utils.getColorAttrDefaultColor(
-                        this@UserSwitcherActivity,
-                        com.android.internal.R.attr.colorAccentPrimary
-                    )
-
-                    setStroke(stroke, color)
-                }
-            }
-
-            ld.setDrawableByLayerId(R.id.user_avatar, drawable)
-            return ld
-        }
-
-        override fun notifyDataSetChanged() {
-            super.notifyDataSetChanged()
-            buildUserViews()
-        }
-    }
+    private val adapter: UserAdapter by lazy { UserAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.user_switcher_fullscreen)
-        window.decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        if (isUsingModernArchitecture()) {
+            Log.d(TAG, "Using modern architecture.")
+            val viewModel = ViewModelProvider(
+                this, viewModelFactory.get())[UserSwitcherViewModel::class.java]
+            UserSwitcherViewBinder.bind(
+                view = requireViewById(R.id.user_switcher_root),
+                viewModel = viewModel,
+                lifecycleOwner = this,
+                layoutInflater = layoutInflater,
+                falsingCollector = falsingCollector,
+                onFinish = this::finish,
+            )
+            return
+        } else {
+            Log.d(TAG, "Not using modern architecture.")
+        }
 
         parent = requireViewById<UserSwitcherRootView>(R.id.user_switcher_root)
 
@@ -346,11 +266,18 @@ class UserSwitcherActivity @Inject constructor(
     }
 
     override fun onBackPressed() {
+        if (isUsingModernArchitecture()) {
+            return super.onBackPressed()
+        }
+
         finish()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (isUsingModernArchitecture()) {
+            return
+        }
 
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
         userTracker.removeCallback(userSwitchedCallback)
@@ -376,6 +303,10 @@ class UserSwitcherActivity @Inject constructor(
         return if (userCount < 5) 4 else ceil(userCount / 2.0).toInt()
     }
 
+    private fun isUsingModernArchitecture(): Boolean {
+        return flags.isEnabled(Flags.MODERN_USER_SWITCHER_ACTIVITY)
+    }
+
     private class ItemAdapter(
         val parentContext: Context,
         val resource: Int,
@@ -397,5 +328,115 @@ class UserSwitcherActivity @Inject constructor(
 
             return view
         }
+    }
+
+    private inner class UserAdapter : BaseUserAdapter(userSwitcherController) {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val item = getItem(position)
+            var view = convertView as ViewGroup?
+            if (view == null) {
+                view = layoutInflater.inflate(
+                    R.layout.user_switcher_fullscreen_item,
+                    parent,
+                    false
+                ) as ViewGroup
+            }
+            (view.getChildAt(0) as ImageView).apply {
+                setImageDrawable(getDrawable(item))
+            }
+            (view.getChildAt(1) as TextView).apply {
+                setText(getName(getContext(), item))
+            }
+
+            view.setEnabled(item.isSwitchToEnabled)
+            view.setAlpha(
+                if (view.isEnabled()) {
+                    USER_SWITCH_ENABLED_ALPHA
+                } else {
+                    USER_SWITCH_DISABLED_ALPHA
+                }
+            )
+            view.setTag(USER_VIEW)
+            return view
+        }
+
+        override fun getName(context: Context, item: UserRecord): String {
+            return if (item == manageUserRecord) {
+                getString(R.string.manage_users)
+            } else {
+                super.getName(context, item)
+            }
+        }
+
+        fun findUserIcon(item: UserRecord): Drawable {
+            if (item == manageUserRecord) {
+                return getDrawable(R.drawable.ic_manage_users)
+            }
+            if (item.info == null) {
+                return getIconDrawable(this@UserSwitcherActivity, item)
+            }
+            val userIcon = userManager.getUserIcon(item.info.id)
+            if (userIcon != null) {
+                return BitmapDrawable(userIcon)
+            }
+            return UserIcons.getDefaultUserIcon(resources, item.info.id, false)
+        }
+
+        fun getTotalUserViews(): Int {
+            return users.count { item ->
+                !doNotRenderUserView(item)
+            }
+        }
+
+        fun doNotRenderUserView(item: UserRecord): Boolean {
+            return item.isAddUser ||
+                    item.isAddSupervisedUser ||
+                    item.isGuest && item.info == null
+        }
+
+        private fun getDrawable(item: UserRecord): Drawable {
+            var drawable = if (item.isGuest) {
+                getDrawable(R.drawable.ic_account_circle)
+            } else {
+                findUserIcon(item)
+            }
+            drawable.mutate()
+
+            if (!item.isCurrent && !item.isSwitchToEnabled) {
+                drawable.setTint(
+                    resources.getColor(
+                        R.color.kg_user_switcher_restricted_avatar_icon_color,
+                        getTheme()
+                    )
+                )
+            }
+
+            val ld = getDrawable(R.drawable.user_switcher_icon_large).mutate()
+                    as LayerDrawable
+            if (item == userSwitcherController.getCurrentUserRecord()) {
+                (ld.findDrawableByLayerId(R.id.ring) as GradientDrawable).apply {
+                    val stroke = resources
+                        .getDimensionPixelSize(R.dimen.user_switcher_icon_selected_width)
+                    val color = Utils.getColorAttrDefaultColor(
+                        this@UserSwitcherActivity,
+                        com.android.internal.R.attr.colorAccentPrimary
+                    )
+
+                    setStroke(stroke, color)
+                }
+            }
+
+            ld.setDrawableByLayerId(R.id.user_avatar, drawable)
+            return ld
+        }
+
+        override fun notifyDataSetChanged() {
+            super.notifyDataSetChanged()
+            buildUserViews()
+        }
+    }
+
+    companion object {
+        private const val TAG = "UserSwitcherActivity"
     }
 }
