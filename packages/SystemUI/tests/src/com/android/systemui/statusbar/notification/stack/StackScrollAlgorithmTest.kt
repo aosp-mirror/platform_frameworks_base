@@ -179,7 +179,28 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun resetViewStates_hiddenShelf_viewAlphaDoesNotChange() {
+    fun resetViewStates_hiddenShelf_allRowsBecomesTransparent() {
+        hostView.removeAllViews()
+        val row1 = mockExpandableNotificationRow()
+        hostView.addView(row1)
+        val row2 = mockExpandableNotificationRow()
+        hostView.addView(row2)
+
+        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.hideAmount = 0.25f
+        notificationShelf.viewState.hidden = true
+        ambientState.shelf = notificationShelf
+        stackScrollAlgorithm.initView(context)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        val expected = 1f - ambientState.hideAmount
+        assertThat(row1.viewState.alpha).isEqualTo(expected)
+        assertThat(row2.viewState.alpha).isEqualTo(expected)
+    }
+
+    @Test
+    fun resetViewStates_hiddenShelf_shelfAlphaDoesNotChange() {
         val expected = notificationShelf.viewState.alpha
         notificationShelf.viewState.hidden = true
         ambientState.shelf = notificationShelf
@@ -457,5 +478,11 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* viewMaxHeight= */ 20f,
                 /* originalCornerRoundness= */ 1f)
         assertEquals(1f, currentRoundness)
+    }
+}
+
+private fun mockExpandableNotificationRow(): ExpandableNotificationRow {
+    return mock(ExpandableNotificationRow::class.java).apply {
+        whenever(viewState).thenReturn(ExpandableViewState())
     }
 }
