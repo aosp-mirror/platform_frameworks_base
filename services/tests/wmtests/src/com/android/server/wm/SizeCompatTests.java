@@ -2270,7 +2270,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, /* maxAspect */ 1.1f, SCREEN_ORIENTATION_UNSPECIFIED);
 
         // Bounds are letterboxed to respect the provided max aspect ratio.
-        assertEquals(mActivity.getBounds(), new Rect(0, 850, 1000, 1950));
+        assertEquals(mActivity.getBounds(), new Rect(0, 0, 1000, 1100));
 
         // Move activity to split screen which has landscape size.
         mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents */ false, "test");
@@ -2337,6 +2337,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     public void testLetterboxDetailsForStatusBar_letterboxNotOverlappingStatusBar() {
+        // Align to center so that we don't overlap with the status bar
+        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2800)
                 .setNotch(100)
                 .build();
@@ -2453,7 +2455,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(0, 0, 700, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(0, 700, 700, 2100),
+                /* sizeCompatUnscaled */ new Rect(0, 0, 700, 1400),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(0, 0, 350, 700));
     }
@@ -2466,7 +2468,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 700, 1050, 2100),
+                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
     }
@@ -2481,7 +2483,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 700, 1050, 2100),
+                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
 
@@ -2491,7 +2493,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 700, 1050, 2100),
+                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
     }
@@ -2504,7 +2506,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(2100, 0, 2800, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(700, 700, 1400, 2100),
+                /* sizeCompatUnscaled */ new Rect(700, 0, 1400, 1400),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(1050, 0, 1400, 700));
     }
@@ -2954,7 +2956,7 @@ public class SizeCompatTests extends WindowTestsBase {
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
         assertTrue(mActivity.inSizeCompatMode());
         // Activity is in size compat mode but not scaled.
-        assertEquals(new Rect(0, 1050, 1400, 1750), mActivity.getBounds());
+        assertEquals(new Rect(0, 0, 1400, 700), mActivity.getBounds());
     }
 
     private void assertVerticalPositionForDifferentDisplayConfigsForPortraitActivity(

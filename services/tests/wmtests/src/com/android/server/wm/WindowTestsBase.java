@@ -238,7 +238,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Ensure letterbox vertical position multiplier is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.0f);
         // Ensure letterbox horizontal reachability treatment isn't overridden on any device target.
         // {@link com.android.internal.R.bool.config_letterboxIsHorizontalReachabilityEnabled},
         // may be set on some device form factors.
