@@ -74,10 +74,19 @@ data class WithPrev<T>(val previousValue: T, val newValue: T)
 /**
  * Returns a new [Flow] that combines the [Set] changes between each emission from [this] using
  * [transform].
+ *
+ * If [emitFirstEvent] is `true`, then the first [Set] emitted from the upstream [Flow] will cause
+ * a change event to be emitted that contains no removals, and all elements from that first [Set]
+ * as additions.
+ *
+ * If [emitFirstEvent] is `false`, then the first emission is ignored and no changes are emitted
+ * until a second [Set] has been emitted from the upstream [Flow].
  */
 fun <T, R> Flow<Set<T>>.setChangesBy(
     transform: suspend (removed: Set<T>, added: Set<T>) -> R,
-): Flow<R> = onStart { emit(emptySet()) }.distinctUntilChanged()
+    emitFirstEvent: Boolean = true,
+): Flow<R> = (if (emitFirstEvent) onStart { emit(emptySet()) } else this)
+    .distinctUntilChanged()
     .pairwiseBy { old: Set<T>, new: Set<T> ->
         // If an element was present in the old set, but not the new one, then it was removed
         val removed = old - new
@@ -86,8 +95,18 @@ fun <T, R> Flow<Set<T>>.setChangesBy(
         transform(removed, added)
     }
 
-/** Returns a new [Flow] that produces the [Set] changes between each emission from [this]. */
-fun <T> Flow<Set<T>>.setChanges(): Flow<SetChanges<T>> = setChangesBy(::SetChanges)
+/**
+ * Returns a new [Flow] that produces the [Set] changes between each emission from [this].
+ *
+ * If [emitFirstEvent] is `true`, then the first [Set] emitted from the upstream [Flow] will cause
+ * a change event to be emitted that contains no removals, and all elements from that first [Set]
+ * as additions.
+ *
+ * If [emitFirstEvent] is `false`, then the first emission is ignored and no changes are emitted
+ * until a second [Set] has been emitted from the upstream [Flow].
+ */
+fun <T> Flow<Set<T>>.setChanges(emitFirstEvent: Boolean = true): Flow<SetChanges<T>> =
+    setChangesBy(::SetChanges, emitFirstEvent)
 
 /** Contains the difference in elements between two [Set]s. */
 data class SetChanges<T>(
