@@ -276,8 +276,6 @@ public interface Bubbles {
 
         void notifyInvalidateNotifications(String reason);
 
-        void notifyMaybeCancelSummary(String key);
-
         void updateNotificationBubbleButton(String key);
 
         void onStackExpandChanged(boolean shouldExpand);

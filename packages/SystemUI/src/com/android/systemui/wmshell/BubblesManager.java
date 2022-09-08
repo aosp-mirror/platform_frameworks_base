@@ -311,18 +311,6 @@ public class BubblesManager {
             }
 
             @Override
-            public void notifyMaybeCancelSummary(String key) {
-                sysuiMainExecutor.execute(() -> {
-                    final NotificationEntry entry = mCommonNotifCollection.getEntry(key);
-                    if (entry != null) {
-                        for (NotifCallback cb : mCallbacks) {
-                            cb.maybeCancelSummary(entry);
-                        }
-                    }
-                });
-            }
-
-            @Override
             public void updateNotificationBubbleButton(String key) {
                 sysuiMainExecutor.execute(() -> {
                     final NotificationEntry entry = mCommonNotifCollection.getEntry(key);
@@ -646,15 +634,5 @@ public class BubblesManager {
          * filtered from the shade.
          */
         void invalidateNotifications(@NonNull String reason);
-
-        /**
-         * Called on a bubbled entry that has been removed when there are no longer
-         * bubbled entries in its group.
-         *
-         * Checks whether its group has any other (non-bubbled) children. If it doesn't,
-         * removes all remnants of the group's summary from the notification pipeline.
-         * TODO: (b/145659174) Only old pipeline needs this - delete post-migration.
-         */
-        void maybeCancelSummary(@NonNull NotificationEntry entry);
     }
 }
