@@ -83,7 +83,11 @@ private fun fakeFooterActionsViewModel(
                 flowOf(
                     securityText?.let { text ->
                         SecurityButtonConfig(
-                            icon = Icon.Resource(R.drawable.ic_info_outline),
+                            icon =
+                                Icon.Resource(
+                                    R.drawable.ic_info_outline,
+                                    contentDescription = null,
+                                ),
                             text = text,
                             isClickable = securityClickable,
                         )

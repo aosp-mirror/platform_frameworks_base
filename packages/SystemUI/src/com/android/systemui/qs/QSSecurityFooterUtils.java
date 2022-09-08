@@ -75,6 +75,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.common.shared.model.ContentDescription;
 import com.android.systemui.common.shared.model.Icon;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
@@ -243,16 +244,17 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
                 isWorkProfileOn).toString();
 
         Icon icon;
+        ContentDescription contentDescription = null;
         if (isParentalControlsEnabled) {
-            icon = new Icon.Loaded(securityModel.getDeviceAdminIcon());
+            icon = new Icon.Loaded(securityModel.getDeviceAdminIcon(), contentDescription);
         } else if (vpnName != null || vpnNameWorkProfile != null) {
             if (securityModel.isVpnBranded()) {
-                icon = new Icon.Resource(R.drawable.stat_sys_branded_vpn);
+                icon = new Icon.Resource(R.drawable.stat_sys_branded_vpn, contentDescription);
             } else {
-                icon = new Icon.Resource(R.drawable.stat_sys_vpn_ic);
+                icon = new Icon.Resource(R.drawable.stat_sys_vpn_ic, contentDescription);
             }
         } else {
-            icon = new Icon.Resource(R.drawable.ic_info_outline);
+            icon = new Icon.Resource(R.drawable.ic_info_outline, contentDescription);
         }
 
         return new SecurityButtonConfig(icon, text, isClickable);
