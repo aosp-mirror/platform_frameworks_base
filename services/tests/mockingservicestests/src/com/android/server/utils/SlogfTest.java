@@ -103,6 +103,24 @@ public final class SlogfTest {
     }
 
     @Test
+    public void testV_msgFormattedWithException_enabled() {
+        enableLogging(Log.VERBOSE);
+
+        Slogf.v(TAG, mException, "msg in a %s", "bottle");
+
+        verify(()-> Slog.v(TAG, "msg in a bottle", mException));
+    }
+
+    @Test
+    public void testV_msgFormattedWithException_disabled() {
+        disableLogging(Log.VERBOSE);
+
+        Slogf.v(TAG, "msg in a %s", "bottle");
+
+        verify(()-> Slog.v(eq(TAG), any(String.class), any(Throwable.class)), never());
+    }
+
+    @Test
     public void testD_msg() {
         Slogf.d(TAG, "msg");
 
@@ -135,6 +153,24 @@ public final class SlogfTest {
     }
 
     @Test
+    public void testD_msgFormattedWithException_enabled() {
+        enableLogging(Log.DEBUG);
+
+        Slogf.d(TAG, mException, "msg in a %s", "bottle");
+
+        verify(()-> Slog.d(TAG, "msg in a bottle", mException));
+    }
+
+    @Test
+    public void testD_msgFormattedWithException_disabled() {
+        disableLogging(Log.DEBUG);
+
+        Slogf.d(TAG, mException, "msg in a %s", "bottle");
+
+        verify(()-> Slog.d(eq(TAG), any(String.class), any(Throwable.class)), never());
+    }
+
+    @Test
     public void testI_msg() {
         Slogf.i(TAG, "msg");
 
@@ -164,6 +200,24 @@ public final class SlogfTest {
         Slogf.i(TAG, "msg in a %s", "bottle");
 
         verify(()-> Slog.i(eq(TAG), any()), never());
+    }
+
+    @Test
+    public void testI_msgFormattedWithException_enabled() {
+        enableLogging(Log.INFO);
+
+        Slogf.i(TAG, mException, "msg in a %s", "bottle");
+
+        verify(()-> Slog.i(TAG, "msg in a bottle", mException));
+    }
+
+    @Test
+    public void testI_msgFormattedWithException_disabled() {
+        disableLogging(Log.INFO);
+
+        Slogf.i(TAG, mException, "msg in a %s", "bottle");
+
+        verify(()-> Slog.i(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
 
     @Test
@@ -218,7 +272,7 @@ public final class SlogfTest {
     public void testW_msgFormattedWithException_disabled() {
         disableLogging(Log.WARN);
 
-        Slogf.w(TAG, "msg in a %s", "bottle");
+        Slogf.w(TAG, mException, "msg in a %s", "bottle");
 
         verify(()-> Slog.w(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
@@ -268,7 +322,7 @@ public final class SlogfTest {
     public void testE_msgFormattedWithException_disabled() {
         disableLogging(Log.ERROR);
 
-        Slogf.e(TAG, "msg in a %s", "bottle");
+        Slogf.e(TAG, mException, "msg in a %s", "bottle");
 
         verify(()-> Slog.e(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
