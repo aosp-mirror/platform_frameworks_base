@@ -408,10 +408,10 @@ public class SpatializerHelper {
             try {
                 mSpat.setLevel(level);
             } catch (RemoteException e) {
-                Log.e(TAG, "Can't set spatializer level", e);
-                mState = STATE_NOT_SUPPORTED;
-                mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
-                enabled = false;
+                Log.e(TAG, "onRoutingUpdated() Can't set spatializer level", e);
+                // try to recover by resetting the native spatializer state
+                postReset();
+                return;
             }
         }
 
@@ -421,6 +421,10 @@ public class SpatializerHelper {
                 && mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_DISABLED) {
             postInitSensors();
         }
+    }
+
+    private void postReset() {
+        mAudioService.postResetSpatializer();
     }
 
     //------------------------------------------------------
@@ -1182,8 +1186,11 @@ public class SpatializerHelper {
             case STATE_DISABLED_AVAILABLE:
             case STATE_ENABLED_AVAILABLE:
                 if (mSpat == null) {
-                    throw (new IllegalStateException(
-                            "null Spatializer when calling " + funcName));
+                    // try to recover by resetting the native spatializer state
+                    Log.e(TAG, "checkSpatForHeadTracking(): "
+                            + "native spatializer should not be null in state: " + mState);
+                    postReset();
+                    return false;
                 }
                 break;
         }
@@ -1273,8 +1280,8 @@ public class SpatializerHelper {
             case STATE_DISABLED_AVAILABLE:
             case STATE_ENABLED_AVAILABLE:
                 if (mSpat == null) {
-                    throw (new IllegalStateException(
-                            "null Spatializer for setParameter for key:" + key));
+                    Log.e(TAG, "setParameter(" + key + "): null spatializer in state: " + mState);
+                    return;
                 }
                 break;
         }
@@ -1297,8 +1304,8 @@ public class SpatializerHelper {
             case STATE_DISABLED_AVAILABLE:
             case STATE_ENABLED_AVAILABLE:
                 if (mSpat == null) {
-                    throw (new IllegalStateException(
-                            "null Spatializer for getParameter for key:" + key));
+                    Log.e(TAG, "getParameter(" + key + "): null spatializer in state: " + mState);
+                    return;
                 }
                 break;
         }
