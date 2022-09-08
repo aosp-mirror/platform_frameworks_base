@@ -75,7 +75,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class SystemDataTransferRequestStore {
 
-    private static final String LOG_TAG = SystemDataTransferRequestStore.class.getSimpleName();
+    private static final String LOG_TAG = "CDM_SystemDataTransferRequestStore";
 
     private static final String FILE_NAME = "companion_device_system_data_transfer_requests.xml";
 

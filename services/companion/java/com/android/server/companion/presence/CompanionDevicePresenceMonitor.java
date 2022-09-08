@@ -57,7 +57,7 @@ import java.util.Set;
 public class CompanionDevicePresenceMonitor implements AssociationStore.OnChangeListener,
         BluetoothCompanionDeviceConnectionListener.Callback, BleCompanionDeviceScanner.Callback {
     static final boolean DEBUG = false;
-    private static final String TAG = "CompanionDevice_PresenceMonitor";
+    private static final String TAG = "CDM_CompanionDevicePresenceMonitor";
 
     /** Callback for notifying about changes to status of companion devices. */
     public interface Callback {
