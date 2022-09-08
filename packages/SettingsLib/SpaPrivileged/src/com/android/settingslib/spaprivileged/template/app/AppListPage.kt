@@ -44,6 +44,7 @@ import com.android.settingslib.spaprivileged.template.common.WorkProfilePager
 fun <T : AppRecord> AppListPage(
     title: String,
     listModel: AppListModel<T>,
+    primaryUserOnly: Boolean = false,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
     val showSystem = rememberSaveable { mutableStateOf(false) }
@@ -55,7 +56,7 @@ fun <T : AppRecord> AppListPage(
         },
     ) { paddingValues ->
         Spacer(Modifier.padding(paddingValues))
-        WorkProfilePager { userInfo ->
+        WorkProfilePager(primaryUserOnly) { userInfo ->
             Column(Modifier.fillMaxSize()) {
                 val options = remember { listModel.getSpinnerOptions() }
                 val selectedOption = rememberSaveable { mutableStateOf(0) }
