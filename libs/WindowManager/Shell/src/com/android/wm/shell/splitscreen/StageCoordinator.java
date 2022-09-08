@@ -121,6 +121,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.SplitBounds;
@@ -200,6 +201,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** The target stage to dismiss to when unlock after folded. */
     @StageType
     private int mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+
+    private DefaultMixedHandler mMixedHandler;
 
     private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
             new SplitWindowManager.ParentContainerCallbacks() {
@@ -322,6 +325,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout();
         transitions.addHandler(this);
+    }
+
+    public void setMixedHandler(DefaultMixedHandler mixedHandler) {
+        mMixedHandler = mixedHandler;
     }
 
     @VisibleForTesting
@@ -1859,8 +1866,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             // Use normal animations.
             return false;
+        } else if (mMixedHandler != null && hasDisplayChange(info)) {
+            // A display-change has been un-expectedly inserted into the transition. Redirect
+            // handling to the mixed-handler to deal with splitting it up.
+            if (mMixedHandler.animatePendingSplitWithDisplayChange(transition, info,
+                    startTransaction, finishTransaction, finishCallback)) {
+                return true;
+            }
         }
 
+        return startPendingAnimation(transition, info, startTransaction, finishTransaction,
+                finishCallback);
+    }
+
+    /** Starts the pending transition animation. */
+    public boolean startPendingAnimation(@NonNull IBinder transition,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
         boolean shouldAnimate = true;
         if (mSplitTransitions.isPendingEnter(transition)) {
             shouldAnimate = startPendingEnterAnimation(
@@ -1877,6 +1901,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 finishCallback, mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token,
                 mRootTaskInfo.token);
         return true;
+    }
+
+    private boolean hasDisplayChange(TransitionInfo info) {
+        boolean has = false;
+        for (int iC = 0; iC < info.getChanges().size() && !has; ++iC) {
+            final TransitionInfo.Change change = info.getChanges().get(iC);
+            has = change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0;
+        }
+        return has;
     }
 
     /** Called to clean-up state and do house-keeping after the animation is done. */
