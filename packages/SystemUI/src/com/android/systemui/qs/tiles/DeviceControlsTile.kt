@@ -31,7 +31,6 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
 import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -42,7 +41,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -55,8 +53,7 @@ class DeviceControlsTile @Inject constructor(
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
-    private val controlsComponent: ControlsComponent,
-    private val keyguardStateController: KeyguardStateController
+    private val controlsComponent: ControlsComponent
 ) : QSTileImpl<QSTile.State>(
         host,
         backgroundLooper,
@@ -105,7 +102,8 @@ class DeviceControlsTile @Inject constructor(
         }
 
         val intent = Intent().apply {
-            component = ComponentName(mContext, ControlsActivity::class.java)
+            component = ComponentName(mContext, controlsComponent.getControlsUiController().get()
+                .resolveActivity())
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         }
@@ -127,10 +125,15 @@ class DeviceControlsTile @Inject constructor(
         state.icon = icon
         if (controlsComponent.isEnabled() && hasControlsApps.get()) {
             if (controlsComponent.getVisibility() == AVAILABLE) {
-                val structure = controlsComponent
-                    .getControlsController().get().getPreferredStructure().structure
-                state.state = Tile.STATE_ACTIVE
-                state.secondaryLabel = if (structure == tileLabel) null else structure
+                val structureInfo = controlsComponent
+                    .getControlsController().get().getPreferredStructure()
+                state.state = if (structureInfo.controls.isEmpty()) {
+                    Tile.STATE_INACTIVE
+                } else {
+                    Tile.STATE_ACTIVE
+                }
+                val label = structureInfo.structure
+                state.secondaryLabel = if (label == tileLabel) null else label
             } else {
                 state.state = Tile.STATE_INACTIVE
                 state.secondaryLabel = mContext.getText(R.string.controls_tile_locked)
