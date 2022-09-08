@@ -152,7 +152,7 @@ public:
         LOG_ALWAYS_FATAL("Not supported");
     }
 
-    virtual void punchHole(const SkRRect& rect, float alpha) = 0;
+    virtual void punchHole(const SkRRect& rect) = 0;
 
     // ----------------------------------------------------------------------------
     // Canvas state operations
