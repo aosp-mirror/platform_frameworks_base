@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,13 @@ import android.os.RemoteException;
 import android.view.KeyEvent;
 
 import java.io.Closeable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * A virtual keyboard representing a key input mechanism on a remote device, such as a built-in
- * keyboard on a laptop, a software keyboard on a tablet, or a keypad on a TV remote control.
+ * A virtual dpad representing a key input mechanism on a remote device.
  *
  * This registers an InputDevice that is interpreted like a physically-connected device and
  * dispatches received events to it.
@@ -36,14 +39,22 @@ import java.io.Closeable;
  * @hide
  */
 @SystemApi
-public class VirtualKeyboard implements Closeable {
+public class VirtualDpad implements Closeable {
 
-    private final int mUnsupportedKeyCode = KeyEvent.KEYCODE_DPAD_CENTER;
+    private final Set<Integer> mSupportedKeyCodes =
+            Collections.unmodifiableSet(
+                    new HashSet<>(
+                            Arrays.asList(
+                                    KeyEvent.KEYCODE_DPAD_UP,
+                                    KeyEvent.KEYCODE_DPAD_DOWN,
+                                    KeyEvent.KEYCODE_DPAD_LEFT,
+                                    KeyEvent.KEYCODE_DPAD_RIGHT,
+                                    KeyEvent.KEYCODE_DPAD_CENTER)));
     private final IVirtualDevice mVirtualDevice;
     private final IBinder mToken;
 
     /** @hide */
-    public VirtualKeyboard(IVirtualDevice virtualDevice, IBinder token) {
+    public VirtualDpad(IVirtualDevice virtualDevice, IBinder token) {
         mVirtualDevice = virtualDevice;
         mToken = token;
     }
@@ -61,17 +72,21 @@ public class VirtualKeyboard implements Closeable {
     /**
      * Sends a key event to the system.
      *
+     * Supported key codes are KEYCODE_DPAD_UP, KEYCODE_DPAD_DOWN, KEYCODE_DPAD_LEFT,
+     * KEYCODE_DPAD_RIGHT and KEYCODE_DPAD_CENTER,
+     *
      * @param event the event to send
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendKeyEvent(@NonNull VirtualKeyEvent event) {
         try {
-            if (mUnsupportedKeyCode == event.getKeyCode()) {
+            if (!mSupportedKeyCodes.contains(event.getKeyCode())) {
                 throw new IllegalArgumentException(
-                    "Unsupported key code " + event.getKeyCode()
-                        + " sent to a VirtualKeyboard input device.");
+                        "Unsupported key code "
+                                + event.getKeyCode()
+                                + " sent to a VirtualDpad input device.");
             }
-            mVirtualDevice.sendKeyEvent(mToken, event);
+            mVirtualDevice.sendDpadKeyEvent(mToken, event);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
