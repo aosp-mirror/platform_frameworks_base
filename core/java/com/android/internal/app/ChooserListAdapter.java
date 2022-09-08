@@ -43,7 +43,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.ChooserTargetInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
@@ -87,7 +86,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private final ChooserActivityLogger mChooserActivityLogger;
 
     private int mNumShortcutResults = 0;
-    private final Map<TargetInfo, AsyncTask> mIconLoaders = new HashMap<>();
+    private Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
     private boolean mApplySharingAppLimits;
 
     // Reserve spots for incoming direct share targets by adding placeholders
@@ -104,8 +103,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private List<DisplayResolveInfo> mSortedList = new ArrayList<>();
     private AppPredictor mAppPredictor;
     private AppPredictor.Callback mAppPredictorCallback;
-
-    private LoadDirectShareIconTaskProvider mTestLoadDirectShareTaskProvider;
 
     // For pinned direct share labels, if the text spans multiple lines, the TextView will consume
     // the full width, even if the characters actually take up less than that. Measure the actual
@@ -243,6 +240,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
         mListViewDataChanged = false;
     }
 
+
     private void createPlaceHolders() {
         mNumShortcutResults = 0;
         mServiceTargets.clear();
@@ -267,25 +265,31 @@ public class ChooserListAdapter extends ResolverListAdapter {
             return;
         }
 
-        if (info instanceof DisplayResolveInfo) {
-            DisplayResolveInfo dri = (DisplayResolveInfo) info;
-            holder.bindLabel(dri.getDisplayLabel(), dri.getExtendedInfo(), alwaysShowSubLabel());
-            startDisplayResolveInfoIconLoading(holder, dri);
-        } else {
+        if (!(info instanceof DisplayResolveInfo)) {
             holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
+            holder.bindIcon(info);
 
             if (info instanceof SelectableTargetInfo) {
-                SelectableTargetInfo selectableInfo = (SelectableTargetInfo) info;
                 // direct share targets should append the application name for a better readout
-                DisplayResolveInfo rInfo = selectableInfo.getDisplayResolveInfo();
+                DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
                 CharSequence appName = rInfo != null ? rInfo.getDisplayLabel() : "";
-                CharSequence extendedInfo = selectableInfo.getExtendedInfo();
-                String contentDescription = String.join(" ", selectableInfo.getDisplayLabel(),
+                CharSequence extendedInfo = info.getExtendedInfo();
+                String contentDescription = String.join(" ", info.getDisplayLabel(),
                         extendedInfo != null ? extendedInfo : "", appName);
                 holder.updateContentDescription(contentDescription);
-                startSelectableTargetInfoIconLoading(holder, selectableInfo);
+            }
+        } else {
+            DisplayResolveInfo dri = (DisplayResolveInfo) info;
+            holder.bindLabel(dri.getDisplayLabel(), dri.getExtendedInfo(), alwaysShowSubLabel());
+            LoadIconTask task = mIconLoaders.get(dri);
+            if (task == null) {
+                task = new LoadIconTask(dri, holder);
+                mIconLoaders.put(dri, task);
+                task.execute();
             } else {
-                holder.bindIcon(info);
+                // The holder was potentially changed as the underlying items were
+                // reshuffled, so reset the target holder
+                task.setViewHolder(holder);
             }
         }
 
@@ -326,32 +330,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
         }
     }
 
-    private void startDisplayResolveInfoIconLoading(ViewHolder holder, DisplayResolveInfo info) {
-        LoadIconTask task = (LoadIconTask) mIconLoaders.get(info);
-        if (task == null) {
-            task = new LoadIconTask(info, holder);
-            mIconLoaders.put(info, task);
-            task.execute();
-        } else {
-            // The holder was potentially changed as the underlying items were
-            // reshuffled, so reset the target holder
-            task.setViewHolder(holder);
-        }
-    }
-
-    private void startSelectableTargetInfoIconLoading(
-            ViewHolder holder, SelectableTargetInfo info) {
-        LoadDirectShareIconTask task = (LoadDirectShareIconTask) mIconLoaders.get(info);
-        if (task == null) {
-            task = mTestLoadDirectShareTaskProvider == null
-                    ? new LoadDirectShareIconTask(info)
-                    : mTestLoadDirectShareTaskProvider.get();
-            mIconLoaders.put(info, task);
-            task.loadIcon();
-        }
-        task.setViewHolder(holder);
-    }
-
     void updateAlphabeticalList() {
         new AsyncTask<Void, Void, List<DisplayResolveInfo>>() {
             @Override
@@ -366,7 +344,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
                     String resolvedTarget = info.getResolvedComponentName().getPackageName()
-                            + '#' + info.getDisplayLabel();
+                        + '#' + info.getDisplayLabel();
                     DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
                     if (multiDri == null) {
                         consolidated.put(resolvedTarget, info);
@@ -375,7 +353,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     } else {
                         // create consolidated target from the single DisplayResolveInfo
                         MultiDisplayResolveInfo multiDisplayResolveInfo =
-                                new MultiDisplayResolveInfo(resolvedTarget, multiDri);
+                            new MultiDisplayResolveInfo(resolvedTarget, multiDri);
                         multiDisplayResolveInfo.addTarget(info);
                         consolidated.put(resolvedTarget, multiDisplayResolveInfo);
                     }
@@ -762,84 +740,15 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     /**
-     * An alias for onBindView to use with unit tests.
-     */
-    @VisibleForTesting
-    public void testViewBind(View view, TargetInfo info, int position) {
-        onBindView(view, info, position);
-    }
-
-    @VisibleForTesting
-    public void setTestLoadDirectShareTaskProvider(LoadDirectShareIconTaskProvider provider) {
-        mTestLoadDirectShareTaskProvider = provider;
-    }
-
-    /**
      * Necessary methods to communicate between {@link ChooserListAdapter}
      * and {@link ChooserActivity}.
      */
-    @VisibleForTesting
-    public interface ChooserListCommunicator extends ResolverListCommunicator {
+    interface ChooserListCommunicator extends ResolverListCommunicator {
 
         int getMaxRankedTargets();
 
         void sendListViewUpdateMessage(UserHandle userHandle);
 
         boolean isSendAction(Intent targetIntent);
-    }
-
-    /**
-     * Loads direct share targets icons.
-     */
-    @VisibleForTesting
-    public class LoadDirectShareIconTask extends AsyncTask<Void, Void, Void> {
-        private final SelectableTargetInfo mTargetInfo;
-        private ViewHolder mViewHolder;
-
-        private LoadDirectShareIconTask(SelectableTargetInfo targetInfo) {
-            mTargetInfo = targetInfo;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            mTargetInfo.loadIcon();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void arg) {
-            if (mViewHolder != null) {
-                mViewHolder.bindIcon(mTargetInfo);
-                notifyDataSetChanged();
-            }
-        }
-
-        /**
-         * Specifies a view holder that will be updated when the task is completed.
-         */
-        public void setViewHolder(ViewHolder viewHolder) {
-            mViewHolder = viewHolder;
-            mViewHolder.bindIcon(mTargetInfo);
-            notifyDataSetChanged();
-        }
-
-        /**
-         * An alias for execute to use with unit tests.
-         */
-        public void loadIcon() {
-            execute();
-        }
-    }
-
-    /**
-     * An interface for the unit tests to override icon loading task creation
-     */
-    @VisibleForTesting
-    public interface LoadDirectShareIconTaskProvider {
-        /**
-         * Provides an instance of the task.
-         * @return
-         */
-        LoadDirectShareIconTask get();
     }
 }
