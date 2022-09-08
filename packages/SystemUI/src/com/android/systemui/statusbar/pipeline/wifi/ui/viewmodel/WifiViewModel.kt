@@ -72,7 +72,8 @@ class WifiViewModel @Inject constructor(
                 isForceHidden ||
                     iconResId == null ||
                     iconResId <= 0 -> null
-                else -> Icon.Resource(iconResId)
+                // TODO(b/238425913): Implement the content description.
+                else -> Icon.Resource(iconResId, /* contentDescription= */ null)
             }
         }
 
