@@ -322,8 +322,7 @@ class FgsManagerController @Inject constructor(
         }
 
         val addedPackages = runningServiceTokens.keys.filter {
-            currentProfileIds.contains(it.userId) &&
-                    it.uiControl != UIControl.HIDE_ENTRY && runningApps[it]?.stopped != true
+            it.uiControl != UIControl.HIDE_ENTRY && runningApps[it]?.stopped != true
         }
         val removedPackages = runningApps.keys.filter { !runningServiceTokens.containsKey(it) }
 

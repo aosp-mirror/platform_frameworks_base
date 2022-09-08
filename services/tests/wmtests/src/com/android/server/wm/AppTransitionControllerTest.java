@@ -777,7 +777,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) throws RemoteException {
+        public void onAnimationCancelled() throws RemoteException {
             mFinishedCallback = null;
         }
 

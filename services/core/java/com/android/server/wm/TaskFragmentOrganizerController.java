@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.window.TaskFragmentOrganizer.putExceptionInBundle;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
-import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
 import android.annotation.IntDef;
@@ -236,7 +235,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         + " is not in a task belong to the organizer app.");
                 return;
             }
-            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED) {
+            if (!task.isAllowedToEmbedActivity(activity, mOrganizerUid)) {
                 Slog.d(TAG, "Reparent activity=" + activity.token
                         + " is not allowed to be embedded.");
                 return;

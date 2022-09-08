@@ -57,7 +57,6 @@ class QSContainerImplTest : SysuiTestCase() {
 
     @Test
     fun testContainerBottomPadding() {
-        val originalPadding = qsPanelContainer.paddingBottom
         qsContainer.updateResources(
             qsPanelController,
             quickStatusBarHeaderController
@@ -67,7 +66,7 @@ class QSContainerImplTest : SysuiTestCase() {
                 anyInt(),
                 anyInt(),
                 anyInt(),
-                eq(originalPadding)
+                eq(mContext.resources.getDimensionPixelSize(R.dimen.footer_actions_height))
             )
     }
 }

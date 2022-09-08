@@ -285,7 +285,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 Log.d(TAG, "This device is already connected! : " + device.getName());
                 return;
             }
-            mController.setTemporaryAllowListExceptionIfNeeded(device);
             mCurrentActivePosition = -1;
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);

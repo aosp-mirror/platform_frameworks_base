@@ -385,12 +385,6 @@ public class PowerExemptionManager {
      */
     public static final int REASON_ACTIVE_DEVICE_ADMIN = 324;
 
-    /**
-     * Media notification re-generate during transferring.
-     * @hide
-     */
-    public static final int REASON_MEDIA_NOTIFICATION_TRANSFER = 325;
-
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
 
@@ -471,7 +465,6 @@ public class PowerExemptionManager {
             REASON_DPO_PROTECTED_APP,
             REASON_DISALLOW_APPS_CONTROL,
             REASON_ACTIVE_DEVICE_ADMIN,
-            REASON_MEDIA_NOTIFICATION_TRANSFER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -837,8 +830,6 @@ public class PowerExemptionManager {
                 return "ACTIVE_DEVICE_ADMIN";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
-            case REASON_MEDIA_NOTIFICATION_TRANSFER:
-                return "REASON_MEDIA_NOTIFICATION_TRANSFER";
             default:
                 return "(unknown:" + reasonCode + ")";
         }

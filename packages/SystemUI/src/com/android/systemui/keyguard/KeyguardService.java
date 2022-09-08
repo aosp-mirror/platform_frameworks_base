@@ -220,6 +220,7 @@ public class KeyguardService extends Service {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) {
+
             }
         };
     }
@@ -348,7 +349,7 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
+        public void onAnimationCancelled() {
             mKeyguardViewMediator.cancelKeyguardExitAnimation();
         }
     };
@@ -405,8 +406,6 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
-            Log.d(TAG, "setOccluded(" + isOccluded + ")");
-
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
             mKeyguardViewMediator.setOccluded(isOccluded, animate);

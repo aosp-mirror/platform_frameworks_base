@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_MANAGEMENT_DISCLOSURE;
-import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -393,7 +392,7 @@ public class KeyguardIndicationController {
                     organizationName);
         } else {
             return mDevicePolicyManager.getResources().getString(
-                    KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE,
+                    KEYGUARD_MANAGEMENT_DISCLOSURE,
                     () -> packageResources.getString(
                             R.string.do_disclosure_with_name, organizationName),
                     organizationName);

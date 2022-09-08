@@ -44,7 +44,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
-import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -757,9 +756,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
-                if (parent.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED) {
+                if (!parent.isAllowedToEmbedActivity(activity)) {
                     final Throwable exception = new SecurityException(
-                            "The task fragment is not allowed to embed the given activity.");
+                            "The task fragment is not trusted to embed the given activity.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
@@ -767,6 +766,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final Throwable exception = new SecurityException("The reparented activity is"
                             + " not in the same Task as the target TaskFragment.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+                if (parent.smallerThanMinDimension(activity)) {
+                    sendMinimumDimensionViolation(parent, activity.getMinDimensions(),
+                            errorCallbackToken, "reparentActivityToTask");
                     break;
                 }
 
@@ -984,7 +988,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     /** A helper method to send minimum dimension violation error to the client. */
-    private void sendMinimumDimensionViolation(TaskFragment taskFragment, Point minDimensions,
+    void sendMinimumDimensionViolation(TaskFragment taskFragment, Point minDimensions,
             IBinder errorCallbackToken, String reason) {
         if (taskFragment == null || taskFragment.getTaskFragmentOrganizer() == null) {
             return;
@@ -1578,10 +1582,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // We are reparenting activities to a new embedded TaskFragment, this operation is only
             // allowed if the new parent is trusted by all reparent activities.
             final boolean isEmbeddingDisallowed = oldParent.forAllActivities(activity ->
-                    newParentTF.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED);
+                    !newParentTF.isAllowedToEmbedActivity(activity));
             if (isEmbeddingDisallowed) {
                 final Throwable exception = new SecurityException(
-                        "The new parent is not allowed to embed the activities.");
+                        "The new parent is not trusted to embed the activities.");
                 sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                 return;
             }
@@ -1596,6 +1600,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final Throwable exception = new SecurityException(
                     "The new parent is not in the same Task as the old parent.");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        final Point minDimensions = oldParent.calculateMinDimension();
+        final Rect newParentBounds = newParentTF.getBounds();
+        if (newParentBounds.width() < minDimensions.x
+                || newParentBounds.height() < minDimensions.y) {
+            sendMinimumDimensionViolation(newParentTF, minDimensions, errorCallbackToken,
+                    "reparentTaskFragment");
             return;
         }
         while (oldParent.hasChild()) {

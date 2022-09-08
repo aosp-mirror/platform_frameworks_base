@@ -599,7 +599,9 @@ public abstract class PanelViewController {
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         if (target == mExpandedHeight && mOverExpansion == 0.0f) {
             // We're at the target and didn't fling and there's no overshoot
-            onFlingEnd(false /* cancelled */);
+            endJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            mKeyguardStateController.notifyPanelFlingEnd();
+            notifyExpandingFinished();
             return;
         }
         mIsFlinging = true;

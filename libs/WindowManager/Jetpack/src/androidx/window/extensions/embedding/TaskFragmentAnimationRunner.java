@@ -83,9 +83,9 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
     }
 
     @Override
-    public void onAnimationCancelled(boolean isKeyguardOccluded) {
+    public void onAnimationCancelled() {
         if (TaskFragmentAnimationController.DEBUG) {
-            Log.v(TAG, "onAnimationCancelled: isKeyguardOccluded=" + isKeyguardOccluded);
+            Log.v(TAG, "onAnimationCancelled");
         }
         mHandler.post(this::cancelAnimation);
     }

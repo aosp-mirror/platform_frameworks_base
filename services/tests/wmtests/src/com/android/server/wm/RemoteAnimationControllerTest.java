@@ -43,7 +43,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -169,7 +168,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
 
         adapter.onAnimationCancelled(mMockLeash);
-        verify(mMockRunner).onAnimationCancelled(anyBoolean());
+        verify(mMockRunner).onAnimationCancelled();
     }
 
     @Test
@@ -184,7 +183,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mClock.fastForward(10500);
         mHandler.timeAdvance();
 
-        verify(mMockRunner).onAnimationCancelled(anyBoolean());
+        verify(mMockRunner).onAnimationCancelled();
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                 eq(adapter));
     }
@@ -205,12 +204,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             mClock.fastForward(10500);
             mHandler.timeAdvance();
 
-            verify(mMockRunner, never()).onAnimationCancelled(anyBoolean());
+            verify(mMockRunner, never()).onAnimationCancelled();
 
             mClock.fastForward(52500);
             mHandler.timeAdvance();
 
-            verify(mMockRunner).onAnimationCancelled(anyBoolean());
+            verify(mMockRunner).onAnimationCancelled();
             verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                     eq(adapter));
         } finally {
@@ -222,7 +221,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     public void testZeroAnimations() throws Exception {
         mController.goodToGo(TRANSIT_OLD_NONE);
         verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
-        verify(mMockRunner).onAnimationCancelled(anyBoolean());
+        verify(mMockRunner).onAnimationCancelled();
     }
 
     @Test
@@ -232,7 +231,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
         verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
-        verify(mMockRunner).onAnimationCancelled(anyBoolean());
+        verify(mMockRunner).onAnimationCancelled();
     }
 
     @Test
@@ -272,7 +271,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         win.mActivityRecord.removeImmediately();
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
         verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
-        verify(mMockRunner).onAnimationCancelled(anyBoolean());
+        verify(mMockRunner).onAnimationCancelled();
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                 eq(adapter));
     }
@@ -528,7 +527,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
             // Cancel the wallpaper window animator and ensure the runner is not canceled
             wallpaperWindowToken.cancelAnimation();
-            verify(mMockRunner, never()).onAnimationCancelled(anyBoolean());
+            verify(mMockRunner, never()).onAnimationCancelled();
         } finally {
             mDisplayContent.mOpeningApps.clear();
         }

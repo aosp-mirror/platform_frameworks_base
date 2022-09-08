@@ -105,7 +105,7 @@ public class RemoteAnimationAdapterCompat {
             }
 
             @Override
-            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            public void onAnimationCancelled() {
                 remoteAnimationAdapter.onAnimationCancelled();
             }
         };

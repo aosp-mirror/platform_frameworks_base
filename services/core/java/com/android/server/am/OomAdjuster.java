@@ -1482,9 +1482,7 @@ public class OomAdjuster {
         if (!cycleReEval) {
             // Don't reset this flag when doing cycles re-evaluation.
             state.setNoKillOnBgRestrictedAndIdle(false);
-            // If this UID is currently allowlisted, it should not be frozen.
-            final UidRecord uidRec = app.getUidRecord();
-            app.mOptRecord.setShouldNotFreeze(uidRec != null && uidRec.isCurAllowListed());
+            app.mOptRecord.setShouldNotFreeze(false);
         }
 
         final int appUid = app.info.uid;
