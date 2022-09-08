@@ -1588,7 +1588,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Geçerlilik:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Yayınlanma tarihi:"</string>
     <string name="expires_on" msgid="1623640879705103121">"Sona erme tarihi:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Seri numara:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Seri numarası:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Parmak izleri:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 parmak izi:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 parmak izi:"</string>
