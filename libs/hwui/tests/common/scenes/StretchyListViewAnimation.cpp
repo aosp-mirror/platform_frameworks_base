@@ -138,7 +138,7 @@ private:
         roundRectPaint.setColor(Color::White);
         if (addHolePunch) {
             // Punch a hole but then cover it up, we don't want to actually see it
-            canvas.punchHole(SkRRect::MakeRect(SkRect::MakeWH(itemWidth, itemHeight)));
+            canvas.punchHole(SkRRect::MakeRect(SkRect::MakeWH(itemWidth, itemHeight)), 1.f);
         }
         canvas.drawRoundRect(0, 0, itemWidth, itemHeight, dp(6), dp(6), roundRectPaint);
 

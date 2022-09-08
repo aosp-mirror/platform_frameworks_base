@@ -69,20 +69,22 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     mDisplayList->setHasHolePunches(false);
 }
 
-void SkiaRecordingCanvas::punchHole(const SkRRect& rect) {
-    // Add the marker annotation to allow HWUI to determine where the current
-    // clip/transformation should be applied
+void SkiaRecordingCanvas::punchHole(const SkRRect& rect, float alpha) {
+    // Add the marker annotation to allow HWUI to determine the current
+    // clip/transformation and alpha should be applied
     SkVector vector = rect.getSimpleRadii();
-    float data[2];
+    float data[3];
     data[0] = vector.x();
     data[1] = vector.y();
+    data[2] = alpha;
     mRecorder.drawAnnotation(rect.rect(), HOLE_PUNCH_ANNOTATION.c_str(),
-                             SkData::MakeWithCopy(data, 2 * sizeof(float)));
+                             SkData::MakeWithCopy(data, sizeof(data)));
 
     // Clear the current rect within the layer itself
     SkPaint paint = SkPaint();
-    paint.setColor(0);
-    paint.setBlendMode(SkBlendMode::kClear);
+    paint.setColor(SkColors::kBlack);
+    paint.setAlphaf(alpha);
+    paint.setBlendMode(SkBlendMode::kDstOut);
     mRecorder.drawRRect(rect, paint);
 
     mDisplayList->setHasHolePunches(true);
