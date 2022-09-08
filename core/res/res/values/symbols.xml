@@ -483,6 +483,7 @@
   <java-symbol type="array" name="config_deviceSpecificSystemServices" />
   <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
   <java-symbol type="string" name="config_deviceSpecificAudioService" />
+  <java-symbol type="string" name="config_deviceSpecificInputMethodManagerService" />
   <java-symbol type="integer" name="config_num_physical_slots" />
   <java-symbol type="integer" name="config_default_cellular_usage_setting" />
   <java-symbol type="array" name="config_supported_cellular_usage_settings" />
