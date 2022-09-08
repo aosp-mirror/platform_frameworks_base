@@ -24,11 +24,15 @@ import android.graphics.drawable.Drawable
  * [Icon.Resource] to a resource.
  */
 sealed class Icon {
+    abstract val contentDescription: ContentDescription?
+
     data class Loaded(
         val drawable: Drawable,
+        override val contentDescription: ContentDescription?,
     ) : Icon()
 
     data class Resource(
         @DrawableRes val res: Int,
+        override val contentDescription: ContentDescription?,
     ) : Icon()
 }
