@@ -1416,8 +1416,8 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"Üksuse <xliff:g id="NAME">%s</xliff:g> väljutamine …"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Ärge eemaldage"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Seadistus"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Eemaldamine"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"Avastamine"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Eemalda"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Avasta"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Vahetage väljundit"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Üksust <xliff:g id="NAME">%s</xliff:g> pole"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Sisestage seade uuesti"</string>
@@ -1560,9 +1560,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Sisemine jagatud mäluruum"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD-kaart"</string>
-    <string name="storage_sd_card_label" msgid="7526153141147470509">"Tootja <xliff:g id="MANUFACTURER">%s</xliff:g> SD-kaart"</string>
+    <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD-kaart"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-ketas"</string>
-    <string name="storage_usb_drive_label" msgid="6631740655876540521">"Tootja <xliff:g id="MANUFACTURER">%s</xliff:g> USB-ketas"</string>
+    <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-ketas"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB-mäluseade"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Muuda"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Andmekasutuse hoiatus"</string>
