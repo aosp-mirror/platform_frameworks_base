@@ -38,11 +38,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.PowerUtil;
+import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.util.Assert;
 
@@ -56,7 +58,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
  * level change events that are broadcasted by the system.
  */
-public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController {
+public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController,
+        Dumpable {
     private static final String TAG = "BatteryController";
 
     private static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
@@ -70,6 +73,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final DemoModeController mDemoModeController;
+    private final DumpManager mDumpManager;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     protected final Context mContext;
@@ -101,6 +105,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             PowerManager powerManager,
             BroadcastDispatcher broadcastDispatcher,
             DemoModeController demoModeController,
+            DumpManager dumpManager,
             @Main Handler mainHandler,
             @Background Handler bgHandler) {
         mContext = context;
@@ -110,6 +115,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         mEstimates = enhancedEstimates;
         mBroadcastDispatcher = broadcastDispatcher;
         mDemoModeController = demoModeController;
+        mDumpManager = dumpManager;
     }
 
     private void registerReceiver() {
@@ -134,6 +140,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             }
         }
         mDemoModeController.addCallback(this);
+        mDumpManager.registerDumpable(TAG, this);
         updatePowerSave();
         updateEstimateInBackground();
     }
