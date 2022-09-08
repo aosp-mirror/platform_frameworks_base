@@ -8336,9 +8336,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 + PackageManager.FEATURE_DEVICE_ADMIN + " feature.");
     }
 
-    // TODO(b/240562946): Remove owner name from API parameters.
     @Override
-    public boolean setDeviceOwner(ComponentName admin, String ownerName, int userId,
+    public boolean setDeviceOwner(ComponentName admin, int userId,
             boolean setProfileOwnerOnCurrentUserIfNecessary) {
         if (!mHasFeature) {
             logMissingFeatureAction("Cannot set " + ComponentName.flattenToShortString(admin)
@@ -18048,11 +18047,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
 
-            if (!setActiveAdminAndDeviceOwner(
-                    deviceOwnerUserId, deviceAdmin, provisioningParams.getOwnerName())) {
+            if (!setActiveAdminAndDeviceOwner(deviceOwnerUserId, deviceAdmin)) {
                 throw new ServiceSpecificException(
-                        ERROR_SET_DEVICE_OWNER_FAILED,
-                        "Failed to set device owner.");
+                        ERROR_SET_DEVICE_OWNER_FAILED, "Failed to set device owner.");
             }
 
             disallowAddUser();
@@ -18179,12 +18176,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean setActiveAdminAndDeviceOwner(
-            @UserIdInt int userId, ComponentName adminComponent, String name) {
+            @UserIdInt int userId, ComponentName adminComponent) {
         enableAndSetActiveAdmin(userId, userId, adminComponent);
         // TODO(b/178187130): Directly set DO and remove the check once silent provisioning is no
         //  longer used.
         if (getDeviceOwnerComponent(/* callingUserOnly= */ true) == null) {
-            return setDeviceOwner(adminComponent, name, userId,
+            return setDeviceOwner(adminComponent, userId,
                     /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
         }
         return true;
