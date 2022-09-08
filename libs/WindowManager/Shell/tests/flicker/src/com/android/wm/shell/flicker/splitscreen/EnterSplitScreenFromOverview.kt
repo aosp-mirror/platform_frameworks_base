@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -42,6 +43,7 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenFromOverview`
  */
+@IwTest(focusArea = "sysui")
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
