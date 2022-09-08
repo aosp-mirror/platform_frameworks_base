@@ -51,7 +51,7 @@ object SpaEnvironment {
                 IllustrationPageProvider,
             ),
             rootPages = listOf(
-                SettingsPage(HomePageProvider.name)
+                SettingsPage.create(HomePageProvider.name)
             ) + ArgumentPageProvider.buildRootPages()
         )
     }

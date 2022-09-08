@@ -56,7 +56,7 @@ internal class TogglePermissionAppListPageProvider(
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val permissionType = parameter.getStringArg(PERMISSION, arguments)!!
         val appListPage = SettingsPage.create(name, parameter, arguments)
-        val appInfoPage = TogglePermissionAppInfoPageProvider.buildPageId(permissionType)
+        val appInfoPage = TogglePermissionAppInfoPageProvider.buildPageData(permissionType)
         val entryList = mutableListOf<SettingsEntry>()
         // TODO: add more categories, such as personal, work, cloned, etc.
         for (category in listOf("personal")) {

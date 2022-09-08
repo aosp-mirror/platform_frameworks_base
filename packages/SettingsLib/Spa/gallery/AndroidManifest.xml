@@ -29,6 +29,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <activity
+            android:name=".GalleryDebugActivity"
+            android:exported="true">
+        </activity>
+    </application>
 </manifest>
