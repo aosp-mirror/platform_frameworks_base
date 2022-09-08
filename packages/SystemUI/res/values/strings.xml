@@ -1862,10 +1862,10 @@
     <!-- URL for care instructions for overheating devices -->
     <string name="high_temp_dialog_help_url" translatable="false"></string>
 
-    <!-- Title for alarm dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=30] -->
-    <string name="high_temp_alarm_title">Unplug charger</string>
-    <!-- Text body for dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=300] -->
-    <string name="high_temp_alarm_notify_message">There\u2019s an issue charging this device. Unplug the power adapter, and take care as the cable may be warm.</string>
+    <!-- Title for alarm dialog alerting user the usb charger or accessorry has reached a certain temperature that should unplug the device immediately. [CHAR LIMIT=30] -->
+    <string name="high_temp_alarm_title">Unplug your device</string>
+    <!-- Text body for dialog alerting user the usb charger or accessorry has reached a certain temperature that should unplug the device immediately. [CHAR LIMIT=300] -->
+    <string name="high_temp_alarm_notify_message">Your device is getting warm near the charging port. If it\u2019s connected to a charger or USB accessory, unplug it, and take care as the cable may also be warm.</string>
     <!-- Text for See care steps button [CHAR LIMIT=300] -->
     <string name="high_temp_alarm_help_care_steps">See care steps</string>
     <!-- Text link directs to usb overheat help page. -->
