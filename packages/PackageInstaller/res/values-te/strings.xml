@@ -59,7 +59,7 @@
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"మీ వర్క్ ప్రొఫైల్ నుండి ఈ యాప్‌ను మీరు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ఈ యాప్‌ను ఫ్యాక్టరీ వెర్షన్‌తో భర్తీ చేయాలా? మొత్తం డేటా తీసివేయబడుతుంది."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ఈ యాప్‌ను ఫ్యాక్టరీ వెర్షన్‌తో భర్తీ చేయాలా? మొత్తం డేటా తీసివేయబడుతుంది. దీని ప్రభావం కార్యాలయ ప్రొఫైళ్లు కలిగి ఉన్నవారితో సహా ఈ పరికర వినియోగదారులందరిపై ఉంటుంది."</string>
-    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> యాప్ డేటాని ఉంచండి."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> యాప్ డేటాను ఉంచండి."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"అన్ఇన్‌స్టాల్ చేయబడుతున్నవి"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"విఫలమైన అన్‌ఇన్‌స్టాల్‌లు"</string>
     <string name="uninstalling" msgid="8709566347688966845">"అన్ఇన్‌స్టాల్ చేస్తోంది…"</string>

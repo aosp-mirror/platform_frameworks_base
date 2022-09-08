@@ -226,7 +226,7 @@
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
     <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcje programisty"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje dla programistów"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje programisty"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ustaw opcje związane z programowaniem aplikacji."</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Opcje programisty są niedostępne dla tego użytkownika"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Ustawienia VPN są niedostępne dla tego użytkownika"</string>

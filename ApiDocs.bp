@@ -132,6 +132,7 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "system",
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 droidstubs {
@@ -146,6 +147,7 @@ droidstubs {
             "packages/modules/Media/apex/aidl/stable",
         ],
     },
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 /////////////////////////////////////////////////////////////////////
