@@ -16,17 +16,23 @@
 
 package com.android.internal.os;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.BatteryManager;
+import android.os.BatteryStats;
+import android.os.BatteryStats.BitDescription;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.HistoryStepDetails;
 import android.os.BatteryStats.HistoryTag;
 import android.os.BatteryStats.MeasuredEnergyDetails;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Process;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -210,6 +216,42 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * A delegate for android.os.Trace to allow testing static calls. Due to
+     * limitations in Android Tracing (b/153319140), the delegate also records
+     * counter values in system properties which allows reading the value at the
+     * start of a tracing session. This overhead is limited to userdebug builds.
+     * On user builds, tracing still occurs but the counter value will be missing
+     * until the first change occurs.
+     */
+    @VisibleForTesting
+    public static class TraceDelegate {
+        // Note: certain tests currently run as platform_app which is not allowed
+        // to set debug system properties. To ensure that system properties are set
+        // only when allowed, we check the current UID.
+        private final boolean mShouldSetProperty =
+                Build.IS_USERDEBUG && (Process.myUid() == Process.SYSTEM_UID);
+
+        /**
+         * Returns true if trace counters should be recorded.
+         */
+        public boolean tracingEnabled() {
+            return Trace.isTagEnabled(Trace.TRACE_TAG_POWER) || mShouldSetProperty;
+        }
+
+        /**
+         * Records the counter value with the given name.
+         */
+        public void traceCounter(@NonNull String name, int value) {
+            Trace.traceCounter(Trace.TRACE_TAG_POWER, name, value);
+            if (mShouldSetProperty) {
+                SystemProperties.set("debug.tracing." + name, Integer.toString(value));
+            }
+        }
+    }
+
+    private TraceDelegate mTracer;
+
+    /**
      * Constructor
      *
      * @param systemDir            typically /data/system
@@ -219,19 +261,20 @@ public class BatteryStatsHistory {
     public BatteryStatsHistory(File systemDir, int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
         this(Parcel.obtain(), systemDir, maxHistoryFiles, maxHistoryBufferSize,
-                stepDetailsCalculator, clock);
+                stepDetailsCalculator, clock, new TraceDelegate());
         initHistoryBuffer();
     }
 
     @VisibleForTesting
     public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
+            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock, TraceDelegate tracer) {
         mHistoryBuffer = historyBuffer;
         mSystemDir = systemDir;
         mMaxHistoryFiles = maxHistoryFiles;
         mMaxHistoryBufferSize = maxHistoryBufferSize;
         mStepDetailsCalculator = stepDetailsCalculator;
+        mTracer = tracer;
         mClock = clock;
 
         mHistoryDir = new File(systemDir, HISTORY_DIR);
@@ -272,6 +315,7 @@ public class BatteryStatsHistory {
 
     public BatteryStatsHistory(HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
         mStepDetailsCalculator = stepDetailsCalculator;
+        mTracer = new TraceDelegate();
         mClock = clock;
 
         mHistoryBuffer = Parcel.obtain();
@@ -287,6 +331,7 @@ public class BatteryStatsHistory {
     private BatteryStatsHistory(Parcel historyBuffer,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
         mHistoryBuffer = historyBuffer;
+        mTracer = new TraceDelegate();
         mClock = clock;
         mSystemDir = null;
         mHistoryDir = null;
@@ -338,7 +383,7 @@ public class BatteryStatsHistory {
         // Make a copy of battery history to avoid concurrent modification.
         Parcel historyBuffer = Parcel.obtain();
         historyBuffer.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
-        return new BatteryStatsHistory(historyBuffer, mSystemDir, 0, 0, null, null);
+        return new BatteryStatsHistory(historyBuffer, mSystemDir, 0, 0, null, null, mTracer);
     }
 
     /**
@@ -1120,6 +1165,30 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Writes changes to a HistoryItem state bitmap to Atrace.
+     */
+    private void recordTraceCounters(int oldval, int newval, BitDescription[] descriptions) {
+        if (!mTracer.tracingEnabled()) return;
+
+        int diff = oldval ^ newval;
+        if (diff == 0) return;
+
+        for (int i = 0; i < descriptions.length; i++) {
+            BitDescription bd = descriptions[i];
+            if ((diff & bd.mask) == 0) continue;
+
+            int value;
+            if (bd.shift < 0) {
+                value = (newval & bd.mask) != 0 ? 1 : 0;
+            } else {
+                value = (newval & bd.mask) >> bd.shift;
+            }
+
+            mTracer.traceCounter("battery_stats." + bd.name, value);
+        }
+    }
+
+    /**
      * Writes the current history item to history.
      */
     public void writeHistoryItem(long elapsedRealtimeMs, long uptimeMs) {
@@ -1159,6 +1228,12 @@ public class BatteryStatsHistory {
                     + Integer.toHexString(diffStates2) + " lastDiff2="
                     + Integer.toHexString(lastDiffStates2));
         }
+
+        recordTraceCounters(mHistoryLastWritten.states,
+                cur.states & mActiveHistoryStates, BatteryStats.HISTORY_STATE_DESCRIPTIONS);
+        recordTraceCounters(mHistoryLastWritten.states2,
+                cur.states2 & mActiveHistoryStates2, BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
+
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
                 && timeDiffMs < 1000 && (diffStates & lastDiffStates) == 0
                 && (diffStates2 & lastDiffStates2) == 0
