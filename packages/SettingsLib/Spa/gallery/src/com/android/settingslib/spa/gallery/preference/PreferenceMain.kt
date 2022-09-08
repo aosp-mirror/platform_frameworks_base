@@ -18,6 +18,9 @@ package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
@@ -29,6 +32,39 @@ private const val TITLE = "Category: Preference"
 object PreferenceMainPageProvider : SettingsPageProvider {
     override val name = "PreferenceMain"
 
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            PreferencePageProvider.buildInjectEntry()
+                .setLink(fromPage = SettingsPage.create(name)).build()
+        )
+        entryList.add(
+            SwitchPreferencePageProvider.buildInjectEntry()
+                .setLink(fromPage = SettingsPage.create(name)).build()
+        )
+        entryList.add(
+            MainSwitchPreferencePageProvider.buildInjectEntry()
+                .setLink(fromPage = SettingsPage.create(name)).build()
+        )
+        entryList.add(
+            TwoTargetSwitchPreferencePageProvider.buildInjectEntry()
+                .setLink(fromPage = SettingsPage.create(name)).build()
+        )
+
+        return entryList
+    }
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         PreferenceMain()
@@ -36,10 +72,7 @@ object PreferenceMainPageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = TITLE
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 
