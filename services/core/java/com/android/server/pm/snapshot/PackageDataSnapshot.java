@@ -16,7 +16,6 @@
 
 package com.android.server.pm.snapshot;
 
-import android.annotation.SystemApi;
 import android.content.pm.PackageManagerInternal;
 
 import com.android.server.pm.Computer;
@@ -32,6 +31,5 @@ import com.android.server.pm.PackageManagerService;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface PackageDataSnapshot {
 }

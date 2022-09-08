@@ -30,7 +30,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * In-process API for server side PackageManager related infrastructure.
@@ -176,8 +175,6 @@ public interface PackageManagerLocal {
          */
         @NonNull
         Map<String, PackageState> getPackageStates();
-
-        void forAllPackageStates(@NonNull Consumer<PackageState> consumer);
 
         @Override
         void close();

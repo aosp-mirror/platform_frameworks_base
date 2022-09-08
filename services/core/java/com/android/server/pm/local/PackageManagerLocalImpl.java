@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /** @hide */
 public class PackageManagerLocalImpl implements PackageManagerLocal {
@@ -197,19 +196,6 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
             }
 
             return mFilteredPackageStates;
-        }
-
-        @Override
-        public void forAllPackageStates(@NonNull Consumer<PackageState> consumer) {
-            checkClosed();
-
-            var packageStates = mSnapshot.getPackageStates();
-            for (int index = 0, size = packageStates.size(); index < size; index++) {
-                var packageState = packageStates.valueAt(index);
-                if (!mSnapshot.shouldFilterApplication(packageState, mCallingUid, mUserId)) {
-                    consumer.accept(packageState);
-                }
-            }
         }
     }
 }

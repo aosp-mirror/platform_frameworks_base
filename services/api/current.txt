@@ -57,7 +57,6 @@ package com.android.server.pm {
 
   public static interface PackageManagerLocal.FilteredSnapshot extends java.lang.AutoCloseable {
     method public void close();
-    method public void forAllPackageStates(@NonNull java.util.function.Consumer<com.android.server.pm.pkg.PackageState>);
     method @Nullable public com.android.server.pm.pkg.PackageState getPackageState(@NonNull String);
     method @NonNull public java.util.Map<java.lang.String,com.android.server.pm.pkg.PackageState> getPackageStates();
   }
@@ -125,13 +124,6 @@ package com.android.server.pm.pkg {
     method public int getType();
     method public long getVersion();
     method public boolean isNative();
-  }
-
-}
-
-package com.android.server.pm.snapshot {
-
-  public interface PackageDataSnapshot {
   }
 
 }
