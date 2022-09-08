@@ -2961,9 +2961,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     try {
                         // Use PackageManager to load label
                         final PackageManager packageManager = mContext.getPackageManager();
-                        contentDescription = packageManager.getApplicationLabel(
-                                mIPackageManager.getApplicationInfo(packageName, 0,
-                                        mSettings.getCurrentUserId()));
+                        final ApplicationInfo applicationInfo = mIPackageManager
+                                .getApplicationInfo(packageName, 0, mSettings.getCurrentUserId());
+                        if (applicationInfo != null) {
+                            contentDescription = packageManager
+                                    .getApplicationLabel(applicationInfo);
+                        }
                     } catch (RemoteException e) {
                         /* ignore */
                     }
