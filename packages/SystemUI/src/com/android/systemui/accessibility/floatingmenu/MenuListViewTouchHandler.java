@@ -79,9 +79,11 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                     final float endX = mMenuTranslationDown.x + dx;
                     mIsDragging = false;
 
-                    mVelocityTracker.computeCurrentVelocity(VELOCITY_UNIT_SECONDS);
-                    mMenuAnimationController.flingMenuThenSpringToEdge(endX,
-                            mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+                    if (!mMenuAnimationController.maybeMoveToEdgeAndHide(endX)) {
+                        mVelocityTracker.computeCurrentVelocity(VELOCITY_UNIT_SECONDS);
+                        mMenuAnimationController.flingMenuThenSpringToEdge(endX,
+                                mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+                    }
 
                     // Avoid triggering the listener of the item.
                     return true;

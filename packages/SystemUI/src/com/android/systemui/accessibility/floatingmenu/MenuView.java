@@ -148,7 +148,7 @@ class MenuView extends FrameLayout implements
         onPositionChanged();
     }
 
-    private void onPositionChanged() {
+    void onPositionChanged() {
         final PointF position = mMenuViewAppearance.getMenuPosition();
         mMenuAnimationController.moveToPosition(position);
         onBoundsInParentChanged((int) position.x, (int) position.y);
@@ -202,6 +202,33 @@ class MenuView extends FrameLayout implements
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
 
         onEdgeChangedIfNeeded();
+    }
+
+    /**
+     * Uses the touch events from the parent view to identify if users clicked the extra
+     * space of the menu view. If yes, will use the percentage position and update the
+     * translations of the menu view to meet the effect of moving out from the edge. It’s only
+     * used when the menu view is hidden to the screen edge.
+     *
+     * @param x the current x of the touch event from the parent {@link MenuViewLayer} of the
+     * {@link MenuView}.
+     * @param y the current y of the touch event from the parent {@link MenuViewLayer} of the
+     * {@link MenuView}.
+     * @return true if consume the touch event, otherwise false.
+     */
+    boolean maybeMoveOutEdgeAndShow(int x, int y) {
+        // Utilizes the touch region of the parent view to implement that users could tap extra
+        // the space region to show the menu from the edge.
+        if (!mMenuAnimationController.isMovedToEdge() || !mBoundsInParent.contains(x, y)) {
+            return false;
+        }
+
+        mMenuAnimationController.fadeInNowIfEnabled();
+
+        mMenuAnimationController.moveOutEdgeAndShow();
+
+        mMenuAnimationController.fadeOutIfEnabled();
+        return true;
     }
 
     void show() {

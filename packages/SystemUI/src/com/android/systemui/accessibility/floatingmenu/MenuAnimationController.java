@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.util.MathUtils.constrain;
+
 import static java.util.Objects.requireNonNull;
 
 import android.animation.ValueAnimator;
@@ -57,6 +59,7 @@ class MenuAnimationController {
     private final MenuView mMenuView;
     private final ValueAnimator mFadeOutAnimator;
     private final Handler mHandler;
+    private boolean mIsMovedToEdge;
     private boolean mIsFadeEffectEnabled;
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
@@ -94,6 +97,12 @@ class MenuAnimationController {
         if (listView.getOverScrollMode() == View.OVER_SCROLL_NEVER) {
             moveToPositionY(positionY);
         }
+    }
+
+    void moveAndPersistPosition(PointF position) {
+        moveToPosition(position);
+        mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
+        constrainPositionAndUpdate(position);
     }
 
     void flingMenuThenSpringToEdge(float x, float velocityX, float velocityY) {
@@ -190,8 +199,61 @@ class MenuAnimationController {
         springAnimation.animateToFinalPosition(finalPosition);
     }
 
+    /**
+     * Determines whether to hide the menu to the edge of the screen with the given current
+     * translation x of the menu view. It should be used when receiving the action up touch event.
+     *
+     * @param currentXTranslation the current translation x of the menu view.
+     * @return true if the menu would be hidden to the edge, otherwise false.
+     */
+    boolean maybeMoveToEdgeAndHide(float currentXTranslation) {
+        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+
+        // If the translation x is zero, it should be at the left of the bound.
+        if (currentXTranslation < draggableBounds.left
+                || currentXTranslation > draggableBounds.right) {
+            moveToEdgeAndHide();
+            return true;
+        }
+
+        fadeOutIfEnabled();
+        return false;
+    }
+
     private boolean isOnLeftSide() {
         return mMenuView.getTranslationX() < mMenuView.getMenuDraggableBounds().centerX();
+    }
+
+    boolean isMovedToEdge() {
+        return mIsMovedToEdge;
+    }
+
+    void moveToEdgeAndHide() {
+        mIsMovedToEdge = true;
+
+        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+        final float endY = constrain(mMenuView.getTranslationY(), draggableBounds.top,
+                draggableBounds.bottom);
+        final float menuHalfWidth = mMenuView.getWidth() / 2.0f;
+        final float endX = isOnLeftSide()
+                ? draggableBounds.left - menuHalfWidth
+                : draggableBounds.right + menuHalfWidth;
+        moveAndPersistPosition(new PointF(endX, endY));
+
+        // Keep the touch region let users could click extra space to pop up the menu view
+        // from the screen edge
+        mMenuView.onBoundsInParentChanged(isOnLeftSide()
+                ? draggableBounds.left
+                : draggableBounds.right, (int) mMenuView.getTranslationY());
+
+        fadeOutIfEnabled();
+    }
+
+    void moveOutEdgeAndShow() {
+        mIsMovedToEdge = false;
+
+        mMenuView.onPositionChanged();
+        mMenuView.onEdgeChangedIfNeeded();
     }
 
     void cancelAnimations() {
@@ -213,7 +275,12 @@ class MenuAnimationController {
 
     private void onSpringAnimationEnd(PointF position) {
         mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
+        constrainPositionAndUpdate(position);
 
+        fadeOutIfEnabled();
+    }
+
+    private void constrainPositionAndUpdate(PointF position) {
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
         // Have the space gap margin between the top bound and the menu view, so actually the
         // position y range needs to cut the margin.

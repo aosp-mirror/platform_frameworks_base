@@ -130,6 +130,28 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
                 anyFloat());
     }
 
+    @Test
+    public void dragMenuOutOfBoundsAndDrop_moveToLeftEdge_shouldMoveToEdgeAndHide() {
+        final int offset = -100;
+        final MotionEvent stubDownEvent =
+                mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 1,
+                        MotionEvent.ACTION_DOWN, mStubMenuView.getTranslationX(),
+                        mStubMenuView.getTranslationY());
+        final MotionEvent stubMoveEvent =
+                mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 3,
+                        MotionEvent.ACTION_MOVE, mStubMenuView.getTranslationX() + offset,
+                        mStubMenuView.getTranslationY() + offset);
+        final MotionEvent stubUpEvent =
+                mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 5,
+                        MotionEvent.ACTION_UP, mStubMenuView.getTranslationX() + offset,
+                        mStubMenuView.getTranslationY() + offset);
+        mTouchHandler.onInterceptTouchEvent(mStubListView, stubDownEvent);
+        mTouchHandler.onInterceptTouchEvent(mStubListView, stubMoveEvent);
+        mTouchHandler.onInterceptTouchEvent(mStubListView, stubUpEvent);
+
+        verify(mMenuAnimationController).moveToEdgeAndHide();
+    }
+
     @After
     public void tearDown() {
         mMotionEventHelper.recycleEvents();
