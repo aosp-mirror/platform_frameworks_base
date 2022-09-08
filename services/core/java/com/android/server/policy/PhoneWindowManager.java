@@ -2930,6 +2930,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             UserHandle.CURRENT_OR_SELF);
                 }
                 return key_consumed;
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP:
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE:
+                // TODO: Add logic to handle keyboard backlight controls (go/pk_backlight_control)
+                return key_consumed;
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE:
