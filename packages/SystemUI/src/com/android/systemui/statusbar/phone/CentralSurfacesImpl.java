@@ -3019,19 +3019,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     }
 
     /**
-     * Fades the content of the Keyguard while we are dozing and makes it invisible when finished
-     * fading.
-     */
-    @Override
-    public void fadeKeyguardWhilePulsing() {
-        mNotificationPanelViewController.fadeOut(0, FADE_KEYGUARD_DURATION_PULSING,
-                ()-> {
-                hideKeyguard();
-                mStatusBarKeyguardViewManager.onKeyguardFadedAway();
-            }).start();
-    }
-
-    /**
      * Plays the animation when an activity that was occluding Keyguard goes away.
      */
     @Override

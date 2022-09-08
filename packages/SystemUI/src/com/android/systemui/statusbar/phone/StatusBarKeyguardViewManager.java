@@ -837,30 +837,24 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             });
         } else {
             executeAfterKeyguardGoneAction();
-            boolean wakeUnlockPulsing =
-                    mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING;
             mCentralSurfaces.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
             mBiometricUnlockController.startKeyguardFadingAway();
             hideBouncer(true /* destroyView */);
-            if (wakeUnlockPulsing) {
-                mCentralSurfaces.fadeKeyguardWhilePulsing();
+
+            boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
+            if (!staying) {
+                mNotificationShadeWindowController.setKeyguardFadingAway(true);
+                mCentralSurfaces.hideKeyguard();
+                // hide() will happen asynchronously and might arrive after the scrims
+                // were already hidden, this means that the transition callback won't
+                // be triggered anymore and StatusBarWindowController will be forever in
+                // the fadingAway state.
+                mCentralSurfaces.updateScrimController();
                 wakeAndUnlockDejank();
             } else {
-                boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
-                if (!staying) {
-                    mNotificationShadeWindowController.setKeyguardFadingAway(true);
-                    mCentralSurfaces.hideKeyguard();
-                    // hide() will happen asynchronously and might arrive after the scrims
-                    // were already hidden, this means that the transition callback won't
-                    // be triggered anymore and StatusBarWindowController will be forever in
-                    // the fadingAway state.
-                    mCentralSurfaces.updateScrimController();
-                    wakeAndUnlockDejank();
-                } else {
-                    mCentralSurfaces.hideKeyguard();
-                    mCentralSurfaces.finishKeyguardFadingAway();
-                    mBiometricUnlockController.finishKeyguardFadingAway();
-                }
+                mCentralSurfaces.hideKeyguard();
+                mCentralSurfaces.finishKeyguardFadingAway();
+                mBiometricUnlockController.finishKeyguardFadingAway();
             }
 
             updateStates();
