@@ -50,9 +50,7 @@ import androidx.test.InstrumentationRegistry;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.power.batterysaver.BatterySaverController;
-import com.android.server.power.batterysaver.BatterySaverPolicy;
-import com.android.server.power.batterysaver.BatterySavingStats;
+import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -69,8 +67,7 @@ public class NotifierTest {
     private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
     private static final int USER_ID = 0;
 
-    @Mock private BatterySaverController mBatterySaverControllerMock;
-    @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
+    @Mock private BatterySaverStateMachine mBatterySaverStateMachineMock;
     @Mock private PowerManagerService.NativeWrapper mNativeWrapperMock;
     @Mock private Notifier mNotifierMock;
     @Mock private WirelessChargerDetector mWirelessChargerDetectorMock;
@@ -263,16 +260,8 @@ public class NotifierTest {
         }
 
         @Override
-        BatterySaverPolicy createBatterySaverPolicy(
-                Object lock, Context context, BatterySavingStats batterySavingStats) {
-            return mBatterySaverPolicyMock;
-        }
-
-        @Override
-        BatterySaverController createBatterySaverController(
-                Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
-                BatterySavingStats batterySavingStats) {
-            return mBatterySaverControllerMock;
+        BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context) {
+            return mBatterySaverStateMachineMock;
         }
 
         @Override
