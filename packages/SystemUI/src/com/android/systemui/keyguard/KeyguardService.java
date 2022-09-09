@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -189,6 +190,9 @@ public class KeyguardService extends Service {
             return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                     : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
         } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
+            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo.topActivityType
+                    == WindowConfiguration.ACTIVITY_TYPE_DREAM;
+            if (isOccludeByDream) return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
             return TRANSIT_OLD_KEYGUARD_OCCLUDE;
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
             return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
@@ -302,6 +306,12 @@ public class KeyguardService extends Service {
                                 mKeyguardViewMediator.getOccludeAnimationRunner(), 0, 0);
                 definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE,
                         occludeAnimationAdapter);
+
+                final RemoteAnimationAdapter occludeByDreamAnimationAdapter =
+                        new RemoteAnimationAdapter(
+                                mKeyguardViewMediator.getOccludeByDreamAnimationRunner(), 0, 0);
+                definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM,
+                        occludeByDreamAnimationAdapter);
 
                 final RemoteAnimationAdapter unoccludeAnimationAdapter =
                         new RemoteAnimationAdapter(
