@@ -43,6 +43,7 @@ android_test {
         "apct-perftests-resources-manager-apps",
         "apct-perftests-utils",
         "collector-device-lib",
+        "compatibility-device-util-axt",
         "core-tests-support",
         "guava",
     ],
