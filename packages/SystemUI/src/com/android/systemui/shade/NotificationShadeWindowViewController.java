@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
@@ -136,6 +137,13 @@ public class NotificationShadeWindowViewController {
      */
     public ViewGroup getBouncerContainer() {
         return mView.findViewById(R.id.keyguard_bouncer_container);
+    }
+
+    /**
+     * @return Location where to place the KeyguardMessageArea
+     */
+    public AuthKeyguardMessageArea getKeyguardMessageArea() {
+        return mView.findViewById(R.id.keyguard_message_area);
     }
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */

@@ -932,7 +932,7 @@ public class KeyguardIndicationController {
                 return; // udfps affordance is highlighted, no need to show action to unlock
             } else if (mKeyguardUpdateMonitor.isFaceEnrolled()) {
                 String message = mContext.getString(R.string.keyguard_retry);
-                mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
+                mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState);
             }
         } else {
             final boolean canSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(
@@ -1080,7 +1080,7 @@ public class KeyguardIndicationController {
                 }
                 return;
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
+                mStatusBarKeyguardViewManager.setKeyguardMessage(helpString,
                         mInitialTextColorState);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 if (isCoExFaceAcquisitionMessage && msgId == FACE_ACQUIRED_TOO_DARK) {
@@ -1155,7 +1155,7 @@ public class KeyguardIndicationController {
                     showActionToUnlock();
                 }
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mStatusBarKeyguardViewManager.showBouncerMessage(errString, mInitialTextColorState);
+                mStatusBarKeyguardViewManager.setKeyguardMessage(errString, mInitialTextColorState);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 showBiometricMessage(errString);
             } else {
