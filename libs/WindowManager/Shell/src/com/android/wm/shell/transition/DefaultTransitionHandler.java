@@ -554,6 +554,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private void edgeExtendWindow(TransitionInfo.Change change,
             Animation a, SurfaceControl.Transaction startTransaction,
             SurfaceControl.Transaction finishTransaction) {
+        // Do not create edge extension surface for transfer starting window change.
+        // The app surface could be empty thus nothing can draw on the hardware renderer, which will
+        // block this thread when calling Surface#unlockCanvasAndPost.
+        if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+            return;
+        }
         final Transformation transformationAtStart = new Transformation();
         a.getTransformationAt(0, transformationAtStart);
         final Transformation transformationAtEnd = new Transformation();

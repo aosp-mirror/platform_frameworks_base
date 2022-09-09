@@ -86,7 +86,7 @@ open class AuthBiometricFingerprintView(
     override fun supportsSmallDialog() = false
 
     override fun createIconController(): AuthIconController =
-        AuthBiometricFingerprintIconController(mContext, mIconView)
+        AuthBiometricFingerprintIconController(mContext, mIconView, mIconViewOverlay)
 
     fun updateOverrideIconLayoutParamsSize() {
         udfpsAdapter?.let {

@@ -43,7 +43,7 @@ import com.android.server.ServiceThread;
  */
 @SuppressLint("LongLogTag")
 class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDeviceService> {
-    private static final String TAG = "CompanionDevice_ServiceConnector";
+    private static final String TAG = "CDM_CompanionServiceConnector";
     private static final boolean DEBUG = false;
 
     /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */

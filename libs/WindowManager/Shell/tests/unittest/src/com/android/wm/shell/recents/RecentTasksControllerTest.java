@@ -20,6 +20,9 @@ import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -45,11 +48,13 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
@@ -179,6 +184,46 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testGetRecentTasks_groupActiveFreeformTasks() {
+        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
+                DesktopMode.class).startMocking();
+        when(DesktopMode.isActive(any())).thenReturn(true);
+
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        setRawList(t1, t2, t3, t4);
+
+        mRecentTasksController.addActiveFreeformTask(1);
+        mRecentTasksController.addActiveFreeformTask(3);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // 2 freeform tasks should be grouped into one, 3 total recents entries
+        assertEquals(3, recentTasks.size());
+        GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
+        GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
+        GroupedRecentTaskInfo singleGroup2 = recentTasks.get(2);
+
+        // Check that groups have expected types
+        assertEquals(GroupedRecentTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup1.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
+
+        // Check freeform group entries
+        assertEquals(t1, freeformGroup.getAllTaskInfos().get(0));
+        assertEquals(t3, freeformGroup.getAllTaskInfos().get(1));
+
+        // Check single entries
+        assertEquals(t2, singleGroup1.getTaskInfo1());
+        assertEquals(t4, singleGroup2.getTaskInfo1());
+
+        mockitoSession.finishMocking();
+    }
+
+    @Test
     public void testRemovedTaskRemovesSplit() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -254,6 +299,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     /**
      * Asserts that the recent tasks matches the given task ids.
+     *
      * @param expectedTaskIds list of task ids that map to the flattened task ids of the tasks in
      *                        the grouped task list
      */
@@ -262,22 +308,23 @@ public class RecentTasksControllerTest extends ShellTestCase {
         int[] flattenedTaskIds = new int[recentTasks.size() * 2];
         for (int i = 0; i < recentTasks.size(); i++) {
             GroupedRecentTaskInfo pair = recentTasks.get(i);
-            int taskId1 = pair.mTaskInfo1.taskId;
+            int taskId1 = pair.getTaskInfo1().taskId;
             flattenedTaskIds[2 * i] = taskId1;
-            flattenedTaskIds[2 * i + 1] = pair.mTaskInfo2 != null
-                    ? pair.mTaskInfo2.taskId
+            flattenedTaskIds[2 * i + 1] = pair.getTaskInfo2() != null
+                    ? pair.getTaskInfo2().taskId
                     : -1;
 
-            if (pair.mTaskInfo2 != null) {
-                assertNotNull(pair.mSplitBounds);
-                int leftTopTaskId = pair.mSplitBounds.leftTopTaskId;
-                int bottomRightTaskId = pair.mSplitBounds.rightBottomTaskId;
+            if (pair.getTaskInfo2() != null) {
+                assertNotNull(pair.getSplitBounds());
+                int leftTopTaskId = pair.getSplitBounds().leftTopTaskId;
+                int bottomRightTaskId = pair.getSplitBounds().rightBottomTaskId;
                 // Unclear if pairs are ordered by split position, most likely not.
-                assertTrue(leftTopTaskId == taskId1 || leftTopTaskId == pair.mTaskInfo2.taskId);
+                assertTrue(leftTopTaskId == taskId1
+                        || leftTopTaskId == pair.getTaskInfo2().taskId);
                 assertTrue(bottomRightTaskId == taskId1
-                        || bottomRightTaskId == pair.mTaskInfo2.taskId);
+                        || bottomRightTaskId == pair.getTaskInfo2().taskId);
             } else {
-                assertNull(pair.mSplitBounds);
+                assertNull(pair.getSplitBounds());
             }
         }
         assertTrue("Expected: " + Arrays.toString(expectedTaskIds)

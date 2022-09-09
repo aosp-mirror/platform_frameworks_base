@@ -1109,6 +1109,7 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mCarrierId);
         sb.append(", ").append(mSkip464Xlat);
         sb.append(", ").append(mAlwaysOn);
+        sb.append(", ").append(Objects.hash(mUser, mPassword));
         return sb.toString();
     }
 
@@ -1297,8 +1298,6 @@ public class ApnSetting implements Parcelable {
                 other.mLingeringNetworkTypeBitmask)
                 && Objects.equals(this.mProfileId, other.mProfileId)
                 && Objects.equals(this.mPersistent, other.mPersistent)
-                && Objects.equals(this.mMvnoType, other.mMvnoType)
-                && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
                 && Objects.equals(this.mApnSetId, other.mApnSetId)
                 && Objects.equals(this.mCarrierId, other.mCarrierId)
                 && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)

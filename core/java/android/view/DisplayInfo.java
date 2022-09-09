@@ -723,9 +723,9 @@ public final class DisplayInfo implements Parcelable {
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
 
-        if (!compatInfo.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
-            compatInfo.applyToDisplayMetrics(outMetrics);
-        }
+        // Apply to size if the configuration is EMPTY because the size is from real display info.
+        final boolean applyToSize = configuration != null && appBounds == null;
+        compatInfo.applyDisplayMetricsIfNeeded(outMetrics, applyToSize);
     }
 
     // For debugging purposes

@@ -133,6 +133,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private TextView mSubtitleView;
     private TextView mDescriptionView;
     private View mIconHolderView;
+    protected LottieAnimationView mIconViewOverlay;
     protected LottieAnimationView mIconView;
     protected TextView mIndicatorView;
 
@@ -651,6 +652,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         mTitleView = findViewById(R.id.title);
         mSubtitleView = findViewById(R.id.subtitle);
         mDescriptionView = findViewById(R.id.description);
+        mIconViewOverlay = findViewById(R.id.biometric_icon_overlay);
         mIconView = findViewById(R.id.biometric_icon);
         mIconHolderView = findViewById(R.id.biometric_icon_frame);
         mIndicatorView = findViewById(R.id.indicator);
@@ -689,6 +691,11 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mIconController = createIconController();
         if (mIconController.getActsAsConfirmButton()) {
+            mIconViewOverlay.setOnClickListener((view)->{
+                if (mState == STATE_PENDING_CONFIRMATION) {
+                    updateState(STATE_AUTHENTICATED);
+                }
+            });
             mIconView.setOnClickListener((view) -> {
                 if (mState == STATE_PENDING_CONFIRMATION) {
                     updateState(STATE_AUTHENTICATED);

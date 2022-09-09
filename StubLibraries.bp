@@ -420,6 +420,7 @@ droidstubs {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 droidstubs {
@@ -432,6 +433,7 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "system",
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 /////////////////////////////////////////////////////////////////////

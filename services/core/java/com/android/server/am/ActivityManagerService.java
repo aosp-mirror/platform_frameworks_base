@@ -377,6 +377,7 @@ import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
+import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
 import com.android.server.IntentResolver;
@@ -17812,6 +17813,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForIdle(pw);
         }
+        if (pw != null) {
+            pw.println("All broadcast queues are idle!");
+            pw.flush();
+        }
     }
 
     public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
@@ -17878,10 +17883,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Reset the dropbox rate limiter
+     * Reset the dropbox rate limiter here and in BootReceiver
      */
     void resetDropboxRateLimiter() {
         mDropboxRateLimiter.reset();
+        BootReceiver.resetDropboxRateLimiter();
     }
 
     /**

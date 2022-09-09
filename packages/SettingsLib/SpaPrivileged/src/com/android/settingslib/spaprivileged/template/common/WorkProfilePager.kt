@@ -26,11 +26,16 @@ import com.android.settingslib.spa.widget.scaffold.SettingsPager
 import com.android.settingslib.spaprivileged.model.enterprise.EnterpriseRepository
 
 @Composable
-fun WorkProfilePager(content: @Composable (userInfo: UserInfo) -> Unit) {
+fun WorkProfilePager(
+    primaryUserOnly: Boolean = false,
+    content: @Composable (userInfo: UserInfo) -> Unit,
+) {
     val context = LocalContext.current
     val profiles = remember {
         val userManager = checkNotNull(context.getSystemService(UserManager::class.java))
-        userManager.getProfiles(UserHandle.myUserId())
+        userManager.getProfiles(UserHandle.myUserId()).filter { userInfo ->
+            !primaryUserOnly || userInfo.isPrimary
+        }
     }
     val titles = remember {
         val enterpriseRepository = EnterpriseRepository(context)

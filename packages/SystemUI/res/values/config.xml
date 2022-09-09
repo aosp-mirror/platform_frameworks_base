@@ -617,8 +617,9 @@
     <!-- Which face help messages to surface when fingerprint is also enrolled.
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
-        <item>25</item>
-        <item>26</item>
+        <item>3</item> <!-- TOO_DARK -->
+        <item>25</item> <!-- DARK_GLASSES -->
+        <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
     </integer-array>
 
     <!-- Whether the communal service should be enabled -->

@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressLint("LongLogTag")
 public class CompanionTransportManager {
-    private static final String TAG = "CompanionTransportManager";
+    private static final String TAG = "CDM_CompanionTransportManager";
     // TODO: flip to false
     private static final boolean DEBUG = true;
 

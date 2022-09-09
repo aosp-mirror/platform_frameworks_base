@@ -44,7 +44,7 @@ import androidx.fragment.app.DialogFragment;
  * A fragmentDialog shows additional information about selfManaged devices
  */
 public class CompanionVendorHelperDialogFragment extends DialogFragment {
-    private static final String TAG = CompanionVendorHelperDialogFragment.class.getSimpleName();
+    private static final String TAG = "CDM_CompanionVendorHelperDialogFragment";
     private static final String ASSOCIATION_REQUEST_EXTRA = "association_request";
 
     private CompanionVendorHelperDialogListener mListener;

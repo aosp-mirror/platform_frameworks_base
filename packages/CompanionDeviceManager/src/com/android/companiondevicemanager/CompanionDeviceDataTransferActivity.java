@@ -39,7 +39,7 @@ import android.widget.TextView;
  */
 public class CompanionDeviceDataTransferActivity extends Activity {
 
-    private static final String LOG_TAG = CompanionDeviceDataTransferActivity.class.getSimpleName();
+    private static final String LOG_TAG = "CDM_CompanionDeviceDataTransferActivity";
 
     // Intent data keys from SystemDataTransferProcessor
     private static final String EXTRA_PERMISSION_SYNC_REQUEST = "permission_sync_request";
