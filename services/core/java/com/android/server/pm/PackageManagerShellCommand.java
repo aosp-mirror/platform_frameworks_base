@@ -3044,7 +3044,12 @@ class PackageManagerShellCommand extends ShellCommand {
                 translateUserId(userId, UserHandle.USER_NULL, "runSetUserRestriction");
         final IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
-        um.setUserRestriction(restriction, value, translatedUserId);
+        try {
+            um.setUserRestriction(restriction, value, translatedUserId);
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(e.getMessage());
+            return 1;
+        }
         return 0;
     }
 

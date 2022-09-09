@@ -671,11 +671,9 @@ public class WindowStateTests extends WindowTestsBase {
         verify(t, never()).setMatrix(any(), anyInt(), anyInt(), anyInt(), anyInt());
 
         // According to "dp * density / 160 = px", density is scaled and the size in dp is the same.
-        final CompatibilityInfo compatInfo = cmp.compatibilityInfoForPackageLocked(
-                mContext.getApplicationInfo());
         final Configuration winConfig = w.getConfiguration();
         final Configuration clientConfig = new Configuration(w.getConfiguration());
-        compatInfo.applyToConfiguration(clientConfig.densityDpi, clientConfig);
+        CompatibilityInfo.scaleConfiguration(w.mInvGlobalScale, clientConfig);
 
         assertEquals(winConfig.screenWidthDp, clientConfig.screenWidthDp);
         assertEquals(winConfig.screenHeightDp, clientConfig.screenHeightDp);

@@ -1771,7 +1771,7 @@ public final class InputMethodManager {
         if (getServedViewLocked() != null) {
             if (DEBUG) {
                 Log.v(TAG, "FINISH INPUT: mServedView="
-                        + dumpViewInfo(getServedViewLocked()));
+                        + InputMethodDebug.dumpViewInfo(getServedViewLocked()));
             }
             setServedViewLocked(null);
             mCompletions = null;
@@ -2304,7 +2304,7 @@ public final class InputMethodManager {
 
             // Make sure we have a window token for the served view.
             if (DEBUG) {
-                Log.v(TAG, "Starting input: view=" + dumpViewInfo(view) +
+                Log.v(TAG, "Starting input: view=" + InputMethodDebug.dumpViewInfo(view) +
                         " reason=" + InputMethodDebug.startInputReasonToString(startInputReason));
             }
             if (view == null) {
@@ -2375,9 +2375,9 @@ public final class InputMethodManager {
             final View servedView = getServedViewLocked();
             if (servedView != view || !mServedConnecting) {
                 // Something else happened, so abort.
-                if (DEBUG) Log.v(TAG,
-                        "Starting input: finished by someone else. view=" + dumpViewInfo(view)
-                        + " servedView=" + dumpViewInfo(servedView)
+                if (DEBUG) Log.v(TAG, "Starting input: finished by someone else."
+                        + " view=" + InputMethodDebug.dumpViewInfo(view)
+                        + " servedView=" + InputMethodDebug.dumpViewInfo(servedView)
                         + " mServedConnecting=" + mServedConnecting);
                 if (mServedInputConnection != null && startInputReason == BOUND_TO_IMMS) {
                     // This is not an error. Once IME binds (MSG_BIND), InputConnection is fully
@@ -2437,8 +2437,8 @@ public final class InputMethodManager {
             mServedInputConnection = servedInputConnection;
 
             if (DEBUG) {
-                Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
-                        + ic + " editorInfo=" + editorInfo + " startInputFlags="
+                Log.v(TAG, "START INPUT: view=" + InputMethodDebug.dumpViewInfo(view)
+                        + " ic=" + ic + " editorInfo=" + editorInfo + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
             }
 
@@ -3772,23 +3772,6 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private int getBindSequenceLocked() {
         return mCurBindState != null ? mCurBindState.mBindSequence : -1;
-    }
-
-    private static String dumpViewInfo(@Nullable final View view) {
-        if (view == null) {
-            return "null";
-        }
-        final StringBuilder sb = new StringBuilder();
-        sb.append(view);
-        sb.append(",focus=" + view.hasFocus());
-        sb.append(",windowFocus=" + view.hasWindowFocus());
-        sb.append(",autofillUiShowing=" + isAutofillUIShowing(view));
-        sb.append(",window=" + view.getWindowToken());
-        sb.append(",displayId=" + view.getContext().getDisplayId());
-        sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
-        sb.append(",hasImeFocus=" + view.hasImeFocus());
-
-        return sb.toString();
     }
 
     /**

@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 
 import android.net.wifi.WifiManager
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import javax.inject.Inject
@@ -33,9 +35,10 @@ import kotlinx.coroutines.flow.map
  */
 @SysUISingleton
 class WifiInteractor @Inject constructor(
-    repository: WifiRepository,
+    connectivityRepository: ConnectivityRepository,
+    wifiRepository: WifiRepository,
 ) {
-    private val ssid: Flow<String?> = repository.wifiNetwork.map { info ->
+    private val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
         when (info) {
             is WifiNetworkModel.Inactive -> null
             is WifiNetworkModel.CarrierMerged -> null
@@ -49,10 +52,16 @@ class WifiInteractor @Inject constructor(
     }
 
     /** Our current wifi network. See [WifiNetworkModel]. */
-    val wifiNetwork: Flow<WifiNetworkModel> = repository.wifiNetwork
+    val wifiNetwork: Flow<WifiNetworkModel> = wifiRepository.wifiNetwork
+
+    /** True if we're configured to force-hide the wifi icon and false otherwise. */
+    val isForceHidden: Flow<Boolean> = connectivityRepository.forceHiddenSlots.map {
+        it.contains(ConnectivitySlot.WIFI)
+    }
 
     /** True if our wifi network has activity in (download), and false otherwise. */
-    val hasActivityIn: Flow<Boolean> = combine(repository.wifiActivity, ssid) { activity, ssid ->
+    val hasActivityIn: Flow<Boolean> =
+        combine(wifiRepository.wifiActivity, ssid) { activity, ssid ->
             activity.hasActivityIn && ssid != null
         }
 }

@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.ImageBox
-
+import com.android.settingslib.spa.widget.ui.Lottie
 enum class ResourceType { IMAGE, LOTTIE }
 
 /**
@@ -72,7 +72,7 @@ fun Illustration(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(SettingsDimension.illustrationPadding),
+            .padding(horizontal = SettingsDimension.illustrationPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val illustrationModifier = modifier
@@ -85,7 +85,10 @@ fun Illustration(
 
         when (resourceType) {
             ResourceType.LOTTIE -> {
-                // TODO: Add Lottie function after lottie is enabled.
+                Lottie(
+                    resId = resId,
+                    modifier = illustrationModifier,
+                )
             }
             ResourceType.IMAGE -> {
                 ImageBox(

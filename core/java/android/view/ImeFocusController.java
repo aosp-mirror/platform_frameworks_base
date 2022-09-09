@@ -181,7 +181,8 @@ public final class ImeFocusController {
         if (!view.hasImeFocus() || !view.hasWindowFocus()) {
             return;
         }
-        if (DEBUG) Log.d(TAG, "onViewFocusChanged, view=" + view + ", mServedView=" + mServedView);
+        if (DEBUG) Log.d(TAG, "onViewFocusChanged, view=" + InputMethodDebug.dumpViewInfo(view)
+                + ", mServedView=" + InputMethodDebug.dumpViewInfo(mServedView));
 
         // We don't need to track the next served view when the view lost focus here because:
         // 1) The current view focus may be cleared temporary when in touch mode, closing input

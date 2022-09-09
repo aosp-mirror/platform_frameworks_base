@@ -16,10 +16,11 @@
 
 package com.android.internal.inputmethod;
 
-import android.annotation.AnyThread;
-import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.autofill.AutofillManager;
 import android.view.inputmethod.HandwritingGesture;
 
 import java.util.StringJoiner;
@@ -281,20 +282,21 @@ public final class InputMethodDebug {
     }
 
     /**
-     * Return a fixed size string of the object.
-     * TODO(b/151575861): Take & return with StringBuilder to make more memory efficient.
+     * Dumps the given {@link View} related to input method focus state for debugging.
      */
-    @NonNull
-    @AnyThread
-    public static String objToString(Object obj) {
-        if (obj == null) {
+    public static String dumpViewInfo(@Nullable View view) {
+        if (view == null) {
             return "null";
         }
-        StringBuilder sb = new StringBuilder(64);
-        sb.setLength(0);
-        sb.append(obj.getClass().getName());
-        sb.append("@");
-        sb.append(Integer.toHexString(obj.hashCode()));
+        final StringBuilder sb = new StringBuilder();
+        sb.append(view);
+        sb.append(",focus=" + view.hasFocus());
+        sb.append(",windowFocus=" + view.hasWindowFocus());
+        sb.append(",window=" + view.getWindowToken());
+        sb.append(",displayId=" + view.getContext().getDisplayId());
+        sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
+        sb.append(",hasImeFocus=" + view.hasImeFocus());
+
         return sb.toString();
     }
 }

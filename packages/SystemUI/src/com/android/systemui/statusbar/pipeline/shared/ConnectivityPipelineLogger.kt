@@ -34,7 +34,7 @@ class ConnectivityPipelineLogger @Inject constructor(
     /**
      * Logs a change in one of the **raw inputs** to the connectivity pipeline.
      */
-    fun logInputChange(callbackName: String, changeInfo: String) {
+    fun logInputChange(callbackName: String, changeInfo: String?) {
         buffer.log(
                 SB_LOGGING_TAG,
                 LogLevel.INFO,

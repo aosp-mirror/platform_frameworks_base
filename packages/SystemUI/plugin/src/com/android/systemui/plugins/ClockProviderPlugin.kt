@@ -17,7 +17,6 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.systemui.plugins.annotations.ProvidesInterface
-import com.android.systemui.shared.regionsampling.RegionDarkness
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -62,7 +61,7 @@ interface Clock {
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
     fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
-        events.onColorPaletteChanged(resources, RegionDarkness.DEFAULT, RegionDarkness.DEFAULT)
+        events.onColorPaletteChanged(resources, true, true)
         animations.doze(dozeFraction)
         animations.fold(foldFraction)
         events.onTimeTick()
@@ -92,8 +91,8 @@ interface ClockEvents {
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(
             resources: Resources,
-            smallClockIsDark: RegionDarkness,
-            largeClockIsDark: RegionDarkness
+            smallClockIsDark: Boolean,
+            largeClockIsDark: Boolean
     ) { }
 }
 

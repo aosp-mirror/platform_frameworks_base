@@ -259,6 +259,7 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun unregisterListeners_validate() {
+        clockEventController.clock = clock
         clockEventController.unregisterListeners()
         verify(broadcastDispatcher).unregisterReceiver(any())
         verify(configurationController).removeCallback(any())

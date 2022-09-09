@@ -2183,9 +2183,7 @@ public class DisplayPolicy {
         }
         mDecorInsets.invalidate();
         mDecorInsets.mInfoForRotation[rotation].set(newInfo);
-        // If the device is booting, let the boot procedure trigger the new configuration.
-        // Otherwise the display configuration needs to be recomputed now.
-        return mService.mDisplayEnabled;
+        return true;
     }
 
     DecorInsets.Info getDecorInsetsInfo(int rotation, int w, int h) {

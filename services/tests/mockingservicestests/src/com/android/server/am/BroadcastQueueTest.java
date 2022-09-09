@@ -168,10 +168,15 @@ public class BroadcastQueueTest {
                 return false;
             }
         };
+        final BroadcastHistory emptyHistory = new BroadcastHistory() {
+            public void addBroadcastToHistoryLocked(BroadcastRecord original) {
+            }
+        };
 
         if (mImpl == Impl.DEFAULT) {
             mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
-                    constants, emptySkipPolicy, false);
+                    constants, emptySkipPolicy, emptyHistory, false,
+                    ProcessList.SCHED_GROUP_DEFAULT);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -225,7 +230,7 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.finishReceiverLocked(threadBinder, Activity.RESULT_OK,
+                mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
                         null, null, false, false);
             });
             return null;
@@ -236,7 +241,7 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.finishReceiverLocked(receiverBinder, Activity.RESULT_OK, null, null,
+                mQueue.finishReceiverLocked(r, Activity.RESULT_OK, null, null,
                         false, false);
             });
             return null;
@@ -298,11 +303,7 @@ public class BroadcastQueueTest {
     }
 
     private void waitForIdle() throws Exception {
-        for (int i = 0; i < 100; i++) {
-            if (mQueue.isIdle()) break;
-            SystemClock.sleep(100);
-        }
-        assertTrue(mQueue.isIdle());
+        mQueue.waitForIdle(null);
     }
 
     private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {

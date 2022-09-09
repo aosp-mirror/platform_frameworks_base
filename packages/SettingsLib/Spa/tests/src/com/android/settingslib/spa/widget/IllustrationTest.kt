@@ -17,12 +17,14 @@
 package com.android.settingslib.spa.widget
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -54,9 +56,32 @@ class IllustrationTest {
         fun hasDrawable(@DrawableRes id: Int): SemanticsMatcher =
             SemanticsMatcher.expectValue(DrawableId, id)
 
-        val isIllustrationNode = !hasAnyAncestor(hasDrawable(resId))
+        val isIllustrationNode = hasAnyAncestor(hasDrawable(resId))
         composeTestRule.onAllNodes(hasDrawable(resId))
             .filterToOne(isIllustrationNode)
             .assertIsDisplayed()
+    }
+
+    private val RawId = SemanticsPropertyKey<Int>("RawResId")
+    private var SemanticsPropertyReceiver.rawId by RawId
+
+    @Test
+    fun empty_lottie_not_displayed() {
+        val resId = R.raw.empty
+        composeTestRule.setContent {
+            Illustration(
+                resId = resId,
+                resourceType = ResourceType.LOTTIE,
+                modifier = Modifier.semantics { rawId = resId }
+            )
+        }
+
+        fun hasRaw(@RawRes id: Int): SemanticsMatcher =
+            SemanticsMatcher.expectValue(RawId, id)
+
+        val isIllustrationNode = hasAnyAncestor(hasRaw(resId))
+        composeTestRule.onAllNodes(hasRaw(resId))
+            .filterToOne(isIllustrationNode)
+            .assertIsNotDisplayed()
     }
 }

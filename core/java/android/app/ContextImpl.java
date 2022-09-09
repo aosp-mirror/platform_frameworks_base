@@ -1390,8 +1390,9 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new LoadedApk.ReceiverDispatcher(
-                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+                rd = new LoadedApk.ReceiverDispatcher(mMainThread.getApplicationThread(),
+                        resultReceiver, getOuterContext(), scheduler, null, false)
+                                .getIIntentReceiver();
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -1497,8 +1498,9 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new LoadedApk.ReceiverDispatcher(resultReceiver, getOuterContext(),
-                        scheduler, null, false).getIIntentReceiver();
+                rd = new LoadedApk.ReceiverDispatcher(mMainThread.getApplicationThread(),
+                        resultReceiver, getOuterContext(), scheduler, null, false)
+                                .getIIntentReceiver();
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -1616,8 +1618,9 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new LoadedApk.ReceiverDispatcher(
-                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+                rd = new LoadedApk.ReceiverDispatcher(mMainThread.getApplicationThread(),
+                        resultReceiver, getOuterContext(), scheduler, null, false)
+                                .getIIntentReceiver();
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -1699,8 +1702,9 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new LoadedApk.ReceiverDispatcher(
-                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+                rd = new LoadedApk.ReceiverDispatcher(mMainThread.getApplicationThread(),
+                        resultReceiver, getOuterContext(), scheduler, null, false)
+                                .getIIntentReceiver();
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -1802,7 +1806,7 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new LoadedApk.ReceiverDispatcher(
+                rd = new LoadedApk.ReceiverDispatcher(mMainThread.getApplicationThread(),
                         receiver, context, scheduler, null, true).getIIntentReceiver();
             }
         }

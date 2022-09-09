@@ -282,7 +282,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * window like any other app. This can be true while [willUnlockWithSmartspaceTransition] is
      * false, if the smartspace is not available or was not ready in time.
      */
-    private var willUnlockWithInWindowLauncherAnimations: Boolean = false
+    @VisibleForTesting
+    var willUnlockWithInWindowLauncherAnimations: Boolean = false
 
     /**
      * Whether we decided in [prepareForInWindowLauncherAnimations] that we are able to and want to
@@ -574,7 +575,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // Now that the Launcher surface (with its smartspace positioned identically to ours) is
         // visible, hide our smartspace.
-        lockscreenSmartspace!!.visibility = View.INVISIBLE
+        lockscreenSmartspace?.visibility = View.INVISIBLE
 
         // As soon as the shade has animated out of the way, finish the keyguard exit animation. The
         // in-window animations in the Launcher window will end on their own.

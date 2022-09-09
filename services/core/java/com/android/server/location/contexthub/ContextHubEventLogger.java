@@ -19,6 +19,8 @@ package com.android.server.location.contexthub;
 import android.hardware.location.NanoAppMessage;
 import android.util.Log;
 
+import java.util.Collection;
+
 /**
  * A class to log events and useful metrics within the Context Hub service.
  *
@@ -214,6 +216,18 @@ public class ContextHubEventLogger {
             sInstance = new ContextHubEventLogger();
         }
         return sInstance;
+    }
+
+    /**
+     * Clears all queues of events.
+     */
+    public synchronized void clear() {
+        for (Collection<?> deque:
+                new Collection<?>[] {mNanoappLoadEventQueue, mNanoappUnloadEventQueue,
+                                     mMessageFromNanoappQueue, mMessageToNanoappQueue,
+                                     mContextHubRestartEventQueue}) {
+            deque.clear();
+        }
     }
 
     /**

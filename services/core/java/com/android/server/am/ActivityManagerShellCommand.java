@@ -341,6 +341,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runNoHomeScreen(pw);
                 case "wait-for-broadcast-idle":
                     return runWaitForBroadcastIdle(pw);
+                case "wait-for-broadcast-barrier":
+                    return runWaitForBroadcastBarrier(pw);
                 case "compat":
                     return runCompat(pw);
                 case "refresh-settings-cache":
@@ -3109,6 +3111,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
         mInternal.waitForBroadcastIdle(pw);
+        return 0;
+    }
+
+    int runWaitForBroadcastBarrier(PrintWriter pw) throws RemoteException {
+        mInternal.waitForBroadcastBarrier(pw);
         return 0;
     }
 

@@ -1598,8 +1598,8 @@ public final class LoadedApk {
                 }
             }
             if (rd == null) {
-                rd = new ReceiverDispatcher(r, context, handler,
-                        instrumentation, registered);
+                rd = new ReceiverDispatcher(mActivityThread.getApplicationThread(), r, context,
+                        handler, instrumentation, registered);
                 if (registered) {
                     if (map == null) {
                         map = new ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>();
@@ -1714,6 +1714,7 @@ public final class LoadedApk {
             }
         }
 
+        final IApplicationThread mAppThread;
         final IIntentReceiver.Stub mIIntentReceiver;
         @UnsupportedAppUsage
         final BroadcastReceiver mReceiver;
@@ -1736,7 +1737,7 @@ public final class LoadedApk {
                     boolean ordered, boolean sticky, int sendingUser) {
                 super(resultCode, resultData, resultExtras,
                         mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED, ordered,
-                        sticky, mIIntentReceiver.asBinder(), sendingUser, intent.getFlags());
+                        sticky, mAppThread.asBinder(), sendingUser, intent.getFlags());
                 mCurIntent = intent;
                 mOrdered = ordered;
             }
@@ -1811,13 +1812,14 @@ public final class LoadedApk {
             }
         }
 
-        ReceiverDispatcher(BroadcastReceiver receiver, Context context,
-                Handler activityThread, Instrumentation instrumentation,
+        ReceiverDispatcher(IApplicationThread appThread, BroadcastReceiver receiver,
+                Context context, Handler activityThread, Instrumentation instrumentation,
                 boolean registered) {
             if (activityThread == null) {
                 throw new NullPointerException("Handler must not be null");
             }
 
+            mAppThread = appThread;
             mIIntentReceiver = new InnerReceiver(this, !registered);
             mReceiver = receiver;
             mContext = context;

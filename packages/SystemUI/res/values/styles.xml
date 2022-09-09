@@ -978,6 +978,8 @@
         <!-- Padding for indeterminate progress bar -->
         <item name="progressBarStartPadding">12dp</item>
         <item name="progressBarEndPadding">16dp</item>
+
+        <item name="iconSize">25dp</item>
     </style>
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">

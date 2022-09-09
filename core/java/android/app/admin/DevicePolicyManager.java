@@ -8689,7 +8689,6 @@ public class DevicePolicyManager {
      * and no accounts.
      *
      * @param who the component name to be registered as device owner.
-     * @param ownerName the human readable name of the institution that owns this device.
      * @param userId ID of the user on which the device owner runs.
      *
      * @return whether the package was successfully registered as the device owner.
@@ -8701,11 +8700,10 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public boolean setDeviceOwner(@NonNull ComponentName who, @Nullable String ownerName,
-            @UserIdInt int userId) {
+    public boolean setDeviceOwner(@NonNull ComponentName who, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(who, ownerName, userId,
+                return mService.setDeviceOwner(who, userId,
                         /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -8715,7 +8713,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Same as {@link #setDeviceOwner(ComponentName, String, int)}, but without setting the profile
+     * Same as {@link #setDeviceOwner(ComponentName, int)}, but without setting the profile
      * owner on current user when running on headless system user mode - should be used only by
      * testing infra.
      *
@@ -8724,10 +8722,10 @@ public class DevicePolicyManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     public boolean setDeviceOwnerOnly(
-            @NonNull ComponentName who, @Nullable String ownerName, @UserIdInt int userId) {
+            @NonNull ComponentName who, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(who, ownerName, userId,
+                return mService.setDeviceOwner(who, userId,
                         /* setProfileOwnerOnCurrentUserIfNecessary= */ false);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();

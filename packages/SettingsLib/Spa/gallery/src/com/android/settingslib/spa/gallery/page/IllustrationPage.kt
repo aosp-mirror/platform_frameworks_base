@@ -54,6 +54,15 @@ object IllustrationPageProvider : SettingsPageProvider {
 private fun IllustrationPage() {
     Column(Modifier.verticalScroll(rememberScrollState())) {
         Preference(object : PreferenceModel {
+            override val title = "Lottie Illustration"
+        })
+
+        Illustration(object : IllustrationModel {
+            override val resId = R.raw.accessibility_shortcut_type_triple_tap
+            override val resourceType = ResourceType.LOTTIE
+        })
+
+        Preference(object : PreferenceModel {
             override val title = "Image Illustration"
         })
 

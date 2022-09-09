@@ -957,10 +957,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // current state of the windows as the window manager may be delaying
             // the computation for performance reasons.
             boolean shouldComputeWindows = false;
-            int displayId = Display.INVALID_DISPLAY;
+            int displayId = event.getDisplayId();
             synchronized (mLock) {
                 final int windowId = event.getWindowId();
-                if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+                if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID
+                        && displayId == Display.INVALID_DISPLAY) {
                     displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
                             resolvedUserId, windowId);
                     event.setDisplayId(displayId);
