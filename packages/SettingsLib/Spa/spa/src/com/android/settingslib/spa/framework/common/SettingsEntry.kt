@@ -19,10 +19,13 @@ package com.android.settingslib.spa.framework.common
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
+import com.android.settingslib.spa.framework.BrowseActivity
+import com.android.settingslib.spa.framework.util.navLink
 import com.android.settingslib.spa.framework.util.normalize
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
+const val ROOT_PAGE_NAME = "Root"
 
 /**
  * Defines data of one Settings entry for Settings search.
@@ -38,7 +41,7 @@ data class UiData(val title: String = "")
  * Defines data to identify a Settings page.
  */
 data class SettingsPage(
-    // The unique id of this page, which is computed by name + arguments
+    // The unique id of this page, which is computed by name + normalized(arguments)
     val id: Int,
 
     // The name of the page, which is used to compute the unique id, and need to be stable.
@@ -47,6 +50,9 @@ data class SettingsPage(
     // The display name of the page, for better readability.
     // By default, it is the same as name.
     val displayName: String,
+
+    // Defined parameters of this page.
+    val parameter: List<NamedNavArgument> = emptyList(),
 
     // The arguments of this page.
     val arguments: Bundle? = null,
@@ -62,12 +68,22 @@ data class SettingsPage(
     }
 
     fun formatArguments(): String {
-        if (arguments == null || arguments.isEmpty) return "[No arguments]"
-        return arguments.toString().removeRange(0, 6)
+        val normalizedArguments = parameter.normalize(arguments)
+        if (normalizedArguments == null || normalizedArguments.isEmpty) return "[No arguments]"
+        return normalizedArguments.toString().removeRange(0, 6)
     }
 
     fun formatAll(): String {
         return "$displayName ${formatArguments()}"
+    }
+
+    fun buildRoute(highlightEntryName: String? = null): String {
+        val highlightParam =
+            if (highlightEntryName == null)
+                ""
+            else
+                "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryName"
+        return name + parameter.navLink(arguments) + highlightParam
     }
 }
 
@@ -133,6 +149,12 @@ data class SettingsEntry(
         )
         return content.joinToString("\n")
     }
+
+    fun buildRoute(): String {
+        // Open entry in its fromPage.
+        val page = fromPage ?: owner
+        return page.buildRoute(name)
+    }
 }
 
 data class SettingsPageWithEntry(
@@ -153,7 +175,8 @@ class SettingsPageBuilder(
             id = "$name:${normArguments?.toString()}".toUniqueId(),
             name = name,
             displayName = displayName ?: name,
-            arguments = normArguments,
+            parameter = parameter,
+            arguments = arguments,
         )
     }
 
@@ -234,12 +257,14 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             return create(entryName, owner).setLink(toPage = owner)
         }
 
-        fun createInject(owner: SettingsPage): SettingsEntryBuilder {
-            return createLinkTo(INJECT_ENTRY_NAME, owner)
+        fun createInject(owner: SettingsPage, entryName: String? = null): SettingsEntryBuilder {
+            val name = entryName ?: "${INJECT_ENTRY_NAME}_${owner.name}"
+            return createLinkTo(name, owner)
         }
 
-        fun createRoot(page: SettingsPage): SettingsEntryBuilder {
-            return createLinkTo(ROOT_ENTRY_NAME, page)
+        fun createRoot(owner: SettingsPage, entryName: String? = null): SettingsEntryBuilder {
+            val name = entryName ?: "${ROOT_ENTRY_NAME}_${owner.name}"
+            return createLinkTo(name, owner)
         }
     }
 }

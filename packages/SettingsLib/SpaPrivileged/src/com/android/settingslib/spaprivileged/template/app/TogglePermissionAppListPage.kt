@@ -110,7 +110,7 @@ internal class TogglePermissionAppListPageProvider(
         internal fun buildInjectEntry(permissionType: String): SettingsEntryBuilder {
             val appListPage = SettingsPage.create(
                 PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
-            return SettingsEntryBuilder.createInject(appListPage).setIsAllowSearch(false)
+            return SettingsEntryBuilder.createInject(owner = appListPage).setIsAllowSearch(false)
         }
     }
 }

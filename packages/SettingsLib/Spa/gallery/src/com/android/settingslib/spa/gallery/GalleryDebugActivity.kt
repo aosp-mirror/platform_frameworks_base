@@ -18,4 +18,4 @@ package com.android.settingslib.spa.gallery
 
 import com.android.settingslib.spa.framework.DebugActivity
 
-class GalleryDebugActivity : DebugActivity(SpaEnvironment.EntryRepository)
+class GalleryDebugActivity : DebugActivity(SpaEnvironment.EntryRepository, MainActivity::class.java)

@@ -38,7 +38,7 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
 
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
-            val rootEntry = SettingsEntryBuilder.createRoot(page).build()
+            val rootEntry = SettingsEntryBuilder.createRoot(owner = page).build()
             if (!entryMap.containsKey(rootEntry.id)) {
                 entryQueue.push(rootEntry)
                 entryMap.put(rootEntry.id, rootEntry)
