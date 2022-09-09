@@ -673,6 +673,18 @@ final class DeletePackageHelper {
         final String packageName = versionedPackage.getPackageName();
         final long versionCode = versionedPackage.getLongVersionCode();
 
+        if (mPm.mProtectedPackages.isPackageDataProtected(userId, packageName)) {
+            mPm.mHandler.post(() -> {
+                try {
+                    Slog.w(TAG, "Attempted to delete protected package: " + packageName);
+                    observer.onPackageDeleted(packageName,
+                            PackageManager.DELETE_FAILED_INTERNAL_ERROR, null);
+                } catch (RemoteException re) {
+                }
+            });
+            return;
+        }
+
         try {
             if (mPm.mInjector.getLocalService(ActivityTaskManagerInternal.class)
                     .isBaseOfLockedTask(packageName)) {
