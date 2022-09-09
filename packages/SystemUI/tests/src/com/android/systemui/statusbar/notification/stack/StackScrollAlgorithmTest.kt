@@ -20,7 +20,10 @@ import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.any
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -35,7 +38,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
-
     private val ambientState = AmbientState(
             context,
             dumpManager,
@@ -115,29 +117,54 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun resetViewStates_isExpansionChanging_viewBecomesTransparent() {
+    fun resetViewStates_expansionChanging_notificationBecomesTransparent() {
         whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(false)
-        ambientState.isExpansionChanging = true
-        ambientState.expansionFraction = 0.25f
-        stackScrollAlgorithm.initView(context)
-
-        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
-
-        val expected = getContentAlpha(0.25f)
-        assertThat(notificationRow.viewState.alpha).isEqualTo(expected)
+        resetViewStates_expansionChanging_notificationAlphaUpdated(
+                expansionFraction = 0.25f,
+                expectedAlpha = 0.0f
+        )
     }
 
     @Test
-    fun resetViewStates_isExpansionChangingWhileBouncerInTransit_viewBecomesTransparent() {
+    fun resetViewStates_expansionChangingWhileBouncerInTransit_viewBecomesTransparent() {
         whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(true)
+        resetViewStates_expansionChanging_notificationAlphaUpdated(
+                expansionFraction = 0.85f,
+                expectedAlpha = 0.0f
+        )
+    }
+
+    @Test
+    fun resetViewStates_expansionChanging_notificationAlphaUpdated() {
+        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(false)
+        resetViewStates_expansionChanging_notificationAlphaUpdated(
+                expansionFraction = 0.6f,
+                expectedAlpha = getContentAlpha(0.6f)
+        )
+    }
+
+    @Test
+    fun resetViewStates_expansionChangingWhileBouncerInTransit_notificationAlphaUpdated() {
+        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(true)
+        resetViewStates_expansionChanging_notificationAlphaUpdated(
+                expansionFraction = 0.95f,
+                expectedAlpha = aboutToShowBouncerProgress(0.95f)
+        )
+    }
+
+    @Test
+    fun resetViewStates_expansionChanging_shelfUpdated() {
+        ambientState.shelf = notificationShelf
         ambientState.isExpansionChanging = true
-        ambientState.expansionFraction = 0.25f
+        ambientState.expansionFraction = 0.6f
         stackScrollAlgorithm.initView(context)
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        val expected = aboutToShowBouncerProgress(0.25f)
-        assertThat(notificationRow.viewState.alpha).isEqualTo(expected)
+        verify(notificationShelf).updateState(
+                /* algorithmState= */any(),
+                /* ambientState= */eq(ambientState)
+        )
     }
 
     @Test
@@ -478,6 +505,19 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* viewMaxHeight= */ 20f,
                 /* originalCornerRoundness= */ 1f)
         assertEquals(1f, currentRoundness)
+    }
+
+    private fun resetViewStates_expansionChanging_notificationAlphaUpdated(
+            expansionFraction: Float,
+            expectedAlpha: Float
+    ) {
+        ambientState.isExpansionChanging = true
+        ambientState.expansionFraction = expansionFraction
+        stackScrollAlgorithm.initView(context)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        assertThat(notificationRow.viewState.alpha).isEqualTo(expectedAlpha)
     }
 }
 
