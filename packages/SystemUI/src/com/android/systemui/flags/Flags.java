@@ -92,12 +92,6 @@ public class Flags {
     public static final ResourceBooleanFlag FACE_SCANNING_ANIM =
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
 
-    /**
-     * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
-     * one.
-     */
-    public static final ReleasedFlag MODERN_BOTTOM_AREA = new ReleasedFlag(206, true);
-
     public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS = new UnreleasedFlag(207);
   
     /**
