@@ -16,20 +16,25 @@
 
 package com.android.settingslib.spa.framework
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
+import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.toState
@@ -48,7 +53,8 @@ private const val PARAM_NAME_PAGE_ID = "pid"
 private const val PARAM_NAME_ENTRY_ID = "eid"
 
 open class DebugActivity(
-    private val entryRepository: SettingsEntryRepository
+    private val entryRepository: SettingsEntryRepository,
+    private val browseActivityClass: Class<*>,
 ) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
@@ -87,7 +93,7 @@ open class DebugActivity(
 
     @Composable
     fun RootPage() {
-        HomeScaffold(title = "Entry Debug") {
+        HomeScaffold(title = "Settings Debug") {
             Preference(object : PreferenceModel {
                 override val title = "List All Pages"
                 override val onClick = navigator(route = ROUTE_All_PAGES)
@@ -128,6 +134,10 @@ open class DebugActivity(
         RegularScaffold(title = "Page ${pageWithEntry.page.displayName}") {
             Text(text = pageWithEntry.page.formatArguments())
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
+            Preference(model = object : PreferenceModel {
+                override val title = "open page"
+                override val onClick = openPage(pageWithEntry.page)
+            })
             EntryList(pageWithEntry.entries)
         }
     }
@@ -137,7 +147,11 @@ open class DebugActivity(
         val id = arguments!!.getInt(PARAM_NAME_ENTRY_ID)
         val entry = entryRepository.getEntry(id)!!
         RegularScaffold(title = "Entry ${entry.displayName}") {
-            Text (text = entry.formatAll())
+            Preference(model = object : PreferenceModel {
+                override val title = "open entry"
+                override val onClick = openEntry(entry)
+            })
+            Text(text = entry.formatAll())
         }
     }
 
@@ -150,6 +164,32 @@ open class DebugActivity(
                     "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}".toState()
                 override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id}")
             })
+        }
+    }
+
+    @Composable
+    private fun openPage(page: SettingsPage): () -> Unit {
+        val route = page.buildRoute()
+        val context = LocalContext.current
+        val intent = Intent(context, browseActivityClass).apply {
+            putExtra(KEY_DESTINATION, route)
+        }
+        return {
+            Log.d("DEBUG ACTIVITY", "Open page: $route")
+            context.startActivity(intent)
+        }
+    }
+
+    @Composable
+    private fun openEntry(entry: SettingsEntry): () -> Unit {
+        val route = entry.buildRoute()
+        val context = LocalContext.current
+        val intent = Intent(context, browseActivityClass).apply {
+            putExtra(KEY_DESTINATION, route)
+        }
+        return {
+            Log.d("DEBUG ACTIVITY", "Open entry: $route")
+            context.startActivity(intent)
         }
     }
 }
