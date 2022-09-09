@@ -482,8 +482,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final boolean userHasTrust = getUserHasTrust(userId);
             if (userHasTrust && trustGrantedMessages != null) {
                 for (String msg : trustGrantedMessages) {
-                    if (!TextUtils.isEmpty(msg)) {
-                        message = msg;
+                    message = msg;
+                    if (!TextUtils.isEmpty(message)) {
                         break;
                     }
                 }

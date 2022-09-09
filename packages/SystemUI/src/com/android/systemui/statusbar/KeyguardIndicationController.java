@@ -692,11 +692,11 @@ public class KeyguardIndicationController {
     /**
      * Returns the indication text indicating that trust has been granted.
      *
-     * @return {@code null} or an empty string if a trust indication text should not be shown.
+     * @return an empty string if a trust indication text should not be shown.
      */
     @VisibleForTesting
     String getTrustGrantedIndication() {
-        return TextUtils.isEmpty(mTrustGrantedIndication)
+        return mTrustGrantedIndication == null
                 ? mContext.getString(R.string.keyguard_indication_trust_unlocked)
                 : mTrustGrantedIndication.toString();
     }

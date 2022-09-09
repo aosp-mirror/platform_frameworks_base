@@ -1050,14 +1050,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onTrustGrantedMessageDoesShowsOnTrustGranted() {
+    public void onTrustGrantedMessageShowsOnTrustGranted() {
         createController();
         mController.setVisible(true);
 
         // GIVEN trust is granted
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
 
-        // WHEN the showTrustGranted message is called
+        // WHEN the showTrustGranted method is called
         final String trustGrantedMsg = "testing trust granted message";
         mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
 
@@ -1065,6 +1065,38 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verifyIndicationMessage(
                 INDICATION_TYPE_TRUST,
                 trustGrantedMsg);
+    }
+
+    @Test
+    public void onTrustGrantedMessage_nullMessage_showsDefaultMessage() {
+        createController();
+        mController.setVisible(true);
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted method is called with a null message
+        mController.getKeyguardCallback().showTrustGrantedMessage(null);
+
+        // THEN verify the default trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                getContext().getString(R.string.keyguard_indication_trust_unlocked));
+    }
+
+    @Test
+    public void onTrustGrantedMessage_emptyString_showsNoMessage() {
+        createController();
+        mController.setVisible(true);
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted method is called with an EMPTY string
+        mController.getKeyguardCallback().showTrustGrantedMessage("");
+
+        // THEN verify NO trust message is shown
+        verifyNoMessage(INDICATION_TYPE_TRUST);
     }
 
     @Test
