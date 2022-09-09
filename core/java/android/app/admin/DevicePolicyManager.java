@@ -15417,7 +15417,7 @@ public class DevicePolicyManager {
      *
      * @see #setWifiSsidPolicy(WifiSsidPolicy)
      * @throws SecurityException if the caller is not a device owner or a profile owner on
-     * an organization-owned managed profile or a system app.
+     * an organization-owned managed profile.
      */
     @Nullable
     public WifiSsidPolicy getWifiSsidPolicy() {
