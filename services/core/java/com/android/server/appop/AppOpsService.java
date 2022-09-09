@@ -68,7 +68,6 @@ import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import android.Manifest;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -129,8 +128,6 @@ import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Pair;
-import android.util.Pools;
-import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -194,7 +191,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
@@ -237,14 +233,22 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private final @Nullable File mNoteOpCallerStacktracesFile;
     final Handler mHandler;
 
-    /** Pool for {@link OpEventProxyInfoPool} to avoid to constantly reallocate new objects */
+    /**
+     * Pool for {@link AttributedOp.OpEventProxyInfoPool} to avoid to constantly reallocate new
+     * objects
+     */
     @GuardedBy("this")
-    final OpEventProxyInfoPool mOpEventProxyInfoPool = new OpEventProxyInfoPool();
+    final AttributedOp.OpEventProxyInfoPool mOpEventProxyInfoPool =
+            new AttributedOp.OpEventProxyInfoPool(MAX_UNUSED_POOLED_OBJECTS);
 
-    /** Pool for {@link InProgressStartOpEventPool} to avoid to constantly reallocate new objects */
+    /**
+     * Pool for {@link AttributedOp.InProgressStartOpEventPool} to avoid to constantly reallocate
+     * new objects
+     */
     @GuardedBy("this")
-    final InProgressStartOpEventPool mInProgressStartOpEventPool =
-            new InProgressStartOpEventPool();
+    final AttributedOp.InProgressStartOpEventPool mInProgressStartOpEventPool =
+            new AttributedOp.InProgressStartOpEventPool(mOpEventProxyInfoPool,
+                    MAX_UNUSED_POOLED_OBJECTS);
 
     private final AppOpsManagerInternalImpl mAppOpsManagerInternal
             = new AppOpsManagerInternalImpl();
@@ -376,60 +380,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             mUidStateTracker.addUidStateChangedCallback(mHandler, this::onUidStateChanged);
         }
         return mUidStateTracker;
-    }
-
-    /**
-     * An unsynchronized pool of {@link OpEventProxyInfo} objects.
-     */
-    class OpEventProxyInfoPool extends SimplePool<OpEventProxyInfo> {
-        OpEventProxyInfoPool() {
-            super(MAX_UNUSED_POOLED_OBJECTS);
-        }
-
-        OpEventProxyInfo acquire(@IntRange(from = 0) int uid, @Nullable String packageName,
-                @Nullable String attributionTag) {
-            OpEventProxyInfo recycled = acquire();
-            if (recycled != null) {
-                recycled.reinit(uid, packageName, attributionTag);
-                return recycled;
-            }
-
-            return new OpEventProxyInfo(uid, packageName, attributionTag);
-        }
-    }
-
-    /**
-     * An unsynchronized pool of {@link InProgressStartOpEvent} objects.
-     */
-    class InProgressStartOpEventPool extends SimplePool<InProgressStartOpEvent> {
-        InProgressStartOpEventPool() {
-            super(MAX_UNUSED_POOLED_OBJECTS);
-        }
-
-        InProgressStartOpEvent acquire(long startTime, long elapsedTime, @NonNull IBinder clientId,
-                @Nullable String attributionTag, @NonNull Runnable onDeath, int proxyUid,
-                @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-                @AppOpsManager.UidState int uidState, @OpFlags int flags, @AttributionFlags
-                int attributionFlags, int attributionChainId) throws RemoteException {
-
-            InProgressStartOpEvent recycled = acquire();
-
-            OpEventProxyInfo proxyInfo = null;
-            if (proxyUid != Process.INVALID_UID) {
-                proxyInfo = mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
-                        proxyAttributionTag);
-            }
-
-            if (recycled != null) {
-                recycled.reinit(startTime, elapsedTime, clientId, attributionTag, onDeath,
-                        uidState, flags, proxyInfo,  attributionFlags, attributionChainId,
-                        mOpEventProxyInfoPool);
-                return recycled;
-            }
-
-            return new InProgressStartOpEvent(startTime, elapsedTime, clientId, attributionTag,
-                    onDeath, uidState, proxyInfo, flags, attributionFlags, attributionChainId);
-        }
     }
 
     /**
@@ -645,181 +595,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         PackageVerificationResult(RestrictionBypass bypass, boolean isAttributionTagValid) {
             this.bypass = bypass;
             this.isAttributionTagValid = isAttributionTagValid;
-        }
-    }
-
-    /** A in progress startOp->finishOp event */
-    static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
-        /** Wall clock time of startOp event (not monotonic) */
-        private long mStartTime;
-
-        /** Elapsed time since boot of startOp event */
-        private long mStartElapsedTime;
-
-        /** Id of the client that started the event */
-        private @NonNull IBinder mClientId;
-
-        /** The attribution tag for this operation */
-        private @Nullable String mAttributionTag;
-
-        /** To call when client dies */
-        private @NonNull Runnable mOnDeath;
-
-        /** uidstate used when calling startOp */
-        private @AppOpsManager.UidState int mUidState;
-
-        /** Proxy information of the startOp event */
-        private @Nullable OpEventProxyInfo mProxy;
-
-        /** Proxy flag information */
-        private @OpFlags int mFlags;
-
-        /** How many times the op was started but not finished yet */
-        int numUnfinishedStarts;
-
-        /** The attribution flags related to this event */
-        private @AttributionFlags int mAttributionFlags;
-
-        /** The id of the attribution chain this even is a part of */
-        private int mAttributionChainId;
-
-        /**
-         * Create a new {@link InProgressStartOpEvent}.
-         *
-         * @param startTime The time {@link #startOperation} was called
-         * @param startElapsedTime The elapsed time when {@link #startOperation} was called
-         * @param clientId The client id of the caller of {@link #startOperation}
-         * @param attributionTag The attribution tag for the operation.
-         * @param onDeath The code to execute on client death
-         * @param uidState The uidstate of the app {@link #startOperation} was called for
-         * @param attributionFlags the attribution flags for this operation.
-         * @param attributionChainId the unique id of the attribution chain this op is a part of.
-         * @param proxy The proxy information, if {@link #startProxyOperation} was called
-         * @param flags The trusted/nontrusted/self flags.
-         *
-         * @throws RemoteException If the client is dying
-         */
-        private InProgressStartOpEvent(long startTime, long startElapsedTime,
-                @NonNull IBinder clientId, @Nullable String attributionTag,
-                @NonNull Runnable onDeath, @AppOpsManager.UidState int uidState,
-                @Nullable OpEventProxyInfo proxy, @OpFlags int flags,
-                @AttributionFlags int attributionFlags, int attributionChainId)
-                throws RemoteException {
-            mStartTime = startTime;
-            mStartElapsedTime = startElapsedTime;
-            mClientId = clientId;
-            mAttributionTag = attributionTag;
-            mOnDeath = onDeath;
-            mUidState = uidState;
-            mProxy = proxy;
-            mFlags = flags;
-            mAttributionFlags = attributionFlags;
-            mAttributionChainId = attributionChainId;
-
-            clientId.linkToDeath(this, 0);
-        }
-
-        /** Clean up event */
-        public void finish() {
-            try {
-                mClientId.unlinkToDeath(this, 0);
-            } catch (NoSuchElementException e) {
-                // Either not linked, or already unlinked. Either way, nothing to do.
-            }
-        }
-
-        @Override
-        public void binderDied() {
-            mOnDeath.run();
-        }
-
-        /**
-         * Reinit existing object with new state.
-         *
-         * @param startTime The time {@link #startOperation} was called
-         * @param startElapsedTime The elapsed time when {@link #startOperation} was called
-         * @param clientId The client id of the caller of {@link #startOperation}
-         * @param attributionTag The attribution tag for this operation.
-         * @param onDeath The code to execute on client death
-         * @param uidState The uidstate of the app {@link #startOperation} was called for
-         * @param flags The flags relating to the proxy
-         * @param proxy The proxy information, if {@link #startProxyOperation} was called
-         * @param attributionFlags the attribution flags for this operation.
-         * @param attributionChainId the unique id of the attribution chain this op is a part of.
-         * @param proxyPool The pool to release previous {@link OpEventProxyInfo} to
-         *
-         * @throws RemoteException If the client is dying
-         */
-        public void reinit(long startTime, long startElapsedTime, @NonNull IBinder clientId,
-                @Nullable String attributionTag, @NonNull Runnable onDeath,
-                @AppOpsManager.UidState int uidState, @OpFlags int flags,
-                @Nullable OpEventProxyInfo proxy, @AttributionFlags int attributionFlags,
-                int attributionChainId, @NonNull Pools.Pool<OpEventProxyInfo> proxyPool
-        ) throws RemoteException {
-            mStartTime = startTime;
-            mStartElapsedTime = startElapsedTime;
-            mClientId = clientId;
-            mAttributionTag = attributionTag;
-            mOnDeath = onDeath;
-            mUidState = uidState;
-            mFlags = flags;
-
-            if (mProxy != null) {
-                proxyPool.release(mProxy);
-            }
-            mProxy = proxy;
-            mAttributionFlags = attributionFlags;
-            mAttributionChainId = attributionChainId;
-
-            clientId.linkToDeath(this, 0);
-        }
-
-        /** @return Wall clock time of startOp event */
-        public long getStartTime() {
-            return mStartTime;
-        }
-
-        /** @return Elapsed time since boot of startOp event */
-        public long getStartElapsedTime() {
-            return mStartElapsedTime;
-        }
-
-        /** @return Id of the client that started the event */
-        public @NonNull IBinder getClientId() {
-            return mClientId;
-        }
-
-        /** @return uidstate used when calling startOp */
-        public @AppOpsManager.UidState int getUidState() {
-            return mUidState;
-        }
-
-        /** @return proxy tag for the access */
-        public @Nullable OpEventProxyInfo getProxy() {
-            return mProxy;
-        }
-
-        /** @return flags used for the access */
-        public @OpFlags int getFlags() {
-            return mFlags;
-        }
-
-        /** @return attributoin flags used for the access */
-        public @AttributionFlags int getAttributionFlags() {
-            return mAttributionFlags;
-        }
-
-        /** @return attribution chain id for the access */
-        public int getAttributionChainId() {
-            return mAttributionChainId;
-        }
-
-        public void setStartTime(long startTime) {
-            mStartTime = startTime;
-        }
-
-        public void setStartElapsedTime(long startElapsedTime) {
-            mStartElapsedTime = startElapsedTime;
         }
     }
 
@@ -5137,10 +4912,11 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             long maxNumStarts = 0;
             int numInProgressEvents = attributedOp.mInProgressEvents.size();
             for (int i = 0; i < numInProgressEvents; i++) {
-                InProgressStartOpEvent event = attributedOp.mInProgressEvents.valueAt(i);
+                AttributedOp.InProgressStartOpEvent event =
+                        attributedOp.mInProgressEvents.valueAt(i);
 
                 earliestElapsedTime = Math.min(earliestElapsedTime, event.getStartElapsedTime());
-                maxNumStarts = Math.max(maxNumStarts, event.numUnfinishedStarts);
+                maxNumStarts = Math.max(maxNumStarts, event.mNumUnfinishedStarts);
             }
 
             pw.print(prefix + "Running start at: ");
