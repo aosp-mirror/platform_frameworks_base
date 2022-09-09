@@ -26,15 +26,15 @@ private const val MAX_ENTRY_SIZE = 5000
  */
 class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
     // Map of entry unique Id to entry
-    private val entryMap: Map<String, SettingsEntry>
+    private val entryMap: Map<Int, SettingsEntry>
 
     // Map of Settings page to its contained entries.
-    private val pageToEntryListMap: Map<String, List<SettingsEntry>>
+    private val pageWithEntryMap: Map<Int, SettingsPageWithEntry>
 
     init {
         logMsg("Initialize")
         entryMap = mutableMapOf()
-        pageToEntryListMap = mutableMapOf()
+        pageWithEntryMap = mutableMapOf()
 
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
@@ -48,10 +48,10 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         while (entryQueue.isNotEmpty() && entryMap.size < MAX_ENTRY_SIZE) {
             val entry = entryQueue.pop()
             val page = entry.toPage
-            if (page == null || pageToEntryListMap.containsKey(page.toString())) continue
+            if (page == null || pageWithEntryMap.containsKey(page.id)) continue
             val spp = sppRepository.getProviderOrNull(page.name) ?: continue
             val newEntries = spp.buildEntry(page.arguments)
-            pageToEntryListMap[page.toString()] = newEntries
+            pageWithEntryMap[page.id] = SettingsPageWithEntry(page, newEntries)
             for (newEntry in newEntries) {
                 if (!entryMap.containsKey(newEntry.id)) {
                     entryQueue.push(newEntry)
@@ -60,19 +60,23 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
             }
         }
 
-        logMsg("Initialize Completed: ${entryMap.size} entries in ${pageToEntryListMap.size} pages")
+        logMsg("Initialize Completed: ${entryMap.size} entries in ${pageWithEntryMap.size} pages")
     }
 
-    fun printAllPages() {
-        for (entry in pageToEntryListMap.entries) {
-            logMsg("page: ${entry.key} with ${entry.value.size} entries")
-        }
+    fun getAllPageWithEntry(): Collection<SettingsPageWithEntry> {
+        return pageWithEntryMap.values
     }
 
-    fun printAllEntries() {
-        for (entry in entryMap.values) {
-            logMsg("entry: $entry")
-        }
+    fun getPageWithEntry(pageId: Int): SettingsPageWithEntry? {
+        return pageWithEntryMap[pageId]
+    }
+
+    fun getAllEntries(): Collection<SettingsEntry> {
+        return entryMap.values
+    }
+
+    fun getEntry(entryId: Int): SettingsEntry? {
+        return entryMap[entryId]
     }
 }
 

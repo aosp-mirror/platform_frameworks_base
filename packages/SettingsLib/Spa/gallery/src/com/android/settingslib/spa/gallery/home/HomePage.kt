@@ -17,15 +17,12 @@
 package com.android.settingslib.spa.gallery.home
 
 import android.os.Bundle
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
-import com.android.settingslib.spa.gallery.SpaEnvironment
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
@@ -55,17 +52,6 @@ private fun HomePage() {
         SettingsPagerPageProvider.EntryItem()
         FooterPageProvider.EntryItem()
         IllustrationPageProvider.EntryItem()
-
-        /**
-         * A test button to generate hierarchy.
-         * TODO: remove it once the content provider is ready.
-         */
-        Button(onClick = {
-            SpaEnvironment.EntryRepository.printAllPages()
-            SpaEnvironment.EntryRepository.printAllEntries()
-        }) {
-            Text(text = "Generate Entry")
-        }
     }
 }
 
