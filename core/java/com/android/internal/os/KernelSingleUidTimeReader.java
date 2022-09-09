@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-@VisibleForTesting(visibility = PACKAGE)
 public class KernelSingleUidTimeReader {
     private static final String TAG = KernelSingleUidTimeReader.class.getName();
     private static final boolean DBG = false;

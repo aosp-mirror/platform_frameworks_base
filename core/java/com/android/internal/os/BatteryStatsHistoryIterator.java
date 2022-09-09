@@ -34,6 +34,7 @@ public class BatteryStatsHistoryIterator {
             new BatteryStats.HistoryStepDetails();
     private final SparseArray<BatteryStats.HistoryTag> mHistoryTags = new SparseArray<>();
     private BatteryStats.MeasuredEnergyDetails mMeasuredEnergyDetails;
+    private BatteryStats.CpuUsageDetails mCpuUsageDetails;
 
     public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history) {
         mBatteryStatsHistory = history;
@@ -229,9 +230,35 @@ public class BatteryStatsHistoryIterator {
                     mMeasuredEnergyDetails.chargeUC[i] = src.readLong();
                 }
                 cur.measuredEnergyDetails = mMeasuredEnergyDetails;
+            } else {
+                cur.measuredEnergyDetails = null;
+            }
+
+            if ((extensionFlags & BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG) != 0) {
+                mCpuUsageDetails = new BatteryStats.CpuUsageDetails();
+                mCpuUsageDetails.cpuBracketDescriptions = src.readStringArray();
+                mCpuUsageDetails.cpuUsageMs =
+                        new long[mCpuUsageDetails.cpuBracketDescriptions.length];
+            } else if (mCpuUsageDetails != null) {
+                mCpuUsageDetails.cpuBracketDescriptions = null;
+            }
+
+            if ((extensionFlags & BatteryStatsHistory.EXTENSION_CPU_USAGE_FLAG) != 0) {
+                if (mCpuUsageDetails == null) {
+                    throw new IllegalStateException("CpuUsageDetails without a header");
+                }
+
+                mCpuUsageDetails.uid = src.readInt();
+                for (int i = 0; i < mCpuUsageDetails.cpuUsageMs.length; i++) {
+                    mCpuUsageDetails.cpuUsageMs[i] = src.readLong();
+                }
+                cur.cpuUsageDetails = mCpuUsageDetails;
+            } else {
+                cur.cpuUsageDetails = null;
             }
         } else {
             cur.measuredEnergyDetails = null;
+            cur.cpuUsageDetails = null;
         }
     }
 

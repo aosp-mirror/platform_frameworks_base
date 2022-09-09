@@ -270,6 +270,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private final KernelMemoryBandwidthStats mKernelMemoryBandwidthStats
             = new KernelMemoryBandwidthStats();
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
+    private int[] mCpuPowerBracketMap;
+    private final CpuUsageDetails mCpuUsageDetails = new CpuUsageDetails();
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
         return mKernelMemoryStats;
@@ -478,7 +480,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     @SuppressWarnings("GuardedBy")    // errorprone false positive on getProcStateTimeCounter
     @VisibleForTesting
-    public void updateProcStateCpuTimesLocked(int uid, long timestampMs) {
+    public void updateProcStateCpuTimesLocked(int uid, long elapsedRealtimeMs, long uptimeMs) {
         if (!initKernelSingleUidTimeReaderLocked()) {
             return;
         }
@@ -488,12 +490,20 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumSingleUidCpuTimeReads++;
 
         LongArrayMultiStateCounter onBatteryCounter =
-                u.getProcStateTimeCounter(timestampMs).getCounter();
+                u.getProcStateTimeCounter(elapsedRealtimeMs).getCounter();
         LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                u.getProcStateScreenOffTimeCounter(timestampMs).getCounter();
+                u.getProcStateScreenOffTimeCounter(elapsedRealtimeMs).getCounter();
 
-        mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
-        mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter, timestampMs);
+        if (isUsageHistoryEnabled()) {
+            LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
+                    getCpuTimeInFreqContainer();
+            mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, elapsedRealtimeMs,
+                    deltaContainer);
+            recordCpuUsage(uid, deltaContainer, elapsedRealtimeMs, uptimeMs);
+        } else {
+            mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, elapsedRealtimeMs);
+        }
+        mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter, elapsedRealtimeMs);
 
         if (u.mChildUids != null) {
             LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
@@ -504,12 +514,25 @@ public class BatteryStatsImpl extends BatteryStats {
                         u.mChildUids.valueAt(j).cpuTimeInFreqCounter;
                 if (cpuTimeInFreqCounter != null) {
                     mKernelSingleUidTimeReader.addDelta(u.mChildUids.keyAt(j),
-                            cpuTimeInFreqCounter, timestampMs, deltaContainer);
+                            cpuTimeInFreqCounter, elapsedRealtimeMs, deltaContainer);
                     onBatteryCounter.addCounts(deltaContainer);
+                    if (isUsageHistoryEnabled()) {
+                        recordCpuUsage(uid, deltaContainer, elapsedRealtimeMs, uptimeMs);
+                    }
                     onBatteryScreenOffCounter.addCounts(deltaContainer);
                 }
             }
         }
+    }
+
+    private void recordCpuUsage(int uid, LongArrayMultiStateCounter.LongArrayContainer cpuUsage,
+            long elapsedRealtimeMs, long uptimeMs) {
+        if (!cpuUsage.combineValues(mCpuUsageDetails.cpuUsageMs, mCpuPowerBracketMap)) {
+            return;
+        }
+
+        mCpuUsageDetails.uid = uid;
+        mHistory.recordCpuUsage(elapsedRealtimeMs, uptimeMs, mCpuUsageDetails);
     }
 
     /**
@@ -557,16 +580,26 @@ public class BatteryStatsImpl extends BatteryStats {
                     continue;
                 }
 
-                final long timestampMs = mClock.elapsedRealtime();
+                final long elapsedRealtimeMs = mClock.elapsedRealtime();
+                final long uptimeMs = mClock.uptimeMillis();
                 final LongArrayMultiStateCounter onBatteryCounter =
-                        u.getProcStateTimeCounter(timestampMs).getCounter();
+                        u.getProcStateTimeCounter(elapsedRealtimeMs).getCounter();
                 final LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                        u.getProcStateScreenOffTimeCounter(timestampMs).getCounter();
+                        u.getProcStateScreenOffTimeCounter(elapsedRealtimeMs).getCounter();
 
                 if (uid == parentUid || Process.isSdkSandboxUid(uid)) {
-                    mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter, timestampMs);
+                    if (isUsageHistoryEnabled()) {
+                        LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
+                                getCpuTimeInFreqContainer();
+                        mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter,
+                                elapsedRealtimeMs, deltaContainer);
+                        recordCpuUsage(parentUid, deltaContainer, elapsedRealtimeMs, uptimeMs);
+                    } else {
+                        mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter,
+                                elapsedRealtimeMs);
+                    }
                     mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryScreenOffCounter,
-                            timestampMs);
+                            elapsedRealtimeMs);
                 } else {
                     Uid.ChildUid childUid = u.getChildUid(uid);
                     if (childUid != null) {
@@ -574,26 +607,18 @@ public class BatteryStatsImpl extends BatteryStats {
                         if (counter != null) {
                             final LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
                                     getCpuTimeInFreqContainer();
-                            mKernelSingleUidTimeReader.addDelta(uid, counter, timestampMs,
+                            mKernelSingleUidTimeReader.addDelta(uid, counter, elapsedRealtimeMs,
                                     deltaContainer);
                             onBatteryCounter.addCounts(deltaContainer);
+                            if (isUsageHistoryEnabled()) {
+                                recordCpuUsage(uid, deltaContainer, elapsedRealtimeMs, uptimeMs);
+                            }
                             onBatteryScreenOffCounter.addCounts(deltaContainer);
                         }
                     }
                 }
             }
         }
-    }
-
-    @VisibleForTesting
-    public static long[] addCpuTimes(long[] timesA, long[] timesB) {
-        if (timesA != null && timesB != null) {
-            for (int i = timesA.length - 1; i >= 0; --i) {
-                timesA[i] += timesB[i];
-            }
-            return timesA;
-        }
-        return timesA == null ? (timesB == null ? null : timesB) : timesA;
     }
 
     @GuardedBy("this")
@@ -7411,8 +7436,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void recordMeasuredEnergyDetailsLocked(long elapsedRealtimeMs,
             long uptimeMs, MeasuredEnergyDetails measuredEnergyDetails) {
-        mHistory.recordMeasuredEnergyDetails(elapsedRealtimeMs, uptimeMs,
-                measuredEnergyDetails);
+        if (isUsageHistoryEnabled()) {
+            mHistory.recordMeasuredEnergyDetails(elapsedRealtimeMs, uptimeMs,
+                    measuredEnergyDetails);
+        }
     }
 
     @GuardedBy("this")
@@ -10274,7 +10301,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
 
                 if (mBsi.trackPerProcStateCpuTimes()) {
-                    mBsi.updateProcStateCpuTimesLocked(mUid, elapsedRealtimeMs);
+                    mBsi.updateProcStateCpuTimesLocked(mUid, elapsedRealtimeMs, uptimeMs);
 
                     LongArrayMultiStateCounter onBatteryCounter =
                             getProcStateTimeCounter(elapsedRealtimeMs).getCounter();
@@ -10773,6 +10800,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mBatteryLevel = 0;
     }
 
+    /**
+     * Injects a power profile.
+     */
+    @GuardedBy("this")
     public void setPowerProfileLocked(PowerProfile profile) {
         mPowerProfile = profile;
 
@@ -10787,6 +10818,27 @@ public class BatteryStatsImpl extends BatteryStats {
             mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
                     numSpeedSteps);
             firstCpuOfCluster += mPowerProfile.getNumCoresInCpuCluster(i);
+        }
+
+        // Initialize CPU power bracket map, which combines CPU states (cluster/freq pairs)
+        // into a small number of brackets
+        mCpuPowerBracketMap = new int[getCpuFreqCount()];
+        int index = 0;
+        int numCpuClusters = mPowerProfile.getNumCpuClusters();
+        for (int cluster = 0; cluster < numCpuClusters; cluster++) {
+            int steps = mPowerProfile.getNumSpeedStepsInCpuCluster(cluster);
+            for (int step = 0; step < steps; step++) {
+                mCpuPowerBracketMap[index++] =
+                        mPowerProfile.getPowerBracketForCpuCore(cluster, step);
+            }
+        }
+
+        int cpuPowerBracketCount = mPowerProfile.getCpuPowerBracketCount();
+        mCpuUsageDetails.cpuBracketDescriptions = new String[cpuPowerBracketCount];
+        mCpuUsageDetails.cpuUsageMs = new long[cpuPowerBracketCount];
+        for (int i = 0; i < cpuPowerBracketCount; i++) {
+            mCpuUsageDetails.cpuBracketDescriptions[i] =
+                    mPowerProfile.getCpuPowerBracketDescription(i);
         }
 
         if (mEstimatedBatteryCapacityMah == -1) {
@@ -14620,8 +14672,13 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public boolean trackPerProcStateCpuTimes() {
+    private boolean trackPerProcStateCpuTimes() {
         return mCpuUidFreqTimeReader.isFastCpuTimesReader();
+    }
+
+    @GuardedBy("this")
+    private boolean isUsageHistoryEnabled() {
+        return false;
     }
 
     @GuardedBy("this")
