@@ -23,7 +23,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_PERMISSION_GR
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
@@ -1420,9 +1419,7 @@ final class InstallPackageHelper {
         }
 
         if (!isApex) {
-            if (!doRenameLI(args, res.mReturnCode, parsedPackage)) {
-                throw new PrepareFailure(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
-            }
+            doRenameLI(args, res.mReturnCode, res.mReturnMsg, parsedPackage);
 
             try {
                 setUpFsVerityIfPossible(parsedPackage);
@@ -1689,19 +1686,20 @@ final class InstallPackageHelper {
      * scanned package should be updated to reflect the rename.
      */
     @GuardedBy("mPm.mInstallLock")
-    private boolean doRenameLI(InstallArgs args, int status, ParsedPackage parsedPackage) {
+    private void doRenameLI(InstallArgs args, int status, String statusMsg,
+            ParsedPackage parsedPackage) throws PrepareFailure {
         if (args.mMoveInfo != null) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 mRemovePackageHelper.cleanUpForMoveInstall(args.mMoveInfo.mToUuid,
                         args.mMoveInfo.mPackageName, args.mMoveInfo.mFromCodePath);
-                return false;
+                throw new PrepareFailure(status, statusMsg);
             }
-            return true;
+            return;
         }
         // For file installations
         if (status != PackageManager.INSTALL_SUCCEEDED) {
             mRemovePackageHelper.removeCodePath(args.mCodeFile);
-            return false;
+            throw new PrepareFailure(status, statusMsg);
         }
 
         final File targetDir = resolveTargetDir(args);
@@ -1723,12 +1721,14 @@ final class InstallPackageHelper {
             }
         } catch (IOException | ErrnoException e) {
             Slog.w(TAG, "Failed to rename", e);
-            return false;
+            throw new PrepareFailure(PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                    "Failed to rename");
         }
 
         if (!onIncremental && !SELinux.restoreconRecursive(afterCodeFile)) {
             Slog.w(TAG, "Failed to restorecon");
-            return false;
+            throw new PrepareFailure(PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failed to restorecon");
         }
 
         // Reflect the rename internally
@@ -1739,14 +1739,13 @@ final class InstallPackageHelper {
             parsedPackage.setPath(afterCodeFile.getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Failed to get path: " + afterCodeFile, e);
-            return false;
+            throw new PrepareFailure(PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failed to get path: " + afterCodeFile);
         }
         parsedPackage.setBaseApkPath(FileUtils.rewriteAfterRename(beforeCodeFile,
                 afterCodeFile, parsedPackage.getBaseApkPath()));
         parsedPackage.setSplitCodePaths(FileUtils.rewriteAfterRename(beforeCodeFile,
                 afterCodeFile, parsedPackage.getSplitCodePaths()));
-
-        return true;
     }
 
     // TODO(b/168126411): Once staged install flow starts using the same folder as non-staged
