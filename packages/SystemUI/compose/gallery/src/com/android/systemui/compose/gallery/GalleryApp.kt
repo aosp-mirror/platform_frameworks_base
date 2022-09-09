@@ -28,31 +28,77 @@ import com.android.systemui.compose.theme.SystemUITheme
 
 /** The gallery app screens. */
 object GalleryAppScreens {
-    val Typography = ChildScreen("typography") { TypographyScreen() }
-    val MaterialColors = ChildScreen("material_colors") { MaterialColorsScreen() }
-    val AndroidColors = ChildScreen("android_colors") { AndroidColorsScreen() }
-    val Buttons = ChildScreen("buttons") { ButtonsScreen() }
-    val ExampleFeature = ChildScreen("example_feature") { ExampleFeatureScreen() }
+    private val Typography = ChildScreen("typography") { TypographyScreen() }
+    private val MaterialColors = ChildScreen("material_colors") { MaterialColorsScreen() }
+    private val AndroidColors = ChildScreen("android_colors") { AndroidColorsScreen() }
+    private val Buttons = ChildScreen("buttons") { ButtonsScreen() }
+    private val ExampleFeature = ChildScreen("example_feature") { ExampleFeatureScreen() }
 
-    val PeopleEmpty =
+    private val PeopleEmpty =
         ChildScreen("people_empty") { navController ->
             EmptyPeopleScreen(onResult = { navController.popBackStack() })
         }
-    val PeopleFew =
+    private val PeopleFew =
         ChildScreen("people_few") { navController ->
             FewPeopleScreen(onResult = { navController.popBackStack() })
         }
-    val PeopleFull =
+    private val PeopleFull =
         ChildScreen("people_full") { navController ->
             FullPeopleScreen(onResult = { navController.popBackStack() })
         }
-    val People =
+    private val People =
         ParentScreen(
             "people",
             mapOf(
                 "Empty" to PeopleEmpty,
                 "Few" to PeopleFew,
                 "Full" to PeopleFull,
+            )
+        )
+    private val UserSwitcherSingleUser =
+        ChildScreen("user_switcher_single") { navController ->
+            UserSwitcherScreen(
+                userCount = 1,
+                onFinished = navController::popBackStack,
+            )
+        }
+    private val UserSwitcherThreeUsers =
+        ChildScreen("user_switcher_three") { navController ->
+            UserSwitcherScreen(
+                userCount = 3,
+                onFinished = navController::popBackStack,
+            )
+        }
+    private val UserSwitcherFourUsers =
+        ChildScreen("user_switcher_four") { navController ->
+            UserSwitcherScreen(
+                userCount = 4,
+                onFinished = navController::popBackStack,
+            )
+        }
+    private val UserSwitcherFiveUsers =
+        ChildScreen("user_switcher_five") { navController ->
+            UserSwitcherScreen(
+                userCount = 5,
+                onFinished = navController::popBackStack,
+            )
+        }
+    private val UserSwitcherSixUsers =
+        ChildScreen("user_switcher_six") { navController ->
+            UserSwitcherScreen(
+                userCount = 6,
+                onFinished = navController::popBackStack,
+            )
+        }
+    private val UserSwitcher =
+        ParentScreen(
+            "user_switcher",
+            mapOf(
+                "Single" to UserSwitcherSingleUser,
+                "Three" to UserSwitcherThreeUsers,
+                "Four" to UserSwitcherFourUsers,
+                "Five" to UserSwitcherFiveUsers,
+                "Six" to UserSwitcherSixUsers,
             )
         )
 
@@ -66,6 +112,7 @@ object GalleryAppScreens {
                 "Example feature" to ExampleFeature,
                 "Buttons" to Buttons,
                 "People" to People,
+                "User Switcher" to UserSwitcher,
             )
         )
 }
