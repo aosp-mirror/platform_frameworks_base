@@ -20,6 +20,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.doze.DozeHost
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -102,6 +104,7 @@ class KeyguardRepositoryImpl
 constructor(
     statusBarStateController: StatusBarStateController,
     keyguardStateController: KeyguardStateController,
+    dozeHost: DozeHost,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -136,19 +139,21 @@ constructor(
         awaitClose { keyguardStateController.removeCallback(callback) }
     }
 
-    override val isDozing: Flow<Boolean> = conflatedCallbackFlow {
-        val callback =
-            object : StatusBarStateController.StateListener {
-                override fun onDozingChanged(isDozing: Boolean) {
-                    trySendWithFailureLogging(isDozing, TAG, "updated isDozing")
-                }
+    override val isDozing: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : DozeHost.Callback {
+                        override fun onDozingChanged(isDozing: Boolean) {
+                            trySendWithFailureLogging(isDozing, TAG, "updated isDozing")
+                        }
+                    }
+                dozeHost.addCallback(callback)
+                trySendWithFailureLogging(false, TAG, "initial isDozing: false")
+
+                awaitClose { dozeHost.removeCallback(callback) }
             }
+            .distinctUntilChanged()
 
-        statusBarStateController.addCallback(callback)
-        trySendWithFailureLogging(statusBarStateController.isDozing, TAG, "initial isDozing")
-
-        awaitClose { statusBarStateController.removeCallback(callback) }
-    }
     override val dozeAmount: Flow<Float> = conflatedCallbackFlow {
         val callback =
             object : StatusBarStateController.StateListener {
