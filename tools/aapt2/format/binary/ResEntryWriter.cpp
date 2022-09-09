@@ -24,11 +24,6 @@
 
 namespace aapt {
 
-using android::BigBuffer;
-using android::Res_value;
-using android::ResTable_entry;
-using android::ResTable_map;
-
 struct less_style_entries {
   bool operator()(const Style::Entry* a, const Style::Entry* b) const {
     if (a->key.id) {
@@ -189,26 +184,40 @@ class MapFlattenVisitor : public ConstValueVisitor {
 };
 
 template <typename T>
-void WriteEntry(const FlatEntry* entry, T* out_result) {
+void WriteEntry(const FlatEntry* entry, T* out_result, bool compact = false) {
   static_assert(std::is_same_v<ResTable_entry, T> || std::is_same_v<ResTable_entry_ext, T>,
                 "T must be ResTable_entry or ResTable_entry_ext");
 
   ResTable_entry* out_entry = (ResTable_entry*)out_result;
+  uint16_t flags = 0;
+
   if (entry->entry->visibility.level == Visibility::Level::kPublic) {
-    out_entry->flags |= ResTable_entry::FLAG_PUBLIC;
+    flags |= ResTable_entry::FLAG_PUBLIC;
   }
 
   if (entry->value->IsWeak()) {
-    out_entry->flags |= ResTable_entry::FLAG_WEAK;
+    flags |= ResTable_entry::FLAG_WEAK;
   }
 
   if constexpr (std::is_same_v<ResTable_entry_ext, T>) {
-    out_entry->flags |= ResTable_entry::FLAG_COMPLEX;
+    flags |= ResTable_entry::FLAG_COMPLEX;
   }
 
-  out_entry->flags = android::util::HostToDevice16(out_entry->flags);
-  out_entry->key.index = android::util::HostToDevice32(entry->entry_key);
-  out_entry->size = android::util::HostToDevice16(sizeof(T));
+  if (!compact) {
+    out_entry->full.flags = android::util::HostToDevice16(flags);
+    out_entry->full.key.index = android::util::HostToDevice32(entry->entry_key);
+    out_entry->full.size = android::util::HostToDevice16(sizeof(T));
+  } else {
+    Res_value value;
+    CHECK(entry->entry_key < 0xffffu) << "cannot encode key in 16-bit";
+    CHECK(compact && (std::is_same_v<ResTable_entry, T>)) << "cannot encode complex entry";
+    CHECK(ValueCast<Item>(entry->value)->Flatten(&value)) << "flatten failed";
+
+    flags |= ResTable_entry::FLAG_COMPACT | (value.dataType << 8);
+    out_entry->compact.flags = android::util::HostToDevice16(flags);
+    out_entry->compact.key = android::util::HostToDevice16(entry->entry_key);
+    out_entry->compact.data = value.data;
+  }
 }
 
 int32_t WriteMapToBuffer(const FlatEntry* map_entry, BigBuffer* buffer) {
@@ -222,57 +231,26 @@ int32_t WriteMapToBuffer(const FlatEntry* map_entry, BigBuffer* buffer) {
   return offset;
 }
 
-void WriteItemToPair(const FlatEntry* item_entry, ResEntryValuePair* out_pair) {
-  static_assert(sizeof(ResEntryValuePair) == sizeof(ResTable_entry) + sizeof(Res_value),
-                "ResEntryValuePair must not have padding between entry and value.");
+template <bool compact_entry, typename T>
+std::pair<int32_t, T*> WriteItemToBuffer(const FlatEntry* item_entry, BigBuffer* buffer) {
+  int32_t offset = buffer->size();
+  T* out_entry = buffer->NextBlock<T>();
 
-  WriteEntry<ResTable_entry>(item_entry, &out_pair->entry);
-
-  CHECK(ValueCast<Item>(item_entry->value)->Flatten(&out_pair->value)) << "flatten failed";
-  out_pair->value.size = android::util::HostToDevice16(sizeof(out_pair->value));
-}
-
-int32_t SequentialResEntryWriter::WriteMap(const FlatEntry* entry) {
-  return WriteMapToBuffer(entry, entries_buffer_);
-}
-
-int32_t SequentialResEntryWriter::WriteItem(const FlatEntry* entry) {
-  int32_t offset = entries_buffer_->size();
-  auto* out_pair = entries_buffer_->NextBlock<ResEntryValuePair>();
-  WriteItemToPair(entry, out_pair);
-  return offset;
-}
-
-std::size_t ResEntryValuePairContentHasher::operator()(const ResEntryValuePairRef& ref) const {
-  return android::JenkinsHashMixBytes(0, ref.ptr, sizeof(ResEntryValuePair));
-}
-
-bool ResEntryValuePairContentEqualTo::operator()(const ResEntryValuePairRef& a,
-                                                 const ResEntryValuePairRef& b) const {
-  return std::memcmp(a.ptr, b.ptr, sizeof(ResEntryValuePair)) == 0;
-}
-
-int32_t DeduplicateItemsResEntryWriter::WriteMap(const FlatEntry* entry) {
-  return WriteMapToBuffer(entry, entries_buffer_);
-}
-
-int32_t DeduplicateItemsResEntryWriter::WriteItem(const FlatEntry* entry) {
-  int32_t initial_offset = entries_buffer_->size();
-
-  auto* out_pair = entries_buffer_->NextBlock<ResEntryValuePair>();
-  WriteItemToPair(entry, out_pair);
-
-  auto ref = ResEntryValuePairRef{*out_pair};
-  auto [it, inserted] = entry_offsets.insert({ref, initial_offset});
-  if (inserted) {
-    // If inserted just return a new offset as this is a first time we store
-    // this entry.
-    return initial_offset;
+  if constexpr (compact_entry) {
+    WriteEntry(item_entry, out_entry, true);
+  } else {
+    WriteEntry(item_entry, &out_entry->entry);
+    CHECK(ValueCast<Item>(item_entry->value)->Flatten(&out_entry->value)) << "flatten failed";
+    out_entry->value.size = android::util::HostToDevice16(sizeof(out_entry->value));
   }
-  // If not inserted this means that this is a duplicate, backup allocated block to the buffer
-  // and return offset of previously stored entry.
-  entries_buffer_->BackUp(sizeof(ResEntryValuePair));
-  return it->second;
+  return {offset, out_entry};
 }
+
+// explicitly specialize both versions
+template std::pair<int32_t, ResEntryValue<false>*> WriteItemToBuffer<false>(
+        const FlatEntry* item_entry, BigBuffer* buffer);
+
+template std::pair<int32_t, ResEntryValue<true>*> WriteItemToBuffer<true>(
+        const FlatEntry* item_entry, BigBuffer* buffer);
 
 }  // namespace aapt

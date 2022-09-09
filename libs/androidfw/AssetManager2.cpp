@@ -43,28 +43,19 @@ namespace {
 
 using EntryValue = std::variant<Res_value, incfs::verified_map_ptr<ResTable_map_entry>>;
 
+/* NOTE: table_entry has been verified in LoadedPackage::GetEntryFromOffset(),
+ * and so access to ->value() and ->map_entry() are safe here
+ */
 base::expected<EntryValue, IOError> GetEntryValue(
     incfs::verified_map_ptr<ResTable_entry> table_entry) {
-  const uint16_t entry_size = dtohs(table_entry->size);
+  const uint16_t entry_size = table_entry->size();
 
   // Check if the entry represents a bag value.
-  if (entry_size >= sizeof(ResTable_map_entry) &&
-      (dtohs(table_entry->flags) & ResTable_entry::FLAG_COMPLEX)) {
-    const auto map_entry = table_entry.convert<ResTable_map_entry>();
-    if (!map_entry) {
-      return base::unexpected(IOError::PAGES_MISSING);
-    }
-    return map_entry.verified();
+  if (entry_size >= sizeof(ResTable_map_entry) && table_entry->is_complex()) {
+    return table_entry.convert<ResTable_map_entry>().verified();
   }
 
-  // The entry represents a non-bag value.
-  const auto entry_value = table_entry.offset(entry_size).convert<Res_value>();
-  if (!entry_value) {
-    return base::unexpected(IOError::PAGES_MISSING);
-  }
-  Res_value value;
-  value.copyFrom_dtoh(entry_value.value());
-  return value;
+  return table_entry->value();
 }
 
 } // namespace
@@ -814,17 +805,12 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
     return base::unexpected(std::nullopt);
   }
 
-  auto best_entry_result = LoadedPackage::GetEntryFromOffset(best_type, best_offset);
-  if (!best_entry_result.has_value()) {
-    return base::unexpected(best_entry_result.error());
+  auto best_entry_verified = LoadedPackage::GetEntryFromOffset(best_type, best_offset);
+  if (!best_entry_verified.has_value()) {
+    return base::unexpected(best_entry_verified.error());
   }
 
-  const incfs::map_ptr<ResTable_entry> best_entry = *best_entry_result;
-  if (!best_entry) {
-    return base::unexpected(IOError::PAGES_MISSING);
-  }
-
-  const auto entry = GetEntryValue(best_entry.verified());
+  const auto entry = GetEntryValue(*best_entry_verified);
   if (!entry.has_value()) {
     return base::unexpected(entry.error());
   }
@@ -837,7 +823,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
     .package_name = &best_package->GetPackageName(),
     .type_string_ref = StringPoolRef(best_package->GetTypeStringPool(), best_type->id - 1),
     .entry_string_ref = StringPoolRef(best_package->GetKeyStringPool(),
-                                      best_entry->key.index),
+                                      (*best_entry_verified)->key()),
     .dynamic_ref_table = package_group.dynamic_ref_table.get(),
   };
 }

@@ -159,6 +159,9 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--enable-sparse-encoding",
                       "This decreases APK size at the cost of resource retrieval performance.",
                       &options_.use_sparse_encoding);
+    AddOptionalSwitch("--enable-compact-entries",
+        "This decreases APK size by using compact resource entries for simple data types.",
+        &options_.table_flattener_options.use_compact_entries);
     AddOptionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01.",
         &legacy_x_flag_);
     AddOptionalSwitch("-z", "Require localization of strings marked 'suggested'.",
