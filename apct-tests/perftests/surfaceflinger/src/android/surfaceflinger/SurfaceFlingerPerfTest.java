@@ -18,8 +18,8 @@ package android.surfaceflinger;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -29,6 +29,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -40,65 +41,35 @@ import java.util.Random;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class SurfaceFlingerPerfTest {
-    protected ActivityScenarioRule<SurfaceFlingerTestActivity> mActivityRule =
+    private static final String TAG = "SurfaceFlingerPerfTest";
+    private final ActivityScenarioRule<SurfaceFlingerTestActivity> mActivityRule =
             new ActivityScenarioRule<>(SurfaceFlingerTestActivity.class);
-    protected PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     private SurfaceFlingerTestActivity mActivity;
-    static final int BUFFER_COUNT = 2;
+    private static final int BUFFER_COUNT = 2;
+    private static final int MAX_BUFFERS = 10;
+    private static final int MAX_POSITION = 10;
+    private static final float MAX_SCALE = 2.0f;
+
+    private static final String ARGUMENT_PROFILING_ITERATIONS = "profiling-iterations";
+    private static final String DEFAULT_PROFILING_ITERATIONS = "100";
+    private static int sProfilingIterations;
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     @Rule
     public final RuleChain mAllRules = RuleChain
-            .outerRule(mPerfStatusReporter)
-            .around(mActivityRule);
+            .outerRule(mActivityRule);
+
+    @BeforeClass
+    public static void suiteSetup() {
+        final Bundle arguments = InstrumentationRegistry.getArguments();
+        sProfilingIterations = Integer.parseInt(
+                arguments.getString(ARGUMENT_PROFILING_ITERATIONS, DEFAULT_PROFILING_ITERATIONS));
+        Log.d(TAG, "suiteSetup: mProfilingIterations = " + sProfilingIterations);
+    }
+
     @Before
     public void setup() {
         mActivityRule.getScenario().onActivity(activity -> mActivity = activity);
-    }
-
-    @After
-    public void teardown() {
-        mSurfaceControls.forEach(SurfaceControl::release);
-        mByfferTrackers.forEach(BufferFlinger::freeBuffers);
-    }
-
-
-    private ArrayList<BufferFlinger> mByfferTrackers = new ArrayList<>();
-    private BufferFlinger createBufferTracker(int color) {
-        BufferFlinger bufferTracker = new BufferFlinger(BUFFER_COUNT, color);
-        mByfferTrackers.add(bufferTracker);
-        return bufferTracker;
-    }
-
-    private ArrayList<SurfaceControl> mSurfaceControls = new ArrayList<>();
-    private SurfaceControl createSurfaceControl() throws InterruptedException {
-        SurfaceControl sc = mActivity.createChildSurfaceControl();
-        mSurfaceControls.add(sc);
-        return sc;
-    }
-
-    @Test
-    public void singleBuffer() throws Exception {
-        SurfaceControl sc = createSurfaceControl();
-        BufferFlinger bufferTracker = createBufferTracker(Color.GREEN);
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        bufferTracker.addBuffer(t, sc);
-        t.show(sc);
-
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            bufferTracker.addBuffer(t, sc);
-            t.apply();
-        }
-    }
-
-    static int getRandomColorComponent() {
-        return new Random().nextInt(155) + 100;
-    }
-
-    @Test
-    public void multipleBuffers() throws Exception {
-        final int MAX_BUFFERS = 10;
-
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         for (int i = 0; i < MAX_BUFFERS; i++) {
             SurfaceControl sc = createSurfaceControl();
@@ -107,122 +78,120 @@ public class SurfaceFlingerPerfTest {
                     getRandomColorComponent()));
             bufferTracker.addBuffer(t, sc);
             t.setPosition(sc, i * 10, i * 10);
-            t.show(sc);
         }
         t.apply(true);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+    }
+
+    @After
+    public void teardown() {
+        mSurfaceControls.forEach(SurfaceControl::release);
+        mBufferTrackers.forEach(BufferFlinger::freeBuffers);
+    }
+
+    static int getRandomColorComponent() {
+        return new Random().nextInt(155) + 100;
+    }
+
+    private final ArrayList<BufferFlinger> mBufferTrackers = new ArrayList<>();
+    private BufferFlinger createBufferTracker(int color) {
+        BufferFlinger bufferTracker = new BufferFlinger(BUFFER_COUNT, color);
+        mBufferTrackers.add(bufferTracker);
+        return bufferTracker;
+    }
+
+    private final ArrayList<SurfaceControl> mSurfaceControls = new ArrayList<>();
+    private SurfaceControl createSurfaceControl() {
+        SurfaceControl sc = mActivity.createChildSurfaceControl();
+        mSurfaceControls.add(sc);
+        return sc;
+    }
+
+    @Test
+    public void singleBuffer() throws Exception {
+        for (int i = 0; i < sProfilingIterations; i++) {
+            mBufferTrackers.get(0).addBuffer(mTransaction, mSurfaceControls.get(0));
+            mTransaction.show(mSurfaceControls.get(0)).apply(true);
+        }
+    }
+
+    @Test
+    public void multipleBuffers() throws Exception {
+        for (int j = 0; j < sProfilingIterations; j++) {
             for (int i = 0; i < MAX_BUFFERS; i++) {
-                mByfferTrackers.get(i).addBuffer(t, mSurfaceControls.get(i));
+                mBufferTrackers.get(i).addBuffer(mTransaction, mSurfaceControls.get(i));
+                mTransaction.show(mSurfaceControls.get(i));
             }
-            t.apply();
+            mTransaction.apply(true);
         }
     }
 
     @Test
     public void multipleOpaqueBuffers() throws Exception {
-        final int MAX_BUFFERS = 10;
-
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        for (int i = 0; i < MAX_BUFFERS; i++) {
-            SurfaceControl sc = createSurfaceControl();
-            BufferFlinger bufferTracker = createBufferTracker(Color.rgb(getRandomColorComponent(),
-                    getRandomColorComponent(), getRandomColorComponent()));
-            bufferTracker.addBuffer(t, sc);
-            t.setOpaque(sc, true);
-            t.setPosition(sc, i * 10, i * 10);
-            t.show(sc);
-        }
-        t.apply(true);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        for (int j = 0; j < sProfilingIterations; j++) {
             for (int i = 0; i < MAX_BUFFERS; i++) {
-                mByfferTrackers.get(i).addBuffer(t, mSurfaceControls.get(i));
+                mBufferTrackers.get(i).addBuffer(mTransaction, mSurfaceControls.get(i));
+                mTransaction.show(mSurfaceControls.get(i)).setOpaque(mSurfaceControls.get(i), true);
             }
-            t.apply();
+            mTransaction.apply(true);
         }
     }
 
     @Test
     public void geometryChanges() throws Exception {
-        final int MAX_POSITION = 10;
-        final float MAX_SCALE = 2.0f;
-
-        SurfaceControl sc = createSurfaceControl();
-        BufferFlinger bufferTracker = createBufferTracker(Color.GREEN);
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        bufferTracker.addBuffer(t, sc);
-        t.show(sc).apply(true);
-
         int step = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        for (int i = 0; i < sProfilingIterations; i++) {
             step = ++step % MAX_POSITION;
-            t.setPosition(sc, step, step);
+            mTransaction.setPosition(mSurfaceControls.get(0), step, step);
             float scale = ((step * MAX_SCALE) / MAX_POSITION) + 0.5f;
-            t.setScale(sc, scale, scale);
-            t.apply();
+            mTransaction.setScale(mSurfaceControls.get(0), scale, scale);
+            mTransaction.show(mSurfaceControls.get(0)).apply(true);
         }
     }
 
     @Test
     public void geometryWithBufferChanges() throws Exception {
-        final int MAX_POSITION = 10;
-
-        SurfaceControl sc = createSurfaceControl();
-        BufferFlinger bufferTracker = createBufferTracker(Color.GREEN);
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        bufferTracker.addBuffer(t, sc);
-        t.show(sc).apply(true);
-
         int step = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        for (int i = 0; i < sProfilingIterations; i++) {
             step = ++step % MAX_POSITION;
-            t.setPosition(sc, step, step);
-            float scale = ((step * 2.0f) / MAX_POSITION) + 0.5f;
-            t.setScale(sc, scale, scale);
-            bufferTracker.addBuffer(t, sc);
-            t.apply();
+            mTransaction.setPosition(mSurfaceControls.get(0), step, step);
+            float scale = ((step * MAX_SCALE) / MAX_POSITION) + 0.5f;
+            mTransaction.setScale(mSurfaceControls.get(0), scale, scale);
+            mBufferTrackers.get(0).addBuffer(mTransaction, mSurfaceControls.get(0));
+            mTransaction.show(mSurfaceControls.get(0)).apply(true);
         }
     }
 
     @Test
     public void addRemoveLayers() throws Exception {
-        SurfaceControl sc = createSurfaceControl();
-        BufferFlinger bufferTracker = createBufferTracker(Color.GREEN);
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        for (int i = 0; i < sProfilingIterations; i++) {
             SurfaceControl childSurfaceControl =  new SurfaceControl.Builder()
                     .setName("childLayer").setBLASTLayer().build();
-            bufferTracker.addBuffer(t, childSurfaceControl);
-            t.reparent(childSurfaceControl, sc);
-            t.apply();
-            t.remove(childSurfaceControl).apply();
+            mBufferTrackers.get(0).addBuffer(mTransaction, childSurfaceControl);
+            mTransaction.reparent(childSurfaceControl, mSurfaceControls.get(0));
+            mTransaction.show(childSurfaceControl).show(mSurfaceControls.get(0));
+            mTransaction.apply(true);
+            mTransaction.remove(childSurfaceControl).apply(true);
         }
     }
 
     @Test
     public void displayScreenshot() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        for (int i = 0; i < sProfilingIterations; i++) {
             Bitmap screenshot =
                     InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
             screenshot.recycle();
+            mTransaction.apply(true);
         }
     }
 
     @Test
     public void layerScreenshot() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        for (int i = 0; i < sProfilingIterations; i++) {
             Bitmap screenshot =
                     InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot(
                             mActivity.getWindow());
             screenshot.recycle();
+            mTransaction.apply(true);
         }
     }
-
 }
