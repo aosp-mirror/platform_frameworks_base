@@ -119,6 +119,7 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -1562,6 +1563,11 @@ public class CentralSurfacesImpl extends CoreStartable implements
     @Override
     public ViewGroup getBouncerContainer() {
         return mNotificationShadeWindowViewController.getBouncerContainer();
+    }
+
+    @Override
+    public AuthKeyguardMessageArea getKeyguardMessageArea() {
+        return mNotificationShadeWindowViewController.getKeyguardMessageArea();
     }
 
     @Override

@@ -27,6 +27,7 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width">
+<include layout="@layout/keyguard_bouncer_message_area"/>
 
 <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pin_container"
@@ -188,8 +189,6 @@
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
     <include layout="@layout/keyguard_eca"
              android:id="@+id/keyguard_selector_fade_container"

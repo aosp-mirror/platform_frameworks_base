@@ -44,7 +44,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardMessageArea;
+import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -122,7 +122,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final DreamOverlayStateController mDreamOverlayStateController;
     @Nullable
     private final FoldAodAnimationController mFoldAodAnimationController;
-    private KeyguardMessageAreaController mKeyguardMessageAreaController;
+    private KeyguardMessageAreaController<AuthKeyguardMessageArea> mKeyguardMessageAreaController;
     private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
 
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
@@ -311,7 +311,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
         mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
-            KeyguardMessageArea.findSecurityMessageDisplay(container));
+                centralSurfaces.getKeyguardMessageArea());
 
         registerListeners();
     }
@@ -616,7 +616,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private void updateAlternateAuthShowing(boolean updateScrim) {
         final boolean isShowingAltAuth = isShowingAlternateAuth();
         if (mKeyguardMessageAreaController != null) {
-            mKeyguardMessageAreaController.setAltBouncerShowing(isShowingAltAuth);
+            mKeyguardMessageAreaController.setIsVisible(isShowingAltAuth);
+            mKeyguardMessageAreaController.setMessage("");
         }
         mBypassController.setAltBouncerShowing(isShowingAltAuth);
         mKeyguardUpdateManager.setUdfpsBouncerShowing(isShowingAltAuth);
@@ -1042,7 +1043,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
             mNotificationShadeWindowController.setBouncerShowing(bouncerShowing);
             mCentralSurfaces.setBouncerShowing(bouncerShowing);
-            mKeyguardMessageAreaController.setBouncerShowing(bouncerShowing);
         }
 
         if (occluded != mLastOccluded || mFirstUpdate) {
@@ -1191,7 +1191,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    public void showBouncerMessage(String message, ColorStateList colorState) {
+    /** Display security message to relevant KeyguardMessageArea. */
+    public void setKeyguardMessage(String message, ColorStateList colorState) {
         if (isShowingAlternateAuth()) {
             if (mKeyguardMessageAreaController != null) {
                 mKeyguardMessageAreaController.setMessage(message);
