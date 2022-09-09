@@ -69,6 +69,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         val controlsController = mock<ControlsController>()
         whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
         whenever(component.getControlsListingController()).thenReturn(Optional.empty())
+        whenever(component.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
 
         val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
@@ -87,6 +88,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         val controlsController = mock<ControlsController>()
         whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
         whenever(component.getControlsListingController()).thenReturn(Optional.empty())
+        whenever(component.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
 
         val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
