@@ -213,8 +213,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
 
         // Check freeform group entries
-        assertEquals(t1, freeformGroup.getAllTaskInfos().get(0));
-        assertEquals(t3, freeformGroup.getAllTaskInfos().get(1));
+        assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
+        assertEquals(t3, freeformGroup.getTaskInfoList().get(1));
 
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());
