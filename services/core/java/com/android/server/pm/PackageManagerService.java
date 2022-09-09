@@ -18181,6 +18181,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final String packageName = versionedPackage.getPackageName();
         final long versionCode = versionedPackage.getLongVersionCode();
+
+        if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+            mHandler.post(() -> {
+                try {
+                    Slog.w(TAG, "Attempted to delete protected package: " + packageName);
+                    observer.onPackageDeleted(packageName,
+                            PackageManager.DELETE_FAILED_INTERNAL_ERROR, null);
+                } catch (RemoteException re) {
+                }
+            });
+            return;
+        }
+
+
         final String internalPackageName;
         synchronized (mLock) {
             // Normalize package name to handle renamed packages and static libs
