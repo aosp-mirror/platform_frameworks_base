@@ -12890,7 +12890,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mViewTranslationCallback != null) {
             mViewTranslationCallback.onClearTranslation(this);
         }
-        clearViewTranslationCallback();
         clearViewTranslationResponse();
         if (hasTranslationTransientState()) {
             setHasTransientState(false);
