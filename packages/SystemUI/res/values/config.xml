@@ -630,11 +630,15 @@
 
     <!-- This value is used when calculating whether the device is in ambient light mode. It is
         light mode when the light sensor sample value exceeds above this value. -->
-    <integer name="config_ambientLightModeThreshold">10</integer>
+    <item name="config_ambientLightModeThreshold" translatable="false" format="float" type="dimen">
+        0.8
+    </item>
 
     <!-- This value is used when calculating whether the device is in ambient dark mode. It is
         dark mode when the light sensor sample value drops below this value. -->
-    <integer name="config_ambientDarkModeThreshold">5</integer>
+    <item name="config_ambientDarkModeThreshold" translatable="false" format="float" type="dimen">
+        0.4
+    </item>
 
     <!-- This value is used when calculating whether the device is in ambient light mode. Each
         sample contains light sensor events from this span of time duration. -->
