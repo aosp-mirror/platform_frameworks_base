@@ -2713,6 +2713,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         checkPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT);
         synchronized (mLock) {
             WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data == null) {
+                data = mWallpaperMap.get(UserHandle.USER_SYSTEM);
+                if (data == null) {
+                    Slog.e(TAG, "getWallpaperDimAmount: wallpaperData is null");
+                    return 0.0f;
+                }
+            }
             return data.mWallpaperDimAmount;
         }
     }
