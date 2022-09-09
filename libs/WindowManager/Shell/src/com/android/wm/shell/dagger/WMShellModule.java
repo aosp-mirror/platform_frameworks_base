@@ -48,7 +48,6 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -595,19 +594,18 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeController> provideDesktopModeController(
-            Context context, ShellInit shellInit,
+    @DynamicOverride
+    static DesktopModeController provideDesktopModeController(Context context, ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            Transitions transitions,
+            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             @ShellMainThread Handler mainHandler,
-            Transitions transitions
+            @ShellMainThread ShellExecutor mainExecutor
     ) {
-        if (DesktopMode.IS_SUPPORTED) {
-            return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
-                    rootTaskDisplayAreaOrganizer, mainHandler, transitions));
-        } else {
-            return Optional.empty();
-        }
+        return new DesktopModeController(context, shellInit, shellTaskOrganizer,
+                rootTaskDisplayAreaOrganizer, transitions, desktopModeTaskRepository, mainHandler,
+                mainExecutor);
     }
 
     @WMSingleton
