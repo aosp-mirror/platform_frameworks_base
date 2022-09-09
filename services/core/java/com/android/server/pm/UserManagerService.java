@@ -6732,10 +6732,24 @@ public class UserManagerService extends IUserManager.Stub {
                         + "users on multiple displays");
             }
 
-            Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
-                    + " on secondary display (%d)", displayId);
-            // TODO(b/239982558): call DisplayManagerInternal to check if display is valid instead
-            Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
+            Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot assign system "
+                    + "user to secondary display (%d)", displayId);
+            Preconditions.checkArgument(displayId != Display.INVALID_DISPLAY,
+                    "Cannot assign to INVALID_DISPLAY (%d)", displayId);
+
+            int currentUserId = getCurrentUserId();
+            Preconditions.checkArgument(userId != currentUserId,
+                    "Cannot assign current user to other displays");
+
+            boolean isProfile = isProfileUnchecked(userId);
+
+            Preconditions.checkArgument(userId != currentUserId,
+                    "Cannot assign current user to other displays");
+
+            Preconditions.checkArgument(
+                    !isProfile || getProfileParentIdUnchecked(userId) != currentUserId,
+                    "Cannot assign profile user %d to display %d when its parent is the current "
+                    + "user (%d)", userId, displayId, currentUserId);
 
             synchronized (mUsersOnSecondaryDisplays) {
                 if (DBG_MUMD) {
@@ -6743,7 +6757,7 @@ public class UserManagerService extends IUserManager.Stub {
                             userId, displayId);
                 }
 
-                if (isProfileUnchecked(userId)) {
+                if (isProfile) {
                     // Profile can only start in the same display as parent
                     int parentUserId = getProfileParentId(userId);
                     int parentDisplayId = mUsersOnSecondaryDisplays.get(parentUserId);
@@ -6762,7 +6776,7 @@ public class UserManagerService extends IUserManager.Stub {
                         // is refactored, it should be atomic.
                         if (mUsersOnSecondaryDisplays.valueAt(i) == displayId) {
                             throw new IllegalStateException("Cannot assign " + userId + " to "
-                                    + "display " + displayId + " as it's  already assigned to "
+                                    + "display " + displayId + " as it's already assigned to "
                                     + "user " + mUsersOnSecondaryDisplays.keyAt(i));
                         }
                         // TODO(b/239982558) also check that user is not already assigned to other
