@@ -51,18 +51,19 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         @Parameters(
             name =
                 "feature enabled = {0}, has favorites = {1}, has service infos = {2}, can show" +
-                    " while locked = {3} - expected visible = {4}"
+                    " while locked = {3}, visibility is AVAILABLE {4} - expected visible = {5}"
         )
         @JvmStatic
         fun data() =
-            (0 until 16)
+            (0 until 32)
                 .map { combination ->
                     arrayOf(
-                        /* isFeatureEnabled= */ combination and 0b1000 != 0,
-                        /* hasFavorites= */ combination and 0b0100 != 0,
-                        /* hasServiceInfos= */ combination and 0b0010 != 0,
-                        /* canShowWhileLocked= */ combination and 0b0001 != 0,
-                        /* isVisible= */ combination == 0b1111,
+                        /* isFeatureEnabled= */ combination and 0b10000 != 0,
+                        /* hasFavorites= */ combination and 0b01000 != 0,
+                        /* hasServiceInfos= */ combination and 0b00100 != 0,
+                        /* canShowWhileLocked= */ combination and 0b00010 != 0,
+                        /* visibilityAvailable= */ combination and 0b00001 != 0,
+                        /* isVisible= */ combination == 0b11111,
                     )
                 }
                 .toList()
@@ -81,7 +82,8 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
     @JvmField @Parameter(1) var hasFavorites: Boolean = false
     @JvmField @Parameter(2) var hasServiceInfos: Boolean = false
     @JvmField @Parameter(3) var canShowWhileLocked: Boolean = false
-    @JvmField @Parameter(4) var isVisible: Boolean = false
+    @JvmField @Parameter(4) var isVisibilityAvailable: Boolean = false
+    @JvmField @Parameter(5) var isVisibleExpected: Boolean = false
 
     @Before
     fun setUp() {
@@ -93,6 +95,14 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
             .thenReturn(Optional.of(controlsListingController))
         whenever(component.canShowWhileLockedSetting)
             .thenReturn(MutableStateFlow(canShowWhileLocked))
+        whenever(component.getVisibility())
+            .thenReturn(
+                if (isVisibilityAvailable) {
+                    ControlsComponent.Visibility.AVAILABLE
+                } else {
+                    ControlsComponent.Visibility.UNAVAILABLE
+                }
+            )
 
         underTest =
             HomeControlsKeyguardQuickAffordanceConfig(
@@ -128,7 +138,7 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
 
         assertThat(values.last())
             .isInstanceOf(
-                if (isVisible) {
+                if (isVisibleExpected) {
                     KeyguardQuickAffordanceConfig.State.Visible::class.java
                 } else {
                     KeyguardQuickAffordanceConfig.State.Hidden::class.java
