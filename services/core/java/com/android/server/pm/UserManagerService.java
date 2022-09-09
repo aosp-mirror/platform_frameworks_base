@@ -630,7 +630,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Set on on devices that support background users (key) running on secondary displays (value).
      */
-    // TODO(b/239982558): move such logic to a different class (like UserDisplayAssigner)
+    // TODO(b/244644281): move such logic to a different class (like UserDisplayAssigner)
     @Nullable
     @GuardedBy("mUsersOnSecondaryDisplays")
     private final SparseIntArray mUsersOnSecondaryDisplays;
@@ -710,7 +710,8 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     UserManagerService(Context context) {
         this(context, /* pm= */ null, /* userDataPreparer= */ null,
-                /* packagesLock= */ new Object(), context.getCacheDir(), /* users= */ null);
+                /* packagesLock= */ new Object(), context.getCacheDir(), /* users= */ null,
+                /* usersOnSecondaryDisplays= */ null);
     }
 
     /**
@@ -721,13 +722,13 @@ public class UserManagerService extends IUserManager.Stub {
     UserManagerService(Context context, PackageManagerService pm, UserDataPreparer userDataPreparer,
             Object packagesLock) {
         this(context, pm, userDataPreparer, packagesLock, Environment.getDataDirectory(),
-                /* users= */ null);
+                /* users= */ null, /* usersOnSecondaryDisplays= */ null);
     }
 
     @VisibleForTesting
     UserManagerService(Context context, PackageManagerService pm,
             UserDataPreparer userDataPreparer, Object packagesLock, File dataDir,
-            SparseArray<UserData> users) {
+            SparseArray<UserData> users, @Nullable SparseIntArray usersOnSecondaryDisplays) {
         mContext = context;
         mPm = pm;
         mPackagesLock = packagesLock;
@@ -758,7 +759,13 @@ public class UserManagerService extends IUserManager.Stub {
         mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
         emulateSystemUserModeIfNeeded();
         mUsersOnSecondaryDisplaysEnabled = UserManager.isUsersOnSecondaryDisplaysEnabled();
-        mUsersOnSecondaryDisplays = mUsersOnSecondaryDisplaysEnabled ? new SparseIntArray() : null;
+        if (mUsersOnSecondaryDisplaysEnabled) {
+            mUsersOnSecondaryDisplays = usersOnSecondaryDisplays == null
+                    ? new SparseIntArray() // default behavior
+                    : usersOnSecondaryDisplays; // passed by unit test
+        } else {
+            mUsersOnSecondaryDisplays = null;
+        }
     }
 
     void systemReady() {
@@ -1720,6 +1727,11 @@ public class UserManagerService extends IUserManager.Stub {
         return userId == getCurrentUserId();
     }
 
+    @VisibleForTesting
+    boolean isUsersOnSecondaryDisplaysEnabled() {
+        return mUsersOnSecondaryDisplaysEnabled;
+    }
+
     @Override
     public boolean isUserVisible(@UserIdInt int userId) {
         int callingUserId = UserHandle.getCallingUserId();
@@ -1733,7 +1745,8 @@ public class UserManagerService extends IUserManager.Stub {
         return isUserVisibleUnchecked(userId);
     }
 
-    private boolean isUserVisibleUnchecked(@UserIdInt int userId) {
+    @VisibleForTesting
+    boolean isUserVisibleUnchecked(@UserIdInt int userId) {
         // First check current foreground user and their profiles (on main display)
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             return true;
@@ -1750,8 +1763,8 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    // TODO(b/239982558): add unit test
-    private int getDisplayAssignedToUser(@UserIdInt int userId) {
+    @VisibleForTesting
+    int getDisplayAssignedToUser(@UserIdInt int userId) {
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             return Display.DEFAULT_DISPLAY;
         }
