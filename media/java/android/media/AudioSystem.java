@@ -2383,6 +2383,14 @@ public class AudioSystem
         return types.size() == 1 && types.contains(type);
     }
 
+    /**
+     * @hide
+     * Return true if the audio device type is a Bluetooth LE Audio device.
+     */
+    public static boolean isLeAudioDeviceType(int type) {
+        return DEVICE_OUT_ALL_BLE_SET.contains(type);
+    }
+
     /** @hide */
     public static final int DEFAULT_MUTE_STREAMS_AFFECTED =
             (1 << STREAM_MUSIC) |
