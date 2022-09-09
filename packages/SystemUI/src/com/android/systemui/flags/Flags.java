@@ -66,6 +66,10 @@ public class Flags {
     public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
             new UnreleasedFlag(110, true);
 
+    public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
+
+    // next id: 112
+
     /***************************************/
     // 200 - keyguard/lockscreen
 
