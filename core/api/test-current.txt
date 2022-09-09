@@ -3343,18 +3343,57 @@ package android.window {
     ctor public TaskFragmentOrganizer(@NonNull java.util.concurrent.Executor);
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizerToken();
-    method public void onActivityReparentedToTask(@NonNull android.window.WindowContainerTransaction, int, @NonNull android.content.Intent, @NonNull android.os.IBinder);
-    method public void onTaskFragmentAppeared(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentError(@NonNull android.window.WindowContainerTransaction, @NonNull android.os.IBinder, @Nullable android.window.TaskFragmentInfo, int, @NonNull Throwable);
-    method public void onTaskFragmentInfoChanged(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentParentInfoChanged(@NonNull android.window.WindowContainerTransaction, int, @NonNull android.content.res.Configuration);
-    method public void onTaskFragmentVanished(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.TaskFragmentInfo);
+    method public void onTransactionReady(@NonNull android.window.TaskFragmentTransaction);
     method @CallSuper public void registerOrganizer();
     method @CallSuper public void unregisterOrganizer();
+    field public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
+    field public static final String KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO = "task_fragment_info";
+    field public static final String KEY_ERROR_CALLBACK_THROWABLE = "fragment_throwable";
   }
 
   public final class TaskFragmentOrganizerToken implements android.os.Parcelable {
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentOrganizerToken> CREATOR;
+  }
+
+  public final class TaskFragmentTransaction implements android.os.Parcelable {
+    ctor public TaskFragmentTransaction();
+    method public void addChange(@Nullable android.window.TaskFragmentTransaction.Change);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.window.TaskFragmentTransaction.Change> getChanges();
+    method @NonNull public android.os.IBinder getTransactionToken();
+    method public boolean isEmpty();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentTransaction> CREATOR;
+    field public static final int TYPE_ACTIVITY_REPARENTED_TO_TASK = 6; // 0x6
+    field public static final int TYPE_TASK_FRAGMENT_APPEARED = 1; // 0x1
+    field public static final int TYPE_TASK_FRAGMENT_ERROR = 5; // 0x5
+    field public static final int TYPE_TASK_FRAGMENT_INFO_CHANGED = 2; // 0x2
+    field public static final int TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED = 4; // 0x4
+    field public static final int TYPE_TASK_FRAGMENT_VANISHED = 3; // 0x3
+  }
+
+  public static final class TaskFragmentTransaction.Change implements android.os.Parcelable {
+    ctor public TaskFragmentTransaction.Change(int);
+    method public int describeContents();
+    method @Nullable public android.content.Intent getActivityIntent();
+    method @Nullable public android.os.IBinder getActivityToken();
+    method @NonNull public android.os.Bundle getErrorBundle();
+    method @Nullable public android.os.IBinder getErrorCallbackToken();
+    method @Nullable public android.content.res.Configuration getTaskConfiguration();
+    method @Nullable public android.window.TaskFragmentInfo getTaskFragmentInfo();
+    method @Nullable public android.os.IBinder getTaskFragmentToken();
+    method public int getTaskId();
+    method public int getType();
+    method @NonNull public android.window.TaskFragmentTransaction.Change setActivityIntent(@NonNull android.content.Intent);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setActivityToken(@NonNull android.os.IBinder);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setErrorBundle(@NonNull android.os.Bundle);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setErrorCallbackToken(@Nullable android.os.IBinder);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setTaskConfiguration(@NonNull android.content.res.Configuration);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setTaskFragmentInfo(@NonNull android.window.TaskFragmentInfo);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setTaskFragmentToken(@NonNull android.os.IBinder);
+    method @NonNull public android.window.TaskFragmentTransaction.Change setTaskId(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentTransaction.Change> CREATOR;
   }
 
   public class TaskOrganizer extends android.window.WindowOrganizer {
