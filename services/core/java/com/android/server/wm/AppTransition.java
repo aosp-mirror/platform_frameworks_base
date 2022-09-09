@@ -39,6 +39,7 @@ import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -746,7 +747,8 @@ public class AppTransition implements Dump {
         if (isKeyguardGoingAwayTransitOld(transit) && enter) {
             a = mTransitionAnimation.loadKeyguardExitAnimation(mNextAppTransitionFlags,
                     transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER);
-        } else if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
+        } else if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
+                || transit == TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM) {
             a = null;
         } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE && !enter) {
             a = mTransitionAnimation.loadKeyguardUnoccludeAnimation();
@@ -1158,6 +1160,9 @@ public class AppTransition implements Dump {
             case TRANSIT_OLD_KEYGUARD_OCCLUDE: {
                 return "TRANSIT_OLD_KEYGUARD_OCCLUDE";
             }
+            case TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM: {
+                return "TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM";
+            }
             case TRANSIT_OLD_KEYGUARD_UNOCCLUDE: {
                 return "TRANSIT_OLD_KEYGUARD_UNOCCLUDE";
             }
@@ -1413,6 +1418,7 @@ public class AppTransition implements Dump {
 
     static boolean isKeyguardOccludeTransitOld(@TransitionOldType int transit) {
         return transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
+                || transit == TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM
                 || transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
     }
 
