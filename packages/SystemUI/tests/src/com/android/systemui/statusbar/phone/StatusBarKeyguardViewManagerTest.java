@@ -51,6 +51,7 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -268,6 +269,17 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenLaunchingApp() {
         when(mCentralSurfaces.isInLaunchTransition()).thenReturn(true);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
+                expansionEvent(
+                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* expanded= */ true,
+                        /* tracking= */ false));
+        verify(mBouncer, never()).setExpansion(anyFloat());
+    }
+
+    @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenShadeLocked() {
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
                         /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,

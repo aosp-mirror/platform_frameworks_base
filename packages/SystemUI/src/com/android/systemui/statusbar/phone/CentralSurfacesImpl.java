@@ -3306,14 +3306,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
         // show the bouncer/lockscreen.
         if (!mKeyguardViewMediator.isHiding()
                 && !mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
-            if (mState == StatusBarState.SHADE_LOCKED
-                    && mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
+            if (mState == StatusBarState.SHADE_LOCKED) {
                 // shade is showing while locked on the keyguard, so go back to showing the
                 // lock screen where users can use the UDFPS affordance to enter the device
                 mStatusBarKeyguardViewManager.reset(true);
-            } else if ((mState == StatusBarState.KEYGUARD
-                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing())
-                    || mState == StatusBarState.SHADE_LOCKED) {
+            } else if (mState == StatusBarState.KEYGUARD
+                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()) {
                 mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
             }
         }

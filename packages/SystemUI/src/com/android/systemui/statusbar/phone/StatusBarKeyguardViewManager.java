@@ -378,11 +378,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             return;
         } else if (mNotificationPanelViewController.isUnlockHintRunning()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
-        } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
-                && mKeyguardUpdateManager.isUdfpsEnrolled()) {
+        } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED) {
             // Don't expand to the bouncer. Instead transition back to the lock screen (see
-            // CentralSurfaces#showBouncerOrLockScreenIfKeyguard) where the user can use the UDFPS
-            // affordance to enter the device (or swipe up to the input bouncer)
+            // CentralSurfaces#showBouncerOrLockScreenIfKeyguard)
             return;
         } else if (bouncerNeedsScrimming()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
