@@ -636,6 +636,7 @@ package android {
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
     field public static final int enableOnBackInvokedCallback = 16844396; // 0x101066c
+    field public static final int enableTextStylingShortcuts;
     field public static final int enableVrMode = 16844069; // 0x1010525
     field public static final int enabled = 16842766; // 0x101000e
     field public static final int end = 16843996; // 0x10104dc
@@ -2113,6 +2114,7 @@ package android {
     field public static final int addToDictionary = 16908330; // 0x102002a
     field public static final int autofill = 16908355; // 0x1020043
     field public static final int background = 16908288; // 0x1020000
+    field public static final int bold;
     field public static final int button1 = 16908313; // 0x1020019
     field public static final int button2 = 16908314; // 0x102001a
     field public static final int button3 = 16908315; // 0x102001b
@@ -2138,6 +2140,7 @@ package android {
     field public static final int inputExtractAccessories = 16908378; // 0x102005a
     field public static final int inputExtractAction = 16908377; // 0x1020059
     field public static final int inputExtractEditText = 16908325; // 0x1020025
+    field public static final int italic;
     field @Deprecated public static final int keyboardView = 16908326; // 0x1020026
     field public static final int list = 16908298; // 0x102000a
     field public static final int list_container = 16908351; // 0x102003f
@@ -2169,6 +2172,7 @@ package android {
     field public static final int textAssist = 16908353; // 0x1020041
     field public static final int title = 16908310; // 0x1020016
     field public static final int toggle = 16908311; // 0x1020017
+    field public static final int underline;
     field public static final int undo = 16908338; // 0x1020032
     field public static final int widget_frame = 16908312; // 0x1020018
   }
@@ -55995,9 +55999,11 @@ package android.widget {
     ctor public EditText(android.content.Context, android.util.AttributeSet, int, int);
     method public void extendSelection(int);
     method public android.text.Editable getText();
+    method public boolean isStyleShortcutEnabled();
     method public void selectAll();
     method public void setSelection(int, int);
     method public void setSelection(int);
+    method public void setStyleShortcutsEnabled(boolean);
   }
 
   public interface ExpandableListAdapter {
