@@ -2555,6 +2555,8 @@ public class StorageManager {
      * This API doesn't require any special permissions, though typical implementations
      * will require being called from an SELinux domain that allows setting file attributes
      * related to quota (eg the GID or project ID).
+     * If the calling user has MANAGE_EXTERNAL_STORAGE permissions, quota for shared profile's
+     * volumes is also updated.
      *
      * The default platform user of this API is the MediaProvider process, which is
      * responsible for managing all of external storage.
@@ -2575,7 +2577,14 @@ public class StorageManager {
             @QuotaType int quotaType) throws IOException {
         long projectId;
         final String filePath = path.getCanonicalPath();
-        final StorageVolume volume = getStorageVolume(path);
+        int volFlags = FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE;
+        // If caller has MANAGE_EXTERNAL_STORAGE permission, results from User Profile(s) are also
+        // returned by enabling FLAG_INCLUDE_SHARED_PROFILE.
+        if (mContext.checkSelfPermission(MANAGE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+            volFlags |= FLAG_INCLUDE_SHARED_PROFILE;
+        }
+        final StorageVolume[] availableVolumes = getVolumeList(mContext.getUserId(), volFlags);
+        final StorageVolume volume = getStorageVolume(availableVolumes, path);
         if (volume == null) {
             Log.w(TAG, "Failed to update quota type for " + filePath);
             return;
