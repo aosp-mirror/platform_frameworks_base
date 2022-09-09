@@ -58,7 +58,7 @@ public class RemoteAnimationAdapterCompat {
         mRemoteTransition = buildRemoteTransition(runner, appThread);
     }
 
-    RemoteAnimationAdapter getWrapped() {
+    public RemoteAnimationAdapter getWrapped() {
         return mWrapped;
     }
 
