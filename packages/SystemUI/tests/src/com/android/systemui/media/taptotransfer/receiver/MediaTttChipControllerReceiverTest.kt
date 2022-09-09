@@ -41,7 +41,6 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -74,8 +73,6 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var windowManager: WindowManager
     @Mock
-    private lateinit var viewUtil: ViewUtil
-    @Mock
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
@@ -102,7 +99,6 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             context,
             logger,
             windowManager,
-            viewUtil,
             FakeExecutor(FakeSystemClock()),
             accessibilityManager,
             configurationController,
@@ -182,7 +178,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
     @Test
     fun setIcon_isAppIcon_usesAppIconSize() {
-        controllerReceiver.displayChip(getChipReceiverInfo())
+        controllerReceiver.displayView(getChipReceiverInfo())
         val chipView = getChipView()
 
         controllerReceiver.setIcon(chipView, PACKAGE_NAME)
@@ -198,7 +194,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
     @Test
     fun setIcon_notAppIcon_usesGenericIconSize() {
-        controllerReceiver.displayChip(getChipReceiverInfo())
+        controllerReceiver.displayView(getChipReceiverInfo())
         val chipView = getChipView()
 
         controllerReceiver.setIcon(chipView, appPackageName = null)
