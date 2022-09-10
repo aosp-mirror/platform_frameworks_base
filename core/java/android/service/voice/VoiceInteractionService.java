@@ -318,7 +318,7 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownHotwordDetector();
-            mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
+            mHotwordDetector = new AlwaysOnHotwordDetector(this, keyphrase, locale, callback,
                     mKeyphraseEnrollmentInfo, mSystemService);
         }
         return mHotwordDetector;
