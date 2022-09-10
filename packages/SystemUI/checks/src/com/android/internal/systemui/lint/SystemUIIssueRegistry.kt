@@ -30,6 +30,8 @@ class SystemUIIssueRegistry : IssueRegistry() {
         get() = listOf(
                 BindServiceViaContextDetector.ISSUE,
                 BroadcastSentViaContextDetector.ISSUE,
+                SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
+                SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY,
                 GetMainLooperViaContextDetector.ISSUE,
                 RegisterReceiverViaContextDetector.ISSUE,
                 SoftwareBitmapDetector.ISSUE,
