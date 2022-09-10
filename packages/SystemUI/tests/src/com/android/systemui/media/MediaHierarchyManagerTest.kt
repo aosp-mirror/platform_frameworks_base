@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.testing.FakeNotifPanelEvents
 import com.android.systemui.statusbar.StatusBarState
@@ -38,6 +39,8 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
@@ -79,6 +82,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
     private lateinit var statusBarCallback: ArgumentCaptor<(StatusBarStateController.StateListener)>
+    @Captor
+    private lateinit var dreamOverlayCallback:
+            ArgumentCaptor<(DreamOverlayStateController.Callback)>
     @JvmField
     @Rule
     val mockito = MockitoJUnit.rule()
@@ -113,6 +119,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 fakeHandler,)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
+        verify(dreamOverlayStateController).addCallback(dreamOverlayCallback.capture())
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
@@ -332,6 +339,27 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
     }
 
+    @Test
+    fun testDream() {
+        goToDream()
+        setMediaDreamComplicationEnabled(true)
+        verify(mediaCarouselController).onDesiredLocationChanged(
+                eq(MediaHierarchyManager.LOCATION_DREAM_OVERLAY),
+                nullable(),
+                eq(false),
+                anyLong(),
+                anyLong())
+        clearInvocations(mediaCarouselController)
+
+        setMediaDreamComplicationEnabled(false)
+        verify(mediaCarouselController).onDesiredLocationChanged(
+                eq(MediaHierarchyManager.LOCATION_QQS),
+                any(MediaHostState::class.java),
+                eq(false),
+                anyLong(),
+                anyLong())
+    }
+
     private fun enableSplitShade() {
         context.getOrCreateTestableResources().addOverride(
             R.bool.config_use_split_notification_shade, true
@@ -343,6 +371,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 1)
         statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
+        whenever(dreamOverlayStateController.isOverlayActive).thenReturn(false)
+        dreamOverlayCallback.value.onStateChanged()
         clearInvocations(mediaCarouselController)
     }
 
@@ -352,6 +382,17 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             StatusBarState.KEYGUARD,
             StatusBarState.SHADE_LOCKED
         )
+    }
+
+    private fun goToDream() {
+        whenever(dreamOverlayStateController.isOverlayActive).thenReturn(true)
+        dreamOverlayCallback.value.onStateChanged()
+    }
+
+    private fun setMediaDreamComplicationEnabled(enabled: Boolean) {
+        val complications = if (enabled) listOf(mock<MediaDreamComplication>()) else emptyList()
+        whenever(dreamOverlayStateController.complications).thenReturn(complications)
+        dreamOverlayCallback.value.onComplicationsChanged()
     }
 
     private fun expandQS() {

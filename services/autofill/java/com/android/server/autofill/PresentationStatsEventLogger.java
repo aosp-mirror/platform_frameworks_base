@@ -41,7 +41,12 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.provider.Settings;
 import android.service.autofill.Dataset;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -61,7 +66,7 @@ public final class PresentationStatsEventLogger {
      * Reasons why presentation was not shown. These are wrappers around
      * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.PresentationEventResult}.
      */
-    @IntDef(prefix = { "NOT_SHOWN_REASON" }, value = {
+    @IntDef(prefix = {"NOT_SHOWN_REASON"}, value = {
             NOT_SHOWN_REASON_ANY_SHOWN,
             NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED,
             NOT_SHOWN_REASON_VIEW_CHANGED,
@@ -72,6 +77,7 @@ public final class PresentationStatsEventLogger {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotShownReason {}
+
     public static final int NOT_SHOWN_REASON_ANY_SHOWN = AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__ANY_SHOWN;
     public static final int NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED = AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUS_CHANGED;
     public static final int NOT_SHOWN_REASON_VIEW_CHANGED = AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
@@ -172,6 +178,45 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetInlinePresentationAndSuggestionHostUid(Context context, int userId) {
+        mEventInternal.ifPresent(event -> {
+            event.mDisplayPresentationType = UI_TYPE_INLINE;
+            String imeString = Settings.Secure.getStringForUser(context.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD, userId);
+            if (TextUtils.isEmpty(imeString)) {
+                Slog.w(TAG, "No default IME found");
+                return;
+            }
+            ComponentName imeComponent = ComponentName.unflattenFromString(imeString);
+            if (imeComponent == null) {
+                Slog.w(TAG, "No default IME found");
+                return;
+            }
+            int imeUid;
+            String packageName = imeComponent.getPackageName();
+            try {
+                imeUid = context.getPackageManager().getApplicationInfoAsUser(packageName,
+                        PackageManager.ApplicationInfoFlags.of(0), userId).uid;
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.w(TAG, "Couldn't find packageName: " + packageName);
+                return;
+            }
+            event.mInlineSuggestionHostUid = imeUid;
+        });
+    }
+
+    public void maybeSetAutofillServiceUid(int uid) {
+        mEventInternal.ifPresent(event -> {
+            event.mAutofillServiceUid = uid;
+        });
+    }
+
+    public void maybeSetIsNewRequest(boolean isRequestTriggered) {
+        mEventInternal.ifPresent(event -> {
+            event.mIsRequestTriggered = isRequestTriggered;
+        });
+    }
+
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
@@ -190,7 +235,10 @@ public final class PresentationStatsEventLogger {
                     + " mCountNotShownImePresentationNotDrawn="
                     + event.mCountNotShownImePresentationNotDrawn
                     + " mCountNotShownImeUserNotSeen=" + event.mCountNotShownImeUserNotSeen
-                    + " mDisplayPresentationType=" + event.mDisplayPresentationType);
+                    + " mDisplayPresentationType=" + event.mDisplayPresentationType
+                    + " mAutofillServiceUid=" + event.mAutofillServiceUid
+                    + " mInlineSuggestionHostUid=" + event.mInlineSuggestionHostUid
+                    + " mIsRequestTriggered=" + event.mIsRequestTriggered);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -208,7 +256,10 @@ public final class PresentationStatsEventLogger {
                 event.mCountFilteredUserTyping,
                 event.mCountNotShownImePresentationNotDrawn,
                 event.mCountNotShownImeUserNotSeen,
-                event.mDisplayPresentationType);
+                event.mDisplayPresentationType,
+                event.mAutofillServiceUid,
+                event.mInlineSuggestionHostUid,
+                event.mIsRequestTriggered);
         mEventInternal = Optional.empty();
     }
 
@@ -222,6 +273,9 @@ public final class PresentationStatsEventLogger {
         int mCountNotShownImePresentationNotDrawn;
         int mCountNotShownImeUserNotSeen;
         int mDisplayPresentationType = AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
+        int mAutofillServiceUid = -1;
+        int mInlineSuggestionHostUid = -1;
+        boolean mIsRequestTriggered;
 
         PresentationStatsEventInternal() {}
     }

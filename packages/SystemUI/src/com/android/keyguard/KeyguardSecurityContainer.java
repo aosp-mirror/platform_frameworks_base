@@ -665,7 +665,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 // When using EXACTLY spec, measure will use the layout width if > 0. Set before
                 // measuring the child
                 lp.width = MeasureSpec.getSize(updatedWidthMeasureSpec);
-                measureChildWithMargins(view, updatedWidthMeasureSpec, 0, heightMeasureSpec, 0);
+                measureChildWithMargins(view, updatedWidthMeasureSpec, 0,
+                        heightMeasureSpec, 0);
 
                 maxWidth = Math.max(maxWidth,
                         view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
@@ -1306,7 +1307,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
             int yTrans = mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_y_trans);
             if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 mUserSwitcherViewGroup.setTranslationY(yTrans);
-                mViewFlipper.setTranslationY(-yTrans);
             } else {
                 // Attempt to reposition a bit higher to make up for this frame being a bit lower
                 // on the device

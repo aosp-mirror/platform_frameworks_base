@@ -66,6 +66,10 @@ public class Flags {
     public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
             new UnreleasedFlag(110, true);
 
+    public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
+
+    // next id: 112
+
     /***************************************/
     // 200 - keyguard/lockscreen
 
@@ -186,6 +190,9 @@ public class Flags {
     /***************************************/
     // 801 - region sampling
     public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
+
+    // 802 - wallpaper rendering
+    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
 
     /***************************************/
     // 900 - media

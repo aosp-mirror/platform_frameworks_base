@@ -23,6 +23,7 @@ import android.view.DisplayInfo
 import android.view.Surface
 import android.view.View
 import com.airbnb.lottie.LottieAnimationView
+import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
 import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
@@ -100,6 +101,8 @@ open class AuthBiometricFingerprintIconController(
             iconView.playAnimation()
             iconViewOverlay.playAnimation()
         }
+        LottieColorUtils.applyDynamicColors(context, iconView)
+        LottieColorUtils.applyDynamicColors(context, iconViewOverlay)
     }
 
     private fun updateIconNormal(@BiometricState lastState: Int, @BiometricState newState: Int) {
@@ -118,6 +121,7 @@ open class AuthBiometricFingerprintIconController(
         if (shouldAnimateForTransition(lastState, newState)) {
             iconView.playAnimation()
         }
+        LottieColorUtils.applyDynamicColors(context, iconView)
     }
 
     override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
@@ -187,11 +191,11 @@ open class AuthBiometricFingerprintIconController(
 
     @RawRes
     private fun getSideFpsAnimationForTransition(rotation: Int): Int = when (rotation) {
-        Surface.ROTATION_0 -> R.raw.BiometricPrompt_Landscape_Base
-        Surface.ROTATION_90 -> R.raw.BiometricPrompt_Portrait_Base_TopLeft
-        Surface.ROTATION_180 -> R.raw.BiometricPrompt_Landscape_Base
-        Surface.ROTATION_270 -> R.raw.BiometricPrompt_Portrait_Base_BottomRight
-        else -> R.raw.BiometricPrompt_Landscape_Base
+        Surface.ROTATION_0 -> R.raw.biometricprompt_landscape_base
+        Surface.ROTATION_90 -> R.raw.biometricprompt_portrait_base_topleft
+        Surface.ROTATION_180 -> R.raw.biometricprompt_landscape_base
+        Surface.ROTATION_270 -> R.raw.biometricprompt_portrait_base_bottomright
+        else -> R.raw.biometricprompt_landscape_base
     }
 
     @RawRes
@@ -203,14 +207,14 @@ open class AuthBiometricFingerprintIconController(
         STATE_HELP,
         STATE_ERROR -> {
             when (rotation) {
-                Surface.ROTATION_0 -> R.raw.BiometricPrompt_Fingerprint_To_Error_Landscape
+                Surface.ROTATION_0 -> R.raw.biometricprompt_fingerprint_to_error_landscape
                 Surface.ROTATION_90 ->
-                    R.raw.BiometricPrompt_Symbol_Fingerprint_To_Error_Portrait_TopLeft
+                    R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft
                 Surface.ROTATION_180 ->
-                    R.raw.BiometricPrompt_Fingerprint_To_Error_Landscape
+                    R.raw.biometricprompt_fingerprint_to_error_landscape
                 Surface.ROTATION_270 ->
-                    R.raw.BiometricPrompt_Symbol_Fingerprint_To_Error_Portrait_BottomRight
-                else -> R.raw.BiometricPrompt_Fingerprint_To_Error_Landscape
+                    R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
+                else -> R.raw.biometricprompt_fingerprint_to_error_landscape
             }
         }
         STATE_AUTHENTICATING_ANIMATING_IN,
@@ -218,25 +222,25 @@ open class AuthBiometricFingerprintIconController(
             if (oldState == STATE_ERROR || oldState == STATE_HELP) {
                 when (rotation) {
                     Surface.ROTATION_0 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Fingerprint_Landscape
+                        R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
                     Surface.ROTATION_90 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Fingerprint_Portrait_TopLeft
+                        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft
                     Surface.ROTATION_180 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Fingerprint_Landscape
+                        R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
                     Surface.ROTATION_270 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Fingerprint_Portrait_BottomRight
-                    else -> R.raw.BiometricPrompt_Symbol_Error_To_Fingerprint_Landscape
+                        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright
+                    else -> R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
                 }
             } else {
                 when (rotation) {
-                    Surface.ROTATION_0 -> R.raw.BiometricPrompt_Fingerprint_To_Error_Landscape
+                    Surface.ROTATION_0 -> R.raw.biometricprompt_fingerprint_to_error_landscape
                     Surface.ROTATION_90 ->
-                        R.raw.BiometricPrompt_Symbol_Fingerprint_To_Error_Portrait_TopLeft
+                        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft
                     Surface.ROTATION_180 ->
-                        R.raw.BiometricPrompt_Fingerprint_To_Error_Landscape
+                        R.raw.biometricprompt_fingerprint_to_error_landscape
                     Surface.ROTATION_270 ->
-                        R.raw.BiometricPrompt_Symbol_Fingerprint_To_Error_Portrait_BottomRight
-                    else -> R.raw.BiometricPrompt_Fingerprint_To_Error_Landscape
+                        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
+                    else -> R.raw.biometricprompt_fingerprint_to_error_landscape
                 }
             }
         }
@@ -244,26 +248,26 @@ open class AuthBiometricFingerprintIconController(
             if (oldState == STATE_ERROR || oldState == STATE_HELP) {
                 when (rotation) {
                     Surface.ROTATION_0 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Success_Landscape
+                        R.raw.biometricprompt_symbol_error_to_success_landscape
                     Surface.ROTATION_90 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Success_Portrait_TopLeft
+                        R.raw.biometricprompt_symbol_error_to_success_portrait_topleft
                     Surface.ROTATION_180 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Success_Landscape
+                        R.raw.biometricprompt_symbol_error_to_success_landscape
                     Surface.ROTATION_270 ->
-                        R.raw.BiometricPrompt_Symbol_Error_To_Success_Portrait_BottomRight
-                    else -> R.raw.BiometricPrompt_Symbol_Error_To_Success_Landscape
+                        R.raw.biometricprompt_symbol_error_to_success_portrait_bottomright
+                    else -> R.raw.biometricprompt_symbol_error_to_success_landscape
                 }
             } else {
                 when (rotation) {
                     Surface.ROTATION_0 ->
-                        R.raw.BiometricPrompt_Symbol_Fingerprint_To_Success_Landscape
+                        R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
                     Surface.ROTATION_90 ->
-                        R.raw.BiometricPrompt_Symbol_Fingerprint_To_Success_Portrait_TopLeft
+                        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft
                     Surface.ROTATION_180 ->
-                        R.raw.BiometricPrompt_Symbol_Fingerprint_To_Success_Landscape
+                        R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
                     Surface.ROTATION_270 ->
-                        R.raw.BiometricPrompt_Symbol_Fingerprint_To_Success_Portrait_BottomRight
-                    else -> R.raw.BiometricPrompt_Symbol_Fingerprint_To_Success_Landscape
+                        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright
+                    else -> R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
                 }
             }
         }
