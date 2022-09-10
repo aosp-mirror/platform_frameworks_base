@@ -17,7 +17,10 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import androidx.test.filters.SmallTest
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
@@ -31,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel.Companion.NO_INTERNET
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,6 +71,7 @@ class WifiViewModelTest : SysuiTestCase() {
         underTest = WifiViewModel(
             statusBarPipelineFlags,
             constants,
+            context,
             logger,
             interactor
         )
@@ -115,7 +120,12 @@ class WifiViewModelTest : SysuiTestCase() {
                 .launchIn(this)
 
         assertThat(latest).isInstanceOf(Icon.Resource::class.java)
-        assertThat((latest as Icon.Resource).res).isEqualTo(WIFI_NO_NETWORK)
+        val icon = latest as Icon.Resource
+        assertThat(icon.res).isEqualTo(WIFI_NO_NETWORK)
+        assertThat(icon.contentDescription?.getAsString())
+            .contains(context.getString(WIFI_NO_CONNECTION))
+        assertThat(icon.contentDescription?.getAsString())
+            .contains(context.getString(NO_INTERNET))
 
         job.cancel()
     }
@@ -169,7 +179,12 @@ class WifiViewModelTest : SysuiTestCase() {
             .launchIn(this)
 
         assertThat(latest).isInstanceOf(Icon.Resource::class.java)
-        assertThat((latest as Icon.Resource).res).isEqualTo(WIFI_FULL_ICONS[level])
+        val icon = latest as Icon.Resource
+        assertThat(icon.res).isEqualTo(WIFI_FULL_ICONS[level])
+        assertThat(icon.contentDescription?.getAsString())
+            .contains(context.getString(WIFI_CONNECTION_STRENGTH[level]))
+        assertThat(icon.contentDescription?.getAsString())
+            .doesNotContain(context.getString(NO_INTERNET))
 
         job.cancel()
     }
@@ -193,7 +208,12 @@ class WifiViewModelTest : SysuiTestCase() {
             .launchIn(this)
 
         assertThat(latest).isInstanceOf(Icon.Resource::class.java)
-        assertThat((latest as Icon.Resource).res).isEqualTo(WIFI_NO_INTERNET_ICONS[level])
+        val icon = latest as Icon.Resource
+        assertThat(icon.res).isEqualTo(WIFI_NO_INTERNET_ICONS[level])
+        assertThat(icon.contentDescription?.getAsString())
+            .contains(context.getString(WIFI_CONNECTION_STRENGTH[level]))
+        assertThat(icon.contentDescription?.getAsString())
+            .contains(context.getString(NO_INTERNET))
 
         job.cancel()
     }
@@ -259,6 +279,13 @@ class WifiViewModelTest : SysuiTestCase() {
         assertThat(latest).isTrue()
 
         job.cancel()
+    }
+
+    private fun ContentDescription.getAsString(): String? {
+        return when (this) {
+            is ContentDescription.Loaded -> this.description
+            is ContentDescription.Resource -> context.getString(this.res)
+        }
     }
 
     companion object {

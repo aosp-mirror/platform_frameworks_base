@@ -61,6 +61,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PatternMatcher;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -581,6 +582,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
             AssistUtils assistUtils,
             DumpManager dumpManager) {
         super(broadcastDispatcher);
+
+        // b/241601880: This component shouldn't be running for a non-primary user
+        if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
+            Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
+        }
+
         mContext = context;
         mPipOptional = pipOptional;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;

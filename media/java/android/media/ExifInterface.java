@@ -79,20 +79,24 @@ import java.util.zip.CRC32;
 /**
  * This is a class for reading and writing Exif tags in various image file formats.
  * <p>
+ * <b>Note:</b> This class has known issues on some versions of Android. It is recommended to use
+ * the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/exifinterface/media/ExifInterface.html">ExifInterface
+ * Library</a> since it offers a superset of the functionality of this class and is more easily
+ * updateable. In addition to the functionality of this class, it supports parsing extra metadata
+ * such as exposure and data compression information as well as setting extra metadata such as GPS
+ * and datetime information.
+ * <p>
  * Supported for reading: JPEG, PNG, WebP, HEIF, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW, RAF,
  * AVIF.
  * <p>
- * Supported for writing: JPEG, PNG, WebP, DNG.
+ * Supported for writing: JPEG, PNG, WebP.
  * <p>
  * Note: JPEG and HEIF files may contain XMP data either inside the Exif data chunk or outside of
  * it. This class will search both locations for XMP data, but if XMP data exist both inside and
  * outside Exif, will favor the XMP data inside Exif over the one outside.
  * <p>
- * Note: It is recommended to use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
- * <a href="{@docRoot}reference/androidx/exifinterface/media/ExifInterface.html">ExifInterface
- * Library</a> since it is a superset of this class. In addition to the functionalities of this
- * class, it supports parsing extra metadata such as exposure and data compression information
- * as well as setting extra metadata such as GPS and datetime information.
+
  */
 public class ExifInterface {
     private static final String TAG = "ExifInterface";
@@ -1294,7 +1298,6 @@ public class ExifInterface {
             new ExifTag(TAG_Y_CB_CR_SUB_SAMPLING, 530, IFD_FORMAT_USHORT),
             new ExifTag(TAG_Y_CB_CR_POSITIONING, 531, IFD_FORMAT_USHORT),
             new ExifTag(TAG_REFERENCE_BLACK_WHITE, 532, IFD_FORMAT_URATIONAL),
-            new ExifTag(TAG_XMP, 700, IFD_FORMAT_BYTE),
             new ExifTag(TAG_COPYRIGHT, 33432, IFD_FORMAT_STRING),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
@@ -2076,7 +2079,7 @@ public class ExifInterface {
      * {@link #setAttribute(String,String)} to set all attributes to write and
      * make a single call rather than multiple calls for each attribute.
      * <p>
-     * This method is supported for JPEG, PNG, WebP, and DNG files.
+     * This method is supported for JPEG, PNG, and WebP files.
      * <p class="note">
      * Note: after calling this method, any attempts to obtain range information
      * from {@link #getAttributeRange(String)} or {@link #getThumbnailRange()}
@@ -2088,11 +2091,15 @@ public class ExifInterface {
      * <p>
      * For PNG format, the Exif data will be stored as an "eXIf" chunk as per
      * "Extensions to the PNG 1.2 Specification, Version 1.5.0".
+     * <p>
+     * <b>Warning:</b> Calling this method on a DNG-based instance of {@code ExifInterface} may
+     * result in the original image file being overwritten with invalid data on some versions of
+     * Android 13 (API 33).
      */
     public void saveAttributes() throws IOException {
         if (!isSupportedFormatForSavingAttributes()) {
             throw new IOException("ExifInterface only supports saving attributes for JPEG, PNG, "
-                    + "WebP, and DNG formats.");
+                    + "and WebP formats.");
         }
         if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
             throw new IOException(
@@ -2150,10 +2157,6 @@ public class ExifInterface {
                     savePngAttributes(bufferedIn, bufferedOut);
                 } else if (mMimeType == IMAGE_TYPE_WEBP) {
                     saveWebpAttributes(bufferedIn, bufferedOut);
-                } else if (mMimeType == IMAGE_TYPE_DNG || mMimeType == IMAGE_TYPE_UNKNOWN) {
-                    ByteOrderedDataOutputStream dataOutputStream =
-                            new ByteOrderedDataOutputStream(bufferedOut, ByteOrder.BIG_ENDIAN);
-                    writeExifSegment(dataOutputStream);
                 }
             }
         } catch (Exception e) {
@@ -5262,8 +5265,7 @@ public class ExifInterface {
 
     private boolean isSupportedFormatForSavingAttributes() {
         if (mIsSupportedFile && (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_PNG
-                || mMimeType == IMAGE_TYPE_WEBP || mMimeType == IMAGE_TYPE_DNG
-                || mMimeType == IMAGE_TYPE_UNKNOWN)) {
+                || mMimeType == IMAGE_TYPE_WEBP)) {
             return true;
         }
         return false;

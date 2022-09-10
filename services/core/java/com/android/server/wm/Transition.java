@@ -577,17 +577,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 t.setLayer(targetLeash, target.getLastLayer());
                 target.getRelativePosition(tmpPos);
                 t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
-                final Rect clipRect;
                 // No need to clip the display in case seeing the clipped content when during the
                 // display rotation. No need to clip activities because they rely on clipping on
                 // task layers.
                 if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
-                    clipRect = null;
+                    t.setCrop(targetLeash, null /* crop */);
                 } else {
-                    clipRect = target.getRequestedOverrideBounds();
-                    clipRect.offset(-tmpPos.x, -tmpPos.y);
+                    // Crop to the requested bounds.
+                    final Rect clipRect = target.getRequestedOverrideBounds();
+                    t.setWindowCrop(targetLeash, clipRect.width(), clipRect.height());
                 }
-                t.setCrop(targetLeash, clipRect);
                 t.setCornerRadius(targetLeash, 0);
                 t.setShadowRadius(targetLeash, 0);
                 t.setMatrix(targetLeash, 1, 0, 0, 1);

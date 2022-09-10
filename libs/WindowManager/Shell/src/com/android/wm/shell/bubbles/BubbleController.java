@@ -1337,19 +1337,7 @@ public class BubbleController implements ConfigurationChangeListener {
                         }
                         mSysuiProxy.updateNotificationBubbleButton(bubble.getKey());
                     }
-
                 }
-                mSysuiProxy.getPendingOrActiveEntry(bubble.getKey(), (entry) -> {
-                    mMainExecutor.execute(() -> {
-                        if (entry != null) {
-                            final String groupKey = entry.getStatusBarNotification().getGroupKey();
-                            if (getBubblesInGroup(groupKey).isEmpty()) {
-                                // Time to potentially remove the summary
-                                mSysuiProxy.notifyMaybeCancelSummary(bubble.getKey());
-                            }
-                        }
-                    });
-                });
             }
             mDataRepository.removeBubbles(mCurrentUserId, bubblesToBeRemovedFromRepository);
 

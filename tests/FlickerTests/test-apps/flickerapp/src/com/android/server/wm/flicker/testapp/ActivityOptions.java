@@ -87,4 +87,9 @@ public class ActivityOptions {
     public static final ComponentName NOTIFICATION_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".NotificationActivity");
+
+    public static final String GAME_ACTIVITY_LAUNCHER_NAME = "GameApp";
+    public static final ComponentName GAME_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                   FLICKER_APP_PACKAGE + ".GameActivity");
 }
