@@ -340,4 +340,40 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                     bool1 = dismissKeyguard
                 }, { "reportUserRequestedUnlock origin=$str1 reason=$str2 dismissKeyguard=$bool1" })
     }
+
+    fun logShowTrustGrantedMessage(
+            message: String
+    ) {
+        logBuffer.log(TAG, DEBUG, {
+            str1 = message
+        }, { "showTrustGrantedMessage message$str1" })
+    }
+
+    fun logTrustChanged(
+            wasTrusted: Boolean,
+            isNowTrusted: Boolean,
+            userId: Int
+    ) {
+        logBuffer.log(TAG, DEBUG, {
+            bool1 = wasTrusted
+            bool2 = isNowTrusted
+            int1 = userId
+        }, { "onTrustChanged[user=$int1] wasTrusted=$bool1 isNowTrusted=$bool2" })
+    }
+
+    fun logKeyguardStateUpdate(
+            secure: Boolean,
+            canDismissLockScreen: Boolean,
+            trusted: Boolean,
+            trustManaged: Boolean
+
+    ) {
+        logBuffer.log("KeyguardState", DEBUG, {
+            bool1 = secure
+            bool2 = canDismissLockScreen
+            bool3 = trusted
+            bool4 = trustManaged
+        }, { "#update secure=$bool1 canDismissKeyguard=$bool2" +
+                " trusted=$bool3 trustManaged=$bool4" })
+    }
 }

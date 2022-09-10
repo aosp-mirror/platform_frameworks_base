@@ -94,6 +94,7 @@ constructor(
                                 hasFavorites = favorites?.isNotEmpty() == true,
                                 hasServiceInfos = serviceInfos.isNotEmpty(),
                                 iconResourceId = component.getTileImageId(),
+                                visibility = component.getVisibility(),
                             ),
                             TAG,
                         )
@@ -110,9 +111,16 @@ constructor(
         isFeatureEnabled: Boolean,
         hasFavorites: Boolean,
         hasServiceInfos: Boolean,
+        visibility: ControlsComponent.Visibility,
         @DrawableRes iconResourceId: Int?,
     ): KeyguardQuickAffordanceConfig.State {
-        return if (isFeatureEnabled && hasFavorites && hasServiceInfos && iconResourceId != null) {
+        return if (
+            isFeatureEnabled &&
+                hasFavorites &&
+                hasServiceInfos &&
+                iconResourceId != null &&
+                visibility == ControlsComponent.Visibility.AVAILABLE
+        ) {
             KeyguardQuickAffordanceConfig.State.Visible(
                 icon = ContainedDrawable.WithResource(iconResourceId),
                 contentDescriptionResourceId = component.getTileTitleId(),

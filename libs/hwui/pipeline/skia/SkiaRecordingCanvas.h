@@ -50,7 +50,7 @@ public:
         initDisplayList(renderNode, width, height);
     }
 
-    virtual void punchHole(const SkRRect& rect, float alpha) override;
+    virtual void punchHole(const SkRRect& rect) override;
 
     virtual void finishRecording(uirenderer::RenderNode* destination) override;
     std::unique_ptr<SkiaDisplayList> finishRecording();

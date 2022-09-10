@@ -82,7 +82,7 @@ internal class TogglePermissionAppInfoPageProvider(
         internal fun navigator(permissionType: String, app: ApplicationInfo) =
             navigator(route = "$PAGE_NAME/$permissionType/${app.toRoute()}")
 
-        internal fun buildPageId(permissionType: String): SettingsPage {
+        internal fun buildPageData(permissionType: String): SettingsPage {
             return SettingsPage.create(
                 PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
         }

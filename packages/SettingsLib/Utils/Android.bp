@@ -26,5 +26,6 @@ android_library {
         "com.android.adservices",
         "com.android.permission",
         "com.android.cellbroadcast",
+        "com.android.healthconnect",
     ],
 }

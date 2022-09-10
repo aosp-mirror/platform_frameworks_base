@@ -16,11 +16,15 @@
 
 package com.android.systemui.util.kotlin
 
+import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 /**
  * Returns a new [Flow] that combines the two most recent emissions from [this] using [transform].
@@ -116,3 +120,35 @@ data class SetChanges<T>(
     /** Elements that are present in the second [Set] but not in the first. */
     val added: Set<T>,
 )
+
+/**
+ * Returns a new [Flow] that emits at the same rate as [this], but combines the emitted value with
+ * the most recent emission from [other] using [transform].
+ *
+ * Note that the returned Flow will not emit anything until [other] has emitted at least one value.
+ */
+fun <A, B, C> Flow<A>.sample(other: Flow<B>, transform: suspend (A, B) -> C): Flow<C> = flow {
+    coroutineScope {
+        val noVal = Any()
+        val sampledRef = AtomicReference(noVal)
+        val job = launch(Dispatchers.Unconfined) {
+            other.collect { sampledRef.set(it) }
+        }
+        collect {
+            val sampled = sampledRef.get()
+            if (sampled != noVal) {
+                @Suppress("UNCHECKED_CAST")
+                emit(transform(it, sampled as B))
+            }
+        }
+        job.cancel()
+    }
+}
+
+/**
+ * Returns a new [Flow] that emits at the same rate as [this], but emits the most recently emitted
+ * value from [other] instead.
+ *
+ * Note that the returned Flow will not emit anything until [other] has emitted at least one value.
+ */
+fun <A> Flow<*>.sample(other: Flow<A>): Flow<A> = sample(other) { _, a -> a }

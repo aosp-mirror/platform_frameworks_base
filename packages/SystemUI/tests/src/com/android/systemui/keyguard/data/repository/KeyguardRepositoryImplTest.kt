@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.repository
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Position
+import com.android.systemui.doze.DozeHost
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
@@ -40,6 +41,7 @@ import org.mockito.MockitoAnnotations
 class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var dozeHost: DozeHost
     @Mock private lateinit var keyguardStateController: KeyguardStateController
 
     private lateinit var underTest: KeyguardRepositoryImpl
@@ -48,7 +50,12 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        underTest = KeyguardRepositoryImpl(statusBarStateController, keyguardStateController)
+        underTest =
+            KeyguardRepositoryImpl(
+                statusBarStateController,
+                keyguardStateController,
+                dozeHost,
+            )
     }
 
     @Test
@@ -129,8 +136,8 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         var latest: Boolean? = null
         val job = underTest.isDozing.onEach { latest = it }.launchIn(this)
 
-        val captor = argumentCaptor<StatusBarStateController.StateListener>()
-        verify(statusBarStateController).addCallback(captor.capture())
+        val captor = argumentCaptor<DozeHost.Callback>()
+        verify(dozeHost).addCallback(captor.capture())
 
         captor.value.onDozingChanged(true)
         assertThat(latest).isTrue()
@@ -139,7 +146,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         assertThat(latest).isFalse()
 
         job.cancel()
-        verify(statusBarStateController).removeCallback(captor.value)
+        verify(dozeHost).removeCallback(captor.value)
     }
 
     @Test

@@ -88,7 +88,7 @@
         android:layout_marginTop="@dimen/status_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:gravity="center_horizontal">
-        <com.android.keyguard.KeyguardMessageArea
+        <com.android.keyguard.AuthKeyguardMessageArea
             android:id="@+id/keyguard_message_area"
             style="@style/Keyguard.TextView"
             android:layout_width="wrap_content"

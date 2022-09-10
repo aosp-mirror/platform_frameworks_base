@@ -28,8 +28,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistManager;
@@ -50,11 +48,9 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.unfold.FoldAodAnimationController;
-import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -80,8 +76,6 @@ public final class DozeServiceHost implements DozeHost {
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
-    @Nullable
-    private final FoldAodAnimationController mFoldAodAnimationController;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
     private final BatteryController mBatteryController;
     private final ScrimController mScrimController;
@@ -114,7 +108,6 @@ public final class DozeServiceHost implements DozeHost {
             Lazy<AssistManager> assistManagerLazy,
             DozeScrimController dozeScrimController, KeyguardUpdateMonitor keyguardUpdateMonitor,
             PulseExpansionHandler pulseExpansionHandler,
-            Optional<SysUIUnfoldComponent> sysUIUnfoldComponent,
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
@@ -138,8 +131,6 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
-        mFoldAodAnimationController = sysUIUnfoldComponent
-                .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -167,6 +158,7 @@ public final class DozeServiceHost implements DozeHost {
     }
 
     void firePowerSaveChanged(boolean active) {
+        Assert.isMainThread();
         for (Callback callback : mCallbacks) {
             callback.onPowerSaveChanged(active);
         }
@@ -177,6 +169,7 @@ public final class DozeServiceHost implements DozeHost {
             entry.setPulseSuppressed(true);
             mNotificationIconAreaController.updateAodNotificationIcons();
         };
+        Assert.isMainThread();
         for (Callback callback : mCallbacks) {
             callback.onNotificationAlerted(pulseSuppressedListener);
         }
@@ -193,11 +186,13 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void addCallback(@NonNull Callback callback) {
+        Assert.isMainThread();
         mCallbacks.add(callback);
     }
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
+        Assert.isMainThread();
         mCallbacks.remove(callback);
     }
 
@@ -212,6 +207,8 @@ public final class DozeServiceHost implements DozeHost {
     }
 
     void updateDozing() {
+        Assert.isMainThread();
+
         // When in wake-and-unlock while pulsing, keep dozing state until fully unlocked.
         boolean
                 dozing =
@@ -225,10 +222,10 @@ public final class DozeServiceHost implements DozeHost {
             dozing = false;
         }
 
-        mStatusBarStateController.setIsDozing(dozing);
-        if (mFoldAodAnimationController != null) {
-            mFoldAodAnimationController.setIsDozing(dozing);
+        for (Callback callback : mCallbacks) {
+            callback.onDozingChanged(dozing);
         }
+        mStatusBarStateController.setIsDozing(dozing);
     }
 
     @Override
@@ -452,6 +449,7 @@ public final class DozeServiceHost implements DozeHost {
             return;
         }
         mAlwaysOnSuppressed = suppressed;
+        Assert.isMainThread();
         for (Callback callback : mCallbacks) {
             callback.onAlwaysOnSuppressedChanged(suppressed);
         }

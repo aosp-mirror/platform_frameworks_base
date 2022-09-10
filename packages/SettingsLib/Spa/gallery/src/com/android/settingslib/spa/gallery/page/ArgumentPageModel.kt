@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.android.settingslib.spa.framework.BrowseActivity
 import com.android.settingslib.spa.framework.common.PageModel
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
@@ -63,6 +64,10 @@ class ArgumentPageModel : PageModel() {
             return (stringParam != null && listOf("foo", "bar").contains(stringParam))
         }
 
+        fun getInjectEntryName(arguments: Bundle?): String {
+            return "${name}_${parameter.getStringArg(STRING_PARAM_NAME, arguments)}"
+        }
+
         @Composable
         fun create(arguments: Bundle?): ArgumentPageModel {
             val pageModel: ArgumentPageModel = viewModel(key = arguments.toString())
@@ -75,12 +80,14 @@ class ArgumentPageModel : PageModel() {
     private var arguments: Bundle? = null
     private var stringParam: String? = null
     private var intParam: Int? = null
+    private var highlightName: String? = null
 
     override fun initialize(arguments: Bundle?) {
         logMsg("init with args " + arguments.toString())
         this.arguments = arguments
         stringParam = parameter.getStringArg(STRING_PARAM_NAME, arguments)
         intParam = parameter.getIntArg(INT_PARAM_NAME, arguments)
+        highlightName = arguments?.getString(BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME)
     }
 
     @Composable

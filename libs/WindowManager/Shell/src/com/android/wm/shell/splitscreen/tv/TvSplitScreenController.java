@@ -34,7 +34,6 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.splitscreen.SplitscreenEventLogger;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -111,7 +110,7 @@ public class TvSplitScreenController extends SplitScreenController {
         return new TvStageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool,
-                new SplitscreenEventLogger(), mIconProvider, mMainExecutor, mMainHandler,
+                mIconProvider, mMainExecutor, mMainHandler,
                 mRecentTasksOptional, mSystemWindows);
     }
 

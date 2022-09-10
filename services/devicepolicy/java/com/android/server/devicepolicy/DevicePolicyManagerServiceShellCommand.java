@@ -50,6 +50,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private final DevicePolicyManagerService mService;
     private int mUserId = UserHandle.USER_SYSTEM;
+    //TODO(b/240562946): remove mName once it is not used by setDeviceOwner
     private String mName = "";
     private ComponentName mComponent;
     private boolean mSetDoOnly;
@@ -287,7 +288,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
 
         try {
-            if (!mService.setProfileOwner(mComponent, mName, mUserId)) {
+            if (!mService.setProfileOwner(mComponent, mUserId)) {
                 throw new RuntimeException("Can't set component "
                         + mComponent.flattenToShortString() + " as profile owner for user "
                         + mUserId);

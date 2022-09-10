@@ -8969,7 +8969,7 @@ public class DevicePolicyManager {
             try {
                 final int myUserId = myUserId();
                 mService.setActiveAdmin(admin, false, myUserId);
-                return mService.setProfileOwner(admin, ownerName, myUserId);
+                return mService.setProfileOwner(admin, myUserId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -9031,20 +9031,16 @@ public class DevicePolicyManager {
      * - the caller is SYSTEM_UID.
      * - or the caller is the shell uid, and there are no accounts on the specified user.
      * @param admin the component name to be registered as profile owner.
-     * @param ownerName the human readable name of the organisation associated with this DPM.
      * @param userHandle the userId to set the profile owner for.
      * @return whether the component was successfully registered as the profile owner.
      * @throws IllegalArgumentException if admin is null, the package isn't installed, or the
      * preconditions mentioned are not met.
      */
-    public boolean setProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName,
-            int userHandle) throws IllegalArgumentException {
+    public boolean setProfileOwner(@NonNull ComponentName admin, int userHandle)
+            throws IllegalArgumentException {
         if (mService != null) {
             try {
-                if (ownerName == null) {
-                    ownerName = "";
-                }
-                return mService.setProfileOwner(admin, ownerName, userHandle);
+                return mService.setProfileOwner(admin, userHandle);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -15427,7 +15423,7 @@ public class DevicePolicyManager {
      *
      * @see #setWifiSsidPolicy(WifiSsidPolicy)
      * @throws SecurityException if the caller is not a device owner or a profile owner on
-     * an organization-owned managed profile or a system app.
+     * an organization-owned managed profile.
      */
     @Nullable
     public WifiSsidPolicy getWifiSsidPolicy() {

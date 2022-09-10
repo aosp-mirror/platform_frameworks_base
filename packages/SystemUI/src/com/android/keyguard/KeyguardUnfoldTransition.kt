@@ -50,12 +50,10 @@ constructor(
             viewsIdToTranslate =
                 setOf(
                     ViewIdToTranslate(R.id.keyguard_status_area, LEFT, filterNever),
-                    ViewIdToTranslate(R.id.controls_button, LEFT, filterNever),
                     ViewIdToTranslate(R.id.lockscreen_clock_view_large, LEFT, filterSplitShadeOnly),
                     ViewIdToTranslate(R.id.lockscreen_clock_view, LEFT, filterNever),
                     ViewIdToTranslate(
                         R.id.notification_stack_scroller, RIGHT, filterSplitShadeOnly),
-                    ViewIdToTranslate(R.id.wallet_button, RIGHT, filterNever),
                     ViewIdToTranslate(R.id.start_button, LEFT, filterNever),
                     ViewIdToTranslate(R.id.end_button, RIGHT, filterNever)),
             progressProvider = unfoldProgressProvider)
