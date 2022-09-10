@@ -2120,7 +2120,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
-        updateEnterpriseThumbnailDrawable(mAtmService.mUiContext);
+        updateEnterpriseThumbnailDrawable(mAtmService.getUiContext());
     }
 
     /**
@@ -7433,7 +7433,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final Rect frame = win.getRelativeFrame();
         final Drawable thumbnailDrawable = task.mUserId == mWmService.mCurrentUserId
-                ? mAtmService.mUiContext.getDrawable(R.drawable.ic_account_circle)
+                ? mAtmService.getUiContext().getDrawable(R.drawable.ic_account_circle)
                 : mEnterpriseThumbnailDrawable;
         final HardwareBuffer thumbnail = getDisplayContent().mAppTransition
                 .createCrossProfileAppsThumbnail(thumbnailDrawable, frame);

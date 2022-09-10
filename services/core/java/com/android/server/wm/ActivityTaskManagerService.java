@@ -346,7 +346,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * This Context is themable and meant for UI display (AlertDialogs, etc.). The theme can
      * change at runtime. Use mContext for non-UI purposes.
      */
-    final Context mUiContext;
+    private final Context mUiContext;
     final ActivityThread mSystemThread;
     H mH;
     UiHandler mUiHandler;
@@ -1039,6 +1039,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             mUsageStatsInternal = usageStatsManager;
         }
+    }
+
+    Context getUiContext() {
+        return mUiContext;
     }
 
     UserManagerService getUserManager() {
