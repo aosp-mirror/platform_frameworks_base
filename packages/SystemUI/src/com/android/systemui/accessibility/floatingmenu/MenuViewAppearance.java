@@ -64,6 +64,7 @@ class MenuViewAppearance {
     private int mElevation;
     private float[] mRadii;
     private Drawable mBackgroundDrawable;
+    private String mContentDescription;
 
     @IntDef({
             SMALL,
@@ -108,6 +109,8 @@ class MenuViewAppearance {
         final Drawable drawable =
                 mRes.getDrawable(R.drawable.accessibility_floating_menu_background);
         mBackgroundDrawable = new InstantInsetLayerDrawable(new Drawable[]{drawable});
+        mContentDescription = mRes.getString(
+                com.android.internal.R.string.accessibility_select_shortcut_menu_title);
     }
 
     void setSizeType(int sizeType) {
@@ -155,6 +158,10 @@ class MenuViewAppearance {
                         + draggableBounds.width() * mPercentagePosition.getPercentageX(),
                 draggableBounds.top
                         + draggableBounds.height() * mPercentagePosition.getPercentageY());
+    }
+
+    String getContentDescription() {
+        return mContentDescription;
     }
 
     Drawable getMenuBackground() {

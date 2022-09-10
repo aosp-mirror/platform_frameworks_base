@@ -28,9 +28,12 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 
@@ -72,10 +75,15 @@ class MenuView extends FrameLayout implements
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
-        final MenuListViewTouchHandler menuListViewTouchHandler =
-                new MenuListViewTouchHandler(mMenuAnimationController);
-        addOnItemTouchListenerToList(menuListViewTouchHandler);
-
+        mTargetFeaturesView.setAccessibilityDelegateCompat(
+                new RecyclerViewAccessibilityDelegate(mTargetFeaturesView) {
+                    @NonNull
+                    @Override
+                    public AccessibilityDelegateCompat getItemDelegate() {
+                        return new MenuItemAccessibilityDelegate(/* recyclerViewDelegate= */ this,
+                                mMenuAnimationController);
+                    }
+                });
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         // Avoid drawing out of bounds of the parent view
         setClipToOutline(true);
@@ -270,6 +278,7 @@ class MenuView extends FrameLayout implements
     void loadLayoutResources() {
         mMenuViewAppearance.update();
 
+        mTargetFeaturesView.setContentDescription(mMenuViewAppearance.getContentDescription());
         setBackground(mMenuViewAppearance.getMenuBackground());
         setElevation(mMenuViewAppearance.getMenuElevation());
         onItemSizeChanged();

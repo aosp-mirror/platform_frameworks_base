@@ -99,6 +99,30 @@ class MenuAnimationController {
         }
     }
 
+    void moveToTopLeftPosition() {
+        mIsMovedToEdge = false;
+        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+        moveAndPersistPosition(new PointF(draggableBounds.left, draggableBounds.top));
+    }
+
+    void moveToTopRightPosition() {
+        mIsMovedToEdge = false;
+        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+        moveAndPersistPosition(new PointF(draggableBounds.right, draggableBounds.top));
+    }
+
+    void moveToBottomLeftPosition() {
+        mIsMovedToEdge = false;
+        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+        moveAndPersistPosition(new PointF(draggableBounds.left, draggableBounds.bottom));
+    }
+
+    void moveToBottomRightPosition() {
+        mIsMovedToEdge = false;
+        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+        moveAndPersistPosition(new PointF(draggableBounds.right, draggableBounds.bottom));
+    }
+
     void moveAndPersistPosition(PointF position) {
         moveToPosition(position);
         mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
