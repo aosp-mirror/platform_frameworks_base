@@ -421,7 +421,7 @@ public class DisplayPolicy {
         mService = service;
         mContext = displayContent.isDefaultDisplay ? service.mContext
                 : service.mContext.createDisplayContext(displayContent.getDisplay());
-        mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.mUiContext
+        mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.getUiContext()
                 : service.mAtmService.mSystemThread
                         .getSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
