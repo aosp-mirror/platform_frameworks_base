@@ -18,7 +18,6 @@ package com.android.systemui.qs.footer.ui.viewmodel
 
 import android.annotation.DrawableRes
 import android.view.View
-import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 
 /**
@@ -29,7 +28,6 @@ data class FooterActionsButtonViewModel(
     val icon: Icon,
     val iconTint: Int?,
     @DrawableRes val background: Int,
-    val contentDescription: ContentDescription,
     // TODO(b/230830644): Replace View by an Expandable interface that can expand in either dialog
     // or activity.
     val onClick: (View) -> Unit,

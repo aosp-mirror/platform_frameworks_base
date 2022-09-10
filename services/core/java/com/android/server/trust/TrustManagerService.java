@@ -1211,7 +1211,7 @@ public class TrustManagerService extends SystemService {
             if (info.userId == userId
                     && info.agent.isTrusted()
                     && info.agent.shouldDisplayTrustGrantedMessage()
-                    && !TextUtils.isEmpty(info.agent.getMessage())) {
+                    && info.agent.getMessage() != null) {
                 trustGrantedMessages.add(info.agent.getMessage().toString());
             }
         }

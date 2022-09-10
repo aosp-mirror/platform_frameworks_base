@@ -34,15 +34,14 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
-import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
-import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -56,18 +55,16 @@ class MediaTttChipControllerReceiver @Inject constructor(
         context: Context,
         @MediaTttReceiverLogger logger: MediaTttLogger,
         windowManager: WindowManager,
-        viewUtil: ViewUtil,
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
-) : MediaTttChipControllerCommon<ChipReceiverInfo>(
+) : TemporaryViewDisplayController<ChipReceiverInfo>(
         context,
         logger,
         windowManager,
-        viewUtil,
         mainExecutor,
         accessibilityManager,
         configurationController,
@@ -119,18 +116,18 @@ class MediaTttChipControllerReceiver @Inject constructor(
         uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeChip(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
             return
         }
         if (appIcon == null) {
-            displayChip(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
+            displayView(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
             return
         }
 
         appIcon.loadDrawableAsync(
                 context,
                 Icon.OnDrawableLoadedListener { drawable ->
-                    displayChip(ChipReceiverInfo(routeInfo, drawable, appName))
+                    displayView(ChipReceiverInfo(routeInfo, drawable, appName))
                 },
                 // Notify the listener on the main handler since the listener will update
                 // the UI.
@@ -138,19 +135,19 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
     }
 
-    override fun updateChipView(newChipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
-        super.updateChipView(newChipInfo, currentChipView)
+    override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
+        super.updateView(newInfo, currentView)
         val iconName = setIcon(
-                currentChipView,
-                newChipInfo.routeInfo.clientPackageName,
-                newChipInfo.appIconDrawableOverride,
-                newChipInfo.appNameOverride
+                currentView,
+                newInfo.routeInfo.clientPackageName,
+                newInfo.appIconDrawableOverride,
+                newInfo.appNameOverride
         )
-        currentChipView.contentDescription = iconName
+        currentView.contentDescription = iconName
     }
 
-    override fun animateChipIn(chipView: ViewGroup) {
-        val appIconView = chipView.requireViewById<View>(R.id.app_icon)
+    override fun animateViewIn(view: ViewGroup) {
+        val appIconView = view.requireViewById<View>(R.id.app_icon)
         appIconView.animate()
                 .translationYBy(-1 * getTranslationAmount().toFloat())
                 .setDuration(30.frames)
@@ -160,8 +157,8 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 .setDuration(5.frames)
                 .start()
         // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
-        appIconView.postOnAnimation { chipView.requestAccessibilityFocus() }
-        startRipple(chipView.requireViewById(R.id.ripple))
+        appIconView.postOnAnimation { view.requestAccessibilityFocus() }
+        startRipple(view.requireViewById(R.id.ripple))
     }
 
     override fun getIconSize(isAppIcon: Boolean): Int? =
@@ -216,7 +213,7 @@ data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,
     val appIconDrawableOverride: Drawable?,
     val appNameOverride: CharSequence?
-) : ChipInfoCommon {
+) : TemporaryViewInfo {
     override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
 }
 

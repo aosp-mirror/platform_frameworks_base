@@ -40,6 +40,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -220,6 +221,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     ViewGroup getBouncerContainer();
 
+    /** Get the Keyguard Message Area that displays auth messages. */
+    AuthKeyguardMessageArea getKeyguardMessageArea();
+
     int getStatusBarHeight();
 
     void updateQsExpansionEnabled();
@@ -389,8 +393,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
-
-    void fadeKeyguardWhilePulsing();
 
     void animateKeyguardUnoccluding();
 

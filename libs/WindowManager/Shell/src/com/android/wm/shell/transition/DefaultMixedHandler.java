@@ -35,10 +35,14 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.splitscreen.StageCoordinator;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * A handler for dealing with transitions involving multiple other handlers. For example: an
@@ -47,8 +51,8 @@ import java.util.ArrayList;
 public class DefaultMixedHandler implements Transitions.TransitionHandler {
 
     private final Transitions mPlayer;
-    private final PipTransitionController mPipHandler;
-    private final StageCoordinator mSplitHandler;
+    private PipTransitionController mPipHandler;
+    private StageCoordinator mSplitHandler;
 
     private static class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
@@ -77,13 +81,22 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
             mTransition = transition;
         }
     }
+
     private final ArrayList<MixedTransition> mActiveTransitions = new ArrayList<>();
 
-    public DefaultMixedHandler(@NonNull Transitions player,
-            @NonNull PipTransitionController pipHandler, @NonNull StageCoordinator splitHandler) {
+    public DefaultMixedHandler(@NonNull ShellInit shellInit, @NonNull Transitions player,
+            Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<PipTouchHandler> pipTouchHandlerOptional) {
         mPlayer = player;
-        mPipHandler = pipHandler;
-        mSplitHandler = splitHandler;
+        if (Transitions.ENABLE_SHELL_TRANSITIONS && pipTouchHandlerOptional.isPresent()
+                && splitScreenControllerOptional.isPresent()) {
+            // Add after dependencies because it is higher priority
+            shellInit.addInitCallback(() -> {
+                mPipHandler = pipTouchHandlerOptional.get().getTransitionHandler();
+                mSplitHandler = splitScreenControllerOptional.get().getTransitionHandler();
+                mPlayer.addHandler(this);
+            }, this);
+        }
     }
 
     @Nullable

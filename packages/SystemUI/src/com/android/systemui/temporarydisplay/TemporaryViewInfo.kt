@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.common
+package com.android.systemui.temporarydisplay
 
 /**
- * A superclass chip state that will be subclassed by the sender chip and receiver chip.
+ * A superclass view state used with [TemporaryViewDisplayController].
  */
-interface ChipInfoCommon {
+interface TemporaryViewInfo {
     /**
-     * Returns the amount of time the given chip state should display on the screen before it times
+     * Returns the amount of time the given view state should display on the screen before it times
      * out and disappears.
      */
-    fun getTimeoutMs(): Long
+    fun getTimeoutMs(): Long = DEFAULT_TIMEOUT_MILLIS
 }
 
 const val DEFAULT_TIMEOUT_MILLIS = 10000L
