@@ -70,9 +70,13 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         val underTest = utils.footerActionsViewModel(showPowerButton = false)
         val settings = underTest.settings
 
-        assertThat(settings.contentDescription)
-            .isEqualTo(ContentDescription.Resource(R.string.accessibility_quick_settings_settings))
-        assertThat(settings.icon).isEqualTo(Icon.Resource(R.drawable.ic_settings))
+        assertThat(settings.icon)
+            .isEqualTo(
+                Icon.Resource(
+                    R.drawable.ic_settings,
+                    ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
+                )
+            )
         assertThat(settings.background).isEqualTo(R.drawable.qs_footer_action_circle)
         assertThat(settings.iconTint).isNull()
     }
@@ -87,11 +91,13 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         val underTestWithPower = utils.footerActionsViewModel(showPowerButton = true)
         val power = underTestWithPower.power
         assertThat(power).isNotNull()
-        assertThat(power!!.contentDescription)
+        assertThat(power!!.icon)
             .isEqualTo(
-                ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
+                Icon.Resource(
+                    android.R.drawable.ic_lock_power_off,
+                    ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
+                )
             )
-        assertThat(power.icon).isEqualTo(Icon.Resource(android.R.drawable.ic_lock_power_off))
         assertThat(power.background).isEqualTo(R.drawable.qs_footer_action_circle_color)
         assertThat(power.iconTint)
             .isEqualTo(
@@ -164,14 +170,13 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         utils.setUserSwitcherEnabled(settings, true, userId)
         val userSwitcher = currentUserSwitcher()
         assertThat(userSwitcher).isNotNull()
-        assertThat(userSwitcher!!.contentDescription)
-            .isEqualTo(ContentDescription.Loaded("Signed in as foo"))
-        assertThat(userSwitcher.icon).isEqualTo(Icon.Loaded(picture))
+        assertThat(userSwitcher!!.icon)
+            .isEqualTo(Icon.Loaded(picture, ContentDescription.Loaded("Signed in as foo")))
         assertThat(userSwitcher.background).isEqualTo(R.drawable.qs_footer_action_circle)
 
         // Change the current user name.
         userSwitcherControllerWrapper.currentUserName = "bar"
-        assertThat(currentUserSwitcher()?.contentDescription)
+        assertThat(currentUserSwitcher()?.icon?.contentDescription)
             .isEqualTo(ContentDescription.Loaded("Signed in as bar"))
 
         fun iconTint(): Int? = currentUserSwitcher()!!.iconTint
@@ -243,7 +248,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         // Map any SecurityModel into a non-null SecurityButtonConfig.
         val buttonConfig =
             SecurityButtonConfig(
-                icon = Icon.Resource(0),
+                icon = Icon.Resource(res = 0, contentDescription = null),
                 text = "foo",
                 isClickable = true,
             )
@@ -340,7 +345,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         assertThat(foregroundServices.displayText).isTrue()
         securityToConfig = {
             SecurityButtonConfig(
-                icon = Icon.Resource(0),
+                icon = Icon.Resource(res = 0, contentDescription = null),
                 text = "foo",
                 isClickable = true,
             )

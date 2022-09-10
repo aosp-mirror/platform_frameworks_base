@@ -41,6 +41,7 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsetsController;
@@ -117,7 +118,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
     @Mock
-    private KeyguardMessageArea mKeyguardMessageArea;
+    private BouncerKeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
@@ -163,9 +164,10 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         when(mAdminSecondaryLockScreenControllerFactory.create(any(KeyguardSecurityCallback.class)))
                 .thenReturn(mAdminSecondaryLockScreenController);
         when(mSecurityViewFlipper.getWindowInsetsController()).thenReturn(mWindowInsetsController);
-        mKeyguardPasswordView = spy(new KeyguardPasswordView(getContext()));
+        mKeyguardPasswordView = spy((KeyguardPasswordView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_password_view, null));
         when(mKeyguardPasswordView.getRootView()).thenReturn(mSecurityViewFlipper);
-        when(mKeyguardPasswordView.findViewById(R.id.keyguard_message_area))
+        when(mKeyguardPasswordView.requireViewById(R.id.bouncer_message_area))
                 .thenReturn(mKeyguardMessageArea);
         when(mKeyguardMessageAreaControllerFactory.create(any(KeyguardMessageArea.class)))
                 .thenReturn(mKeyguardMessageAreaController);

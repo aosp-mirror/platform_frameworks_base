@@ -66,6 +66,10 @@ public class Flags {
     public static final UnreleasedFlag FSI_REQUIRES_KEYGUARD =
             new UnreleasedFlag(110, true);
 
+    public static final UnreleasedFlag INSTANT_VOICE_REPLY = new UnreleasedFlag(111, true);
+
+    // next id: 112
+
     /***************************************/
     // 200 - keyguard/lockscreen
 
@@ -87,12 +91,6 @@ public class Flags {
 
     public static final ResourceBooleanFlag FACE_SCANNING_ANIM =
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
-
-    /**
-     * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
-     * one.
-     */
-    public static final ReleasedFlag MODERN_BOTTOM_AREA = new ReleasedFlag(206, true);
 
     public static final UnreleasedFlag LOCKSCREEN_CUSTOM_CLOCKS = new UnreleasedFlag(207);
   
@@ -185,6 +183,9 @@ public class Flags {
     /***************************************/
     // 801 - region sampling
     public static final UnreleasedFlag REGION_SAMPLING = new UnreleasedFlag(801);
+
+    // 802 - wallpaper rendering
+    public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
 
     /***************************************/
     // 900 - media

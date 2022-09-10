@@ -318,6 +318,10 @@ public abstract class UserManagerInternal {
      *
      * <p>On most devices this call will be a no-op, but it will be used on devices that support
      * multiple users on multiple displays (like automotives with passenger displays).
+     *
+     * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} when a user is
+     * started and it doesn't validate if the display exists.
+     *
      */
     public abstract void assignUserToDisplay(@UserIdInt int userId, int displayId);
 
@@ -326,6 +330,9 @@ public abstract class UserManagerInternal {
      *
      * <p>On most devices this call will be a no-op, but it will be used on devices that support
      * multiple users on multiple displays (like automotives with passenger displays).
+     *
+     * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} when a user is
+     * stopped.
      */
     public abstract void unassignUserFromDisplay(@UserIdInt int userId);
 

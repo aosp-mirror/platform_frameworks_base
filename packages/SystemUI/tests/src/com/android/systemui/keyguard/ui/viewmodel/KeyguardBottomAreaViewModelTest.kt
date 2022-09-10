@@ -224,7 +224,10 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         repository.setAnimateDozingTransitions(false)
         yield()
 
-        assertThat(values).isEqualTo(listOf(false, true, false))
+        // Note the extra false value in the beginning. This is to cover for the initial value
+        // inserted by the quick affordance interactor which it does to cover for config
+        // implementations that don't emit an initial value.
+        assertThat(values).isEqualTo(listOf(false, false, true, false))
         job.cancel()
     }
 
@@ -372,6 +375,10 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
         var latest: KeyguardQuickAffordanceViewModel? = null
         val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+        // The interactor has an onStart { emit(Hidden) } to cover for upstream configs that don't
+        // produce an initial value. We yield to give the coroutine time to emit the first real
+        // value from our config.
+        yield()
 
         assertQuickAffordanceViewModel(
             viewModel = latest,

@@ -6893,11 +6893,11 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public void setCellInfoListRate(int rateInMillis) {
+    public void setCellInfoListRate(int rateInMillis, int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                telephony.setCellInfoListRate(rateInMillis);
+                telephony.setCellInfoListRate(rateInMillis, subId);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }

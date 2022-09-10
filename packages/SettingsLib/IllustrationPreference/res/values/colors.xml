@@ -43,6 +43,8 @@
     <color name="settingslib_color_grey400">#bdc1c6</color>
     <color name="settingslib_color_grey300">#dadce0</color>
     <color name="settingslib_color_grey200">#e8eaed</color>
+    <color name="settingslib_color_grey100">#f1f3f4</color>
+    <color name="settingslib_color_grey50">#f8f9fa</color>
     <color name="settingslib_color_orange600">#e8710a</color>
     <color name="settingslib_color_orange400">#fa903e</color>
     <color name="settingslib_color_orange300">#fcad70</color>

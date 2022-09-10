@@ -82,7 +82,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.transition.SplitscreenPipMixedHandler;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
@@ -220,13 +220,14 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
+            Optional<RecentTasksController> recentTasksController,
             WindowDecorViewModel<?> windowDecorViewModel) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
         ShellInit init = FreeformComponents.isFreeformEnabled(context)
                 ? shellInit
                 : null;
-        return new FreeformTaskListener<>(init, shellTaskOrganizer,
+        return new FreeformTaskListener<>(init, shellTaskOrganizer, recentTasksController,
                 windowDecorViewModel);
     }
 
@@ -483,13 +484,13 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static SplitscreenPipMixedHandler provideSplitscreenPipMixedHandler(
+    static DefaultMixedHandler provideDefaultMixedHandler(
             ShellInit shellInit,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             Transitions transitions) {
-        return new SplitscreenPipMixedHandler(shellInit, splitScreenOptional,
-                pipTouchHandlerOptional, transitions);
+        return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
+                pipTouchHandlerOptional);
     }
 
     //
@@ -618,7 +619,7 @@ public abstract class WMShellModule {
     @ShellCreateTriggerOverride
     @Provides
     static Object provideIndependentShellComponentsToCreate(
-            SplitscreenPipMixedHandler splitscreenPipMixedHandler,
+            DefaultMixedHandler defaultMixedHandler,
             Optional<DesktopModeController> desktopModeController) {
         return new Object();
     }

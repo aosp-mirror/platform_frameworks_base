@@ -62,6 +62,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -12889,7 +12890,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mViewTranslationCallback != null) {
             mViewTranslationCallback.onClearTranslation(this);
         }
-        clearViewTranslationCallback();
         clearViewTranslationResponse();
         if (hasTranslationTransientState()) {
             setHasTransientState(false);
@@ -27546,6 +27546,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 || (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
             throw new IllegalStateException("Drag shadow dimensions must not be negative");
         }
+        final float overrideInvScale = CompatibilityInfo.getOverrideInvertedScale();
+        if (overrideInvScale != 1f) {
+            shadowTouchPoint.x = (int) (shadowTouchPoint.x / overrideInvScale);
+            shadowTouchPoint.y = (int) (shadowTouchPoint.y / overrideInvScale);
+        }
 
         // Create 1x1 surface when zero surface size is specified because SurfaceControl.Builder
         // does not accept zero size surface.
@@ -27570,6 +27575,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setCallsite("View.startDragAndDrop")
                 .build();
+        if (overrideInvScale != 1f) {
+            final SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+            transaction.setMatrix(surfaceControl, 1 / overrideInvScale, 0, 0, 1 / overrideInvScale)
+                    .apply();
+        }
         final Surface surface = new Surface();
         surface.copyFrom(surfaceControl);
         IBinder token = null;

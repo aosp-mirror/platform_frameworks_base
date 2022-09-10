@@ -18,7 +18,6 @@
 
 #include "CanvasProperty.h"
 #include "NinePatchUtils.h"
-#include "SkBlendMode.h"
 #include "VectorDrawable.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
@@ -252,11 +251,10 @@ const SkiaCanvas::SaveRec* SkiaCanvas::currentSaveRec() const {
     return (rec && rec->saveCount == currentSaveCount) ? rec : nullptr;
 }
 
-void SkiaCanvas::punchHole(const SkRRect& rect, float alpha) {
+void SkiaCanvas::punchHole(const SkRRect& rect) {
     SkPaint paint = SkPaint();
-    paint.setColor(SkColors::kBlack);
-    paint.setAlphaf(alpha);
-    paint.setBlendMode(SkBlendMode::kDstOut);
+    paint.setColor(0);
+    paint.setBlendMode(SkBlendMode::kClear);
     mCanvas->drawRRect(rect, paint);
 }
 

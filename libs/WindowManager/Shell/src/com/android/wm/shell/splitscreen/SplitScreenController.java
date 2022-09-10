@@ -147,7 +147,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final DragAndDropController mDragAndDropController;
     private final Transitions mTransitions;
     private final TransactionPool mTransactionPool;
-    private final SplitscreenEventLogger mLogger;
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
     private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
@@ -186,7 +185,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDragAndDropController = dragAndDropController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
-        mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
@@ -221,7 +219,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     protected StageCoordinator createStageCoordinator() {
         return new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
-                mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
+                mDisplayInsetsController, mTransitions, mTransactionPool,
                 mIconProvider, mMainExecutor, mRecentTasksOptional);
     }
 

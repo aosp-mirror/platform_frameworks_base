@@ -309,6 +309,7 @@ public class BubbleController implements ConfigurationChangeListener {
     protected void onInit() {
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
+        mDataRepository.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
@@ -1336,19 +1337,7 @@ public class BubbleController implements ConfigurationChangeListener {
                         }
                         mSysuiProxy.updateNotificationBubbleButton(bubble.getKey());
                     }
-
                 }
-                mSysuiProxy.getPendingOrActiveEntry(bubble.getKey(), (entry) -> {
-                    mMainExecutor.execute(() -> {
-                        if (entry != null) {
-                            final String groupKey = entry.getStatusBarNotification().getGroupKey();
-                            if (getBubblesInGroup(groupKey).isEmpty()) {
-                                // Time to potentially remove the summary
-                                mSysuiProxy.notifyMaybeCancelSummary(bubble.getKey());
-                            }
-                        }
-                    });
-                });
             }
             mDataRepository.removeBubbles(mCurrentUserId, bubblesToBeRemovedFromRepository);
 

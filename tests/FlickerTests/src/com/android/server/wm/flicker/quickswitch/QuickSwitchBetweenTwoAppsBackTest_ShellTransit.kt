@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -56,29 +55,6 @@ open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
-
-    @FlakyTest(bugId = 228009808)
-    @Test
-    override fun app1LayerIsVisibleOnceApp2LayerIsInvisible() =
-        super.app1LayerIsVisibleOnceApp2LayerIsInvisible()
-
-    @FlakyTest(bugId = 228009808)
-    @Test
-    override fun app1WindowBecomesAndStaysVisible() = super.app1WindowBecomesAndStaysVisible()
-
-    @FlakyTest(bugId = 228009808)
-    @Test
-    override fun endsWithApp1BeingOnTop() = super.endsWithApp1BeingOnTop()
-
-    @FlakyTest(bugId = 239147075)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest(bugId = 239147075)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
     @Ignore("Nav bar window becomes invisible during quick switch")

@@ -26,6 +26,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.tuner.TunerService
@@ -49,6 +50,7 @@ class PulsingGestureListener @Inject constructor(
         private val dockManager: DockManager,
         private val centralSurfaces: CentralSurfaces,
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
+        private val statusBarStateController: StatusBarStateController,
         tunerService: TunerService,
         dumpManager: DumpManager
 ) : GestureDetector.SimpleOnGestureListener(), Dumpable {
@@ -74,7 +76,8 @@ class PulsingGestureListener @Inject constructor(
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-        if (singleTapEnabled &&
+        if (statusBarStateController.isPulsing &&
+                singleTapEnabled &&
                 !dockManager.isDocked &&
                 !falsingManager.isProximityNear &&
                 !falsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)
@@ -89,7 +92,8 @@ class PulsingGestureListener @Inject constructor(
     }
 
     override fun onDoubleTap(e: MotionEvent): Boolean {
-        if ((doubleTapEnabled || singleTapEnabled) &&
+        if (statusBarStateController.isPulsing &&
+                (doubleTapEnabled || singleTapEnabled) &&
                 !falsingManager.isProximityNear &&
                 !falsingManager.isFalseDoubleTap
         ) {

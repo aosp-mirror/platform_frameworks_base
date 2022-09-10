@@ -250,7 +250,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // Validate that when the animation ends the stackEndHeight is recalculated immediately
         clearInvocations(mAmbientState);
         mStackScroller.setPanelFlinging(false);
-        verify(mAmbientState).setIsFlinging(eq(false));
+        verify(mAmbientState).setFlinging(eq(false));
         verify(mAmbientState).setStackEndHeight(anyFloat());
         verify(mAmbientState).setStackHeight(anyFloat());
     }

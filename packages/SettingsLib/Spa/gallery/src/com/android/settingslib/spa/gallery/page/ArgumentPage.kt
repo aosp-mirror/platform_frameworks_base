@@ -68,7 +68,10 @@ object ArgumentPageProvider : SettingsPageProvider {
     private fun buildInjectEntry(arguments: Bundle?): SettingsEntryBuilder? {
         if (!ArgumentPageModel.isValidArgument(arguments)) return null
 
-        return SettingsEntryBuilder.createInject(SettingsPage.create(name, parameter, arguments))
+        return SettingsEntryBuilder.createInject(
+            entryName = ArgumentPageModel.getInjectEntryName(arguments),
+            owner = SettingsPage.create(name, parameter, arguments)
+        )
             // Set attributes
             .setIsAllowSearch(false)
             .setUiLayoutFn {

@@ -26,7 +26,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 class CompanionDeviceShellCommand extends ShellCommand {
-    private static final String TAG = "CompanionDevice_ShellCommand";
+    private static final String TAG = "CDM_CompanionDeviceShellCommand";
 
     private final CompanionDeviceManagerService mService;
     private final AssociationStore mAssociationStore;

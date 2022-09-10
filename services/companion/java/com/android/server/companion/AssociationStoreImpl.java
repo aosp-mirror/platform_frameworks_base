@@ -58,7 +58,7 @@ import java.util.StringJoiner;
 @SuppressLint("LongLogTag")
 class AssociationStoreImpl implements AssociationStore {
     private static final boolean DEBUG = false;
-    private static final String TAG = "CompanionDevice_AssociationStore";
+    private static final String TAG = "CDM_AssociationStore";
 
     private final Object mLock = new Object();
 

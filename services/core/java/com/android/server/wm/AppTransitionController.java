@@ -34,6 +34,7 @@ import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -357,8 +358,14 @@ public class AppTransitionController {
                 // When there is a closing app, the keyguard has already been occluded by an
                 // activity, and another activity has started on top of that activity, so normal
                 // app transition animation should be used.
-                return closingApps.isEmpty() ? TRANSIT_OLD_KEYGUARD_OCCLUDE
-                        : TRANSIT_OLD_ACTIVITY_OPEN;
+                if (!closingApps.isEmpty()) {
+                    return TRANSIT_OLD_ACTIVITY_OPEN;
+                }
+                if (!openingApps.isEmpty() && openingApps.valueAt(0).getActivityType()
+                        == ACTIVITY_TYPE_DREAM) {
+                    return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
+                }
+                return TRANSIT_OLD_KEYGUARD_OCCLUDE;
             case TRANSIT_KEYGUARD_UNOCCLUDE:
                 return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
         }

@@ -138,10 +138,12 @@ class FooterActionsViewModel(
     /** The model for the settings button. */
     val settings: FooterActionsButtonViewModel =
         FooterActionsButtonViewModel(
-            Icon.Resource(R.drawable.ic_settings),
+            Icon.Resource(
+                R.drawable.ic_settings,
+                ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
+            ),
             iconTint = null,
             R.drawable.qs_footer_action_circle,
-            ContentDescription.Resource(R.string.accessibility_quick_settings_settings),
             this::onSettingsButtonClicked,
         )
 
@@ -149,14 +151,16 @@ class FooterActionsViewModel(
     val power: FooterActionsButtonViewModel? =
         if (showPowerButton) {
             FooterActionsButtonViewModel(
-                Icon.Resource(android.R.drawable.ic_lock_power_off),
+                Icon.Resource(
+                    android.R.drawable.ic_lock_power_off,
+                    ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
+                ),
                 iconTint =
                     Utils.getColorAttrDefaultColor(
                         context,
                         com.android.internal.R.attr.textColorOnAccent,
                     ),
                 R.drawable.qs_footer_action_circle_color,
-                ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu),
                 this::onPowerButtonClicked,
             )
         } else {
@@ -252,10 +256,12 @@ class FooterActionsViewModel(
             }
 
         return FooterActionsButtonViewModel(
-            Icon.Loaded(icon),
+            Icon.Loaded(
+                icon,
+                ContentDescription.Loaded(userSwitcherContentDescription(status.currentUserName)),
+            ),
             iconTint,
             R.drawable.qs_footer_action_circle,
-            ContentDescription.Loaded(userSwitcherContentDescription(status.currentUserName)),
             this::onUserSwitcherClicked,
         )
     }

@@ -2534,7 +2534,7 @@ public class OomAdjuster {
             capability |= capabilityFromFGS;
         }
 
-        capability |= getDefaultCapability(psr, procState);
+        capability |= getDefaultCapability(app, procState);
 
         // Do final modification to adj.  Everything we do between here and applying
         // the final setAdj must be done in this function, because we will also use
@@ -2556,7 +2556,7 @@ public class OomAdjuster {
                 || state.getCurCapability() != prevCapability;
     }
 
-    private int getDefaultCapability(ProcessServiceRecord psr, int procState) {
+    private int getDefaultCapability(ProcessRecord app, int procState) {
         switch (procState) {
             case PROCESS_STATE_PERSISTENT:
             case PROCESS_STATE_PERSISTENT_UI:
@@ -2565,15 +2565,13 @@ public class OomAdjuster {
             case PROCESS_STATE_BOUND_TOP:
                 return PROCESS_CAPABILITY_NETWORK;
             case PROCESS_STATE_FOREGROUND_SERVICE:
-                if (psr.hasForegroundServices()) {
-                    // Capability from FGS are conditional depending on foreground service type in
-                    // manifest file and the mAllowWhileInUsePermissionInFgs flag.
-                    return PROCESS_CAPABILITY_NETWORK;
+                if (app.getActiveInstrumentation() != null) {
+                    return PROCESS_CAPABILITY_ALL_IMPLICIT | PROCESS_CAPABILITY_NETWORK ;
                 } else {
-                    // process has no FGS, the PROCESS_STATE_FOREGROUND_SERVICE is from client.
-                    // the implicit capability could be removed in the future, client should use
-                    // BIND_INCLUDE_CAPABILITY flag.
-                    return PROCESS_CAPABILITY_ALL_IMPLICIT | PROCESS_CAPABILITY_NETWORK;
+                    // Capability from foreground service is conditional depending on
+                    // foregroundServiceType in the manifest file and the
+                    // mAllowWhileInUsePermissionInFgs flag.
+                    return PROCESS_CAPABILITY_NETWORK;
                 }
             case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
                 return PROCESS_CAPABILITY_NETWORK;

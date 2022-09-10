@@ -19,6 +19,7 @@ android_test {
 
     static_libs: [
         "androidx.test.core",
+        "androidx.test.ext.truth",
         "androidx.test.rules",
         "compatibility-device-util-axt",
         "mockito-target-minus-junit4",

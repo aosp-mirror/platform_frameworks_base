@@ -240,8 +240,6 @@
 -packages/SystemUI/src/com/android/systemui/media/nearby/NearbyMediaDevicesManager.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/MediaTttCommandLineHelper.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/MediaTttFlags.kt
--packages/SystemUI/src/com/android/systemui/media/taptotransfer/common/ChipInfoCommon.kt
--packages/SystemUI/src/com/android/systemui/media/taptotransfer/common/MediaTttChipControllerCommon.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/common/MediaTttLogger.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/receiver/ChipStateReceiver.kt
 -packages/SystemUI/src/com/android/systemui/media/taptotransfer/receiver/MediaTttChipControllerReceiver.kt
@@ -529,6 +527,8 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/tv/VpnStatusObserver.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowModule.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowStateController.kt
+-packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewInfo.kt
+-packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayController.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastDefaultAnimation.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastLogger.kt
 -packages/SystemUI/src/com/android/systemui/tv/TVSystemUICoreStartableModule.kt
@@ -677,7 +677,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/media/muteawait/MediaMuteAwaitConnectionManagerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/nearby/NearbyMediaDevicesManagerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/MediaTttCommandLineHelperTest.kt
--packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/common/MediaTttChipControllerCommonTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/common/MediaTttLoggerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/receiver/MediaTttChipControllerReceiverTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/media/taptotransfer/sender/MediaTttChipControllerSenderTest.kt
@@ -834,6 +833,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/VariableDateViewControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/WalletControllerImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/window/StatusBarWindowStateControllerTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/FoldStateLoggingProviderTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/UnfoldLatencyTrackerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/unfold/UnfoldTransitionWallpaperControllerTest.kt

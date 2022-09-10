@@ -37,7 +37,7 @@ import java.io.FileOutputStream;
  * Util class for CDM data stores
  */
 public final class DataStoreUtils {
-    private static final String TAG = "CompanionDevice_DataStoreUtils";
+    private static final String TAG = "CDM_DataStoreUtils";
 
     /**
      * Check if the parser pointer is at the start of the tag

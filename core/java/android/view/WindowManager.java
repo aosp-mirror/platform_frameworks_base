@@ -285,10 +285,16 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
 
     /**
-     * Keyguard is being occluded.
+     * Keyguard is being occluded by non-Dream.
      * @hide
      */
     int TRANSIT_OLD_KEYGUARD_OCCLUDE = 22;
+
+    /**
+     * Keyguard is being occluded by Dream.
+     * @hide
+     */
+    int TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM = 33;
 
     /**
      * Keyguard is being unoccluded.

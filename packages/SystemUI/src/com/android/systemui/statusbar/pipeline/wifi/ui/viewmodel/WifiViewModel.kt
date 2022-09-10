@@ -16,8 +16,15 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
+import android.content.Context
 import android.graphics.Color
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
+import com.android.systemui.R
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
@@ -41,6 +48,7 @@ import kotlinx.coroutines.flow.map
 class WifiViewModel @Inject constructor(
     statusBarPipelineFlags: StatusBarPipelineFlags,
     private val constants: WifiConstants,
+    private val context: Context,
     private val logger: ConnectivityPipelineLogger,
     private val interactor: WifiInteractor,
 ) {
@@ -61,18 +69,43 @@ class WifiViewModel @Inject constructor(
         }
     }
 
+    /** The content description for the wifi icon. */
+    private val contentDescription: Flow<ContentDescription?> = interactor.wifiNetwork.map {
+        when (it) {
+            is WifiNetworkModel.CarrierMerged -> null
+            is WifiNetworkModel.Inactive ->
+                ContentDescription.Loaded(
+                    "${context.getString(WIFI_NO_CONNECTION)},${context.getString(NO_INTERNET)}"
+                )
+            is WifiNetworkModel.Active ->
+                when (it.level) {
+                    null -> null
+                    else -> {
+                        val levelDesc = context.getString(WIFI_CONNECTION_STRENGTH[it.level])
+                        when {
+                            it.isValidated -> ContentDescription.Loaded(levelDesc)
+                            else -> ContentDescription.Loaded(
+                                "$levelDesc,${context.getString(NO_INTERNET)}"
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
     /**
      * The wifi icon that should be displayed. Null if we shouldn't display any icon.
      */
     val wifiIcon: Flow<Icon?> = combine(
             interactor.isForceHidden,
-            iconResId
-        ) { isForceHidden, iconResId ->
+            iconResId,
+            contentDescription,
+        ) { isForceHidden, iconResId, contentDescription ->
             when {
                 isForceHidden ||
                     iconResId == null ||
                     iconResId <= 0 -> null
-                else -> Icon.Resource(iconResId)
+                else -> Icon.Resource(iconResId, contentDescription)
             }
         }
 
@@ -93,5 +126,11 @@ class WifiViewModel @Inject constructor(
         emptyFlow()
     } else {
         flowOf(Color.CYAN)
+    }
+
+    companion object {
+        @StringRes
+        @VisibleForTesting
+        internal val NO_INTERNET = R.string.data_connection_no_internet
     }
 }

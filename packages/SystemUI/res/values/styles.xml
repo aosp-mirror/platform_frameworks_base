@@ -580,6 +580,7 @@
     </style>
 
     <style name="MediaPlayer.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:thumb">@drawable/media_seekbar_thumb</item>
         <item name="android:thumbTint">?android:attr/textColorPrimary</item>
         <item name="android:progressDrawable">@drawable/media_squiggly_progress</item>
         <item name="android:progressTint">?android:attr/textColorPrimary</item>

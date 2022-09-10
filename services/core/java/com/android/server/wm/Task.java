@@ -4459,6 +4459,14 @@ class Task extends TaskFragment {
             // transferring the transform on the leash to the task, reset this state once we're
             // moving out of pip
             setCanAffectSystemUiFlags(true);
+            // Turn on userLeaveHint so other app can enter PiP mode.
+            mTaskSupervisor.mUserLeaving = true;
+            // Allow entering PiP from current top most activity when we are leaving PiP.
+            final Task topFocused = mRootWindowContainer.getTopDisplayFocusedRootTask();
+            if (topFocused != null) {
+                final ActivityRecord ar = topFocused.getTopResumedActivity();
+                enableEnterPipOnTaskSwitch(ar, null /* toFrontTask */, ar, null /* opts */);
+            }
             mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {

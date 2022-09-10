@@ -2059,6 +2059,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void invalidateRectOnScreen(Rect dirty) {
+        if (DEBUG_DRAW) Log.v(mTag, "invalidateRectOnScreen: " + dirty);
         final Rect localDirty = mDirty;
 
         // Add the new dirty rect to the current one
@@ -4752,25 +4753,8 @@ public final class ViewRootImpl implements ViewParent,
         // Draw with software renderer.
         final Canvas canvas;
 
-        // We already have the offset of surfaceInsets in xoff, yoff and dirty region,
-        // therefore we need to add it back when moving the dirty region.
-        int dirtyXOffset = xoff;
-        int dirtyYOffset = yoff;
-        if (surfaceInsets != null) {
-            dirtyXOffset += surfaceInsets.left;
-            dirtyYOffset += surfaceInsets.top;
-        }
-
         try {
-            dirty.offset(-dirtyXOffset, -dirtyYOffset);
-            final int left = dirty.left;
-            final int top = dirty.top;
-            final int right = dirty.right;
-            final int bottom = dirty.bottom;
-
             canvas = mSurface.lockCanvas(dirty);
-
-            // TODO: Do this in native
             canvas.setDensity(mDensity);
         } catch (Surface.OutOfResourcesException e) {
             handleOutOfResourcesException(e);
@@ -4782,14 +4766,13 @@ public final class ViewRootImpl implements ViewParent,
             // kill stuff (or ourself) for no reason.
             mLayoutRequested = true;    // ask wm for a new surface next time.
             return false;
-        } finally {
-            dirty.offset(dirtyXOffset, dirtyYOffset);  // Reset to the original value.
         }
 
         try {
             if (DEBUG_ORIENTATION || DEBUG_DRAW) {
                 Log.v(mTag, "Surface " + surface + " drawing to bitmap w="
-                        + canvas.getWidth() + ", h=" + canvas.getHeight());
+                        + canvas.getWidth() + ", h=" + canvas.getHeight() + ", dirty: " + dirty
+                        + ", xOff=" + xoff + ", yOff=" + yoff);
                 //canvas.drawARGB(255, 255, 0, 0);
             }
 

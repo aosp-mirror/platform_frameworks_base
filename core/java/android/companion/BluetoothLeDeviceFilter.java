@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "BluetoothLeDeviceFilter";
+    private static final String LOG_TAG = "CDM_BluetoothLeDeviceFilter";
 
     private static final int RENAME_PREFIX_LENGTH_LIMIT = 10;
 

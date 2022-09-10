@@ -17,9 +17,11 @@
 package com.android.keyguard;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.util.LatencyTracker;
@@ -44,7 +46,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     private final EmergencyButton mEmergencyButton;
     private final EmergencyButtonController mEmergencyButtonController;
     private boolean mPaused;
-
+    protected KeyguardMessageAreaController<BouncerKeyguardMessageArea> mMessageAreaController;
 
     // The following is used to ignore callbacks from SecurityViews that are no longer current
     // (e.g. face unlock). This avoids unwanted asynchronous events from messing with the
@@ -72,12 +74,24 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     protected KeyguardInputViewController(T view, SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback,
-            EmergencyButtonController emergencyButtonController) {
+            EmergencyButtonController emergencyButtonController,
+            @Nullable KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
         super(view);
         mSecurityMode = securityMode;
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mEmergencyButton = view == null ? null : view.findViewById(R.id.emergency_call_button);
         mEmergencyButtonController = emergencyButtonController;
+        if (messageAreaControllerFactory != null) {
+            try {
+                BouncerKeyguardMessageArea kma = view.requireViewById(R.id.bouncer_message_area);
+                mMessageAreaController = messageAreaControllerFactory.create(kma);
+                mMessageAreaController.init();
+                mMessageAreaController.setIsVisible(true);
+            } catch (IllegalArgumentException exception) {
+                Log.e("KeyguardInputViewController",
+                        "Ensure that a BouncerKeyguardMessageArea is included in the layout");
+            }
+        }
     }
 
     @Override
