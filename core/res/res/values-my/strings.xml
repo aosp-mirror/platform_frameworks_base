@@ -1416,11 +1416,11 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> ကို ထုတ်နေသည်"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"မဖယ်ရှားပါနှင့်"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"သတ်မှတ်ရန်"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"ထုတ်မည်"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"ထုတ်ရန်"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"စူးစမ်းရန်"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"မီဒီယာအထွက် ပြောင်းရန်"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> ပျောက်နေသည်"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"စက်ပစ္စည်းကို ထပ်မံထည့်သွင်းပါ"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"ကတ်ကို ထပ်မံထည့်သွင်းပါ"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> ရွှေ့နေစဉ်"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"ဒေတာများ ရွှေ့နေစဉ်"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"အကြောင်းအရာ လွှဲပြောင်းပြီးပါပြီ"</string>
