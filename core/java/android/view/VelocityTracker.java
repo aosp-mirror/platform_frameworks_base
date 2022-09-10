@@ -180,9 +180,9 @@ public final class VelocityTracker {
     private static native void nativeClear(long ptr);
     private static native void nativeAddMovement(long ptr, MotionEvent event);
     private static native void nativeComputeCurrentVelocity(long ptr, int units, float maxVelocity);
-    private static native float nativeGetXVelocity(long ptr, int id);
-    private static native float nativeGetYVelocity(long ptr, int id);
-    private static native boolean nativeGetEstimator(long ptr, int id, Estimator outEstimator);
+    private static native float nativeGetVelocity(long ptr, int axis, int id);
+    private static native boolean nativeGetEstimator(
+            long ptr, int axis, int id, Estimator outEstimator);
 
     static {
         // Strategy string and IDs mapping lookup.
@@ -361,7 +361,7 @@ public final class VelocityTracker {
      * @return The previously computed X velocity.
      */
     public float getXVelocity() {
-        return nativeGetXVelocity(mPtr, ACTIVE_POINTER_ID);
+        return getXVelocity(ACTIVE_POINTER_ID);
     }
 
     /**
@@ -371,7 +371,7 @@ public final class VelocityTracker {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity() {
-        return nativeGetYVelocity(mPtr, ACTIVE_POINTER_ID);
+        return getYVelocity(ACTIVE_POINTER_ID);
     }
 
     /**
@@ -382,7 +382,7 @@ public final class VelocityTracker {
      * @return The previously computed X velocity.
      */
     public float getXVelocity(int id) {
-        return nativeGetXVelocity(mPtr, id);
+        return nativeGetVelocity(mPtr, MotionEvent.AXIS_X, id);
     }
 
     /**
@@ -393,7 +393,7 @@ public final class VelocityTracker {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity(int id) {
-        return nativeGetYVelocity(mPtr, id);
+        return nativeGetVelocity(mPtr, MotionEvent.AXIS_Y, id);
     }
 
     /**
@@ -403,6 +403,8 @@ public final class VelocityTracker {
      * It is not necessary to call {@link #computeCurrentVelocity(int)} before calling
      * this method.
      *
+     * @param axis Which axis's velocity to return.
+     *             Should be one of the axes defined in {@link MotionEvent}.
      * @param id Which pointer's velocity to return.
      * @param outEstimator The estimator to populate.
      * @return True if an estimator was obtained, false if there is no information
@@ -410,11 +412,11 @@ public final class VelocityTracker {
      *
      * @hide For internal use only.  Not a final API.
      */
-    public boolean getEstimator(int id, Estimator outEstimator) {
+    public boolean getEstimator(int axis, int id, Estimator outEstimator) {
         if (outEstimator == null) {
             throw new IllegalArgumentException("outEstimator must not be null");
         }
-        return nativeGetEstimator(mPtr, id, outEstimator);
+        return nativeGetEstimator(mPtr, axis, id, outEstimator);
     }
 
     /**
@@ -434,16 +436,9 @@ public final class VelocityTracker {
         private static final int MAX_DEGREE = 4;
 
         /**
-         * Polynomial coefficients describing motion in X.
+         * Polynomial coefficients describing motion.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public final float[] xCoeff = new float[MAX_DEGREE + 1];
-
-        /**
-         * Polynomial coefficients describing motion in Y.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public final float[] yCoeff = new float[MAX_DEGREE + 1];
+        public final float[] coeff = new float[MAX_DEGREE + 1];
 
         /**
          * Polynomial degree, or zero if only position information is available.
@@ -458,39 +453,21 @@ public final class VelocityTracker {
         public float confidence;
 
         /**
-         * Gets an estimate of the X position of the pointer at the specified time point.
+         * Gets an estimate of the position of the pointer at the specified time point.
          * @param time The time point in seconds, 0 is the last recorded time.
-         * @return The estimated X coordinate.
+         * @return The estimated axis value.
          */
-        public float estimateX(float time) {
-            return estimate(time, xCoeff);
+        public float estimate(float time) {
+            return estimate(time, coeff);
         }
 
         /**
-         * Gets an estimate of the Y position of the pointer at the specified time point.
-         * @param time The time point in seconds, 0 is the last recorded time.
-         * @return The estimated Y coordinate.
-         */
-        public float estimateY(float time) {
-            return estimate(time, yCoeff);
-        }
-
-        /**
-         * Gets the X coefficient with the specified index.
+         * Gets the coefficient with the specified index.
          * @param index The index of the coefficient to return.
-         * @return The X coefficient, or 0 if the index is greater than the degree.
+         * @return The coefficient, or 0 if the index is greater than the degree.
          */
-        public float getXCoeff(int index) {
-            return index <= degree ? xCoeff[index] : 0;
-        }
-
-        /**
-         * Gets the Y coefficient with the specified index.
-         * @param index The index of the coefficient to return.
-         * @return The Y coefficient, or 0 if the index is greater than the degree.
-         */
-        public float getYCoeff(int index) {
-            return index <= degree ? yCoeff[index] : 0;
+        public float getCoeff(int index) {
+            return index <= degree ? coeff[index] : 0;
         }
 
         private float estimate(float time, float[] c) {
