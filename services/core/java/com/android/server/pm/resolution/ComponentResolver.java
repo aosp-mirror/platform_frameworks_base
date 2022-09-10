@@ -930,12 +930,14 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected boolean isFilterStopped(@Nullable PackageStateInternal packageState,
+        protected boolean isFilterStopped(@NonNull Computer computer, F filter,
                 @UserIdInt int userId) {
             if (!mUserManager.exists(userId)) {
                 return true;
             }
 
+            final PackageStateInternal packageState = computer.getPackageStateInternal(
+                    filter.first.getPackageName());
             if (packageState == null || packageState.getPkg() == null) {
                 return false;
             }

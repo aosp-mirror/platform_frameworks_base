@@ -35,7 +35,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.pm.Computer;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.PrintWriter;
@@ -566,7 +565,7 @@ public abstract class IntentResolver<F, R extends Object> {
      * "stopped", that is whether it should not be included in the result
      * if the intent requests to excluded stopped objects.
      */
-    protected boolean isFilterStopped(PackageStateInternal packageState, @UserIdInt int userId) {
+    protected boolean isFilterStopped(@NonNull Computer computer, F filter, @UserIdInt int userId) {
         return false;
     }
 
@@ -805,8 +804,7 @@ public abstract class IntentResolver<F, R extends Object> {
             int match;
             if (debug) Slog.v(TAG, "Matching against filter " + filter);
 
-            if (excludingStopped && isFilterStopped(computer.getPackageStateInternal(packageName),
-                    userId)) {
+            if (excludingStopped && isFilterStopped(computer, filter, userId)) {
                 if (debug) {
                     Slog.v(TAG, "  Filter's target is stopped; skipping");
                 }
