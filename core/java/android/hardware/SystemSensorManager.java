@@ -882,6 +882,7 @@ public class SystemSensorManager extends SensorManager {
             }
 
             // Indicate if the discontinuity count changed
+            t.firstEventAfterDiscontinuity = false;
             if (t.sensor.getType() == Sensor.TYPE_HEAD_TRACKER) {
                 final int lastCount = mSensorDiscontinuityCounts.get(handle);
                 final int curCount = Float.floatToIntBits(values[6]);
