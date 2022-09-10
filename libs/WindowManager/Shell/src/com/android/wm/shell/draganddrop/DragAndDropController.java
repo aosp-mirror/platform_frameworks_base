@@ -258,12 +258,12 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
-                pd.dragLayout.update(event);
                 break;
             case ACTION_DRAG_LOCATION:
                 pd.dragLayout.update(event);
                 break;
             case ACTION_DROP: {
+                pd.dragLayout.update(event);
                 return handleDrop(event, pd);
             }
             case ACTION_DRAG_EXITED: {

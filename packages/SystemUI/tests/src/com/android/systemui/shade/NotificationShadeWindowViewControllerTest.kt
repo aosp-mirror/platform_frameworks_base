@@ -19,8 +19,10 @@ package com.android.systemui.shade
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
+import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.keyguard.LockIconViewController
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
@@ -245,6 +247,18 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
         assertThat(returnVal).isTrue()
+    }
+
+    @Test
+    fun testGetBouncerContainer() {
+        underTest.bouncerContainer
+        verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
+    }
+
+    @Test
+    fun testGetKeyguardMessageArea() {
+        underTest.keyguardMessageArea
+        verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
     }
 }
 

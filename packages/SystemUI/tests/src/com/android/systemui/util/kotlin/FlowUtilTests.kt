@@ -28,12 +28,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -125,6 +127,53 @@ class SetChangesFlowTest : SysuiTestCase() {
                     removed = emptySet(),
                     added = setOf(1, 2),
                 )
+            )
+    }
+
+    @Test
+    fun dontEmitFirstEvent() = runBlocking {
+        assertThatFlow(flowOf(setOf(1, 2), setOf(2, 3)).setChanges(emitFirstEvent = false))
+            .emitsExactly(
+                SetChanges(
+                    removed = setOf(1),
+                    added = setOf(3),
+                )
+            )
+    }
+}
+
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+class SampleFlowTest : SysuiTestCase() {
+    @Test
+    fun simple() = runBlocking {
+        assertThatFlow(flow { yield(); emit(1) }.sample(flowOf(2)) { a, b -> a to b })
+            .emitsExactly(1 to 2)
+    }
+
+    @Test
+    fun otherFlowNoValueYet() = runBlocking {
+        assertThatFlow(flowOf(1).sample(emptyFlow<Unit>()))
+            .emitsNothing()
+    }
+
+    @Test
+    fun multipleSamples() = runBlocking {
+        val samplee = MutableSharedFlow<Int>()
+        val sampler = flow {
+            emit(1)
+            samplee.emit(1)
+            emit(2)
+            samplee.emit(2)
+            samplee.emit(3)
+            emit(3)
+            emit(4)
+        }
+        assertThatFlow(sampler.sample(samplee) { a, b -> a to b })
+            .emitsExactly(
+                2 to 1,
+                3 to 3,
+                4 to 3,
             )
     }
 }

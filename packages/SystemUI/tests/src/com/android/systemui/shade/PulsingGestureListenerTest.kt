@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.tuner.TunerService.Tunable
@@ -63,6 +64,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     private lateinit var tunerService: TunerService
     @Mock
     private lateinit var dumpManager: DumpManager
+    @Mock
+    private lateinit var statusBarStateController: StatusBarStateController
 
     private lateinit var tunableCaptor: ArgumentCaptor<Tunable>
     private lateinit var underTest: PulsingGestureListener
@@ -77,6 +80,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
                 dockManager,
                 centralSurfaces,
                 ambientDisplayConfiguration,
+                statusBarStateController,
                 tunerService,
                 dumpManager
         )
@@ -85,6 +89,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
     @Test
     fun testGestureDetector_singleTapEnabled() {
+        whenever(statusBarStateController.isPulsing).thenReturn(true)
+
         // GIVEN tap is enabled, prox not covered
         whenever(ambientDisplayConfiguration.tapGestureEnabled(anyInt())).thenReturn(true)
         updateSettings()
@@ -102,6 +108,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
     @Test
     fun testGestureDetector_doubleTapEnabled() {
+        whenever(statusBarStateController.isPulsing).thenReturn(true)
+
         // GIVEN double tap is enabled, prox not covered
         whenever(ambientDisplayConfiguration.doubleTapGestureEnabled(anyInt())).thenReturn(true)
         updateSettings()
@@ -119,6 +127,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
     @Test
     fun testGestureDetector_singleTapEnabled_falsing() {
+        whenever(statusBarStateController.isPulsing).thenReturn(true)
+
         // GIVEN tap is enabled, prox not covered
         whenever(ambientDisplayConfiguration.tapGestureEnabled(anyInt())).thenReturn(true)
         updateSettings()
@@ -135,7 +145,23 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testGestureDetector_notPulsing_noFalsingCheck() {
+        whenever(statusBarStateController.isPulsing).thenReturn(false)
+
+        // GIVEN tap is enabled, prox not covered
+        whenever(ambientDisplayConfiguration.tapGestureEnabled(anyInt())).thenReturn(true)
+        // WHEN there's a tap
+        underTest.onSingleTapConfirmed(downEv)
+
+        // THEN the falsing manager never gets a call (because the device wasn't pulsing
+        // during the tap)
+        verify(falsingManager, never()).isFalseTap(anyInt())
+    }
+
+    @Test
     fun testGestureDetector_doubleTapEnabled_falsing() {
+        whenever(statusBarStateController.isPulsing).thenReturn(true)
+
         // GIVEN double tap is enabled, prox not covered
         whenever(ambientDisplayConfiguration.doubleTapGestureEnabled(anyInt())).thenReturn(true)
         updateSettings()
@@ -153,6 +179,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
     @Test
     fun testGestureDetector_singleTapEnabled_proxCovered() {
+        whenever(statusBarStateController.isPulsing).thenReturn(true)
+
         // GIVEN tap is enabled, not a false tap based on classifiers
         whenever(ambientDisplayConfiguration.tapGestureEnabled(anyInt())).thenReturn(true)
         updateSettings()
@@ -170,6 +198,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
     @Test
     fun testGestureDetector_doubleTapEnabled_proxCovered() {
+        whenever(statusBarStateController.isPulsing).thenReturn(true)
+
         // GIVEN double tap is enabled, not a false tap based on classifiers
         whenever(ambientDisplayConfiguration.doubleTapGestureEnabled(anyInt())).thenReturn(true)
         updateSettings()

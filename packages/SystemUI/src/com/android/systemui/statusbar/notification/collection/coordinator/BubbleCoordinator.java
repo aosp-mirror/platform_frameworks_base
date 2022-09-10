@@ -144,11 +144,6 @@ public class BubbleCoordinator implements Coordinator {
         public void invalidateNotifications(String reason) {
             mNotifFilter.invalidateList(reason);
         }
-
-        @Override
-        public void maybeCancelSummary(NotificationEntry entry) {
-            // no-op
-        }
     };
 
     private boolean isInterceptingDismissal(NotificationEntry entry) {

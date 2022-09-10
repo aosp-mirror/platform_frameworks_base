@@ -2794,10 +2794,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mDebugRemoveAnimation) {
             Log.d(TAG, "generateRemove " + key
                     + "\nmIsExpanded " + mIsExpanded
-                    + "\nmAnimationsEnabled " + mAnimationsEnabled
-                    + "\n!invisible group " + !isChildInInvisibleGroup(child));
+                    + "\nmAnimationsEnabled " + mAnimationsEnabled);
         }
-        if (mIsExpanded && mAnimationsEnabled && !isChildInInvisibleGroup(child)) {
+        if (mIsExpanded && mAnimationsEnabled) {
             if (!mChildrenToAddAnimated.contains(child)) {
                 if (mDebugRemoveAnimation) {
                     Log.d(TAG, "needsAnimation = true " + key);
@@ -2843,26 +2842,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mTmpList.clear();
         return hasAddEvent && mAddedHeadsUpChildren.contains(child);
-    }
-
-    // TODO (b/162832756): remove since this won't happen in new pipeline (we prune groups in
-    //  ShadeListBuilder)
-    /**
-     * @param child the child to query
-     * @return whether a view is not a top level child but a child notification and that group is
-     * not expanded
-     */
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    private boolean isChildInInvisibleGroup(View child) {
-        if (child instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            NotificationEntry groupSummary =
-                    mGroupMembershipManager.getGroupSummary(row.getEntry());
-            if (groupSummary != null && groupSummary.getRow() != row) {
-                return row.getVisibility() == View.INVISIBLE;
-            }
-        }
-        return false;
     }
 
     /**
@@ -5042,7 +5021,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setPanelFlinging(boolean flinging) {
-        mAmbientState.setIsFlinging(flinging);
+        mAmbientState.setFlinging(flinging);
         if (!flinging) {
             // re-calculate the stack height which was frozen while flinging
             updateStackPosition();
