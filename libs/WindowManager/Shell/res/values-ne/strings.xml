@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्यामेरासम्बन्धी समस्या देखियो?\nसमस्या हल गर्न ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"समस्या हल भएन?\nपहिलेको जस्तै बनाउन ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्यामेरासम्बन्धी कुनै पनि समस्या छैन? खारेज गर्न ट्याप गर्नुहोस्।"</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"थप कुरा हेर्नुहोस् र गर्नुहोस्"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"स्प्लिट स्क्रिन मोड प्रयोग गर्न अर्को एप ड्रयाग एन्ड ड्रप गर्नुहोस्"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"तपाईं जुन एपको स्थिति मिलाउन चाहनुहुन्छ सोही एपको बाहिर डबल ट्याप गर्नुहोस्"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"बुझेँ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"थप जानकारी प्राप्त गर्न चाहनुहुन्छ भने एक्स्पान्ड गर्नुहोस्।"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ठुलो बनाउनुहोस्"</string>
