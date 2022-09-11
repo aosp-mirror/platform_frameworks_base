@@ -24,11 +24,13 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.UserHandle;
+import android.util.Pair;
 
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -50,6 +52,9 @@ public class ChooserActivityOverrideData {
     public Function<PackageManager, PackageManager> createPackageManager;
     public Function<TargetInfo, Boolean> onSafelyStartCallback;
     public Function<ChooserListAdapter, Void> onQueryDirectShareTargets;
+    public BiFunction<
+            IChooserWrapper, ChooserListAdapter, Pair<Integer, ChooserActivity.ServiceResultInfo[]>>
+            directShareTargets;
     public ResolverListController resolverListController;
     public ResolverListController workResolverListController;
     public Boolean isVoiceInteraction;
@@ -72,6 +77,7 @@ public class ChooserActivityOverrideData {
     public void reset() {
         onSafelyStartCallback = null;
         onQueryDirectShareTargets = null;
+        directShareTargets = null;
         isVoiceInteraction = null;
         createPackageManager = null;
         previewThumbnail = null;
@@ -112,4 +118,3 @@ public class ChooserActivityOverrideData {
 
     private ChooserActivityOverrideData() {}
 }
-
