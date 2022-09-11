@@ -1416,7 +1416,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"درحال بیرون راندن <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"جدا نکنید"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"راه‌اندازی"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"بیرون راندن"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"خارج کردن"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"کاوش"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"تغییر خروجی"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> وجود ندارد"</string>

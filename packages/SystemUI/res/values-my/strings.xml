@@ -573,7 +573,7 @@
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"ပူးတွဲပါဖိုင်ကို ဖယ်ရှားရန်"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"စနစ်"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ပင်မ"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"လတ်တလော"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"မကြာသေးမီက"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>
