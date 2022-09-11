@@ -161,10 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چهره شناسایی نشد. درعوض از اثر انگشت استفاده کنید."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
-    <skip />
-    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"چهره شناسایی نشد"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"از اثر انگشت استفاده کنید"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"بلوتوث متصل است."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"درصد شارژ باتری مشخص نیست."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"به <xliff:g id="BLUETOOTH">%s</xliff:g> متصل شد."</string>
@@ -423,10 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"همپوشانی زیرنویس ناشنوایان"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کردن"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
-    <!-- no translation found for sound_settings (8874581353127418308) -->
-    <skip />
-    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
-    <skip />
+    <string name="sound_settings" msgid="8874581353127418308">"صدا و لرزش"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"تنظیمات"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
@@ -602,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"روشن"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"خاموش"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"در دسترس نیست"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"غیرفعال"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"نوار پیمایش"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"طرح‌بندی"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"نوع دکمه منتهی‌الیه چپ"</string>
@@ -675,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"وقتی تلفن درحال خنک شدن است، بعضی از ویژگی‌ها محدود می‌شوند.\nبرای اطلاعات بیشتر ضربه بزنید"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"تلفنتان به‌طور خودکار سعی می‌کند خنک شود. همچنان می‌توانید از تلفنتان استفاده کنید، اما ممکن است کندتر عمل کند.\n\nوقتی تلفن خنک شد، عملکرد عادی‌اش از سرگرفته می‌شود."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"دیدن اقدامات محافظتی"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"جدا کردن شارژر از برق"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"مشکلی در شارژ کردن این دستگاه وجود دارد. آداپتور برق را از برق جدا کنید و مراقب باشید زیرا ممکن است کابل گرم باشد."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"مشاهده مراحل احتیاط"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"میان‌بر چپ"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"میان‌بر راست"</string>

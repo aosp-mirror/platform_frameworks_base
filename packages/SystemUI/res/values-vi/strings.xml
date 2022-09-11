@@ -161,10 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Không thể nhận dạng khuôn mặt. Hãy dùng vân tay."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
-    <skip />
-    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Không nhận ra khuôn mặt"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Hãy dùng vân tay"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Đã kết nối bluetooth."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Tỷ lệ phần trăm pin không xác định."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Đã kết nối với <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -600,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Đang bật"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Đang tắt"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Không có sẵn"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Đã tắt"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Thanh điều hướng"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Bố cục"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Loại nút bổ sung bên trái"</string>
@@ -673,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Một số tính năng bị hạn chế trong khi điện thoại nguội dần.\nHãy nhấn để biết thêm thông tin"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Điện thoại của bạn sẽ tự động nguội dần. Bạn vẫn có thể sử dụng điện thoại, nhưng điện thoại có thể chạy chậm hơn. \n\nSau khi đã nguội, điện thoại sẽ chạy bình thường."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Xem các bước chăm sóc"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Rút phích cắm bộ sạc"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Đã xảy ra sự cố khi sạc thiết bị này. Hãy rút phích cắm bộ chuyển đổi điện và cẩn thận vì dây cáp có thể nóng."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Xem các bước chăm sóc"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Lối tắt bên trái"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Lối tắt bên phải"</string>
