@@ -42,7 +42,6 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest WMShellFlickerTests:CopyContentInSplit`
  */
-@IwTest(focusArea = "sysui")
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -65,32 +64,39 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
             }
         }
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppLayerKeepVisible() = testSpec.layerKeepVisible(primaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun textEditAppLayerKeepVisible() = testSpec.layerKeepVisible(textEditApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
         primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun textEditAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
         textEditApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(primaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun textEditAppWindowKeepVisible() = testSpec.appWindowKeepVisible(textEditApp)
