@@ -117,6 +117,7 @@ import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.RefreshRateRange;
 import android.window.DisplayWindowPolicyController;
 import android.window.ScreenCapture;
 
