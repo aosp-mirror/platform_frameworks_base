@@ -1077,13 +1077,13 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         /**
-         * Compose all of the added primitives together into a single {@link VibrationEffect}.
+         * Compose all of the added elements together into a single {@link VibrationEffect}.
          *
          * <p>The {@link Composition} object is still valid after this call, so you can continue
-         * adding more primitives to it and generating more {@link VibrationEffect}s by calling this
+         * adding more elements to it and generating more {@link VibrationEffect}s by calling this
          * method again.
          *
-         * @return The {@link VibrationEffect} resulting from the composition of the primitives.
+         * @return The {@link VibrationEffect} resulting from the composition of the elements.
          */
         @NonNull
         public VibrationEffect compose() {
