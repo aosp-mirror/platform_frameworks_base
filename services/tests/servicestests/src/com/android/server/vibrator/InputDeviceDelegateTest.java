@@ -33,7 +33,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputDeviceCountryCode;
 import android.hardware.input.InputManager;
 import android.os.CombinedVibration;
 import android.os.Handler;
@@ -328,10 +327,11 @@ public class InputDeviceDelegateTest {
     }
 
     private InputDevice createInputDevice(int id, boolean hasVibrator) {
-        return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, InputDeviceCountryCode.INVALID, hasVibrator, false, false,
-                false /* hasSensor */, false /* hasBattery */);
-
-
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("name")
+                .setDescriptor("descriptor")
+                .setHasVibrator(hasVibrator)
+                .build();
     }
 }

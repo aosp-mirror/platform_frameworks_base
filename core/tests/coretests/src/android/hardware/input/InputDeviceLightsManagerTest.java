@@ -110,11 +110,10 @@ public class InputDeviceLightsManagerTest {
     }
 
     private InputDevice createInputDevice(int id) {
-        return new InputDevice(id, 0 /* generation */, 0 /* controllerNumber */, "name",
-                0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
-                0 /* sources */, 0 /* keyboardType */, null /* keyCharacterMap */,
-                InputDeviceCountryCode.INVALID, false /* hasVibrator */, false /* hasMicrophone */,
-                false /* hasButtonUnderpad */, false /* hasSensor */, false /* hasBattery */);
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("Test Device " + id)
+                .build();
     }
 
     private void mockLights(Light[] lights) throws Exception {

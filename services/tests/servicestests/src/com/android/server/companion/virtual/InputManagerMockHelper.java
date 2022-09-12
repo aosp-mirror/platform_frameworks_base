@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputDeviceCountryCode;
 import android.hardware.input.InputManager;
 import android.os.RemoteException;
 import android.testing.TestableLooper;
@@ -81,11 +80,16 @@ class InputManagerMockHelper {
     private Void handleNativeOpenInputDevice(InvocationOnMock inv) {
         Objects.requireNonNull(mDevicesChangedListener,
                 "InputController did not register an InputDevicesChangedListener.");
-        // We only use a subset of the fields of InputDevice in InputController.
-        final InputDevice device = new InputDevice(mDevices.size() /*id*/, 1 /*generation*/, 0,
-                inv.getArgument(0) /*name*/, inv.getArgument(1) /*vendorId*/,
-                inv.getArgument(2) /*productId*/, inv.getArgument(3) /*descriptor*/, true, 0, 0,
-                null, InputDeviceCountryCode.INVALID, false, false, false, false, false);
+
+        final InputDevice device = new InputDevice.Builder()
+                .setId(mDevices.size())
+                .setName(inv.getArgument(0))
+                .setVendorId(inv.getArgument(1))
+                .setProductId(inv.getArgument(2))
+                .setDescriptor(inv.getArgument(3))
+                .setExternal(true)
+                .build();
+
         mDevices.add(device);
         try {
             mDevicesChangedListener.onInputDevicesChanged(

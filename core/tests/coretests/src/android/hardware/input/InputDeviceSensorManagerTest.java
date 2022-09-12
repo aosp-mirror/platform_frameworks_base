@@ -35,7 +35,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputDevice;
 
@@ -73,10 +72,7 @@ public class InputDeviceSensorManagerTest {
 
     @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
-    private TestLooper mTestLooper;
-    private ContextWrapper mContextSpy;
     private InputManager mInputManager;
-    private InputDeviceSensorManager mSensorManager;
     private IInputSensorEventListener mIInputSensorEventListener;
     private final Object mLock = new Object();
 
@@ -84,11 +80,10 @@ public class InputDeviceSensorManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        mTestLooper = new TestLooper();
-        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
+        final Context context = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
 
-        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
+        when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
 
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
 
@@ -104,7 +99,7 @@ public class InputDeviceSensorManagerTest {
 
         when(mIInputManagerMock.registerSensorListener(any())).thenReturn(true);
 
-        mInputManager = mContextSpy.getSystemService(InputManager.class);
+        mInputManager = context.getSystemService(InputManager.class);
     }
 
     @After
@@ -145,13 +140,11 @@ public class InputDeviceSensorManagerTest {
     }
 
     private InputDevice createInputDeviceWithSensor(int id) {
-        InputDevice d = new InputDevice(id, 0 /* generation */, 0 /* controllerNumber */, "name",
-                0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
-                0 /* sources */, 0 /* keyboardType */, null /* keyCharacterMap */,
-                InputDeviceCountryCode.INVALID, false /* hasVibrator */, false /* hasMicrophone */,
-                false /* hasButtonUnderpad */, true /* hasSensor */, false /* hasBattery */);
-        assertTrue(d.hasSensor());
-        return d;
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("Test Device " + id)
+                .setHasSensor(true)
+                .build();
     }
 
     private InputSensorInfo createInputSensorInfo(int id, int type) {
@@ -164,8 +157,8 @@ public class InputDeviceSensorManagerTest {
     }
 
     private InputDevice getSensorDevice(int[] deviceIds) {
-        for (int i = 0; i < deviceIds.length; i++) {
-            InputDevice device = mInputManager.getInputDevice(deviceIds[i]);
+        for (int deviceId : deviceIds) {
+            InputDevice device = mInputManager.getInputDevice(deviceId);
             if (device.hasSensor()) {
                 return device;
             }
@@ -176,7 +169,7 @@ public class InputDeviceSensorManagerTest {
     @Test
     public void getInputDeviceSensors_withExpectedType() throws Exception {
         InputDevice device = getSensorDevice(mInputManager.getInputDeviceIds());
-        assertTrue(device != null);
+        assertNotNull(device);
 
         SensorManager sensorManager = device.getSensorManager();
         List<Sensor> accelList = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
@@ -197,7 +190,7 @@ public class InputDeviceSensorManagerTest {
     public void getInputDeviceSensors_withUnexpectedType() throws Exception {
         InputDevice device = getSensorDevice(mInputManager.getInputDeviceIds());
 
-        assertTrue(device != null);
+        assertNotNull(device);
         SensorManager sensorManager = device.getSensorManager();
 
         List<Sensor> gameRotationList = sensorManager.getSensorList(
@@ -213,7 +206,7 @@ public class InputDeviceSensorManagerTest {
     @Test
     public void testInputDeviceSensorListener() throws Exception {
         InputDevice device = getSensorDevice(mInputManager.getInputDeviceIds());
-        assertTrue(device != null);
+        assertNotNull(device);
 
         SensorManager sensorManager = device.getSensorManager();
         Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
