@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.SurfaceControl;
+import android.window.ScreenCapture;
 
 /**
  * Helper class used to take screenshots.
@@ -40,11 +41,11 @@ final class Screenshooter {
         Log.d(TAG, "Taking fullscreen screenshot");
         // Take the screenshot
         final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        final SurfaceControl.DisplayCaptureArgs captureArgs =
-                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+        final ScreenCapture.DisplayCaptureArgs captureArgs =
+                new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
                         .build();
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                SurfaceControl.captureDisplay(captureArgs);
+        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                ScreenCapture.captureDisplay(captureArgs);
         final Bitmap screenShot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (screenShot == null) {
             Log.e(TAG, "Failed to take fullscreen screenshot");

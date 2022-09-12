@@ -19,6 +19,7 @@ package com.android.wm.shell.common;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
+import android.window.ScreenCapture;
 
 import java.util.function.Consumer;
 
@@ -35,9 +36,9 @@ public class ScreenshotUtils {
      * @param consumer Consumer for the captured buffer
      */
     public static void captureLayer(SurfaceControl sc, Rect crop,
-            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
-        consumer.accept(SurfaceControl.captureLayers(
-                new SurfaceControl.LayerCaptureArgs.Builder(sc)
+            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
+        consumer.accept(ScreenCapture.captureLayers(
+                new ScreenCapture.LayerCaptureArgs.Builder(sc)
                     .setSourceCrop(crop)
                     .setCaptureSecureLayers(true)
                     .setAllowProtected(true)
@@ -45,7 +46,7 @@ public class ScreenshotUtils {
     }
 
     private static class BufferConsumer implements
-            Consumer<SurfaceControl.ScreenshotHardwareBuffer> {
+            Consumer<ScreenCapture.ScreenshotHardwareBuffer> {
         SurfaceControl mScreenshot = null;
         SurfaceControl.Transaction mTransaction;
         SurfaceControl mSurfaceControl;
@@ -58,7 +59,7 @@ public class ScreenshotUtils {
         }
 
         @Override
-        public void accept(SurfaceControl.ScreenshotHardwareBuffer buffer) {
+        public void accept(ScreenCapture.ScreenshotHardwareBuffer buffer) {
             if (buffer == null || buffer.getHardwareBuffer() == null) {
                 return;
             }

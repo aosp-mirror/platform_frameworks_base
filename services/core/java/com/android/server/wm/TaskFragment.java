@@ -89,6 +89,7 @@ import android.view.DisplayInfo;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
+import android.window.ScreenCapture;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizerToken;
 
@@ -306,7 +307,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
     // implemented
-    HashMap<String, SurfaceControl.ScreenshotHardwareBuffer> mBackScreenshots = new HashMap<>();
+    HashMap<String, ScreenCapture.ScreenshotHardwareBuffer> mBackScreenshots = new HashMap<>();
 
     private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
             new EnsureActivitiesVisibleHelper(this);
@@ -1859,7 +1860,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 ProtoLog.v(WM_DEBUG_BACK_PREVIEW, "Screenshotting Activity %s",
                         r.mActivityComponent.flattenToString());
                 Rect outBounds = r.getBounds();
-                SurfaceControl.ScreenshotHardwareBuffer backBuffer = SurfaceControl.captureLayers(
+                ScreenCapture.ScreenshotHardwareBuffer backBuffer = ScreenCapture.captureLayers(
                         r.mSurfaceControl,
                         new Rect(0, 0, outBounds.width(), outBounds.height()),
                         1f);

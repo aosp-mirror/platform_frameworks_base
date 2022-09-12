@@ -36,6 +36,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ScreenCapture;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
@@ -98,11 +99,11 @@ public class ScreenshotTests {
                 .setColorSpace(secureSC, ColorSpace.get(ColorSpace.Named.SRGB))
                 .apply(true);
 
-        SurfaceControl.LayerCaptureArgs args = new SurfaceControl.LayerCaptureArgs.Builder(secureSC)
+        ScreenCapture.LayerCaptureArgs args = new ScreenCapture.LayerCaptureArgs.Builder(secureSC)
                 .setCaptureSecureLayers(true)
                 .setChildrenOnly(false)
                 .build();
-        SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = SurfaceControl.captureLayers(args);
+        ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = ScreenCapture.captureLayers(args);
         assertNotNull(hardwareBuffer);
 
         Bitmap screenshot = hardwareBuffer.asBitmap();

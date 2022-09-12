@@ -231,6 +231,8 @@ cc_library_shared {
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
                 "android_window_WindowInfosListener.cpp",
+                "android_window_ScreenCapture.cpp",
+                "jni_common.cpp",
             ],
 
             static_libs: [
