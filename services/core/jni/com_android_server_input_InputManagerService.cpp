@@ -168,8 +168,9 @@ static struct {
     jmethodID constructor;
     jfieldID lightTypeInput;
     jfieldID lightTypePlayerId;
+    jfieldID lightTypeKeyboardBacklight;
     jfieldID lightCapabilityBrightness;
-    jfieldID lightCapabilityRgb;
+    jfieldID lightCapabilityColorRgb;
 } gLightClassInfo;
 
 static struct {
@@ -2011,24 +2012,27 @@ static jobject nativeGetLights(JNIEnv* env, jobject nativeImplObj, jint deviceId
 
         jint jTypeId =
                 env->GetStaticIntField(gLightClassInfo.clazz, gLightClassInfo.lightTypeInput);
-        jint jCapability = 0;
-
-        if (lightInfo.type == InputDeviceLightType::MONO) {
-            jCapability = env->GetStaticIntField(gLightClassInfo.clazz,
-                                                 gLightClassInfo.lightCapabilityBrightness);
-        } else if (lightInfo.type == InputDeviceLightType::RGB ||
-                   lightInfo.type == InputDeviceLightType::MULTI_COLOR) {
-            jCapability =
-                env->GetStaticIntField(gLightClassInfo.clazz,
-                                                 gLightClassInfo.lightCapabilityBrightness) |
-                env->GetStaticIntField(gLightClassInfo.clazz,
-                                                 gLightClassInfo.lightCapabilityRgb);
+        if (lightInfo.type == InputDeviceLightType::INPUT) {
+            jTypeId = env->GetStaticIntField(gLightClassInfo.clazz, gLightClassInfo.lightTypeInput);
         } else if (lightInfo.type == InputDeviceLightType::PLAYER_ID) {
             jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
                                                  gLightClassInfo.lightTypePlayerId);
+        } else if (lightInfo.type == InputDeviceLightType::KEYBOARD_BACKLIGHT) {
+            jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
+                                             gLightClassInfo.lightTypeKeyboardBacklight);
         } else {
             ALOGW("Unknown light type %d", lightInfo.type);
             continue;
+        }
+
+        jint jCapability = 0;
+        if (lightInfo.capabilityFlags.test(InputDeviceLightCapability::BRIGHTNESS)) {
+            jCapability |= env->GetStaticIntField(gLightClassInfo.clazz,
+                                                  gLightClassInfo.lightCapabilityBrightness);
+        }
+        if (lightInfo.capabilityFlags.test(InputDeviceLightCapability::RGB)) {
+            jCapability |= env->GetStaticIntField(gLightClassInfo.clazz,
+                                                  gLightClassInfo.lightCapabilityColorRgb);
         }
         ScopedLocalRef<jobject> lightObj(env,
                                          env->NewObject(gLightClassInfo.clazz,
@@ -2596,10 +2600,12 @@ int register_android_server_InputManager(JNIEnv* env) {
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_INPUT", "I");
     gLightClassInfo.lightTypePlayerId =
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_PLAYER_ID", "I");
+    gLightClassInfo.lightTypeKeyboardBacklight =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_KEYBOARD_BACKLIGHT", "I");
     gLightClassInfo.lightCapabilityBrightness =
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_CAPABILITY_BRIGHTNESS", "I");
-    gLightClassInfo.lightCapabilityRgb =
-            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_CAPABILITY_RGB", "I");
+    gLightClassInfo.lightCapabilityColorRgb =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_CAPABILITY_COLOR_RGB", "I");
 
     // ArrayList
     FIND_CLASS(gArrayListClassInfo.clazz, "java/util/ArrayList");
