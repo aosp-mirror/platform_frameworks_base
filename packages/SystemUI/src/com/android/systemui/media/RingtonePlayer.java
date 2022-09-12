@@ -96,8 +96,9 @@ public class RingtonePlayer extends CoreStartable {
             mToken = token;
 
             mRingtone = new Ringtone(getContextForUser(user), false);
-            mRingtone.setAudioAttributes(aa);
+            mRingtone.setAudioAttributesField(aa);
             mRingtone.setUri(uri, volumeShaperConfig);
+            mRingtone.createLocalMediaPlayer();
         }
 
         @Override
