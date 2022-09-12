@@ -77,11 +77,10 @@ final class ReconcilePackageUtils {
             }
 
             // the following may be null if we're just reconciling on boot (and not during install)
-            final InstallArgs installArgs = request.mInstallArgs.get(installPackageName);
-            final PackageInstalledInfo res = request.mInstallResults.get(installPackageName);
+            final InstallRequest installRequest = request.mInstallRequests.get(installPackageName);
             final PrepareResult prepareResult = request.mPreparedPackages.get(installPackageName);
-            final boolean isInstall = installArgs != null;
-            if (isInstall && (res == null || prepareResult == null)) {
+            final boolean isInstall = installRequest != null;
+            if (isInstall && prepareResult == null) {
                 throw new ReconcileFailure("Reconcile arguments are not balanced for "
                         + installPackageName + "!");
             }
@@ -92,7 +91,8 @@ final class ReconcilePackageUtils {
                 final boolean killApp = (scanResult.mRequest.mScanFlags & SCAN_DONT_KILL_APP) == 0;
                 final int deleteFlags = PackageManager.DELETE_KEEP_DATA
                         | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
-                deletePackageAction = DeletePackageHelper.mayDeletePackageLocked(res.mRemovedInfo,
+                deletePackageAction = DeletePackageHelper.mayDeletePackageLocked(
+                        installRequest.getRemovedInfo(),
                         prepareResult.mOriginalPs, prepareResult.mDisabledPs,
                         deleteFlags, null /* all users */);
                 if (deletePackageAction == null) {
@@ -146,8 +146,8 @@ final class ReconcilePackageUtils {
                             request.mVersionInfos.get(installPackageName);
                     final boolean compareCompat = isCompatSignatureUpdateNeeded(versionInfo);
                     final boolean compareRecover = isRecoverSignatureUpdateNeeded(versionInfo);
-                    final boolean isRollback = installArgs != null
-                            && installArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
+                    final boolean isRollback = installRequest != null
+                            && installRequest.isRollback();
                     final boolean compatMatch =
                             PackageManagerServiceUtils.verifySignatures(signatureCheckPs,
                                     sharedUserSetting, disabledPkgSetting,
@@ -257,8 +257,8 @@ final class ReconcilePackageUtils {
             }
 
             result.put(installPackageName,
-                    new ReconciledPackage(request, installArgs, scanResult.mPkgSetting,
-                            res, request.mPreparedPackages.get(installPackageName), scanResult,
+                    new ReconciledPackage(request, installRequest, scanResult.mPkgSetting,
+                            request.mPreparedPackages.get(installPackageName), scanResult,
                             deletePackageAction, allowedSharedLibInfos, signingDetails,
                             sharedUserSignaturesChanged, removeAppKeySetData));
         }

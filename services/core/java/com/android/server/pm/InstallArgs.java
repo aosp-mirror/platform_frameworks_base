@@ -70,10 +70,9 @@ final class InstallArgs {
             UserHandle user, String[] instructionSets,
             String abiOverride, String[] installGrantPermissions,
             List<String> allowlistedRestrictedPermissions,
-            int autoRevokePermissionsMode,
-            String traceMethod, int traceCookie, SigningDetails signingDetails,
-            int installReason, int installScenario, boolean forceQueryableOverride,
-            int dataLoaderType, int packageSource) {
+            int autoRevokePermissionsMode, String traceMethod, int traceCookie,
+            SigningDetails signingDetails, int installReason, int installScenario,
+            boolean forceQueryableOverride, int dataLoaderType, int packageSource) {
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mInstallFlags = installFlags;
@@ -94,18 +93,6 @@ final class InstallArgs {
         mForceQueryableOverride = forceQueryableOverride;
         mDataLoaderType = dataLoaderType;
         mPackageSource = packageSource;
-    }
-
-    /** New install */
-    InstallArgs(InstallingSession params) {
-        this(params.mOriginInfo, params.mMoveInfo, params.mObserver, params.mInstallFlags,
-                params.mInstallSource, params.mVolumeUuid,
-                params.getUser(), null /*instructionSets*/, params.mPackageAbiOverride,
-                params.mGrantedRuntimePermissions, params.mAllowlistedRestrictedPermissions,
-                params.mAutoRevokePermissionsMode,
-                params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
-                params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
-                params.mDataLoaderType, params.mPackageSource);
     }
 
     /**
