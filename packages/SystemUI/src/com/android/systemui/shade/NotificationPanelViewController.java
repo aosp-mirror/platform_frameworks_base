@@ -79,7 +79,10 @@ import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.transition.ChangeBounds;
+import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.transition.TransitionValues;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
@@ -1664,9 +1667,40 @@ public final class NotificationPanelViewController {
                     // horizontally properly.
                     transition.excludeTarget(R.id.status_view_media_container, true);
                 }
+
                 transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-                TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
+
+                boolean customClockAnimation =
+                        mKeyguardStatusViewController
+                                .getClockAnimations()
+                                .getHasCustomPositionUpdatedAnimation();
+
+                if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
+                    // Find the clock, so we can exclude it from this transition.
+                    FrameLayout clockContainerView =
+                            mView.findViewById(R.id.lockscreen_clock_view_large);
+                    View clockView = clockContainerView.getChildAt(0);
+
+                    transition.excludeTarget(clockView, /* exclude= */ true);
+
+                    TransitionSet set = new TransitionSet();
+                    set.addTransition(transition);
+
+                    SplitShadeTransitionAdapter adapter =
+                            new SplitShadeTransitionAdapter(mKeyguardStatusViewController);
+
+                    // Use linear here, so the actual clock can pick its own interpolator.
+                    adapter.setInterpolator(Interpolators.LINEAR);
+                    adapter.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                    adapter.addTarget(clockView);
+                    set.addTransition(adapter);
+
+                    TransitionManager.beginDelayedTransition(mNotificationContainerParent, set);
+                } else {
+                    TransitionManager.beginDelayedTransition(
+                            mNotificationContainerParent, transition);
+                }
             }
 
             constraintSet.applyTo(mNotificationContainerParent);
@@ -6236,6 +6270,56 @@ public final class NotificationPanelViewController {
         @Override
         public void onConfigurationChanged(Configuration newConfig) {
             loadDimens();
+        }
+    }
+
+    static class SplitShadeTransitionAdapter extends Transition {
+        private static final String PROP_BOUNDS = "splitShadeTransitionAdapter:bounds";
+        private static final String[] TRANSITION_PROPERTIES = { PROP_BOUNDS };
+
+        private final KeyguardStatusViewController mController;
+
+        SplitShadeTransitionAdapter(KeyguardStatusViewController controller) {
+            mController = controller;
+        }
+
+        private void captureValues(TransitionValues transitionValues) {
+            Rect boundsRect = new Rect();
+            boundsRect.left = transitionValues.view.getLeft();
+            boundsRect.top = transitionValues.view.getTop();
+            boundsRect.right = transitionValues.view.getRight();
+            boundsRect.bottom = transitionValues.view.getBottom();
+            transitionValues.values.put(PROP_BOUNDS, boundsRect);
+        }
+
+        @Override
+        public void captureEndValues(TransitionValues transitionValues) {
+            captureValues(transitionValues);
+        }
+
+        @Override
+        public void captureStartValues(TransitionValues transitionValues) {
+            captureValues(transitionValues);
+        }
+
+        @Override
+        public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
+                TransitionValues endValues) {
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+
+            Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
+            Rect to = (Rect) endValues.values.get(PROP_BOUNDS);
+
+            anim.addUpdateListener(
+                    animation -> mController.getClockAnimations().onPositionUpdated(
+                            from, to, animation.getAnimatedFraction()));
+
+            return anim;
+        }
+
+        @Override
+        public String[] getTransitionProperties() {
+            return TRANSITION_PROPERTIES;
         }
     }
 }
