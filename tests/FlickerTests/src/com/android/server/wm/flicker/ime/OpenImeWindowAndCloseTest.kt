@@ -52,19 +52,15 @@ class OpenImeWindowAndCloseTest(testSpec: FlickerTestParameter) : BaseTest(testS
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                simpleApp.launchViaIntent(wmHelper)
-                testApp.launchViaIntent(wmHelper)
-                testApp.openIME(wmHelper)
-            }
+            simpleApp.launchViaIntent(wmHelper)
+            testApp.launchViaIntent(wmHelper)
+            testApp.openIME(wmHelper)
         }
         transitions {
             testApp.finishActivity(wmHelper)
         }
         teardown {
-            test {
-                simpleApp.exit(wmHelper)
-            }
+            simpleApp.exit(wmHelper)
         }
     }
 

@@ -55,9 +55,7 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, textEditApp)
-                }
+                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, textEditApp)
             }
             transitions {
                 SplitScreenHelper.copyContentInSplit(

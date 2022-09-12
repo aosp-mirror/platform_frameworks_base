@@ -64,15 +64,11 @@ open class OpenAppColdTest(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    removeAllTasksButHome()
-                    this.setRotation(testSpec.startRotation)
-                }
+                removeAllTasksButHome()
+                this.setRotation(testSpec.startRotation)
             }
             teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
-                }
+                testApp.exit(wmHelper)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)

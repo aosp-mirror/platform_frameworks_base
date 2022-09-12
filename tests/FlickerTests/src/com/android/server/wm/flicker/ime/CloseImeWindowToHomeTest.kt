@@ -49,13 +49,9 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotationCheckEnabled(false)
-            }
-            eachRun {
-                testApp.launchViaIntent(wmHelper)
-                testApp.openIME(wmHelper)
-            }
+            tapl.setExpectedRotationCheckEnabled(false)
+            testApp.launchViaIntent(wmHelper)
+            testApp.openIME(wmHelper)
         }
         transitions {
             tapl.goHome()
@@ -65,9 +61,7 @@ class CloseImeWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTest(testSp
                 .waitForAndVerify()
         }
         teardown {
-            test {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
     }
 

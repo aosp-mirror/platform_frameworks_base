@@ -48,10 +48,8 @@ open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                test {
-                    val addBubbleBtn = waitAndGetAddBubbleBtn()
-                    addBubbleBtn?.click() ?: error("Add Bubble not found")
-                }
+                val addBubbleBtn = waitAndGetAddBubbleBtn()
+                addBubbleBtn?.click() ?: error("Add Bubble not found")
             }
             transitions {
                 val showBubble = device.wait(

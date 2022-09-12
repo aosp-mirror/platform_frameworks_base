@@ -51,13 +51,11 @@ open class OpenAppFromNotificationCold(
             super.transition(this)
 
             setup {
-                eachRun {
-                    // Close the app that posted the notification to trigger a cold start next time
-                    // it is open - can't just kill it because that would remove the notification.
-                    tapl.goHome()
-                    tapl.workspace.switchToOverview()
-                    tapl.overview.dismissAllTasks()
-                }
+                // Close the app that posted the notification to trigger a cold start next time
+                // it is open - can't just kill it because that would remove the notification.
+                tapl.goHome()
+                tapl.workspace.switchToOverview()
+                tapl.overview.dismissAllTasks()
             }
         }
 

@@ -33,14 +33,10 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = true) {
             setup {
-                eachRun {
-                    this.setRotation(testSpec.startRotation)
-                }
+                this.setRotation(testSpec.startRotation)
             }
             teardown {
-                eachRun {
-                    this.setRotation(Surface.ROTATION_0)
-                }
+                this.setRotation(Surface.ROTATION_0)
             }
         }
 

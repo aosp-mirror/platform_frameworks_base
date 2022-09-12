@@ -54,14 +54,12 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
 
-                    tapl.goHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                }
+                tapl.goHome()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
             }
             transitions {
                 tapl.workspace.switchToOverview()

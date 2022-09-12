@@ -36,18 +36,12 @@ abstract class CloseAppTransition(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotation(testSpec.startRotation)
-            }
-            eachRun {
-                testApp.launchViaIntent(wmHelper)
-                this.setRotation(testSpec.startRotation)
-            }
+            tapl.setExpectedRotation(testSpec.startRotation)
+            testApp.launchViaIntent(wmHelper)
+            this.setRotation(testSpec.startRotation)
         }
         teardown {
-            test {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
     }
 

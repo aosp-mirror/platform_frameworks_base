@@ -52,21 +52,15 @@ open class OpenAppAfterCameraTest(
         get() = {
             super.transition(this)
             setup {
-                test{
-                    tapl.setExpectedRotationCheckEnabled(false)
-                }
-                eachRun {
-                    // 1. Open camera - cold -> close it first
-                    cameraApp.exit(wmHelper)
-                    cameraApp.launchViaIntent(wmHelper)
-                    // 2. Press home button (button nav mode) / swipe up to home (gesture nav mode)
-                    tapl.goHome()
-                }
+                tapl.setExpectedRotationCheckEnabled(false)
+                // 1. Open camera - cold -> close it first
+                cameraApp.exit(wmHelper)
+                cameraApp.launchViaIntent(wmHelper)
+                // 2. Press home button (button nav mode) / swipe up to home (gesture nav mode)
+                tapl.goHome()
             }
             teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
-                }
+                testApp.exit(wmHelper)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)

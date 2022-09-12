@@ -54,20 +54,16 @@ class OpenImeWindowFromFixedOrientationAppTest(
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotationCheckEnabled(false)
-            }
-            test {
-                // Launch the activity with expecting IME will be shown.
-                imeTestApp.launchViaIntent(wmHelper)
-            }
-            eachRun {
-                // Swiping out the IME activity to home.
-                tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
-            }
+            tapl.setExpectedRotationCheckEnabled(false)
+
+            // Launch the activity with expecting IME will be shown.
+            imeTestApp.launchViaIntent(wmHelper)
+
+            // Swiping out the IME activity to home.
+            tapl.goHome()
+            wmHelper.StateSyncBuilder()
+                .withHomeActivityVisible()
+                .waitForAndVerify()
         }
         transitions {
             // Bring the exist IME activity to the front in landscape mode device rotation.
@@ -75,9 +71,7 @@ class OpenImeWindowFromFixedOrientationAppTest(
             imeTestApp.launchViaIntent(wmHelper)
         }
         teardown {
-            test {
-                imeTestApp.exit(wmHelper)
-            }
+            imeTestApp.exit(wmHelper)
         }
     }
 

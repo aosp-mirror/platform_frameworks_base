@@ -73,27 +73,23 @@ class EnterSplitScreenByDragFromNotification(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    // Send a notification
-                    sendNotificationApp.launchViaIntent(wmHelper)
-                    val sendNotification = device.wait(
-                        Until.findObject(By.text("Send Notification")),
-                        SplitScreenHelper.TIMEOUT_MS
-                    )
-                    sendNotification?.click() ?: error("Send notification button not found")
+                // Send a notification
+                sendNotificationApp.launchViaIntent(wmHelper)
+                val sendNotification = device.wait(
+                    Until.findObject(By.text("Send Notification")),
+                    SplitScreenHelper.TIMEOUT_MS
+                )
+                sendNotification?.click() ?: error("Send notification button not found")
 
-                    tapl.goHome()
-                    primaryApp.launchViaIntent(wmHelper)
-                }
+                tapl.goHome()
+                primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
                 SplitScreenHelper.dragFromNotificationToSplit(instrumentation, device, wmHelper)
                 SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, sendNotificationApp)
             }
             teardown {
-                eachRun {
-                    sendNotificationApp.exit(wmHelper)
-                }
+                sendNotificationApp.exit(wmHelper)
             }
         }
 
