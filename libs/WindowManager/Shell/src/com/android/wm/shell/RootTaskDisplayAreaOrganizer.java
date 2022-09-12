@@ -179,6 +179,14 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     }
 
     /**
+     * Returns the {@link DisplayAreaInfo} of the {@link DisplayAreaInfo#displayId}.
+     */
+    @Nullable
+    public DisplayAreaInfo getDisplayAreaInfo(int displayId) {
+        return mDisplayAreasInfo.get(displayId);
+    }
+
+    /**
      * Applies the {@link DisplayAreaInfo} to the {@link DisplayAreaContext} specified by
      * {@link DisplayAreaInfo#displayId}.
      */

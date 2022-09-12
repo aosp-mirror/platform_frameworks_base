@@ -27,7 +27,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
-import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
@@ -598,13 +597,13 @@ public abstract class WMShellModule {
     static Optional<DesktopModeController> provideDesktopModeController(
             Context context, ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @ShellMainThread Handler mainHandler,
             Transitions transitions
     ) {
         if (DesktopMode.IS_SUPPORTED) {
             return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
-                    rootDisplayAreaOrganizer, mainHandler, transitions));
+                    rootTaskDisplayAreaOrganizer, mainHandler, transitions));
         } else {
             return Optional.empty();
         }
