@@ -62,7 +62,7 @@ import javax.inject.Inject
  */
 
 @SysUISingleton
-class PrivacyDotViewController @Inject constructor(
+open class PrivacyDotViewController @Inject constructor(
     @Main private val mainExecutor: Executor,
     private val stateController: StatusBarStateController,
     private val configurationController: ConfigurationController,
@@ -76,7 +76,8 @@ class PrivacyDotViewController @Inject constructor(
     private lateinit var br: View
 
     // Only can be modified on @UiThread
-    private var currentViewState: ViewState = ViewState()
+    var currentViewState: ViewState = ViewState()
+        get() = field
 
     @GuardedBy("lock")
     private var nextViewState: ViewState = currentViewState.copy()
@@ -142,6 +143,10 @@ class PrivacyDotViewController @Inject constructor(
         uiExecutor = e
     }
 
+    fun getUiExecutor(): DelayableExecutor? {
+        return uiExecutor
+    }
+
     fun setShowingListener(l: ShowingListener?) {
         showingListener = l
     }
@@ -176,7 +181,7 @@ class PrivacyDotViewController @Inject constructor(
     }
 
     @UiThread
-    private fun hideDotView(dot: View, animate: Boolean) {
+    fun hideDotView(dot: View, animate: Boolean) {
         dot.clearAnimation()
         if (animate) {
             dot.animate()
@@ -195,7 +200,7 @@ class PrivacyDotViewController @Inject constructor(
     }
 
     @UiThread
-    private fun showDotView(dot: View, animate: Boolean) {
+    fun showDotView(dot: View, animate: Boolean) {
         dot.clearAnimation()
         if (animate) {
             dot.visibility = View.VISIBLE
@@ -508,6 +513,13 @@ class PrivacyDotViewController @Inject constructor(
             state.designatedCorner?.contentDescription = state.contentDescription
         }
 
+        updateDotView(state)
+
+        currentViewState = state
+    }
+
+    @UiThread
+    open fun updateDotView(state: ViewState) {
         val shouldShow = state.shouldShowDot()
         if (shouldShow != currentViewState.shouldShowDot()) {
             if (shouldShow && state.designatedCorner != null) {
@@ -516,8 +528,6 @@ class PrivacyDotViewController @Inject constructor(
                 hideDotView(state.designatedCorner, true)
             }
         }
-
-        currentViewState = state
     }
 
     private val systemStatusAnimationCallback: SystemStatusAnimationCallback =
@@ -621,7 +631,7 @@ private fun Int.innerGravity(): Int {
     }
 }
 
-private data class ViewState(
+data class ViewState(
     val viewInitialized: Boolean = false,
 
     val systemPrivacyEventIsActive: Boolean = false,
