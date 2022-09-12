@@ -302,6 +302,11 @@ key 317   BUTTON_THUMBL
 key 318   BUTTON_THUMBR
 
 
+key 329   STYLUS_BUTTON_TERTIARY
+key 331   STYLUS_BUTTON_PRIMARY
+key 332   STYLUS_BUTTON_SECONDARY
+
+
 # key 352 "KEY_OK"
 key 353   DPAD_CENTER
 # key 354 "KEY_GOTO"
@@ -424,6 +429,8 @@ key usage 0x0c007C KEYBOARD_BACKLIGHT_TOGGLE
 key usage 0x0c0173 MEDIA_AUDIO_TRACK
 key usage 0x0c019C PROFILE_SWITCH
 key usage 0x0c01A2 ALL_APPS
+key usage 0x0d0044 STYLUS_BUTTON_PRIMARY
+key usage 0x0d005a STYLUS_BUTTON_SECONDARY
 
 # Joystick and game controller axes.
 # Axes that are not mapped will be assigned generic axis numbers by the input subsystem.
