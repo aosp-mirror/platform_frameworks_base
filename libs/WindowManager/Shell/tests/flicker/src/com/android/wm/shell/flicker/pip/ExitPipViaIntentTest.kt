@@ -78,7 +78,12 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
         }
 
     /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
+    @FlakyTest
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc}  */
+    @Presubmit
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() {
         Assume.assumeFalse(isShellTransitionsEnabled)
@@ -106,11 +111,6 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
         Assume.assumeTrue(isShellTransitionsEnabled)
         super.pipLayerExpands()
     }
-
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 227313015)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**
