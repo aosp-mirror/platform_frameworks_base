@@ -654,8 +654,8 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"전체 얼굴이 보여야 합니다."</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"전체 얼굴이 보여야 합니다."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"전체 얼굴이 보여야\\n합니다."</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"전체 얼굴이 보여야\\n합니다."</string>
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"선글라스가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
