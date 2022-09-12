@@ -60,6 +60,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.concurrent.Executor;
 
 /**
  * Handles windowing changes when desktop mode system setting changes
@@ -130,6 +131,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     private ExternalInterfaceBinder createExternalInterface() {
         return new IDesktopModeImpl(this);
+    }
+
+    /**
+     * Adds a listener to find out about changes in the visibility of freeform tasks.
+     *
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+            Executor callbackExecutor) {
+        mDesktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor);
     }
 
     @VisibleForTesting
@@ -293,7 +305,14 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     @ExternalThread
     private final class DesktopModeImpl implements DesktopMode {
-        // Do nothing
+
+        @Override
+        public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+                Executor callbackExecutor) {
+            mMainExecutor.execute(() -> {
+                DesktopModeController.this.addListener(listener, callbackExecutor);
+            });
+        }
     }
 
     /**
