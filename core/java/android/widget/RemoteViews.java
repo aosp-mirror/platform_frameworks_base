@@ -1598,7 +1598,13 @@ public class RemoteViews implements Parcelable, Filter {
 
         public BitmapCache(Parcel source) {
             mBitmaps = source.createTypedArrayList(Bitmap.CREATOR);
-            mBitmapHashes = source.readSparseIntArray();
+            mBitmapHashes = new SparseIntArray();
+            for (int i = 0; i < mBitmaps.size(); i++) {
+                Bitmap b = mBitmaps.get(i);
+                if (b != null) {
+                    mBitmapHashes.put(b.hashCode(), i);
+                }
+            }
         }
 
         public int getBitmapId(Bitmap b) {
@@ -1614,7 +1620,7 @@ public class RemoteViews implements Parcelable, Filter {
                         b = b.asShared();
                     }
                     mBitmaps.add(b);
-                    mBitmapHashes.put(mBitmaps.size() - 1, hash);
+                    mBitmapHashes.put(hash, mBitmaps.size() - 1);
                     mBitmapMemory = -1;
                     return (mBitmaps.size() - 1);
                 }
@@ -1631,7 +1637,6 @@ public class RemoteViews implements Parcelable, Filter {
 
         public void writeBitmapsToParcel(Parcel dest, int flags) {
             dest.writeTypedList(mBitmaps, flags);
-            dest.writeSparseIntArray(mBitmapHashes);
         }
 
         public int getBitmapMemory() {

@@ -2664,7 +2664,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     final Permission bp = mRegistry.getPermission(permName);
                     final boolean appSupportsRuntimePermissions =
                             pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
-                    String legacyActivityRecognitionPermission = null;
 
                     if (DEBUG_INSTALL && bp != null) {
                         Log.i(TAG, "Package " + friendlyName
@@ -2688,47 +2687,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     // Cache newImplicitPermissions before modifing permissionsState as for the
                     // shared uids the original and new state are the same object
                     if (!origState.hasPermissionState(permName)
-                            && (pkg.getImplicitPermissions().contains(permName)
-                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
-                        if (pkg.getImplicitPermissions().contains(permName)) {
+                            && (pkg.getImplicitPermissions().contains(permName))) {
                             // If permName is an implicit permission, try to auto-grant
                             newImplicitPermissions.add(permName);
-
                             if (DEBUG_PERMISSIONS) {
                                 Slog.i(TAG, permName + " is newly added for " + friendlyName);
                             }
-                        } else {
-                            // Special case for Activity Recognition permission. Even if AR
-                            // permission is not an implicit permission we want to add it to the
-                            // list (try to auto-grant it) if the app was installed on a device
-                            // before AR permission was split, regardless of if the app now requests
-                            // the new AR permission or has updated its target SDK and AR is no
-                            // longer implicit to it. This is a compatibility workaround for apps
-                            // when AR permission was split in Q.
-                            // TODO(zhanghai): This calls into SystemConfig, which generally
-                            //  shouldn't  cause deadlock, but maybe we should keep a cache of the
-                            //  split permission  list and just eliminate the possibility.
-                            final List<PermissionManager.SplitPermissionInfo> permissionList =
-                                    getSplitPermissionInfos();
-                            int numSplitPerms = permissionList.size();
-                            for (int splitPermNum = 0; splitPermNum < numSplitPerms;
-                                    splitPermNum++) {
-                                PermissionManager.SplitPermissionInfo sp = permissionList.get(
-                                        splitPermNum);
-                                String splitPermName = sp.getSplitPermission();
-                                if (sp.getNewPermissions().contains(permName)
-                                        && origState.isPermissionGranted(splitPermName)) {
-                                    legacyActivityRecognitionPermission = splitPermName;
-                                    newImplicitPermissions.add(permName);
-
-                                    if (DEBUG_PERMISSIONS) {
-                                        Slog.i(TAG, permName + " is newly added for "
-                                                + friendlyName);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
                     }
 
                     // TODO(b/140256621): The package instant app method has been removed
@@ -2862,8 +2826,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             // Hard restricted permissions cannot be held.
                             } else if (!permissionPolicyInitialized
                                     || (!hardRestricted || restrictionExempt)) {
-                                if ((origPermState != null && origPermState.isGranted())
-                                        || legacyActivityRecognitionPermission != null) {
+                                if ((origPermState != null && origPermState.isGranted())) {
                                     if (!uidState.grantPermission(bp)) {
                                         wasChanged = true;
                                     }

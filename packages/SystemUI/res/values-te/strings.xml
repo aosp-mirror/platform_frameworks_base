@@ -348,7 +348,7 @@
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
-      <item quantity="one">ఒక్క వినియోగదారుని మాత్రమే సృష్టించవచ్చు.</item>
+      <item quantity="one">ఒక్క వినియోగదారుని మాత్రమే క్రియేట్ చేయవచ్చు.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"వినియోగదారుని తీసివేయాలా?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ఈ వినియోగదారుకు సంబంధించిన అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
@@ -561,7 +561,7 @@
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"తర్వాత"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"మునుపటి"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"రివైండ్ చేయి"</string>
-    <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"వేగంగా ఫార్వార్డ్ చేయి"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"వేగంగా ఫార్వర్డ్ చేయి"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
@@ -624,7 +624,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ఎడమ వైపు చిహ్నం"</string>
     <string name="right_icon" msgid="1103955040645237425">"కుడివైపు ఉన్న చిహ్నం"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"టైల్స్‌ను జోడించడానికి పట్టుకుని, లాగండి"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్స్‌ను వేరే క్రమంలో అమర్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"మీ వద్ద కనీసం <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> టైల్‌లు ఉండాలి"</string>
     <string name="qs_edit" msgid="5583565172803472437">"ఎడిట్ చేయండి"</string>
@@ -742,17 +742,17 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"స్క్రీన్ రికార్డింగ్"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"శీర్షిక లేదు"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"స్టాండ్‌బై"</string>
-    <string name="magnification_window_title" msgid="4863914360847258333">"మాగ్నిఫికేషన్ విండో"</string>
-    <string name="magnification_controls_title" msgid="8421106606708891519">"మాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"మ్యాగ్నిఫికేషన్ విండో"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"మ్యాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"దగ్గరగా జూమ్ చేయండి"</string>
     <string name="accessibility_control_zoom_out" msgid="69578832020304084">"దూరంగా జూమ్ చేయండి"</string>
     <string name="accessibility_control_move_up" msgid="6622825494014720136">"పైకి పంపండి"</string>
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"కిందకి పంపండి"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ఎడమవైపుగా జరపండి"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"కుడివైపుగా జరపండి"</string>
-    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"మాగ్నిఫికేషన్ స్విచ్"</string>
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"మ్యాగ్నిఫికేషన్ స్విచ్"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
-    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"యాక్సెసిబిలిటీ ఫీచర్‌లను తెరవడానికి ట్యాప్ చేయండి. సెట్టింగ్‌లలో ఈ బటన్‌ను అనుకూలంగా మార్చండి లేదా రీప్లేస్ చేయండి.\n\n"<annotation id="link">"వీక్షణ సెట్టింగ్‌లు"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>

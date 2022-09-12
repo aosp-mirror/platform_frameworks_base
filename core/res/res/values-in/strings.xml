@@ -127,7 +127,7 @@
     <item msgid="468830943567116703">"Untuk menelepon dan mengirim pesan melalui Wi-Fi, tanyalah ke operator Anda terlebih dahulu untuk menyiapkan layanan ini. Kemudian, aktifkan kembali panggilan Wi-Fi dari Setelan. (Kode error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Terjadi masalah saat mendaftarkan panggilan Wi‑Fi dengan operator Anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Terjadi error saat mendaftarkan panggilan Wi‑Fi dengan operator Anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
@@ -157,7 +157,7 @@
     <string name="fcComplete" msgid="1080909484660507044">"Kode fitur selesai."</string>
     <string name="fcError" msgid="5325116502080221346">"Masalah sambungan atau kode fitur tidak valid."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Oke"</string>
-    <string name="httpError" msgid="3406003584150566720">"Terjadi kesalahan jaringan."</string>
+    <string name="httpError" msgid="3406003584150566720">"Terjadi error jaringan."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"Tidak dapat menemukan URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Skema autentikasi situs tidak didukung."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"Tidak dapat mengautentikasi."</string>
@@ -1813,7 +1813,7 @@
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Potret tidak diketahui"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Lanskap tidak diketahui"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Dibatalkan"</string>
-    <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Terjadi kesalahan saat menulis konten"</string>
+    <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Terjadi error saat menulis konten"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"tak diketahui"</string>
     <string name="reason_service_unavailable" msgid="5288405248063804713">"Layanan cetak tidak diaktifkan"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"Layanan <xliff:g id="NAME">%s</xliff:g> telah terpasang"</string>

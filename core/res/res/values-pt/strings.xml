@@ -735,8 +735,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Permite que um app remova certificados de DRM. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"vincular a um serviço de mensagens de operadora"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite que o proprietário use a interface de nível superior de um serviço de mensagens de operadora. Não deve ser necessária para apps comuns."</string>
-    <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular a serviços de operadora"</string>
-    <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite que o proprietário use serviços de operadora. Não deve ser necessário para apps comuns."</string>
+    <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular a serviços da operadora"</string>
+    <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite que o proprietário use serviços da operadora. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"acessar \"Não perturbe\""</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permitir que o app leia e grave a configuração \"Não perturbe\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso da permissão para visualização"</string>
