@@ -37,7 +37,7 @@
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g> sulla TV."</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g> sul telefono."</string>
     <string name="launch" msgid="3952550563999890101">"Apri"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"L\'amministratore non consente l\'installazione di app ottenute da fonti sconosciute"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"L\'amministratore non consente l\'installazione di app ottenute da origini sconosciute"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Questo utente non può installare app sconosciute"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"L\'utente non è autorizzato a installare app"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>

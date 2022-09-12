@@ -69,11 +69,13 @@ public abstract class MediaOutputBaseAdapter extends
     View mHolderView;
     boolean mIsDragging;
     int mCurrentActivePosition;
+    private boolean mIsInitVolumeFirstTime;
 
     public MediaOutputBaseAdapter(MediaOutputController controller) {
         mController = controller;
         mIsDragging = false;
         mCurrentActivePosition = -1;
+        mIsInitVolumeFirstTime = true;
     }
 
     @Override
@@ -271,11 +273,13 @@ public abstract class MediaOutputBaseAdapter extends
         void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
             if (!mController.isVolumeControlEnabled(device)) {
                 disableSeekBar();
+            } else {
+                enableSeekBar();
             }
             mSeekBar.setMaxVolume(device.getMaxVolume());
             final int currentVolume = device.getCurrentVolume();
             if (mSeekBar.getVolume() != currentVolume) {
-                if (isCurrentSeekbarInvisible) {
+                if (isCurrentSeekbarInvisible && !mIsInitVolumeFirstTime) {
                     animateCornerAndVolume(mSeekBar.getProgress(),
                             MediaOutputSeekbar.scaleVolumeToProgress(currentVolume));
                 } else {
@@ -283,6 +287,9 @@ public abstract class MediaOutputBaseAdapter extends
                         mSeekBar.setVolume(currentVolume);
                     }
                 }
+            }
+            if (mIsInitVolumeFirstTime) {
+                mIsInitVolumeFirstTime = false;
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -412,9 +419,14 @@ public abstract class MediaOutputBaseAdapter extends
             return drawable;
         }
 
-        private void disableSeekBar() {
+        protected void disableSeekBar() {
             mSeekBar.setEnabled(false);
             mSeekBar.setOnTouchListener((v, event) -> true);
+        }
+
+        private void enableSeekBar() {
+            mSeekBar.setEnabled(true);
+            mSeekBar.setOnTouchListener((v, event) -> false);
         }
 
         protected void setUpDeviceIcon(MediaDevice device) {

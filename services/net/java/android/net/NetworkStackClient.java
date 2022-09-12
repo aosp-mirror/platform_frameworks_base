@@ -25,19 +25,18 @@ import android.content.Context;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
-import android.net.util.SharedLog;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -60,9 +59,6 @@ public class NetworkStackClient {
     @Nullable
     @GuardedBy("mPendingNetStackRequests")
     private INetworkStackConnector mConnector;
-
-    @GuardedBy("mLog")
-    private final SharedLog mLog = new SharedLog(TAG);
 
     private volatile boolean mWasSystemServerInitialized = false;
 
@@ -237,34 +233,23 @@ public class NetworkStackClient {
     }
 
     /**
-     * Log a message in the local log.
+     * Log a debug message.
      */
     private void log(@NonNull String message) {
-        synchronized (mLog) {
-            mLog.log(message);
-        }
+        Log.d(TAG, message);
     }
 
     private void logWtf(@NonNull String message, @Nullable Throwable e) {
         Slog.wtf(TAG, message);
-        synchronized (mLog) {
-            mLog.e(message, e);
-        }
+        Log.e(TAG, message, e);
     }
 
     private void loge(@NonNull String message, @Nullable Throwable e) {
-        synchronized (mLog) {
-            mLog.e(message, e);
-        }
+        Log.e(TAG, message, e);
     }
 
-    /**
-     * Log a message in the local and system logs.
-     */
     private void logi(@NonNull String message) {
-        synchronized (mLog) {
-            mLog.i(message);
-        }
+        Log.i(TAG, message);
     }
 
     /**
@@ -319,23 +304,5 @@ public class NetworkStackClient {
         }
 
         request.onNetworkStackConnected(connector);
-    }
-
-    /**
-     * Dump NetworkStackClient logs to the specified {@link PrintWriter}.
-     */
-    public void dump(PrintWriter pw) {
-        // dump is thread-safe on SharedLog
-        mLog.dump(null, pw, null);
-        // dump connectivity module connector logs.
-        ConnectivityModuleConnector.getInstance().dump(pw);
-
-        final int requestsQueueLength;
-        synchronized (mPendingNetStackRequests) {
-            requestsQueueLength = mPendingNetStackRequests.size();
-        }
-
-        pw.println();
-        pw.println("pendingNetStackRequests length: " + requestsQueueLength);
     }
 }

@@ -37,6 +37,7 @@ import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -52,6 +53,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityStarter.canEmbedActivity;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
+import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
+import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
+import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -59,6 +65,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -87,6 +94,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
+import android.util.Size;
 import android.view.Gravity;
 import android.window.TaskFragmentOrganizerToken;
 
@@ -1172,6 +1180,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 null /* inTask */, taskFragment);
 
         assertFalse(taskFragment.hasChild());
+        assertNotNull("Target record must be started on Task.", targetRecord.getParent().asTask());
     }
 
     @Test
@@ -1340,6 +1349,58 @@ public class ActivityStarterTests extends WindowTestsBase {
                 null /* inTask */, null /* inTaskFragment */);
         verify(sourceRecord).sendResult(anyInt(), any(), anyInt(), eq(RESULT_CANCELED), any(),
                 any());
+    }
+
+    @Test
+    public void testCanEmbedActivity() {
+        final Size minDimensions = new Size(1000, 1000);
+        final WindowLayout windowLayout = new WindowLayout(0, 0, 0, 0, 0,
+                minDimensions.getWidth(), minDimensions.getHeight());
+        final ActivityRecord starting = new ActivityBuilder(mAtm)
+                .setUid(UNIMPORTANT_UID)
+                .setWindowLayout(windowLayout)
+                .build();
+
+        // Task fragment hasn't attached to a task yet. Start activity to a new task.
+        TaskFragment taskFragment = new TaskFragmentBuilder(mAtm).build();
+        final Task task = new TaskBuilder(mSupervisor).build();
+
+        assertEquals(EMBEDDING_DISALLOWED_NEW_TASK,
+                canEmbedActivity(taskFragment, starting, task));
+
+        // Starting activity is going to be started on a task different from task fragment's parent
+        // task. Start activity to a new task.
+        task.addChild(taskFragment, POSITION_TOP);
+        final Task newTask = new TaskBuilder(mSupervisor).build();
+
+        assertEquals(EMBEDDING_DISALLOWED_NEW_TASK,
+                canEmbedActivity(taskFragment, starting, newTask));
+
+        // Make task fragment bounds exceed task bounds.
+        final Rect taskBounds = task.getBounds();
+        taskFragment.setBounds(taskBounds.left, taskBounds.top, taskBounds.right + 1,
+                taskBounds.bottom + 1);
+
+        assertEquals(EMBEDDING_DISALLOWED_UNTRUSTED_HOST,
+                canEmbedActivity(taskFragment, starting, task));
+
+        taskFragment.setBounds(taskBounds);
+        starting.info.flags |= FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
+
+        assertEquals(EMBEDDING_ALLOWED, canEmbedActivity(taskFragment, starting, task));
+
+        starting.info.flags &= ~FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
+        // Set task fragment's uid as the same as starting activity's uid.
+        taskFragment.setTaskFragmentOrganizer(mock(TaskFragmentOrganizerToken.class),
+                UNIMPORTANT_UID, "test");
+
+        assertEquals(EMBEDDING_ALLOWED, canEmbedActivity(taskFragment, starting, task));
+
+        // Make task fragment bounds smaller than starting activity's minimum dimensions
+        taskFragment.setBounds(0, 0, minDimensions.getWidth() - 1, minDimensions.getHeight() - 1);
+
+        assertEquals(EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION,
+                canEmbedActivity(taskFragment, starting, task));
     }
 
     private static void startActivityInner(ActivityStarter starter, ActivityRecord target,

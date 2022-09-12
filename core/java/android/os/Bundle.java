@@ -934,6 +934,12 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
      * Otherwise, this method might throw an exception or return {@code null}.
      *
+     * <p><b>Warning: </b> the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #getParcelable(String)} instead.
+     *
      * @param key a String, or {@code null}
      * @param clazz The type of the object expected
      * @return a Parcelable value, or {@code null}
@@ -989,6 +995,13 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
      * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
      * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #getParcelableArray(String)} instead.
      *
      * @param key a String, or {@code null}
      * @param clazz The type of the items inside the array. This is only verified when unparceling.
@@ -1054,6 +1067,13 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
      * Otherwise, this method might throw an exception or return {@code null}.
      *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #getParcelableArrayList(String)} instead.
+     *
      * @param key   a String, or {@code null}
      * @param clazz The type of the items inside the array list. This is only verified when
      *     unparceling.
@@ -1104,6 +1124,13 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *     <li>A {@code null} value is explicitly associated with the key.
      *     <li>The object is not of type {@code clazz}.
      * </ul>
+     *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #getSparseParcelableArray(String)} instead.
      *
      * @param key a String, or null
      * @param clazz The type of the items inside the sparse array. This is only verified when

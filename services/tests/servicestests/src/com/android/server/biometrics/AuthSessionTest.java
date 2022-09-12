@@ -20,7 +20,9 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricPrompt.DISMISSED_REASON_NEGATIVE;
 
-import static com.android.server.biometrics.BiometricServiceStateProto.*;
+import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
+import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_STARTED;
+import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_STARTED_UI_SHOWING;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -32,6 +34,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -277,6 +281,43 @@ public class AuthSessionTest {
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         assertEquals(BiometricSensor.STATE_AUTHENTICATING,
                 session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
+    }
+
+    @Test
+    public void testOnDialogAnimatedInDoesNothingDuringInvalidState() throws Exception {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        final long operationId = 123;
+        final int userId = 10;
+
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                operationId,
+                userId);
+        final IBiometricAuthenticator impl = session.mPreAuthInfo.eligibleSensors.get(0).impl;
+
+        session.goToInitialState();
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        assertTrue(session.allCookiesReceived());
+        assertEquals(STATE_AUTH_STARTED, session.getState());
+        verify(impl, never()).startPreparedClient(anyInt());
+
+        // First invocation should start the client monitor.
+        session.onDialogAnimatedIn();
+        assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
+        verify(impl).startPreparedClient(anyInt());
+
+        // Subsequent invocations should not start the client monitor again.
+        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn();
+        assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
+        verify(impl, times(1)).startPreparedClient(anyInt());
     }
 
     @Test

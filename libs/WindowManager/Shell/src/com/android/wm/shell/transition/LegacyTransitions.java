@@ -107,7 +107,7 @@ public class LegacyTransitions {
             }
 
             @Override
-            public void onAnimationCancelled() throws RemoteException {
+            public void onAnimationCancelled(boolean isKeyguardOccluded) throws RemoteException {
                 mCancelled = true;
                 mApps = mWallpapers = mNonApps = null;
                 checkApply();

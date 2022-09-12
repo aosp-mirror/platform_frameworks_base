@@ -20,6 +20,7 @@ android_library {
     min_sdk_version: "29",
     apex_available: [
         "//apex_available:platform",
+        "com.android.adservices",
         "com.android.cellbroadcast",
         "com.android.permission",
     ],

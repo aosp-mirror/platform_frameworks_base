@@ -539,7 +539,7 @@ public final class SatellitePvt implements Parcelable {
      *
      * <p>This field is valid if {@link #hasIssueOfDataEphemeris()} is true.
      */
-    @IntRange(from = 0, to = 255)
+    @IntRange(from = 0, to = 1023)
     public int getIssueOfDataEphemeris() {
         return mIssueOfDataEphemeris;
     }
@@ -847,8 +847,8 @@ public final class SatellitePvt implements Parcelable {
          */
         @NonNull
         public Builder setIssueOfDataEphemeris(
-                @IntRange(from = 0, to = 255) int issueOfDataEphemeris) {
-            Preconditions.checkArgumentInRange(issueOfDataEphemeris, 0, 255,
+                @IntRange(from = 0, to = 1023) int issueOfDataEphemeris) {
+            Preconditions.checkArgumentInRange(issueOfDataEphemeris, 0, 1023,
                     "issueOfDataEphemeris");
             mIssueOfDataEphemeris = issueOfDataEphemeris;
             mFlags = (byte) (mFlags | HAS_ISSUE_OF_DATA_EPHEMERIS);

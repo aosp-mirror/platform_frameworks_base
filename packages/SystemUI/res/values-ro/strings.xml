@@ -376,7 +376,7 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Acest dispozitiv este oferit de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Acest dispozitiv aparține organizației dvs. și este conectat la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la internet prin aplicația <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și e conectat la internet prin <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Dispozitivul aparține organizației dvs."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Acest dispozitiv aparține organizației dvs. și este conectat la internet prin rețele VPN."</string>

@@ -308,7 +308,7 @@ import java.util.function.Consumer;
  * <li>The <b>foreground lifetime</b> of an activity happens between a call to
  * {@link android.app.Activity#onResume} until a corresponding call to
  * {@link android.app.Activity#onPause}.  During this time the activity is
- * in visible, active and interacting with the user.  An activity
+ * visible, active and interacting with the user.  An activity
  * can frequently go between the resumed and paused states -- for example when
  * the device goes to sleep, when an activity result is delivered, when a new
  * intent is delivered -- so the code in these methods should be fairly

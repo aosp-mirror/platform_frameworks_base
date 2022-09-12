@@ -1323,10 +1323,24 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnStackYChanged != null) {
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
+        updateStackEndHeightAndStackHeight(fraction);
+    }
+
+    @VisibleForTesting
+    public void updateStackEndHeightAndStackHeight(float fraction) {
+        final float oldStackHeight = mAmbientState.getStackHeight();
         if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
             final float endHeight = updateStackEndHeight(
                     getHeight(), getEmptyBottomMargin(), mTopPadding);
             updateStackHeight(endHeight, fraction);
+        } else {
+            // Always updateStackHeight to prevent jumps in the stack height when this fraction
+            // suddenly reapplies after a freeze.
+            final float endHeight = mAmbientState.getStackEndHeight();
+            updateStackHeight(endHeight, fraction);
+        }
+        if (oldStackHeight != mAmbientState.getStackHeight()) {
+            requestChildrenUpdate();
         }
     }
 
@@ -1343,6 +1357,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return stackEndHeight;
     }
 
+    @VisibleForTesting
     public void updateStackHeight(float endHeight, float fraction) {
         // During the (AOD<=>LS) transition where dozeAmount is changing,
         // apply dozeAmount to stack height instead of expansionFraction
@@ -5041,6 +5056,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setUnlockHintRunning(boolean running) {
         mAmbientState.setUnlockHintRunning(running);
+        if (!running) {
+            // re-calculate the stack height which was frozen while running this animation
+            updateStackPosition();
+        }
+    }
+
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    public void setPanelFlinging(boolean flinging) {
+        mAmbientState.setIsFlinging(flinging);
+        if (!flinging) {
+            // re-calculate the stack height which was frozen while flinging
+            updateStackPosition();
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

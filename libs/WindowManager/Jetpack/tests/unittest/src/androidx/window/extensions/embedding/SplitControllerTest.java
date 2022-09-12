@@ -35,6 +35,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -437,6 +438,50 @@ public class SplitControllerTest {
     }
 
     @Test
+    public void testResolveStartActivityIntent_shouldExpandSplitContainer() {
+        final Intent intent = new Intent().setComponent(
+                new ComponentName(ApplicationProvider.getApplicationContext(),
+                        MinimumDimensionActivity.class));
+        setupSplitRule(mActivity, intent, false /* clearTop */);
+        final Activity secondaryActivity = createMockActivity();
+        addSplitTaskFragments(mActivity, secondaryActivity, false /* clearTop */);
+
+        final TaskFragmentContainer container = mSplitController.resolveStartActivityIntent(
+                mTransaction, TASK_ID, intent, mActivity);
+        final TaskFragmentContainer primaryContainer = mSplitController.getContainerWithActivity(
+                mActivity);
+
+        assertNotNull(mSplitController.getActiveSplitForContainers(primaryContainer, container));
+        assertTrue(primaryContainer.areLastRequestedBoundsEqual(null));
+        assertTrue(container.areLastRequestedBoundsEqual(null));
+        assertEquals(container, mSplitController.getContainerWithActivity(secondaryActivity));
+    }
+
+    @Test
+    public void testResolveStartActivityIntent_noInfo_shouldCreateSplitContainer() {
+        final Intent intent = new Intent().setComponent(
+                new ComponentName(ApplicationProvider.getApplicationContext(),
+                        MinimumDimensionActivity.class));
+        setupSplitRule(mActivity, intent, false /* clearTop */);
+        final Activity secondaryActivity = createMockActivity();
+        addSplitTaskFragments(mActivity, secondaryActivity, false /* clearTop */);
+
+        final TaskFragmentContainer secondaryContainer = mSplitController
+                .getContainerWithActivity(secondaryActivity);
+        secondaryContainer.mInfo = null;
+
+        final TaskFragmentContainer container = mSplitController.resolveStartActivityIntent(
+                mTransaction, TASK_ID, intent, mActivity);
+        final TaskFragmentContainer primaryContainer = mSplitController.getContainerWithActivity(
+                mActivity);
+
+        assertNotNull(mSplitController.getActiveSplitForContainers(primaryContainer, container));
+        assertTrue(primaryContainer.areLastRequestedBoundsEqual(null));
+        assertTrue(container.areLastRequestedBoundsEqual(null));
+        assertNotEquals(container, secondaryContainer);
+    }
+
+    @Test
     public void testPlaceActivityInTopContainer() {
         mSplitController.placeActivityInTopContainer(mActivity);
 
@@ -807,22 +852,38 @@ public class SplitControllerTest {
         final Activity activityBelow = createMockActivity();
         setupSplitRule(activityBelow, mActivity);
 
-        ActivityInfo aInfo = new ActivityInfo();
-        final Rect secondaryBounds = getSplitBounds(false /* isPrimary */);
-        aInfo.windowLayout = new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
-                secondaryBounds.width() + 1, secondaryBounds.height() + 1);
-        doReturn(aInfo).when(mActivity).getActivityInfo();
+        doReturn(createActivityInfoWithMinDimensions()).when(mActivity).getActivityInfo();
 
         final TaskFragmentContainer container = mSplitController.newContainer(activityBelow,
                 TASK_ID);
         container.addPendingAppearedActivity(mActivity);
 
-        // Allow to split as primary.
         boolean result = mSplitController.resolveActivityToContainer(mActivity,
                 false /* isOnReparent */);
 
         assertTrue(result);
         assertSplitPair(activityBelow, mActivity, true /* matchParentBounds */);
+    }
+
+    @Test
+    public void testResolveActivityToContainer_minDimensions_shouldExpandSplitContainer() {
+        final Activity primaryActivity = createMockActivity();
+        final Activity secondaryActivity = createMockActivity();
+        addSplitTaskFragments(primaryActivity, secondaryActivity, false /* clearTop */);
+
+        setupSplitRule(primaryActivity, mActivity, false /* clearTop */);
+        doReturn(createActivityInfoWithMinDimensions()).when(mActivity).getActivityInfo();
+        doReturn(secondaryActivity).when(mSplitController).findActivityBelow(eq(mActivity));
+
+        clearInvocations(mSplitPresenter);
+        boolean result = mSplitController.resolveActivityToContainer(mActivity,
+                false /* isOnReparent */);
+
+        assertTrue(result);
+        assertSplitPair(primaryActivity, mActivity, true /* matchParentBounds */);
+        assertEquals(mSplitController.getContainerWithActivity(secondaryActivity),
+                mSplitController.getContainerWithActivity(mActivity));
+        verify(mSplitPresenter, never()).createNewSplitContainer(any(), any(), any());
     }
 
     @Test
@@ -941,23 +1002,41 @@ public class SplitControllerTest {
     /** Setups a rule to always split the given activities. */
     private void setupSplitRule(@NonNull Activity primaryActivity,
             @NonNull Intent secondaryIntent) {
-        final SplitRule splitRule = createSplitRule(primaryActivity, secondaryIntent);
+        setupSplitRule(primaryActivity, secondaryIntent, true /* clearTop */);
+    }
+
+    /** Setups a rule to always split the given activities. */
+    private void setupSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Intent secondaryIntent, boolean clearTop) {
+        final SplitRule splitRule = createSplitRule(primaryActivity, secondaryIntent, clearTop);
         mSplitController.setEmbeddingRules(Collections.singleton(splitRule));
     }
 
     /** Setups a rule to always split the given activities. */
     private void setupSplitRule(@NonNull Activity primaryActivity,
             @NonNull Activity secondaryActivity) {
-        final SplitRule splitRule = createSplitRule(primaryActivity, secondaryActivity);
+        setupSplitRule(primaryActivity, secondaryActivity, true /* clearTop */);
+    }
+
+    /** Setups a rule to always split the given activities. */
+    private void setupSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity, boolean clearTop) {
+        final SplitRule splitRule = createSplitRule(primaryActivity, secondaryActivity, clearTop);
         mSplitController.setEmbeddingRules(Collections.singleton(splitRule));
     }
 
     /** Adds a pair of TaskFragments as split for the given activities. */
     private void addSplitTaskFragments(@NonNull Activity primaryActivity,
             @NonNull Activity secondaryActivity) {
+        addSplitTaskFragments(primaryActivity, secondaryActivity, true /* clearTop */);
+    }
+
+    /** Adds a pair of TaskFragments as split for the given activities. */
+    private void addSplitTaskFragments(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity, boolean clearTop) {
         registerSplitPair(createMockTaskFragmentContainer(primaryActivity),
                 createMockTaskFragmentContainer(secondaryActivity),
-                createSplitRule(primaryActivity, secondaryActivity));
+                createSplitRule(primaryActivity, secondaryActivity, clearTop));
     }
 
     /** Registers the two given TaskFragments as split pair. */
@@ -1008,16 +1087,18 @@ public class SplitControllerTest {
         if (primaryContainer.mInfo != null) {
             final Rect primaryBounds = matchParentBounds ? new Rect()
                     : getSplitBounds(true /* isPrimary */);
+            final int windowingMode = matchParentBounds ? WINDOWING_MODE_UNDEFINED
+                    : WINDOWING_MODE_MULTI_WINDOW;
             assertTrue(primaryContainer.areLastRequestedBoundsEqual(primaryBounds));
-            assertTrue(primaryContainer.isLastRequestedWindowingModeEqual(
-                    WINDOWING_MODE_MULTI_WINDOW));
+            assertTrue(primaryContainer.isLastRequestedWindowingModeEqual(windowingMode));
         }
         if (secondaryContainer.mInfo != null) {
             final Rect secondaryBounds = matchParentBounds ? new Rect()
                     : getSplitBounds(false /* isPrimary */);
+            final int windowingMode = matchParentBounds ? WINDOWING_MODE_UNDEFINED
+                    : WINDOWING_MODE_MULTI_WINDOW;
             assertTrue(secondaryContainer.areLastRequestedBoundsEqual(secondaryBounds));
-            assertTrue(secondaryContainer.isLastRequestedWindowingModeEqual(
-                    WINDOWING_MODE_MULTI_WINDOW));
+            assertTrue(secondaryContainer.isLastRequestedWindowingModeEqual(windowingMode));
         }
     }
 }

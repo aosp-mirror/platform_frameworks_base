@@ -269,6 +269,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         private void onGroupActionTriggered(boolean isChecked, MediaDevice device) {
+            disableSeekBar();
             if (isChecked && isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                 mController.addDeviceToPlayMedia(device);
             } else if (!isChecked && isDeviceIncluded(mController.getDeselectableMediaDevice(),
@@ -285,6 +286,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 Log.d(TAG, "This device is already connected! : " + device.getName());
                 return;
             }
+            mController.setTemporaryAllowListExceptionIfNeeded(device);
             mCurrentActivePosition = -1;
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
