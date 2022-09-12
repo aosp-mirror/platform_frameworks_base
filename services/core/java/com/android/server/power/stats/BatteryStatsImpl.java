@@ -14965,6 +14965,18 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @GuardedBy("this")
+    private void dumpCpuPowerBracketsLocked(PrintWriter pw) {
+        pw.println("CPU power brackets; cluster/freq in MHz(avg current in mA):");
+        final int bracketCount = mPowerProfile.getCpuPowerBracketCount();
+        for (int bracket = 0; bracket < bracketCount; bracket++) {
+            pw.print("    ");
+            pw.print(bracket);
+            pw.print(": ");
+            pw.println(mPowerProfile.getCpuPowerBracketDescription(bracket));
+        }
+    }
+
     /**
      * Dump measured charge stats
      */
@@ -16295,6 +16307,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
         pw.println();
         dumpConstantsLocked(pw);
+
+        pw.println();
+        dumpCpuPowerBracketsLocked(pw);
 
         pw.println();
         dumpMeasuredEnergyStatsLocked(pw);
