@@ -533,7 +533,9 @@ public class InternalResourceService extends SystemService {
 
     void onPackageForceStopped(final int userId, @NonNull final String pkgName) {
         synchronized (mLock) {
-            // TODO: reduce ARC count by some amount
+            // Remove all credits if the user force stops the app. It will slowly regain them
+            // in response to different events.
+            mAgent.reclaimAllAssetsLocked(userId, pkgName, EconomicPolicy.REGULATION_FORCE_STOP);
         }
     }
 
