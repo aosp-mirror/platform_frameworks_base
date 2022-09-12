@@ -19,17 +19,16 @@ package com.android.server.wm;
 
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
-import static com.android.server.wm.WindowContainerProto.IDENTIFIER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateProto.IDENTIFIER;
 
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.proto.ProtoOutputStream;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
