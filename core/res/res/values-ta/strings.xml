@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"கைரேகை செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"பயனர், கைரேகை உறுதிப்படுத்துதலை ரத்துசெய்தார்."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"அதிகமான முயற்சிகள். பிறகு முயற்சிக்கவும்."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"பலமுறை முயன்றுவிட்டீர்கள். இதற்குப் பதிலாகத் திரைப்பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"மீண்டும் முயற்சிக்கவும்."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"கைரேகைப் பதிவுகள் எதுவும் இல்லை."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"இந்தச் சாதனத்தில் கைரேகை சென்சார் இல்லை."</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"பழுதுபார்ப்புச் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"முகத் தோற்றம் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"அதிக ஒளிர்வு. மிதமான ஒளியில் முயலவும்."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"பிரகாசமான ஒளியில் முயலவும்"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"மொபைலை முகத்தில் இருந்து தள்ளிப் பிடிக்கவும்"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"மொபைலை அருகில் நகர்த்தவும்"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"மொபைலை மேலே நகர்த்தவும்"</string>

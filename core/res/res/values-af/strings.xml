@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Vingerafdrukhandeling is gekanselleer."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vingerafdrukhandeling is deur gebruiker gekanselleer."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Te veel pogings. Probeer later weer."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Te veel pogings. Gebruik eerder skermslot."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Probeer weer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Geen vingerafdrukke is geregistreer nie."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Hierdie toetstel het nie \'n vingerafdruksensor nie."</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besoek \'n verskaffer wat herstelwerk doen."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Te helder. Probeer sagter beligting."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Probeer helderder beligting"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Beweeg foon verder weg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Beweeg foon nader"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Beweeg foon hoër op"</string>

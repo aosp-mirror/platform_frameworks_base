@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర యాక్టివిటీ రద్దయింది."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేశారు."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"మీ ఫేస్‌మోడల్ క్రియేషన్ కుదరదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"వెలుతురు అధికంగా ఉంది. తక్కువ ఉండేలా చూడండి."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ప్రకాశవంతమైన లైటింగ్‌లో ట్రై చేయండి"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ఫోన్‌ను కాస్త దూరంగా జరపండి"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ఫోన్‌ను పైకి పట్టుకోండి"</string>
