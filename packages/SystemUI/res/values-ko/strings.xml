@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"얼굴을 인식할 수 없습니다."</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"대신 지문을 사용하세요."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"블루투스가 연결되었습니다."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"배터리 잔량을 알 수 없습니다."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>에 연결되었습니다."</string>
@@ -281,7 +283,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"시작"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"중지"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"한 손 사용 모드"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 차단 해제하시겠습니까?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 &amp;#173;차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"기기 카메라를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"기기 카메라 및 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
@@ -419,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"캡션 오버레이"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"사용"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"사용 중지"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"소리 및 진동"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"설정"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"앱 고정됨"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 홈을 길게 터치하세요."</string>
@@ -594,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"사용"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"사용 안함"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"사용할 수 없음"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"사용 안함"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"탐색 메뉴"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"레이아웃"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"추가 왼쪽 버튼 유형"</string>
@@ -667,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"휴대전화 온도를 낮추는 동안 일부 기능이 제한됩니다.\n자세히 알아보려면 탭하세요."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"휴대전화 온도를 자동으로 낮추려고 시도합니다. 휴대전화를 계속 사용할 수는 있지만 작동이 느려질 수도 있습니다.\n\n휴대전화 온도가 낮아지면 정상적으로 작동됩니다."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"해결 방법 확인하기"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"충전기를 연결 해제하세요"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"기기를 충전하는 중에 문제가 발생했습니다. 케이블이 뜨거울 수 있으므로 주의하여 전원 어댑터를 분리하세요."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"취해야 할 조치 확인"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"왼쪽 바로가기"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"오른쪽 바로가기"</string>
