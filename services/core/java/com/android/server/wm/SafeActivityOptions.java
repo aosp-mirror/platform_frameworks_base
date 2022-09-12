@@ -118,6 +118,34 @@ public class SafeActivityOptions {
     }
 
     /**
+     * To ensure that two activities, one using this object, and the other using the
+     * SafeActivityOptions returned from this function, are launched into the same display through
+     * ActivityStartController#startActivities, all display-related information, i.e.
+     * displayAreaToken, launchDisplayId and callerDisplayId, are cloned.
+     */
+    @Nullable SafeActivityOptions selectiveCloneDisplayOptions() {
+        final ActivityOptions options = cloneLaunchingDisplayOptions(mOriginalOptions);
+        final ActivityOptions callerOptions = cloneLaunchingDisplayOptions(mCallerOptions);
+        if (options == null && callerOptions == null) {
+            return null;
+        }
+
+        final SafeActivityOptions safeOptions = new SafeActivityOptions(options,
+                mOriginalCallingPid, mOriginalCallingUid);
+        safeOptions.mCallerOptions = callerOptions;
+        safeOptions.mRealCallingPid = mRealCallingPid;
+        safeOptions.mRealCallingUid = mRealCallingUid;
+        return safeOptions;
+    }
+
+    private ActivityOptions cloneLaunchingDisplayOptions(ActivityOptions options) {
+        return options == null ? null : ActivityOptions.makeBasic()
+                .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
+                .setLaunchDisplayId(options.getLaunchDisplayId())
+                .setCallerDisplayId((options.getCallerDisplayId()));
+    }
+
+    /**
      * Overrides options with options from a caller and records {@link Binder#getCallingPid}/
      * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when calling this
      * method.
