@@ -1914,7 +1914,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return null;
     }
 
-    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+    @Nullable UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
             return mDeviceInventory.getDeviceSensorUuid(device);
         }

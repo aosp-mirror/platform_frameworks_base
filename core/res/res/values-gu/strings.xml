@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"તમારા કૅરિઅર દ્વારા સિમ <xliff:g id="SIMNUMBER">%d</xliff:g> માટે હંગામી રૂપે બંધ કરેલ છે"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"મોબાઇલ નેટવર્ક સુધી પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"વાઇ-ફાઇ પરથી કટોકટીના કૉલ કરી શકાતા નથી"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ઇમર્જન્સી કૉલ કદાચ ઉપલબ્ધ ન હોય"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> વાઇ-ફાઇ પર ઇમર્જન્સી કૉલને સપોર્ટ કરતા નથી. વિગતો માટે ટૅપ કરો."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
@@ -1415,7 +1415,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"અન્વેષણ કરો"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"આઉટપુટ સ્વિચ કરો"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> ખૂટે છે"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"ફરીથી ઉપકરણ દાખલ કરો"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"ફરીથી ડિવાઇસ દાખલ કરો"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> ખસેડી રહ્યાં છીએ"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"ડેટાને ખસેડી રહ્યાં છીએ"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"કન્ટેન્ટ ટ્રાન્સફર કરવાનું પૂર્ણ થયું"</string>

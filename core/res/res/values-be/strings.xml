@@ -82,8 +82,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Часова адключана для SIM <xliff:g id="SIMNUMBER">%d</xliff:g> аператарам сувязі"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Сетка мабільнай сувязі недаступная"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Націсніце, каб выбраць іншую сетку."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Экстранныя выклікі недаступныя"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Экстранныя выклікі ў сетцы Wi‑Fi недаступныя"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Экстранныя выклікі могуць быць недаступнымі"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не падтрымлівае экстранныя выклікі праз Wi-Fi. Націсніце, каб убачыць больш інфармацыі."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пераадрасацыя выкліку"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстранных зваротных выклікаў"</string>

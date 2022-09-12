@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"شرکت مخابراتی‌تان موقتاً آن را برای سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> خاموش کرده است"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"شبکه تلفن همراه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه ترجیحی را امتحان کنید. برای تغییر، ضربه بزنید."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"تماس اضطراری امکان‌پذیر نیست"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏تماس اضطراری ازطریق Wi‑Fi امکان‌پذیر نیست"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ممکن است تماس‌های اضطراری دردسترس نباشد"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"‏<xliff:g id="SPN">%s</xliff:g> از تماس‌های اضطراری ازطریق Wi-Fi پشتیبانی نمی‌کند. برای دیدن جزئیات، ضربه بزنید."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"هشدارها"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"بازارسال تماس"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"حالت پاسخ تماس اضطراری"</string>
@@ -645,9 +645,9 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"بسیار شبیه قبلی است، لطفاً قیافه دیگری بگیرید."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی کج بگیرید."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی صاف کنید."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"هر چیزی که جلو صورت شما را می‌گیرد بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1008,7 +1008,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="9161712335355510035">"تأیید"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"نکته: برای نزدیک‌نمایی و دورنمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="7065519579174882778">"نکته: برای زوم‌پیش و زوم‌پس کردن، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"تکمیل خودکار با <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
@@ -1411,7 +1411,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"درحال بیرون راندن <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"جدا نکنید"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"راه‌اندازی"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"بیرون راندن"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"خارج کردن"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"کاوش"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"تغییر خروجی"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> وجود ندارد"</string>

@@ -80,6 +80,10 @@ cc_library_shared {
         "include",
     ],
 
+    defaults: [
+        "latest_android_media_audio_common_types_cpp_target_shared",
+    ],
+
     target: {
         android: {
             srcs: [
@@ -243,7 +247,6 @@ cc_library_shared {
             ],
 
             shared_libs: [
-                "android.media.audio.common.types-V1-cpp",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "audiopolicy-types-aidl-cpp",

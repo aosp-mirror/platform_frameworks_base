@@ -81,8 +81,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Privremeno je isključio mobilni operater za SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Povezivanje sa mobilnom mrežom nije uspelo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probajte da promenite željenu mrežu. Dodirnite da biste promenili."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hitni pozivi nisu dostupni"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ne možete da upućujete hitne pozive preko Wi‑Fi-ja"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Hitni pozivi možda nisu dostupni"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne podržava hitne pozive preko WiFi-ja. Dodirnite za detalje."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Obaveštenja"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Režim za hitan povratni poziv"</string>
