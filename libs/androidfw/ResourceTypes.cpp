@@ -6521,8 +6521,12 @@ status_t ResTable::getEntry(
                     // Entry does not exist.
                     continue;
                 }
-
-                thisOffset = dtohl(eindex[realEntryIndex]);
+                if (thisType->flags & ResTable_type::FLAG_OFFSET16) {
+                    auto eindex16 = reinterpret_cast<const uint16_t*>(eindex);
+                    thisOffset = offset_from16(eindex16[realEntryIndex]);
+                } else {
+                    thisOffset = dtohl(eindex[realEntryIndex]);
+                }
             }
 
             if (thisOffset == ResTable_type::NO_ENTRY) {
@@ -7574,6 +7578,9 @@ void ResTable::print(bool inclValues) const
                         if (type->flags & ResTable_type::FLAG_SPARSE) {
                             printf(" [sparse]");
                         }
+                        if (type->flags & ResTable_type::FLAG_OFFSET16) {
+                            printf(" [offset16]");
+                        }
                     }
 
                     printf(":\n");
@@ -7605,7 +7612,13 @@ void ResTable::print(bool inclValues) const
                             thisOffset = static_cast<uint32_t>(dtohs(entry->offset)) * 4u;
                         } else {
                             entryId = entryIndex;
-                            thisOffset = dtohl(eindex[entryIndex]);
+                            if (type->flags & ResTable_type::FLAG_OFFSET16) {
+                                const auto eindex16 =
+                                    reinterpret_cast<const uint16_t*>(eindex);
+                                thisOffset = offset_from16(eindex16[entryIndex]);
+                            } else {
+                                thisOffset = dtohl(eindex[entryIndex]);
+                            }
                             if (thisOffset == ResTable_type::NO_ENTRY) {
                                 continue;
                             }
