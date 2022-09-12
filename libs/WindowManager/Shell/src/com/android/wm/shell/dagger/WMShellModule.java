@@ -333,6 +333,7 @@ public abstract class WMShellModule {
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
+            DisplayInsetsController displayInsetsController,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(
@@ -341,7 +342,7 @@ public abstract class WMShellModule {
                 pipBoundsState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                oneHandedController, mainExecutor));
+                displayInsetsController, oneHandedController, mainExecutor));
     }
 
     @WMSingleton

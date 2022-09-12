@@ -42,13 +42,6 @@ interface ISystemUiProxy {
     void onOverviewShown(boolean fromHome) = 6;
 
     /**
-     * Control the {@param alpha} of the option nav bar button (back-button in 2 button mode
-     * and home handle & background in gestural mode).  The {@param animate} is currently only
-     * supported for 2 button mode.
-     */
-    void setNavBarButtonAlpha(float alpha, boolean animate) = 19;
-
-    /**
      * Proxies motion events from the homescreen UI to the status bar. Only called when
      * swipe down is detected on WORKSPACE. The sender guarantees the following order of events on
      * the tracking pointer.
