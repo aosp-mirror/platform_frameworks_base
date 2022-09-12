@@ -49,6 +49,7 @@ import android.os.UserManager;
 import android.util.Pair;
 import android.util.Size;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
 import android.window.WindowContainerTransaction;
@@ -64,6 +65,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -135,6 +137,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipTransitionController mPipTransitionController;
     private TaskStackListenerImpl mTaskStackListener;
     private PipParamsChangedForwarder mPipParamsChangedForwarder;
+    private DisplayInsetsController mDisplayInsetsController;
     private Optional<OneHandedController> mOneHandedController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
@@ -338,6 +341,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
+            DisplayInsetsController displayInsetsController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -351,7 +355,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 pipBoundsState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                oneHandedController, mainExecutor)
+                displayInsetsController, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -374,6 +378,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
+            DisplayInsetsController displayInsetsController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
@@ -407,6 +412,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mEnterAnimationDuration = mContext.getResources()
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
         mPipParamsChangedForwarder = pipParamsChangedForwarder;
+        mDisplayInsetsController = displayInsetsController;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -546,6 +552,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void onActionsChanged(List<RemoteAction> actions,
                             RemoteAction closeAction) {
                         mMenuController.setAppActions(actions, closeAction);
+                    }
+                });
+
+        mDisplayInsetsController.addInsetsChangedListener(mPipBoundsState.getDisplayId(),
+                new DisplayInsetsController.OnInsetsChangedListener() {
+                    @Override
+                    public void insetsChanged(InsetsState insetsState) {
+                        onDisplayChanged(
+                                mDisplayController.getDisplayLayout(mPipBoundsState.getDisplayId()),
+                                false /* saveRestoreSnapFraction */);
                     }
                 });
 
