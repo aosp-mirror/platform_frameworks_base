@@ -46,6 +46,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
+      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="one">Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata.</item>
     </plurals>
@@ -175,7 +176,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"La memoria dell\'orologio è piena. Elimina alcuni file per liberare spazio."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Lo spazio di archiviazione del dispositivo Android TV è pieno. Elimina alcuni file per liberare spazio."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Spazio di archiviazione del telefono esaurito. Elimina alcuni file per liberare spazio."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autorità di certificazione installata}other{Autorità di certificazione installate}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autorità di certificazione installata}many{Autorità di certificazione installate}other{Autorità di certificazione installate}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Da una terza parte sconosciuta"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Dall\'amministratore del tuo profilo di lavoro"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Da <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -249,7 +250,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilizza questa opzione nella maggior parte dei casi. Ti consente di monitorare l\'avanzamento della segnalazione, di inserire maggiori dettagli relativi al problema e di acquisire screenshot. Potrebbero essere omesse alcune sezioni meno utilizzate il cui inserimento nella segnalazione richiede molto tempo."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Report completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilizza questa opzione per ridurre al minimo l\'interferenza di sistema quando il dispositivo non risponde, è troppo lento oppure quando ti servono tutte le sezioni della segnalazione. Non puoi inserire altri dettagli o acquisire altri screenshot."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Lo screenshot per la segnalazione di bug verrà acquisito tra # secondo.}other{Lo screenshot per la segnalazione di bug verrà acquisito tra # secondi.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Lo screenshot per la segnalazione di bug verrà acquisito tra # secondo.}many{Lo screenshot per la segnalazione di bug verrà acquisito tra # secondi.}other{Lo screenshot per la segnalazione di bug verrà acquisito tra # secondi.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Screenshot con segnalazione di bug effettuato correttamente"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Impossibile acquisire screenshot con segnalazione di bug"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modalità silenziosa"</string>
@@ -605,8 +606,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operazione associata all\'impronta annullata."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operazione di autenticazione dell\'impronta annullata dall\'utente."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Troppi tentativi. Riprova più tardi."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Troppi tentativi. Usa il blocco schermo."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Riprova."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nessuna impronta digitale registrata."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Questo dispositivo non dispone di sensore di impronte."</string>
@@ -635,7 +635,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Contatta un fornitore di servizi di riparazione."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Impossibile creare il modello del volto. Riprova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Troppa luce. Prova con una luce più soft."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Prova con più luce"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allontana il telefono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Avvicina il telefono"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta il telefono più in alto"</string>
@@ -1085,7 +1086,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vuole attivare la funzione Esplora al tocco. Quando la funzione Esplora al tocco è attiva, puoi ascoltare o visualizzare le descrizioni di ciò che stai toccando oppure interagire con il telefono tramite gesti."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 mese fa"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Oltre 1 mese fa"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Ultimo giorno}other{Ultimi # giorni}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Ultimo giorno}many{Ultimi # giorni}other{Ultimi # giorni}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Ultimo mese"</string>
     <string name="older" msgid="1645159827884647400">"Precedente"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1112,14 +1113,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"tra <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"tra <xliff:g id="COUNT">%d</xliff:g> g"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"tra <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto fa}other{# minuti fa}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ora fa}other{# ore fa}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# giorno fa}other{# giorni fa}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# anno fa}other{# anni fa}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}other{# minuti}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ora}other{# ore}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# giorno}other{# giorni}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# anno}other{# anni}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto fa}many{# minuti fa}other{# minuti fa}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ora fa}many{# ore fa}other{# ore fa}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# giorno fa}many{# giorni fa}other{# giorni fa}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# anno fa}many{# anni fa}other{# anni fa}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}many{# minuti}other{# minuti}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ora}many{# ore}other{# ore}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# giorno}many{# giorni}other{# giorni}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# anno}many{# anni}other{# anni}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problemi video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Questo video non è valido per lo streaming su questo dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Impossibile riprodurre il video."</string>
@@ -1168,7 +1169,7 @@
     <string name="not_checked" msgid="7972320087569023342">"deselezionato"</string>
     <string name="selected" msgid="6614607926197755875">"selezionato"</string>
     <string name="not_selected" msgid="410652016565864475">"non selezionato"</string>
-    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Una stella su {max}}other{# stelle su {max}}}"</string>
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Una stella su {max}}many{# stelle su {max}}other{# stelle su {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"In corso"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'azione con"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completamento azione con %1$s"</string>
@@ -1507,7 +1508,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Salta"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Trova nella pagina"</string>
-    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# corrispondenza}other{# di {total}}}"</string>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# corrispondenza}many{# di {total}}other{# di {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fine"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Cancellazione archivio condiviso…"</string>
     <string name="share" msgid="4157615043345227321">"Condividi"</string>
@@ -1860,14 +1861,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzionalità Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Per esempio, è possibile che le immagini non vengano visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Per un minuto (fino alle ore {formattedTime})}other{Per # minuti (fino alle ore {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Per 1 min (fino alle ore {formattedTime})}other{Per # min (fino alle ore {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Per 1 ora (fino alle ore {formattedTime})}other{Per # ore (fino alle ore {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Per 1 h (fino alle ore {formattedTime})}other{Per # h (fino alle ore {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Per un minuto}other{Per # minuti}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Per 1 min}other{Per # min}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Per 1 ora}other{Per # ore}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Per 1 h}other{Per # h}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Per un minuto (fino alle ore {formattedTime})}many{Per # minuti (fino alle ore {formattedTime})}other{Per # minuti (fino alle ore {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Per 1 min (fino alle ore {formattedTime})}many{Per # min (fino alle ore {formattedTime})}other{Per # min (fino alle ore {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Per 1 ora (fino alle ore {formattedTime})}many{Per # ore (fino alle ore {formattedTime})}other{Per # ore (fino alle ore {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Per 1 h (fino alle ore {formattedTime})}many{Per # h (fino alle ore {formattedTime})}other{Per # h (fino alle ore {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Per un minuto}many{Per # minuti}other{Per # minuti}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Per 1 min}many{Per # min}other{Per # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Per 1 ora}many{Per # ore}other{Per # ore}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Per 1 h}many{Per # h}other{Per # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Fino a: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fino a <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fino a <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (prossima sveglia)"</string>
@@ -2000,7 +2001,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Salva per Compilazione automatica"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Impossibile compilare automaticamente i contenuti"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Nessun suggerimento di Compilazione automatica"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Un suggerimento di compilazione automatica}other{# suggerimenti di compilazione automatica}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Un suggerimento di compilazione automatica}many{# suggerimenti di compilazione automatica}other{# suggerimenti di compilazione automatica}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vuoi salvare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vuoi salvare la <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> su "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2110,7 +2111,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Presentazione <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Il Bluetooth rimane attivo durante l\'uso della modalità aereo"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Caricamento"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # file}other{{file_name} + # file}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # file}many{{file_name} + # file}other{{file_name} + # file}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nessuna persona consigliata per la condivisione"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Elenco di app"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"A questa app non è stata concessa l\'autorizzazione di registrazione, ma l\'app potrebbe acquisire l\'audio tramite questo dispositivo USB."</string>

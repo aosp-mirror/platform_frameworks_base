@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যবহারকারী আঙ্গুলের ছাপের অপারেশনটি বাতিল করেছেন।"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"অনেকবার প্রচেষ্টা করা হয়েছে৷ পরে আবার চেষ্টা করুন৷"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"অনেকবার চেষ্টা করেছেন। পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"একজন মেরামতি মিস্ত্রির কাছে যান।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ফেস মডেল তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"আরও উজ্জ্বল আলো ব্যবহার করে দেখুন"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ফোন আরও দূরে নিয়ে যান"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ফোন আরও কাছে নিয়ে আসুন"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ফোন আরও উঁচুতে তুলুন"</string>
