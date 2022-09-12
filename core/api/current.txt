@@ -15128,7 +15128,7 @@ package android.graphics {
     field @NonNull public static final android.os.Parcelable.Creator<android.graphics.ParcelableColorSpace> CREATOR;
   }
 
-  public class Path implements java.lang.Iterable<android.graphics.PathIterator.Segment> {
+  public class Path {
     ctor public Path();
     ctor public Path(@Nullable android.graphics.Path);
     method public void addArc(@NonNull android.graphics.RectF, float, float);
@@ -15155,6 +15155,7 @@ package android.graphics {
     method public void cubicTo(float, float, float, float, float, float);
     method @NonNull public android.graphics.Path.FillType getFillType();
     method public int getGenerationId();
+    method @NonNull public android.graphics.PathIterator getPathIterator();
     method public void incReserve(int);
     method public boolean interpolate(@NonNull android.graphics.Path, float, @NonNull android.graphics.Path);
     method @Deprecated public boolean isConvex();
@@ -15162,7 +15163,6 @@ package android.graphics {
     method public boolean isInterpolatable(@NonNull android.graphics.Path);
     method public boolean isInverseFillType();
     method public boolean isRect(@Nullable android.graphics.RectF);
-    method @NonNull public android.graphics.PathIterator iterator();
     method public void lineTo(float, float);
     method public void moveTo(float, float);
     method public void offset(float, float, @Nullable android.graphics.Path);
