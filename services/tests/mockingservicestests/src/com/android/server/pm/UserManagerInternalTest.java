@@ -229,4 +229,9 @@ public final class UserManagerInternalTest extends UserManagerServiceOrInternalT
     protected int getDisplayAssignedToUser(int userId) {
         return mUmi.getDisplayAssignedToUser(userId);
     }
+
+    @Override
+    protected int getUserAssignedToDisplay(int displayId) {
+        return mUmi.getUserAssignedToDisplay(displayId);
+    }
 }
