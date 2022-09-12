@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Service temporairement désactivé par votre opérateur concernant la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossible d\'accéder au réseau mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Essayez de changer le réseau préféré. Appuyez pour le modifier."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Appels d\'urgence non disponibles"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Impossible de passer des appels d\'urgence via le Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Vous ne pourrez peut-être pas passer d\'appels d\'urgence"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne prend pas en charge les appels d\'urgence via le Wi-Fi. Appuyez ici pour en savoir plus."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transfert d\'appel"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de rappel d\'urgence"</string>
@@ -623,7 +623,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Appuyez pour supprimer votre empreinte faciale, puis ajoutez de nouveau votre visage"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser Face Unlock, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser le déverrouillage par reconnaissance faciale, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Appuyez pour ajouter une empreinte digitale"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Déverrouillage par empreinte digitale"</string>
@@ -1414,7 +1414,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Parcourir"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Support \"<xliff:g id="NAME">%s</xliff:g>\" manquant"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez le périphérique"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Déplacement des données en cours"</string>

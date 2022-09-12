@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"<xliff:g id="SIMNUMBER">%d</xliff:g> numaralı SIM kart için operatörünüz tarafından geçici olarak kapatıldı"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobil ağa erişilemiyor"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Tercih edilen ağı değiştirmeyi deneyin. Değiştirmek için dokunun."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Acil durum çağrısı kullanılamaz"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Kablosuz ağ üzerinden acil durum çağrıları yapılamaz"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Acil durum aramaları kullanılamayabilir"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>, kablosuz bağlantı üzerinden acil durum aramalarını desteklemiyor. Ayrıntılar için dokunun."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Uyarılar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Çağrı yönlendirme"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Acil geri arama modu"</string>
@@ -1583,7 +1583,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Geçerlilik:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Yayınlanma tarihi:"</string>
     <string name="expires_on" msgid="1623640879705103121">"Sona erme tarihi:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Seri numara:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Seri numarası:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Parmak izleri:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 parmak izi:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 parmak izi:"</string>

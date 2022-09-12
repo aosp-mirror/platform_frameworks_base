@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"El proveedor desactivó temporalmente el servicio para la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"No se puede acceder a la red móvil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Presiona para cambiar la red preferida."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Servicio de llamadas de emergencia no disponible"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"No se pueden hacer llamadas de emergencia mediante Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Es posible que las llamadas de emergencia no estén disponibles"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> no admite llamadas de emergencia por Wi-Fi. Presiona para ver más detalles"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desvío de llamada"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de devolución de llamada de emergencia"</string>
@@ -908,7 +908,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Presionar Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dibujar el patrón de desbloqueo"</string>
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergencia"</string>
-    <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regresar a llamada"</string>
+    <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regresar a la llamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Vuelve a intentarlo."</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Volver a intentarlo"</string>
@@ -1414,7 +1414,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"Expulsar"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"Explorar"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Cambiar salida"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"No se encuentra dispositivo <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"Falta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Vuelve a insertar dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfiriendo la aplicación <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Transfiriendo los datos"</string>

@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"បិទ​​ដោយ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នកជាបណ្តោះ​អាសន្ន ​សម្រាប់​ស៊ីមទី <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"មិន​អាច​ភ្ជាប់​បណ្ដាញ​ទូរសព្ទ​ចល័តបានទេ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"សាកល្បង​ប្ដូរ​ទៅបណ្ដាញ​ដែល​ចង់ប្រើ។ សូមចុច​ដើម្បីផ្លាស់​ប្ដូរ។"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"មិន​អាច​ប្រើ​ការ​ហៅ​បន្ទាន់​បានទេ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"មិន​អាចធ្វើការ​ហៅ​បន្ទាន់​តាម Wi‑Fi បានទេ"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ប្រហែលជាមិនអាចហៅទៅលេខសង្គ្រោះបន្ទាន់បានទេ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> មិនអាចហៅទៅលេខសង្គ្រោះបន្ទាន់តាម Wi-Fi បានទេ។ សូមចុច​ដើម្បី​ទទួលបាន​ព័ត៌មាន​លម្អិត។"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
@@ -1414,7 +1414,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"ដកចេញ"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"រុករក"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"លទ្ធផល Switch"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"បាត់ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"បាត់<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"បញ្ចូល​ឧបករណ៍​ម្តងទៀត"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"កំពុងផ្លាស់ទី <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"កំពុងផ្លាស់ទីទិន្នន័យ…"</string>
@@ -1554,7 +1554,7 @@
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"ទំហំផ្ទុករួមខាងក្នុង"</string>
-    <string name="storage_sd_card" msgid="3404740277075331881">"កាត​អេសឌី"</string>
+    <string name="storage_sd_card" msgid="3404740277075331881">"កាត SD"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"កាត SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
@@ -1844,8 +1844,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"មុខងារ​សន្សំថ្មបើកទម្រង់រចនាងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ បែបផែនរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើកទម្រង់រចនាងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ បែបផែនរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ មុខងារសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>

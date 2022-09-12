@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Símafyrirtækið slökkti tímabundið á þessu fyrir SIM-kort <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ekki næst samband við farsímakerfi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prófaðu að velja annað símkerfi. Ýttu til að breyta."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Neyðarsímtöl eru ekki í boði"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ekki er hægt að hringja neyðarsímtöl með Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Neyðarsímtöl eru hugsanlega ekki tiltæk"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> styður ekki neyðarsímtöl um Wi-Fi. Ýttu til að fá frekari upplýsingar."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Tilkynningar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Símtalsflutningur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Stilling fyrir svarhringingu neyðarsímtala"</string>

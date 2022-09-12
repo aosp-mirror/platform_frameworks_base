@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"আপনার পরিষেবা প্রদানকারী <xliff:g id="SIMNUMBER">%d</xliff:g> সিমটি অস্থায়ীভাবে বন্ধ করেছে"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"মোবাইল নেটওয়ার্কে কানেক্ট করা যাচ্ছে না"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পছন্দের নেটওয়ার্ক পরিবর্তন করে দেখুন। অন্য নেটওয়ার্ক বেছে নিতে ট্যাপ করুন।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জরুরি কল করা যাবে না"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ওয়াই-ফাইয়ের মাধ্যমে জরুরি কল করা যাবে না"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"জরুরি কল উপলভ্য নাও হতে পারে"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>-এ ওয়াই-ফাইয়ের মাধ্যমে জরুরি কল কাজ করে না। বিশদ বিবরণের জন্য ট্যাপ করুন।"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতর্কতা"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফরওয়ার্ড করা"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"জরুরি কলব্যাক মোড"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"আপনার মাথা একটু কম ঝোঁকান।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"আপনার মাথাটি সামান্য ঘোরান।"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার ফেসকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার মুখকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ব্ল্যাক বার সহ আপনার স্ক্রিনের উপরের অংশ মুছে ফেলুন"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1059,7 +1059,7 @@
     <string name="menu_shift_shortcut_label" msgid="5443936876111232346">"Shift+"</string>
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
-    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"স্পেস"</string>
+    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"মুছুন"</string>
     <string name="search_go" msgid="2141477624421347086">"সার্চ"</string>

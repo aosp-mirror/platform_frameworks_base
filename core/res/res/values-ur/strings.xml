@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کے لئے آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ہنگامی کالز نہیں کر سکتے"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ہو سکتا ہے کہ ہنگامی کالز دستیاب نہ ہوں"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"‏<xliff:g id="SPN">%s</xliff:g> Wi-Fi پر ہنگامی کالز کو سپورٹ نہیں کرتا ہے۔ تفصیلات کے ليے تھپتھپائيں۔"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"کال فارورڈنگ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ہنگامی کال بیک وضع"</string>
@@ -1973,7 +1973,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"پروڈکٹیوٹی"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"ایکسیسبیلٹی"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"آلہ کی اسٹوریج"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‏USB ڈیبگ کرنا"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‏USB ڈیبگنگ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"گھنٹہ"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"منٹ"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"وقت سیٹ کریں"</string>

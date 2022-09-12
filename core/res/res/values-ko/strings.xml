@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"이동통신사에서 SIM <xliff:g id="SIMNUMBER">%d</xliff:g>의 서비스를 일시적으로 사용 중지했습니다."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"모바일 네트워크에 연결할 수 없습니다."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"기본 네트워크를 변경해 보세요. 탭하여 변경할 수 있습니다."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"긴급 전화를 사용할 수 없습니다."</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi로는 긴급 전화를 걸 수 없습니다."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"긴급 전화를 사용할 수 없음"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>에서는 Wi-Fi를 통한 긴급 전화를 지원하지 않습니다. 탭하여 세부정보를 확인하세요."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"알림"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"착신전환"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"긴급 콜백 모드"</string>
@@ -1411,7 +1411,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> 마운트 해제 중"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"외부 미디어를 제거하지 마세요."</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"설정"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"마운트 해제"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"꺼내기"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"둘러보기"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"출력 전환"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> 없음"</string>

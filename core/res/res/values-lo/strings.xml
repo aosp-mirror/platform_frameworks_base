@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານປິດໄວ້ສຳລັບຊິມ <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ບໍ່ສາມາດຕິດຕໍ່ເຄືອຂ່າຍມືຖືໄດ້"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ໃຫ້ລອງປ່ຽນເຄືອຂ່າຍທີ່ຕ້ອງການ. ແຕະເພື່ອປ່ຽນ."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ບໍ່ສາມາດໂທສຸກເສີນຜ່ານ Wi‑Fi ໄດ້"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ການໂທ​ສຸກ​ເສີນອາດບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ບໍ່ຮອງຮັບການໂທ​ສຸກ​ເສີນຂ້າມ Wi-Fi. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ການເຕືອນ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ການໂອນສາຍ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ໂໝດໂທກັບສຸກເສີນ"</string>

@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"<xliff:g id="SIMNUMBER">%d</xliff:g> SIM-н оператор компаниас түр унтраасан"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобайл сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сонгосон сүлжээг өөрчлөхөөр оролдоно уу. Өөрчлөхийн тулд товшино уу."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Яаралтай дуудлага хийх боломжгүй"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi-р яаралтай дуудлага хийх боломжгүй байна"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Яаралтай дуудлага боломжгүй байж магадгүй"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-р яаралтай дуудлага хийхийг дэмждэггүй. Дэлгэрэнгүйг харахын тулд товшино уу."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сануулга"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Дуудлага шилжүүлэх"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Яаралтай дуудлага хийх горим"</string>
@@ -1690,7 +1690,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Товчлолыг унтраах"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Товчлол ашиглах"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Өнгө хувиргалт"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Өнгөний засвар"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Өнгө тохируулга"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Нэг гарын горим"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Хэт бүүдгэр"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г асаалаа."</string>

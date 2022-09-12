@@ -346,6 +346,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
     private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
     private static final int MSG_DISPATCH_DEVICE_VOLUME_BEHAVIOR = 47;
+    private static final int MSG_RESET_SPATIALIZER = 50;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -353,6 +354,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 100;
     private static final int MSG_INIT_STREAMS_VOLUMES = 101;
     private static final int MSG_INIT_SPATIALIZER = 102;
+
     // end of messages handled under wakelock
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
@@ -965,7 +967,9 @@ public class AudioService extends IAudioService.Stub
 
         mSfxHelper = new SoundEffectsHelper(mContext);
 
-        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem);
+        final boolean headTrackingDefault = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_spatial_audio_head_tracking_enabled_default);
+        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem, headTrackingDefault);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
@@ -3239,8 +3243,7 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, newIndex);
             }
 
-            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
+            if (AudioSystem.isLeAudioDeviceType(device)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -3933,8 +3936,7 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, index);
             }
 
-            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
+            if (AudioSystem.isLeAudioDeviceType(device)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -6772,7 +6774,8 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
         }
         if (isAbsoluteVolumeDevice(audioSystemDeviceOut)
-                || isA2dpAbsoluteVolumeDevice(audioSystemDeviceOut)) {
+                || isA2dpAbsoluteVolumeDevice(audioSystemDeviceOut)
+                || AudioSystem.isLeAudioDeviceType(audioSystemDeviceOut)) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
         }
         return AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE;
@@ -7539,7 +7542,9 @@ public class AudioService extends IAudioService.Stub
             int index;
             if (isFullyMuted()) {
                 index = 0;
-            } else if (isAbsoluteVolumeDevice(device) || isA2dpAbsoluteVolumeDevice(device)) {
+            } else if (isAbsoluteVolumeDevice(device)
+                    || isA2dpAbsoluteVolumeDevice(device)
+                    || AudioSystem.isLeAudioDeviceType(device)) {
                 index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
             } else if (isFullVolumeDevice(device)) {
                 index = (mIndexMax + 5)/10;
@@ -7561,7 +7566,8 @@ public class AudioService extends IAudioService.Stub
                         if (isFullyMuted()) {
                             index = 0;
                         } else if (isAbsoluteVolumeDevice(device)
-                                || isA2dpAbsoluteVolumeDevice(device)) {
+                                || isA2dpAbsoluteVolumeDevice(device)
+                                || AudioSystem.isLeAudioDeviceType(device)) {
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if (isFullVolumeDevice(device)) {
                             index = (mIndexMax + 5)/10;
@@ -7982,7 +7988,8 @@ public class AudioService extends IAudioService.Stub
                     int streamDevice = getDeviceForStream(streamType);
                     if ((device != streamDevice)
                             && (isAbsoluteVolumeDevice(device)
-                            || isA2dpAbsoluteVolumeDevice(device))) {
+                                || isA2dpAbsoluteVolumeDevice(device)
+                                || AudioSystem.isLeAudioDeviceType(device))) {
                         mStreamStates[streamType].applyDeviceVolume_syncVSS(device);
                     }
                     mStreamStates[streamType].applyDeviceVolume_syncVSS(streamDevice);
@@ -8165,6 +8172,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS:
                     onPersistSpatialAudioDeviceSettings();
+                    break;
+
+                case MSG_RESET_SPATIALIZER:
+                    mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
                     break;
 
                 case MSG_CHECK_MUSIC_ACTIVE:
@@ -9135,16 +9146,23 @@ public class AudioService extends IAudioService.Stub
                 /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
     }
 
+    /**
+     * post a message to schedule a reset of the spatializer state
+     */
+    void postResetSpatializer() {
+        sendMsg(mAudioHandler,
+                MSG_RESET_SPATIALIZER,
+                SENDMSG_REPLACE,
+                /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
+    }
+
     void onInitSpatializer() {
         final String settings = mSettings.getSecureStringForUser(mContentResolver,
                 Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
         if (settings == null) {
             Log.e(TAG, "error reading spatial audio device settings");
-        } else {
-            Log.v(TAG, "restoring spatial audio device settings: " + settings);
-            mSpatializerHelper.setSADeviceSettings(settings);
         }
-        mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
+        mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect, settings);
         mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
     }
 

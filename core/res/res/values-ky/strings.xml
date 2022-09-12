@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> үчүн байланыш оператору тарабынан убактылуу бөгөттөлгөн"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобилдик тармакка туташпай жатат"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Тандалган тармакты өзгөртүп көрүңүз. Өзгөртүү үчүн таптаңыз."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Шашылыш чалуу жеткиликсиз"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi-Fi аркылуу шашылыш чалуулар иштетилген жок"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Шашылыш чалуулар жеткиликсиз болушу мүмкүн"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi аркылуу шашылыш чалууларды колдоого албайт. Чоо-жайын көрүү үчүн таптап коюңуз."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Шашылыш билдирүүлөр"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Чалууну башка номерге багыттоо"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Шашылыш кайра чалуу режими"</string>
@@ -621,7 +621,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Жүзүнөн таанып ачуу"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Жүзүнөн таанып ачуу функциясында маселе келип чыкты"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну тууралоо"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
@@ -632,7 +632,7 @@
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Жүзүңүз жакшы тартылган жок. Кайталап көрүңүз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерге туруңуз."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонду алысыраак жылдырыңыз."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонду алыстатыңыз."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакындатыңыз."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Телефонду өйдө жылдырыңыз."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Телефонду ылдый жылдырыңыз."</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Башыңызды бир аз гана эңкейтиңиз."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүз жакшы көрүнбөй жатат."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экраныңыздын жогору жагын, анын ичинде тилкени да тазалаңыз"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1392,7 +1392,7 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Жөндөө үчүн таптаңыз"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Жөндөө үчүн тандаңыз"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Түзмөктү форматташыңыз керек болушу мүмкүн. Чыгаруу үчүн таптап коюңуз."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Сүрөттөрдү жана медиа өткөрүү үчүн"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Сүрөттөрдү жана башка файлдарды өткөрүү үчүн"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Медиа файлдарды серептөө"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> түзмөгүндө бир маселе бар"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> иштебей жатат"</string>

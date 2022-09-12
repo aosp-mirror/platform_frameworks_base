@@ -82,8 +82,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Dočasne vypnuté operátorom pre SIM kartu <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nepodarilo sa pripojiť k mobilnej sieti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Skúste zmeniť predvolenú sieť. Zmeníte ju klepnutím."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Tiesňové volania nie sú k dispozícii"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nedajú sa uskutočniť tiesňové volania cez Wi-Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Tiesňové volanie môže byť nedostupné"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nepodporuje tiesňové volanie cez Wi‑Fi. Klepnutím zobrazíte podrobnosti."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozornenia"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Presmerovanie hovorov"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Režim tiesňového spätného volania"</string>
@@ -2055,7 +2055,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavrieť"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavenia"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofón"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sa zobrazuje cez ďalšie aplikácie na obrazovke"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Poskytnúť spätnú väzbu"</string>
@@ -2260,7 +2260,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Zapnúť v Nastaveniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Zavrieť"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Odblokujte mikrofón zariadenia"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte fotoaparát zariadenia"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte kameru zariadenia"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pre aplikáciu &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a všetky aplikácie a služby"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Odblokovať"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Ochrana súkromia senzorov"</string>
