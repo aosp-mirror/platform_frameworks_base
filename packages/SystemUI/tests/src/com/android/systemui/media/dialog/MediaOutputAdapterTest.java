@@ -23,6 +23,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.WallpaperColors;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
@@ -102,6 +104,18 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void getItemId_validPosition_returnCorrespondingId() {
+        assertThat(mMediaOutputAdapter.getItemId(0)).isEqualTo(mMediaDevices.get(
+                0).getId().hashCode());
+    }
+
+    @Test
+    public void getItemId_invalidPosition_returnPosition() {
+        int invalidPosition = mMediaDevices.size() + 1;
+        assertThat(mMediaOutputAdapter.getItemId(invalidPosition)).isEqualTo(invalidPosition);
+    }
+
+    @Test
     public void onBindViewHolder_bindPairNew_verifyView() {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
 
@@ -155,6 +169,33 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBindViewHolder_bindConnectedDeviceWithMutingExpectedDeviceExist_verifyView() {
+        when(mMediaOutputController.hasMutingExpectedDevice()).thenReturn(true);
+        when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(false);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
+    }
+
+    @Test
+    public void onBindViewHolder_isMutingExpectedDevice_verifyView() {
+        when(mMediaDevice1.isMutingExpectedDevice()).thenReturn(true);
+        when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(false);
+        when(mMediaOutputController.isActiveRemoteDevice(mMediaDevice1)).thenReturn(false);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
+    }
+
+    @Test
     public void onBindViewHolder_initSeekbar_setsVolume() {
         when(mMediaDevice1.getMaxVolume()).thenReturn(TEST_MAX_VOLUME);
         when(mMediaDevice1.getCurrentVolume()).thenReturn(TEST_CURRENT_VOLUME);
@@ -162,6 +203,20 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSeekBar.getVolume()).isEqualTo(TEST_CURRENT_VOLUME);
+    }
+
+    @Test
+    public void onBindViewHolder_bindSelectableDevice_verifyView() {
+        List<MediaDevice> selectableDevices = new ArrayList<>();
+        selectableDevices.add(mMediaDevice2);
+        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(selectableDevices);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
+
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_2);
     }
 
     @Test
@@ -223,6 +278,22 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBindViewHolder_bindGroupingDevice_verifyView() {
+        when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(false);
+        when(mMediaDevice1.getState()).thenReturn(
+                LocalMediaManager.MediaDeviceState.STATE_GROUPING);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
     public void onBindViewHolder_inTransferring_bindNonTransferringDevice_verifyView() {
         when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(true);
         when(mMediaDevice2.getState()).thenReturn(
@@ -256,6 +327,31 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onItemClick_clicksWithMutingExpectedDeviceExist_cancelsMuteAwaitConnection() {
+        when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(false);
+        when(mMediaOutputController.hasMutingExpectedDevice()).thenReturn(true);
+        when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(false);
+        when(mMediaDevice1.isMutingExpectedDevice()).thenReturn(false);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        mViewHolder.mContainerLayout.performClick();
+
+        verify(mMediaOutputController).cancelMuteAwaitConnection();
+    }
+
+    @Test
+    public void onItemClick_clicksSelectableDevice_triggerGrouping() {
+        List<MediaDevice> selectableDevices = new ArrayList<>();
+        selectableDevices.add(mMediaDevice2);
+        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(selectableDevices);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
+
+        mViewHolder.mContainerLayout.performClick();
+
+        verify(mMediaOutputController).addDeviceToPlayMedia(mMediaDevice2);
+    }
+
+    @Test
     public void onItemClick_onGroupActionTriggered_verifySeekbarDisabled() {
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
         List<MediaDevice> selectableDevices = new ArrayList<>();
@@ -279,5 +375,15 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mSeekBar.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void updateColorScheme_triggerController() {
+        WallpaperColors wallpaperColors = WallpaperColors.fromBitmap(
+                Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888));
+
+        mMediaOutputAdapter.updateColorScheme(wallpaperColors, true);
+
+        verify(mMediaOutputController).setCurrentColorScheme(wallpaperColors, true);
     }
 }
