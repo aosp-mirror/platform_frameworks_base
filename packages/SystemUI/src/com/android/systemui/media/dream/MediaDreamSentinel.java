@@ -19,6 +19,7 @@ package com.android.systemui.media.dream;
 import static com.android.systemui.flags.Flags.MEDIA_DREAM_COMPLICATION;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +39,9 @@ import javax.inject.Inject;
  * the media complication as appropriate
  */
 public class MediaDreamSentinel extends CoreStartable {
+    private static final String TAG = "MediaDreamSentinel";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
     private final MediaDataManager.Listener mListener = new MediaDataManager.Listener() {
         private boolean mAdded;
         @Override
@@ -46,11 +50,17 @@ public class MediaDreamSentinel extends CoreStartable {
 
         @Override
         public void onMediaDataRemoved(@NonNull String key) {
+            final boolean hasActiveMedia = mMediaDataManager.hasActiveMedia();
+            if (DEBUG) {
+                Log.d(TAG, "onMediaDataRemoved(" + key + "), mAdded=" + mAdded + ", hasActiveMedia="
+                        + hasActiveMedia);
+            }
+
             if (!mAdded) {
                 return;
             }
 
-            if (mMediaDataManager.hasActiveMedia()) {
+            if (hasActiveMedia) {
                 return;
             }
 
@@ -71,11 +81,24 @@ public class MediaDreamSentinel extends CoreStartable {
                 return;
             }
 
+            final boolean hasActiveMedia = mMediaDataManager.hasActiveMedia();
+            if (DEBUG) {
+                Log.d(TAG, "onMediaDataLoaded(" + key + "), mAdded=" + mAdded + ", hasActiveMedia="
+                        + hasActiveMedia);
+            }
+
+            // Media data can become inactive without triggering onMediaDataRemoved.
+            if (mAdded && !hasActiveMedia) {
+                mAdded = false;
+                mDreamOverlayStateController.removeComplication(mMediaEntryComplication);
+                return;
+            }
+
             if (mAdded) {
                 return;
             }
 
-            if (!mMediaDataManager.hasActiveMedia()) {
+            if (!hasActiveMedia) {
                 return;
             }
 
