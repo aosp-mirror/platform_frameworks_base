@@ -310,7 +310,7 @@ class BackNavigationController {
                         mBackNaviAnimationController = new BackNaviAnimationController(
                                 backAnimationAdaptor.getRunner(), this,
                                 currentActivity.getDisplayId());
-                        prepareBackToHomeTransition(currentTask, prevTask);
+                        prepareBackToHomeTransition(currentActivity, prevTask);
                         infoBuilder.setPrepareAnimation(true);
                     }
                 } else {
@@ -489,8 +489,8 @@ class BackNavigationController {
         mWindowManagerService = wm;
     }
 
-    private void prepareBackToHomeTransition(Task currentTask, Task homeTask) {
-        final DisplayContent dc = currentTask.getDisplayContent();
+    private void prepareBackToHomeTransition(ActivityRecord currentActivity, Task homeTask) {
+        final DisplayContent dc = currentActivity.getDisplayContent();
         final ActivityRecord homeActivity = homeTask.getTopNonFinishingActivity();
         if (!homeActivity.mVisibleRequested) {
             homeActivity.setVisibility(true);
@@ -499,7 +499,7 @@ class BackNavigationController {
         dc.ensureActivitiesVisible(
                 null /* starting */, 0 /* configChanges */,
                 false /* preserveWindows */, true);
-        mBackNaviAnimationController.initialize(homeActivity, currentTask.getTopMostActivity());
+        mBackNaviAnimationController.initialize(homeActivity, currentActivity);
     }
 
     void finishAnimation() {

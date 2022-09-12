@@ -43,6 +43,7 @@ import android.util.Size;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -99,7 +100,8 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private TaskStackListenerImpl mMockTaskStackListener;
     @Mock private ShellExecutor mMockExecutor;
     @Mock private Optional<OneHandedController> mMockOneHandedController;
-    @Mock private PipParamsChangedForwarder mPipParamsChangedForwarder;
+    @Mock private PipParamsChangedForwarder mMockPipParamsChangedForwarder;
+    @Mock private DisplayInsetsController mMockDisplayInsetsController;
 
     @Mock private DisplayLayout mMockDisplayLayout1;
     @Mock private DisplayLayout mMockDisplayLayout2;
@@ -120,8 +122,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTransitionState,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
-                mMockTaskStackListener, mPipParamsChangedForwarder,
-                mMockOneHandedController, mMockExecutor);
+                mMockTaskStackListener, mMockPipParamsChangedForwarder,
+                mMockDisplayInsetsController, mMockOneHandedController, mMockExecutor);
         mShellInit.init();
         when(mMockPipBoundsAlgorithm.getSnapAlgorithm()).thenReturn(mMockPipSnapAlgorithm);
         when(mMockPipTouchHandler.getMotionHelper()).thenReturn(mMockPipMotionHelper);
@@ -186,8 +188,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTransitionState,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
-                mMockTaskStackListener, mPipParamsChangedForwarder,
-                mMockOneHandedController, mMockExecutor));
+                mMockTaskStackListener, mMockPipParamsChangedForwarder,
+                mMockDisplayInsetsController, mMockOneHandedController, mMockExecutor));
     }
 
     @Test
