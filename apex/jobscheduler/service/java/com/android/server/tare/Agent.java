@@ -816,35 +816,16 @@ class Agent {
 
     @GuardedBy("mLock")
     void onPackageRemovedLocked(final int userId, @NonNull final String pkgName) {
-        reclaimAssetsLocked(userId, pkgName);
+        mScribe.discardLedgerLocked(userId, pkgName);
+        mCurrentOngoingEvents.delete(userId, pkgName);
         mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
     }
 
-    /**
-     * Reclaims any ARCs granted to the app, making them available to other apps. Also deletes the
-     * app's ledger and stops any ongoing event tracking.
-     */
     @GuardedBy("mLock")
-    private void reclaimAssetsLocked(final int userId, @NonNull final String pkgName) {
-        final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
-        if (ledger.getCurrentBalance() != 0) {
-            mScribe.adjustRemainingConsumableCakesLocked(-ledger.getCurrentBalance());
-        }
-        mScribe.discardLedgerLocked(userId, pkgName);
-        mCurrentOngoingEvents.delete(userId, pkgName);
-    }
-
-    @GuardedBy("mLock")
-    void onUserRemovedLocked(final int userId, @NonNull final List<String> pkgNames) {
-        reclaimAssetsLocked(userId, pkgNames);
+    void onUserRemovedLocked(final int userId) {
+        mScribe.discardLedgersLocked(userId);
+        mCurrentOngoingEvents.delete(userId);
         mBalanceThresholdAlarmQueue.removeAlarmsForUserId(userId);
-    }
-
-    @GuardedBy("mLock")
-    private void reclaimAssetsLocked(final int userId, @NonNull final List<String> pkgNames) {
-        for (int i = 0; i < pkgNames.size(); ++i) {
-            reclaimAssetsLocked(userId, pkgNames.get(i));
-        }
     }
 
     @VisibleForTesting
