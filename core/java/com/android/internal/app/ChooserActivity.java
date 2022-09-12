@@ -142,6 +142,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -3708,6 +3709,7 @@ public class ChooserActivity extends ResolverActivity implements
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
             this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
+            Arrays.fill(mCellVisibility, true);
             this.mListAdapterSupplier = listAdapterSupplier;
         }
 
