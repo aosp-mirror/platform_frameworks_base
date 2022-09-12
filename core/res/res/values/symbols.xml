@@ -1082,7 +1082,7 @@
   <java-symbol type="string" name="default_audio_route_id" />
   <java-symbol type="string" name="default_audio_route_name" />
   <java-symbol type="string" name="default_audio_route_name_dock_speakers" />
-  <java-symbol type="string" name="default_audio_route_name_hdmi" />
+  <java-symbol type="string" name="default_audio_route_name_external_device" />
   <java-symbol type="string" name="default_audio_route_name_headphones" />
   <java-symbol type="string" name="default_audio_route_name_usb" />
   <java-symbol type="string" name="default_audio_route_category_name" />

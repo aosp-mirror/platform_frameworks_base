@@ -1611,7 +1611,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"تلویزیون"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"تلفن"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"بلندگوهای جایگاه"</string>
-    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"هدفون‌ها"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
