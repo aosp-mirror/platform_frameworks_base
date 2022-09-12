@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"မျက်နှာကို မမှတ်မိပါ။ လက်ဗွေကို အစားထိုးသုံးပါ။"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"မျက်နှာကို မမှတ်မိပါ"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"လက်ဗွေကို အစားထိုးသုံးပါ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ဘက်ထရီရာခိုင်နှုန်းကို မသိပါ။"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>သို့ ချိတ်ဆက်ထား"</string>
@@ -419,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"စာတန်းများ ထပ်ပိုးရန်"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ဖွင့်ရန်"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ပိတ်ရန်"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"အသံနှင့် တုန်ခါမှု"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ဆက်တင်များ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"အက်ပ်ကို ပင်ထိုးထားသည်"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"သင်က ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ။"</string>
@@ -569,7 +573,7 @@
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"ပူးတွဲပါဖိုင်ကို ဖယ်ရှားရန်"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"စနစ်"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ပင်မ"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"လတ်တလော"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"မကြာသေးမီက"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>
@@ -594,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ဖွင့်"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ပိတ်"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"မရနိုင်ပါ"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"ပိတ်ထားသည်"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"ရွှေ့လျားရန်ဘားတန်း"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"အပြင်အဆင်"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"လက်ဝဲခလုတ် အမျိုးအစားအပို"</string>
@@ -667,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"အားသွင်းကိရိယာ ပလပ်ဖြုတ်ပါ"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ဤစက်ပစ္စည်းကို အားသွင်းရာတွင် ပြဿနာရှိနေသည်။ ပါဝါ ကြားခံကိရိယာကို ပလပ်ဖြုတ်ပါ။ ကေဘယ်ကြိုး ပူနွေးနေနိုင်သဖြင့် သတိထားပါ။"</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"လက်ဝဲ ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"လက်ယာ ဖြတ်လမ်းလင့်ခ်"</string>
