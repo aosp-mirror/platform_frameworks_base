@@ -2090,6 +2090,14 @@ static jint nativeGetBatteryStatus(JNIEnv* env, jobject nativeImplObj, jint devi
     return static_cast<jint>(ret.value_or(BATTERY_STATUS_UNKNOWN));
 }
 
+static jstring nativeGetBatteryDevicePath(JNIEnv* env, jobject nativeImplObj, jint deviceId) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    const std::optional<std::string> batteryPath =
+            im->getInputManager()->getReader().getBatteryDevicePath(deviceId);
+    return batteryPath ? env->NewStringUTF(batteryPath->c_str()) : nullptr;
+}
+
 static void nativeReloadKeyboardLayouts(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -2371,6 +2379,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setLightColor", "(III)V", (void*)nativeSetLightColor},
         {"getBatteryCapacity", "(I)I", (void*)nativeGetBatteryCapacity},
         {"getBatteryStatus", "(I)I", (void*)nativeGetBatteryStatus},
+        {"getBatteryDevicePath", "(I)Ljava/lang/String;", (void*)nativeGetBatteryDevicePath},
         {"reloadKeyboardLayouts", "()V", (void*)nativeReloadKeyboardLayouts},
         {"reloadDeviceAliases", "()V", (void*)nativeReloadDeviceAliases},
         {"dump", "()Ljava/lang/String;", (void*)nativeDump},
