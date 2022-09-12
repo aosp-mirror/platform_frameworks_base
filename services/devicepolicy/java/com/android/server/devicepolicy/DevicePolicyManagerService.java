@@ -10220,6 +10220,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ApplicationInfo applicationInfo = mIPackageManager.getApplicationInfo(
                             enabledPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES,
                             userIdToCheck);
+
+                    if (applicationInfo == null) {
+                        return false;
+                    }
+
                     systemService = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 } catch (RemoteException e) {
                     Slogf.i(LOG_TAG, "Can't talk to package managed", e);
