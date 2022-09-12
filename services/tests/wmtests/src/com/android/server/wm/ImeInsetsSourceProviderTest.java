@@ -63,6 +63,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     public void testInputMethodInputTargetCanShowIme() {
         WindowState target = createWindow(null, TYPE_APPLICATION, "app");
         mDisplayContent.setImeLayeringTarget(target);
+        mDisplayContent.updateImeInputAndControlTarget(target);
         mImeProvider.scheduleShowImePostLayout(target);
         assertTrue(mImeProvider.isReadyToShowIme());
     }
