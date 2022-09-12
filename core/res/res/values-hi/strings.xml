@@ -1419,7 +1419,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"निकालें"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"एक्सप्लोर करें"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"आउटपुट बदलें"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> गुम है"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> नहीं मिल रहा है"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"डिवाइस को दोबारा लगाएं"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> को ले जाया जा रहा है"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"डेटा ले जाया जा रहा है"</string>
@@ -1978,7 +1978,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"सुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करें"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>

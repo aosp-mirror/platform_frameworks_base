@@ -1420,7 +1420,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"جارٍ إخراج <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"عدم الإزالة"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"إعداد"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"إلغاء"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"إخراج"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"استكشاف"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"تبديل جهاز إخراج الصوت"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> مفقود"</string>

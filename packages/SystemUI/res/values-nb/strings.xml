@@ -229,7 +229,7 @@
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Blokkert"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Medieenhet"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Bruker"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wifi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internett"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tilgjengelige nettverk"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nettverk er utilgjengelige"</string>
@@ -911,7 +911,7 @@
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Ingen tilkobling"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ingen andre nettverk er tilgjengelige"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Ingen nettverk er tilgjengelige"</string>
-    <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
+    <string name="turn_on_wifi" msgid="1308379840799281023">"Wifi"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Trykk på et nettverk for å koble til"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Lås opp for å se nettverk"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Søker etter nettverk …"</string>
