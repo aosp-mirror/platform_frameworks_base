@@ -1614,24 +1614,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             config = new Configuration();
             computeScreenConfiguration(config);
-        } else if (!(mTransitionController.isCollecting(this)
-                // If waiting for a remote display change, don't prematurely update configuration.
-                || mRemoteDisplayChangeController.isWaitingForRemoteDisplayChange())) {
-            // No obvious action we need to take, but if our current state mismatches the
-            // activity manager's, update it, disregarding font scale, which should remain set
-            // to the value of the previous configuration.
-            // Here we're calling Configuration#unset() instead of setToDefaults() because we
-            // need to keep override configs clear of non-empty values (e.g. fontSize).
-            final Configuration currentConfig = getRequestedOverrideConfiguration();
-            mTmpConfiguration.unset();
-            mTmpConfiguration.updateFrom(currentConfig);
-            computeScreenConfiguration(mTmpConfiguration);
-            if (currentConfig.diff(mTmpConfiguration) != 0) {
-                mWaitingForConfig = true;
-                setLayoutNeeded();
-                mDisplayRotation.prepareNormalRotationAnimation();
-                config = new Configuration(mTmpConfiguration);
-            }
         }
 
         return config;
