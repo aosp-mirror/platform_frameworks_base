@@ -8995,7 +8995,8 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges})
-     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION} if includeLocationData is
+     * set to {@link #INCLUDE_LOCATION_DATA_FINE}.
      *
      * If the system-wide location switch is off, apps may still call this API, with the
      * following constraints:
@@ -9009,7 +9010,10 @@ public class TelephonyManager {
      * </ol>
      *
      * @param includeLocationData Specifies if the caller would like to receive
-     * location related information.
+     * location related information. If this parameter is set to
+     * {@link #INCLUDE_LOCATION_DATA_FINE} then the application will be checked for
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission and available
+     * location related information received during network scan will be sent to the caller.
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
@@ -9020,8 +9024,7 @@ public class TelephonyManager {
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
-            android.Manifest.permission.MODIFY_PHONE_STATE,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            android.Manifest.permission.MODIFY_PHONE_STATE
     })
     public @Nullable NetworkScan requestNetworkScan(
             @IncludeLocationData int includeLocationData,
