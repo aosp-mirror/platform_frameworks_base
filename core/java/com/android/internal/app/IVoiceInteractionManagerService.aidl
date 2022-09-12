@@ -270,7 +270,6 @@ interface IVoiceInteractionManagerService {
      */
     void shutdownHotwordDetectionService();
 
-    @EnforcePermission(allOf={"RECORD_AUDIO", "CAPTURE_AUDIO_HOTWORD"})
     void startListeningFromMic(
         in AudioFormat audioFormat,
         in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
@@ -286,7 +285,6 @@ interface IVoiceInteractionManagerService {
     /**
      * Test API to simulate to trigger hardware recognition event for test.
      */
-    @EnforcePermission(allOf={"RECORD_AUDIO", "CAPTURE_AUDIO_HOTWORD"})
     void triggerHardwareRecognitionEventForTest(
             in SoundTrigger.KeyphraseRecognitionEvent event,
             in IHotwordRecognitionStatusCallback callback);

@@ -1284,12 +1284,13 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        @android.annotation.EnforcePermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD})
         @Override
         public void startListeningFromMic(
                 AudioFormat audioFormat,
                 IMicrophoneHotwordDetectionVoiceInteractionCallback callback)
                 throws RemoteException {
+            enforceCallingPermission(Manifest.permission.RECORD_AUDIO);
+            enforceCallingPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
@@ -1349,12 +1350,13 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        @android.annotation.EnforcePermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD})
         @Override
         public void triggerHardwareRecognitionEventForTest(
                 SoundTrigger.KeyphraseRecognitionEvent event,
                 IHotwordRecognitionStatusCallback callback)
                 throws RemoteException {
+            enforceCallingPermission(Manifest.permission.RECORD_AUDIO);
+            enforceCallingPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
