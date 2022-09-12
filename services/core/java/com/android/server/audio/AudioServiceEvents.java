@@ -433,7 +433,7 @@ public class AudioServiceEvents {
                 case VOL_SET_LE_AUDIO_VOL:
                     return new StringBuilder("setLeAudioVolume:")
                             .append(" index:").append(mVal1)
-                            .append(" gain dB:").append(mVal2)
+                            .append(" maxIndex:").append(mVal2)
                             .toString();
                 case VOL_SET_AVRCP_VOL:
                     return new StringBuilder("setAvrcpVolume:")
