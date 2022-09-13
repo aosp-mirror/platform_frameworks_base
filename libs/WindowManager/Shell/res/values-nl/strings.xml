@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Cameraproblemen?\nTik om opnieuw passend te maken."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Is dit geen oplossing?\nTik om terug te zetten."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Geen cameraproblemen? Tik om te sluiten."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Zie en doe meer"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Sleep een andere app hier naartoe om het scherm te splitsen"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik naast een app om deze opnieuw te positioneren"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Uitvouwen voor meer informatie."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximaliseren"</string>
