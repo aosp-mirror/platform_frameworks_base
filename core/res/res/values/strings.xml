@@ -4525,8 +4525,8 @@
     <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
 
-    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=50] -->
-    <string name="default_audio_route_name_hdmi">HDMI</string>
+    <!-- Name of the default audio route when an external device is connected. [CHAR LIMIT=50] -->
+    <string name="default_audio_route_name_external_device">External Device</string>
 
     <!-- Name of the default audio route when wired headphones are
          connected. [CHAR LIMIT=50] -->
