@@ -41,7 +41,7 @@ import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
+import com.android.systemui.wallpapers.gl.ImageWallpaperRenderer;
 
 import org.junit.Before;
 import org.junit.Ignore;

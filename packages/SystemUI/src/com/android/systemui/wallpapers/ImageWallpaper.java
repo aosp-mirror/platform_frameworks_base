@@ -37,8 +37,8 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.glwallpaper.EglHelper;
-import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
+import com.android.systemui.wallpapers.gl.EglHelper;
+import com.android.systemui.wallpapers.gl.ImageWallpaperRenderer;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
