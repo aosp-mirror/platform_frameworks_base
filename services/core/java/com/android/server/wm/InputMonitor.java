@@ -52,6 +52,7 @@ import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.InputConfig;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -77,7 +78,8 @@ final class InputMonitor {
     private final WindowManagerService mService;
 
     // Current input focus token for keys and other non-touch events.  May be null.
-    private IBinder mInputFocus = null;
+    IBinder mInputFocus = null;
+    long mInputFocusRequestTimeMillis = 0;
 
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
@@ -479,6 +481,7 @@ final class InputMonitor {
         }
 
         mInputFocus = focusToken;
+        mInputFocusRequestTimeMillis = SystemClock.uptimeMillis();
         mInputTransaction.setFocusedWindow(mInputFocus, windowName, mDisplayId);
         EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Focus request " + windowName,
                 "reason=UpdateInputWindows");
