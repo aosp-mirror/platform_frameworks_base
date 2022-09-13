@@ -99,15 +99,23 @@ public abstract class HandwritingGesture {
      */
     public static final int GESTURE_TYPE_DELETE = 1 << 2;
 
+    /** Gesture of type {@link RemoveSpaceGesture} to remove whitespace from text. */
+    public static final int GESTURE_TYPE_REMOVE_SPACE = 1 << 3;
+
+    /** Gesture of type {@link JoinOrSplitGesture} to join or split text. */
+    public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 1 << 4;
+
     /**
      * Type of gesture like {@link #GESTURE_TYPE_SELECT}, {@link #GESTURE_TYPE_INSERT},
      * or {@link #GESTURE_TYPE_DELETE}.
      */
     @IntDef(prefix = {"GESTURE_TYPE_"}, value = {
-                GESTURE_TYPE_NONE,
-                GESTURE_TYPE_SELECT,
-                GESTURE_TYPE_INSERT,
-                GESTURE_TYPE_DELETE})
+            GESTURE_TYPE_NONE,
+            GESTURE_TYPE_SELECT,
+            GESTURE_TYPE_INSERT,
+            GESTURE_TYPE_DELETE,
+            GESTURE_TYPE_REMOVE_SPACE,
+            GESTURE_TYPE_JOIN_OR_SPLIT})
     @Retention(RetentionPolicy.SOURCE)
     @interface GestureType{}
 
@@ -121,7 +129,9 @@ public abstract class HandwritingGesture {
     @IntDef(flag = true, prefix = {"GESTURE_TYPE_"}, value = {
             GESTURE_TYPE_SELECT,
             GESTURE_TYPE_INSERT,
-            GESTURE_TYPE_DELETE})
+            GESTURE_TYPE_DELETE,
+            GESTURE_TYPE_REMOVE_SPACE,
+            GESTURE_TYPE_JOIN_OR_SPLIT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface GestureTypeFlags{}
 

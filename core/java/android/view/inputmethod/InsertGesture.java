@@ -124,7 +124,8 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
     /**
      * Used to make this class parcelable.
      */
-    public static final @android.annotation.NonNull Creator<InsertGesture> CREATOR =
+    @NonNull
+    public static final Creator<InsertGesture> CREATOR =
             new Creator<InsertGesture>() {
         @Override
         public InsertGesture createFromParcel(Parcel source) {

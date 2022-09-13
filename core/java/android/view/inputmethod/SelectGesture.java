@@ -63,8 +63,7 @@ public final class SelectGesture extends HandwritingGesture implements Parcelabl
     /**
      * Returns the Selection area {@link RectF} in screen coordinates.
      *
-     * Getter for selection area set with {@link Builder#setSelectionArea(RectF)}. {@code null}
-     * if area was not set.
+     * Getter for selection area set with {@link Builder#setSelectionArea(RectF)}.
      */
     @NonNull
     public RectF getSelectionArea() {
@@ -126,7 +125,7 @@ public final class SelectGesture extends HandwritingGesture implements Parcelabl
         }
 
         /**
-         * @return {@link SelectGesture} using parameters in this {@link InsertGesture.Builder}.
+         * @return {@link SelectGesture} using parameters in this {@link Builder}.
          * @throws IllegalArgumentException if one or more positional parameters are not specified.
          */
         @NonNull
@@ -144,7 +143,8 @@ public final class SelectGesture extends HandwritingGesture implements Parcelabl
     /**
      * Used to make this class parcelable.
      */
-    public static final @android.annotation.NonNull Parcelable.Creator<SelectGesture> CREATOR =
+    @NonNull
+    public static final Parcelable.Creator<SelectGesture> CREATOR =
             new Parcelable.Creator<SelectGesture>() {
         @Override
         public SelectGesture createFromParcel(Parcel source) {
