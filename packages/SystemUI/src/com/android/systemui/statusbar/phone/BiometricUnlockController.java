@@ -177,7 +177,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private KeyguardViewMediator mKeyguardViewMediator;
     private ScrimController mScrimController;
     private PendingAuthenticated mPendingAuthenticated = null;
-    private boolean mPendingShowBouncer;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
     private boolean mFadedAwayAfterWakeAndUnlock;
     private BiometricModeListener mBiometricModeListener;
@@ -474,31 +473,22 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 break;
             case MODE_UNLOCK_COLLAPSING:
                 Trace.beginSection("MODE_UNLOCK_COLLAPSING");
-                if (!wasDeviceInteractive) {
-                    mPendingShowBouncer = true;
-                } else {
-                    // If the keyguard unlock controller is going to handle the unlock animation, it
-                    // will fling the panel collapsed when it's ready.
-                    if (!mKeyguardUnlockAnimationController.willHandleUnlockAnimation()) {
-                        mShadeController.animateCollapsePanels(
-                                CommandQueue.FLAG_EXCLUDE_NONE,
-                                true /* force */,
-                                false /* delayed */,
-                                BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
-                    }
-                    mPendingShowBouncer = false;
-                    mKeyguardViewController.notifyKeyguardAuthenticated(
-                            false /* strongAuth */);
+                // If the keyguard unlock controller is going to handle the unlock animation, it
+                // will fling the panel collapsed when it's ready.
+                if (!mKeyguardUnlockAnimationController.willHandleUnlockAnimation()) {
+                    mShadeController.animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_NONE,
+                            true /* force */,
+                            false /* delayed */,
+                            BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
                 }
+                mKeyguardViewController.notifyKeyguardAuthenticated(
+                        false /* strongAuth */);
                 Trace.endSection();
                 break;
             case MODE_SHOW_BOUNCER:
                 Trace.beginSection("MODE_SHOW_BOUNCER");
-                if (!wasDeviceInteractive) {
-                    mPendingShowBouncer = true;
-                } else {
-                    showBouncer();
-                }
+                mKeyguardViewController.showBouncer(true);
                 Trace.endSection();
                 break;
             case MODE_WAKE_AND_UNLOCK_FROM_DREAM:
@@ -534,15 +524,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (mBiometricModeListener != null) {
             mBiometricModeListener.onModeChanged(mode);
         }
-    }
-
-    private void showBouncer() {
-        if (mMode == MODE_SHOW_BOUNCER) {
-            mKeyguardViewController.showBouncer(true);
-        }
-        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
-                false /* delayed */, BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
-        mPendingShowBouncer = false;
     }
 
     public boolean hasPendingAuthentication() {
@@ -770,13 +751,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     @VisibleForTesting
     final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
-                @Override
-                public void onFinishedWakingUp() {
-                    if (mPendingShowBouncer) {
-                        BiometricUnlockController.this.showBouncer();
-                    }
-                }
-
                 @Override
                 public void onStartedGoingToSleep() {
                     resetMode();

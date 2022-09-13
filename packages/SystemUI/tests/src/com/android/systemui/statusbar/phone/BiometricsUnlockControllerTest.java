@@ -167,8 +167,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
                 BiometricSourceType.FINGERPRINT, false /* isStrongBiometric */);
         verify(mStatusBarKeyguardViewManager).showBouncer(anyBoolean());
-        verify(mShadeController).animateCollapsePanels(anyInt(), anyBoolean(), anyBoolean(),
-                anyFloat());
         assertThat(mBiometricUnlockController.getMode())
                 .isEqualTo(BiometricUnlockController.MODE_SHOW_BOUNCER);
         assertThat(mBiometricUnlockController.getBiometricType())
@@ -297,10 +295,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         // value of isUnlockingWithBiometricAllowed()
         mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
                 BiometricSourceType.FACE, true /* isStrongBiometric */);
-
-        // Wake up before showing the bouncer
-        verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
-        mBiometricUnlockController.mWakefulnessObserver.onFinishedWakingUp();
 
         verify(mStatusBarKeyguardViewManager).showBouncer(anyBoolean());
         assertThat(mBiometricUnlockController.getMode())
