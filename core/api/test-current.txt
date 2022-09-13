@@ -3350,17 +3350,11 @@ package android.window {
     ctor public TaskFragmentOrganizer(@NonNull java.util.concurrent.Executor);
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizerToken();
-    method public void onActivityReparentedToTask(@NonNull android.window.WindowContainerTransaction, int, @NonNull android.content.Intent, @NonNull android.os.IBinder);
     method @Deprecated public void onTaskFragmentAppeared(@NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentAppeared(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.TaskFragmentInfo);
     method @Deprecated public void onTaskFragmentError(@NonNull android.os.IBinder, @NonNull Throwable);
-    method public void onTaskFragmentError(@NonNull android.window.WindowContainerTransaction, @NonNull android.os.IBinder, @Nullable android.window.TaskFragmentInfo, int, @NonNull Throwable);
     method @Deprecated public void onTaskFragmentInfoChanged(@NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentInfoChanged(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.TaskFragmentInfo);
     method @Deprecated public void onTaskFragmentParentInfoChanged(@NonNull android.os.IBinder, @NonNull android.content.res.Configuration);
-    method public void onTaskFragmentParentInfoChanged(@NonNull android.window.WindowContainerTransaction, int, @NonNull android.content.res.Configuration);
     method @Deprecated public void onTaskFragmentVanished(@NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentVanished(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.TaskFragmentInfo);
     method @CallSuper public void registerOrganizer();
     method @CallSuper public void unregisterOrganizer();
   }
