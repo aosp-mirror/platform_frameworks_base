@@ -155,6 +155,27 @@ public class AlarmQueueTest {
                 anyInt(), eq(nowElapsed + HOUR_IN_MILLIS), eq(ALARM_TAG), any(), any());
     }
 
+    @Test
+    public void testAddingLargeAlarmTimes() {
+        final AlarmQueue<String> alarmQueue = createAlarmQueue(true, 0);
+        final long nowElapsed = mInjector.getElapsedRealtime();
+
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        alarmQueue.addAlarm("com.android.test.1", Long.MAX_VALUE - 5);
+        inOrder.verify(mAlarmManager, timeout(1000).times(1))
+                .setExact(anyInt(), eq(Long.MAX_VALUE - 5), eq(ALARM_TAG), any(), any());
+        alarmQueue.addAlarm("com.android.test.2", Long.MAX_VALUE - 4);
+        inOrder.verify(mAlarmManager, never())
+                .setExact(anyInt(), anyLong(), eq(ALARM_TAG), any(), any());
+        alarmQueue.addAlarm("com.android.test.3", nowElapsed + 5);
+        inOrder.verify(mAlarmManager, timeout(1000).times(1))
+                .setExact(anyInt(), eq(nowElapsed + 5), eq(ALARM_TAG), any(), any());
+        alarmQueue.addAlarm("com.android.test.4", nowElapsed + 6);
+        inOrder.verify(mAlarmManager, never())
+                .setExact(anyInt(), anyLong(), eq(ALARM_TAG), any(), any());
+    }
+
     /**
      * Verify that updating the alarm time for a key will result in the AlarmManager alarm changing,
      * if needed.
