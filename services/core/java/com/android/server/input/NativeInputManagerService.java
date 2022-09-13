@@ -29,16 +29,13 @@ import android.view.InputEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.util.List;
 
 /**
  * An interface for the native methods of InputManagerService. We use a public interface so that
  * this can be mocked for testing by Mockito.
  */
-@VisibleForTesting
-public interface NativeInputManagerService {
+interface NativeInputManagerService {
 
     void start();
 
