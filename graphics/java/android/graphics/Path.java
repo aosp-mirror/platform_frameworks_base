@@ -33,7 +33,7 @@ import libcore.util.NativeAllocationRegistry;
  * (based on the paint's Style), or it can be used for clipping or to draw
  * text on a path.
  */
-public class Path implements Iterable<PathIterator.Segment> {
+public class Path {
 
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
@@ -97,8 +97,7 @@ public class Path implements Iterable<PathIterator.Segment> {
      * @return the Iterator object
      */
     @NonNull
-    @Override
-    public PathIterator iterator() {
+    public PathIterator getPathIterator() {
         return new PathIterator(this);
     }
 
