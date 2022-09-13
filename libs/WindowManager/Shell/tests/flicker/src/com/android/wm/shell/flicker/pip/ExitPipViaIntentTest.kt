@@ -64,10 +64,8 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = true) {
             setup {
-                eachRun {
-                    // launch an app behind the pip one
-                    testApp.launchViaIntent(wmHelper)
-                }
+                // launch an app behind the pip one
+                testApp.launchViaIntent(wmHelper)
             }
             transitions {
                 // This will bring PipApp to fullscreen

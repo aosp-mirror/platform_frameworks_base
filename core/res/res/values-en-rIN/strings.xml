@@ -634,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visit a repair provider."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Can’t create your face model. Try again."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Too bright. Try gentler lighting."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Try brighter lighting"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Move phone further away"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Move phone closer"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Move phone higher"</string>

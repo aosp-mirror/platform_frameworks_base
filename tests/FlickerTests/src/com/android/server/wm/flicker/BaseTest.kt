@@ -58,9 +58,7 @@ abstract class BaseTest @JvmOverloads constructor(
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
-                test {
-                    testSpec.setIsTablet(wmHelper.currentState.wmState.isTablet)
-                }
+                testSpec.setIsTablet(wmHelper.currentState.wmState.isTablet)
             }
             transition()
         }

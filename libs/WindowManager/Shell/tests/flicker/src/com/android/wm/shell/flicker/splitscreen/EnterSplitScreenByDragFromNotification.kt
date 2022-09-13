@@ -28,11 +28,13 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import org.junit.Assume
@@ -71,33 +73,42 @@ class EnterSplitScreenByDragFromNotification(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    // Send a notification
-                    sendNotificationApp.launchViaIntent(wmHelper)
-                    val sendNotification = device.wait(
-                        Until.findObject(By.text("Send Notification")),
-                        SplitScreenHelper.TIMEOUT_MS
-                    )
-                    sendNotification?.click() ?: error("Send notification button not found")
+                // Send a notification
+                sendNotificationApp.launchViaIntent(wmHelper)
+                val sendNotification = device.wait(
+                    Until.findObject(By.text("Send Notification")),
+                    SplitScreenHelper.TIMEOUT_MS
+                )
+                sendNotification?.click() ?: error("Send notification button not found")
 
-                    tapl.goHome()
-                    primaryApp.launchViaIntent(wmHelper)
-                }
+                tapl.goHome()
+                primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
                 SplitScreenHelper.dragFromNotificationToSplit(instrumentation, device, wmHelper)
                 SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, sendNotificationApp)
             }
             teardown {
-                eachRun {
-                    sendNotificationApp.exit(wmHelper)
-                }
+                sendNotificationApp.exit(wmHelper)
             }
         }
 
     @Presubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerBecomesVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.splitScreenDividerBecomesVisible()
+    }
+
+    // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
+    @Presubmit
+    @Test
+    fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        testSpec.assertLayersEnd {
+            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+        }
+    }
 
     @Presubmit
     @Test
@@ -115,8 +126,8 @@ class EnterSplitScreenByDragFromNotification(
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        sendNotificationApp, landscapePosLeft = true, portraitPosTop = true)
+    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
+        sendNotificationApp)
 
     @Presubmit
     @Test

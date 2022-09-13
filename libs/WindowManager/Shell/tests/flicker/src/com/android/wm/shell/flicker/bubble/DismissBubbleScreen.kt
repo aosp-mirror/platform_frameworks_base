@@ -54,10 +54,8 @@ open class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScree
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                eachRun {
-                    val addBubbleBtn = waitAndGetAddBubbleBtn()
-                    addBubbleBtn?.click() ?: error("Add Bubble not found")
-                }
+                val addBubbleBtn = waitAndGetAddBubbleBtn()
+                addBubbleBtn?.click() ?: error("Add Bubble not found")
             }
             transitions {
                 wm.run { wm.defaultDisplay.getMetrics(displaySize) }

@@ -39,17 +39,13 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     override val transition: FlickerBuilder.() -> Unit = {
         super.transition(this)
         setup {
-            eachRun {
-                device.sleep()
-                wmHelper.StateSyncBuilder()
-                    .withoutTopVisibleAppWindows()
-                    .waitForAndVerify()
-            }
+            device.sleep()
+            wmHelper.StateSyncBuilder()
+                .withoutTopVisibleAppWindows()
+                .waitForAndVerify()
         }
         teardown {
-            eachRun {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
         transitions {
             testApp.launchViaIntent(wmHelper)

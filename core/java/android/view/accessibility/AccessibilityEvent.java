@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.android.internal.util.BitUtils;
 
@@ -685,6 +686,18 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 0x0000200;
 
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * It means the content is invalid or associated with an error.
+     * For example, text that sets an error message, such as when input isn't in a valid format,
+     * should send this event and use {@link AccessibilityNodeInfo#setError} to
+     * provide more context.
+     *
+     * @see AccessibilityNodeInfo#setError
+     * @see TextView#setError
+     */
+    public static final int CONTENT_CHANGE_TYPE_INVALID = 0x0000400;
+
     /** Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is speaking. */
     public static final int SPEECH_STATE_SPEAKING_START = 0x00000001;
 
@@ -810,6 +823,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 CONTENT_CHANGE_TYPE_DRAG_STARTED,
                 CONTENT_CHANGE_TYPE_DRAG_DROPPED,
                 CONTENT_CHANGE_TYPE_DRAG_CANCELLED,
+                CONTENT_CHANGE_TYPE_INVALID,
             })
     public @interface ContentChangeTypes {}
 
@@ -1076,6 +1090,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case CONTENT_CHANGE_TYPE_DRAG_STARTED: return "CONTENT_CHANGE_TYPE_DRAG_STARTED";
             case CONTENT_CHANGE_TYPE_DRAG_DROPPED: return "CONTENT_CHANGE_TYPE_DRAG_DROPPED";
             case CONTENT_CHANGE_TYPE_DRAG_CANCELLED: return "CONTENT_CHANGE_TYPE_DRAG_CANCELLED";
+            case CONTENT_CHANGE_TYPE_INVALID: return "CONTENT_CHANGE_TYPE_INVALID";
             default: return Integer.toHexString(type);
         }
     }

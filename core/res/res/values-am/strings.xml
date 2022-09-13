@@ -106,8 +106,8 @@
     <string name="roamingText0" msgid="7793257871609854208">"በዝውውር ላይ አመላካች በርቷል"</string>
     <string name="roamingText1" msgid="5073028598334616445">"በዝውውር ላይ አመልካች ጠፍቷል"</string>
     <string name="roamingText2" msgid="2834048284153110598">"በዝውውር ላይ አመልካች ብልጭ ብልጭ ይላል"</string>
-    <string name="roamingText3" msgid="831690234035748988">"ከጎረቤት ውጪ"</string>
-    <string name="roamingText4" msgid="2171252529065590728">"ከህንፃ ውጪ"</string>
+    <string name="roamingText3" msgid="831690234035748988">"ከጎረቤት ውጭ"</string>
+    <string name="roamingText4" msgid="2171252529065590728">"ከህንፃ ውጭ"</string>
     <string name="roamingText5" msgid="4294671587635796641">"የዝውውር- ተመራጭ ስርዓት"</string>
     <string name="roamingText6" msgid="5536156746637992029">"ዝውውር- ዝግጁ የሆነ ስርዓት"</string>
     <string name="roamingText7" msgid="1783303085512907706">" የዝውውር- አጋር ስምምነት"</string>
@@ -428,7 +428,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ይህ መተግበሪያ ሁሉንም በእርስዎ ጡባዊ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ይህ መተግበሪያ ሁሉንም በእርስዎ Android TV መሣሪያ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"ይህ መተግበሪያ ሁሉንም በእርስዎ ስልክ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
-    <string name="permlab_writeCalendar" msgid="6422137308329578076">"የቀን መቁጠሪያ ክስተቶችን ቀይር ወይም አክል እና ለእንግዶች ከባለቤቱ ዕውቅና ውጪ ላክ።"</string>
+    <string name="permlab_writeCalendar" msgid="6422137308329578076">"የቀን መቁጠሪያ ክስተቶችን ቀይር ወይም አክል እና ለእንግዶች ከባለቤቱ ዕውቅና ውጭ ላክ።"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"ይህ መተግበሪያ በእርስዎ ጡባዊ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ይህ መተግበሪያ በእርስዎ Android TV መሣሪያ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"የጣት አሻራ ስርዓተ ክወና ተትቷል።"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"የጣት አሻራ ክወና በተጠቃሚ ተሰርዟል።"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"በጣም ብዙ ሙከራዎች። በምትኩ የማያ ገጽ መቆለፊያን ይጠቀሙ።"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ምንም የጣት አሻራዎች አልተመዘገቡም።"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ይህ መሣሪያ የጣት አሻራ ዳሳሽ የለውም።"</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"የጥገና አገልግሎት ሰጪን ይጎብኙ።"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"የመልክዎን ሞዴል መፍጠር አልተቻለም። እንደገና ይሞክሩ።"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ከልክ በላይ ፈካ ያለ። ይበልጥ ረጋ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ከዚህ ፈካ ያለ ብርሃንን ይሞክሩ"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ስልኩን ያርቁት"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ስልኩን ያቅርቡት"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ስልኩን ከፍ ወዳለ ቦታ ይውሰዱት"</string>
@@ -1163,7 +1163,7 @@
     <string name="dialog_alert_title" msgid="651856561974090712">"ትኩረት"</string>
     <string name="loading" msgid="3138021523725055037">"በመጫን ላይ…"</string>
     <string name="capital_on" msgid="2770685323900821829">"በ"</string>
-    <string name="capital_off" msgid="7443704171014626777">"ውጪ"</string>
+    <string name="capital_off" msgid="7443704171014626777">"ውጭ"</string>
     <string name="checked" msgid="9179896827054513119">"ምልክት ተደርጎበታል"</string>
     <string name="not_checked" msgid="7972320087569023342">"ምልክት አልተደረገበትም"</string>
     <string name="selected" msgid="6614607926197755875">"ተመርጧል"</string>
@@ -1476,7 +1476,7 @@
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ፈቃድ ተጠይቋል"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">\n" ለ<xliff:g id="ACCOUNT">%s</xliff:g> መለያ ፈቃድ ተጠይቋል"</string>
     <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"ለመለያ <xliff:g id="ACCOUNT">%2$s</xliff:g>\nበ<xliff:g id="APP">%1$s</xliff:g> የተጠየቀ ፈቃድ።"</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"ከስራ መገለጫዎ ውጪ ሆነው መተግበሪያ እየተጠቀሙ ነው"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"ከስራ መገለጫዎ ውጭ ሆነው መተግበሪያ እየተጠቀሙ ነው"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"ይህን መተግበሪያ በእርስዎ የስራ መገለጫ ላይ እየተጠቀሙበት ነው"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ግቤት ስልት"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"አስምር"</string>

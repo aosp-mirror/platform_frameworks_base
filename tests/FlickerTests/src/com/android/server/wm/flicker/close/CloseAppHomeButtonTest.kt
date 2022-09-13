@@ -71,9 +71,7 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         get() = {
             super.transition(this)
             setup {
-                test {
-                    tapl.setExpectedRotationCheckEnabled(false)
-                }
+                tapl.setExpectedRotationCheckEnabled(false)
             }
             transitions {
                 // Can't use TAPL at the moment because of rotation test issues

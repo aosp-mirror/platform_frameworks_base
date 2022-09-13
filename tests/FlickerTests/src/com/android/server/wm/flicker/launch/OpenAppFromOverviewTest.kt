@@ -69,27 +69,23 @@ open class OpenAppFromOverviewTest(
         get() = {
             super.transition(this)
             setup {
-                test {
-                    tapl.setExpectedRotationCheckEnabled(false)
-                    testApp.launchViaIntent(wmHelper)
+                tapl.setExpectedRotationCheckEnabled(false)
+                testApp.launchViaIntent(wmHelper)
+                tapl.goHome()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
+                // By default, launcher doesn't rotate on phones, but rotates on tablets
+                if (testSpec.isTablet) {
+                    tapl.setExpectedRotation(testSpec.startRotation)
+                } else {
+                    tapl.setExpectedRotation(Surface.ROTATION_0)
                 }
-                eachRun {
-                    tapl.goHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                    // By default, launcher doesn't rotate on phones, but rotates on tablets
-                    if (testSpec.isTablet) {
-                        tapl.setExpectedRotation(testSpec.startRotation)
-                    } else {
-                        tapl.setExpectedRotation(Surface.ROTATION_0)
-                    }
-                    tapl.workspace.switchToOverview()
-                    wmHelper.StateSyncBuilder()
-                        .withRecentsActivityVisible()
-                        .waitForAndVerify()
-                    this.setRotation(testSpec.startRotation)
-                }
+                tapl.workspace.switchToOverview()
+                wmHelper.StateSyncBuilder()
+                    .withRecentsActivityVisible()
+                    .waitForAndVerify()
+                this.setRotation(testSpec.startRotation)
             }
             transitions {
                 tapl.overview.currentTask.open()

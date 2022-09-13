@@ -87,15 +87,13 @@ open class SeamlessAppRotationTest(
         get() = {
             super.transition(this)
             setup {
-                test {
-                    testApp.launchViaIntent(
-                        wmHelper,
-                        stringExtras = mapOf(
-                            ActivityOptions.EXTRA_STARVE_UI_THREAD
-                                to testSpec.starveUiThread.toString()
-                        )
+                testApp.launchViaIntent(
+                    wmHelper,
+                    stringExtras = mapOf(
+                        ActivityOptions.EXTRA_STARVE_UI_THREAD
+                            to testSpec.starveUiThread.toString()
                     )
-                }
+                )
             }
         }
 

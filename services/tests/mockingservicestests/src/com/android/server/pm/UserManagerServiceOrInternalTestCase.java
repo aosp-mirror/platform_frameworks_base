@@ -194,6 +194,7 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
     protected abstract boolean isUserVisible(int userId);
     protected abstract boolean isUserVisibleOnDisplay(int userId, int displayId);
     protected abstract int getDisplayAssignedToUser(int userId);
+    protected abstract int getUserAssignedToDisplay(int displayId);
 
     /////////////////////////////////
     // Tests for the above methods //
@@ -426,6 +427,67 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
 
     // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
     // getDisplayAssignedToUser() for bg users relies only on the user / display assignments
+
+    @Test
+    public void testGetUserAssignedToDisplay_invalidDisplay() {
+        mockCurrentUser(USER_ID);
+
+        assertWithMessage("getUserAssignedToDisplay(%s)", INVALID_DISPLAY)
+                .that(getUserAssignedToDisplay(INVALID_DISPLAY)).isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetUserAssignedToDisplay_defaultDisplay() {
+        mockCurrentUser(USER_ID);
+
+        assertWithMessage("getUserAssignedToDisplay(%s)", DEFAULT_DISPLAY)
+                .that(getUserAssignedToDisplay(DEFAULT_DISPLAY)).isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetUserAssignedToDisplay_secondaryDisplay() {
+        mockCurrentUser(USER_ID);
+
+        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
+                .that(getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetUserAssignedToDisplay_mumd_bgUserOnSecondaryDisplay() {
+        enableUsersOnSecondaryDisplays();
+        mockCurrentUser(OTHER_USER_ID);
+        assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+
+        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
+                .that(getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetUserAssignedToDisplay_mumd_noUserOnSecondaryDisplay() {
+        enableUsersOnSecondaryDisplays();
+        mockCurrentUser(USER_ID);
+
+        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
+                .that(getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
+    }
+
+    // TODO(b/244644281): scenario below shouldn't happen on "real life", as the profile cannot be
+    // started on secondary display if its parent isn't, so we might need to remove (or refactor
+    // this test) if/when the underlying logic changes
+    @Test
+    public void testGetUserAssignedToDisplay_mumd_profileOnSecondaryDisplay() {
+        enableUsersOnSecondaryDisplays();
+        addDefaultProfileAndParent();
+        mockCurrentUser(USER_ID);
+        assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+
+        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
+                .that(getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
+    }
+
+    // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
+    // getUserAssignedToDisplay() for bg users relies only on the user / display assignments
+
 
     ///////////////////////////////////////////
     // Helper methods exposed to sub-classes //

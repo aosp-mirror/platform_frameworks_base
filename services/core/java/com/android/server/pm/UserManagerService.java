@@ -1387,15 +1387,20 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserEnabled(@UserIdInt int userId) {
         checkManageUsersPermission("enable user");
+        UserInfo info;
+        boolean wasUserDisabled = false;
         synchronized (mPackagesLock) {
-            UserInfo info;
             synchronized (mUsersLock) {
                 info = getUserInfoLU(userId);
+                if (info != null && !info.isEnabled()) {
+                    wasUserDisabled = true;
+                    info.flags ^= UserInfo.FLAG_DISABLED;
+                    writeUserLP(getUserDataLU(info.id));
+                }
             }
-            if (info != null && !info.isEnabled()) {
-                info.flags ^= UserInfo.FLAG_DISABLED;
-                writeUserLP(getUserDataLU(info.id));
-            }
+        }
+        if (wasUserDisabled && info != null && info.isProfile()) {
+            sendProfileAddedBroadcast(info.profileGroupId, info.id);
         }
     }
 
@@ -1776,6 +1781,43 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersOnSecondaryDisplays) {
             return mUsersOnSecondaryDisplays.get(userId, Display.INVALID_DISPLAY);
         }
+    }
+
+    @VisibleForTesting
+    int getUserAssignedToDisplay(int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return getCurrentUserId();
+        }
+
+        if (!mUsersOnSecondaryDisplaysEnabled) {
+            int currentUserId = getCurrentUserId();
+            Slogf.w(LOG_TAG, "getUsersAssignedToDisplay(%d) called with non-DEFAULT_DISPLAY on "
+                    + "system that doesn't support that; returning current user (%d)", displayId,
+                    currentUserId);
+            return currentUserId;
+        }
+
+        synchronized (mUsersOnSecondaryDisplays) {
+            for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
+                if (mUsersOnSecondaryDisplays.valueAt(i) != displayId) {
+                    continue;
+                }
+                int userId = mUsersOnSecondaryDisplays.keyAt(i);
+                if (!isProfileUnchecked(userId)) {
+                    return userId;
+                } else if (DBG_MUMD) {
+                    Slogf.d(LOG_TAG, "getUserAssignedToDisplay(%d): skipping user %d because it's "
+                            + "a profile", displayId, userId);
+                }
+            }
+        }
+
+        int currentUserId = getCurrentUserId();
+        if (DBG_MUMD) {
+            Slogf.d(LOG_TAG, "getUserAssignedToDisplay(%d): no user assigned to display, returning "
+                    + "current user (%d) instead", displayId, currentUserId);
+        }
+        return currentUserId;
     }
 
     /**
@@ -4830,7 +4872,9 @@ public class UserManagerService extends IUserManager.Stub {
         MetricsLogger.count(mContext, userInfo.isGuest() ? TRON_GUEST_CREATED
                 : (userInfo.isDemo() ? TRON_DEMO_CREATED : TRON_USER_CREATED), 1);
 
-        if (!userInfo.isProfile()) {
+        if (userInfo.isProfile()) {
+            sendProfileAddedBroadcast(userInfo.profileGroupId, userInfo.id);
+        } else {
             // If the user switch hasn't been explicitly toggled on or off by the user, turn it on.
             if (android.provider.Settings.Global.getString(mContext.getContentResolver(),
                     android.provider.Settings.Global.USER_SWITCHER_ENABLED) == null) {
@@ -5430,6 +5474,17 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Send {@link Intent#ACTION_PROFILE_ADDED} broadcast when a user of type
+     * {@link UserInfo#isProfile()} is added. This broadcast is sent only to dynamic receivers
+     * created with {@link Context#registerReceiver}.
+     */
+    private void sendProfileAddedBroadcast(int parentUserId, int addedUserId) {
+        sendProfileBroadcast(
+                new Intent(Intent.ACTION_PROFILE_ADDED),
+                parentUserId, addedUserId);
+    }
+
+    /**
      * Send {@link Intent#ACTION_PROFILE_REMOVED} broadcast when a user of type
      * {@link UserInfo#isProfile()} is removed. Additionally sends
      * {@link Intent#ACTION_MANAGED_PROFILE_REMOVED} broadcast if the profile is of type
@@ -5447,12 +5502,12 @@ public class UserManagerService extends IUserManager.Stub {
         if (Objects.equals(userType, UserManager.USER_TYPE_PROFILE_MANAGED)) {
             sendManagedProfileRemovedBroadcast(parentUserId, removedUserId);
         }
-        sendProfileBroadcastToRegisteredReceivers(
+        sendProfileBroadcast(
                 new Intent(Intent.ACTION_PROFILE_REMOVED),
                 parentUserId, removedUserId);
     }
 
-    private void sendProfileBroadcastToRegisteredReceivers(Intent intent,
+    private void sendProfileBroadcast(Intent intent,
             int parentUserId, int userId) {
         final UserHandle parentHandle = UserHandle.of(parentUserId);
         intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
@@ -5463,7 +5518,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void sendManagedProfileRemovedBroadcast(int parentUserId, int removedUserId) {
         Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
+        managedProfileIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(removedUserId));
         managedProfileIntent.putExtra(Intent.EXTRA_USER_HANDLE, removedUserId);
         final UserHandle parentHandle = UserHandle.of(parentUserId);
         getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
@@ -6826,6 +6881,11 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public int getDisplayAssignedToUser(int userId) {
             return UserManagerService.this.getDisplayAssignedToUser(userId);
+        }
+
+        @Override
+        public int getUserAssignedToDisplay(int displayId) {
+            return UserManagerService.this.getUserAssignedToDisplay(displayId);
         }
     } // class LocalService
 

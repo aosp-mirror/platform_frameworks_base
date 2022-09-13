@@ -607,8 +607,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Zbyt wiele prób. Użyj blokady ekranu."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Spróbuj ponownie."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nie zarejestrowano odcisków palców."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"To urządzenie nie jest wyposażone w czytnik linii papilarnych."</string>
@@ -637,7 +636,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Odwiedź serwis."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nie można utworzyć modelu twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zbyt jasno. Spróbuj przy słabszym świetle."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Spróbuj w jaśniejszym świetle"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Odsuń telefon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Przybliż telefon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Przesuń telefon wyżej"</string>

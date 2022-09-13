@@ -314,10 +314,8 @@ public class Watchdog implements Dumpable {
             } else {
                 prefix =  "Blocked in monitor " + mCurrentMonitor.getClass().getName();
             }
-            Thread thread = getThread();
-            String threadIdentifier = thread.getName() + ", tid=" + thread.getId();
             long latencySeconds = (SystemClock.uptimeMillis() - mStartTimeMillis) / 1000;
-            return prefix + " on " + mName + " (" + threadIdentifier + ")"
+            return prefix + " on " + mName + " (" + getThread().getName() + ")"
                 + " for " + latencySeconds + "s";
         }
 

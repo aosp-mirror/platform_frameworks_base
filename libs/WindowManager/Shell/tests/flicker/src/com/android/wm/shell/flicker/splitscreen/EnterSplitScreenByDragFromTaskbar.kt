@@ -26,12 +26,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import org.junit.Assume
@@ -68,13 +70,11 @@ class EnterSplitScreenByDragFromTaskbar(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    tapl.goHome()
-                    SplitScreenHelper.createShortcutOnHotseatIfNotExist(
-                        tapl, secondaryApp.appName
-                    )
-                    primaryApp.launchViaIntent(wmHelper)
-                }
+                tapl.goHome()
+                SplitScreenHelper.createShortcutOnHotseatIfNotExist(
+                    tapl, secondaryApp.appName
+                )
+                primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
                 tapl.launchedAppState.taskbar
@@ -86,7 +86,20 @@ class EnterSplitScreenByDragFromTaskbar(
 
     @Presubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerBecomesVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.splitScreenDividerBecomesVisible()
+    }
+
+    // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
+    @Presubmit
+    @Test
+    fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        testSpec.assertLayersEnd {
+            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+        }
+    }
 
     @Presubmit
     @Test
@@ -103,8 +116,8 @@ class EnterSplitScreenByDragFromTaskbar(
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
+    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
+        secondaryApp)
 
     @Presubmit
     @Test

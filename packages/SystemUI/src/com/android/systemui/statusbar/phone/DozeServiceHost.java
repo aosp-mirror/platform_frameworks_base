@@ -209,12 +209,8 @@ public final class DozeServiceHost implements DozeHost {
     void updateDozing() {
         Assert.isMainThread();
 
-        // When in wake-and-unlock while pulsing, keep dozing state until fully unlocked.
-        boolean
-                dozing =
-                mDozingRequested && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                        || mBiometricUnlockControllerLazy.get().getMode()
-                        == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
+        boolean dozing =
+                mDozingRequested && mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         // When in wake-and-unlock we may not have received a change to StatusBarState
         // but we still should not be dozing, manually set to false.
         if (mBiometricUnlockControllerLazy.get().getMode()

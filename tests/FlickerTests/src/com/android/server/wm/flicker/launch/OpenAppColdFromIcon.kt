@@ -62,16 +62,12 @@ class OpenAppColdFromIcon(
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    tapl.setExpectedRotation(Surface.ROTATION_0)
-                    RemoveAllTasksButHomeRule.removeAllTasksButHome()
-                    this.setRotation(testSpec.startRotation)
-                }
+                tapl.setExpectedRotation(Surface.ROTATION_0)
+                RemoveAllTasksButHomeRule.removeAllTasksButHome()
+                this.setRotation(testSpec.startRotation)
             }
             teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
-                }
+                testApp.exit(wmHelper)
             }
             transitions {
                 tapl.goHome()

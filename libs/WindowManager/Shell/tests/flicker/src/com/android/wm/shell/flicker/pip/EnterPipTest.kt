@@ -25,6 +25,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -59,16 +62,15 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     /** {@inheritDoc}  */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setupAndTeardown(this)
             setup {
-                eachRun {
-                    pipApp.launchViaIntent(wmHelper)
-                }
+                RemoveAllTasksButHomeRule.removeAllTasksButHome()
+                device.wakeUpAndGoToHomeScreen()
+                pipApp.launchViaIntent(wmHelper)
             }
             teardown {
-                eachRun {
-                    pipApp.exit(wmHelper)
-                }
+                setRotation(Surface.ROTATION_0)
+                RemoveAllTasksButHomeRule.removeAllTasksButHome()
+                pipApp.exit(wmHelper)
             }
             transitions {
                 pipApp.clickEnterPipButton(wmHelper)

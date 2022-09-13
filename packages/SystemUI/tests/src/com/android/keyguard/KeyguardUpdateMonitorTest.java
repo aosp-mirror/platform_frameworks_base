@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
@@ -31,6 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -73,6 +75,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -198,6 +201,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private SessionTracker mSessionTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private PowerManager mPowerManager;
 
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
@@ -1560,6 +1565,28 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(anyBoolean())).isEqualTo(true);
     }
 
+    @Test
+    public void testFingerAcquired_wakesUpPowerManager() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.kg_wake_on_acquire_start, true);
+        mSpiedContext = spy(mContext);
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
+        fingerprintAcquireStart();
+
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    @Test
+    public void testFingerAcquired_doesNotWakeUpPowerManager() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.kg_wake_on_acquire_start, false);
+        mSpiedContext = spy(mContext);
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
+        fingerprintAcquireStart();
+
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
     private void faceAuthEnabled() {
         // this ensures KeyguardUpdateMonitor updates the cached mIsFaceEnrolled flag using the
         // face manager mock wire-up in setup()
@@ -1606,6 +1633,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private void fingerprintErrorLockedOut() {
         mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
                 .onAuthenticationError(FINGERPRINT_ERROR_LOCKOUT, "Fingerprint locked out");
+    }
+
+    private void fingerprintAcquireStart() {
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
+                .onAuthenticationAcquired(FINGERPRINT_ACQUIRED_START);
     }
 
     private void triggerSuccessfulFaceAuth() {
@@ -1729,7 +1761,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
                     mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig,
-                    mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker);
+                    mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker,
+                    mPowerManager);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

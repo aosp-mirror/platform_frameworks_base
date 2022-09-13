@@ -102,4 +102,9 @@ public final class UserManagerServiceTest extends UserManagerServiceOrInternalTe
     protected int getDisplayAssignedToUser(int userId) {
         return mUms.getDisplayAssignedToUser(userId);
     }
+
+    @Override
+    protected int getUserAssignedToDisplay(int displayId) {
+        return mUms.getUserAssignedToDisplay(displayId);
+    }
 }

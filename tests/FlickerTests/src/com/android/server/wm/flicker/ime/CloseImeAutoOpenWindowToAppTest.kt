@@ -57,14 +57,10 @@ class CloseImeAutoOpenWindowToAppTest(testSpec: FlickerTestParameter) : BaseTest
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                testApp.launchViaIntent(wmHelper)
-            }
+            testApp.launchViaIntent(wmHelper)
         }
         teardown {
-            eachRun {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
         transitions {
             testApp.closeIME(wmHelper)

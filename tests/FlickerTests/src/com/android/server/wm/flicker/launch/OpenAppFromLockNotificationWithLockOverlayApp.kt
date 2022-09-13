@@ -59,26 +59,22 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
             super.transition(this)
 
             setup {
-                eachRun {
-                    device.wakeUpAndGoToHomeScreen()
+                device.wakeUpAndGoToHomeScreen()
 
-                    // Launch an activity that is shown when the device is locked
-                    showWhenLockedApp.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(showWhenLockedApp)
-                        .waitForAndVerify()
+                // Launch an activity that is shown when the device is locked
+                showWhenLockedApp.launchViaIntent(wmHelper)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(showWhenLockedApp)
+                    .waitForAndVerify()
 
-                    device.sleep()
-                    wmHelper.StateSyncBuilder()
-                        .withoutTopVisibleAppWindows()
-                        .waitForAndVerify()
-                }
+                device.sleep()
+                wmHelper.StateSyncBuilder()
+                    .withoutTopVisibleAppWindows()
+                    .waitForAndVerify()
             }
 
             teardown {
-                test {
-                    showWhenLockedApp.exit(wmHelper)
-                }
+                showWhenLockedApp.exit(wmHelper)
             }
         }
 

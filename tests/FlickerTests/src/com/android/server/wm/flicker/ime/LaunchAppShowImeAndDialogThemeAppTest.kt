@@ -55,22 +55,18 @@ class LaunchAppShowImeAndDialogThemeAppTest(
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                testApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withImeShown()
-                    .waitForAndVerify()
-                testApp.startDialogThemedActivity(wmHelper)
-                // Verify IME insets isn't visible on dialog since it's non-IME focusable window
-                assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
-                assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
-                assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
-            }
+            testApp.launchViaIntent(wmHelper)
+            wmHelper.StateSyncBuilder()
+                .withImeShown()
+                .waitForAndVerify()
+            testApp.startDialogThemedActivity(wmHelper)
+            // Verify IME insets isn't visible on dialog since it's non-IME focusable window
+            assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
+            assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
+            assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
         }
         teardown {
-            eachRun {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
         transitions {
             testApp.dismissDialog(wmHelper)
