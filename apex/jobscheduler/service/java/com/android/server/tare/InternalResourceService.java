@@ -578,17 +578,15 @@ public class InternalResourceService extends SystemService {
     void onUserRemoved(final int userId) {
         synchronized (mLock) {
             mVipOverrides.delete(userId);
-            ArrayList<String> removedPkgs = new ArrayList<>();
             final int uIdx = mPkgCache.indexOfKey(userId);
             if (uIdx >= 0) {
                 for (int p = mPkgCache.numElementsForKeyAt(uIdx) - 1; p >= 0; --p) {
                     final InstalledPackageInfo pkgInfo = mPkgCache.valueAt(uIdx, p);
-                    removedPkgs.add(pkgInfo.packageName);
                     mUidToPackageCache.remove(pkgInfo.uid);
                 }
             }
             mPkgCache.delete(userId);
-            mAgent.onUserRemovedLocked(userId, removedPkgs);
+            mAgent.onUserRemovedLocked(userId);
         }
     }
 

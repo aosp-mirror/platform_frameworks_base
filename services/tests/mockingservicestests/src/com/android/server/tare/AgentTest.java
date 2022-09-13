@@ -18,6 +18,7 @@ package com.android.server.tare;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.tare.TareTestUtils.assertLedgersEqual;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -86,6 +87,33 @@ public class AgentTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+    }
+
+    @Test
+    public void testAppRemoval() {
+        final long consumptionLimit = 1_000_000L;
+        final long remainingCakes = consumptionLimit / 2;
+        mScribe.setConsumptionLimitLocked(consumptionLimit);
+        mScribe.adjustRemainingConsumableCakesLocked(remainingCakes - consumptionLimit);
+        assertEquals(remainingCakes, mScribe.getRemainingConsumableCakesLocked());
+
+        final int userId = 0;
+        final String pkgName = "com.test";
+        final Agent agent = new Agent(mIrs, mScribe, mAnalyst);
+        final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+
+        doReturn(consumptionLimit).when(mIrs).getConsumptionLimitLocked();
+        doReturn(consumptionLimit).when(mEconomicPolicy)
+                .getMaxSatiatedBalance(anyInt(), anyString());
+
+        Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 10);
+        agent.recordTransactionLocked(userId, pkgName, ledger, transaction, false);
+        assertEquals(5, ledger.getCurrentBalance());
+        assertEquals(remainingCakes - 10, mScribe.getRemainingConsumableCakesLocked());
+
+        agent.onPackageRemovedLocked(userId, pkgName);
+        assertEquals(remainingCakes - 10, mScribe.getRemainingConsumableCakesLocked());
+        assertLedgersEqual(new Ledger(), mScribe.getLedgerLocked(userId, pkgName));
     }
 
     @Test
