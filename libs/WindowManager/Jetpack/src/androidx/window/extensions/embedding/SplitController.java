@@ -63,6 +63,7 @@ import android.util.Pair;
 import android.util.Size;
 import android.util.SparseArray;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
@@ -191,7 +192,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         onTaskFragmentVanished(wct, info);
                         break;
                     case TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED:
-                        onTaskFragmentParentInfoChanged(wct, taskId, change.getTaskConfiguration());
+                        onTaskFragmentParentInfoChanged(wct, taskId,
+                                change.getTaskFragmentParentInfo());
                         break;
                     case TYPE_TASK_FRAGMENT_ERROR:
                         final Bundle errorBundle = change.getErrorBundle();
@@ -346,12 +348,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      *
      * @param wct   The {@link WindowContainerTransaction} to make any changes with if needed.
      * @param taskId    Id of the parent Task that is changed.
-     * @param parentConfig  Config of the parent Task.
+     * @param parentInfo  {@link TaskFragmentParentInfo} of the parent Task.
      */
     @VisibleForTesting
     @GuardedBy("mLock")
     void onTaskFragmentParentInfoChanged(@NonNull WindowContainerTransaction wct,
-            int taskId, @NonNull Configuration parentConfig) {
+            int taskId, @NonNull TaskFragmentParentInfo parentInfo) {
+        // TODO(b/241043111): handles displayId and visibility here.
+        final Configuration parentConfig = parentInfo.getConfiguration();
         onTaskConfigurationChanged(taskId, parentConfig);
         if (isInPictureInPicture(parentConfig)) {
             // No need to update presentation in PIP until the Task exit PIP.
