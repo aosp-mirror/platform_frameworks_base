@@ -17,12 +17,11 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -32,9 +31,56 @@ import com.android.settingslib.spa.widget.IllustrationModel
 import com.android.settingslib.spa.widget.ResourceType
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+
+private const val TITLE = "Sample Illustration"
 
 object IllustrationPageProvider : SettingsPageProvider {
     override val name = "Illustration"
+
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = SettingsPage.create(name)
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            SettingsEntryBuilder.create( "Lottie Illustration", owner)
+                .setUiLayoutFn {
+                    Preference(object : PreferenceModel {
+                        override val title = "Lottie Illustration"
+                    })
+
+                    Illustration(object : IllustrationModel {
+                        override val resId = R.raw.accessibility_shortcut_type_triple_tap
+                        override val resourceType = ResourceType.LOTTIE
+                    })
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create( "Image Illustration", owner)
+                .setUiLayoutFn {
+                    Preference(object : PreferenceModel {
+                        override val title = "Image Illustration"
+                    })
+
+                    Illustration(object : IllustrationModel {
+                        override val resId = R.drawable.accessibility_captioning_banner
+                        override val resourceType = ResourceType.IMAGE
+                    })
+                }.build()
+        )
+
+        return entryList
+    }
+
+     fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
 
     @Composable
     override fun Page(arguments: Bundle?) {
@@ -43,33 +89,16 @@ object IllustrationPageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = "Sample Illustration"
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 
 @Composable
 private fun IllustrationPage() {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
-        Preference(object : PreferenceModel {
-            override val title = "Lottie Illustration"
-        })
-
-        Illustration(object : IllustrationModel {
-            override val resId = R.raw.accessibility_shortcut_type_triple_tap
-            override val resourceType = ResourceType.LOTTIE
-        })
-
-        Preference(object : PreferenceModel {
-            override val title = "Image Illustration"
-        })
-
-        Illustration(object : IllustrationModel {
-            override val resId = R.drawable.accessibility_captioning_banner
-            override val resourceType = ResourceType.IMAGE
-        })
+    RegularScaffold(title = TITLE) {
+        for (entry in IllustrationPageProvider.buildEntry(arguments = null)) {
+            entry.uiLayout()
+        }
     }
 }
 

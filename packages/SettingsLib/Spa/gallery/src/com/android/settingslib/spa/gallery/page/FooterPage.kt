@@ -20,6 +20,9 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
@@ -34,6 +37,36 @@ private const val TITLE = "Sample Footer"
 object FooterPageProvider : SettingsPageProvider {
     override val name = "Footer"
 
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = SettingsPage.create(name)
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            SettingsEntryBuilder.create( "Some Preference", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    Preference(remember {
+                        object : PreferenceModel {
+                            override val title = "Some Preference"
+                            override val summary = stateOf("Some summary")
+                        }
+                    })
+                }.build()
+        )
+
+        return entryList
+    }
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         FooterPage()
@@ -41,22 +74,16 @@ object FooterPageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = TITLE
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 
 @Composable
 private fun FooterPage() {
     RegularScaffold(title = TITLE) {
-        Preference(remember {
-            object : PreferenceModel {
-                override val title = "Some Preference"
-                override val summary = stateOf("Some summary")
-            }
-        })
+        for (entry in FooterPageProvider.buildEntry(arguments = null)) {
+            entry.uiLayout()
+        }
         Footer(footerText = "Footer text always at the end of page.")
     }
 }

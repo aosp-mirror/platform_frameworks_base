@@ -23,6 +23,9 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
@@ -39,6 +42,52 @@ private const val TITLE = "Sample SwitchPreference"
 object SwitchPreferencePageProvider : SettingsPageProvider {
     override val name = "SwitchPreference"
 
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = SettingsPage.create(name)
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            SettingsEntryBuilder.create( "SwitchPreference", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleSwitchPreference()
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create( "SwitchPreference with summary", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleSwitchPreferenceWithSummary()
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create( "SwitchPreference with async summary", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleSwitchPreferenceWithAsyncSummary()
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create( "SwitchPreference not changeable", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleNotChangeableSwitchPreference()
+                }.build()
+        )
+
+        return entryList
+    }
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         SwitchPreferencePage()
@@ -46,20 +95,16 @@ object SwitchPreferencePageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = TITLE
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 
 @Composable
 private fun SwitchPreferencePage() {
     RegularScaffold(title = TITLE) {
-        SampleSwitchPreference()
-        SampleSwitchPreferenceWithSummary()
-        SampleSwitchPreferenceWithAsyncSummary()
-        SampleNotChangeableSwitchPreference()
+        for (entry in SwitchPreferencePageProvider.buildEntry(arguments = null)) {
+            entry.uiLayout()
+        }
     }
 }
 
