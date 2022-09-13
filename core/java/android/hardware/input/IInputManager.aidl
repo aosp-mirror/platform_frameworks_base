@@ -21,6 +21,7 @@ import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputDeviceBatteryListener;
+import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
@@ -110,9 +111,7 @@ interface IInputManager {
     boolean registerVibratorStateListener(int deviceId, in IVibratorStateListener listener);
     boolean unregisterVibratorStateListener(int deviceId, in IVibratorStateListener listener);
 
-    // Input device battery query.
-    int getBatteryStatus(int deviceId);
-    int getBatteryCapacity(int deviceId);
+    IInputDeviceBatteryState getBatteryState(int deviceId);
 
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);

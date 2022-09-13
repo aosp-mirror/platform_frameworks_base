@@ -112,7 +112,13 @@ class InputDeviceBatteryListenerTest {
         capacity: Float = 1.0f,
         eventTime: Long = 12345L
     ) {
-        registeredListener!!.onBatteryStateChanged(deviceId, isPresent, status, capacity, eventTime)
+        registeredListener!!.onBatteryStateChanged(IInputDeviceBatteryState().apply {
+            this.deviceId = deviceId
+            this.updateTime = eventTime
+            this.isPresent = isPresent
+            this.status = status
+            this.capacity = capacity
+        })
     }
 
     @Test

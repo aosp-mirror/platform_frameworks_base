@@ -1308,32 +1308,6 @@ public final class InputManager {
     }
 
     /**
-     * Get the battery status of the input device
-     * @param deviceId The input device ID
-     * @hide
-     */
-    public int getBatteryStatus(int deviceId) {
-        try {
-            return mIm.getBatteryStatus(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the remaining battery capacity of the input device
-     * @param deviceId The input device ID
-     * @hide
-     */
-    public int getBatteryCapacity(int deviceId) {
-        try {
-            return mIm.getBatteryCapacity(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
      * @param inputPort The port of the input device.
@@ -1622,8 +1596,17 @@ public final class InputManager {
      * @return The battery, never null.
      * @hide
      */
-    public InputDeviceBatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
-        return new InputDeviceBatteryState(this, deviceId, hasBattery);
+    @NonNull
+    public BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
+        if (!hasBattery) {
+            return new LocalBatteryState();
+        }
+        try {
+            final IInputDeviceBatteryState state = mIm.getBatteryState(deviceId);
+            return new LocalBatteryState(state.isPresent, state.status, state.capacity);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1767,8 +1750,8 @@ public final class InputManager {
             listenersForDevice.mDelegates.add(delegate);
 
             // Notify the listener immediately if we already have the latest battery state.
-            if (listenersForDevice.mLatestBatteryState != null) {
-                delegate.notifyBatteryStateChanged(listenersForDevice.mLatestBatteryState);
+            if (listenersForDevice.mInputDeviceBatteryState != null) {
+                delegate.notifyBatteryStateChanged(listenersForDevice.mInputDeviceBatteryState);
             }
         }
     }
@@ -1952,20 +1935,21 @@ public final class InputManager {
         }
     }
 
+    // Implementation of the android.hardware.BatteryState interface used to report the battery
+    // state via the InputDevice#getBatteryState() and InputDeviceBatteryListener interfaces.
     private static final class LocalBatteryState extends BatteryState {
-        final int mDeviceId;
-        final boolean mIsPresent;
-        final int mStatus;
-        final float mCapacity;
-        final long mEventTime;
+        private final boolean mIsPresent;
+        private final int mStatus;
+        private final float mCapacity;
 
-        LocalBatteryState(int deviceId, boolean isPresent, int status, float capacity,
-                long eventTime) {
-            mDeviceId = deviceId;
+        LocalBatteryState() {
+            this(false /*isPresent*/, BatteryState.STATUS_UNKNOWN, Float.NaN /*capacity*/);
+        }
+
+        LocalBatteryState(boolean isPresent, int status, float capacity) {
             mIsPresent = isPresent;
             mStatus = status;
             mCapacity = capacity;
-            mEventTime = eventTime;
         }
 
         @Override
@@ -1986,7 +1970,7 @@ public final class InputManager {
 
     private static final class RegisteredBatteryListeners {
         final List<InputDeviceBatteryListenerDelegate> mDelegates = new ArrayList<>();
-        LocalBatteryState mLatestBatteryState;
+        IInputDeviceBatteryState mInputDeviceBatteryState;
     }
 
     private static final class InputDeviceBatteryListenerDelegate {
@@ -1998,27 +1982,24 @@ public final class InputManager {
             mExecutor = executor;
         }
 
-        void notifyBatteryStateChanged(LocalBatteryState batteryState) {
+        void notifyBatteryStateChanged(IInputDeviceBatteryState state) {
             mExecutor.execute(() ->
-                    mListener.onBatteryStateChanged(batteryState.mDeviceId, batteryState.mEventTime,
-                            batteryState));
+                    mListener.onBatteryStateChanged(state.deviceId, state.updateTime,
+                            new LocalBatteryState(state.isPresent, state.status, state.capacity)));
         }
     }
 
     private class LocalInputDeviceBatteryListener extends IInputDeviceBatteryListener.Stub {
         @Override
-        public void onBatteryStateChanged(int deviceId, boolean isBatteryPresent, int status,
-                float capacity, long eventTime) {
+        public void onBatteryStateChanged(IInputDeviceBatteryState state) {
             synchronized (mBatteryListenersLock) {
                 if (mBatteryListeners == null) return;
-                final RegisteredBatteryListeners entry = mBatteryListeners.get(deviceId);
+                final RegisteredBatteryListeners entry = mBatteryListeners.get(state.deviceId);
                 if (entry == null) return;
 
-                entry.mLatestBatteryState =
-                        new LocalBatteryState(
-                                deviceId, isBatteryPresent, status, capacity, eventTime);
+                entry.mInputDeviceBatteryState = state;
                 for (InputDeviceBatteryListenerDelegate delegate : entry.mDelegates) {
-                    delegate.notifyBatteryStateChanged(entry.mLatestBatteryState);
+                    delegate.notifyBatteryStateChanged(entry.mInputDeviceBatteryState);
                 }
             }
         }
