@@ -572,7 +572,7 @@ final class DeletePackageHelper {
         if (deleteCodeAndResources && (outInfo != null)) {
             outInfo.mArgs = new InstallArgs(
                     ps.getPathString(), getAppDexInstructionSets(
-                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()), mPm);
+                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
         }
     }
