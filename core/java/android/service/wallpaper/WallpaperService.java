@@ -519,7 +519,7 @@ public abstract class WallpaperService extends Service {
          * {@link #addLocalColorsAreas(List)}
          * {@link #removeLocalColorsAreas(List)}
          * When local colors change, call {@link #notifyLocalColorsChanged(List, List)}
-         * See {@link com.android.systemui.ImageWallpaper} for an example
+         * See {@link com.android.systemui.wallpapers.ImageWallpaper} for an example
          * @hide
          */
         public boolean supportsLocalColorExtraction() {
