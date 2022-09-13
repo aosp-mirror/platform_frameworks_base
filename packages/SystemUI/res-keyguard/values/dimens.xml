@@ -44,10 +44,6 @@
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 
-    <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
-         Should be 0 on devices with plenty of room (e.g. tablets) -->
-    <dimen name="eca_overlap">-10dip</dimen>
-
     <!-- Slice header -->
     <dimen name="widget_title_font_size">20dp</dimen>
     <dimen name="widget_title_line_height">24dp</dimen>
