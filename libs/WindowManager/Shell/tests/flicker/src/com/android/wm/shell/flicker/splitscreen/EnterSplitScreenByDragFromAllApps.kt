@@ -50,7 +50,6 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromAllApps`
  */
-@IwTest(focusArea = "sysui")
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -81,6 +80,7 @@ class EnterSplitScreenByDragFromAllApps(
             }
         }
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun splitScreenDividerBecomesVisible() {
@@ -89,6 +89,7 @@ class EnterSplitScreenByDragFromAllApps(
     }
 
     // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
@@ -98,10 +99,12 @@ class EnterSplitScreenByDragFromAllApps(
         }
     }
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() {
@@ -125,20 +128,24 @@ class EnterSplitScreenByDragFromAllApps(
         testSpec.layerBecomesVisible(secondaryApp)
     }
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
         secondaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)

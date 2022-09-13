@@ -46,7 +46,6 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest WMShellFlickerTests:DismissSplitScreenByDivider`
  */
-@IwTest(focusArea = "sysui")
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -74,23 +73,28 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
             }
         }
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun splitScreenDividerBecomesInvisible() = testSpec.splitScreenDividerBecomesInvisible()
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(secondaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
         primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppBoundsIsFullscreenAtEnd() {
@@ -113,10 +117,12 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
         }
     }
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun primaryAppWindowBecomesInvisible() = testSpec.appWindowBecomesInvisible(primaryApp)
 
+    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(secondaryApp)
