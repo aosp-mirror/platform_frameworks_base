@@ -51,6 +51,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Introduza o PUK2 para desbloquear o cartão SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Ação sem êxito. Ative o bloqueio do SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
+      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar bloqueado.</item>
       <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
     </plurals>
@@ -180,7 +181,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"O armazenamento de visualizações está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"O armazenamento do dispositivo Android TV está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"O armazenamento do telemóvel está cheio. Elimine alguns ficheiros para libertar espaço."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autoridade de certificação instalada}other{Autoridades de certificação instaladas}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autoridade de certificação instalada}many{Autoridades de certificação instaladas}other{Autoridades de certificação instaladas}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Por um terceiro desconhecido"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Pelo gestor do seu perfil de trabalho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -254,7 +255,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilize esta opção na maioria das circunstâncias. Permite monitorizar o progresso do relatório, introduzir mais detalhes acerca do problema e tirar capturas de ecrã. Pode omitir algumas secções menos utilizadas que demoram muito tempo a comunicar."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Relatório completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilize esta opção para uma interferência mínima do sistema quando o dispositivo não responder ou estiver demasiado lento, ou quando precisar de todas as secções de relatório. Não permite introduzir mais detalhes ou tirar capturas de ecrã adicionais."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{A fazer uma captura de ecrã do relatório de erro dentro de # segundo.}other{A fazer uma captura de ecrã do relatório de erro dentro de # segundos.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{A fazer uma captura de ecrã do relatório de erro dentro de # segundo.}many{A fazer uma captura de ecrã do relatório de erro dentro de # segundos.}other{A fazer uma captura de ecrã do relatório de erro dentro de # segundos.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Captura de ecrã tirada com o relatório de erro."</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Falha ao fazer captura de ecrã com o relatório de erro."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
@@ -1079,7 +1080,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> pretende ativar a funcionalidade Explorar Através do Toque. Quando a funcionalidade Explorar Através do Toque estiver ativada, pode ouvir ou visualizar descrições sobre o que está por baixo do seu dedo ou executar gestos para interagir com o telemóvel."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Há 1 mês"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Há mais de 1 mês"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dia anterior}other{# dias anteriores}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dia anterior}many{# dias anteriores}other{# dias anteriores}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Último mês"</string>
     <string name="older" msgid="1645159827884647400">"Mais antiga"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"a <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1106,14 +1107,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"em <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"em <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"em <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}other{Há # minutos}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Há # hora}other{Há # horas}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}other{Há # dias}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Há # ano}other{Há # anos}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}other{# minutos}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}other{# horas}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}other{# dias}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ano}other{# anos}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}many{Há # minutos}other{Há # minutos}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Há # hora}many{Há # horas}other{Há # horas}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}many{Há # dias}other{Há # dias}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Há # ano}many{Há # anos}other{Há # anos}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}many{# horas}other{# horas}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}many{# dias}other{# dias}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ano}many{# anos}other{# anos}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problema com o vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Este vídeo não é válido para transmissão neste aparelho."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Não é possível reproduzir este vídeo."</string>
@@ -1420,7 +1421,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"Explorar"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Saída do interruptor"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> em falta"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Volte a inserir o dispositivo."</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Volte a inserir o dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"A mover <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"A mover dados"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Transf. de conteúdo concluída"</string>
@@ -1501,7 +1502,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ignorar"</string>
     <string name="no_matches" msgid="6472699895759164599">"Sem correspondências"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Localizar na página"</string>
-    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# correspondência}other{# de {total}}}"</string>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# correspondência}many{# de {total}}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Concluído"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"A apagar o armazenamento partilhado…"</string>
     <string name="share" msgid="4157615043345227321">"Partilhar"</string>
@@ -1854,14 +1855,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durante 1 min (até à[s] {formattedTime})}other{Durante # min (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durante 1 hora (até à[s] {formattedTime})}other{Durante # horas (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durante 1 h (até à[s] {formattedTime})}other{Durante # h (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durante um minuto}other{Durante # minutos}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durante 1 min}other{Durante # min}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}other{Durante # horas}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}other{Durante # h}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}many{Durante # minutos (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durante 1 min (até à[s] {formattedTime})}many{Durante # min (até à[s] {formattedTime})}other{Durante # min (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durante 1 hora (até à[s] {formattedTime})}many{Durante # horas (até à[s] {formattedTime})}other{Durante # horas (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durante 1 h (até à[s] {formattedTime})}many{Durante # h (até à[s] {formattedTime})}other{Durante # h (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durante um minuto}many{Durante # minutos}other{Durante # minutos}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durante 1 min}many{Durante # min}other{Durante # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}many{Durante # horas}other{Durante # horas}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}many{Durante # h}other{Durante # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
@@ -1990,7 +1991,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Guardar para o Preenchimento automático"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Não é possível preencher automaticamente o conteúdo"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Sem sugestões do preenchimento automático"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Uma sugestão do preenchimento automático}other{# sugestões de preenchimento automático}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Uma sugestão do preenchimento automático}many{# sugestões de preenchimento automático}other{# sugestões de preenchimento automático}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Pretende guardar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Pretende guardar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Pretende guardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2100,7 +2101,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Apresentação <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"O Bluetooth continuará ativado durante o modo de avião."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"A carregar…"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}other{{file_name} + # ficheiros}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}many{{file_name} + # ficheiros}other{{file_name} + # ficheiros}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Não existem pessoas recomendadas com quem partilhar"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicações"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
