@@ -16,20 +16,14 @@
 
 package android.credentials;
 
-import android.credentials.CreateCredentialRequest;
-import android.credentials.GetCredentialRequest;
-import android.credentials.ICreateCredentialCallback;
-import android.credentials.IGetCredentialCallback;
-import android.os.ICancellationSignal;
+import android.credentials.CreateCredentialResponse;
 
 /**
- * System private interface for talking to the credential manager service.
+ * Listener for an executeCreateCredential request.
  *
  * @hide
  */
-interface ICredentialManager {
-
-    @nullable ICancellationSignal executeGetCredential(in GetCredentialRequest request, in IGetCredentialCallback callback);
-
-    @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback);
+interface ICreateCredentialCallback {
+    oneway void onResponse(in CreateCredentialResponse response);
+    oneway void onError(int errorCode, String message);
 }

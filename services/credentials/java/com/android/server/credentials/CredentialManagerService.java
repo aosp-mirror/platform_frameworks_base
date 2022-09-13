@@ -16,10 +16,18 @@
 
 package com.android.server.credentials;
 
+import static android.content.Context.CREDENTIAL_SERVICE;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.credentials.CreateCredentialRequest;
+import android.credentials.GetCredentialRequest;
+import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
+import android.credentials.IGetCredentialCallback;
+import android.os.CancellationSignal;
+import android.os.ICancellationSignal;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -59,11 +67,17 @@ public final class CredentialManagerService extends
     @Override
     public void onStart() {
         Log.i(TAG, "onStart");
+        publishBinderService(CREDENTIAL_SERVICE, new CredentialManagerServiceStub());
     }
 
     final class CredentialManagerServiceStub extends ICredentialManager.Stub {
         @Override
-        public void getCredential() {
+        public ICancellationSignal executeGetCredential(
+                GetCredentialRequest request,
+                IGetCredentialCallback callback) {
+            // TODO: implement.
+            Log.i(TAG, "executeGetCredential");
+
             final int userId = UserHandle.getCallingUserId();
             synchronized (mLock) {
                 final CredentialManagerServiceImpl service = peekServiceForUserLocked(userId);
@@ -72,6 +86,19 @@ public final class CredentialManagerService extends
                     service.getCredential();
                 }
             }
+
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+            return cancelTransport;
+        }
+
+        @Override
+        public ICancellationSignal executeCreateCredential(
+                CreateCredentialRequest request,
+                ICreateCredentialCallback callback) {
+            // TODO: implement.
+            Log.i(TAG, "executeCreateCredential");
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+            return cancelTransport;
         }
     }
 }
