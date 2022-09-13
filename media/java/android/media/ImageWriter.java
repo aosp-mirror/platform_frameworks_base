@@ -29,7 +29,6 @@ import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
 import android.hardware.SyncFence;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -266,31 +265,11 @@ public class ImageWriter implements AutoCloseable {
             // nativeInit internally overrides UNKNOWN format. So does surface format query after
             // nativeInit and before getEstimatedNativeAllocBytes().
             imageFormat = SurfaceUtils.getSurfaceFormat(surface);
-            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
-            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+            mDataSpace = dataSpace = PublicFormatUtils.getHalDataspace(dataSpace);
+            mHardwareBufferFormat =
+                hardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
         }
 
-        // Several public formats use the same native HAL_PIXEL_FORMAT_BLOB. The native
-        // allocation estimation sequence depends on the public formats values. To avoid
-        // possible errors, convert where necessary.
-        if (imageFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) {
-            int surfaceDataspace = SurfaceUtils.getSurfaceDataspace(surface);
-            switch (surfaceDataspace) {
-                case StreamConfigurationMap.HAL_DATASPACE_DEPTH:
-                    imageFormat = ImageFormat.DEPTH_POINT_CLOUD;
-                    break;
-                case StreamConfigurationMap.HAL_DATASPACE_DYNAMIC_DEPTH:
-                    imageFormat = ImageFormat.DEPTH_JPEG;
-                    break;
-                case StreamConfigurationMap.HAL_DATASPACE_HEIF:
-                    imageFormat = ImageFormat.HEIC;
-                    break;
-                default:
-                    imageFormat = ImageFormat.JPEG;
-            }
-            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
-            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
-        }
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue
         // itself and the buffers requested by the producer.
@@ -301,17 +280,44 @@ public class ImageWriter implements AutoCloseable {
         mWidth = width == -1 ? surfSize.getWidth() : width;
         mHeight = height == -1 ? surfSize.getHeight() : height;
 
-        mEstimatedNativeAllocBytes =
-            ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
-                useLegacyImageFormat ? imageFormat : hardwareBufferFormat, /*buffer count*/ 1);
+        if (hardwareBufferFormat == HardwareBuffer.BLOB) {
+            // TODO(b/246344817): remove mWriterFormat and mDataSpace re-set here after fixing.
+            mWriterFormat = imageFormat = getImageFormatByBLOB(dataSpace);
+            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+
+            mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
+                imageFormat, /*buffer count*/ 1);
+        } else {
+            mEstimatedNativeAllocBytes =
+                ImageUtils.getEstimatedNativeAllocBytes(mWidth, mHeight,
+                    useLegacyImageFormat ? imageFormat : hardwareBufferFormat, /*buffer count*/ 1);
+        }
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
+    }
+
+    // Several public formats use the same native HAL_PIXEL_FORMAT_BLOB. The native
+    // allocation estimation sequence depends on the public formats values. To avoid
+    // possible errors, convert where necessary.
+    private int getImageFormatByBLOB(int dataspace) {
+        switch (dataspace) {
+            case DataSpace.DATASPACE_DEPTH:
+                return ImageFormat.DEPTH_POINT_CLOUD;
+            case DataSpace.DATASPACE_DYNAMIC_DEPTH:
+                return ImageFormat.DEPTH_JPEG;
+            case DataSpace.DATASPACE_HEIF:
+                return ImageFormat.HEIC;
+            default:
+                return ImageFormat.JPEG;
+        }
     }
 
     private ImageWriter(Surface surface, int maxImages, boolean useSurfaceImageFormatInfo,
             int imageFormat, int width, int height) {
         mMaxImages = maxImages;
-        mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
-        mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+        if (!useSurfaceImageFormatInfo) {
+            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
+            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+        }
 
         initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo, true,
                 imageFormat, mHardwareBufferFormat, mDataSpace, width, height, mUsage);
@@ -321,8 +327,10 @@ public class ImageWriter implements AutoCloseable {
             int imageFormat, int width, int height, long usage) {
         mMaxImages = maxImages;
         mUsage = usage;
-        mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
-        mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+        if (!useSurfaceImageFormatInfo) {
+            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
+            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+        }
 
         initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo, true,
                 imageFormat, mHardwareBufferFormat, mDataSpace, width, height, usage);
@@ -337,8 +345,6 @@ public class ImageWriter implements AutoCloseable {
         // and retrieve corresponding hardwareBufferFormat and dataSpace here.
         if (useSurfaceImageFormatInfo) {
             imageFormat = ImageFormat.UNKNOWN;
-            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
-            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
         } else {
             imageFormat = PublicFormatUtils.getPublicFormat(hardwareBufferFormat, dataSpace);
             mHardwareBufferFormat = hardwareBufferFormat;

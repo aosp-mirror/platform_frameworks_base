@@ -16896,6 +16896,7 @@ package android.hardware {
     field public static final int DATASPACE_DEPTH = 4096; // 0x1000
     field public static final int DATASPACE_DISPLAY_P3 = 143261696; // 0x88a0000
     field public static final int DATASPACE_DYNAMIC_DEPTH = 4098; // 0x1002
+    field public static final int DATASPACE_HEIF = 4100; // 0x1004
     field public static final int DATASPACE_JFIF = 146931712; // 0x8c20000
     field public static final int DATASPACE_SCRGB = 411107328; // 0x18810000
     field public static final int DATASPACE_SCRGB_LINEAR = 406913024; // 0x18410000
