@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ຍົກ​ເລີກ​ການ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ແລ້ວ."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ຜູ້ໃຊ້ໄດ້ຍົກເລີກຄຳສັ່ງລາຍນິ້ວມືແລ້ວ."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ມີ​ຄວາມ​ພະ​ຍາ​ຍາມ​ຫຼາຍ​ຄັ້ງ​ເກີນ​ໄປ. ລອງ​ໃໝ່​ພາຍ​ຫຼັງ."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາໃຊ້ການລອກໜ້າຈໍແທນ."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ລອງໃໝ່ອີກຄັ້ງ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ບໍ່ມີການລົງທະບຽນລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ກະລຸນາໄປຫາຜູ້ໃຫ້ບໍລິການສ້ອມແປງ."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ບໍ່ສາມາດສ້າງຮູບແບບໃບໜ້າຂອງທ່ານໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ແຈ້ງເກີນໄປ. ລອງຄ່ອຍແສງໄຟລົງ."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ກະລຸນາລອງໃຊ້ສະພາບແສງທີ່ແຈ້ງຂຶ້ນ"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ເລື່ອນໂທລະສັບອອກໄປໄກຂຶ້ນ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ເລື່ອນໂທລະສັບເຂົ້າໄປໃກ້ຂຶ້ນ"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ຍົກໂທລະສັບໃຫ້ສູງຂຶ້ນ"</string>

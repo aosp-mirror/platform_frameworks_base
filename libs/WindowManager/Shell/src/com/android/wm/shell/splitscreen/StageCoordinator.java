@@ -1887,7 +1887,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // properly for the animation itself.
             mSplitLayout.release();
             mSplitLayout.resetDividerPosition();
-            mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT;
             mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         }
     }

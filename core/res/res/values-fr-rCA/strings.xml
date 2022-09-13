@@ -52,6 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Opération infructueuse. Activez le verrouillage SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée.</item>
+      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IIEM"</string>
@@ -180,7 +181,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"La mémoire de la montre est pleine. Supprimez des fichiers pour libérer de l\'espace."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"L\'espace de stockage de l\'appareil Android TV est plein. Supprimez des fichiers pour libérer de l\'espace."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"La mémoire du téléphone est pleine. Veuillez supprimer des fichiers pour libérer de l\'espace."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autorité de certification installée}one{Autorité de certification installée}other{Autorités de certification installées}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autorité de certification installée}one{Autorité de certification installée}many{Autorités de certification installées}other{Autorités de certification installées}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Par un tiers inconnu"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Par l\'administrateur de votre profil professionnel"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Par <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -254,7 +255,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilisez cette option dans la plupart des circonstances. Elle vous permet de suivre la progression du rapport, d\'entrer plus d\'information sur le problème et d\'effectuer des saisies d\'écran. Certaines sections moins utilisées et dont le remplissage demande beaucoup de temps peuvent être omises."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Rapport complet"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilisez cette option pour qu\'il y ait le moins d\'interférences système possible lorsque votre appareil ne répond pas ou qu\'il est trop lent, ou lorsque vous avez besoin de toutes les sections du rapport de bogue. Aucune capture d\'écran supplémentaire ne peut être capturée, et vous ne pouvez entrer aucune autre information."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Saisie d\'une capture d\'écran pour le rapport de bogue dans # seconde.}one{Saisie d\'une capture d\'écran pour le rapport de bogue dans # seconde.}other{Saisie d\'une capture d\'écran pour le rapport de bogue dans # secondes.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Saisie d\'une capture d\'écran pour le rapport de bogue dans # seconde.}one{Saisie d\'une capture d\'écran pour le rapport de bogue dans # seconde.}many{Saisie d\'une capture d\'écran pour le rapport de bogue dans # secondes.}other{Saisie d\'une capture d\'écran pour le rapport de bogue dans # secondes.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Capture d\'écran prise avec le rapport de bogue"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Échec de la prise de capture d\'écran avec le rapport de bogue"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mode silencieux"</string>
@@ -608,8 +609,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale numérique annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'opération d\'empreinte digitale a été annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Trop de tentatives. Veuillez réessayer plus tard."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Trop de tentatives. Utilisez plutôt le verrouillage de l\'écran."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Réessayer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Aucune empreinte digitale enregistrée."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Cet appareil ne possède pas de capteur d\'empreintes digitales."</string>
@@ -638,7 +638,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Consultez un fournisseur de services de réparation."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Impossible de créer votre modèle facial. Réessayez."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Trop lumineux. Essayez un éclairage plus faible."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Essayez avec un éclairage plus fort"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Éloignez le téléphone"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Rapprochez le téléphone"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Tenez le téléphone plus haut"</string>
@@ -1088,7 +1089,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> souhaite activer la fonctionnalité \"Explorer au toucher\". Lorsque celle-ci est activée, vous pouvez entendre ou voir les descriptions des éléments que vous sélectionnez, ou bien interagir avec le téléphone en effectuant certains gestes."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Il y a 1 mois"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Il y a plus d\'un mois"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dernier jour}one{# dernier jour}other{# derniers jours}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dernier jour}one{# dernier jour}many{# derniers jours}other{# derniers jours}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Le mois dernier"</string>
     <string name="older" msgid="1645159827884647400">"Précédent"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"le <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1115,14 +1116,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"dans <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"dans <xliff:g id="COUNT">%d</xliff:g> j"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"dans <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Il y a # minute}one{Il y a # minute}other{Il y a # minutes}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Il y a # heure}one{Il y a # heure}other{Il y a # heures}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Il y a # jour}one{Il y a # jour}other{Il y a # jours}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Il y a # an}one{Il y a # an}other{Il y a # ans}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minute}one{# minute}other{# minutes}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# heure}one{# heure}other{# heures}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# jour}one{# jour}other{# jours}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# an}one{# an}other{# ans}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Il y a # minute}one{Il y a # minute}many{Il y a # minutes}other{Il y a # minutes}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Il y a # heure}one{Il y a # heure}many{Il y a # heures}other{Il y a # heures}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Il y a # jour}one{Il y a # jour}many{Il y a # jours}other{Il y a # jours}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Il y a # an}one{Il y a # an}many{Il y a # ans}other{Il y a # ans}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minute}one{# minute}many{# minutes}other{# minutes}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# heure}one{# heure}many{# heures}other{# heures}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# jour}one{# jour}many{# jours}other{# jours}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# an}one{# an}many{# ans}other{# ans}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problème vidéo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Impossible de lire cette vidéo en continu sur cet appareil."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Impossible de lire la vidéo."</string>
@@ -1509,7 +1510,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ignorer"</string>
     <string name="no_matches" msgid="6472699895759164599">"Aucune partie"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Rechercher sur la page"</string>
-    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# correspondance}one{# sur {total}}other{# sur {total}}}"</string>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# correspondance}one{# sur {total}}many{# sur {total}}other{# sur {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Terminé"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Effacement du stockage partagé en cours…"</string>
     <string name="share" msgid="4157615043345227321">"Partager"</string>
@@ -1862,14 +1863,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Pour aider à diminuer l\'utilisation des données, la fonctionnalité Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Pendant une minute (jusqu\'à {formattedTime})}one{Pendant # minute (jusqu\'à {formattedTime})}other{Pendant # minutes (jusqu\'à {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Pendant 1 m (jusqu\'à {formattedTime})}one{Pendant # m (jusqu\'à {formattedTime})}other{Pendant # m (jusqu\'à {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Pendant 1 heure (jusqu\'à {formattedTime})}one{Pendant # heure (jusqu\'à {formattedTime})}other{Pendant # heures (jusqu\'à {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Pendant 1 h (jusqu\'à {formattedTime})}one{Pendant # h (jusqu\'à {formattedTime})}other{Pendant # h (jusqu\'à {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Pendant une minute}one{Pendant # minute}other{Pendant # minutes}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Pendant 1 m}one{Pendant # m}other{Pendant # m}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Pendant 1 heure}one{Pendant # heure}other{Pendant # heures}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Pendant 1 h}one{Pendant # h}other{Pendant # h}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Pendant une minute (jusqu\'à {formattedTime})}one{Pendant # minute (jusqu\'à {formattedTime})}many{Pendant # minutes (jusqu\'à {formattedTime})}other{Pendant # minutes (jusqu\'à {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Pendant 1 m (jusqu\'à {formattedTime})}one{Pendant # m (jusqu\'à {formattedTime})}many{Pendant # m (jusqu\'à {formattedTime})}other{Pendant # m (jusqu\'à {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Pendant 1 heure (jusqu\'à {formattedTime})}one{Pendant # heure (jusqu\'à {formattedTime})}many{Pendant # heures (jusqu\'à {formattedTime})}other{Pendant # heures (jusqu\'à {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Pendant 1 h (jusqu\'à {formattedTime})}one{Pendant # h (jusqu\'à {formattedTime})}many{Pendant # h (jusqu\'à {formattedTime})}other{Pendant # h (jusqu\'à {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Pendant une minute}one{Pendant # minute}many{Pendant # minutes}other{Pendant # minutes}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Pendant 1 m}one{Pendant # m}many{Pendant # m}other{Pendant # m}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Pendant 1 heure}one{Pendant # heure}many{Pendant # heures}other{Pendant # heures}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Pendant 1 h}one{Pendant # h}many{Pendant # h}other{Pendant # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarme suivante)"</string>
@@ -2000,7 +2001,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Enregistrer pour le remplissage automatique"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Le contenu ne peut pas être entré automatiquement"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Aucune suggestion de remplissage automatique"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Une suggestion de remplissage automatique}one{# suggestion de remplissage automatique}other{# suggestions de remplissage automatique}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Une suggestion de remplissage automatique}one{# suggestion de remplissage automatique}many{# suggestions de remplissage automatique}other{# suggestions de remplissage automatique}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Enregistrer sous "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer <xliff:g id="TYPE">%1$s</xliff:g> sous "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g> et <xliff:g id="TYPE_1">%2$s</xliff:g> sous "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2110,7 +2111,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Présentation <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Le Bluetooth restera activé en mode Avion"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Chargement en cours…"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fichier}one{{file_name} + # fichier}other{{file_name} + # fichiers}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fichier}one{{file_name} + # fichier}many{{file_name} + # fichiers}other{{file_name} + # fichiers}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Aucune recommandation de personnes avec lesquelles effectuer un partage"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste des applications"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Cette application n\'a pas été autorisée à effectuer des enregistrements, mais elle pourrait capturer du contenu audio par l\'intermédiaire de cet appareil USB."</string>

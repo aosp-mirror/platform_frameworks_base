@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ប្រតិបត្តិការ​ស្នាម​ម្រាម​ដៃ​ត្រូវ​បាន​បោះ​បង់​ដោយ​អ្នក​ប្រើប្រាស់។"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ព្យាយាម​ច្រើនដងពេក។ សូមប្រើការចាក់សោ​អេក្រង់ជំនួសវិញ។"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"មិន​មាន​ការ​ចុះឈ្មោះស្នាម​ម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ។"</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ទាក់ទងក្រុមហ៊ុន​ផ្ដល់ការជួសជុល។"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ភ្លឺពេក។ សូមសាកល្បង​ប្រើ​ពន្លឺស្រាលជាងនេះ។"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"សាកល្បងប្រើ​ពន្លឺភ្លឺជាងនេះ"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ដាក់​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ដាក់​ទូរសព្ទ​ឱ្យជិត​ជាងមុន"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ដាក់​ទូរសព្ទ​ឱ្យខ្ពស់​ជាងមុន"</string>

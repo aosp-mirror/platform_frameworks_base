@@ -161,10 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"മുഖം തിരിച്ചറിയാനായില്ല. പകരം ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കൂ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
-    <skip />
-    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"മുഖം തിരിച്ചറിയാനാകുന്നില്ല"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"പകരം ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കൂ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്തു."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ബാറ്ററി ശതമാനം അജ്ഞാതമാണ്."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
@@ -423,10 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"അടിക്കുറിപ്പുകൾ മുകളിൽ വയ്ക്കുക"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <!-- no translation found for sound_settings (8874581353127418308) -->
-    <skip />
-    <!-- no translation found for volume_panel_dialog_settings_button (2513228491513390310) -->
-    <skip />
+    <string name="sound_settings" msgid="8874581353127418308">"ശബ്‌ദവും വൈബ്രേഷനും"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ക്രമീകരണം"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ആപ്പ് പിൻ ചെയ്തു"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ\', \'ചുരുക്കവിവരണം\' എന്നിവ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക."</string>
@@ -602,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"ഓൺ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ഓഫ്"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ലഭ്യമല്ല"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"പ്രവർത്തനരഹിതമാക്കി"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"നാവിഗേഷൻ ബാർ"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ലേ‌ഔട്ട്"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"അധിക ഇടത് ബട്ടൺ തരം"</string>
@@ -675,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ഫോൺ തണുത്തുകൊണ്ടിരിക്കുമ്പോൾ ചില ഫീച്ചറുകൾ പരിമിതപ്പെടുത്തപ്പെടും.\nകൂടുതൽ വിവരങ്ങൾക്ക് ടാപ്പ് ചെയ്യുക"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"നിങ്ങളുടെ ഫോൺ സ്വയമേവ തണുക്കാൻ ശ്രമിക്കും. നിങ്ങൾക്ക് അപ്പോഴും ഫോൺ ഉപയോഗിക്കാമെങ്കിലും പ്രവർത്തനം മന്ദഗതിയിലായിരിക്കും.\n\nതണുത്തുകഴിഞ്ഞാൽ, ഫോൺ സാധാരണ ഗതിയിൽ പ്രവർത്തിക്കും."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"പരിപാലന നിർദ്ദേശങ്ങൾ കാണുക"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"ചാർജർ അൺപ്ലഗ് ചെയ്യുക"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ഈ ഉപകരണം ചാർജ് ചെയ്യുന്നതിൽ തടസ്സമുണ്ട്. പവർ അഡാപ്റ്റർ അൺപ്ലഗ് ചെയ്യുക, കേബിളിന് ചൂടുണ്ടായിരിക്കുമെന്നതിനാൽ ശ്രദ്ധിക്കണം."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"മുൻകരുതൽ നടപടികൾ കാണുക"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"ഇടത് കുറുക്കുവഴി"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"വലത് കുറുക്കുവഴി"</string>

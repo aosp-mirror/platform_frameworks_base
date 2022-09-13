@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"कॅमेराशी संबंधित काही समस्या आहेत का?\nपुन्हा फिट करण्यासाठी टॅप करा"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"निराकरण झाले नाही?\nरिव्हर्ट करण्यासाठी कृपया टॅप करा"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"कॅमेराशी संबंधित कोणत्याही समस्या नाहीत का? डिसमिस करण्‍यासाठी टॅप करा."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"पहा आणि आणखी बरेच काही करा"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"स्प्लिट-स्क्रीन वापरण्यासाठी दुसऱ्या ॲपमध्ये ड्रॅग करा"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ॲपची स्थिती पुन्हा बदलण्यासाठी, त्याच्या बाहेर दोनदा टॅप करा"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"समजले"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"अधिक माहितीसाठी विस्तार करा."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"मोठे करा"</string>

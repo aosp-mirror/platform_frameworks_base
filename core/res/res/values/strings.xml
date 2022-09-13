@@ -1696,7 +1696,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
+    <string name="fingerprint_acquired_insufficient">Can\u2019t recognize fingerprint. Try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
     <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
@@ -1732,17 +1732,17 @@
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
     <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
-    <string name="fingerprint_error_timeout">Fingerprint time out reached. Try again.</string>
+    <string name="fingerprint_error_timeout">Fingerprint setup timed out. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
     <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
     <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
     <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
-    <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
+    <string name="fingerprint_error_lockout">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
     <string name="fingerprint_error_lockout_permanent">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
-    <string name="fingerprint_error_unable_to_process">Try again.</string>
+    <string name="fingerprint_error_unable_to_process">Can\u2019t process fingerprint. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
