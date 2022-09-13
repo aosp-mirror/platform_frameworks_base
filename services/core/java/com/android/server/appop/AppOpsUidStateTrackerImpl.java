@@ -48,6 +48,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.PrintWriter;
+import java.util.concurrent.CountDownLatch;
 
 class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
@@ -68,12 +69,16 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     private ArrayMap<UidStateChangedCallback, Handler> mUidStateChangedCallbacks = new ArrayMap<>();
 
+    private final EventLog mEventLog;
+
     AppOpsUidStateTrackerImpl(ActivityManagerInternal activityManagerInternal,
             Handler handler, Clock clock, AppOpsService.Constants constants) {
         mActivityManagerInternal = activityManagerInternal;
         mHandler = handler;
         mClock = clock;
         mConstants = constants;
+
+        mEventLog = new EventLog(handler);
     }
 
     @Override
@@ -103,8 +108,10 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         pendingTop = mActivityManagerInternal.isPendingTopUid(uid);
         tempAllowlist = mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid);
 
-        return evalMode(uidStateValue, code, mode, capability, visibleAppWidget, pendingTop,
+        int result = evalMode(uidStateValue, code, mode, capability, visibleAppWidget, pendingTop,
                 tempAllowlist);
+        mEventLog.logEvalForegroundMode(uid, uidStateValue, capability, code, result);
+        return result;
     }
 
     private static int evalMode(int uidState, int code, int mode, int capability,
@@ -177,6 +184,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     @Override
     public void updateUidProcState(int uid, int procState, int capability) {
+        mEventLog.logUpdateUidProcState(uid, procState, capability);
         if (procState == PROCESS_STATE_NONEXISTENT) {
             mUidStates.delete(uid);
             mPendingUidStates.delete(uid);
@@ -271,6 +279,11 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         }
     }
 
+    @Override
+    public void dumpEvents(PrintWriter pw) {
+        mEventLog.dumpEvents(pw);
+    }
+
     private void updateUidPendingStateIfNeeded(int uid) {
         updateUidPendingStateIfNeededLocked(uid);
     }
@@ -303,6 +316,12 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
                     || capability != pendingCapability
                     || visibleAppWidget != pendingVisibleAppWidget;
 
+            if (foregroundChange) {
+                // To save on memory usage, log only interesting changes.
+                mEventLog.logCommitUidState(uid, pendingUidState, pendingCapability,
+                        pendingVisibleAppWidget);
+            }
+
             for (int i = 0; i < mUidStateChangedCallbacks.size(); i++) {
                 UidStateChangedCallback cb = mUidStateChangedCallbacks.keyAt(i);
                 Handler h = mUidStateChangedCallbacks.valueAt(i);
@@ -328,5 +347,254 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     private boolean getUidVisibleAppWidget(int uid) {
         return mVisibleAppWidget.get(uid, false);
+    }
+
+    private static class EventLog {
+
+        // These seems a bit too verbose and not as useful, turning off for now.
+        // DCE should be able to remove most associated code.
+        // Memory usage: 16 * size bytes
+        private static final int UPDATE_UID_PROC_STATE_LOG_MAX_SIZE = 0;
+        // Memory usage: 20 * size bytes
+        private static final int COMMIT_UID_STATE_LOG_MAX_SIZE = 200;
+        // Memory usage: 24 * size bytes
+        private static final int EVAL_FOREGROUND_MODE_MAX_SIZE = 200;
+
+        private final Handler mHandler;
+
+        private int[][] mUpdateUidProcStateLog = new int[UPDATE_UID_PROC_STATE_LOG_MAX_SIZE][3];
+        private long[] mUpdateUidProcStateLogTimestamps =
+                new long[UPDATE_UID_PROC_STATE_LOG_MAX_SIZE];
+        private int mUpdateUidProcStateLogSize = 0;
+        private int mUpdateUidProcStateLogHead = 0;
+
+        private int[][] mCommitUidStateLog = new int[COMMIT_UID_STATE_LOG_MAX_SIZE][4];
+        private long[] mCommitUidStateLogTimestamps = new long[COMMIT_UID_STATE_LOG_MAX_SIZE];
+        private int mCommitUidStateLogSize = 0;
+        private int mCommitUidStateLogHead = 0;
+
+        private int[][] mEvalForegroundModeLog = new int[EVAL_FOREGROUND_MODE_MAX_SIZE][5];
+        private long[] mEvalForegroundModeLogTimestamps = new long[EVAL_FOREGROUND_MODE_MAX_SIZE];
+        private int mEvalForegroundModeLogSize = 0;
+        private int mEvalForegroundModeLogHead = 0;
+
+        EventLog(Handler handler) {
+            mHandler = handler;
+        }
+
+        void logUpdateUidProcState(int uid, int procState, int capability) {
+            if (UPDATE_UID_PROC_STATE_LOG_MAX_SIZE == 0) {
+                return;
+            }
+            mHandler.sendMessage(PooledLambda.obtainMessage(EventLog::logUpdateUidProcStateAsync,
+                    this, System.currentTimeMillis(), uid, procState, capability));
+        }
+
+        void logUpdateUidProcStateAsync(long timestamp, int uid, int procState, int capability) {
+            int idx = (mUpdateUidProcStateLogHead + mUpdateUidProcStateLogSize)
+                    % UPDATE_UID_PROC_STATE_LOG_MAX_SIZE;
+            if (mUpdateUidProcStateLogSize == UPDATE_UID_PROC_STATE_LOG_MAX_SIZE) {
+                mUpdateUidProcStateLogHead =
+                        (mUpdateUidProcStateLogHead + 1) % UPDATE_UID_PROC_STATE_LOG_MAX_SIZE;
+            } else {
+                mUpdateUidProcStateLogSize++;
+            }
+
+            mUpdateUidProcStateLog[idx][0] = uid;
+            mUpdateUidProcStateLog[idx][1] = procState;
+            mUpdateUidProcStateLog[idx][2] = capability;
+            mUpdateUidProcStateLogTimestamps[idx] = timestamp;
+        }
+
+        void logCommitUidState(int uid, int uidState, int capability, boolean visible) {
+            if (COMMIT_UID_STATE_LOG_MAX_SIZE == 0) {
+                return;
+            }
+            mHandler.sendMessage(PooledLambda.obtainMessage(EventLog::logCommitUidStateAsync,
+                    this, System.currentTimeMillis(), uid, uidState, capability, visible));
+        }
+
+        void logCommitUidStateAsync(long timestamp, int uid, int uidState, int capability,
+                boolean visible) {
+            int idx = (mCommitUidStateLogHead + mCommitUidStateLogSize)
+                    % COMMIT_UID_STATE_LOG_MAX_SIZE;
+            if (mCommitUidStateLogSize == COMMIT_UID_STATE_LOG_MAX_SIZE) {
+                mCommitUidStateLogHead =
+                        (mCommitUidStateLogHead + 1) % COMMIT_UID_STATE_LOG_MAX_SIZE;
+            } else {
+                mCommitUidStateLogSize++;
+            }
+
+            mCommitUidStateLog[idx][0] = uid;
+            mCommitUidStateLog[idx][1] = uidState;
+            mCommitUidStateLog[idx][2] = capability;
+            mCommitUidStateLog[idx][3] = visible ? 1 : 0;
+            mCommitUidStateLogTimestamps[idx] = timestamp;
+        }
+
+        void logEvalForegroundMode(int uid, int uidState, int capability, int code, int result) {
+            if (EVAL_FOREGROUND_MODE_MAX_SIZE == 0) {
+                return;
+            }
+            mHandler.sendMessage(PooledLambda.obtainMessage(EventLog::logEvalForegroundModeAsync,
+                    this, System.currentTimeMillis(), uid, uidState, capability, code, result));
+        }
+
+        void logEvalForegroundModeAsync(long timestamp, int uid, int uidState, int capability,
+                int code, int result) {
+            int idx = (mEvalForegroundModeLogHead + mEvalForegroundModeLogSize)
+                    % EVAL_FOREGROUND_MODE_MAX_SIZE;
+            if (mEvalForegroundModeLogSize == EVAL_FOREGROUND_MODE_MAX_SIZE) {
+                mEvalForegroundModeLogHead =
+                        (mEvalForegroundModeLogHead + 1) % EVAL_FOREGROUND_MODE_MAX_SIZE;
+            } else {
+                mEvalForegroundModeLogSize++;
+            }
+
+            mEvalForegroundModeLog[idx][0] = uid;
+            mEvalForegroundModeLog[idx][1] = uidState;
+            mEvalForegroundModeLog[idx][2] = capability;
+            mEvalForegroundModeLog[idx][3] = code;
+            mEvalForegroundModeLog[idx][4] = result;
+            mEvalForegroundModeLogTimestamps[idx] = timestamp;
+        }
+
+        void dumpEvents(PrintWriter pw) {
+            if (Thread.currentThread() != mHandler.getLooper().getThread()) {
+                // All operations are done on the handler's thread
+                CountDownLatch latch = new CountDownLatch(1);
+                mHandler.post(() -> {
+                    dumpEvents(pw);
+                    latch.countDown();
+                });
+
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return;
+            }
+
+            int updateIdx = 0;
+            int commitIdx = 0;
+            int evalIdx = 0;
+
+            while (updateIdx < mUpdateUidProcStateLogSize
+                    || commitIdx < mCommitUidStateLogSize
+                    || evalIdx < mEvalForegroundModeLogSize) {
+                int updatePtr = 0;
+                int commitPtr = 0;
+                int evalPtr = 0;
+                if (UPDATE_UID_PROC_STATE_LOG_MAX_SIZE != 0) {
+                    updatePtr = (mUpdateUidProcStateLogHead + updateIdx)
+                            % UPDATE_UID_PROC_STATE_LOG_MAX_SIZE;
+                }
+                if (COMMIT_UID_STATE_LOG_MAX_SIZE != 0) {
+                    commitPtr = (mCommitUidStateLogHead + commitIdx)
+                            % COMMIT_UID_STATE_LOG_MAX_SIZE;
+                }
+                if (EVAL_FOREGROUND_MODE_MAX_SIZE != 0) {
+                    evalPtr = (mEvalForegroundModeLogHead + evalIdx)
+                            % EVAL_FOREGROUND_MODE_MAX_SIZE;
+                }
+
+                long aTimestamp = updateIdx < mUpdateUidProcStateLogSize
+                        ? mUpdateUidProcStateLogTimestamps[updatePtr] : Long.MAX_VALUE;
+                long bTimestamp = commitIdx < mCommitUidStateLogSize
+                        ? mCommitUidStateLogTimestamps[commitPtr] : Long.MAX_VALUE;
+                long cTimestamp = evalIdx < mEvalForegroundModeLogSize
+                        ? mEvalForegroundModeLogTimestamps[evalPtr] : Long.MAX_VALUE;
+
+                if (aTimestamp <= bTimestamp && aTimestamp <= cTimestamp) {
+                    dumpUpdateUidProcState(pw, updatePtr);
+                    updateIdx++;
+                } else if (bTimestamp <= cTimestamp) {
+                    dumpCommitUidState(pw, commitPtr);
+                    commitIdx++;
+                } else {
+                    dumpEvalForegroundMode(pw, evalPtr);
+                    evalIdx++;
+                }
+            }
+        }
+
+        void dumpUpdateUidProcState(PrintWriter pw, int idx) {
+            long timestamp = mUpdateUidProcStateLogTimestamps[idx];
+            int uid = mUpdateUidProcStateLog[idx][0];
+            int procState = mUpdateUidProcStateLog[idx][1];
+            int capability = mUpdateUidProcStateLog[idx][2];
+
+            TimeUtils.dumpTime(pw, timestamp);
+
+            pw.print(" UPDATE_UID_PROC_STATE");
+
+            pw.print(" uid=");
+            pw.print(uid);
+
+            pw.print(" procState=");
+            pw.print(String.format("%-30s", ActivityManager.procStateToString(procState)));
+
+            pw.print(" capability=");
+            pw.print(ActivityManager.getCapabilitiesSummary(capability));
+
+            pw.println();
+        }
+
+        void dumpCommitUidState(PrintWriter pw, int idx) {
+            long timestamp = mCommitUidStateLogTimestamps[idx];
+            int uid = mCommitUidStateLog[idx][0];
+            int uidState = mCommitUidStateLog[idx][1];
+            int capability = mCommitUidStateLog[idx][2];
+            boolean visibleAppWidget = mCommitUidStateLog[idx][3] != 0;
+
+            TimeUtils.dumpTime(pw, timestamp);
+
+            pw.print(" COMMIT_UID_STATE     ");
+
+            pw.print(" uid=");
+            pw.print(uid);
+
+            pw.print(" uidState=");
+            pw.print(String.format("%-30s", AppOpsManager.uidStateToString(uidState)));
+
+            pw.print(" capability=");
+            pw.print(ActivityManager.getCapabilitiesSummary(capability));
+
+            pw.print(" visibleAppWidget=");
+            pw.print(visibleAppWidget);
+
+            pw.println();
+        }
+
+        void dumpEvalForegroundMode(PrintWriter pw, int idx) {
+            long timestamp = mEvalForegroundModeLogTimestamps[idx];
+            int uid = mEvalForegroundModeLog[idx][0];
+            int uidState = mEvalForegroundModeLog[idx][1];
+            int capability = mEvalForegroundModeLog[idx][2];
+            int code = mEvalForegroundModeLog[idx][3];
+            int result = mEvalForegroundModeLog[idx][4];
+
+            TimeUtils.dumpTime(pw, timestamp);
+
+            pw.print(" EVAL_FOREGROUND_MODE ");
+
+            pw.print(" uid=");
+            pw.print(uid);
+
+            pw.print(" uidState=");
+            pw.print(String.format("%-30s", AppOpsManager.uidStateToString(uidState)));
+
+            pw.print(" capability=");
+            pw.print(ActivityManager.getCapabilitiesSummary(capability));
+
+            pw.print(" code=");
+            pw.print(String.format("%-20s", AppOpsManager.opToName(code)));
+
+            pw.print(" result=");
+            pw.print(AppOpsManager.modeToName(result));
+
+            pw.println();
+        }
     }
 }

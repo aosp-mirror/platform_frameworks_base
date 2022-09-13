@@ -115,4 +115,6 @@ interface AppOpsUidStateTracker {
     }
 
     void dumpUidState(PrintWriter pw, int uid, long nowElapsed);
+
+    void dumpEvents(PrintWriter pw);
 }

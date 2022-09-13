@@ -5776,6 +5776,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         boolean includeDiscreteOps = false;
         int nDiscreteOps = 10;
         @HistoricalOpsRequestFilter int dumpFilter = 0;
+        boolean dumpAll = false;
 
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
@@ -5785,6 +5786,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     return;
                 } else if ("-a".equals(arg)) {
                     // dump all data
+                    dumpAll = true;
                 } else if ("--op".equals(arg)) {
                     i++;
                     if (i >= args.length) {
@@ -6316,6 +6318,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             pw.println("Discrete accesses: ");
             mHistoricalRegistry.dumpDiscreteData(pw, dumpUid, dumpPackage, dumpAttributionTag,
                     dumpFilter, dumpOp, sdf, date, "  ", nDiscreteOps);
+        }
+
+        if (dumpAll) {
+            pw.println();
+            pw.println("Uid State Changes Event Log:");
+            if (mUidStateTracker != null) {
+                mUidStateTracker.dumpEvents(pw);
+            }
         }
     }
 
