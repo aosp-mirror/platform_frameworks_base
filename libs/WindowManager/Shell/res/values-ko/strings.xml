@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"카메라 문제가 있나요?\n해결하려면 탭하세요."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"해결되지 않았나요?\n되돌리려면 탭하세요."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"카메라에 문제가 없나요? 닫으려면 탭하세요."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"더 많은 정보를 보고 더 많은 작업을 처리하세요"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"화면 분할을 사용하려면 다른 앱을 드래그해 가져옵니다."</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"앱 위치를 조정하려면 앱 외부를 두 번 탭합니다."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"확인"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"추가 정보는 펼쳐서 확인하세요."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"최대화"</string>

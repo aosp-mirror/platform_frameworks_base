@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Du har gjort för många försök. Försök igen senare."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"För många försök. Använd låsskärmen i stället."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Försök igen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Inga fingeravtryck har registrerats."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Enheten har ingen fingeravtryckssensor."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besök ett reparationsställe."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Testa med bättre belysning"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Flytta telefonen längre bort"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"För telefonen närmare"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Höj telefonen"</string>

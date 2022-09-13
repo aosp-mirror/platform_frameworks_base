@@ -161,10 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"No se reconoce el rostro. Usa la huella dactilar."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
-    <skip />
-    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"No se reconoce el rostro"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Usa la huella dactilar"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth conectado"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Se desconoce el porcentaje de la batería."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
@@ -206,7 +204,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensores desactivados sí"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Eliminar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
-    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{# notificación más en el grupo.}other{# notificaciones más en el grupo.}}"</string>
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{# notificación más en el grupo.}many{# notificaciones más en el grupo.}other{# notificaciones más en el grupo.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"La pantalla está bloqueada en modo vertical."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Caja para postres"</string>
@@ -254,7 +252,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos act."</string>
-    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# dispositivo}other{# dispositivos}}"</string>
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# dispositivo}many{# dispositivos}other{# dispositivos}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Linterna"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Cámara en uso"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Datos móviles"</string>
@@ -355,7 +353,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Estás en el modo de invitado"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si agregas un usuario nuevo, se desactivará el modo de invitado y se borrarán todas las apps y los datos de la sesión de invitado actual."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Alcanzaste el límite de usuarios"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Solo se puede crear un usuario.}other{Puedes agregar hasta # usuarios.}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Solo se puede crear un usuario.}many{Puedes agregar hasta # usuarios.}other{Puedes agregar hasta # usuarios.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"¿Confirmas que quieres quitar el usuario?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se borrarán todas las aplicaciones y los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
@@ -543,8 +541,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Recuérdame"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posponer <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# hora}=2{# horas}other{# horas}}"</string>
-    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minuto}other{# minutos}}"</string>
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# hora}=2{# horas}many{# horas}other{# horas}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ahorro de batería"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Inicio"</string>
@@ -600,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Activado"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desactivado"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"No disponible"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Inhabilitada"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Barra de navegación"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Diseño"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo de botón izquierdo adicional"</string>
@@ -673,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Algunas funciones se limitan durante el enfriamiento del teléfono.\nPresiona para obtener más información"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Tu teléfono intentará enfriarse automáticamente. Podrás usarlo, pero es posible que funcione más lento.\n\nUna vez que se haya enfriado, volverá a funcionar correctamente."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver pasos de mantenimiento"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Desconectar cargador"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"No se puede cargar el dispositivo. Desconecta el adaptador de la corriente con cuidado, ya que el cable podría estar caliente."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ver pasos de mantenimiento"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Acceso directo izquierdo"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Acceso directo derecho"</string>
@@ -768,7 +769,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar o desactivar"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Controles de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige la app para agregar los controles"</string>
-    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Se agregó # control.}other{Se agregaron # controles.}}"</string>
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Se agregó # control.}many{Se agregaron # controles.}other{Se agregaron # controles.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Quitados"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Está en favoritos"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Está en favoritos en la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -925,7 +926,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Agregar tarjeta"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No agregar tarjeta"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app está activa}other{# apps están activas}}"</string>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app está activa}many{# apps están activas}other{# apps están activas}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nueva información"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps activas"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Estas apps están activas y en ejecución, incluso mientras no las usas. Esto mejora su funcionalidad, pero también afecta la duración de batería."</string>
@@ -955,7 +956,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"La cámara está desactivada"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"El micrófono está desactivado"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"La cámara y el micrófono están apagados"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}other{# notificaciones}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}many{# notificaciones}other{# notificaciones}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Transmitiendo"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"¿Quieres dejar de transmitir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

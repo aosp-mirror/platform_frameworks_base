@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Sõrmejälje toiming tühistati."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kasutaja tühistas sõrmejälje kasutamise."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Liiga palju katseid. Kasutage selle asemel ekraanilukku."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Proovige uuesti."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ühtegi sõrmejälge pole registreeritud."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Selles seadmes pole sõrmejäljeandurit."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Külastage remonditeenuse pakkujat."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Liiga ere. Proovige hämaramat valgust."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Proovige parema valgustusega kohas"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Liigutage telefoni kaugemale"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Liigutage telefoni lähemale"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Liigutage telefoni kõrgemale"</string>

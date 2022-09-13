@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.glwallpaper;
+package com.android.systemui.wallpapers.gl;
 
 import static android.opengl.EGL14.EGL_ALPHA_SIZE;
 import static android.opengl.EGL14.EGL_BLUE_SIZE;

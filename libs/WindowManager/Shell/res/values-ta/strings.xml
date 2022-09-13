@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"கேமரா தொடர்பான சிக்கல்களா?\nமீண்டும் பொருத்த தட்டவும்"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"சிக்கல்கள் சரிசெய்யப்படவில்லையா?\nமாற்றியமைக்க தட்டவும்"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"கேமரா தொடர்பான சிக்கல்கள் எதுவும் இல்லையா? நிராகரிக்க தட்டவும்."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"பலவற்றைப் பார்த்தல் மற்றும் செய்தல்"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"திரைப் பிரிப்புக்கு மற்றொரு ஆப்ஸை இழுக்கலாம்"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ஆப்ஸை இடம் மாற்ற அதன் வெளியில் இருமுறை தட்டலாம்"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"சரி"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"கூடுதல் தகவல்களுக்கு விரிவாக்கலாம்."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"பெரிதாக்கும்"</string>

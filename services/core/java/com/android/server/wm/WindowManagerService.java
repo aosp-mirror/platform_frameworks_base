@@ -650,7 +650,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Whether the system should use BLAST for ViewRootImpl
     final boolean mUseBLAST;
     // Whether to enable BLASTSyncEngine Transaction passing.
-    final boolean mUseBLASTSync = true;
+    static final boolean USE_BLAST_SYNC = true;
 
     final BLASTSyncEngine mSyncEngine;
 
@@ -2576,7 +2576,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (outSyncIdBundle != null) {
                 final int maybeSyncSeqId;
-                if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
+                if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
                     maybeSyncSeqId = win.shouldSyncWithBuffers() ? win.mSyncSeqId : -1;
                     win.markRedrawForSyncReported();
@@ -5659,7 +5659,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public boolean useBLASTSync() {
-        return mUseBLASTSync;
+        return USE_BLAST_SYNC;
     }
 
     @Override

@@ -398,6 +398,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     * @param id the group id from the CSIP.
     */
     public void setGroupId(int id) {
+        Log.d(TAG, this.getDevice().getAnonymizedAddress() + " set GroupId " + id);
         mGroupId = id;
     }
 

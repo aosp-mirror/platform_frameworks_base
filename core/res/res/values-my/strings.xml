@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"လက်ဗွေယူခြင်း ပယ်ဖျက်လိုက်သည်။"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"လက်ဗွေဖြင့် အထောက်အထားစိစစ်ခြင်းကို အသုံးပြုသူက ပယ်ဖျက်ထားသည်။"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ကြိုးစာမှု အကြိမ်များနေ၏။ နောက်မှ ထပ်မံကြိုးစားပါ။"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ ဖန်သားပြင်လော့ခ်ချခြင်းကို အစားထိုးသုံးပါ။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ။"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"သင့်မျက်နှာနမူနာ ပြုလုပ်၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"အလွန် လင်းသည်။ အလင်းလျှော့ကြည့်ပါ။"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ပိုလင်းအောင် လုပ်ကြည့်ပါ"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ဖုန်းကို အဝေးသို့ခွာပါ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ဖုန်းကို အနားသို့ပိုတိုးပါ"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ"</string>

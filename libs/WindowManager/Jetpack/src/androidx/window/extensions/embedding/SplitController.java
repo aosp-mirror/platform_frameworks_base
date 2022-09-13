@@ -901,6 +901,36 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
     }
 
+    @Nullable
+    @GuardedBy("mLock")
+    private TaskFragmentContainer resolveStartActivityIntentFromNonActivityContext(
+            @NonNull WindowContainerTransaction wct, @NonNull Intent intent) {
+        final int taskCount = mTaskContainers.size();
+        if (taskCount == 0) {
+            // We don't have other Activity to check split with.
+            return null;
+        }
+        if (taskCount > 1) {
+            Log.w(TAG, "App is calling startActivity from a non-Activity context when it has"
+                    + " more than one Task. If the new launch Activity is in a different process,"
+                    + " and it is expected to be embedded, please start it from an Activity"
+                    + " instead.");
+            return null;
+        }
+
+        // Check whether the Intent should be embedded in the known Task.
+        final TaskContainer taskContainer = mTaskContainers.valueAt(0);
+        if (taskContainer.isInPictureInPicture()
+                || taskContainer.getTopNonFinishingActivity() == null) {
+            // We don't embed activity when it is in PIP, or if we can't find any other owner
+            // activity in the Task.
+            return null;
+        }
+
+        return resolveStartActivityIntent(wct, taskContainer.getTaskId(), intent,
+                null /* launchingActivity */);
+    }
+
     /**
      * When we are trying to handle a new activity Intent, returns the {@link TaskFragmentContainer}
      * that we should reparent the new activity to if there is any embedding rule matched.
@@ -1777,23 +1807,38 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public Instrumentation.ActivityResult onStartActivity(@NonNull Context who,
                 @NonNull Intent intent, @NonNull Bundle options) {
-            // TODO(b/190433398): Check if the activity is configured to always be expanded.
+            // TODO(b/232042367): Consolidate the activity create handling so that we can handle
+            // cross-process the same as normal.
 
-            // Check if activity should be put in a split with the activity that launched it.
-            if (!(who instanceof Activity)) {
-                return super.onStartActivity(who, intent, options);
-            }
-            final Activity launchingActivity = (Activity) who;
-            if (isInPictureInPicture(launchingActivity)) {
-                // We don't embed activity when it is in PIP.
-                return super.onStartActivity(who, intent, options);
+            final Activity launchingActivity;
+            if (who instanceof Activity) {
+                // We will check if the new activity should be split with the activity that launched
+                // it.
+                launchingActivity = (Activity) who;
+                if (isInPictureInPicture(launchingActivity)) {
+                    // We don't embed activity when it is in PIP.
+                    return super.onStartActivity(who, intent, options);
+                }
+            } else {
+                // When the context to start activity is not an Activity context, we will check if
+                // the new activity should be embedded in the known Task belonging to the organizer
+                // process. @see #resolveStartActivityIntentFromNonActivityContext
+                // It is a current security limitation that we can't access the activity info of
+                // other process even if it is in the same Task.
+                launchingActivity = null;
             }
 
             synchronized (mLock) {
-                final int taskId = getTaskId(launchingActivity);
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
-                final TaskFragmentContainer launchedInTaskFragment = resolveStartActivityIntent(wct,
-                        taskId, intent, launchingActivity);
+                final TaskFragmentContainer launchedInTaskFragment;
+                if (launchingActivity != null) {
+                    final int taskId = getTaskId(launchingActivity);
+                    launchedInTaskFragment = resolveStartActivityIntent(wct, taskId, intent,
+                            launchingActivity);
+                } else {
+                    launchedInTaskFragment = resolveStartActivityIntentFromNonActivityContext(wct,
+                            intent);
+                }
                 if (launchedInTaskFragment != null) {
                     // Make sure the WCT is applied immediately instead of being queued so that the
                     // TaskFragment will be ready before activity attachment.

@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"કૅમેરામાં સમસ્યાઓ છે?\nફરીથી ફિટ કરવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"સુધારો નથી થયો?\nપહેલાંના પર પાછું ફેરવવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"કૅમેરામાં કોઈ સમસ્યા નથી? છોડી દેવા માટે ટૅપ કરો."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"જુઓ અને બીજું ઘણું કરો"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"સ્ક્રીન વિભાજન માટે કોઈ અન્ય ઍપમાં ખેંચો"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"કોઈ ઍપની જગ્યા બદલવા માટે, તેની બહાર બે વાર ટૅપ કરો"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"સમજાઈ ગયું"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"વધુ માહિતી માટે મોટું કરો."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"મોટું કરો"</string>
