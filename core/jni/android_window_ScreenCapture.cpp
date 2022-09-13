@@ -61,9 +61,8 @@ static struct {
 } gLayerCaptureArgsClassInfo;
 
 static struct {
-    jclass clazz;
-    jmethodID onScreenCaptureComplete;
-} gScreenCaptureListenerClassInfo;
+    jmethodID accept;
+} gConsumerClassInfo;
 
 static struct {
     jclass clazz;
@@ -98,14 +97,14 @@ class ScreenCaptureListenerWrapper : public gui::BnScreenCaptureListener {
 public:
     explicit ScreenCaptureListenerWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
-        mScreenCaptureListenerObject = env->NewGlobalRef(jobject);
-        LOG_ALWAYS_FATAL_IF(!mScreenCaptureListenerObject, "Failed to make global ref");
+        mConsumerObject = env->NewGlobalRef(jobject);
+        LOG_ALWAYS_FATAL_IF(!mConsumerObject, "Failed to make global ref");
     }
 
     ~ScreenCaptureListenerWrapper() {
-        if (mScreenCaptureListenerObject) {
-            getenv()->DeleteGlobalRef(mScreenCaptureListenerObject);
-            mScreenCaptureListenerObject = nullptr;
+        if (mConsumerObject) {
+            getenv()->DeleteGlobalRef(mConsumerObject);
+            mConsumerObject = nullptr;
         }
     }
 
@@ -113,9 +112,8 @@ public:
             const gui::ScreenCaptureResults& captureResults) override {
         JNIEnv* env = getenv();
         if (!captureResults.fenceResult.ok() || captureResults.buffer == nullptr) {
-            env->CallVoidMethod(mScreenCaptureListenerObject,
-                                gScreenCaptureListenerClassInfo.onScreenCaptureComplete, nullptr);
-            checkAndClearException(env, "onScreenCaptureComplete");
+            env->CallVoidMethod(mConsumerObject, gConsumerClassInfo.accept, nullptr);
+            checkAndClearException(env, "accept");
             return binder::Status::ok();
         }
         captureResults.fenceResult.value()->waitForever(LOG_TAG);
@@ -130,17 +128,15 @@ public:
                                             captureResults.capturedSecureLayers,
                                             captureResults.capturedHdrLayers);
         checkAndClearException(env, "builder");
-        env->CallVoidMethod(mScreenCaptureListenerObject,
-                            gScreenCaptureListenerClassInfo.onScreenCaptureComplete,
-                            screenshotHardwareBuffer);
-        checkAndClearException(env, "onScreenCaptureComplete");
+        env->CallVoidMethod(mConsumerObject, gConsumerClassInfo.accept, screenshotHardwareBuffer);
+        checkAndClearException(env, "accept");
         env->DeleteLocalRef(jhardwareBuffer);
         env->DeleteLocalRef(screenshotHardwareBuffer);
         return binder::Status::ok();
     }
 
 private:
-    jobject mScreenCaptureListenerObject;
+    jobject mConsumerObject;
     JavaVM* mVm;
 
     JNIEnv* getenv() {
@@ -194,7 +190,7 @@ static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
 }
 
 static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptureArgsObject,
-                                 jobject screenCaptureListenerObject) {
+                                 jlong screenCaptureListenerObject) {
     const DisplayCaptureArgs captureArgs =
             displayCaptureArgsFromObject(env, displayCaptureArgsObject);
 
@@ -202,13 +198,13 @@ static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptu
         return BAD_VALUE;
     }
 
-    sp<IScreenCaptureListener> captureListener =
-            sp<ScreenCaptureListenerWrapper>::make(env, screenCaptureListenerObject);
+    sp<gui::IScreenCaptureListener> captureListener =
+            reinterpret_cast<gui::IScreenCaptureListener*>(screenCaptureListenerObject);
     return ScreenshotClient::captureDisplay(captureArgs, captureListener);
 }
 
 static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureArgsObject,
-                                jobject screenCaptureListenerObject) {
+                                jlong screenCaptureListenerObject) {
     LayerCaptureArgs captureArgs;
     getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
     SurfaceControl* layer = reinterpret_cast<SurfaceControl*>(
@@ -238,21 +234,70 @@ static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureA
         }
     }
 
-    sp<IScreenCaptureListener> captureListener =
-            sp<ScreenCaptureListenerWrapper>::make(env, screenCaptureListenerObject);
+    sp<gui::IScreenCaptureListener> captureListener =
+            reinterpret_cast<gui::IScreenCaptureListener*>(screenCaptureListenerObject);
     return ScreenshotClient::captureLayers(captureArgs, captureListener);
+}
+
+static jlong nativeCreateScreenCaptureListener(JNIEnv* env, jclass clazz, jobject consumerObj) {
+    sp<gui::IScreenCaptureListener> listener =
+            sp<ScreenCaptureListenerWrapper>::make(env, consumerObj);
+    listener->incStrong((void*)nativeCreateScreenCaptureListener);
+    return reinterpret_cast<jlong>(listener.get());
+}
+
+static void nativeWriteListenerToParcel(JNIEnv* env, jclass clazz, jlong nativeObject,
+                                        jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (parcel == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return;
+    }
+    ScreenCaptureListenerWrapper* const self =
+            reinterpret_cast<ScreenCaptureListenerWrapper*>(nativeObject);
+    if (self != nullptr) {
+        parcel->writeStrongBinder(IInterface::asBinder(self));
+    }
+}
+
+static jlong nativeReadListenerFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (parcel == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return 0;
+    }
+    sp<gui::IScreenCaptureListener> listener =
+            interface_cast<gui::IScreenCaptureListener>(parcel->readStrongBinder());
+    if (listener == nullptr) {
+        return 0;
+    }
+    listener->incStrong((void*)nativeCreateScreenCaptureListener);
+    return reinterpret_cast<jlong>(listener.get());
+}
+
+void destroyNativeListener(void* ptr) {
+    ScreenCaptureListenerWrapper* listener = reinterpret_cast<ScreenCaptureListenerWrapper*>(ptr);
+    listener->decStrong((void*)nativeCreateScreenCaptureListener);
+}
+
+static jlong getNativeListenerFinalizer(JNIEnv* env, jclass clazz) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyNativeListener));
 }
 
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sScreenCaptureMethods[] = {
         // clang-format off
-   {"nativeCaptureDisplay",
-            "(Landroid/window/ScreenCapture$DisplayCaptureArgs;Landroid/window/ScreenCapture$ScreenCaptureListener;)I",
+    {"nativeCaptureDisplay", "(Landroid/window/ScreenCapture$DisplayCaptureArgs;J)I",
             (void*)nativeCaptureDisplay },
-    {"nativeCaptureLayers",
-            "(Landroid/window/ScreenCapture$LayerCaptureArgs;Landroid/window/ScreenCapture$ScreenCaptureListener;)I",
+    {"nativeCaptureLayers",  "(Landroid/window/ScreenCapture$LayerCaptureArgs;J)I",
             (void*)nativeCaptureLayers },
+    {"nativeCreateScreenCaptureListener", "(Ljava/util/function/Consumer;)J",
+            (void*)nativeCreateScreenCaptureListener },
+    {"nativeWriteListenerToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteListenerToParcel },
+    {"nativeReadListenerFromParcel", "(Landroid/os/Parcel;)J",
+            (void*)nativeReadListenerFromParcel },
+    {"getNativeListenerFinalizer", "()J", (void*)getNativeListenerFinalizer },
         // clang-format on
 };
 
@@ -293,12 +338,8 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
     gLayerCaptureArgsClassInfo.childrenOnly =
             GetFieldIDOrDie(env, layerCaptureArgsClazz, "mChildrenOnly", "Z");
 
-    jclass screenCaptureListenerClazz =
-            FindClassOrDie(env, "android/window/ScreenCapture$ScreenCaptureListener");
-    gScreenCaptureListenerClassInfo.clazz = MakeGlobalRefOrDie(env, screenCaptureListenerClazz);
-    gScreenCaptureListenerClassInfo.onScreenCaptureComplete =
-            GetMethodIDOrDie(env, screenCaptureListenerClazz, "onScreenCaptureComplete",
-                             "(Landroid/window/ScreenCapture$ScreenshotHardwareBuffer;)V");
+    jclass consumer = FindClassOrDie(env, "java/util/function/Consumer");
+    gConsumerClassInfo.accept = GetMethodIDOrDie(env, consumer, "accept", "(Ljava/lang/Object;)V");
 
     jclass screenshotGraphicsBufferClazz =
             FindClassOrDie(env, "android/window/ScreenCapture$ScreenshotHardwareBuffer");
