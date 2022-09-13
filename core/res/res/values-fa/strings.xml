@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"تلاش‌های بیش‌ازحد. حالا از قفل صفحه استفاده کنید."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"دوباره امتحان کنید."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"اثر انگشتی ثبت نشده است."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"به ارائه‌دهنده خدمات تعمیر مراجعه کنید."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"مدل چهره ایجاد نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"خیلی روشن است. روشنایی‌اش را ملایم‌تر کنید."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"نور را بیشتر کنید"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"تلفن را دورتر ببرید"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"تلفن را نزدیک‌تر بیاورید"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"تلفن را بالاتر ببرید"</string>

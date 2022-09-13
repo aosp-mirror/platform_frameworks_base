@@ -142,6 +142,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -2939,12 +2940,14 @@ public class ChooserActivity extends ResolverActivity implements
 
     private void startFinishAnimation() {
         View rootView = findRootView();
-        rootView.startAnimation(new FinishAnimation(this, rootView));
+        if (rootView != null) {
+            rootView.startAnimation(new FinishAnimation(this, rootView));
+        }
     }
 
     private boolean maybeCancelFinishAnimation() {
         View rootView = findRootView();
-        Animation animation = rootView.getAnimation();
+        Animation animation = rootView == null ? null : rootView.getAnimation();
         if (animation instanceof FinishAnimation) {
             boolean hasEnded = animation.hasEnded();
             animation.cancel();
@@ -3708,6 +3711,7 @@ public class ChooserActivity extends ResolverActivity implements
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
             this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
+            Arrays.fill(mCellVisibility, true);
             this.mListAdapterSupplier = listAdapterSupplier;
         }
 
@@ -4071,11 +4075,13 @@ public class ChooserActivity extends ResolverActivity implements
      */
     private static class FinishAnimation extends AlphaAnimation implements
             Animation.AnimationListener {
+        @Nullable
         private Activity mActivity;
+        @Nullable
         private View mRootView;
         private final float mFromAlpha;
 
-        FinishAnimation(Activity activity, View rootView) {
+        FinishAnimation(@NonNull Activity activity, @NonNull View rootView) {
             super(rootView.getAlpha(), 0.0f);
             mActivity = activity;
             mRootView = rootView;
@@ -4099,7 +4105,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public void cancel() {
-            mRootView.setAlpha(mFromAlpha);
+            if (mRootView != null) {
+                mRootView.setAlpha(mFromAlpha);
+            }
             cleanup();
             super.cancel();
         }
@@ -4110,9 +4118,10 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public void onAnimationEnd(Animation animation) {
-            if (mActivity != null) {
-                mActivity.finish();
-                cleanup();
+            Activity activity = mActivity;
+            cleanup();
+            if (activity != null) {
+                activity.finish();
             }
         }
 
