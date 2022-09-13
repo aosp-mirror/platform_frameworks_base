@@ -135,7 +135,7 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Loading
         currentView.requireViewById<View>(R.id.loading).visibility =
-            chipState.isMidTransfer.visibleIfTrue()
+            (chipState.transferStatus == TransferStatus.IN_PROGRESS).visibleIfTrue()
 
         // Undo
         val undoView = currentView.requireViewById<View>(R.id.undo)
@@ -147,7 +147,7 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Failure
         currentView.requireViewById<View>(R.id.failure_icon).visibility =
-            chipState.isTransferFailure.visibleIfTrue()
+            (chipState.transferStatus == TransferStatus.FAILED).visibleIfTrue()
 
         // For accessibility
         currentView.requireViewById<ViewGroup>(
@@ -170,10 +170,14 @@ class MediaTttChipControllerSender @Inject constructor(
     }
 
     override fun removeView(removalReason: String) {
-        // Don't remove the chip if we're mid-transfer since the user should still be able to
-        // see the status of the transfer. (But do remove it if it's finally timed out.)
-        if (info?.state?.isMidTransfer == true &&
-                removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT) {
+        // Don't remove the chip if we're in progress or succeeded, since the user should still be
+        // able to see the status of the transfer. (But do remove it if it's finally timed out.)
+        val transferStatus = info?.state?.transferStatus
+        if (
+            (transferStatus == TransferStatus.IN_PROGRESS ||
+                transferStatus == TransferStatus.SUCCEEDED) &&
+            removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT
+        ) {
             return
         }
         super.removeView(removalReason)
