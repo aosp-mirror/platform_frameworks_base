@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.wallpapers;
 
 import android.app.WallpaperColors;
 import android.graphics.Bitmap;
