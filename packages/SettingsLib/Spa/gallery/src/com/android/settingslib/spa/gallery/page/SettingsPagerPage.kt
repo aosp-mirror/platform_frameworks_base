@@ -48,20 +48,10 @@ object SettingsPagerPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        SettingsPagerPage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun SettingsPagerPage() {
-    SettingsScaffold(title = TITLE) {
-        SettingsPager(listOf("Personal", "Work")) {
-            PlaceholderTitle("Page $it")
+        SettingsScaffold(title = TITLE) {
+            SettingsPager(listOf("Personal", "Work")) {
+                PlaceholderTitle("Page $it")
+            }
         }
     }
 }
@@ -70,6 +60,6 @@ private fun SettingsPagerPage() {
 @Composable
 private fun SettingsPagerPagePreview() {
     SettingsTheme {
-        SettingsPagerPage()
+        SettingsPagerPageProvider.Page(null)
     }
 }

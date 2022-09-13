@@ -90,20 +90,10 @@ object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        TwoTargetSwitchPreferencePage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun TwoTargetSwitchPreferencePage() {
-    RegularScaffold(title = TITLE) {
-        for (entry in TwoTargetSwitchPreferencePageProvider.buildEntry(arguments = null)) {
-            entry.uiLayout()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
         }
     }
 }
@@ -168,6 +158,6 @@ private fun SampleNotChangeableTwoTargetSwitchPreference() {
 @Composable
 private fun TwoTargetSwitchPreferencePagePreview() {
     SettingsTheme {
-        TwoTargetSwitchPreferencePage()
+        TwoTargetSwitchPreferencePageProvider.Page(null)
     }
 }

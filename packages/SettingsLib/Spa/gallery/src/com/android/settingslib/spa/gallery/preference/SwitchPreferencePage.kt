@@ -90,20 +90,10 @@ object SwitchPreferencePageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        SwitchPreferencePage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun SwitchPreferencePage() {
-    RegularScaffold(title = TITLE) {
-        for (entry in SwitchPreferencePageProvider.buildEntry(arguments = null)) {
-            entry.uiLayout()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
         }
     }
 }
@@ -168,6 +158,6 @@ private fun SampleNotChangeableSwitchPreference() {
 @Composable
 private fun SwitchPreferencePagePreview() {
     SettingsTheme {
-        SwitchPreferencePage()
+        SwitchPreferencePageProvider.Page(null)
     }
 }

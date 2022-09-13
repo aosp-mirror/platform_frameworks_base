@@ -69,22 +69,12 @@ object FooterPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        FooterPage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun FooterPage() {
-    RegularScaffold(title = TITLE) {
-        for (entry in FooterPageProvider.buildEntry(arguments = null)) {
-            entry.uiLayout()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
+            Footer(footerText = "Footer text always at the end of page.")
         }
-        Footer(footerText = "Footer text always at the end of page.")
     }
 }
 
@@ -92,6 +82,6 @@ private fun FooterPage() {
 @Composable
 private fun FooterPagePreview() {
     SettingsTheme {
-        FooterPage()
+        FooterPageProvider.Page(null)
     }
 }

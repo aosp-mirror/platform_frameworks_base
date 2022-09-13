@@ -84,20 +84,10 @@ object IllustrationPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        IllustrationPage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun IllustrationPage() {
-    RegularScaffold(title = TITLE) {
-        for (entry in IllustrationPageProvider.buildEntry(arguments = null)) {
-            entry.uiLayout()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
         }
     }
 }
@@ -106,6 +96,6 @@ private fun IllustrationPage() {
 @Composable
 private fun IllustrationPagePreview() {
     SettingsTheme {
-        IllustrationPage()
+        IllustrationPageProvider.Page(null)
     }
 }

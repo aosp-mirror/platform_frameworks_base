@@ -44,28 +44,22 @@ class ArgumentPageModel : PageModel() {
             navArgument(INT_PARAM_NAME) { type = NavType.IntType },
         )
 
-        fun buildArgument(stringParam: String, intParam: Int? = null): Bundle {
+        fun buildArgument(stringParam: String? = null, intParam: Int? = null): Bundle {
             val args = Bundle()
-            args.putString(STRING_PARAM_NAME, stringParam)
+            if (stringParam != null) args.putString(STRING_PARAM_NAME, stringParam)
             if (intParam != null) args.putInt(INT_PARAM_NAME, intParam)
             return args
         }
 
-        fun buildNextArgument(newStringParam: String, arguments: Bundle? = null): Bundle {
+        fun buildNextArgument(arguments: Bundle? = null): Bundle {
             val intParam = parameter.getIntArg(INT_PARAM_NAME, arguments)
-            return if (intParam == null)
-                buildArgument(newStringParam)
-            else
-                buildArgument(newStringParam, intParam + 1)
+            val nextIntParam = if (intParam != null) intParam + 1 else null
+            return buildArgument(intParam = nextIntParam)
         }
 
         fun isValidArgument(arguments: Bundle?): Boolean {
             val stringParam = parameter.getStringArg(STRING_PARAM_NAME, arguments)
             return (stringParam != null && listOf("foo", "bar").contains(stringParam))
-        }
-
-        fun getInjectEntryName(arguments: Bundle?): String {
-            return "${name}_${parameter.getStringArg(STRING_PARAM_NAME, arguments)}"
         }
 
         @Composable
