@@ -303,6 +303,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
     final ImePlatformCompatUtils mImePlatformCompatUtils;
+    final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
     private final DisplayManagerInternal mDisplayManagerInternal;
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
@@ -1732,6 +1733,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImePlatformCompatUtils = new ImePlatformCompatUtils();
+        mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
         mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
@@ -3888,6 +3890,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                                 SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR);
                     }
+                }
+                if (!isTextEditor && mInputShown && startInputByWinGainedFocus
+                        && mInputMethodDeviceConfigs.shouldHideImeWhenNoEditorFocus()) {
+                    // Hide the soft-keyboard when the system do nothing for softInputModeState
+                    // of the window being gained focus without an editor. This behavior benefits
+                    // to resolve some unexpected IME visible cases while that window with following
+                    // configurations being switched from an IME shown window:
+                    // 1) SOFT_INPUT_STATE_UNCHANGED state without an editor
+                    // 2) SOFT_INPUT_STATE_VISIBLE state without an editor
+                    // 3) SOFT_INPUT_STATE_ALWAYS_VISIBLE state without an editor
+                    hideCurrentInputLocked(mCurFocusedWindow, 0, null,
+                            SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR);
                 }
                 res = startInputUncheckedLocked(cs, inputContext,
                         remoteAccessibilityInputConnection, editorInfo, startInputFlags,
