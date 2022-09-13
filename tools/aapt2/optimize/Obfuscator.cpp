@@ -16,6 +16,7 @@
 
 #include "optimize/Obfuscator.h"
 
+#include <map>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -32,7 +33,10 @@ static const char base64_chars[] =
 
 namespace aapt {
 
-Obfuscator::Obfuscator(std::map<std::string, std::string>& path_map_out) : path_map_(path_map_out) {
+Obfuscator::Obfuscator(OptimizeOptions& optimizeOptions)
+    : options_(optimizeOptions.table_flattener_options),
+      shorten_resource_paths_(optimizeOptions.shorten_resource_paths),
+      collapse_key_stringpool_(optimizeOptions.table_flattener_options.collapse_key_stringpool) {
 }
 
 std::string ShortenFileName(const android::StringPiece& file_path, int output_length) {
@@ -77,7 +81,8 @@ struct PathComparator {
   }
 };
 
-bool Obfuscator::Consume(IAaptContext* context, ResourceTable* table) {
+static bool HandleShortenFilePaths(ResourceTable* table,
+                                   std::map<std::string, std::string>& shortened_path_map) {
   // used to detect collisions
   std::unordered_set<std::string> shortened_paths;
   std::set<FileReference*, PathComparator> file_refs;
@@ -109,10 +114,94 @@ bool Obfuscator::Consume(IAaptContext* context, ResourceTable* table) {
       shortened_path = GetShortenedPath(shortened_filename, extension, collision_count);
     }
     shortened_paths.insert(shortened_path);
-    path_map_.insert({*file_ref->path, shortened_path});
+    shortened_path_map.insert({*file_ref->path, shortened_path});
     file_ref->path = table->string_pool.MakeRef(shortened_path, file_ref->path.GetContext());
   }
   return true;
+}
+
+void Obfuscator::ObfuscateResourceName(
+    const bool collapse_key_stringpool, const std::set<ResourceName>& name_collapse_exemptions,
+    const ResourceNamedType& type_name, const ResourceTableEntryView& entry,
+    const android::base::function_ref<void(Result obfuscatedResult, const ResourceName&)>
+        onObfuscate) {
+  ResourceName resource_name({}, type_name, entry.name);
+  if (!collapse_key_stringpool ||
+      name_collapse_exemptions.find(resource_name) != name_collapse_exemptions.end()) {
+    onObfuscate(Result::Keep_ExemptionList, resource_name);
+  } else {
+    // resource isn't exempt from collapse, add it as obfuscated value
+    if (entry.overlayable_item) {
+      // if the resource name of the specific entry is obfuscated and this
+      // entry is in the overlayable list, the overlay can't work on this
+      // overlayable at runtime because the name has been obfuscated in
+      // resources.arsc during flatten operation.
+      onObfuscate(Result::Keep_Overlayable, resource_name);
+    } else {
+      onObfuscate(Result::Obfuscated, resource_name);
+    }
+  }
+}
+
+static bool HandleCollapseKeyStringPool(
+    const ResourceTable* table, const bool collapse_key_string_pool,
+    const std::set<ResourceName>& name_collapse_exemptions,
+    std::unordered_map<uint32_t, std::string>& id_resource_map) {
+  if (!collapse_key_string_pool) {
+    return true;
+  }
+
+  int entryResId = 0;
+  auto onObfuscate = [&entryResId, &id_resource_map](const Obfuscator::Result obfuscatedResult,
+                                                     const ResourceName& resource_name) {
+    if (obfuscatedResult == Obfuscator::Result::Obfuscated) {
+      id_resource_map.insert({entryResId, resource_name.entry});
+    }
+  };
+
+  for (auto& package : table->packages) {
+    for (auto& type : package->types) {
+      for (auto& entry : type->entries) {
+        if (!entry->id.has_value() || entry->name.empty()) {
+          continue;
+        }
+        entryResId = entry->id->id;
+        ResourceTableEntryView entry_view{
+            .name = entry->name,
+            .id = entry->id ? entry->id.value().entry_id() : (std::optional<uint16_t>)std::nullopt,
+            .visibility = entry->visibility,
+            .allow_new = entry->allow_new,
+            .overlayable_item = entry->overlayable_item,
+            .staged_id = entry->staged_id};
+
+        Obfuscator::ObfuscateResourceName(collapse_key_string_pool, name_collapse_exemptions,
+                                          type->named_type, entry_view, onObfuscate);
+      }
+    }
+  }
+
+  return true;
+}
+
+bool Obfuscator::Consume(IAaptContext* context, ResourceTable* table) {
+  HandleCollapseKeyStringPool(table, options_.collapse_key_stringpool,
+                              options_.name_collapse_exemptions, options_.id_resource_map);
+  if (shorten_resource_paths_) {
+    return HandleShortenFilePaths(table, options_.shortened_path_map);
+  }
+  return true;
+}
+
+/**
+ * Tell the optimizer whether it's needed to dump information for de-obfuscating.
+ *
+ * There are two conditions need to dump the information for de-obfuscating.
+ * * the option of shortening file paths is enabled.
+ * * the option of collapsing resource names is enabled.
+ * @return true if the information needed for de-obfuscating, otherwise false
+ */
+bool Obfuscator::IsEnabled() const {
+  return shorten_resource_paths_ || collapse_key_stringpool_;
 }
 
 }  // namespace aapt

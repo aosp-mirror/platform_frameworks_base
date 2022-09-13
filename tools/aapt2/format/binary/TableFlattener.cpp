@@ -32,6 +32,7 @@
 #include "format/binary/ChunkWriter.h"
 #include "format/binary/ResEntryWriter.h"
 #include "format/binary/ResourceTypeExtensions.h"
+#include "optimize/Obfuscator.h"
 #include "trace/TraceBuffer.h"
 
 using namespace android;
@@ -466,9 +467,6 @@ class PackageFlattener {
       // table.
       std::map<ConfigDescription, std::vector<FlatEntry>> config_to_entry_list_map;
 
-      // hardcoded string uses characters which make it an invalid resource name
-      const std::string obfuscated_resource_name = "0_resource_name_obfuscated";
-
       for (const ResourceTableEntryView& entry : type.entries) {
         if (entry.staged_id) {
           aliases_.insert(std::make_pair(
@@ -477,30 +475,31 @@ class PackageFlattener {
         }
 
         uint32_t local_key_index;
-        ResourceName resource_name({}, type.named_type, entry.name);
-        if (!collapse_key_stringpool_ ||
-            name_collapse_exemptions_.find(resource_name) != name_collapse_exemptions_.end()) {
-          local_key_index = (uint32_t)key_pool_.MakeRef(entry.name).index();
-        } else {
-          // resource isn't exempt from collapse, add it as obfuscated value
-          if (entry.overlayable_item) {
+        auto onObfuscate = [this, &local_key_index, &entry](Obfuscator::Result obfuscatedResult,
+                                                            const ResourceName& resource_name) {
+          if (obfuscatedResult == Obfuscator::Result::Keep_ExemptionList) {
+            local_key_index = (uint32_t)key_pool_.MakeRef(entry.name).index();
+          } else if (obfuscatedResult == Obfuscator::Result::Keep_Overlayable) {
             // if the resource name of the specific entry is obfuscated and this
             // entry is in the overlayable list, the overlay can't work on this
             // overlayable at runtime because the name has been obfuscated in
             // resources.arsc during flatten operation.
             const OverlayableItem& item = entry.overlayable_item.value();
             context_->GetDiagnostics()->Warn(android::DiagMessage(item.overlayable->source)
-                                             << "The resource name of overlayable entry "
-                                             << resource_name.to_string() << "'"
-                                             << " shouldn't be obfuscated in resources.arsc");
+                                             << "The resource name of overlayable entry '"
+                                             << resource_name.to_string()
+                                             << "' shouldn't be obfuscated in resources.arsc");
 
             local_key_index = (uint32_t)key_pool_.MakeRef(entry.name).index();
           } else {
-            // TODO(b/228192695): output the entry.name and Resource id to make
-            //  de-obfuscated possible.
-            local_key_index = (uint32_t)key_pool_.MakeRef(obfuscated_resource_name).index();
+            local_key_index =
+                (uint32_t)key_pool_.MakeRef(Obfuscator::kObfuscatedResourceName).index();
           }
-        }
+        };
+
+        Obfuscator::ObfuscateResourceName(collapse_key_stringpool_, name_collapse_exemptions_,
+                                          type.named_type, entry, onObfuscate);
+
         // Group values by configuration.
         for (auto& config_value : entry.values) {
           config_to_entry_list_map[config_value->config].push_back(

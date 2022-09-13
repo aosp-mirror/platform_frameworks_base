@@ -17,10 +17,14 @@
 #ifndef TOOLS_AAPT2_OPTIMIZE_OBFUSCATOR_H_
 #define TOOLS_AAPT2_OPTIMIZE_OBFUSCATOR_H_
 
-#include <map>
+#include <set>
 #include <string>
 
+#include "ResourceTable.h"
+#include "android-base/function_ref.h"
 #include "android-base/macros.h"
+#include "cmd/Optimize.h"
+#include "format/binary/TableFlattener.h"
 #include "process/IResourceTableConsumer.h"
 
 namespace aapt {
@@ -30,12 +34,26 @@ class ResourceTable;
 // Maps resources in the apk to shortened paths.
 class Obfuscator : public IResourceTableConsumer {
  public:
-  explicit Obfuscator(std::map<std::string, std::string>& path_map_out);
+  explicit Obfuscator(OptimizeOptions& optimizeOptions);
 
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
+  bool IsEnabled() const;
+
+  enum class Result { Obfuscated, Keep_ExemptionList, Keep_Overlayable };
+
+  // hardcoded string uses characters which make it an invalid resource name
+  static constexpr char kObfuscatedResourceName[] = "0_resource_name_obfuscated";
+
+  static void ObfuscateResourceName(
+      const bool collapse_key_stringpool, const std::set<ResourceName>& name_collapse_exemptions,
+      const ResourceNamedType& type_name, const ResourceTableEntryView& entry,
+      const android::base::function_ref<void(Result, const ResourceName&)> onObfuscate);
+
  private:
-  std::map<std::string, std::string>& path_map_;
+  TableFlattenerOptions& options_;
+  const bool shorten_resource_paths_;
+  const bool collapse_key_stringpool_;
   DISALLOW_COPY_AND_ASSIGN(Obfuscator);
 };
 
