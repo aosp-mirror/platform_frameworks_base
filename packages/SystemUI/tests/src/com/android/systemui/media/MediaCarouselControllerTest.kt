@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import javax.inject.Provider
@@ -38,6 +39,8 @@ import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
@@ -71,6 +74,10 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var player: TransitionLayout
     @Mock lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock lateinit var recommendations: TransitionLayout
+    @Mock lateinit var mediaPlayer: MediaControlPanel
+    @Mock lateinit var mediaViewController: MediaViewController
+    @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
+    @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -94,7 +101,10 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             logger,
             debugLogger
         )
-
+        verify(mediaDataManager).addListener(capture(listener))
+        whenever(mediaControlPanelFactory.get()).thenReturn(mediaPlayer)
+        whenever(mediaPlayer.mediaViewController).thenReturn(mediaViewController)
+        whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
         MediaPlayerData.clear()
     }
 
@@ -304,5 +314,64 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         mediaCarouselController.squishinessFraction = 0.5f
         verifyNoMoreInteractions(mediaViewHolder)
         verify(recommendationViewHolder.recommendations).bottom = 75
+    }
+
+    fun testMediaLoaded_ScrollToActivePlayer() {
+        listener.value.onMediaDataLoaded("playing local",
+                null,
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false)
+        )
+        listener.value.onMediaDataLoaded("paused local",
+                null,
+                DATA.copy(active = true, isPlaying = false,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false))
+        // adding a media recommendation card.
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
+                false, clock)
+        mediaCarouselController.shouldScrollToActivePlayer = true
+        // switching between media players.
+        listener.value.onMediaDataLoaded("playing local",
+        "playing local",
+                DATA.copy(active = true, isPlaying = false,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true)
+        )
+        listener.value.onMediaDataLoaded("paused local",
+                "paused local",
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false))
+
+        assertEquals(
+                MediaPlayerData.getMediaPlayerIndex("paused local"),
+                mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
+        )
+    }
+
+    @Test
+    fun testMediaLoadedFromRecommendationCard_ScrollToActivePlayer() {
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
+                false, clock)
+        listener.value.onMediaDataLoaded("playing local",
+                null,
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false)
+        )
+
+        var playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
+        assertEquals(
+                playerIndex,
+                mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
+        )
+        assertEquals( playerIndex, 0)
+
+        // Replaying the same media player one more time.
+        // And check that the card stays in its position.
+        listener.value.onMediaDataLoaded("playing local",
+                null,
+                DATA.copy(active = true, isPlaying = true,
+                        playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = false)
+        )
+        playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
+        assertEquals(playerIndex, 0)
     }
 }
