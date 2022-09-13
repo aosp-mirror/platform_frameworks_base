@@ -39,6 +39,11 @@ public interface LogWriter {
     void clicked(int category, String key);
 
     /**
+     * Logs a value changed event when user changed item value.
+     */
+    void changed(int category, String key, int value);
+
+    /**
      * Logs an user action.
      */
     void action(Context context, int category, Pair<Integer, Object>... taggedData);
