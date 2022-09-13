@@ -1733,7 +1733,7 @@
     <item name="default_lock_wallpaper" type="drawable">@null</item>
 
     <!-- Component name of the built in wallpaper used to display bitmap wallpapers. This must not be null. -->
-    <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.ImageWallpaper</string>
+    <string name="image_wallpaper_component" translatable="false">com.android.systemui/com.android.systemui.wallpapers.ImageWallpaper</string>
 
     <!-- True if WallpaperService is enabled -->
     <bool name="config_enableWallpaperService">true</bool>
