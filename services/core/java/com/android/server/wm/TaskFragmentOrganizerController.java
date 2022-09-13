@@ -649,6 +649,34 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 .build());
     }
 
+    void onTaskFragmentParentInfoChanged(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull Task task) {
+        validateAndGetState(organizer);
+        final PendingTaskFragmentEvent pendingEvent = getLastPendingParentInfoChangedEvent(
+                organizer, task);
+        if (pendingEvent == null) {
+            addPendingEvent(new PendingTaskFragmentEvent.Builder(
+                    PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED, organizer)
+                    .setTask(task)
+                    .build());
+        }
+    }
+
+    @Nullable
+    private PendingTaskFragmentEvent getLastPendingParentInfoChangedEvent(
+            @NonNull ITaskFragmentOrganizer organizer, @NonNull Task task) {
+        final List<PendingTaskFragmentEvent> events = mPendingTaskFragmentEvents
+                .get(organizer.asBinder());
+        for (int i = events.size() - 1; i >= 0; i--) {
+            final PendingTaskFragmentEvent event = events.get(i);
+            if (task == event.mTask
+                    && event.mEventType == PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED) {
+                return event;
+            }
+        }
+        return null;
+    }
+
     private void addPendingEvent(@NonNull PendingTaskFragmentEvent event) {
         mPendingTaskFragmentEvents.get(event.mTaskFragmentOrg.asBinder()).add(event);
     }
@@ -851,7 +879,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     private boolean shouldSendEventWhenTaskInvisible(@NonNull PendingTaskFragmentEvent event) {
-        if (event.mEventType == PendingTaskFragmentEvent.EVENT_ERROR) {
+        if (event.mEventType == PendingTaskFragmentEvent.EVENT_ERROR
+                // Always send parent info changed to update task visibility
+                || event.mEventType == PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED) {
             return true;
         }
 

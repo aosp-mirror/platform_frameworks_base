@@ -297,6 +297,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     final Point mLastSurfaceSize = new Point();
 
+    /** The latest updated value when there's a child {@link #onActivityVisibleRequestedChanged} */
+    boolean mVisibleRequested;
+
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpFullBounds = new Rect();
     /** For calculating screenWidthDp and screenWidthDp, i.e. the area without the system bars. */
@@ -2379,6 +2382,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
+    void sendTaskFragmentParentInfoChanged() {
+        final Task parentTask = getParent().asTask();
+        if (mTaskFragmentOrganizer != null && parentTask != null) {
+            mTaskFragmentOrganizerController
+                    .onTaskFragmentParentInfoChanged(mTaskFragmentOrganizer, parentTask);
+        }
+    }
+
     private void sendTaskFragmentAppeared() {
         if (mTaskFragmentOrganizer != null) {
             mTaskFragmentOrganizerController.onTaskFragmentAppeared(mTaskFragmentOrganizer, this);
@@ -2414,7 +2425,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
                 getNonFinishingActivityCount(),
-                isVisible(),
+                isVisibleRequested(),
                 childActivities,
                 positionInParent,
                 mClearedTaskForReuse,
@@ -2669,6 +2680,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // in fullscreen windowing mode even it doesn't match parent bounds because there will be
         // letterbox around its real content.
         return getWindowingMode() == WINDOWING_MODE_FULLSCREEN || matchParentBounds();
+    }
+
+    void onActivityVisibleRequestedChanged() {
+        final boolean isVisibleRequested = isVisibleRequested();
+        if (mVisibleRequested == isVisibleRequested) {
+            return;
+        }
+        mVisibleRequested = isVisibleRequested;
+        final TaskFragment parentTf = getParent().asTaskFragment();
+        if (parentTf != null) {
+            parentTf.onActivityVisibleRequestedChanged();
+        }
     }
 
     String toFullString() {
