@@ -158,6 +158,13 @@ class QSPanelTest : SysuiTestCase() {
         assertThat(qsPanel.paddingBottom).isEqualTo(padding)
     }
 
+    @Test
+    fun testSetSquishinessFraction_noCrash() {
+        qsPanel.addView(qsPanel.mTileLayout as View, 0)
+        qsPanel.addView(FrameLayout(context))
+        qsPanel.setSquishinessFraction(0.5f)
+    }
+
     private infix fun View.isLeftOf(other: View): Boolean {
         val rect = Rect()
         getBoundsOnScreen(rect)
