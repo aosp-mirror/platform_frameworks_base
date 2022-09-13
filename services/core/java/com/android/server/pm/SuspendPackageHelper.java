@@ -160,9 +160,11 @@ public final class SuspendPackageHelper {
                 }
             }
 
-            // If size one, the package will be unsuspended from this call
-            boolean packageUnsuspended =
-                    !suspended && CollectionUtils.size(suspendParamsMap) <= 1;
+            // If only the callingPackage is suspending this package,
+            // it will be unsuspended when this change is committed
+            boolean packageUnsuspended = !suspended
+                    && CollectionUtils.size(suspendParamsMap) == 1
+                    && suspendParamsMap.containsKey(callingPackage);
             if (suspended || packageUnsuspended) {
                 changedPackagesList.add(packageName);
                 changedUids.add(UserHandle.getUid(userId, packageState.getAppId()));
