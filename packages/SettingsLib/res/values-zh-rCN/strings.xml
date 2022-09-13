@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"通过 USB 验证应用"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"检查通过 ADB/ADT 安装的应用是否存在有害行为。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"系统将显示没有名称（只有 MAC 地址）的蓝牙设备"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"停用蓝牙绝对音量功能，以防在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"启用“蓝牙 Gabeldorsche”功能堆栈。"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"启用增强连接性功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本地终端"</string>
@@ -656,7 +656,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"更改输出来源"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"预测性返回手势动画"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"启用系统动画作为预测性返回手势动画。"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"预见式返回动画"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"启用系统动画作为预见式返回动画。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"此设置将启用系统动画作为预测性手势动画。这要求在清单文件中将单个应用的 enableOnBackInvokedCallback 设为 true。"</string>
 </resources>

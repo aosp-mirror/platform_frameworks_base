@@ -32,8 +32,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
@@ -42,44 +40,29 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.ShadeInterpolation;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
-import com.android.systemui.qs.external.CustomTileStatePersister;
-import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceRequestController;
-import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tileimpl.QSFactoryImpl;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.animation.UniqueObjectHostView;
-import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -125,33 +108,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         mFragments.dispatchResume();
         processAllMessages();
 
-        QSTileHost host =
-                new QSTileHost(
-                        mContext,
-                        mock(StatusBarIconController.class),
-                        mock(QSFactoryImpl.class),
-                        new Handler(),
-                        Looper.myLooper(),
-                        mock(PluginManager.class),
-                        mock(TunerService.class),
-                        () -> mock(AutoTileManager.class),
-                        mock(DumpManager.class),
-                        mock(BroadcastDispatcher.class),
-                        Optional.of(mock(CentralSurfaces.class)),
-                        mock(QSLogger.class),
-                        mock(UiEventLogger.class),
-                        mock(UserTracker.class),
-                        mock(SecureSettings.class),
-                        mock(CustomTileStatePersister.class),
-                        mTileServiceRequestControllerBuilder,
-                        mock(TileLifecycleManager.Factory.class));
-
         qs.setListening(true);
         processAllMessages();
 
         qs.setListening(false);
-        processAllMessages();
-        host.destroy();
         processAllMessages();
     }
 

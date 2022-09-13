@@ -203,6 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Eliminar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más en el grupo.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación más en el grupo.</item>
     </plurals>
@@ -223,7 +224,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Giro automático"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar la pantalla automáticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a la cámara"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al mic."</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
@@ -241,8 +242,8 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Red Wi-Fi no conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversión de color"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de colores"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corregir colores"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuración del usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
@@ -253,6 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos act."</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="many">%d devices</item>
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -285,7 +287,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Grabación de pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
-    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo de una mano"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo una mano"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Quieres desbloquear el micrófono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"¿Quieres desbloquear la cámara del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"¿Quieres desbloquear la cámara y el micrófono del dispositivo?"</string>
@@ -347,6 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Alcanzaste el límite de usuarios"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Puedes agregar hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>
       <item quantity="one">Solo se puede crear un usuario.</item>
     </plurals>
@@ -536,10 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posponer <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="many">%d hours</item>
       <item quantity="other">%d horas</item>
       <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -766,6 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controles de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige la app para agregar los controles"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
       <item quantity="other">Se agregaron <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
       <item quantity="one">Se agregó <xliff:g id="NUMBER_0">%s</xliff:g> control.</item>
     </plurals>
@@ -926,6 +932,7 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No agregar tarjeta"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> apps están activas</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps están activas</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app está activa</item>
     </plurals>
@@ -956,5 +963,5 @@
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo prioridad"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Se estableció la alarma"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"La cámara y el micrófono están apagados"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}other{# notificaciones}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}many{# notificaciones}other{# notificaciones}}"</string>
 </resources>
