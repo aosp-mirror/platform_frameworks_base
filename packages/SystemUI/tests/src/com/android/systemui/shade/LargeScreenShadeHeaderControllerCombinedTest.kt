@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.DisplayCutout
 import android.view.View
+import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -30,6 +31,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -64,6 +66,7 @@ import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.anyInt
@@ -612,6 +615,34 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(statusIcons, never()).addIgnoredSlot(
                 context.getString(com.android.internal.R.string.status_bar_alarm_clock)
         )
+    }
+
+    @Test
+    fun animateOutOnStartCustomizing() {
+        val animator = Mockito.mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+
+        controller.startCustomizingAnimation(show = true, duration)
+
+        verify(animator).setDuration(duration)
+        verify(animator).alpha(0f)
+        verify(animator).setInterpolator(Interpolators.ALPHA_OUT)
+        verify(animator).start()
+    }
+
+    @Test
+    fun animateInOnEndCustomizing() {
+        val animator = Mockito.mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+
+        controller.startCustomizingAnimation(show = false, duration)
+
+        verify(animator).setDuration(duration)
+        verify(animator).alpha(1f)
+        verify(animator).setInterpolator(Interpolators.ALPHA_IN)
+        verify(animator).start()
     }
 
     private fun createWindowInsets(
