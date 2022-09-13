@@ -161,10 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Imeshindwa kutambua uso. Tumia alama ya kidole."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (9044619102286917151) -->
-    <skip />
-    <!-- no translation found for keyguard_suggest_fingerprint (8742015961962702960) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Imeshindwa kutambua uso"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Badala yake, tumia alama ya kidole"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth imeunganishwa."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Asilimia ya betri haijulikani."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Imeunganishwa kwenye <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -600,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Imewashwa"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Imezimwa"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Hakipatikani"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Imezimwa"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Sehemu ya viungo muhimu"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Mpangilio"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Aina ya kitufe cha kushoto cha ziada"</string>
@@ -673,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa.\nGusa ili upate maelezo zaidi"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Angalia hatua za utunzaji"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Chomoa chaja"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Kuna tatizo la kuchaji kifaa hiki. Chomoa adapta ya nishati na uwe mwangalifu, huenda kebo ni moto."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Angalia hatua za ulinzi"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Njia ya mkato ya kushoto"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Njia ya mkato ya kulia"</string>
