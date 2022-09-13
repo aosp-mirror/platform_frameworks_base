@@ -82,6 +82,10 @@ object Flags {
     // TODO(b/257506350): Tracking Bug
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
+    @JvmField
+    val SIMPLIFIED_APPEAR_FRACTION =
+        unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
+
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
 

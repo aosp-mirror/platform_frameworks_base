@@ -32,6 +32,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -191,6 +192,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /** Used to track the Y positions that were already used to draw debug text labels. */
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
+    private final boolean mSimplifiedAppearFraction;
 
     private int mContentHeight;
     private float mIntrinsicContentHeight;
@@ -571,6 +573,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         FeatureFlags featureFlags = Dependency.get(FeatureFlags.class);
         mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
+        mSimplifiedAppearFraction = featureFlags.isEnabled(Flags.SIMPLIFIED_APPEAR_FRACTION);
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
         mScreenOffAnimationController =
                 Dependency.get(ScreenOffAnimationController.class);
@@ -1411,10 +1414,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         int stackHeight;
         float translationY;
-        float appearEndPosition = getAppearEndPosition();
-        float appearStartPosition = getAppearStartPosition();
         float appearFraction = 1.0f;
-        boolean appearing = height < appearEndPosition;
+        boolean appearing = calculateAppearFraction(height) < 1;
         mAmbientState.setAppearing(appearing);
         if (!appearing) {
             translationY = 0;
@@ -1445,11 +1446,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             } else {
                 // This may happen when pushing up a heads up. We linearly push it up from the
                 // start
-                translationY = height - appearStartPosition + getExpandTranslationStart();
+                translationY = height - getAppearStartPosition() + getExpandTranslationStart();
             }
             stackHeight = (int) (height - translationY);
-            if (isHeadsUpTransition()) {
-                translationY = MathUtils.lerp(mHeadsUpInset - mTopPadding, 0, appearFraction);
+            if (isHeadsUpTransition() && appearFraction >= 0) {
+                int topSpacing = mShouldUseSplitNotificationShade
+                        ? mAmbientState.getStackTopMargin() : mTopPadding;
+                float startPos = mHeadsUpInset - topSpacing;
+                translationY = MathUtils.lerp(startPos, 0, appearFraction);
             }
         }
         mAmbientState.setAppearFraction(appearFraction);
@@ -1581,7 +1585,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearEndPosition() {
-        int appearPosition = 0;
+        int appearPosition = mAmbientState.getStackTopMargin();
         int visibleNotifCount = mController.getVisibleNotificationCount();
         if (mEmptyShadeView.getVisibility() == GONE && visibleNotifCount > 0) {
             if (isHeadsUpTransition()
@@ -1605,16 +1609,47 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mAmbientState.getTrackedHeadsUpRow() != null;
     }
 
-    /**
-     * @param height the height of the panel
-     * @return the fraction of the appear animation that has been performed
-     */
+    // TODO(b/246353296): remove it when Flags.SIMPLIFIED_APPEAR_FRACTION is removed
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public float calculateAppearFraction(float height) {
+    public float calculateAppearFractionOld(float height) {
         float appearEndPosition = getAppearEndPosition();
         float appearStartPosition = getAppearStartPosition();
         return (height - appearStartPosition)
                 / (appearEndPosition - appearStartPosition);
+    }
+
+    /**
+     * @param height the height of the panel
+     * @return Fraction of the appear animation that has been performed. Normally follows expansion
+     * fraction so goes from 0 to 1, the only exception is HUN where it can go negative, down to -1,
+     * when HUN is swiped up.
+     */
+    @FloatRange(from = -1.0, to = 1.0)
+    public float simplifiedAppearFraction(float height) {
+        if (isHeadsUpTransition()) {
+            // HUN is a special case because fraction can go negative if swiping up. And for now
+            // it must go negative as other pieces responsible for proper translation up assume
+            // negative value for HUN going up.
+            // This can't use expansion fraction as that goes only from 0 to 1. Also when
+            // appear fraction for HUN is 0, expansion fraction will be already around 0.2-0.3
+            // and that makes translation jump immediately. Let's use old implementation for now and
+            // see if we can figure out something better
+            return MathUtils.constrain(calculateAppearFractionOld(height), -1, 1);
+        } else {
+            return mAmbientState.getExpansionFraction();
+        }
+    }
+
+    public float calculateAppearFraction(float height) {
+        if (mSimplifiedAppearFraction) {
+            return simplifiedAppearFraction(height);
+        } else if (mShouldUseSplitNotificationShade) {
+            // for split shade we want to always use the new way of calculating appear fraction
+            // because without it heads-up experience is very broken and it's less risky change
+            return simplifiedAppearFraction(height);
+        } else {
+            return calculateAppearFractionOld(height);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
