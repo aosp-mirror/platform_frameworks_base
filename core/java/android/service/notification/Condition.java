@@ -90,6 +90,12 @@ public final class Condition implements Parcelable {
     public final int icon;
 
     /**
+     * The maximum string length for any string contained in this condition.
+     * @hide
+     */
+    public static final int MAX_STRING_LENGTH = 1000;
+
+    /**
      * An object representing the current state of a {@link android.app.AutomaticZenRule}.
      * @param id the {@link android.app.AutomaticZenRule#getConditionId()} of the zen rule
      * @param summary a user visible description of the rule state.
@@ -103,16 +109,19 @@ public final class Condition implements Parcelable {
         if (id == null) throw new IllegalArgumentException("id is required");
         if (summary == null) throw new IllegalArgumentException("summary is required");
         if (!isValidState(state)) throw new IllegalArgumentException("state is invalid: " + state);
-        this.id = id;
-        this.summary = summary;
-        this.line1 = line1;
-        this.line2 = line2;
+        this.id = getTrimmedUri(id);
+        this.summary = getTrimmedString(summary);
+        this.line1 = getTrimmedString(line1);
+        this.line2 = getTrimmedString(line2);
         this.icon = icon;
         this.state = state;
         this.flags = flags;
     }
 
     public Condition(Parcel source) {
+        // This constructor passes all fields directly into the constructor that takes all the
+        // fields as arguments; that constructor will trim each of the input strings to
+        // max length if necessary.
         this((Uri)source.readParcelable(Condition.class.getClassLoader()),
                 source.readString(),
                 source.readString(),
@@ -239,4 +248,25 @@ public final class Condition implements Parcelable {
             return new Condition[size];
         }
     };
+
+    /**
+     * Returns a truncated copy of the string if the string is longer than MAX_STRING_LENGTH.
+     */
+    private static String getTrimmedString(String input) {
+        if (input != null && input.length() > MAX_STRING_LENGTH) {
+            return input.substring(0, MAX_STRING_LENGTH);
+        }
+        return input;
+    }
+
+    /**
+     * Returns a truncated copy of the Uri by trimming the string representation to the maximum
+     * string length.
+     */
+    private static Uri getTrimmedUri(Uri input) {
+        if (input != null && input.toString().length() > MAX_STRING_LENGTH) {
+            return Uri.parse(getTrimmedString(input.toString()));
+        }
+        return input;
+    }
 }
