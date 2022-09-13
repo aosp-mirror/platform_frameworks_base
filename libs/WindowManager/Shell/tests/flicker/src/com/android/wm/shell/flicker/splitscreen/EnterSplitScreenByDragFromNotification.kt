@@ -116,8 +116,26 @@ class EnterSplitScreenByDragFromNotification(
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesVisible() =
+    fun secondaryAppLayerBecomesVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.assertLayers {
+            this.isInvisible(sendNotificationApp)
+                .then()
+                .isVisible(sendNotificationApp)
+                .then()
+                .isInvisible(sendNotificationApp)
+                .then()
+                .isVisible(sendNotificationApp)
+        }
+    }
+
+    // TODO(b/245472831): Align to legacy transition after shell transition ready.
+    @Presubmit
+    @Test
+    fun secondaryAppLayerBecomesVisible_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.layerBecomesVisible(sendNotificationApp)
+    }
 
     @Presubmit
     @Test

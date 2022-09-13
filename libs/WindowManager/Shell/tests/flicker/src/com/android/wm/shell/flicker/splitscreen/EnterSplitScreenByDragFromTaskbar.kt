@@ -107,7 +107,26 @@ class EnterSplitScreenByDragFromTaskbar(
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(secondaryApp)
+    fun secondaryAppLayerBecomesVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.assertLayers {
+            this.isInvisible(secondaryApp)
+                .then()
+                .isVisible(secondaryApp)
+                .then()
+                .isInvisible(secondaryApp)
+                .then()
+                .isVisible(secondaryApp)
+        }
+    }
+
+    // TODO(b/245472831): Align to legacy transition after shell transition ready.
+    @Presubmit
+    @Test
+    fun secondaryAppLayerBecomesVisible_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        testSpec.layerBecomesVisible(secondaryApp)
+    }
 
     @Presubmit
     @Test
