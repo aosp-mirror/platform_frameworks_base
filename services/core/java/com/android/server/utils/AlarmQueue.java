@@ -34,6 +34,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.function.Predicate;
 
@@ -58,8 +59,11 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
      * The pair is the key and its associated alarm time (in the elapsed realtime timebase).
      */
     private static class AlarmPriorityQueue<Q> extends PriorityQueue<Pair<Q, Long>> {
+        private static final Comparator<Pair<?, Long>> sTimeComparator =
+                (o1, o2) -> Long.compare(o1.second, o2.second);
+
         AlarmPriorityQueue() {
-            super(1, (o1, o2) -> (int) (o1.second - o2.second));
+            super(1, sTimeComparator);
         }
 
         /**
