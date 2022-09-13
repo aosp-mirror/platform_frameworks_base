@@ -929,9 +929,18 @@ public class PipTouchHandler {
                     if (mMenuController.isMenuVisible()) {
                         mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
                     }
-                    if (toExpand) {
+
+                    // the size to toggle to after a double tap
+                    int nextSize = PipDoubleTapHelper
+                            .nextSizeSpec(mPipBoundsState, getUserResizeBounds());
+
+                    // actually toggle to the size chosen
+                    if (nextSize == PipDoubleTapHelper.SIZE_SPEC_MAX) {
                         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                         animateToMaximizedState(null);
+                    } else if (nextSize == PipDoubleTapHelper.SIZE_SPEC_DEFAULT) {
+                        mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
+                        animateToNormalSize(null);
                     } else {
                         animateToUnexpandedState(getUserResizeBounds());
                     }
