@@ -87,4 +87,6 @@ oneway interface IInputMethod {
     void finishStylusHandwriting();
 
     void removeStylusHandwritingWindow();
+
+    void setStylusWindowIdleTimeoutForTest(long timeout);
 }

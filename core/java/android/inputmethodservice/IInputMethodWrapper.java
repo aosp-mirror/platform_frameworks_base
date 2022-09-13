@@ -17,6 +17,7 @@
 package android.inputmethodservice;
 
 import android.annotation.BinderThread;
+import android.annotation.DurationMillisLong;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -82,6 +83,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_FINISH_STYLUS_HANDWRITING = 130;
     private static final int DO_UPDATE_TOOL_TYPE = 140;
     private static final int DO_REMOVE_STYLUS_HANDWRITING_WINDOW = 150;
+    private static final int DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT = 160;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -151,7 +153,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         final InputMethodServiceInternal target = mTarget.get();
         switch (msg.what) {
             case DO_DUMP: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                SomeArgs args = (SomeArgs) msg.obj;
                 if (isValid(inputMethod, target, "DO_DUMP")) {
                     final FileDescriptor fd = (FileDescriptor) args.arg1;
                     final PrintWriter fout = (PrintWriter) args.arg2;
@@ -201,7 +203,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 }
                 return;
             case DO_CREATE_SESSION: {
-                SomeArgs args = (SomeArgs)msg.obj;
+                SomeArgs args = (SomeArgs) msg.obj;
                 if (isValid(inputMethod, target, "DO_CREATE_SESSION")) {
                     inputMethod.createSession(new InputMethodSessionCallbackWrapper(
                             mContext, (InputChannel) args.arg1,
@@ -216,7 +218,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 }
                 return;
             case DO_SHOW_SOFT_INPUT: {
-                final SomeArgs args = (SomeArgs)msg.obj;
+                final SomeArgs args = (SomeArgs) msg.obj;
                 if (isValid(inputMethod, target, "DO_SHOW_SOFT_INPUT")) {
                     inputMethod.showSoftInputWithToken(
                             msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1);
@@ -287,6 +289,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 }
                 return;
             }
+            case DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT: {
+                inputMethod.setStylusWindowIdleTimeoutForTest((long) msg.obj);
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -300,7 +306,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
         if (target.getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
-            
+
             fout.println("Permission Denial: can't dump InputMethodManager from from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid());
@@ -471,6 +477,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void removeStylusHandwritingWindow() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_STYLUS_HANDWRITING_WINDOW));
+    }
+
+    @BinderThread
+    @Override
+    public void setStylusWindowIdleTimeoutForTest(@DurationMillisLong long timeout) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT, timeout));
     }
 
     private static boolean isValid(InputMethod inputMethod, InputMethodServiceInternal target,

@@ -60,6 +60,7 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.DurationMillisLong;
 import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -4457,6 +4458,31 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             try {
                 if (DEBUG) Slog.v(TAG, "Adding virtual stylus id for session");
                 addStylusDeviceIdLocked(VIRTUAL_STYLUS_ID_FOR_TEST);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /**
+     * Helper method to set a stylus idle-timeout after which handwriting {@code InkWindow}
+     * will be removed.
+     * @param timeout to set in milliseconds. To reset to default, use a value <= zero.
+     */
+    @BinderThread
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @Override
+    public void setStylusWindowIdleTimeoutForTest(
+            IInputMethodClient client, @DurationMillisLong long timeout) {
+        int uid = Binder.getCallingUid();
+        synchronized (ImfLock.class) {
+            if (!canInteractWithImeLocked(uid, client, "setStylusWindowIdleTimeoutForTest")) {
+                return;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG) Slog.v(TAG, "Setting stylus window idle timeout");
+                getCurMethodLocked().setStylusWindowIdleTimeoutForTest(timeout);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

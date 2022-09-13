@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -415,6 +416,14 @@ public interface InputMethod {
      * @hide
      */
     default void removeStylusHandwritingWindow() {
+        // intentionally empty
+    }
+
+    /**
+     * Set a stylus idle-timeout after which handwriting {@code InkWindow} will be removed.
+     * @hide
+     */
+    default void setStylusWindowIdleTimeoutForTest(@DurationMillisLong long timeout) {
         // intentionally empty
     }
 }

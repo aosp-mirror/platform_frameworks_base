@@ -36,8 +36,10 @@ import static com.android.internal.inputmethod.StartInputReason.BOUND_TO_IMMS;
 import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
 import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION;
 
+import android.Manifest;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -2572,6 +2574,20 @@ public final class InputMethodManager {
     public void addVirtualStylusIdForTestSession() {
         synchronized (mH) {
             mServiceInvoker.addVirtualStylusIdForTestSession(mClient);
+        }
+    }
+
+    /**
+     * Set a stylus idle-timeout after which handwriting {@code InkWindow} will be removed.
+     * <p> This API is for tests only.</p>
+     * @param timeout to set in milliseconds. To reset to default, use a value <= zero.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    @TestApi
+    public void setStylusWindowIdleTimeoutForTest(@DurationMillisLong long timeout) {
+        synchronized (mH) {
+            mServiceInvoker.setStylusWindowIdleTimeoutForTest(mClient, timeout);
         }
     }
 

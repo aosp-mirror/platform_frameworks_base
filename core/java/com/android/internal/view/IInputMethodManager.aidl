@@ -144,4 +144,10 @@ interface IInputMethodManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INJECT_EVENTS)")
     void addVirtualStylusIdForTestSession(in IInputMethodClient client);
+
+    /** Set a stylus idle-timeout after which handwriting {@code InkWindow} will be removed. */
+    @EnforcePermission("TEST_INPUT_METHOD")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.TEST_INPUT_METHOD)")
+    void setStylusWindowIdleTimeoutForTest(in IInputMethodClient client, long timeout);
 }

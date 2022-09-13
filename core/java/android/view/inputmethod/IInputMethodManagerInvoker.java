@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.annotation.AnyThread;
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -260,6 +261,16 @@ final class IInputMethodManagerInvoker {
     void addVirtualStylusIdForTestSession(IInputMethodClient client) {
         try {
             mTarget.addVirtualStylusIdForTestSession(client);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    void setStylusWindowIdleTimeoutForTest(
+            IInputMethodClient client, @DurationMillisLong long timeout) {
+        try {
+            mTarget.setStylusWindowIdleTimeoutForTest(client, timeout);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
