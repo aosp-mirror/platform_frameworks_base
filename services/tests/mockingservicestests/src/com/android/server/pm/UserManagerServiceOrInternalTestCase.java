@@ -535,8 +535,7 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
     }
 
     protected final void stopDefaultProfile() {
-        // TODO(b/244798930): should set it to STATE_STOPPING or STATE_SHUTDOWN instead
-        removeUserState(PROFILE_USER_ID);
+        setUserState(PROFILE_USER_ID, UserState.STATE_STOPPING);
     }
 
     // NOTE: should only called by tests that indirectly needs to check user assignments (like
