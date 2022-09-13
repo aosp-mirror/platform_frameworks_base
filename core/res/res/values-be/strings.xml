@@ -610,8 +610,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Аперацыя з адбіткамі пальцаў скасавана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Занадта шмат спроб. Скарыстайце блакіроўку экрана."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Паўтарыце спробу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
@@ -640,7 +639,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Звярніцеся ў сэрвісны цэнтр."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не ўдалося стварыць мадэль твару. Паўтарыце."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Занадта светла. Прыглушыце асвятленне."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Павялічце асвятленне"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Перамясціце тэлефон далей"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Перамясціце тэлефон бліжэй"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Перамясціце тэлефон вышэй"</string>

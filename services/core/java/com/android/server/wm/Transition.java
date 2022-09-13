@@ -2155,8 +2155,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 Slog.w(TAG, "Failed to capture screenshot for " + wc);
                 return false;
             }
+            final boolean isDisplayRotation = wc.asDisplayContent() != null
+                    && wc.asDisplayContent().isRotationChanging();
+            // Some tests may check the name "RotationLayer" to detect display rotation.
+            final String name = isDisplayRotation ? "RotationLayer" : "transition snapshot: " + wc;
             SurfaceControl snapshotSurface = wc.makeAnimationLeash()
-                    .setName("transition snapshot: " + wc.toString())
+                    .setName(name)
                     .setOpaque(true)
                     .setParent(wc.getSurfaceControl())
                     .setSecure(screenshotBuffer.containsSecureLayers())
@@ -2166,9 +2170,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mFrozen.add(wc);
             final ChangeInfo changeInfo = Objects.requireNonNull(mChanges.get(wc));
             changeInfo.mSnapshot = snapshotSurface;
-            if (wc.asDisplayContent() != null) {
-                // This isn't cheap, so only do it for rotations: assume display-level is rotate
-                // since most of the time it is.
+            if (isDisplayRotation) {
+                // This isn't cheap, so only do it for display rotations.
                 changeInfo.mSnapshotLuma = RotationAnimationUtils.getMedianBorderLuma(
                         screenshotBuffer.getHardwareBuffer(), screenshotBuffer.getColorSpace());
             }

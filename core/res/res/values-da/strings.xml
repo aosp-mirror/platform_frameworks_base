@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeraftrykshandlingen blev annulleret."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeraftrykshandlingen blev annulleret af brugeren."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Du har prøvet for mange gange. Prøv igen senere."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Du har brugt for mange forsøg. Brug skærmlåsen i stedet."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Prøv igen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Der er ikke registreret nogen fingeraftryk."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Denne enhed har ingen fingeraftrykslæser."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Få den repareret."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Din ansigtsmodel kan ikke oprettes. Prøv igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Der er for lyst. Prøv en mere dæmpet belysning."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Prøv med mere belysning"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Flyt telefonen længere væk"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Flyt telefonen tættere på"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Løft telefonen højere op"</string>

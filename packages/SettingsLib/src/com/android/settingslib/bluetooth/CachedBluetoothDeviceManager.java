@@ -357,8 +357,12 @@ public class CachedBluetoothDeviceManager {
      * {@code false}.
      */
     public synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
-        if (mOngoingSetMemberPair != null || device.getBondState() != BluetoothDevice.BOND_NONE
+        boolean isOngoingSetMemberPair = mOngoingSetMemberPair != null;
+        int bondState = device.getBondState();
+        if (isOngoingSetMemberPair || bondState != BluetoothDevice.BOND_NONE
                 || !mCsipDeviceManager.isExistedGroupId(groupId)) {
+            Log.d(TAG, "isOngoingSetMemberPair: " + isOngoingSetMemberPair
+                    + " , device.getBondState: " + bondState);
             return false;
         }
 

@@ -72,13 +72,13 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
     }
 
     @Test
-    public void testComplicationAddition() {
+    public void testOnMediaDataLoaded_complicationAddition() {
         final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
                 mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
-
         sentinel.start();
 
         final MediaDataManager.Listener listener = captureMediaDataListener();
+
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
         listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */ true,
                 /* receivedSmartspaceCardLatency= */ 0, /* isSsReactived= */ false);
@@ -90,6 +90,19 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
         verify(mDreamOverlayStateController).addComplication(eq(mMediaEntryComplication));
         verify(mDreamOverlayStateController, never()).addComplication(
                 not(eq(mMediaEntryComplication)));
+    }
+
+    @Test
+    public void testOnMediaDataRemoved_complicationRemoval() {
+        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
+                mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
+        sentinel.start();
+
+        final MediaDataManager.Listener listener = captureMediaDataListener();
+
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */true,
+                /* receivedSmartspaceCardLatency= */0, /* isSsReactived= */ false);
 
         listener.onMediaDataRemoved(mKey);
         verify(mDreamOverlayStateController, never()).removeComplication(any());
@@ -100,7 +113,30 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
     }
 
     @Test
-    public void testMediaDreamSentinel_mediaComplicationDisabled_doNotAddComplication() {
+    public void testOnMediaDataLoaded_complicationRemoval() {
+        final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,
+                mDreamOverlayStateController, mMediaEntryComplication, mFeatureFlags);
+        sentinel.start();
+
+        final MediaDataManager.Listener listener = captureMediaDataListener();
+
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */true,
+                /* receivedSmartspaceCardLatency= */0, /* isSsReactived= */ false);
+        verify(mDreamOverlayStateController, never()).removeComplication(any());
+
+        listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */true,
+                /* receivedSmartspaceCardLatency= */0, /* isSsReactived= */ false);
+        verify(mDreamOverlayStateController, never()).removeComplication(any());
+
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
+        listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */true,
+                /* receivedSmartspaceCardLatency= */0, /* isSsReactived= */ false);
+        verify(mDreamOverlayStateController).removeComplication(eq(mMediaEntryComplication));
+    }
+
+    @Test
+    public void testOnMediaDataLoaded_mediaComplicationDisabled_doesNotAddComplication() {
         when(mFeatureFlags.isEnabled(MEDIA_DREAM_COMPLICATION)).thenReturn(false);
 
         final MediaDreamSentinel sentinel = new MediaDreamSentinel(mContext, mMediaDataManager,

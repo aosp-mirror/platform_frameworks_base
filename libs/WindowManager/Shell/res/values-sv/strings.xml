@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problem med kameran?\nTryck för att anpassa på nytt"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Löstes inte problemet?\nTryck för att återställa"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Inga problem med kameran? Tryck för att ignorera."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Se och gör mer"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Dra till en annan app för läget Delad skärm"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tryck snabbt två gånger utanför en app för att flytta den"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Utöka för mer information."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Utöka"</string>

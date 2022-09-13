@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Massa intents. Utilitza el bloqueig de pantalla."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Torna-ho a provar."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No s\'ha registrat cap empremta digital."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un proveïdor de reparacions."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"No es pot crear el model facial. Torna-ho a provar."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Massa brillant Prova una il·luminació més suau."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Prova amb més il·luminació"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allunya\'t del telèfon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Apropa el telèfon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Mou el telèfon més amunt"</string>

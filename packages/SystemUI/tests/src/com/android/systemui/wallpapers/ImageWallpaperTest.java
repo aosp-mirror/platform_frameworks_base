@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.wallpapers;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -40,7 +40,8 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 
-import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.wallpapers.gl.ImageWallpaperRenderer;
 
 import org.junit.Before;
 import org.junit.Ignore;

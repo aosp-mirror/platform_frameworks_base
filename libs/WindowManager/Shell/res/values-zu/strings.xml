@@ -76,12 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Izinkinga zekhamera?\nThepha ukuze uyilinganise kabusha"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Akuyilungisanga?\nThepha ukuze ubuyele"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Azikho izinkinga zekhamera? Thepha ukuze ucashise."</string>
-    <!-- no translation found for letterbox_education_dialog_title (7739895354143295358) -->
-    <skip />
-    <!-- no translation found for letterbox_education_split_screen_text (6206339484068670830) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (4589957299813220661) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Bona futhi wenze okuningi"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Hudula kwenye i-app mayelana nokuhlukanisa isikrini"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Thepha kabili ngaphandle kwe-app ukuze uyimise kabusha"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ngiyezwa"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Nweba ukuze uthole ulwazi olwengeziwe"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Khulisa"</string>

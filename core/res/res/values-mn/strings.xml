@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Хурууны хээний бүртгэл амжилтгүй боллоо."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Хэрэглэгч хурууны хээний баталгаажуулалтыг цуцалсан байна."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Хэтэрхий олон оролдлоо.  Түр хүлээгээд дахин оролдоно уу."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ ашиглана уу."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Дахин оролдно уу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бүртгүүлсэн хурууны хээ алга."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Энэ төхөөрөмжид хурууны хээ мэдрэгч алга."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Засварын үйлчилгээ үзүүлэгчид зочилно уу."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Нүүрний загвар үүсгэж чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Хэт цайвар байна. Гэрэл багатай газар оролдоно уу."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Гэрэлтэй орчинд туршина уу"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Утсаа холдуулна уу"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Утсаа ойртуулна уу"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Утсаа дээшлүүлнэ үү"</string>

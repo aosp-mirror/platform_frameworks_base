@@ -547,8 +547,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNavigationModeController,
                 mFragmentService,
                 mContentResolver,
-                mQuickAccessWalletController,
-                mQrCodeScannerController,
                 mRecordingController,
                 mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
@@ -556,7 +554,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mPanelExpansionStateManager,
                 mNotificationRemoteInputManager,
                 mSysUIUnfoldComponent,
-                mControlsComponent,
                 mInteractionJankMonitor,
                 mQsFrameTranslateController,
                 mSysUiState,
@@ -569,8 +566,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mShadeTransitionController,
                 mSystemClock,
                 mock(CameraGestureHelper.class),
-                () -> mKeyguardBottomAreaViewModel,
-                () -> mKeyguardBottomAreaInteractor);
+                mKeyguardBottomAreaViewModel,
+                mKeyguardBottomAreaInteractor);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
