@@ -62,18 +62,22 @@ class OpenAppColdFromIcon(
         get() = {
             super.transition(this)
             setup {
-                tapl.setExpectedRotation(Surface.ROTATION_0)
+                if (testSpec.isTablet) {
+                    tapl.setExpectedRotation(testSpec.startRotation)
+                } else {
+                    tapl.setExpectedRotation(Surface.ROTATION_0)
+                }
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 this.setRotation(testSpec.startRotation)
-            }
-            teardown {
-                testApp.exit(wmHelper)
             }
             transitions {
                 tapl.goHome()
                     .switchToAllApps()
                     .getAppIcon(testApp.launcherName)
                     .launch(testApp.`package`)
+            }
+            teardown {
+                testApp.exit(wmHelper)
             }
         }
 
