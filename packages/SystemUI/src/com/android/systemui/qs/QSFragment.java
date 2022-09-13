@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
@@ -165,6 +166,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     // Whether QQS or QS is visible. When in lockscreen, this is true if and only if QQS or QS is
     // visible;
     private boolean mQsVisible;
+
+    /**
+     * Whether the notification panel uses the full width of the screen.
+     *
+     * Usually {@code true} on small screens, and {@code false} on large screens.
+     */
+    private boolean mIsNotificationPanelFullWidth;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -571,15 +579,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setTransitionToFullShadeAmount(float pxAmount, float progress) {
-        boolean isTransitioningToFullShade = pxAmount > 0;
+    public void setTransitionToFullShadeProgress(
+            boolean isTransitioningToFullShade,
+            @FloatRange(from = 0.0, to = 1.0) float qsTransitionFraction,
+            @FloatRange(from = 0.0, to = 1.0) float qsSquishinessFraction) {
         if (isTransitioningToFullShade != mTransitioningToFullShade) {
             mTransitioningToFullShade = isTransitioningToFullShade;
             updateShowCollapsedOnKeyguard();
         }
-        mFullShadeProgress = progress;
+        mFullShadeProgress = qsTransitionFraction;
         setQsExpansion(mLastQSExpansion, mLastPanelFraction, mLastHeaderTranslation,
-                isTransitioningToFullShade ? progress : mSquishinessFraction);
+                isTransitioningToFullShade ? qsSquishinessFraction : mSquishinessFraction);
     }
 
     @Override
@@ -598,12 +608,16 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void setIsNotificationPanelFullWidth(boolean isFullWidth) {
+        mIsNotificationPanelFullWidth = isFullWidth;
+    }
+
+    @Override
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
-        float alphaProgress = mTransitioningToFullShade || mState == StatusBarState.KEYGUARD
-                ? mFullShadeProgress : panelExpansionFraction;
-        setAlphaAnimationProgress(mInSplitShade ? alphaProgress : 1);
+        float alphaProgress = calculateAlphaProgress(panelExpansionFraction);
+        setAlphaAnimationProgress(alphaProgress);
         mContainer.setExpansion(expansion);
         final float translationScaleY = (mInSplitShade
                 ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
@@ -684,10 +698,43 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = mQSPanelController.isBouncerInTransit()
-                ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress)
-                : ShadeInterpolation.getContentAlpha(progress);
-        view.setAlpha(alpha);
+        view.setAlpha(interpolateAlphaAnimationProgress(progress));
+    }
+
+    private float calculateAlphaProgress(float panelExpansionFraction) {
+        if (mIsNotificationPanelFullWidth) {
+            // Small screens. QS alpha is not animated.
+            return 1;
+        }
+        if (mInSplitShade) {
+            // Large screens in landscape.
+            if (mTransitioningToFullShade || isKeyguardState()) {
+                // Always use "mFullShadeProgress" on keyguard, because
+                // "panelExpansionFractions" is always 1 on keyguard split shade.
+                return mFullShadeProgress;
+            } else {
+                return panelExpansionFraction;
+            }
+        }
+        // Large screens in portrait.
+        if (mTransitioningToFullShade) {
+            // Only use this value during the standard lock screen shade expansion. During the
+            // "quick" expansion from top, this value is 0.
+            return mFullShadeProgress;
+        } else {
+            return panelExpansionFraction;
+        }
+    }
+
+    private float interpolateAlphaAnimationProgress(float progress) {
+        if (mQSPanelController.isBouncerInTransit()) {
+            return BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress);
+        }
+        if (isKeyguardState()) {
+            // Alpha progress should be linear on lockscreen shade expansion.
+            return progress;
+        }
+        return ShadeInterpolation.getContentAlpha(progress);
     }
 
     private void updateQsBounds() {
