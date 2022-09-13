@@ -543,4 +543,37 @@ public class BiometricScheduler {
         mPendingOperations.clear();
         mCurrentOperation = null;
     }
+
+    /**
+     * Marks all pending operations as canceling and cancels the current
+     * operation.
+     */
+    private void clearScheduler() {
+        if (mCurrentOperation == null) {
+            return;
+        }
+        for (BiometricSchedulerOperation pendingOperation : mPendingOperations) {
+            Slog.d(getTag(), "[Watchdog cancelling pending] "
+                    + pendingOperation.getClientMonitor());
+            pendingOperation.markCanceling();
+        }
+        Slog.d(getTag(), "[Watchdog cancelling current] "
+                + mCurrentOperation.getClientMonitor());
+        mCurrentOperation.cancel(mHandler, getInternalCallback());
+    }
+
+    /**
+     * Start the timeout for the watchdog.
+     */
+    public void startWatchdog() {
+        if (mCurrentOperation == null) {
+            return;
+        }
+        final BiometricSchedulerOperation mOperation = mCurrentOperation;
+        mHandler.postDelayed(() -> {
+            if (mOperation == mCurrentOperation) {
+                clearScheduler();
+            }
+        }, 10000);
+    }
 }

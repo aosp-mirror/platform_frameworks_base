@@ -267,7 +267,7 @@ public class BiometricSchedulerOperation {
 
     /** Flags this operation as canceled, if possible, but does not cancel it until started. */
     public boolean markCanceling() {
-        if (mState == STATE_WAITING_IN_QUEUE && isInterruptable()) {
+        if (mState == STATE_WAITING_IN_QUEUE) {
             mState = STATE_WAITING_IN_QUEUE_CANCELING;
             return true;
         }
@@ -287,10 +287,6 @@ public class BiometricSchedulerOperation {
         }
 
         final int currentState = mState;
-        if (!isInterruptable()) {
-            Slog.w(TAG, "Cannot cancel - operation not interruptable: " + this);
-            return;
-        }
         if (currentState == STATE_STARTED_CANCELING) {
             Slog.w(TAG, "Cannot cancel - already invoked for operation: " + this);
             return;
@@ -301,10 +297,10 @@ public class BiometricSchedulerOperation {
                 || currentState == STATE_WAITING_IN_QUEUE_CANCELING
                 || currentState == STATE_WAITING_FOR_COOKIE) {
             Slog.d(TAG, "[Cancelling] Current client (without start): " + mClientMonitor);
-            ((Interruptable) mClientMonitor).cancelWithoutStarting(getWrappedCallback(callback));
+            mClientMonitor.cancelWithoutStarting(getWrappedCallback(callback));
         } else {
             Slog.d(TAG, "[Cancelling] Current client: " + mClientMonitor);
-            ((Interruptable) mClientMonitor).cancel();
+            mClientMonitor.cancel();
         }
 
         // forcibly finish this client if the HAL does not acknowledge within the timeout

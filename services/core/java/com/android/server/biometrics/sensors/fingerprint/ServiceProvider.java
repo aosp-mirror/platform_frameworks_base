@@ -140,4 +140,10 @@ public interface ServiceProvider extends
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
             @NonNull String opPackageName);
+
+    /**
+     * Schedules watchdog for canceling hung operations
+     * @param sensorId sensor ID of the associated operation
+     */
+    default void scheduleWatchdog(int sensorId) {}
 }

@@ -183,6 +183,18 @@ public class FaceService extends SystemService {
                     receiver, opPackageName, disabledFeatures, previewSurface, debugConsent);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void scheduleWatchdog() {
+            final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for scheduling watchdog");
+                return;
+            }
+
+            provider.second.scheduleWatchdog(provider.first);
+        }
+
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_BIOMETRIC)
         @Override // Binder call
         public long enrollRemotely(int userId, final IBinder token, final byte[] hardwareAuthToken,

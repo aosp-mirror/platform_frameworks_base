@@ -21,6 +21,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -292,5 +293,31 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
                 + ", cookie=" + getCookie()
                 + ", requestId=" + getRequestId()
                 + ", userId=" + getTargetUserId() + "}";
+    }
+
+    /**
+     * Cancels this ClientMonitor
+     */
+    public void cancel() {
+        cancelWithoutStarting(mCallback);
+    }
+
+    /**
+     * Cancels this ClientMonitor without starting
+     * @param callback
+     */
+    public void cancelWithoutStarting(@NonNull ClientMonitorCallback callback) {
+        Slog.d(TAG, "cancelWithoutStarting: " + this);
+
+        final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
+        try {
+            ClientMonitorCallbackConverter listener = getListener();
+            if (listener != null) {
+                listener.onError(getSensorId(), getCookie(), errorCode, 0 /* vendorCode */);
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to invoke sendError", e);
+        }
+        callback.onClientFinished(this, true /* success */);
     }
 }
