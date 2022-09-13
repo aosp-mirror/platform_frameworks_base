@@ -29,7 +29,10 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -78,29 +81,28 @@ class EnterPipToOtherOrientationTest(
      */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setupAndTeardown(this)
-
             setup {
-                eachRun {
-                    // Launch a portrait only app on the fullscreen stack
-                    testApp.launchViaIntent(
-                        wmHelper, stringExtras = mapOf(
-                            EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString()
-                        )
+                RemoveAllTasksButHomeRule.removeAllTasksButHome()
+                device.wakeUpAndGoToHomeScreen()
+
+                // Launch a portrait only app on the fullscreen stack
+                testApp.launchViaIntent(
+                    wmHelper, stringExtras = mapOf(
+                        EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString()
                     )
-                    // Launch the PiP activity fixed as landscape
-                    pipApp.launchViaIntent(
-                        wmHelper, stringExtras = mapOf(
-                            EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()
-                        )
+                )
+                // Launch the PiP activity fixed as landscape
+                pipApp.launchViaIntent(
+                    wmHelper, stringExtras = mapOf(
+                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()
                     )
-                }
+                )
             }
             teardown {
-                eachRun {
-                    pipApp.exit(wmHelper)
-                    testApp.exit(wmHelper)
-                }
+                setRotation(Surface.ROTATION_0)
+                RemoveAllTasksButHomeRule.removeAllTasksButHome()
+                pipApp.exit(wmHelper)
+                testApp.exit(wmHelper)
             }
             transitions {
                 // Enter PiP, and assert that the PiP is within bounds now that the device is back

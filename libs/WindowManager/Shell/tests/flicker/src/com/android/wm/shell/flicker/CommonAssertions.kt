@@ -99,12 +99,37 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
     portraitPosTop: Boolean
 ) {
     assertLayers {
-        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
+        // TODO(b/242025948): Use SPLIT_SCREEN_DIVIDER_COMPONENT.or(component) for notContains
+        // and isInvisible when they are ready.
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT)
             .then()
-            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+            .notContains(component, isOptional = true)
+            .then()
+            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT, isOptional = true)
+            .then()
+            .isInvisible(component, isOptional = true)
             .then()
             .splitAppLayerBoundsSnapToDivider(
                 component, landscapePosLeft, portraitPosTop, endRotation)
+    }
+}
+
+fun FlickerTestParameter.splitAppLayerBoundsBecomesVisibleByDrag(
+    component: IComponentMatcher
+) {
+    assertLayers {
+        // TODO(b/242025948): Use SPLIT_SCREEN_DIVIDER_COMPONENT.or(component) for notContains
+        // and isInvisible when they are ready.
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT)
+            .then()
+            .notContains(component, isOptional = true)
+            .then()
+            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT, isOptional = true)
+            .then()
+            .isInvisible(component, isOptional = true)
+            .then()
+            // TODO(b/245472831): Verify the component should snap to divider.
+            .isVisible(component)
     }
 }
 

@@ -10220,6 +10220,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ApplicationInfo applicationInfo = mIPackageManager.getApplicationInfo(
                             enabledPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES,
                             userIdToCheck);
+
+                    if (applicationInfo == null) {
+                        return false;
+                    }
+
                     systemService = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 } catch (RemoteException e) {
                     Slogf.i(LOG_TAG, "Can't talk to package managed", e);
@@ -15408,24 +15413,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
 
-            final String[] feature_allow =
-                    { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED };
-            final String[] feature_disallow =
-                    { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED };
-
-            boolean compatible = true;
-            for (Account account : accounts) {
-                if (hasAccountFeatures(am, account, feature_disallow)) {
-                    Slogf.e(LOG_TAG, "%s has %s", account, feature_disallow[0]);
-                    compatible = false;
-                    break;
-                }
-                if (!hasAccountFeatures(am, account, feature_allow)) {
-                    Slogf.e(LOG_TAG, "%s doesn't have %s", account, feature_allow[0]);
-                    compatible = false;
-                    break;
-                }
-            }
+            boolean compatible = !hasIncompatibleAccounts(am, accounts);
             if (compatible) {
                 Slogf.w(LOG_TAG, "All accounts are compatible");
             } else {
@@ -15433,6 +15421,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return !compatible;
         });
+    }
+
+    private boolean hasIncompatibleAccounts(AccountManager am, Account[] accounts) {
+        // TODO(b/244284408): Add test
+        final String[] feature_allow =
+                { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED };
+        final String[] feature_disallow =
+                { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED };
+
+        for (Account account : accounts) {
+            if (hasAccountFeatures(am, account, feature_disallow)) {
+                Slogf.e(LOG_TAG, "%s has %s", account, feature_disallow[0]);
+                return true;
+            }
+            if (!hasAccountFeatures(am, account, feature_allow)) {
+                Slogf.e(LOG_TAG, "%s doesn't have %s", account, feature_allow[0]);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean hasAccountFeatures(AccountManager am, Account account, String[] features) {
@@ -18698,7 +18707,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         AccountManager am = AccountManager.get(mContext);
         Account[] accounts = am.getAccounts();
-        return accounts.length == 0;
+        if (accounts.length == 0) {
+            return true;
+        }
+        return !hasIncompatibleAccounts(am, accounts);
     }
 
     private void setBypassDevicePolicyManagementRoleQualificationStateInternal(

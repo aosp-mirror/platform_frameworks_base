@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ফিংগাৰপ্ৰিণ্ট কাৰ্য বাতিল কৰা হ’ল।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্ট ক্ৰিয়া বাতিল কৰিছে।"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"অত্যধিক ভুল প্ৰয়াস। কিছুসময়ৰ পাছত আকৌ চেষ্টা কৰক।"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"অতি বেছিসংখ্যক প্ৰয়াস। ইয়াৰ সলনি স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"আকৌ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"মেৰামতি সেৱা প্ৰদানকাৰী কোনো প্ৰতিষ্ঠানলৈ যাওক।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"মুখাৱয়বৰ মডেল সৃষ্টি কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"অতি উজ্জ্বল। ইয়াতকৈ কম পোহৰৰ উৎস ব্যৱহাৰ কৰক।"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"উজ্জ্বল পোহৰ থকা ঠাইলৈ গৈ চাওক"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ফ’নটো আৰু আঁতৰলৈ নিয়ক"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ফ’নটো ওচৰলৈ আনক"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ফ’নটো ওপৰলৈ নিয়ক"</string>

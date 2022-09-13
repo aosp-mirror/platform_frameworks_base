@@ -59,16 +59,12 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = false) {
             setup {
-                test {
-                    imeApp.launchViaIntent(wmHelper)
-                    setRotation(testSpec.startRotation)
-                }
+                imeApp.launchViaIntent(wmHelper)
+                setRotation(testSpec.startRotation)
             }
             teardown {
-                test {
-                    imeApp.exit(wmHelper)
-                    setRotation(Surface.ROTATION_0)
-                }
+                imeApp.exit(wmHelper)
+                setRotation(Surface.ROTATION_0)
             }
             transitions {
                 // open the soft keyboard

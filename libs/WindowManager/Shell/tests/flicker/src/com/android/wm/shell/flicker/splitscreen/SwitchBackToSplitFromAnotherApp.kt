@@ -55,14 +55,12 @@ class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScr
         get() = {
             super.transition(this)
             setup {
-                eachRun {
-                    SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
 
-                    thirdApp.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withWindowSurfaceAppeared(thirdApp)
-                        .waitForAndVerify()
-                }
+                thirdApp.launchViaIntent(wmHelper)
+                wmHelper.StateSyncBuilder()
+                    .withWindowSurfaceAppeared(thirdApp)
+                    .waitForAndVerify()
             }
             transitions {
                 tapl.launchedAppState.quickSwitchToPreviousApp()

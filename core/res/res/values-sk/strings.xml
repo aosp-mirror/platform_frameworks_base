@@ -607,8 +607,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Overenie odtlačku prsta zrušil používateľ."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Príliš veľa pokusov. Skúste to neskôr."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Príliš veľa pokusov. Použite radšej zámku obrazovky."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Skúste to znova"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Neregistrovali ste žiadne odtlačky prstov."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Toto zariadenie nemá senzor odtlačkov prstov."</string>
@@ -637,7 +636,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Navštívte poskytovateľa opráv."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Model tváre sa nedá vytvoriť. Skúste to znova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Príliš veľa svetla. Skúste jemnejšie osvetlenie."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Skúste lepšie osvetlenie"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Oddiaľte telefón"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Priblížte telefón"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Posuňte telefón vyššie"</string>

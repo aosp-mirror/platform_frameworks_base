@@ -69,15 +69,11 @@ open class QuickSwitchBetweenTwoAppsBackTest(
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotation(testSpec.startRotation)
-            }
-            eachRun {
-                testApp1.launchViaIntent(wmHelper)
-                testApp2.launchViaIntent(wmHelper)
-                startDisplayBounds = wmHelper.currentState.layerState
-                    .physicalDisplayBounds ?: error("Display not found")
-            }
+            tapl.setExpectedRotation(testSpec.startRotation)
+            testApp1.launchViaIntent(wmHelper)
+            testApp2.launchViaIntent(wmHelper)
+            startDisplayBounds = wmHelper.currentState.layerState
+                .physicalDisplayBounds ?: error("Display not found")
         }
         transitions {
             tapl.launchedAppState.quickSwitchToPreviousApp()
@@ -89,10 +85,8 @@ open class QuickSwitchBetweenTwoAppsBackTest(
         }
 
         teardown {
-            test {
-                testApp1.exit(wmHelper)
-                testApp2.exit(wmHelper)
-            }
+            testApp1.exit(wmHelper)
+            testApp2.exit(wmHelper)
         }
     }
 

@@ -64,33 +64,27 @@ open class SwitchImeWindowsFromGestureNavTest(
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            test {
-                tapl.setExpectedRotationCheckEnabled(false)
-            }
-            eachRun {
-                this.setRotation(testSpec.startRotation)
-                testApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp)
-                    .waitForAndVerify()
+            tapl.setExpectedRotationCheckEnabled(false)
+            this.setRotation(testSpec.startRotation)
+            testApp.launchViaIntent(wmHelper)
+            wmHelper.StateSyncBuilder()
+                .withFullScreenApp(testApp)
+                .waitForAndVerify()
 
-                imeTestApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(imeTestApp)
-                    .waitForAndVerify()
+            imeTestApp.launchViaIntent(wmHelper)
+            wmHelper.StateSyncBuilder()
+                .withFullScreenApp(imeTestApp)
+                .waitForAndVerify()
 
-                imeTestApp.openIME(wmHelper)
-            }
+            imeTestApp.openIME(wmHelper)
         }
         teardown {
-            eachRun {
-                tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
-                testApp.exit(wmHelper)
-                imeTestApp.exit(wmHelper)
-            }
+            tapl.goHome()
+            wmHelper.StateSyncBuilder()
+                .withHomeActivityVisible()
+                .waitForAndVerify()
+            testApp.exit(wmHelper)
+            imeTestApp.exit(wmHelper)
         }
         transitions {
             // [Step1]: Swipe right from imeTestApp to testApp task

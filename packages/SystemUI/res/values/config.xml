@@ -587,9 +587,6 @@
          when the double-press power gesture is used. Ignored if empty. -->
     <string translatable="false" name="config_cameraGesturePackage"></string>
 
-    <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
-    <bool name="allow_force_nav_bar_handle_opaque">true</bool>
-
     <!-- Whether a transition of ACTIVITY_TYPE_DREAM to the home app should play a home sound
          effect -->
     <bool name="config_playHomeSoundAfterDream">false</bool>

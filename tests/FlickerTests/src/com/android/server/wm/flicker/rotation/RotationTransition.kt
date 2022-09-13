@@ -34,14 +34,10 @@ abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                this.setRotation(testSpec.startRotation)
-            }
+            this.setRotation(testSpec.startRotation)
         }
         teardown {
-            test {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
         transitions {
             this.setRotation(testSpec.endRotation)

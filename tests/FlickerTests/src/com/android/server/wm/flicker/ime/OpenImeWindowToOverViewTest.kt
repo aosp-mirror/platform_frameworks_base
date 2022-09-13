@@ -57,9 +57,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                imeTestApp.launchViaIntent(wmHelper)
-            }
+            imeTestApp.launchViaIntent(wmHelper)
         }
         transitions {
             device.pressRecentApps()
@@ -69,13 +67,11 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
             builder.waitForAndVerify()
         }
         teardown {
-            test {
-                device.pressHome()
-                wmHelper.StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
-                imeTestApp.exit(wmHelper)
-            }
+            device.pressHome()
+            wmHelper.StateSyncBuilder()
+                .withHomeActivityVisible()
+                .waitForAndVerify()
+            imeTestApp.exit(wmHelper)
         }
     }
 

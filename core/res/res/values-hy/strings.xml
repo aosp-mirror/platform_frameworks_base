@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Իսկորոշումը մատնահետքի միջոցով չեղարկվեց:"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Մատնահետքով նույնականացման գործողությունը չեղարկվել է օգտատիրոջ կողմից:"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Չափից շատ փորձ եք կատարել: Փորձեք նորից քիչ հետո:"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Փորձեք նորից:"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Գրանցված մատնահետք չկա:"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Այս սարքը չունի մատնահետքերի սկաներ։"</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Այցելեք սպասարկման կենտրոն։"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Շատ լուսավոր է։ Փորձեք ավելի թեթև լուսավորություն։"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Ավելի պայծառ դարձրեք լուսավորությունը"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Փոքր-ինչ հեռու պահեք հեռախոսը"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Մոտեցրեք հեռախոսը"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Բարձրացրեք հեռախոսը"</string>

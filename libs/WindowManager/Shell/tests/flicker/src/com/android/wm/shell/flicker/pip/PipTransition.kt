@@ -23,7 +23,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.BaseTest
 import com.android.wm.shell.flicker.helpers.PipAppHelper
@@ -57,28 +56,6 @@ abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec
     }
 
     /**
-     * Gets a configuration that handles basic setup and teardown of pip tests
-     */
-    protected val setupAndTeardown: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                test {
-                    removeAllTasksButHome()
-                    device.wakeUpAndGoToHomeScreen()
-                }
-            }
-            teardown {
-                eachRun {
-                    setRotation(Surface.ROTATION_0)
-                }
-                test {
-                    removeAllTasksButHome()
-                    pipApp.exit(wmHelper)
-                }
-            }
-        }
-
-    /**
      * Gets a configuration that handles basic setup and teardown of pip tests and that
      * launches the Pip app for test
      *
@@ -93,30 +70,27 @@ abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec
         extraSpec: FlickerBuilder.() -> Unit = {}
     ): FlickerBuilder.() -> Unit {
         return {
-            setupAndTeardown(this)
-
             setup {
-                test {
-                    if (!eachRun) {
-                        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-                    }
+                setRotation(Surface.ROTATION_0)
+                removeAllTasksButHome()
+
+                if (!eachRun) {
+                    pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
                 }
-                eachRun {
-                    if (eachRun) {
-                        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-                    }
+                if (eachRun) {
+                    pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
                 }
             }
             teardown {
-                eachRun {
-                    if (eachRun) {
-                        pipApp.exit(wmHelper)
-                    }
+                setRotation(Surface.ROTATION_0)
+                removeAllTasksButHome()
+                pipApp.exit(wmHelper)
+
+                if (eachRun) {
+                    pipApp.exit(wmHelper)
                 }
-                test {
-                    if (!eachRun) {
-                        pipApp.exit(wmHelper)
-                    }
+                if (!eachRun) {
+                    pipApp.exit(wmHelper)
                 }
             }
 

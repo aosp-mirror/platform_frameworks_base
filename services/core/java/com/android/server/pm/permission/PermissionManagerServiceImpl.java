@@ -168,7 +168,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class PermissionManagerServiceImpl implements PermissionManagerServiceInterface {
 
-    private static final String TAG = "PackageManager";
+    private static final String TAG = "PermissionManager";
     private static final String LOG_TAG = PermissionManagerServiceImpl.class.getSimpleName();
 
     private static final String SKIP_KILL_APP_REASON_NOTIFICATION_TEST = "skip permission revoke "

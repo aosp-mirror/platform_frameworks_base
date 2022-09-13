@@ -96,6 +96,7 @@ public class LogAccessDialogActivity extends Activity implements
 
         // show Alert
         mAlert = mAlertDialog.create();
+        mAlert.getWindow().setHideOverlayWindows(true);
         mAlert.show();
 
         // set Alert Timeout

@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"指紋の操作がユーザーによりキャンセルされました。"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"所定の回数以上間違えました。しばらくしてからもう一度お試しください。"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
@@ -635,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"修理業者に調整を依頼してください。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"顔モデルを作成できません。もう一度お試しください。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"明るすぎます。もっと暗い場所でお試しください。"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"もっと明るい場所でお試しください"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"十分な光がありません"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"スマートフォンをもっと離してください"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"スマートフォンをもっと近づけてください"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"スマートフォンをもっと上げてください"</string>

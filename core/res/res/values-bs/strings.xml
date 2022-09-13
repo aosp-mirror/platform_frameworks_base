@@ -606,8 +606,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Radnja s otiskom prsta je otkazana."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Korisnik je otkazao radnju s otiskom prsta."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Previše pokušaja. Umjesto toga koristite zaključavanje ekrana."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Pokušajte ponovo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nije prijavljen nijedan otisak prsta."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ovaj uređaj nema senzor za otisak prsta."</string>
@@ -636,7 +635,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Posjetite pružaoca usluga za popravke."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nije moguće kreirati model lica. Pokušajte ponovo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Previše svijetlo. Probajte s blažim osvjetljenjem."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Pokušajte s jačim osvjetljenjem"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Odmaknite telefon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Primaknite telefon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Pomjerite telefon naviše"</string>

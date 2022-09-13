@@ -2991,6 +2991,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Add a decor insets provider window.
         final WindowState navbar = createNavBarWithProvidedInsets(squareDisplay);
         squareDisplay.getDisplayPolicy().updateDecorInsetsInfoIfNeeded(navbar);
+        squareDisplay.sendNewConfiguration();
         final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
 
         // create a fixed portrait activity

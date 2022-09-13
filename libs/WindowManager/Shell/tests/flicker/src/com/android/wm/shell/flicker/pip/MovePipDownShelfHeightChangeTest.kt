@@ -62,12 +62,8 @@ open class MovePipDownShelfHeightChangeTest(
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = false) {
             teardown {
-                eachRun {
-                    testApp.launchViaIntent(wmHelper)
-                }
-                test {
-                    testApp.exit(wmHelper)
-                }
+                testApp.launchViaIntent(wmHelper)
+                testApp.exit(wmHelper)
             }
             transitions {
                 tapl.pressHome()

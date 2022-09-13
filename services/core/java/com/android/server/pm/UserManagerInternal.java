@@ -352,10 +352,22 @@ public abstract class UserManagerInternal {
      * Returns the display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
      * user is not assigned to any display.
      *
-     * <p>The current foreground user is associated with the main display, while other users would
-     * only assigned to a display if they were started with
+     * <p>The current foreground user is associated with the
+     * {@link android.view.Display#DEFAULT_DISPLAY default display}, while other users would only be
+     * assigned to a display if they were started with
      * {@code ActivityManager.startUserInBackgroundOnSecondaryDisplay()}. If the user is a profile
      * and is running, it's assigned to its parent display.
      */
     public abstract int getDisplayAssignedToUser(@UserIdInt int userId);
+
+    /**
+     * Returns the main user (i.e., not a profile) that is assigned to the display, or the
+     * {@link android.app.ActivityManager#getCurrentUser() current foreground user} if no user is
+     * associated with the display.
+     *
+     * <p>The {@link android.view.Display#DEFAULT_DISPLAY default display} is always assigned to
+     * the current foreground user, while other displays would be associated with the user that was
+     * started with {@code ActivityManager.startUserInBackgroundOnSecondaryDisplay()}.
+     */
+    public abstract @UserIdInt int getUserAssignedToDisplay(int displayId);
 }

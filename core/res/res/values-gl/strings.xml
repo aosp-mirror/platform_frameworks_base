@@ -605,8 +605,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Cancelouse a operación da impresión dixital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"O usuario cancelou a operación da impresión dixital."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Demasiados intentos. Téntao de novo máis tarde."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Demasiados intentos. Mellor usa o bloqueo de pantalla."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Téntao de novo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Non se rexistraron impresións dixitais."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo non ten sensor de impresión dixital."</string>
@@ -635,7 +634,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un provedor de reparacións."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Non se puido crear o modelo facial. Téntao de novo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Hai demasiada iluminación. Proba cunha máis suave."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Proba con máis luz"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afasta o teléfono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Achega o teléfono"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Sube o teléfono"</string>

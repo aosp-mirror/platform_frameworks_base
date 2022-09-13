@@ -46,7 +46,7 @@ import com.android.server.pm.UserManagerService;
  * Legacy permission manager service.
  */
 public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stub {
-    private static final String TAG = "PackageManager";
+    private static final String TAG = "PermissionManager";
 
     /** Injector that can be used to facilitate testing. */
     private final Injector mInjector;

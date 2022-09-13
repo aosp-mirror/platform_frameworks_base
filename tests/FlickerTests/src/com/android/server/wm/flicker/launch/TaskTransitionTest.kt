@@ -65,14 +65,10 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            eachRun {
-                testApp.launchViaIntent(wmHelper)
-            }
+            testApp.launchViaIntent(wmHelper)
         }
         teardown {
-            test {
-                testApp.exit(wmHelper)
-            }
+            testApp.exit(wmHelper)
         }
         transitions {
             testApp.openNewTask(device, wmHelper)
