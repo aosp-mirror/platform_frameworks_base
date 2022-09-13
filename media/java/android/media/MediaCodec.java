@@ -3843,11 +3843,10 @@ final public class MediaCodec {
     private void invalidateByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index, boolean input) {
         if (buffers == null) {
-            if (index < 0) {
-                throw new IllegalStateException("index is negative (" + index + ")");
+            if (index >= 0) {
+                BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
+                indices.clear(index);
             }
-            BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
-            indices.clear(index);
         } else if (index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -3859,10 +3858,9 @@ final public class MediaCodec {
     private void validateInputByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index) {
         if (buffers == null) {
-            if (index < 0) {
-                throw new IllegalStateException("index is negative (" + index + ")");
+            if (index >= 0) {
+                mValidInputIndices.set(index);
             }
-            mValidInputIndices.set(index);
         } else if (index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -3876,11 +3874,10 @@ final public class MediaCodec {
             @Nullable ByteBuffer[] buffers, int index, boolean input) {
         synchronized(mBufferLock) {
             if (buffers == null) {
-                if (index < 0) {
-                    throw new IllegalStateException("index is negative (" + index + ")");
+                if (index >= 0) {
+                    BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
+                    indices.set(index);
                 }
-                BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
-                indices.set(index);
             } else if (index >= 0 && index < buffers.length) {
                 ByteBuffer buffer = buffers[index];
                 if (buffer != null) {
@@ -3893,10 +3890,9 @@ final public class MediaCodec {
     private void validateOutputByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index, @NonNull BufferInfo info) {
         if (buffers == null) {
-            if (index < 0) {
-                throw new IllegalStateException("index is negative (" + index + ")");
+            if (index >= 0) {
+                mValidOutputIndices.set(index);
             }
-            mValidOutputIndices.set(index);
         } else if (index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
