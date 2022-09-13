@@ -1198,7 +1198,7 @@ public class Vpn {
                 mContext.unbindService(mConnection);
                 cleanupVpnStateLocked();
             } else if (mVpnRunner != null) {
-                stopVpnRunnerAndNotifyAppLocked(mPackage);
+                stopVpnRunnerAndNotifyAppLocked();
             }
 
             try {
@@ -4061,7 +4061,7 @@ public class Vpn {
     }
 
     @GuardedBy("this")
-    private void stopVpnRunnerAndNotifyAppLocked(@NonNull String packageName) {
+    private void stopVpnRunnerAndNotifyAppLocked() {
         // Build intent first because the sessionKey will be reset after performing
         // VpnRunner.exit(). Also, cache mOwnerUID even if ownerUID will not be changed in
         // VpnRunner.exit() to prevent design being changed in the future.
@@ -4069,17 +4069,17 @@ public class Vpn {
         //  ConnectivityServiceTest.
         final int ownerUid = mOwnerUID;
         Intent intent = null;
-        if (SdkLevel.isAtLeastT() && isVpnApp(packageName)) {
+        if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
             intent = buildVpnManagerEventIntent(
                     VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
-                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                    -1 /* errorClass */, -1 /* errorCode*/, mPackage,
                     getSessionKeyLocked(), makeVpnProfileStateLocked(),
                     null /* underlyingNetwork */, null /* nc */, null /* lp */);
         }
         // cleanupVpnStateLocked() is called from mVpnRunner.exit()
         mVpnRunner.exit();
-        if (intent != null && isVpnApp(packageName)) {
-            notifyVpnManagerVpnStopped(packageName, ownerUid, intent);
+        if (intent != null && isVpnApp(mPackage)) {
+            notifyVpnManagerVpnStopped(mPackage, ownerUid, intent);
         }
     }
 
@@ -4099,7 +4099,7 @@ public class Vpn {
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
         if (isCurrentIkev2VpnLocked(packageName)) {
-            stopVpnRunnerAndNotifyAppLocked(packageName);
+            stopVpnRunnerAndNotifyAppLocked();
         }
     }
 
