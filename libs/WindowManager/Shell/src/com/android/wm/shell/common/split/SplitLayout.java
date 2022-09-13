@@ -561,6 +561,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         if (from == to) {
             // No animation run, still callback to stop resizing.
             mSplitLayoutHandler.onLayoutSizeChanged(this);
+
+            if (flingFinishedCallback != null) {
+                flingFinishedCallback.run();
+            }
             InteractionJankMonitorUtils.endTracing(
                     CUJ_SPLIT_SCREEN_RESIZE);
             return;
