@@ -107,9 +107,10 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateDefaultDisplayWindowingModeOnSettingsRetrieved() {
+    public void testUpdateDefaultTaskDisplayAreaWindowingModeOnSettingsRetrieved() {
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+                mWm.getDefaultDisplayContentLocked().getDefaultTaskDisplayArea()
+                        .getWindowingMode());
 
         mWm.mIsPc = true;
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
@@ -117,7 +118,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mWm.mRoot.onSettingsRetrieved();
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
-                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+                mWm.getDefaultDisplayContentLocked().getDefaultTaskDisplayArea()
+                        .getWindowingMode());
     }
 
     /**
