@@ -29,7 +29,7 @@ import android.util.TypedXmlSerializer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Computer;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;

@@ -23,16 +23,16 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACH
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility.RemoveUnnecessaryAndroidTestBaseLibrary;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.junit.Assume;
 import org.junit.Test;

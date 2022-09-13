@@ -33,13 +33,11 @@ import android.os.FabricatedOverlayInternal;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.content.om.OverlayConfig;
-import com.android.internal.util.CollectionUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Assert;
 import org.junit.Before;

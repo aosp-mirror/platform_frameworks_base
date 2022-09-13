@@ -72,8 +72,8 @@ import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.ArrayList;
 import java.util.Collections;

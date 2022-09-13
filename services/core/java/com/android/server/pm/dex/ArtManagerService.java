@@ -54,7 +54,7 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;

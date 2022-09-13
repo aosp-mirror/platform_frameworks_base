@@ -33,7 +33,7 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerException;
-import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
@@ -340,7 +340,7 @@ public class AndroidPackageUtils {
         info.versionCodeMajor = ((ParsingPackageHidden) pkg).getVersionCodeMajor();
     }
 
-    public static ApplicationInfo toAppInfoWithoutState(AndroidPackageApi pkg) {
+    public static ApplicationInfo toAppInfoWithoutState(AndroidPackage pkg) {
         return ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
     }
 }

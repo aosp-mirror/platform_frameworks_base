@@ -31,7 +31,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;

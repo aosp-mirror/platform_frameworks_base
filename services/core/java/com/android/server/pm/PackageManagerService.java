@@ -203,13 +203,14 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -6705,6 +6706,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void forEachPackage(@NonNull Computer snapshot, Consumer<AndroidPackage> consumer) {
+        final ArrayMap<String, ? extends PackageStateInternal> packageStates =
+                snapshot.getPackageStates();
+        int size = packageStates.size();
+        for (int index = 0; index < size; index++) {
+            PackageStateInternal packageState = packageStates.valueAt(index);
+            if (packageState.getPkg() != null) {
+                consumer.accept(packageState.getPkg());
+            }
+        }
+    }
+
+    void forEachPackageInternal(@NonNull Computer snapshot,
+            @NonNull Consumer<AndroidPackageInternal> consumer) {
         final ArrayMap<String, ? extends PackageStateInternal> packageStates =
                 snapshot.getPackageStates();
         int size = packageStates.size();

@@ -84,7 +84,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.UserManagerService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import libcore.util.EmptyArray;
 

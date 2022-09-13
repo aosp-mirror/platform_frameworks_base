@@ -29,7 +29,8 @@ import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl
@@ -520,7 +521,7 @@ class DomainVerificationManagerApiTest {
         pkgUserState1: PackageStateInternal.() -> PackageUserStateInternal = {
             PackageUserStateInternal.DEFAULT }
     ) = mockThrowOnUnmocked<PackageStateInternal> {
-        val pkg = mockThrowOnUnmocked<AndroidPackage> {
+        val pkg = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }

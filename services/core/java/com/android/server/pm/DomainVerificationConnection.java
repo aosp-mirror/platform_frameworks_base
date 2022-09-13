@@ -26,7 +26,7 @@ import android.os.Message;
 import android.os.UserHandle;
 
 import com.android.server.DeviceIdleInternal;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;

@@ -23,7 +23,7 @@ import android.content.pm.PackageInfo
 import android.os.Process
 import android.util.ArrayMap
 import com.android.server.om.OverlayActorEnforcer.ActorState
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat

@@ -20,8 +20,8 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACH
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 /**
  * Updates a package to ensure that if it targets < P that the org.apache.http.legacy library is

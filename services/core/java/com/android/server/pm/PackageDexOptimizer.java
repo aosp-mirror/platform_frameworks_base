@@ -77,8 +77,8 @@ import com.android.server.pm.dex.ArtStatsLogUtils.ArtStatsLogger;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.DexFile;

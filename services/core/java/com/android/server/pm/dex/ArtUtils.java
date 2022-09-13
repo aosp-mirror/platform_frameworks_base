@@ -21,8 +21,8 @@ import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import android.annotation.NonNull;
 
 import com.android.server.pm.PackageDexOptimizer;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;

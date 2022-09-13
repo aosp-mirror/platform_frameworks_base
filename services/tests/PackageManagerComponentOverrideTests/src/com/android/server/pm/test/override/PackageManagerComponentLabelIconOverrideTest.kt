@@ -21,14 +21,25 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import com.android.server.pm.pkg.component.ParsedActivity
 import android.os.Binder
 import android.os.UserHandle
 import android.util.ArrayMap
-import com.android.server.pm.*
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.AppsFilterImpl
+import com.android.server.pm.PackageManagerService
+import com.android.server.pm.PackageManagerServiceInjector
+import com.android.server.pm.PackageManagerServiceTestParams
+import com.android.server.pm.PackageManagerTracedLock
+import com.android.server.pm.PackageSetting
+import com.android.server.pm.PendingPackageBroadcasts
+import com.android.server.pm.Settings
+import com.android.server.pm.SharedLibrariesImpl
+import com.android.server.pm.UserManagerInternal
+import com.android.server.pm.UserManagerService
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
+import com.android.server.pm.pkg.AndroidPackage
+import com.android.server.pm.pkg.component.ParsedActivity
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
@@ -168,7 +179,7 @@ class PackageManagerComponentLabelIconOverrideTest {
     lateinit var params: Params
 
     private lateinit var mockPendingBroadcasts: PendingPackageBroadcasts
-    private lateinit var mockPkg: AndroidPackage
+    private lateinit var mockPkg: AndroidPackageInternal
     private lateinit var mockPkgSetting: PackageSetting
     private lateinit var service: PackageManagerService
 
@@ -287,7 +298,7 @@ class PackageManagerComponentLabelIconOverrideTest {
                     .apply(block)
                     .hideAsFinal()
 
-    private fun makePkgSetting(pkgName: String, pkg: AndroidPackage) =
+    private fun makePkgSetting(pkgName: String, pkg: AndroidPackageInternal) =
         PackageSetting(
             pkgName, null, File("/test"),
             null, null, null, null, 0, 0, 0, 0, null, null, null, null, null,
@@ -297,7 +308,7 @@ class PackageManagerComponentLabelIconOverrideTest {
                 this.flags = this.flags or ApplicationInfo.FLAG_SYSTEM
             }
             this.pkgState.isUpdatedSystemApp = params.isUpdatedSystemApp
-            this.pkg = pkg
+            setPkg(pkg)
         }
 
     private fun makeTestData() {

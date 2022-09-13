@@ -43,8 +43,6 @@ import android.Manifest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.SharedLibraryInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.UserHandle;
@@ -53,9 +51,11 @@ import android.util.Pair;
 
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import org.hamcrest.BaseMatcher;

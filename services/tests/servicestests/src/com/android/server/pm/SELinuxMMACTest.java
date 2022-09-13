@@ -26,9 +26,9 @@ import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

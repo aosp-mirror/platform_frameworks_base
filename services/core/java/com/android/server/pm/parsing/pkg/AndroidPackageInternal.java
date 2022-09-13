@@ -17,7 +17,7 @@
 package com.android.server.pm.parsing.pkg;
 
 import com.android.internal.content.om.OverlayConfig;
-import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.AndroidPackage;
 
 /**
  * The last state of a package during parsing/install before it is available in {@link
@@ -29,6 +29,7 @@ import com.android.server.pm.pkg.AndroidPackageApi;
  *
  * @hide
  */
-public interface AndroidPackage extends AndroidPackageApi, OverlayConfig.PackageProvider.Package {
+public interface AndroidPackageInternal extends AndroidPackage,
+        OverlayConfig.PackageProvider.Package {
 
 }

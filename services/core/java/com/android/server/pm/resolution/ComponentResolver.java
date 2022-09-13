@@ -51,7 +51,7 @@ import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.UserNeedsBadgingCache;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;

@@ -122,7 +122,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
 
 import libcore.util.EmptyArray;

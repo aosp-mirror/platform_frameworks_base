@@ -55,7 +55,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Computer;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
