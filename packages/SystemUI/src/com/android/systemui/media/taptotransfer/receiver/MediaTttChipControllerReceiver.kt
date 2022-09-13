@@ -140,7 +140,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         super.updateView(newInfo, currentView)
 
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
-            context, newInfo.routeInfo.clientPackageName
+            context, newInfo.routeInfo.clientPackageName, logger
         )
         val iconDrawable = newInfo.appIconDrawableOverride ?: iconInfo.drawable
         val iconContentDescription = newInfo.appNameOverride ?: iconInfo.contentDescription

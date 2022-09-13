@@ -120,7 +120,7 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // App icon
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
-            context, newInfo.routeInfo.clientPackageName
+            context, newInfo.routeInfo.clientPackageName, logger
         )
         MediaTttUtils.setIcon(
             currentView.requireViewById(R.id.app_icon),

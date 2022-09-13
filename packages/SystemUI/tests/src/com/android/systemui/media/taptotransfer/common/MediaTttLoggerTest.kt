@@ -72,6 +72,19 @@ class MediaTttLoggerTest : SysuiTestCase() {
         assertThat(actualString).contains(DEVICE_TYPE_TAG)
         assertThat(actualString).contains(reason)
     }
+
+    @Test
+    fun logPackageNotFound_bufferHasPackageName() {
+        val packageName = "this.is.a.package"
+
+        logger.logPackageNotFound(packageName)
+
+        val stringWriter = StringWriter()
+        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
+        val actualString = stringWriter.toString()
+
+        assertThat(actualString).contains(packageName)
+    }
 }
 
 private const val DEVICE_TYPE_TAG = "TEST TYPE"

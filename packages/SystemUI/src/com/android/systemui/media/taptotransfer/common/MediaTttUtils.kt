@@ -19,7 +19,6 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.util.Log
 import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
@@ -34,8 +33,13 @@ class MediaTttUtils {
          * default name and icon if we can't find the app name/icon.
          *
          * @param appPackageName the package name of the app playing the media.
+         * @param logger the logger to use for any errors.
          */
-        fun getIconInfoFromPackageName(context: Context, appPackageName: String?): IconInfo {
+        fun getIconInfoFromPackageName(
+            context: Context,
+            appPackageName: String?,
+            logger: MediaTttLogger
+        ): IconInfo {
             if (appPackageName != null) {
                 try {
                     val contentDescription =
@@ -52,7 +56,7 @@ class MediaTttUtils {
                         isAppIcon = true
                     )
                 } catch (e: PackageManager.NameNotFoundException) {
-                    Log.w(TAG, "Cannot find package $appPackageName", e)
+                    logger.logPackageNotFound(appPackageName)
                 }
             }
             return IconInfo(
@@ -101,5 +105,3 @@ data class IconInfo(
      */
     val isAppIcon: Boolean
 )
-
-private const val TAG = "MediaTtt"

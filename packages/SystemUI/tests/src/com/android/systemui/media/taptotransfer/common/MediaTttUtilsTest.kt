@@ -39,6 +39,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
     private lateinit var appIconFromPackageName: Drawable
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
+    @Mock private lateinit var logger: MediaTttLogger
 
     @Before
     fun setUp() {
@@ -64,7 +65,8 @@ class MediaTttUtilsTest : SysuiTestCase() {
 
     @Test
     fun getIconInfoFromPackageName_nullPackageName_returnsDefault() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null)
+        val iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null, logger)
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription)
@@ -73,7 +75,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
 
     @Test
     fun getIconInfoFromPackageName_invalidPackageName_returnsDefault() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName")
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName", logger)
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription)
@@ -82,7 +84,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
 
     @Test
     fun getIconInfoFromPackageName_validPackageName_returnsAppInfo() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, logger)
 
         assertThat(iconInfo.isAppIcon).isTrue()
         assertThat(iconInfo.drawable).isEqualTo(appIconFromPackageName)
