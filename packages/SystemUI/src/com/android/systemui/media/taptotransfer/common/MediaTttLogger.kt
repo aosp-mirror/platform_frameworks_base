@@ -29,15 +29,16 @@ class MediaTttLogger(
     private val buffer: LogBuffer
 ){
     /** Logs a change in the chip state for the given [mediaRouteId]. */
-    fun logStateChange(stateName: String, mediaRouteId: String) {
+    fun logStateChange(stateName: String, mediaRouteId: String, packageName: String?) {
         buffer.log(
             BASE_TAG + deviceTypeTag,
             LogLevel.DEBUG,
             {
                 str1 = stateName
                 str2 = mediaRouteId
+                str3 = packageName
             },
-            { "State changed to $str1 for ID=$str2" }
+            { "State changed to $str1 for ID=$str2 package=$str3" }
         )
     }
 

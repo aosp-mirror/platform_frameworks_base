@@ -23,11 +23,11 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.LogcatEchoTracker
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.StringWriter
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
-import java.io.PrintWriter
-import java.io.StringWriter
 
 @SmallTest
 class MediaTttLoggerTest : SysuiTestCase() {
@@ -43,11 +43,12 @@ class MediaTttLoggerTest : SysuiTestCase() {
     }
 
     @Test
-    fun logStateChange_bufferHasDeviceTypeTagAndStateNameAndId() {
+    fun logStateChange_bufferHasDeviceTypeTagAndParamInfo() {
         val stateName = "test state name"
         val id = "test id"
+        val packageName = "this.is.a.package"
 
-        logger.logStateChange(stateName, id)
+        logger.logStateChange(stateName, id, packageName)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
@@ -56,6 +57,7 @@ class MediaTttLoggerTest : SysuiTestCase() {
         assertThat(actualString).contains(DEVICE_TYPE_TAG)
         assertThat(actualString).contains(stateName)
         assertThat(actualString).contains(id)
+        assertThat(actualString).contains(packageName)
     }
 
     @Test

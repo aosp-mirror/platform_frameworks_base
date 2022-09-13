@@ -173,7 +173,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             null
         )
 
-        verify(logger).logStateChange(any(), any())
+        verify(logger).logStateChange(any(), any(), any())
     }
 
     @Test

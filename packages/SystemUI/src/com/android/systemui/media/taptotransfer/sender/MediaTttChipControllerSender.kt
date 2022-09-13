@@ -95,7 +95,7 @@ class MediaTttChipControllerSender @Inject constructor(
     ) {
         val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
         val stateName = chipState?.name ?: "Invalid"
-        logger.logStateChange(stateName, routeInfo.id)
+        logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
             Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
