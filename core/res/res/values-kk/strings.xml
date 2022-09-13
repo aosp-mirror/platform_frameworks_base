@@ -638,7 +638,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Жөндеу қызметіне барыңыз."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Бет үлгісі жасалмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Тым ашық. Күңгірттеу жарық керек."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Жарық деңгейін арттырыңыз."</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонды алшақ ұстаңыз."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>

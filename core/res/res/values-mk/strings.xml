@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операцијата со отпечаток се откажа."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Корисникот ја откажа потврдата со отпечаток."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Премногу обиди. Обидете се повторно подоцна."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Премногу обиди. Користете заклучување екран."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Обидете се повторно."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Не се запишани отпечатоци."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Уредов нема сензор за отпечатоци."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Однесете го на поправка."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не може да создаде модел на лик. Обидете се пак."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Премногу светла. Пробајте со послабо осветлување."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Пробајте со посилно осветлување"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Оддалечете го телефонот"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Доближете го телефонот"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Кренете го телефонот погоре"</string>

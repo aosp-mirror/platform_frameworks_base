@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kinansela ng user ang operasyon sa fingerprint."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Napakaraming pagtatangka. Subukan ulit sa ibang pagkakataon."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Masyadong maraming pagsubok. Gamitin na lang ang lock ng screen."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Subukang muli."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Walang naka-enroll na fingerprint."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Walang sensor ng fingerprint ang device na ito."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bumisita sa provider ng pag-aayos."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Hindi magawa ang iyong face model. Subukan ulit."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Masyadong maliwanag. Subukang bawasan ang liwanag."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Subukan sa mas maliwanag"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Ilayo pa ang telepono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Ilapit pa ang telepono"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Itaas pa ang telepono"</string>

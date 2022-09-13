@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"පරිශීලක විසින් ඇඟිලි සලකුණු මෙහෙයුම අවසන් කරන ලදී."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"උත්සාහ ගණන ඉතා වැඩියි. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ඔබගේ මුහුණු ආකෘතිය තැනිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"දීප්තිය වැඩියි. තවත් මඳ ආලෝකය උත්සාහ කරන්න."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"තවත් දීප්තිමත් ආලෝකය උත්සාහ කරන්න"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"දුරකථනය තවත් ඈතට ගෙන යන්න"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"දුරකථනය තවත් සමීපයට ගෙන එන්න"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"දුරකථනය තවත් ඉහළට ගෙන යන්න"</string>

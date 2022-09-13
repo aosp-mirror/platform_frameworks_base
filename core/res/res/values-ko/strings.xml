@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"사용자가 지문 인식 작업을 취소했습니다."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"시도 횟수가 너무 많습니다. 화면 잠금을 대신 사용하세요."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"다시 시도해 보세요."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"등록된 지문이 없습니다."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"기기에 지문 센서가 없습니다."</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"수리업체에 방문하세요."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"조명을 밝게 해 보세요."</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"휴대전화를 얼굴에서 더 멀리 떨어뜨려 주세요."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"휴대전화를 얼굴에 더 가까이 가져와 주세요."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위로 이동하세요"</string>

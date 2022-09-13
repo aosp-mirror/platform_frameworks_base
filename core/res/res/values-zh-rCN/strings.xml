@@ -608,8 +608,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指纹操作已取消。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"用户取消了指纹操作。"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"尝试次数过多，请稍后重试。"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (9060651300306264843) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"尝试次数过多，请通过屏幕锁定功能解锁。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"请重试。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"未注册任何指纹。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"此设备没有指纹传感器。"</string>
@@ -638,7 +637,8 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"请联系维修服务提供商。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"无法创建您的脸部模型，请重试。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度过高，请尝试使用较柔和的亮度。"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"请尝试调亮光线"</string>
+    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
+    <skip />
     <string name="face_acquired_too_close" msgid="4453646176196302462">"请将手机拿远一点"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"请将手机拿近一点"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"请将手机举高一点"</string>
