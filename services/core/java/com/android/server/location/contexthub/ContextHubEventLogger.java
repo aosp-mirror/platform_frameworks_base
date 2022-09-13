@@ -325,12 +325,8 @@ public class ContextHubEventLogger {
         }
     }
 
-    /**
-     * Creates a string representation of the logged events
-     *
-     * @return the dumped events
-     */
-    public synchronized String dump() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Nanoapp Loads:");
         sb.append(System.lineSeparator());
@@ -367,10 +363,5 @@ public class ContextHubEventLogger {
             sb.append(System.lineSeparator());
         }
         return sb.toString();
-    }
-
-    @Override
-    public String toString() {
-        return dump();
     }
 }
