@@ -294,6 +294,7 @@ public class AudioDeviceInventory {
         }
     }
 
+    // @GuardedBy("AudioDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     void onSetBtActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo btInfo, int streamType) {
         if (AudioService.DEBUG_DEVICES) {
@@ -1510,6 +1511,19 @@ public class AudioDeviceInventory {
             return di.mSensorUuid;
         }
     }
+
+    /* package */ AudioDeviceAttributes getDeviceOfType(int type) {
+        synchronized (mDevicesLock) {
+            for (DeviceInfo di : mConnectedDevices.values()) {
+                if (di.mDeviceType == type) {
+                    return new AudioDeviceAttributes(
+                            di.mDeviceType, di.mDeviceAddress, di.mDeviceName);
+                }
+            }
+        }
+        return null;
+    }
+
     //----------------------------------------------------------
     // For tests only
 
