@@ -205,15 +205,15 @@ static sp<AudioEffect> getAudioEffect(JNIEnv* env, jobject thiz)
     Mutex::Autolock l(sLock);
     AudioEffect* const ae =
             (AudioEffect*)env->GetLongField(thiz, fields.fidNativeAudioEffect);
-    return sp<AudioEffect>(ae);
+    return sp<AudioEffect>::fromExisting(ae);
 }
 
 static sp<AudioEffect> setAudioEffect(JNIEnv* env, jobject thiz,
                                     const sp<AudioEffect>& ae)
 {
     Mutex::Autolock l(sLock);
-    sp<AudioEffect> old =
-            (AudioEffect*)env->GetLongField(thiz, fields.fidNativeAudioEffect);
+    sp<AudioEffect> old = sp<AudioEffect>::fromExisting(
+            (AudioEffect*)env->GetLongField(thiz, fields.fidNativeAudioEffect));
     if (ae.get()) {
         ae->incStrong((void*)setAudioEffect);
     }
@@ -347,8 +347,8 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     // create the native AudioEffect object
     parcel = parcelForJavaObject(env, jAttributionSource);
     attributionSource.readFromParcel(parcel);
-    lpAudioEffect = new AudioEffect(attributionSource);
-    if (lpAudioEffect == 0) {
+    lpAudioEffect = sp<AudioEffect>::make(attributionSource);
+    if (lpAudioEffect == 0) {  // FIXME: I don't think this is actually possible.
         ALOGE("Error creating AudioEffect");
         goto setup_failure;
     }

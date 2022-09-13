@@ -142,7 +142,8 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
     mCaptureRate = rate;
 
     if (cbk != NULL) {
-        mCaptureThread = new CaptureThread(this, rate, ((flags & CAPTURE_CALL_JAVA) != 0));
+        mCaptureThread = sp<CaptureThread>::make(
+                sp<Visualizer>::fromExisting(this), rate, ((flags & CAPTURE_CALL_JAVA) != 0));
     }
     ALOGV("setCaptureCallBack() rate: %d thread %p flags 0x%08x",
             rate, mCaptureThread.get(), mCaptureFlags);
@@ -439,7 +440,7 @@ void Visualizer::controlStatusChanged(bool controlGranted) {
 
 //-------------------------------------------------------------------------
 
-Visualizer::CaptureThread::CaptureThread(Visualizer* receiver, uint32_t captureRate,
+Visualizer::CaptureThread::CaptureThread(const sp<Visualizer>& receiver, uint32_t captureRate,
         bool bCanCallJava)
     : Thread(bCanCallJava), mReceiver(receiver)
 {

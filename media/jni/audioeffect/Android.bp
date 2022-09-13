@@ -28,7 +28,7 @@ cc_library_shared {
         "libaudioclient",
         "libaudioutils",
         "libaudiofoundation",
-        "libbinder"
+        "libbinder",
     ],
 
     export_shared_lib_headers: [
@@ -42,6 +42,7 @@ cc_library_shared {
         "-Werror",
         "-Wunused",
         "-Wunreachable-code",
+        "-DANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION",
     ],
 
     // Workaround Clang LTO crash.
