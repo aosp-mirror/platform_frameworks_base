@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.glwallpaper;
+package com.android.systemui.wallpapers.gl;
 
 import static com.google.common.truth.Truth.assertThat;
 
