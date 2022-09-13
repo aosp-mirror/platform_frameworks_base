@@ -689,7 +689,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (Float.isNaN(centerX)) {
             centerX = mMagnificationFrame.centerX();
         }
-        if (Float.isNaN(centerX)) {
+        if (Float.isNaN(centerY)) {
             centerY = mMagnificationFrame.centerY();
         }
 
