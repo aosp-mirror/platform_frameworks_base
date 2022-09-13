@@ -121,8 +121,8 @@ final class AidlTestUtils {
         return hwInfo;
     }
 
-    static ProgramListChunk makeHalChunk(boolean purge, List<RadioManager.ProgramInfo> modified,
-            List<ProgramSelector.Identifier> removed) {
+    static ProgramListChunk makeHalChunk(boolean purge, boolean complete,
+            List<RadioManager.ProgramInfo> modified, List<ProgramSelector.Identifier> removed) {
         ProgramInfo[] halModified =
                 new android.hardware.broadcastradio.ProgramInfo[modified.size()];
         for (int i = 0; i < modified.size(); i++) {
@@ -134,7 +134,7 @@ final class AidlTestUtils {
         for (int i = 0; i < removed.size(); i++) {
             halRemoved[i] = ConversionUtils.identifierToHalProgramIdentifier(removed.get(i));
         }
-        return makeHalChunk(purge, /* complete= */ true, halModified, halRemoved);
+        return makeHalChunk(purge, complete, halModified, halRemoved);
     }
 
     static ProgramListChunk makeHalChunk(boolean purge, boolean complete,
@@ -147,7 +147,7 @@ final class AidlTestUtils {
         return halChunk;
     }
 
-    static ProgramList.Chunk makeChunk(boolean purge,
+    static ProgramList.Chunk makeChunk(boolean purge, boolean complete,
             List<RadioManager.ProgramInfo> modified,
             List<ProgramSelector.Identifier> removed) throws RemoteException {
         ArraySet<RadioManager.ProgramInfo> modifiedSet = new ArraySet<>();
@@ -158,8 +158,7 @@ final class AidlTestUtils {
         if (removed != null) {
             removedSet.addAll(removed);
         }
-        ProgramList.Chunk chunk = new ProgramList.Chunk(/* purge= */ purge, /* complete= */true,
-                modifiedSet, removedSet);
+        ProgramList.Chunk chunk = new ProgramList.Chunk(purge, complete, modifiedSet, removedSet);
         return chunk;
     }
 

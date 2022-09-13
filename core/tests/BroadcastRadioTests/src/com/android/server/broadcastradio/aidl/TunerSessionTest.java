@@ -676,10 +676,10 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         ProgramFilter halFilter = ConversionUtils.filterToHalProgramFilter(filter);
         List<RadioManager.ProgramInfo> modified = List.of(TEST_FM_INFO, TEST_RDS_INFO);
         List<ProgramSelector.Identifier> removed = new ArrayList<>();
-        ProgramListChunk halProgramList =
-                AidlTestUtils.makeHalChunk(/* purge= */ true, modified, removed);
+        ProgramListChunk halProgramList = AidlTestUtils.makeHalChunk(/* purge= */ true,
+                /* complete= */ true, modified, removed);
         ProgramList.Chunk expectedProgramList =
-                AidlTestUtils.makeChunk(/* purge= */ true, modified, removed);
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true, modified, removed);
 
         mTunerSessions[0].startProgramListUpdates(filter);
         mHalTunerCallback.onProgramListUpdated(halProgramList);
@@ -696,17 +696,17 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                 /* includeCategories= */ true, /* excludeModifications= */ false);
         mTunerSessions[0].startProgramListUpdates(filter);
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ true,
-                List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_FM_INFO_MODIFIED),
-                        List.of(TEST_RDS_PI_ID)));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
     }
 
     @Test
@@ -716,22 +716,22 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                 /* includeCategories= */ true, /* excludeModifications= */ false);
         mTunerSessions[0].startProgramListUpdates(filter);
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ true,
-                List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_FM_INFO_MODIFIED),
-                        List.of(TEST_RDS_PI_ID)));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
 
         mTunerSessions[0].startProgramListUpdates(filter);
 
         verify(mBroadcastRadioMock).startProgramListUpdates(any());
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ true, List.of(TEST_FM_INFO_MODIFIED),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
     }
 
     @Test
@@ -740,19 +740,19 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].startProgramListUpdates(/* filter= */ null);
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ true,
-                List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
 
         verify(mBroadcastRadioMock).startProgramListUpdates(any());
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_FM_INFO_MODIFIED),
-                        List.of(TEST_RDS_PI_ID)));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
     }
 
     @Test
@@ -765,15 +765,15 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].startProgramListUpdates(idFilter);
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_RDS_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_RDS_INFO), new ArrayList<>()));
 
         verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_RDS_INFO),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_RDS_INFO), new ArrayList<>()));
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(any());
     }
@@ -789,15 +789,15 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].startProgramListUpdates(filterExcludingModifications);
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
 
         verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_FM_INFO),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO), new ArrayList<>()));
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(any());
     }
@@ -813,19 +813,19 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].startProgramListUpdates(filterIncludingModifications);
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
 
         verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_FM_INFO),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO), new ArrayList<>()));
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
-                AidlTestUtils.makeChunk(/* purge= */ false, List.of(TEST_FM_INFO_MODIFIED),
-                        new ArrayList<>()));
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
     }
 
     @Test
@@ -840,7 +840,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         verify(mBroadcastRadioMock).stopProgramListUpdates();
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0)).onProgramListUpdated(any());
     }
@@ -893,17 +893,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         }
 
         mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
-                List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
                 .onProgramListUpdated(AidlTestUtils.makeChunk(/* purge= */ false,
-                        List.of(TEST_RDS_INFO), new ArrayList<>()));
+                        /* complete= */ true, List.of(TEST_RDS_INFO), new ArrayList<>()));
         verify(mAidlTunerCallbackMocks[1], CALLBACK_TIMEOUT)
                 .onProgramListUpdated(AidlTestUtils.makeChunk(/* purge= */ false,
-                        List.of(TEST_FM_INFO), new ArrayList<>()));
+                        /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
         verify(mAidlTunerCallbackMocks[2], CALLBACK_TIMEOUT)
                 .onProgramListUpdated(AidlTestUtils.makeChunk(/* purge= */ false,
-                        List.of(TEST_RDS_INFO, TEST_FM_INFO), new ArrayList<>()));
+                        /* complete= */ true, List.of(TEST_RDS_INFO, TEST_FM_INFO),
+                        new ArrayList<>()));
     }
 
     @Test
