@@ -49,7 +49,8 @@ fun AppInfo(packageName: String, userId: Int) {
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val packageInfo = remember { PackageManagers.getPackageInfoAsUser(packageName, userId) }
+        val packageInfo =
+            remember { PackageManagers.getPackageInfoAsUser(packageName, userId) } ?: return
         Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
             AppIcon(app = packageInfo.applicationInfo, size = SettingsDimension.appIconInfoSize)
         }

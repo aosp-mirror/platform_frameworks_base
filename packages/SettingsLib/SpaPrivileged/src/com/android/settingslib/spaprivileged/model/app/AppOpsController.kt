@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 
 class AppOpsController(
     context: Context,
@@ -32,21 +33,23 @@ class AppOpsController(
 ) {
     private val appOpsManager = checkNotNull(context.getSystemService(AppOpsManager::class.java))
 
+    val mode: LiveData<Int>
+        get() = _mode
     val isAllowed: LiveData<Boolean>
-        get() = _isAllowed
+        get() = Transformations.map(_mode) { it == MODE_ALLOWED }
 
     fun setAllowed(allowed: Boolean) {
         val mode = if (allowed) MODE_ALLOWED else MODE_ERRORED
         appOpsManager.setMode(op, app.uid, app.packageName, mode)
-        _isAllowed.postValue(allowed)
+        _mode.postValue(mode)
     }
 
     @Mode
     fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
 
-    private val _isAllowed = object : MutableLiveData<Boolean>() {
+    private val _mode = object : MutableLiveData<Int>() {
         override fun onActive() {
-            postValue(getMode() == MODE_ALLOWED)
+            postValue(getMode())
         }
 
         override fun onInactive() {
