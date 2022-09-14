@@ -36,6 +36,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.lifecycle.ViewModelProvider
@@ -67,7 +69,7 @@ private const val USER_VIEW = "user_view"
 /**
  * Support a fullscreen user switcher
  */
-class UserSwitcherActivity @Inject constructor(
+open class UserSwitcherActivity @Inject constructor(
     private val userSwitcherController: UserSwitcherController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val falsingCollector: FalsingCollector,
@@ -83,6 +85,7 @@ class UserSwitcherActivity @Inject constructor(
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
     private var addUserRecords = mutableListOf<UserRecord>()
+    private val onBackCallback = OnBackInvokedCallback { finish() }
     private val userSwitchedCallback: UserTracker.Callback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
             finish()
@@ -105,7 +108,11 @@ class UserSwitcherActivity @Inject constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createActivity()
+    }
 
+    @VisibleForTesting
+    fun createActivity() {
         setContentView(R.layout.user_switcher_fullscreen)
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -147,6 +154,9 @@ class UserSwitcherActivity @Inject constructor(
                 _ -> showPopupMenu()
             }
         }
+
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackCallback)
 
         userSwitcherController.init(parent)
         initBroadcastReceiver()
@@ -278,7 +288,12 @@ class UserSwitcherActivity @Inject constructor(
         if (isUsingModernArchitecture()) {
             return
         }
+        destroyActivity()
+    }
 
+    @VisibleForTesting
+    fun destroyActivity() {
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(onBackCallback)
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
         userTracker.removeCallback(userSwitchedCallback)
     }

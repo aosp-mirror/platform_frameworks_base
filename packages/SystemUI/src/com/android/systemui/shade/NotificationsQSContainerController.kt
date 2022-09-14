@@ -35,6 +35,7 @@ class NotificationsQSContainerController @Inject constructor(
     view: NotificationsQuickSettingsContainer,
     private val navigationModeController: NavigationModeController,
     private val overviewProxyService: OverviewProxyService,
+    private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
     private val featureFlags: FeatureFlags,
     @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
@@ -156,9 +157,12 @@ class NotificationsQSContainerController @Inject constructor(
         }
     }
 
-    override fun setCustomizerShowing(showing: Boolean) {
-        isQSCustomizing = showing
-        updateBottomSpacing()
+    override fun setCustomizerShowing(showing: Boolean, animationDuration: Long) {
+        if (showing != isQSCustomizing) {
+            isQSCustomizing = showing
+            largeScreenShadeHeaderController.startCustomizingAnimation(showing, animationDuration)
+            updateBottomSpacing()
+        }
     }
 
     override fun setDetailShowing(showing: Boolean) {
