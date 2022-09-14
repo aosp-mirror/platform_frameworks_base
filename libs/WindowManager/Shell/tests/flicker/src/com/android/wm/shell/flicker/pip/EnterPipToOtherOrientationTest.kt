@@ -231,11 +231,6 @@ class EnterPipToOtherOrientationTest(
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 227313015)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
     companion object {
         /**
          * Creates the test configurations.

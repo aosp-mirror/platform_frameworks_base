@@ -76,7 +76,7 @@ class OpenImeWindowFromFixedOrientationAppTest(
     }
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 

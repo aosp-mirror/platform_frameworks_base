@@ -171,18 +171,6 @@ open class SetRequestedOrientationWhilePinnedTest(
     /** {@inheritDoc}  */
     @Postsubmit
     @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc}  */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc}  */
-    @Postsubmit
-    @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc}  */
@@ -193,24 +181,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     /** {@inheritDoc}  */
     @Postsubmit
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc}  */
-    @Postsubmit
-    @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc}  */
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc}  */
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

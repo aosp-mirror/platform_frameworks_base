@@ -24,7 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -58,91 +57,6 @@ open class OpenAppFromNotificationCold(
                 tapl.overview.dismissAllTasks()
             }
         }
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun notificationAppWindowVisibleAtEnd() = super.notificationAppWindowVisibleAtEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun notificationAppWindowOnTopAtEnd() = super.notificationAppWindowOnTopAtEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun notificationAppLayerVisibleAtEnd() = super.notificationAppLayerVisibleAtEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
-
-    /** {@inheritDoc} */
-    @Test
-    @Postsubmit
-    override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
-
-    /** {@inheritDoc} */
-    @Test
-    @Postsubmit
-    override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun appWindowIsTopWindowAtEnd() =
-        super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**

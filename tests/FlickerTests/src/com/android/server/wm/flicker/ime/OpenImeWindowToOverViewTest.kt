@@ -130,6 +130,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     @Presubmit
     @Test
     fun navBarLayerIsInvisibleInLandscapeGestural() {
+        Assume.assumeFalse(testSpec.isTablet)
         Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(testSpec.isGesturalNavigation)
         Assume.assumeTrue(isShellTransitionsEnabled)
