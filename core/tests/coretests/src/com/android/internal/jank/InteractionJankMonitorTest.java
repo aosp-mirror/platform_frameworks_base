@@ -354,10 +354,11 @@ public class InteractionJankMonitorTest {
         when(configuration.isSurfaceOnly()).thenReturn(false);
         when(configuration.getView()).thenReturn(mView);
         when(configuration.getHandler()).thenReturn(mView.getHandler());
+        when(configuration.getDisplayId()).thenReturn(42);
 
         FrameTracker tracker = spy(new FrameTracker(monitor, session, mWorker.getThreadHandler(),
                 threadedRenderer, viewRoot, surfaceControl, choreographer,
-                new FrameMetricsWrapper(), new StatsLogWrapper(),
+                new FrameMetricsWrapper(), new StatsLogWrapper(null),
                 /* traceThresholdMissedFrames= */ 1,
                 /* traceThresholdFrameTimeMillis= */ -1, listener, configuration));
 

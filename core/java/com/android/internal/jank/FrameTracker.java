@@ -100,6 +100,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private final Session mSession;
     private final ViewRootWrapper mViewRoot;
     private final SurfaceControlWrapper mSurfaceControlWrapper;
+    private final int mDisplayId;
     private final ViewRootImpl.SurfaceChangedCallback mSurfaceChangedCallback;
     private final Handler mHandler;
     private final ChoreographerWrapper mChoreographer;
@@ -213,6 +214,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mTraceThresholdMissedFrames = traceThresholdMissedFrames;
         mTraceThresholdFrameTimeMillis = traceThresholdFrameTimeMillis;
         mListener = listener;
+        mDisplayId = config.getDisplayId();
 
         if (mSurfaceOnly) {
             mSurfaceControl = config.getSurfaceControl();
@@ -625,6 +627,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         if (mSession.logToStatsd()) {
             mStatsLog.write(
                     FrameworkStatsLog.UI_INTERACTION_FRAME_INFO_REPORTED,
+                    mDisplayId,
                     mSession.getStatsdInteractionType(),
                     totalFramesCount,
                     missedFramesCount,
@@ -785,9 +788,17 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     }
 
     public static class StatsLogWrapper {
-        public void write(int code,
+        private final DisplayResolutionTracker mDisplayResolutionTracker;
+
+        public StatsLogWrapper(DisplayResolutionTracker displayResolutionTracker) {
+            mDisplayResolutionTracker = displayResolutionTracker;
+        }
+
+        /** {@see FrameworkStatsLog#write) */
+        public void write(int code, int displayId,
                 int arg1, long arg2, long arg3, long arg4, long arg5, long arg6, long arg7) {
-            FrameworkStatsLog.write(code, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            FrameworkStatsLog.write(code, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
+                    mDisplayResolutionTracker.getResolution(displayId));
         }
     }
 
