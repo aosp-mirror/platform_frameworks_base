@@ -42,6 +42,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Monitors the GNSS time.
@@ -66,7 +67,15 @@ public final class GnssTimeUpdateService extends Binder {
 
         @Override
         public void onStart() {
-            mService = new GnssTimeUpdateService(getContext());
+            Context context = getContext().createAttributionContext(ATTRIBUTION_TAG);
+            AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
+            LocationManager locationManager = context.getSystemService(LocationManager.class);
+            LocationManagerInternal locationManagerInternal =
+                    LocalServices.getService(LocationManagerInternal.class);
+            TimeDetector timeDetector = context.getSystemService(TimeDetector.class);
+
+            mService = new GnssTimeUpdateService(context, alarmManager, locationManager,
+                    locationManagerInternal, timeDetector);
             publishBinderService("gnss_time_update_service", mService);
         }
 
@@ -98,12 +107,15 @@ public final class GnssTimeUpdateService extends Binder {
     @Nullable private TimestampedValue<Long> mLastSuggestedGnssTime;
 
     @VisibleForTesting
-    GnssTimeUpdateService(@NonNull Context context) {
-        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
-        mTimeDetector = mContext.getSystemService(TimeDetector.class);
-        mLocationManager = mContext.getSystemService(LocationManager.class);
-        mAlarmManager = mContext.getSystemService(AlarmManager.class);
-        mLocationManagerInternal = LocalServices.getService(LocationManagerInternal.class);
+    GnssTimeUpdateService(@NonNull Context context, @NonNull AlarmManager alarmManager,
+            @NonNull LocationManager locationManager,
+            @NonNull LocationManagerInternal locationManagerInternal,
+            @NonNull TimeDetector timeDetector) {
+        mContext = Objects.requireNonNull(context);
+        mAlarmManager = Objects.requireNonNull(alarmManager);
+        mLocationManager = Objects.requireNonNull(locationManager);
+        mLocationManagerInternal = Objects.requireNonNull(locationManagerInternal);
+        mTimeDetector = Objects.requireNonNull(timeDetector);
     }
 
     /**

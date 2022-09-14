@@ -19,7 +19,6 @@ package com.android.server.timedetector;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -59,7 +58,7 @@ public final class GnssTimeUpdateServiceTest {
     @Mock private TimeDetector mMockTimeDetector;
     @Mock private AlarmManager mMockAlarmManager;
     @Mock private LocationManager mMockLocationManager;
-    @Mock private LocationManagerInternal mLocationManagerInternal;
+    @Mock private LocationManagerInternal mMockLocationManagerInternal;
 
     private GnssTimeUpdateService mGnssTimeUpdateService;
 
@@ -67,31 +66,12 @@ public final class GnssTimeUpdateServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockContext.createAttributionContext(anyString()))
-                .thenReturn(mMockContext);
-
-        when(mMockContext.getSystemServiceName(TimeDetector.class))
-                .thenReturn((TimeDetector.class).getSimpleName());
-        when(mMockContext.getSystemService(TimeDetector.class))
-                .thenReturn(mMockTimeDetector);
-
-        when(mMockContext.getSystemServiceName(LocationManager.class))
-                .thenReturn((LocationManager.class).getSimpleName());
-        when(mMockContext.getSystemService(LocationManager.class))
-                .thenReturn(mMockLocationManager);
-
-        when(mMockContext.getSystemServiceName(AlarmManager.class))
-                .thenReturn((AlarmManager.class).getSimpleName());
-        when(mMockContext.getSystemService(AlarmManager.class))
-                .thenReturn(mMockAlarmManager);
-
         when(mMockLocationManager.hasProvider(LocationManager.GPS_PROVIDER))
-                .thenReturn(true);
+            .thenReturn(true);
 
-        LocalServices.addService(LocationManagerInternal.class, mLocationManagerInternal);
-
-        mGnssTimeUpdateService =
-                new GnssTimeUpdateService(mMockContext);
+        mGnssTimeUpdateService = new GnssTimeUpdateService(
+                mMockContext, mMockAlarmManager, mMockLocationManager, mMockLocationManagerInternal,
+                mMockTimeDetector);
     }
 
     @After
@@ -105,7 +85,7 @@ public final class GnssTimeUpdateServiceTest {
                 ELAPSED_REALTIME_MS, GNSS_TIME);
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
         LocationTime locationTime = new LocationTime(GNSS_TIME, ELAPSED_REALTIME_NS);
-        doReturn(locationTime).when(mLocationManagerInternal).getGnssTimeMillis();
+        doReturn(locationTime).when(mMockLocationManagerInternal).getGnssTimeMillis();
 
         mGnssTimeUpdateService.requestGnssTimeUpdates();
 
@@ -135,7 +115,7 @@ public final class GnssTimeUpdateServiceTest {
 
     @Test
     public void testLocationListenerOnLocationChanged_nullLocationTime_doesNotSuggestGnssTime() {
-        doReturn(null).when(mLocationManagerInternal).getGnssTimeMillis();
+        doReturn(null).when(mMockLocationManagerInternal).getGnssTimeMillis();
 
         mGnssTimeUpdateService.requestGnssTimeUpdates();
 
