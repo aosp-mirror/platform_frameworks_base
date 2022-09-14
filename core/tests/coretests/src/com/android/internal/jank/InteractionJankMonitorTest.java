@@ -262,8 +262,6 @@ public class InteractionJankMonitorTest {
                         && f.getType() == int.class)
                 .collect(Collectors.toMap(this::getIntFieldChecked, Field::getName));
 
-        assertThat(enumsMap.size() - 1).isEqualTo(cujs.size());
-
         cujs.forEach(f -> {
             final int cuj = getIntFieldChecked(f);
             final String cujName = f.getName();
@@ -281,9 +279,7 @@ public class InteractionJankMonitorTest {
                     .that(expectedEnumName.equals(enumName))
                     .isTrue();
             mExpect
-                    .withMessage(
-                            formatSimple("getNameOfCuj(%d) not matches: %s, expected=%s",
-                                    cuj, cujName, expectedNameOfCuj))
+                    .withMessage(formatSimple("getNameOfCuj(%d) not matches %s", cuj, cujName))
                     .that(cujName.equals(expectedNameOfCuj))
                     .isTrue();
         });
