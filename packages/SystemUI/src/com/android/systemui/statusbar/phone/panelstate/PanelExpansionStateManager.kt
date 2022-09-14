@@ -114,8 +114,8 @@ class PanelExpansionStateManager @Inject constructor() {
                     "end state=${state.panelStateToString()} " +
                     "f=$fraction " +
                     "expanded=$expanded " +
-                    "tracking=$tracking" +
-                    "drawDownPxAmount=$dragDownPxAmount " +
+                    "tracking=$tracking " +
+                    "dragDownPxAmount=$dragDownPxAmount " +
                     "${if (fullyOpened) " fullyOpened" else ""} " +
                     if (fullyClosed) " fullyClosed" else ""
         )

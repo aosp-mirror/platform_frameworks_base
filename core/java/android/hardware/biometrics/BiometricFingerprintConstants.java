@@ -217,7 +217,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_START,
             FINGERPRINT_ACQUIRED_UNKNOWN,
             FINGERPRINT_ACQUIRED_IMMOBILE,
-            FINGERPRINT_ACQUIRED_TOO_BRIGHT})
+            FINGERPRINT_ACQUIRED_TOO_BRIGHT,
+            FINGERPRINT_ACQUIRED_POWER_PRESSED})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -300,6 +301,13 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_TOO_BRIGHT = 10;
+
+    /**
+     * For sensors that have the power button co-located with their sensor, this event will
+     * be sent during enrollment.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_POWER_PRESSED = 11;
 
     /**
      * @hide

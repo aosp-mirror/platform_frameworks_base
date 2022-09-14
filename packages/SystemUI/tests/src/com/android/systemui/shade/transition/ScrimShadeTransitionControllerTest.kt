@@ -13,6 +13,7 @@ import com.android.systemui.statusbar.phone.panelstate.STATE_CLOSED
 import com.android.systemui.statusbar.phone.panelstate.STATE_OPEN
 import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +29,7 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
     @Mock private lateinit var scrimController: ScrimController
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
+    @Mock private lateinit var headsUpManager: HeadsUpManager
     private val configurationController = FakeConfigurationController()
 
     private lateinit var controller: ScrimShadeTransitionController
@@ -42,7 +44,8 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
                 dumpManager,
                 scrimController,
                 context.resources,
-                statusBarStateController)
+                statusBarStateController,
+                headsUpManager)
 
         controller.onPanelStateChanged(STATE_OPENING)
     }

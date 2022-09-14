@@ -133,6 +133,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @VisibleForTesting
     LocalMediaManager mLocalMediaManager;
     private MediaOutputMetricLogger mMetricLogger;
+    private int mCurrentState;
 
     private int mColorItemContent;
     private int mColorSeekbarProgress;
@@ -140,6 +141,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private int mColorItemBackground;
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
+    private int mColorDialogBackground;
     private float mInactiveRadius;
     private float mActiveRadius;
 
@@ -188,6 +190,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.dimen.media_output_dialog_background_radius);
         mActiveRadius = mContext.getResources().getDimension(
                 R.dimen.media_output_dialog_active_background_radius);
+        mColorDialogBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_background);
     }
 
     void start(@NonNull Callback cb) {
@@ -204,6 +208,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
                     mMediaController = controller;
                     mMediaController.unregisterCallback(mCb);
+                    if (mMediaController.getPlaybackState() != null) {
+                        mCurrentState = mMediaController.getPlaybackState().getState();
+                    }
                     mMediaController.registerCallback(mCb);
                     break;
                 }
@@ -471,6 +478,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             mColorItemBackground = mCurrentColorScheme.getNeutral2().get(9); // N2-800
             mColorConnectedItemBackground = mCurrentColorScheme.getAccent2().get(9); // A2-800
             mColorPositiveButtonText = mCurrentColorScheme.getAccent2().get(9); // A2-800
+            mColorDialogBackground = mCurrentColorScheme.getNeutral1().get(10); // N1-900
         } else {
             mColorItemContent = mCurrentColorScheme.getAccent1().get(9); // A1-800
             mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(4); // A1-300
@@ -478,6 +486,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             mColorItemBackground = mCurrentColorScheme.getAccent2().get(1); // A2-50
             mColorConnectedItemBackground = mCurrentColorScheme.getAccent1().get(2); // A1-100
             mColorPositiveButtonText = mCurrentColorScheme.getNeutral1().get(1); // N1-50
+            mColorDialogBackground = mCurrentColorScheme.getBackgroundColor();
         }
     }
 
@@ -495,6 +504,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     public int getColorPositiveButtonText() {
         return mColorPositiveButtonText;
+    }
+
+    public int getColorDialogBackground() {
+        return mColorDialogBackground;
     }
 
     public int getColorItemContent() {
@@ -994,10 +1007,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
         @Override
         public void onPlaybackStateChanged(PlaybackState playbackState) {
-            final int state = playbackState.getState();
-            if (state == PlaybackState.STATE_STOPPED || state == PlaybackState.STATE_PAUSED) {
+            final int newState =
+                    playbackState == null ? PlaybackState.STATE_STOPPED : playbackState.getState();
+            if (mCurrentState == newState) {
+                return;
+            }
+
+            if (newState == PlaybackState.STATE_STOPPED || newState == PlaybackState.STATE_PAUSED) {
                 mCallback.onMediaStoppedOrPaused();
             }
+            mCurrentState = newState;
         }
     };
 
