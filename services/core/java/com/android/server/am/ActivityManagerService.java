@@ -667,10 +667,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     // we still create this new offload queue, but never ever put anything on it.
     final boolean mEnableOffloadQueue;
 
-    final BroadcastQueue mFgBroadcastQueue;
-    final BroadcastQueue mBgBroadcastQueue;
-    final BroadcastQueue mBgOffloadBroadcastQueue;
-    final BroadcastQueue mFgOffloadBroadcastQueue;
+    /**
+     * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
+     * of the default {@link BroadcastQueueImpl}.
+     */
+    final boolean mEnableModernQueue;
+
+    static final int BROADCAST_QUEUE_FG = 0;
+    static final int BROADCAST_QUEUE_BG = 1;
+    static final int BROADCAST_QUEUE_BG_OFFLOAD = 2;
+    static final int BROADCAST_QUEUE_FG_OFFLOAD = 3;
+
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
     final BroadcastQueue[] mBroadcastQueues;
@@ -692,12 +699,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     BroadcastQueue broadcastQueueForFlags(int flags, Object cookie) {
+        if (mEnableModernQueue) {
+            return mBroadcastQueues[0];
+        }
+
         if (isOnFgOffloadQueue(flags)) {
             if (DEBUG_BROADCAST_BACKGROUND) {
                 Slog.i(TAG_BROADCAST,
                         "Broadcast intent " + cookie + " on foreground offload queue");
             }
-            return mFgOffloadBroadcastQueue;
+            return mBroadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD];
         }
 
         if (isOnBgOffloadQueue(flags)) {
@@ -705,14 +716,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.i(TAG_BROADCAST,
                         "Broadcast intent " + cookie + " on background offload queue");
             }
-            return mBgOffloadBroadcastQueue;
+            return mBroadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD];
         }
 
         final boolean isFg = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
         if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
                 "Broadcast intent " + cookie + " on "
                 + (isFg ? "foreground" : "background") + " queue");
-        return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
+        return (isFg) ? mBroadcastQueues[BROADCAST_QUEUE_FG]
+                : mBroadcastQueues[BROADCAST_QUEUE_BG];
     }
 
     private volatile int mDeviceOwnerUid = INVALID_UID;
@@ -2365,9 +2377,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
+        mEnableModernQueue = false;
         mBroadcastQueues = new BroadcastQueue[0];
-        mFgBroadcastQueue = mBgBroadcastQueue = mBgOffloadBroadcastQueue =
-                mFgOffloadBroadcastQueue = null;
         mComponentAliasResolver = new ComponentAliasResolver(this);
     }
 
@@ -2423,20 +2434,23 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
+        mEnableModernQueue = SystemProperties.getBoolean(
+                "persist.device_config.activity_manager_native_boot.modern_queue_enabled", false);
 
-        mBroadcastQueues = new BroadcastQueue[4];
-        mFgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
-        mBgBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        mBgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        mFgOffloadBroadcastQueue = new BroadcastQueueImpl(this, mHandler,
-                "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        mBroadcastQueues[0] = mFgBroadcastQueue;
-        mBroadcastQueues[1] = mBgBroadcastQueue;
-        mBroadcastQueues[2] = mBgOffloadBroadcastQueue;
-        mBroadcastQueues[3] = mFgOffloadBroadcastQueue;
+        if (mEnableModernQueue) {
+            mBroadcastQueues = new BroadcastQueue[1];
+            mBroadcastQueues[0] = new BroadcastQueueModernImpl(this, mHandler, foreConstants);
+        } else {
+            mBroadcastQueues = new BroadcastQueue[4];
+            mBroadcastQueues[BROADCAST_QUEUE_FG] = new BroadcastQueueImpl(this, mHandler,
+                    "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
+            mBroadcastQueues[BROADCAST_QUEUE_BG] = new BroadcastQueueImpl(this, mHandler,
+                    "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+            mBroadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD] = new BroadcastQueueImpl(this, mHandler,
+                    "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+            mBroadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD] = new BroadcastQueueImpl(this, mHandler,
+                    "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+        }
 
         mServices = new ActiveServices(this);
         mCpHelper = new ContentProviderHelper(this, true);

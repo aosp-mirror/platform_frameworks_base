@@ -90,7 +90,8 @@ public class BroadcastQueueTest {
     private final Impl mImpl;
 
     private enum Impl {
-        DEFAULT
+        DEFAULT,
+        MODERN,
     }
 
     private Context mContext;
@@ -114,7 +115,7 @@ public class BroadcastQueueTest {
 
     @Parameters(name = "impl={0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { {Impl.DEFAULT} });
+        return Arrays.asList(new Object[][] { {Impl.DEFAULT}, {Impl.MODERN} });
     }
 
     public BroadcastQueueTest(Impl impl) {
@@ -177,6 +178,9 @@ public class BroadcastQueueTest {
             mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
                     constants, emptySkipPolicy, emptyHistory, false,
                     ProcessList.SCHED_GROUP_DEFAULT);
+        } else if (mImpl == Impl.MODERN) {
+            mQueue = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
+                    constants, emptySkipPolicy, emptyHistory);
         } else {
             throw new UnsupportedOperationException();
         }
