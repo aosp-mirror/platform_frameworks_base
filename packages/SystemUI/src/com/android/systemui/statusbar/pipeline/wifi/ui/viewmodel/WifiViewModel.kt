@@ -35,9 +35,11 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -46,11 +48,11 @@ import kotlinx.coroutines.flow.map
  * Models the UI state for the status bar wifi icon.
  */
 class WifiViewModel @Inject constructor(
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-    private val constants: WifiConstants,
+    constants: WifiConstants,
     private val context: Context,
-    private val logger: ConnectivityPipelineLogger,
-    private val interactor: WifiInteractor,
+    logger: ConnectivityPipelineLogger,
+    interactor: WifiInteractor,
+    statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     /**
      * The drawable resource ID to use for the wifi icon. Null if we shouldn't display any icon.
@@ -109,17 +111,36 @@ class WifiViewModel @Inject constructor(
             }
         }
 
-    /**
-     * True if the activity in icon should be displayed and false otherwise.
-     */
-    val isActivityInVisible: Flow<Boolean>
-        get() =
-            if (!constants.shouldShowActivityConfig) {
-                flowOf(false)
-            } else {
-                interactor.hasActivityIn
+    /** The wifi activity status. Null if we shouldn't display the activity status. */
+    private val activity: Flow<WifiActivityModel?> =
+        if (!constants.shouldShowActivityConfig) {
+            flowOf(null)
+        } else {
+            combine(interactor.activity, interactor.ssid) { activity, ssid ->
+                when (ssid) {
+                    null -> null
+                    else -> activity
+                }
             }
-                .logOutputChange(logger, "activityInVisible")
+        }
+        .distinctUntilChanged()
+        .logOutputChange(logger, "activity")
+
+    /** True if the activity in view should be visible. */
+    val isActivityInViewVisible: Flow<Boolean> = activity.map { it?.hasActivityIn == true }
+
+    /** True if the activity out view should be visible. */
+    val isActivityOutViewVisible: Flow<Boolean> = activity.map { it?.hasActivityOut == true }
+
+    /** True if the activity container view should be visible. */
+    val isActivityContainerVisible: Flow<Boolean> =
+            combine(isActivityInViewVisible, isActivityOutViewVisible) { activityIn, activityOut ->
+                activityIn || activityOut
+            }
+
+    // TODO(b/238425913): Update this class to use state flows instead. Right now, we have a ton of
+    //  duplicate activity logs because the cold flows are getting duplicated for the three
+    //  activityVisible flows.
 
     /** The tint that should be applied to the icon. */
     val tint: Flow<Int> = if (!statusBarPipelineFlags.useNewPipelineDebugColoring()) {

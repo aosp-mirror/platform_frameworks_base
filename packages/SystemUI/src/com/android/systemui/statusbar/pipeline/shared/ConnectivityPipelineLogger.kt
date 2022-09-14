@@ -133,7 +133,7 @@ class ConnectivityPipelineLogger @Inject constructor(
          * @param prettyPrint an optional function to transform the value into a readable string.
          *   [toString] is used if no custom function is provided.
          */
-        fun <T : Any> Flow<T>.logOutputChange(
+        fun <T> Flow<T>.logOutputChange(
                 logger: ConnectivityPipelineLogger,
                 outputParamName: String,
                 prettyPrint: (T) -> String = { it.toString() }

@@ -22,9 +22,10 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlo
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -38,7 +39,11 @@ class WifiInteractor @Inject constructor(
     connectivityRepository: ConnectivityRepository,
     wifiRepository: WifiRepository,
 ) {
-    private val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
+    /**
+     * The SSID (service set identifier) of the wifi network. Null if we don't have a network, or
+     * have a network but no valid SSID.
+     */
+    val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
         when (info) {
             is WifiNetworkModel.Inactive -> null
             is WifiNetworkModel.CarrierMerged -> null
@@ -54,14 +59,11 @@ class WifiInteractor @Inject constructor(
     /** Our current wifi network. See [WifiNetworkModel]. */
     val wifiNetwork: Flow<WifiNetworkModel> = wifiRepository.wifiNetwork
 
+    /** Our current wifi activity. See [WifiActivityModel]. */
+    val activity: StateFlow<WifiActivityModel> = wifiRepository.wifiActivity
+
     /** True if we're configured to force-hide the wifi icon and false otherwise. */
     val isForceHidden: Flow<Boolean> = connectivityRepository.forceHiddenSlots.map {
         it.contains(ConnectivitySlot.WIFI)
     }
-
-    /** True if our wifi network has activity in (download), and false otherwise. */
-    val hasActivityIn: Flow<Boolean> =
-        combine(wifiRepository.wifiActivity, ssid) { activity, ssid ->
-            activity.hasActivityIn && ssid != null
-        }
 }

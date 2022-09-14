@@ -23,9 +23,15 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -64,12 +70,34 @@ class ConnectivityPipelineLoggerTest : SysuiTestCase() {
         assertThat(actualString).contains(expectedNetId)
     }
 
-    private val NET_1_ID = 100
-    private val NET_1 = com.android.systemui.util.mockito.mock<Network>().also {
-        Mockito.`when`(it.getNetId()).thenReturn(NET_1_ID)
+    @Test
+    fun logOutputChange_printsValuesAndNulls() = runBlocking(IMMEDIATE) {
+        val flow: Flow<Int?> = flowOf(1, null, 3)
+
+        val job = flow
+            .logOutputChange(logger, "testInts")
+            .launchIn(this)
+
+        val stringWriter = StringWriter()
+        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
+        val actualString = stringWriter.toString()
+
+        assertThat(actualString).contains("1")
+        assertThat(actualString).contains("null")
+        assertThat(actualString).contains("3")
+
+        job.cancel()
     }
-    private val NET_1_CAPS = NetworkCapabilities.Builder()
-        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-        .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-        .build()
+
+    companion object {
+        private const val NET_1_ID = 100
+        private val NET_1 = com.android.systemui.util.mockito.mock<Network>().also {
+            Mockito.`when`(it.getNetId()).thenReturn(NET_1_ID)
+        }
+        private val NET_1_CAPS = NetworkCapabilities.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            .build()
+        private val IMMEDIATE = Dispatchers.Main.immediate
+    }
 }

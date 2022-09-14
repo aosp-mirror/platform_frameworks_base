@@ -48,6 +48,9 @@ object WifiViewBinder {
         viewModel: WifiViewModel,
     ) {
         val iconView = view.requireViewById<ImageView>(R.id.wifi_signal)
+        val activityInView = view.requireViewById<ImageView>(R.id.wifi_in)
+        val activityOutView = view.requireViewById<ImageView>(R.id.wifi_out)
+        val activityContainerView = view.requireViewById<View>(R.id.inout_container)
 
         view.isVisible = true
         iconView.isVisible = true
@@ -61,20 +64,37 @@ object WifiViewBinder {
                         //   [ModernStatusBarWifiView.isIconVisible], which is what actually makes
                         //   the view GONE.
                         view.isVisible = wifiIcon != null
-                        wifiIcon?.let {
-                            IconViewBinder.bind(wifiIcon, iconView)
-                        }
+                        wifiIcon?.let { IconViewBinder.bind(wifiIcon, iconView) }
                     }
                 }
 
                 launch {
                     viewModel.tint.collect { tint ->
-                        iconView.imageTintList = ColorStateList.valueOf(tint)
+                        val tintList = ColorStateList.valueOf(tint)
+                        iconView.imageTintList = tintList
+                        activityInView.imageTintList = tintList
+                        activityOutView.imageTintList = tintList
+                    }
+                }
+
+                launch {
+                    viewModel.isActivityInViewVisible.distinctUntilChanged().collect { visible ->
+                        activityInView.isVisible = visible
+                    }
+                }
+
+                launch {
+                    viewModel.isActivityOutViewVisible.distinctUntilChanged().collect { visible ->
+                        activityOutView.isVisible = visible
+                    }
+                }
+
+                launch {
+                    viewModel.isActivityContainerVisible.distinctUntilChanged().collect { visible ->
+                        activityContainerView.isVisible = visible
                     }
                 }
             }
         }
-
-        // TODO(b/238425913): Hook up to [viewModel] to render actual changes to the wifi icon.
     }
 }

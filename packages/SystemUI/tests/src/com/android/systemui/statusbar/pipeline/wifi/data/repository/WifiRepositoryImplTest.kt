@@ -29,10 +29,10 @@ import android.net.wifi.WifiManager.TrafficStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
