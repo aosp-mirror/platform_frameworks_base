@@ -16,26 +16,6 @@ package com.android.internal.util;
 
 import static android.os.Trace.TRACE_TAG_APP;
 
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TURN_ON_SCREEN;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,7 +30,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.EventLogTags;
 import com.android.internal.os.BackgroundThread;
 
@@ -124,14 +103,14 @@ public class LatencyTracker {
     public static final int ACTION_START_RECENTS_ANIMATION = 8;
 
     /**
-     * Time it takes to for the camera based algorithm to rotate the screen.
-     */
-    public static final int ACTION_ROTATE_SCREEN_CAMERA_CHECK = 9;
-
-    /**
      * Time it takes the sensor to detect rotation.
      */
-    public static final int ACTION_ROTATE_SCREEN_SENSOR = 10;
+    public static final int ACTION_ROTATE_SCREEN_SENSOR = 9;
+
+    /**
+     * Time it takes to for the camera based algorithm to rotate the screen.
+     */
+    public static final int ACTION_ROTATE_SCREEN_CAMERA_CHECK = 10;
 
     /**
      * Time it takes to start unlock animation .
@@ -164,14 +143,9 @@ public class LatencyTracker {
     public static final int ACTION_LOAD_SHARE_SHEET = 16;
 
     /**
-     * Time it takes for showing the selection toolbar.
-     */
-    public static final int ACTION_SHOW_SELECTION_TOOLBAR = 17;
-
-    /**
      * Time it takes to show AOD display after folding the device.
      */
-    public static final int ACTION_FOLD_TO_AOD = 18;
+    public static final int ACTION_FOLD_TO_AOD = 17;
 
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
@@ -183,15 +157,14 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN,
         ACTION_FACE_WAKE_AND_UNLOCK,
         ACTION_START_RECENTS_ANIMATION,
-        ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_ROTATE_SCREEN_SENSOR,
+        ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
         ACTION_USER_SWITCH,
         ACTION_SWITCH_DISPLAY_UNFOLD,
         ACTION_UDFPS_ILLUMINATE,
         ACTION_SHOW_BACK_ARROW,
         ACTION_LOAD_SHARE_SHEET,
-        ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
     };
 
@@ -206,42 +179,39 @@ public class LatencyTracker {
         ACTION_ROTATE_SCREEN,
         ACTION_FACE_WAKE_AND_UNLOCK,
         ACTION_START_RECENTS_ANIMATION,
-        ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_ROTATE_SCREEN_SENSOR,
+        ACTION_ROTATE_SCREEN_CAMERA_CHECK,
         ACTION_LOCKSCREEN_UNLOCK,
         ACTION_USER_SWITCH,
         ACTION_SWITCH_DISPLAY_UNFOLD,
         ACTION_UDFPS_ILLUMINATE,
         ACTION_SHOW_BACK_ARROW,
         ACTION_LOAD_SHARE_SHEET,
-        ACTION_SHOW_SELECTION_TOOLBAR,
-        ACTION_FOLD_TO_AOD,
+        ACTION_FOLD_TO_AOD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
     }
 
-    @VisibleForTesting
-    public static final int[] STATSD_ACTION = new int[] {
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_TURN_ON_SCREEN,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD,
+    private static final int[] STATSD_ACTION = new int[]{
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TURN_ON_SCREEN,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -301,43 +271,41 @@ public class LatencyTracker {
         switch (atomsProtoAction) {
             case 0:
                 return "UNKNOWN";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL:
+            case 1:
                 return "ACTION_EXPAND_PANEL";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS:
+            case 2:
                 return "ACTION_TOGGLE_RECENTS";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK:
+            case 3:
                 return "ACTION_FINGERPRINT_WAKE_AND_UNLOCK";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL:
+            case 4:
                 return "ACTION_CHECK_CREDENTIAL";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED:
+            case 5:
                 return "ACTION_CHECK_CREDENTIAL_UNLOCKED";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_TURN_ON_SCREEN:
+            case 6:
                 return "ACTION_TURN_ON_SCREEN";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN:
+            case 7:
                 return "ACTION_ROTATE_SCREEN";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK:
+            case 8:
                 return "ACTION_FACE_WAKE_AND_UNLOCK";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION:
+            case 9:
                 return "ACTION_START_RECENTS_ANIMATION";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK:
+            case 10:
                 return "ACTION_ROTATE_SCREEN_CAMERA_CHECK";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR:
+            case 11:
                 return "ACTION_ROTATE_SCREEN_SENSOR";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK:
+            case 12:
                 return "ACTION_LOCKSCREEN_UNLOCK";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH:
+            case 13:
                 return "ACTION_USER_SWITCH";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD:
+            case 14:
                 return "ACTION_SWITCH_DISPLAY_UNFOLD";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE:
+            case 15:
                 return "ACTION_UDFPS_ILLUMINATE";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW:
+            case 16:
                 return "ACTION_SHOW_BACK_ARROW";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET:
+            case 17:
                 return "ACTION_LOAD_SHARE_SHEET";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR:
-                return "ACTION_SHOW_SELECTION_TOOLBAR";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD:
+            case 19:
                 return "ACTION_FOLD_TO_AOD";
             default:
                 throw new IllegalArgumentException("Invalid action");
