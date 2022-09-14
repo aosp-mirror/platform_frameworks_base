@@ -727,7 +727,7 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(ime.mToken.inTransition());
         assertTrue(task.inTransition());
         assertTrue(asyncRotationController.isTargetToken(decorToken));
-        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(navBar));
+        assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
 
         screenDecor.setOrientationChanging(false);
         // Status bar finishes drawing before the start transaction. Its fade-in animation will be
@@ -742,6 +742,7 @@ public class TransitionTests extends WindowTestsBase {
         // The transaction is committed, so fade-in animation for status bar is consumed.
         transactionCommittedListener.onTransactionCommitted();
         assertFalse(asyncRotationController.isTargetToken(statusBar.mToken));
+        assertShouldFreezeInsetsPosition(asyncRotationController, navBar, false);
 
         // Navigation bar finishes drawing after the start transaction, so its fade-in animation
         // can execute directly.
@@ -777,7 +778,7 @@ public class TransitionTests extends WindowTestsBase {
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
-        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
+        assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
 
         statusBar.setOrientationChanging(true);
         player.startTransition();
@@ -823,7 +824,7 @@ public class TransitionTests extends WindowTestsBase {
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
-        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
+        assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
         assertTrue(app.getTask().inTransition());
 
         player.start();
@@ -856,6 +857,15 @@ public class TransitionTests extends WindowTestsBase {
         statusBar.finishDrawing(mWm.mTransactionFactory.get(), Integer.MAX_VALUE);
         statusBar.setOrientationChanging(false);
         assertNull(mDisplayContent.getAsyncRotationController());
+    }
+
+    private static void assertShouldFreezeInsetsPosition(AsyncRotationController controller,
+            WindowState w, boolean freeze) {
+        if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST) {
+            // Non blast sync should never freeze insets position.
+            freeze = false;
+        }
+        assertEquals(freeze, controller.shouldFreezeInsetsPosition(w));
     }
 
     @Test
