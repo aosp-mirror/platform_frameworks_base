@@ -143,20 +143,10 @@ object PreferencePageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        PreferencePage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun PreferencePage() {
-    RegularScaffold(title = TITLE) {
-        for (entry in PreferencePageProvider.buildEntry(arguments = null)) {
-            entry.uiLayout()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
         }
     }
 }
@@ -165,6 +155,6 @@ private fun PreferencePage() {
 @Composable
 private fun PreferencePagePreview() {
     SettingsTheme {
-        PreferencePage()
+        PreferencePageProvider.Page(null)
     }
 }

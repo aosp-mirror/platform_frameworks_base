@@ -43,7 +43,7 @@ object ArgumentPageProvider : SettingsPageProvider {
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     // Set ui rendering
-                    Preference(ArgumentPageModel.create(arguments).genStringParamPreferenceModel())
+                    Preference(ArgumentPageModel.create(it).genStringParamPreferenceModel())
                 }.build()
         )
 
@@ -53,53 +53,43 @@ object ArgumentPageProvider : SettingsPageProvider {
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
                     // Set ui rendering
-                    Preference(ArgumentPageModel.create(arguments).genIntParamPreferenceModel())
+                    Preference(ArgumentPageModel.create(it).genIntParamPreferenceModel())
                 }.build()
         )
 
-        val entryFoo = buildInjectEntry(ArgumentPageModel.buildNextArgument("foo", arguments))
-        val entryBar = buildInjectEntry(ArgumentPageModel.buildNextArgument("bar", arguments))
-        if (entryFoo != null) entryList.add(entryFoo.setLink(fromPage = owner).build())
-        if (entryBar != null) entryList.add(entryBar.setLink(fromPage = owner).build())
+        entryList.add(buildInjectEntry("foo")!!.setLink(fromPage = owner).build())
+        entryList.add(buildInjectEntry("bar")!!.setLink(fromPage = owner).build())
 
         return entryList
     }
 
-    private fun buildInjectEntry(arguments: Bundle?): SettingsEntryBuilder? {
+    fun buildInjectEntry(stringParam: String): SettingsEntryBuilder? {
+        val arguments = ArgumentPageModel.buildArgument(stringParam)
         if (!ArgumentPageModel.isValidArgument(arguments)) return null
 
         return SettingsEntryBuilder.createInject(
-            entryName = ArgumentPageModel.getInjectEntryName(arguments),
+            entryName = "${name}_$stringParam",
             owner = SettingsPage.create(name, parameter, arguments)
         )
             // Set attributes
             .setIsAllowSearch(false)
             .setUiLayoutFn {
                 // Set ui rendering
-                Preference(ArgumentPageModel.create(arguments).genInjectPreferenceModel())
+                Preference(ArgumentPageModel.create(it).genInjectPreferenceModel())
             }
-    }
-
-    fun buildRootPages(): List<SettingsPage> {
-        return listOf(
-            SettingsPage.create(name, parameter, ArgumentPageModel.buildArgument("foo")),
-            SettingsPage.create(name, parameter, ArgumentPageModel.buildArgument("bar")),
-        )
     }
 
     @Composable
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = ArgumentPageModel.create(arguments).genPageTitle()) {
             for (entry in buildEntry(arguments)) {
-                entry.uiLayout()
+                if (entry.name.startsWith(name)) {
+                    entry.UiLayout(ArgumentPageModel.buildNextArgument(arguments))
+                } else {
+                    entry.UiLayout()
+                }
             }
         }
-    }
-
-    @Composable
-    fun EntryItem(stringParam: String, intParam: Int) {
-        buildInjectEntry(ArgumentPageModel.buildArgument(stringParam, intParam))
-            ?.build()?.uiLayout?.let { it() }
     }
 }
 
