@@ -342,7 +342,6 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
         addDefaultProfileAndParent();
         mockCurrentUser(PARENT_USER_ID);
         startDefaultProfile();
-        setUserState(PROFILE_USER_ID, UserState.STATE_RUNNING_UNLOCKED);
 
         assertWithMessage("isUserVisibleOnDisplay(%s, %s)", PROFILE_USER_ID, INVALID_DISPLAY)
                 .that(isUserVisibleOnDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY)).isTrue();
@@ -584,11 +583,19 @@ abstract class UserManagerServiceOrInternalTestCase extends ExtendedMockitoTestC
     }
 
     protected final void startDefaultProfile() {
-        setUserState(PROFILE_USER_ID, UserState.STATE_RUNNING_UNLOCKED);
+        startUser(PROFILE_USER_ID);
     }
 
     protected final void stopDefaultProfile() {
-        setUserState(PROFILE_USER_ID, UserState.STATE_STOPPING);
+        stopUser(PROFILE_USER_ID);
+    }
+
+    protected final void startUser(@UserIdInt int userId) {
+        setUserState(userId, UserState.STATE_RUNNING_UNLOCKED);
+    }
+
+    protected final void stopUser(@UserIdInt int userId) {
+        setUserState(userId, UserState.STATE_STOPPING);
     }
 
     // NOTE: should only called by tests that indirectly needs to check user assignments (like
