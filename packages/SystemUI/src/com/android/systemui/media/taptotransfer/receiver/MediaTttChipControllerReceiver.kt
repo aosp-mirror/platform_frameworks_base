@@ -62,7 +62,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
-) : TemporaryViewDisplayController<ChipReceiverInfo>(
+) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
         context,
         logger,
         windowManager,

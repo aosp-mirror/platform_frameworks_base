@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.common
+package com.android.systemui.temporarydisplay
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -27,51 +27,44 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
 
 @SmallTest
-class MediaTttLoggerTest : SysuiTestCase() {
-
+class TemporaryViewLoggerTest : SysuiTestCase() {
     private lateinit var buffer: LogBuffer
-    private lateinit var logger: MediaTttLogger
+    private lateinit var logger: TemporaryViewLogger
 
     @Before
-    fun setUp () {
-        buffer = LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
-            .create("buffer", 10)
-        logger = MediaTttLogger(DEVICE_TYPE_TAG, buffer)
+    fun setUp() {
+        buffer =
+            LogBufferFactory(DumpManager(), Mockito.mock(LogcatEchoTracker::class.java))
+                .create("buffer", 10)
+        logger = TemporaryViewLogger(buffer, TAG)
     }
 
     @Test
-    fun logStateChange_bufferHasDeviceTypeTagAndParamInfo() {
-        val stateName = "test state name"
-        val id = "test id"
-        val packageName = "this.is.a.package"
-
-        logger.logStateChange(stateName, id, packageName)
+    fun logChipAddition_bufferHasLog() {
+        logger.logChipAddition()
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
 
-        assertThat(actualString).contains(DEVICE_TYPE_TAG)
-        assertThat(actualString).contains(stateName)
-        assertThat(actualString).contains(id)
-        assertThat(actualString).contains(packageName)
+        assertThat(actualString).contains(TAG)
     }
 
     @Test
-    fun logPackageNotFound_bufferHasPackageName() {
-        val packageName = "this.is.a.package"
-
-        logger.logPackageNotFound(packageName)
+    fun logChipRemoval_bufferHasTagAndReason() {
+        val reason = "test reason"
+        logger.logChipRemoval(reason)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
 
-        assertThat(actualString).contains(packageName)
+        assertThat(actualString).contains(TAG)
+        assertThat(actualString).contains(reason)
     }
 }
 
-private const val DEVICE_TYPE_TAG = "TEST TYPE"
+private const val TAG = "TestTag"

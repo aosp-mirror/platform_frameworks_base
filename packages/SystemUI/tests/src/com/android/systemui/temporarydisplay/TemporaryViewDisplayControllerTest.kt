@@ -25,7 +25,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -52,7 +51,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     private lateinit var fakeExecutor: FakeExecutor
 
     @Mock
-    private lateinit var logger: MediaTttLogger
+    private lateinit var logger: TemporaryViewLogger
     @Mock
     private lateinit var accessibilityManager: AccessibilityManager
     @Mock
@@ -216,13 +215,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     inner class TestController(
         context: Context,
-        logger: MediaTttLogger,
+        logger: TemporaryViewLogger,
         windowManager: WindowManager,
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-    ) : TemporaryViewDisplayController<ViewInfo>(
+    ) : TemporaryViewDisplayController<ViewInfo, TemporaryViewLogger>(
         context,
         logger,
         windowManager,
