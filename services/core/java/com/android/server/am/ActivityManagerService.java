@@ -214,7 +214,6 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
-import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -582,17 +581,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @ChangeId
     @Disabled
     private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
-
-    /**
-     * Apps targeting Android U and above will need to export components in order to invoke them
-     * through implicit intents.
-     *
-     * If a component is not exported and invoked, it will be removed from the list of receivers.
-     * This applies specifically to activities and broadcasts.
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    public static final long IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS = 229362273;
 
     /**
      * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
@@ -12344,58 +12332,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Filters out non-exported components in a given list of broadcast filters
-     * @param intent the original intent
-     * @param callingUid the calling UID
-     * @param query the list of broadcast filters
-     * @param platformCompat the instance of platform compat
-     */
-    private static void filterNonExportedComponents(Intent intent, int callingUid,
-            List query, PlatformCompat platformCompat, String callerPackage) {
-        if (query == null
-                || intent.getPackage() != null
-                || intent.getComponent() != null
-                || ActivityManager.canAccessUnexportedComponents(callingUid)) {
-            return;
-        }
-        for (int i = query.size() - 1; i >= 0; i--) {
-            String componentInfo;
-            ResolveInfo resolveInfo;
-            BroadcastFilter broadcastFilter;
-            if (query.get(i) instanceof ResolveInfo) {
-                resolveInfo = (ResolveInfo) query.get(i);
-                if (resolveInfo.getComponentInfo().exported) {
-                    continue;
-                }
-                componentInfo = resolveInfo.getComponentInfo()
-                        .getComponentName().flattenToShortString();
-            } else if (query.get(i) instanceof BroadcastFilter) {
-                broadcastFilter = (BroadcastFilter) query.get(i);
-                if (broadcastFilter.exported) {
-                    continue;
-                }
-                componentInfo = broadcastFilter.packageName;
-            } else {
-                continue;
-            }
-            if (!platformCompat.isChangeEnabledByUid(
-                    IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS, callingUid)) {
-                Slog.w(TAG, "Non-exported component not filtered out "
-                        + "(will be filtered out once the app targets U+)- intent: "
-                        + intent.getAction() + ", component: "
-                        + componentInfo + ", sender: "
-                        + callerPackage);
-                return;
-            }
-            Slog.w(TAG, "Non-exported component filtered out - intent: "
-                    + intent.getAction() + ", component: "
-                    + componentInfo + ", sender: "
-                    + callerPackage);
-            query.remove(i);
-        }
-    }
-
-    /**
      * Main code for cleaning up a process when it has gone away.  This is
      * called both as a result of the process dying, or directly when stopping
      * a process when running in single process mode.
@@ -14237,8 +14173,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        filterNonExportedComponents(intent, callingUid, registeredReceivers,
-                mPlatformCompat, callerPackage);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
         if (!ordered && NR > 0) {
             // If we are not serializing this broadcast, then send the
@@ -14341,8 +14275,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
-            filterNonExportedComponents(intent, callingUid, receivers,
-                    mPlatformCompat, callerPackage);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
