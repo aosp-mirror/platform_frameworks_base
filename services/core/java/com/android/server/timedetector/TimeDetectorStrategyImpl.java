@@ -17,6 +17,7 @@
 package com.android.server.timedetector;
 
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_HIGH;
+import static com.android.server.SystemClockTime.TIME_CONFIDENCE_LOW;
 import static com.android.server.timedetector.TimeDetectorStrategy.originToString;
 
 import android.annotation.CurrentTimeMillisLong;
@@ -25,6 +26,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
@@ -295,6 +298,75 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // clock.
         String reason = "New network time suggested. timeSuggestion=" + suggestion;
         doAutoTimeDetection(reason);
+    }
+
+    @Override
+    public synchronized TimeState getTimeState() {
+        boolean userShouldConfirmTime = mEnvironment.systemClockConfidence() < TIME_CONFIDENCE_HIGH;
+        UnixEpochTime unixEpochTime = new UnixEpochTime(
+                mEnvironment.elapsedRealtimeMillis(), mEnvironment.systemClockMillis());
+        return new TimeState(unixEpochTime, userShouldConfirmTime);
+    }
+
+    @Override
+    public synchronized void setTimeState(@NonNull TimeState timeState) {
+        Objects.requireNonNull(timeState);
+
+        @TimeConfidence int confidence = timeState.getUserShouldConfirmTime()
+                ? TIME_CONFIDENCE_LOW : TIME_CONFIDENCE_HIGH;
+        mEnvironment.acquireWakeLock();
+        try {
+            // The origin is a lie but this method is only used for command line / manual testing
+            // to force the device into a specific state.
+            @Origin int origin = ORIGIN_MANUAL;
+            UnixEpochTime unixEpochTime = timeState.getUnixEpochTime();
+            setSystemClockAndConfidenceUnderWakeLock(
+                    origin, unixEpochTime.toTimestampedValue(), confidence, "setTimeZoneState()");
+        } finally {
+            mEnvironment.releaseWakeLock();
+        }
+    }
+
+    @Override
+    public synchronized boolean confirmTime(@NonNull UnixEpochTime confirmationTime) {
+        Objects.requireNonNull(confirmationTime);
+
+        @TimeConfidence int newTimeConfidence = TIME_CONFIDENCE_HIGH;
+        @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
+        boolean timeNeedsConfirmation = currentTimeConfidence < newTimeConfidence;
+
+        // All system clock calculation take place under a wake lock.
+        mEnvironment.acquireWakeLock();
+        try {
+            // Check if the specified time matches the current system clock time (closely
+            // enough) to raise the confidence.
+            long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
+            long actualSystemClockMillis = mEnvironment.systemClockMillis();
+            long adjustedAutoDetectedUnixEpochMillis =
+                    confirmationTime.at(elapsedRealtimeMillis).getUnixEpochTimeMillis();
+            long absTimeDifferenceMillis =
+                    Math.abs(adjustedAutoDetectedUnixEpochMillis - actualSystemClockMillis);
+            int confidenceUpgradeThresholdMillis =
+                    mCurrentConfigurationInternal.getSystemClockConfidenceThresholdMillis();
+            boolean timeConfirmed = absTimeDifferenceMillis <= confidenceUpgradeThresholdMillis;
+            boolean updateConfidenceRequired = timeNeedsConfirmation && timeConfirmed;
+            if (updateConfidenceRequired) {
+                String logMsg = "Confirm system clock time."
+                        + " confirmationTime=" + confirmationTime
+                        + " newTimeConfidence=" + newTimeConfidence
+                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                        + " (old) actualSystemClockMillis=" + actualSystemClockMillis
+                        + " currentTimeConfidence=" + currentTimeConfidence;
+                if (DBG) {
+                    Slog.d(LOG_TAG, logMsg);
+                }
+
+                mEnvironment.setSystemClockConfidence(newTimeConfidence, logMsg);
+            }
+            return timeConfirmed;
+        } finally {
+            mEnvironment.releaseWakeLock();
+        }
     }
 
     @Override
@@ -799,7 +871,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             long absTimeDifferenceMillis =
                     Math.abs(adjustedAutoDetectedUnixEpochMillis - actualSystemClockMillis);
             int confidenceUpgradeThresholdMillis =
-                    mCurrentConfigurationInternal.getSystemClockConfidenceUpgradeThresholdMillis();
+                    mCurrentConfigurationInternal.getSystemClockConfidenceThresholdMillis();
             boolean updateConfidenceRequired =
                     absTimeDifferenceMillis <= confidenceUpgradeThresholdMillis;
             if (updateConfidenceRequired) {
@@ -866,7 +938,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         boolean updateSystemClockRequired = absTimeDifference >= systemClockUpdateThreshold;
 
         @TimeConfidence int currentTimeConfidence = mEnvironment.systemClockConfidence();
-        boolean updateConfidenceRequired = newTimeConfidence > currentTimeConfidence;
+        boolean updateConfidenceRequired = newTimeConfidence != currentTimeConfidence;
 
         if (updateSystemClockRequired) {
             String logMsg = "Set system clock & confidence."

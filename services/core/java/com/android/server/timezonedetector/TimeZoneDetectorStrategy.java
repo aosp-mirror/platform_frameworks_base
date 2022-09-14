@@ -17,6 +17,7 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
@@ -92,6 +93,24 @@ import android.util.IndentingPrintWriter;
  * @hide
  */
 public interface TimeZoneDetectorStrategy extends Dumpable {
+
+    /** Returns a snapshot of the system time zone state. See {@link TimeZoneState} for details. */
+    @NonNull
+    TimeZoneState getTimeZoneState();
+
+    /**
+     * Sets the system time zone state. See {@link TimeZoneState} for details. Intended for use
+     * during testing to force the device's state, this bypasses the time zone detection logic.
+     */
+    void setTimeZoneState(@NonNull TimeZoneState timeZoneState);
+
+    /**
+     * Signals that a user has confirmed the time zone. If the {@code timeZoneId} is the same as
+     * the current time zone then this can be used to raise the system's confidence in that time
+     * zone. Returns {@code true} if confirmation was successful (i.e. the ID matched),
+     * {@code false} otherwise.
+     */
+    boolean confirmTimeZone(@NonNull String timeZoneId);
 
     /**
      * Suggests zero, one or more time zones for the device, or withdraws a previous suggestion if

@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.util.IndentingPrintWriter;
@@ -30,6 +32,8 @@ import android.util.IndentingPrintWriter;
  * in tests.
  */
 class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
+    // State
+    private TimeState mTimeState;
 
     // Call tracking.
     private TelephonyTimeSuggestion mLastTelephonySuggestion;
@@ -38,7 +42,24 @@ class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
     private NetworkTimeSuggestion mLastNetworkSuggestion;
     private GnssTimeSuggestion mLastGnssSuggestion;
     private ExternalTimeSuggestion mLastExternalSuggestion;
+    private UnixEpochTime mLastConfirmedTime;
     private boolean mDumpCalled;
+
+    @Override
+    public TimeState getTimeState() {
+        return mTimeState;
+    }
+
+    @Override
+    public void setTimeState(TimeState timeState) {
+        mTimeState = timeState;
+    }
+
+    @Override
+    public boolean confirmTime(UnixEpochTime confirmationTime) {
+        mLastConfirmedTime = confirmationTime;
+        return false;
+    }
 
     @Override
     public void suggestTelephonyTime(TelephonyTimeSuggestion timeSuggestion) {
@@ -79,6 +100,7 @@ class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
         mLastNetworkSuggestion = null;
         mLastGnssSuggestion = null;
         mLastExternalSuggestion = null;
+        mLastConfirmedTime = null;
         mDumpCalled = false;
     }
 
@@ -102,6 +124,10 @@ class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
 
     void verifySuggestExternalTimeCalled(ExternalTimeSuggestion expectedSuggestion) {
         assertEquals(expectedSuggestion, mLastExternalSuggestion);
+    }
+
+    void verifyConfirmTimeCalled(UnixEpochTime expectedConfirmationTime) {
+        assertEquals(mLastConfirmedTime, expectedConfirmationTime);
     }
 
     void verifyDumpCalled() {

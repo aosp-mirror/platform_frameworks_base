@@ -57,21 +57,21 @@ public final class TimeCapabilities implements Parcelable {
     @NonNull
     private final UserHandle mUserHandle;
     private final @CapabilityState int mConfigureAutoDetectionEnabledCapability;
-    private final @CapabilityState int mSuggestManualTimeCapability;
+    private final @CapabilityState int mSetManualTimeCapability;
 
     private TimeCapabilities(@NonNull Builder builder) {
         this.mUserHandle = Objects.requireNonNull(builder.mUserHandle);
         this.mConfigureAutoDetectionEnabledCapability =
                 builder.mConfigureAutoDetectionEnabledCapability;
-        this.mSuggestManualTimeCapability = builder.mSuggestManualTimeCapability;
+        this.mSetManualTimeCapability = builder.mSetManualTimeCapability;
     }
 
     @NonNull
-    private static TimeCapabilities createFromParcel(Parcel in) {
+    private static TimeCapabilities createFromParcel(@NonNull Parcel in) {
         UserHandle userHandle = UserHandle.readFromParcel(in);
         return new TimeCapabilities.Builder(userHandle)
                 .setConfigureAutoDetectionEnabledCapability(in.readInt())
-                .setSuggestManualTimeCapability(in.readInt())
+                .setSetManualTimeCapability(in.readInt())
                 .build();
     }
 
@@ -79,7 +79,7 @@ public final class TimeCapabilities implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         UserHandle.writeToParcel(mUserHandle, dest);
         dest.writeInt(mConfigureAutoDetectionEnabledCapability);
-        dest.writeInt(mSuggestManualTimeCapability);
+        dest.writeInt(mSetManualTimeCapability);
     }
 
     /**
@@ -94,11 +94,12 @@ public final class TimeCapabilities implements Parcelable {
 
     /**
      * Returns the capability state associated with the user's ability to manually set time on a
-     * device.
+     * device. The setting can be updated via {@link
+     * TimeManager#updateTimeConfiguration(TimeConfiguration)}.
      */
     @CapabilityState
-    public int getSuggestManualTimeCapability() {
-        return mSuggestManualTimeCapability;
+    public int getSetManualTimeCapability() {
+        return mSetManualTimeCapability;
     }
 
     /**
@@ -136,14 +137,14 @@ public final class TimeCapabilities implements Parcelable {
         TimeCapabilities that = (TimeCapabilities) o;
         return mConfigureAutoDetectionEnabledCapability
                 == that.mConfigureAutoDetectionEnabledCapability
-                && mSuggestManualTimeCapability == that.mSuggestManualTimeCapability
+                && mSetManualTimeCapability == that.mSetManualTimeCapability
                 && mUserHandle.equals(that.mUserHandle);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mUserHandle, mConfigureAutoDetectionEnabledCapability,
-                mSuggestManualTimeCapability);
+                mSetManualTimeCapability);
     }
 
     @Override
@@ -152,7 +153,7 @@ public final class TimeCapabilities implements Parcelable {
                 + "mUserHandle=" + mUserHandle
                 + ", mConfigureAutoDetectionEnabledCapability="
                 + mConfigureAutoDetectionEnabledCapability
-                + ", mSuggestManualTimeCapability=" + mSuggestManualTimeCapability
+                + ", mSetManualTimeCapability=" + mSetManualTimeCapability
                 + '}';
     }
 
@@ -165,7 +166,7 @@ public final class TimeCapabilities implements Parcelable {
 
         @NonNull private final UserHandle mUserHandle;
         private @CapabilityState int mConfigureAutoDetectionEnabledCapability;
-        private @CapabilityState int mSuggestManualTimeCapability;
+        private @CapabilityState int mSetManualTimeCapability;
 
         public Builder(@NonNull UserHandle userHandle) {
             this.mUserHandle = Objects.requireNonNull(userHandle);
@@ -176,18 +177,18 @@ public final class TimeCapabilities implements Parcelable {
             this.mUserHandle = timeCapabilities.mUserHandle;
             this.mConfigureAutoDetectionEnabledCapability =
                     timeCapabilities.mConfigureAutoDetectionEnabledCapability;
-            this.mSuggestManualTimeCapability = timeCapabilities.mSuggestManualTimeCapability;
+            this.mSetManualTimeCapability = timeCapabilities.mSetManualTimeCapability;
         }
 
-        /** Sets the state for automatic time detection config. */
+        /** Sets the value for the "configure automatic time detection" capability. */
         public Builder setConfigureAutoDetectionEnabledCapability(@CapabilityState int value) {
             this.mConfigureAutoDetectionEnabledCapability = value;
             return this;
         }
 
-        /** Sets the state for manual time change. */
-        public Builder setSuggestManualTimeCapability(@CapabilityState int value) {
-            this.mSuggestManualTimeCapability = value;
+        /** Sets the value for the "set manual time" capability. */
+        public Builder setSetManualTimeCapability(@CapabilityState int value) {
+            this.mSetManualTimeCapability = value;
             return this;
         }
 
@@ -195,7 +196,7 @@ public final class TimeCapabilities implements Parcelable {
         public TimeCapabilities build() {
             verifyCapabilitySet(mConfigureAutoDetectionEnabledCapability,
                     "configureAutoDetectionEnabledCapability");
-            verifyCapabilitySet(mSuggestManualTimeCapability, "mSuggestManualTimeCapability");
+            verifyCapabilitySet(mSetManualTimeCapability, "mSetManualTimeCapability");
             return new TimeCapabilities(this);
         }
 

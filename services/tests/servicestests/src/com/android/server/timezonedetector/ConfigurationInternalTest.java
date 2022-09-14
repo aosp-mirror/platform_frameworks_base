@@ -76,7 +76,7 @@ public class ConfigurationInternalTest {
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_NOT_APPLICABLE,
-                    capabilities.getSuggestManualTimeZoneCapability());
+                    capabilities.getSetManualTimeZoneCapability());
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
 
@@ -102,7 +102,7 @@ public class ConfigurationInternalTest {
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_POSSESSED,
-                    capabilities.getSuggestManualTimeZoneCapability());
+                    capabilities.getSetManualTimeZoneCapability());
             assertEquals(CAPABILITY_NOT_APPLICABLE,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
 
@@ -143,7 +143,7 @@ public class ConfigurationInternalTest {
             assertEquals(CAPABILITY_NOT_ALLOWED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_NOT_ALLOWED,
-                    capabilities.getSuggestManualTimeZoneCapability());
+                    capabilities.getSetManualTimeZoneCapability());
             // This has user privacy implications so it is not restricted in the same way as others.
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
@@ -170,7 +170,7 @@ public class ConfigurationInternalTest {
             assertEquals(CAPABILITY_NOT_ALLOWED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_NOT_ALLOWED,
-                    capabilities.getSuggestManualTimeZoneCapability());
+                    capabilities.getSetManualTimeZoneCapability());
             // This has user privacy implications so it is not restricted in the same way as others.
             assertEquals(CAPABILITY_NOT_APPLICABLE,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
@@ -211,7 +211,7 @@ public class ConfigurationInternalTest {
             TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeZoneCapability());
+            assertEquals(CAPABILITY_POSSESSED, capabilities.getSetManualTimeZoneCapability());
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
 
@@ -235,7 +235,7 @@ public class ConfigurationInternalTest {
             TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeZoneCapability());
+            assertEquals(CAPABILITY_POSSESSED, capabilities.getSetManualTimeZoneCapability());
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
 
@@ -279,7 +279,7 @@ public class ConfigurationInternalTest {
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_NOT_APPLICABLE,
-                    capabilities.getSuggestManualTimeZoneCapability());
+                    capabilities.getSetManualTimeZoneCapability());
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
 
@@ -303,7 +303,7 @@ public class ConfigurationInternalTest {
             TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeZoneCapability());
+            assertEquals(CAPABILITY_POSSESSED, capabilities.getSetManualTimeZoneCapability());
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
 

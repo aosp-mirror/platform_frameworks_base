@@ -15,8 +15,10 @@
  */
 package com.android.server.timezonedetector;
 
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_CONFIRM_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_DUMP_METRICS;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_GET_TIME_ZONE_STATE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
@@ -24,6 +26,7 @@ import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_TEL
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SERVICE_NAME;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_GEO_DETECTION_ENABLED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_TIME_ZONE_STATE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE;
@@ -38,6 +41,7 @@ import static com.android.server.timedetector.ServerFlags.KEY_TIME_ZONE_DETECTOR
 
 import android.app.time.LocationTimeZoneManager;
 import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.os.ShellCommand;
@@ -83,6 +87,12 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 return runSuggestTelephonyTimeZone();
             case SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK:
                 return runEnableTelephonyFallback();
+            case SHELL_COMMAND_GET_TIME_ZONE_STATE:
+                return runGetTimeZoneState();
+            case SHELL_COMMAND_SET_TIME_ZONE_STATE:
+                return runSetTimeZoneState();
+            case SHELL_COMMAND_CONFIRM_TIME_ZONE:
+                return runConfirmTimeZone();
             case SHELL_COMMAND_DUMP_METRICS:
                 return runDumpMetrics();
             default: {
@@ -183,6 +193,45 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetTimeZoneState() {
+        TimeZoneState timeZoneState = mInterface.getTimeZoneState();
+        getOutPrintWriter().println(timeZoneState);
+        return 0;
+    }
+
+    private int runSetTimeZoneState() {
+        TimeZoneState timeZoneState = TimeZoneState.parseCommandLineArgs(this);
+        mInterface.setTimeZoneState(timeZoneState);
+        return 0;
+    }
+
+    private int runConfirmTimeZone() {
+        String timeZoneId = parseTimeZoneIdArg(this);
+        getOutPrintWriter().println(mInterface.confirmTimeZone(timeZoneId));
+        return 0;
+    }
+
+    private static String parseTimeZoneIdArg(ShellCommand cmd) {
+        String zoneId = null;
+        String opt;
+        while ((opt = cmd.getNextArg()) != null) {
+            switch (opt) {
+                case "--zone_id": {
+                    zoneId = cmd.getNextArgRequired();
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+                }
+            }
+        }
+
+        if (zoneId == null) {
+            throw new IllegalArgumentException("No zoneId specified.");
+        }
+        return zoneId;
+    }
+
     private int runDumpMetrics() {
         final PrintWriter pw = getOutPrintWriter();
         MetricsTimeZoneDetectorState metricsState = mInterface.generateMetricsState();
@@ -226,6 +275,12 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("    Suggests a time zone as if via the \"manual\" origin.\n");
         pw.printf("  %s <telephony suggestion opts>\n", SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE);
         pw.printf("    Suggests a time zone as if via the \"telephony\" origin.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_GET_TIME_ZONE_STATE);
+        pw.printf("    Returns the current time zone setting state.\n");
+        pw.printf("  %s <time zone state options>\n", SHELL_COMMAND_SET_TIME_ZONE_STATE);
+        pw.printf("    Sets the current time zone state for tests.\n");
+        pw.printf("  %s <--zone_id Olson ID>\n", SHELL_COMMAND_CONFIRM_TIME_ZONE);
+        pw.printf("    Tries to confirms the time zone, raising the confidence.\n");
         pw.printf("  %s\n", SHELL_COMMAND_DUMP_METRICS);
         pw.printf("    Dumps the service metrics to stdout for inspection.\n");
         pw.println();
@@ -234,6 +289,8 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         ManualTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();
         TelephonyTimeZoneSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        TimeZoneState.printCommandLineOpts(pw);
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);

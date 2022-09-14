@@ -243,7 +243,7 @@ public final class ConfigurationInternal {
         } else {
             suggestManualTimeZoneCapability = CAPABILITY_POSSESSED;
         }
-        builder.setSuggestManualTimeZoneCapability(suggestManualTimeZoneCapability);
+        builder.setSetManualTimeZoneCapability(suggestManualTimeZoneCapability);
 
         return builder.build();
     }

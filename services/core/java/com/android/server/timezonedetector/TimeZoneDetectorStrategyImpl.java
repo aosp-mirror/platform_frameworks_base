@@ -23,6 +23,7 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_M
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_LOW;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
@@ -30,6 +31,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilities;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
@@ -76,7 +78,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();
 
         /**
-         * Returns the device's currently configured time zone.
+         * Returns the device's currently configured time zone. May return an empty string.
          */
         @NonNull String getDeviceTimeZone();
 
@@ -250,6 +252,39 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     @Override
+    public synchronized boolean confirmTimeZone(@NonNull String timeZoneId) {
+        Objects.requireNonNull(timeZoneId);
+
+        String currentTimeZoneId = mEnvironment.getDeviceTimeZone();
+        if (!currentTimeZoneId.equals(timeZoneId)) {
+            return false;
+        }
+
+        if (mEnvironment.getDeviceTimeZoneConfidence() < TIME_ZONE_CONFIDENCE_HIGH) {
+            mEnvironment.setDeviceTimeZoneAndConfidence(currentTimeZoneId,
+                    TIME_ZONE_CONFIDENCE_HIGH, "confirmTimeZone: timeZoneId=" + timeZoneId);
+        }
+        return true;
+    }
+
+    @Override
+    public synchronized TimeZoneState getTimeZoneState() {
+        boolean userShouldConfirmId =
+                mEnvironment.getDeviceTimeZoneConfidence() < TIME_ZONE_CONFIDENCE_HIGH;
+        return new TimeZoneState(mEnvironment.getDeviceTimeZone(), userShouldConfirmId);
+    }
+
+    @Override
+    public void setTimeZoneState(@NonNull TimeZoneState timeZoneState) {
+        Objects.requireNonNull(timeZoneState);
+
+        @TimeZoneConfidence int confidence = timeZoneState.getUserShouldConfirmId()
+                ? TIME_ZONE_CONFIDENCE_LOW : TIME_ZONE_CONFIDENCE_HIGH;
+        mEnvironment.setDeviceTimeZoneAndConfidence(
+                timeZoneState.getId(), confidence, "setTimeZoneState()");
+    }
+
+    @Override
     public synchronized void suggestGeolocationTimeZone(
             @NonNull GeolocationTimeZoneSuggestion suggestion) {
 
@@ -301,7 +336,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                 currentUserConfig.createCapabilitiesAndConfig();
         TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
-        if (capabilities.getSuggestManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
+        if (capabilities.getSetManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
             Slog.i(LOG_TAG, "User does not have the capability needed to set the time zone manually"
                     + ": capabilities=" + capabilities
                     + ", timeZoneId=" + timeZoneId
