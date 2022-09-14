@@ -150,8 +150,9 @@ public class SystemDataTransferProcessor {
         // Create a PendingIntent
         final long token = Binder.clearCallingIdentity();
         try {
-            return PendingIntent.getActivity(mContext, /*requestCode */ associationId, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
+            return PendingIntent.getActivityAsUser(mContext, /*requestCode */ associationId, intent,
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE, /* options= */ null,
+                    UserHandle.CURRENT);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
