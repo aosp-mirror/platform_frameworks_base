@@ -1148,6 +1148,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Creating display=" + display);
 
+        setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
     }
 
@@ -2649,16 +2650,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && !mDisplayRotation.isRotatingSeamlessly()) {
             clearFixedRotationLaunchingApp();
         }
-    }
-
-    @Override
-    public void setWindowingMode(int windowingMode) {
-        // Intentionally call onRequestedOverrideConfigurationChanged() directly to change windowing
-        // mode and display windowing mode atomically.
-        mTmpConfiguration.setTo(getRequestedOverrideConfiguration());
-        mTmpConfiguration.windowConfiguration.setWindowingMode(windowingMode);
-        mTmpConfiguration.windowConfiguration.setDisplayWindowingMode(windowingMode);
-        onRequestedOverrideConfigurationChanged(mTmpConfiguration);
     }
 
     @Override

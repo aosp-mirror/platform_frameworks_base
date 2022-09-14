@@ -4,10 +4,12 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.testing.AndroidTestingRunner
 import android.view.View
+import android.view.ViewPropertyAnimator
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -29,8 +31,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
@@ -197,5 +201,33 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         verify(statusIcons).addIgnoredSlot(
                 context.getString(com.android.internal.R.string.status_bar_alarm_clock)
         )
+    }
+
+    @Test
+    fun animateOutOnStartCustomizing() {
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+
+        mLargeScreenShadeHeaderController.startCustomizingAnimation(show = true, duration)
+
+        verify(animator).setDuration(duration)
+        verify(animator).alpha(0f)
+        verify(animator).setInterpolator(Interpolators.ALPHA_OUT)
+        verify(animator).start()
+    }
+
+    @Test
+    fun animateInOnEndCustomizing() {
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+
+        mLargeScreenShadeHeaderController.startCustomizingAnimation(show = false, duration)
+
+        verify(animator).setDuration(duration)
+        verify(animator).alpha(1f)
+        verify(animator).setInterpolator(Interpolators.ALPHA_IN)
+        verify(animator).start()
     }
 }

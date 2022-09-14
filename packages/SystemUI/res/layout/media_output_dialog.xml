@@ -20,6 +20,7 @@
     android:id="@+id/media_output_dialog"
     android:layout_width="@dimen/large_dialog_width"
     android:layout_height="wrap_content"
+    android:background="@drawable/media_output_dialog_background"
     android:orientation="vertical">
 
     <LinearLayout

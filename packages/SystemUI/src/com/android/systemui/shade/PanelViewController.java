@@ -248,7 +248,7 @@ public abstract class PanelViewController {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
-                requestPanelHeightUpdate();
+                updateExpandedHeightToMaxHeight();
             }
         });
         mAmbientState = ambientState;
@@ -730,7 +730,7 @@ public abstract class PanelViewController {
         setExpandedHeightInternal(height);
     }
 
-    protected void requestPanelHeightUpdate() {
+    void updateExpandedHeightToMaxHeight() {
         float currentMaxPanelHeight = getMaxPanelHeight();
 
         if (isFullyCollapsed()) {
@@ -753,6 +753,13 @@ public abstract class PanelViewController {
         setExpandedHeight(currentMaxPanelHeight);
     }
 
+    /**
+     * Returns drag down distance after which panel should be fully expanded. Usually it's the
+     * same as max panel height but for large screen devices (especially split shade) we might
+     * want to return different value to shorten drag distance
+     */
+    public abstract int getMaxPanelTransitionDistance();
+
     public void setExpandedHeightInternal(float h) {
         if (isNaN(h)) {
             Log.wtf(TAG, "ExpandedHeight set to NaN");
@@ -763,18 +770,15 @@ public abstract class PanelViewController {
                         () -> mLatencyTracker.onActionEnd(LatencyTracker.ACTION_EXPAND_PANEL));
                 mExpandLatencyTracking = false;
             }
-            float maxPanelHeight = getMaxPanelHeight();
+            float maxPanelHeight = getMaxPanelTransitionDistance();
             if (mHeightAnimator == null) {
                 // Split shade has its own overscroll logic
                 if (mTracking && !mInSplitShade) {
                     float overExpansionPixels = Math.max(0, h - maxPanelHeight);
                     setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
                 }
-                mExpandedHeight = Math.min(h, maxPanelHeight);
-            } else {
-                mExpandedHeight = h;
             }
-
+            mExpandedHeight = Math.min(h, maxPanelHeight);
             // If we are closing the panel and we are almost there due to a slow decelerating
             // interpolator, abort the animation.
             if (mExpandedHeight < 1f && mExpandedHeight != 0f && mClosing) {
@@ -832,7 +836,7 @@ public abstract class PanelViewController {
     protected abstract int getMaxPanelHeight();
 
     public void setExpandedFraction(float frac) {
-        setExpandedHeight(getMaxPanelHeight() * frac);
+        setExpandedHeight(getMaxPanelTransitionDistance() * frac);
     }
 
     public float getExpandedHeight() {
@@ -1029,7 +1033,7 @@ public abstract class PanelViewController {
         mHeightAnimator = animator;
         if (animator == null && mPanelUpdateWhenAnimatorEnds) {
             mPanelUpdateWhenAnimatorEnds = false;
-            requestPanelHeightUpdate();
+            updateExpandedHeightToMaxHeight();
         }
     }
 
@@ -1421,7 +1425,7 @@ public abstract class PanelViewController {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
                 int oldTop, int oldRight, int oldBottom) {
-            requestPanelHeightUpdate();
+            updateExpandedHeightToMaxHeight();
             mHasLayoutedSinceDown = true;
             if (mUpdateFlingOnLayout) {
                 abortAnimations();

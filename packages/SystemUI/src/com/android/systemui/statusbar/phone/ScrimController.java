@@ -259,11 +259,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mKeyguardOccluded;
 
     @Inject
-    public ScrimController(LightBarController lightBarController, DozeParameters dozeParameters,
-            AlarmManager alarmManager, KeyguardStateController keyguardStateController,
-            DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
-            ConfigurationController configurationController, @Main Executor mainExecutor,
+    public ScrimController(
+            LightBarController lightBarController,
+            DozeParameters dozeParameters,
+            AlarmManager alarmManager,
+            KeyguardStateController keyguardStateController,
+            DelayedWakeLock.Builder delayedWakeLockBuilder,
+            Handler handler,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DockManager dockManager,
+            ConfigurationController configurationController,
+            @Main Executor mainExecutor,
             ScreenOffAnimationController screenOffAnimationController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
@@ -826,19 +832,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mBehindTint = Color.BLACK;
             } else {
                 mBehindAlpha = behindAlpha;
-                if (mState == ScrimState.SHADE_LOCKED) {
+                if (mState == ScrimState.KEYGUARD && mTransitionToFullShadeProgress > 0.0f) {
+                    mNotificationsAlpha = MathUtils
+                            .saturate(mTransitionToLockScreenFullShadeNotificationsProgress);
+                } else if (mState == ScrimState.SHADE_LOCKED) {
                     // going from KEYGUARD to SHADE_LOCKED state
                     mNotificationsAlpha = getInterpolatedFraction();
                 } else {
                     mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
-                }
-                if (mState == ScrimState.KEYGUARD
-                        && mTransitionToLockScreenFullShadeNotificationsProgress > 0.0f) {
-                    // Interpolate the notification alpha when transitioning!
-                    mNotificationsAlpha = MathUtils.lerp(
-                            mNotificationsAlpha,
-                            getInterpolatedFraction(),
-                            mTransitionToLockScreenFullShadeNotificationsProgress);
                 }
                 mNotificationsTint = mState.getNotifTint();
                 mBehindTint = behindTint;
@@ -1430,6 +1431,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.print(mNotificationsAlpha);
         pw.print(" tint=0x");
         pw.println(Integer.toHexString(mNotificationsScrim.getTint()));
+        pw.print(" expansionProgress=");
+        pw.println(mTransitionToLockScreenFullShadeNotificationsProgress);
 
         pw.print("  mTracking=");
         pw.println(mTracking);

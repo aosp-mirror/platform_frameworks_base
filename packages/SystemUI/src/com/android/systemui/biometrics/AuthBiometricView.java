@@ -169,6 +169,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     private Animator.AnimatorListener mJankListener;
 
+    private final boolean mUseCustomBpSize;
+    private final int mCustomBpWidth;
+    private final int mCustomBpHeight;
+
     private final OnClickListener mBackgroundClickListener = (view) -> {
         if (mState == STATE_AUTHENTICATED) {
             Log.w(TAG, "Ignoring background click after authenticated");
@@ -209,6 +213,10 @@ public abstract class AuthBiometricView extends LinearLayout {
             handleResetAfterHelp();
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         };
+
+        mUseCustomBpSize = getResources().getBoolean(R.bool.use_custom_bp_size);
+        mCustomBpWidth = getResources().getDimensionPixelSize(R.dimen.biometric_dialog_width);
+        mCustomBpHeight = getResources().getDimensionPixelSize(R.dimen.biometric_dialog_height);
     }
 
     /** Delay after authentication is confirmed, before the dialog should be animated away. */
@@ -834,14 +842,17 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        final int newWidth = Math.min(width, height);
+        if (mUseCustomBpSize) {
+            width = mCustomBpWidth;
+            height = mCustomBpHeight;
+        } else {
+            width = Math.min(width, height);
+        }
 
-        // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
-        // width.
-        mLayoutParams = onMeasureInternal(newWidth, height);
+        mLayoutParams = onMeasureInternal(width, height);
         setMeasuredDimension(mLayoutParams.mMediumWidth, mLayoutParams.mMediumHeight);
     }
 

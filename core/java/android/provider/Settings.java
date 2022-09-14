@@ -6660,6 +6660,26 @@ public final class Settings {
         public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
 
         /**
+         * This is used by LocalBluetoothLeBroadcast to store the broadcast program info.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_PROGRAM_INFO =
+                "bluetooth_le_broadcast_program_info";
+
+        /**
+         * This is used by LocalBluetoothLeBroadcast to store the broadcast code.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_CODE = "bluetooth_le_broadcast_code";
+
+        /**
+         * This is used by LocalBluetoothLeBroadcast to store the app source name.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME =
+                "bluetooth_le_broadcast_app_source_name";
+
+        /**
          * Setting to indicate that on device captions are enabled.
          *
          * @hide
