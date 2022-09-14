@@ -46,6 +46,9 @@ import com.android.systemui.util.concurrency.DelayableExecutor
  * display the view in a certain state, since they receive <T> in [updateView].
  *
  * TODO(b/245610654): Remove all the media-specific logic from this class.
+ *
+ * @property windowTitle the title to use for the window that displays the temporary view. Should be
+ *   normally cased, like "Window Title".
  */
 abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
     internal val context: Context,
@@ -56,6 +59,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
     private val configurationController: ConfigurationController,
     private val powerManager: PowerManager,
     @LayoutRes private val viewLayoutRes: Int,
+    private val windowTitle: String,
 ) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -67,7 +71,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        title = WINDOW_TITLE
+        title = windowTitle
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -188,10 +192,6 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
      */
     open fun animateViewIn(view: ViewGroup) {}
 }
-
-// Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
-// UpdateMediaTapToTransferReceiverDisplayTest
-private const val WINDOW_TITLE = "Media Transfer Chip View"
 
 object TemporaryDisplayRemovalReason {
     const val REASON_TIMEOUT = "TIMEOUT"
