@@ -20,6 +20,8 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
@@ -34,6 +36,37 @@ import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
 object HomePageProvider : SettingsPageProvider {
     override val name = "Home"
+
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = SettingsPage.create(name)
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            PreferenceMainPageProvider.buildInjectEntry()
+                .setLink(fromPage = owner).build()
+        )
+        entryList.add(
+            SliderPageProvider.buildInjectEntry()
+                .setLink(fromPage = owner).build()
+        )
+        entryList.add(
+            SpinnerPageProvider.buildInjectEntry()
+                .setLink(fromPage = owner).build()
+        )
+        entryList.add(
+            SettingsPagerPageProvider.buildInjectEntry()
+                .setLink(fromPage = owner).build()
+        )
+        entryList.add(
+            FooterPageProvider.buildInjectEntry()
+                .setLink(fromPage = owner).build()
+        )
+        entryList.add(
+            IllustrationPageProvider.buildInjectEntry()
+                .setLink(fromPage = owner).build()
+        )
+
+        return entryList
+    }
 
     @Composable
     override fun Page(arguments: Bundle?) {

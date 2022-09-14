@@ -56,6 +56,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedActivity;
@@ -102,7 +103,7 @@ import java.util.UUID;
  *
  * @hide
  */
-public class PackageImpl implements ParsedPackage, AndroidPackage,
+public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         AndroidPackageHidden, ParsingPackage, ParsingPackageHidden, Parcelable {
 
     private static final SparseArray<int[]> EMPTY_INT_ARRAY_SPARSE_ARRAY = new SparseArray<>();
@@ -2591,7 +2592,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackage,
     }
 
     @Override
-    public AndroidPackage hideAsFinal() {
+    public AndroidPackageInternal hideAsFinal() {
         // TODO(b/135203078): Lock as immutable
         if (mStorageUuid == null) {
             assignDerivedFields();

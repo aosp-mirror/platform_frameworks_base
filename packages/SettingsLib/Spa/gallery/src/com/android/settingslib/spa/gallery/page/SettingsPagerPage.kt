@@ -19,6 +19,8 @@ package com.android.settingslib.spa.gallery.page
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -33,6 +35,17 @@ private const val TITLE = "Sample SettingsPager"
 object SettingsPagerPageProvider : SettingsPageProvider {
     override val name = "SettingsPager"
 
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         SettingsPagerPage()
@@ -40,10 +53,7 @@ object SettingsPagerPageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = TITLE
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 

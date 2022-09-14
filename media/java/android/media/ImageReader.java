@@ -342,9 +342,14 @@ public class ImageReader implements AutoCloseable {
         // Only include memory for 1 buffer, since actually accounting for the memory used is
         // complex, and 1 buffer is enough for the VM to treat the ImageReader as being of some
         // size.
-        mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(
-            width, height, useLegacyImageFormat ? imageFormat : hardwareBufferFormat,
-            /*buffer count*/ 1);
+        if (hardwareBufferFormat == HardwareBuffer.BLOB) {
+            mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(
+                width, height, imageFormat, /*buffer count*/ 1);
+        } else {
+            mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(
+                width, height, useLegacyImageFormat ? imageFormat : hardwareBufferFormat,
+                /*buffer count*/ 1);
+        }
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
@@ -370,7 +375,6 @@ public class ImageReader implements AutoCloseable {
             MultiResolutionImageReader parent, int hardwareBufferFormat, int dataSpace) {
         mWidth = width;
         mHeight = height;
-        mFormat = ImageFormat.UNKNOWN; // set default image format value as UNKNOWN
         mUsage = usage;
         mMaxImages = maxImages;
         mParent = parent;
@@ -378,6 +382,7 @@ public class ImageReader implements AutoCloseable {
         mDataSpace = dataSpace;
         mUseLegacyImageFormat = false;
         mNumPlanes = ImageUtils.getNumPlanesForHardwareBufferFormat(mHardwareBufferFormat);
+        mFormat = PublicFormatUtils.getPublicFormat(hardwareBufferFormat, dataSpace);
 
         initializeImageReader(width, height, mFormat, maxImages, usage, hardwareBufferFormat,
                 dataSpace, mUseLegacyImageFormat);

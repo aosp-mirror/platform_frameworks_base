@@ -23,7 +23,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.Installer;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 

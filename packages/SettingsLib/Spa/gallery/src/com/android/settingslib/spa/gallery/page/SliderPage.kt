@@ -27,6 +27,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -41,6 +44,81 @@ private const val TITLE = "Sample Slider"
 object SliderPageProvider : SettingsPageProvider {
     override val name = "Slider"
 
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = SettingsPage.create(name)
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            SettingsEntryBuilder.create("Simple Slider", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SettingsSlider(object : SettingsSliderModel {
+                        override val title = "Simple Slider"
+                        override val initValue = 40
+                    })
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create("Slider with icon", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SettingsSlider(object : SettingsSliderModel {
+                        override val title = "Slider with icon"
+                        override val initValue = 30
+                        override val onValueChangeFinished = {
+                            println("onValueChangeFinished")
+                        }
+                        override val icon = Icons.Outlined.AccessAlarm
+                    })
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create("Slider with changeable icon", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    val initValue = 0
+                    var icon by remember { mutableStateOf(Icons.Outlined.MusicOff) }
+                    var sliderPosition by remember { mutableStateOf(initValue) }
+                    SettingsSlider(object : SettingsSliderModel {
+                        override val title = "Slider with changeable icon"
+                        override val initValue = initValue
+                        override val onValueChange = { it: Int ->
+                            sliderPosition = it
+                            icon = if (it > 0) Icons.Outlined.MusicNote else Icons.Outlined.MusicOff
+                        }
+                        override val onValueChangeFinished = {
+                            println("onValueChangeFinished: the value is $sliderPosition")
+                        }
+                        override val icon = icon
+                    })
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create("Slider with steps", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SettingsSlider(object : SettingsSliderModel {
+                        override val title = "Slider with steps"
+                        override val initValue = 2
+                        override val valueRange = 1..5
+                        override val showSteps = true
+                    })
+                }.build()
+        )
+
+        return entryList
+    }
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         SliderPage()
@@ -48,52 +126,16 @@ object SliderPageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = TITLE
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 
 @Composable
 private fun SliderPage() {
     RegularScaffold(title = TITLE) {
-        SettingsSlider(object : SettingsSliderModel {
-            override val title = "Slider"
-            override val initValue = 40
-        })
-
-        SettingsSlider(object : SettingsSliderModel {
-            override val title = "Slider with icon"
-            override val initValue = 30
-            override val onValueChangeFinished = {
-                println("onValueChangeFinished")
-            }
-            override val icon = Icons.Outlined.AccessAlarm
-        })
-
-        val initValue = 0
-        var icon by remember { mutableStateOf(Icons.Outlined.MusicOff) }
-        var sliderPosition by remember { mutableStateOf(initValue) }
-        SettingsSlider(object : SettingsSliderModel {
-            override val title = "Slider with changeable icon"
-            override val initValue = initValue
-            override val onValueChange = { it: Int ->
-                sliderPosition = it
-                icon = if (it > 0) Icons.Outlined.MusicNote else Icons.Outlined.MusicOff
-            }
-            override val onValueChangeFinished = {
-                println("onValueChangeFinished: the value is $sliderPosition")
-            }
-            override val icon = icon
-        })
-
-        SettingsSlider(object : SettingsSliderModel {
-            override val title = "Slider with steps"
-            override val initValue = 2
-            override val valueRange = 1..5
-            override val showSteps = true
-        })
+        for (entry in SliderPageProvider.buildEntry(arguments = null)) {
+            entry.uiLayout()
+        }
     }
 }
 

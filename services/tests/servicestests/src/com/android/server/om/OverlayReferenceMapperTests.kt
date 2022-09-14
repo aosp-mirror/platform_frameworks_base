@@ -17,7 +17,7 @@
 package com.android.server.om
 
 import android.net.Uri
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat

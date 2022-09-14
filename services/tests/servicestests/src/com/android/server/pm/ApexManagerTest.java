@@ -47,7 +47,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -64,7 +64,7 @@ import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

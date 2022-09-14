@@ -18,17 +18,22 @@ package com.android.server.pm.parsing.pkg;
 
 import android.content.pm.SigningDetails;
 
+import com.android.server.pm.pkg.AndroidPackage;
+
 /**
  * Methods used for mutation after direct package parsing, mostly done inside
  * {@link com.android.server.pm.PackageManagerService}.
  *
  * Java disallows defining this as an inner interface, so this must be a separate file.
  *
+ * TODO: Remove extending AndroidPackage, should be an isolated interface with only the methods
+ *  necessary to parse and install
+ *
  * @hide
  */
 public interface ParsedPackage extends AndroidPackage {
 
-    AndroidPackage hideAsFinal();
+    AndroidPackageInternal hideAsFinal();
 
     ParsedPackage addUsesLibrary(int index, String libraryName);
 

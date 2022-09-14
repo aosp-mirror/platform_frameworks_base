@@ -63,7 +63,8 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY,
         SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED,
-        SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION})
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION,
+        SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -247,4 +248,9 @@ public @interface SoftInputShowHideReason {
      * {@link InputMethodManager#hideSoftInputFromInputMethod(IBinder, int)}.
      */
     int HIDE_SOFT_INPUT_IMM_DEPRECATION = 31;
+
+    /**
+     * Hide soft input when the window gained focus without an editor from the IME shown window.
+     */
+    int HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR = 32;
 }

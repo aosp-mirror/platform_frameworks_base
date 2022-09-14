@@ -1514,8 +1514,6 @@ class UserController implements Handler.Callback {
             Preconditions.checkArgument(!foreground, "Cannot start user %d in foreground AND "
                     + "on secondary display (%d)", userId, displayId);
         }
-        mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
-
         // TODO(b/239982558): log display id (or use a new event)
         EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId);
 
@@ -1570,6 +1568,8 @@ class UserController implements Handler.Callback {
                 Slogf.w(TAG, "Cannot start pre-created user #" + userId + " as foreground");
                 return false;
             }
+
+            mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
 
             // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {

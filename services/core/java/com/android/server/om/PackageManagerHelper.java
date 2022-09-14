@@ -19,19 +19,14 @@ package com.android.server.om;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.om.OverlayableInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.Slog;
 
 import com.android.server.pm.PackageManagerServiceUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

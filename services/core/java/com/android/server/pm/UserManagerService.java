@@ -1862,22 +1862,48 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     // TODO(b/239982558): try to merge with isUserVisibleUnchecked() (once both are unit tested)
+    /**
+     * See {@link UserManagerInternal#isUserVisible(int, int)}.
+     */
     boolean isUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
-        // TODO(b/244644281): temporary workaround to let WM use this API without breaking current
-        // behavior (otherwise current user / profiles wouldn't be able to launch activities on
-        // other non-passenger displays, like cluster, display, or virtual displays)
-        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
-            return true;
+        if (displayId == Display.INVALID_DISPLAY) {
+            return false;
         }
-
-        if (displayId == Display.DEFAULT_DISPLAY) {
+        if (!mUsersOnSecondaryDisplaysEnabled) {
             return isCurrentUserOrRunningProfileOfCurrentUser(userId);
         }
 
-        // Device doesn't support multiple users on multiple displays, so only users checked above
-        // can be visible
-        if (!mUsersOnSecondaryDisplaysEnabled) {
-            return false;
+        // TODO(b/244644281): temporary workaround to let WM use this API without breaking current
+        // behavior - return true for current user / profile for any display (other than those
+        // explicitly assigned to another users), otherwise they wouldn't be able to launch
+        // activities on other non-passenger displays, like cluster, display, or virtual displays).
+        // In the long-term, it should rely just on mUsersOnSecondaryDisplays, which
+        // would be updated by DisplayManagerService when displays are created / initialized.
+        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
+            synchronized (mUsersOnSecondaryDisplays) {
+                boolean assignedToUser = false;
+                boolean assignedToAnotherUser = false;
+                for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
+                    if (mUsersOnSecondaryDisplays.valueAt(i) == displayId) {
+                        if (mUsersOnSecondaryDisplays.keyAt(i) == userId) {
+                            assignedToUser = true;
+                            break;
+                        } else {
+                            assignedToAnotherUser = true;
+                            // Cannot break because it could be assigned to a profile of the user
+                            // (and we better not assume that the iteration will check for the
+                            // parent user before its profiles)
+                        }
+                    }
+                }
+                if (DBG_MUMD) {
+                    Slogf.d(LOG_TAG, "isUserVisibleOnDisplay(%d, %d): assignedToUser=%b, "
+                            + "assignedToAnotherUser=%b, mUsersOnSecondaryDisplays=%s",
+                            userId, displayId, assignedToUser, assignedToAnotherUser,
+                            mUsersOnSecondaryDisplays);
+                }
+                return assignedToUser || !assignedToAnotherUser;
+            }
         }
 
         synchronized (mUsersOnSecondaryDisplays) {
@@ -6578,9 +6604,14 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public boolean isUserRunning(@UserIdInt int userId) {
+            int state;
             synchronized (mUserStates) {
-                return mUserStates.get(userId, -1) >= 0;
+                state =  mUserStates.get(userId, UserState.STATE_NONE);
             }
+
+            return state != UserState.STATE_NONE
+                    && state != UserState.STATE_STOPPING
+                    && state != UserState.STATE_SHUTDOWN;
         }
 
         @Override

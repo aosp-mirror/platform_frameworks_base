@@ -60,8 +60,8 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -572,7 +572,7 @@ final class DeletePackageHelper {
         if (deleteCodeAndResources && (outInfo != null)) {
             outInfo.mArgs = new InstallArgs(
                     ps.getPathString(), getAppDexInstructionSets(
-                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()), mPm);
+                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
         }
     }

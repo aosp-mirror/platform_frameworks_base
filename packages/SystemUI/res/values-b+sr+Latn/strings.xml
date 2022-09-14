@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Lice nije prepoznato. Koristite otisak prsta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Lice nije prepoznato"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Koristite otisak prsta"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth je priključen."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Procenat napunjenosti baterije nije poznat."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Povezani ste sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -419,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Preklapanje titlova"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"omogućite"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"onemogućite"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"Zvuk i vibriranje"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Podešavanja"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacija je zakačena"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Pregled da biste ga otkačili."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Početna da biste ga otkačili."</string>
@@ -594,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Uključeno"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Isključeno"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Nedostupno"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Onemogućeno"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"Traka za navigaciju"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Raspored"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Dodatni tip levog dugmeta"</string>
@@ -667,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Neke funkcije su ograničene dok se telefon ne ohladi.\nDodirnite za više informacija"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon će automatski pokušati da se ohladi. I dalje ćete moći da koristite telefon, ali će sporije reagovati.\n\nKada se telefon ohladi, normalno će raditi."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pogledajte upozorenja"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Isključite punjač iz struje"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Došlo je do problema sa punjenjem ovog uređaja. Isključite adapter iz napajanja i budite pažljivi jer kabl može da bude topao."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Pogledajte upozorenja"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Leva prečica"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Desna prečica"</string>

@@ -561,6 +561,10 @@ public class EditorInfo implements InputType, Parcelable {
                 supportedTypes |= HandwritingGesture.GESTURE_TYPE_INSERT;
             } else if (gesture.equals(DeleteGesture.class)) {
                 supportedTypes |= HandwritingGesture.GESTURE_TYPE_DELETE;
+            } else if (gesture.equals(RemoveSpaceGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE;
+            } else if (gesture.equals(JoinOrSplitGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_JOIN_OR_SPLIT;
             } else {
                 throw new IllegalArgumentException("Unknown gesture type: " + gesture);
             }
@@ -594,6 +598,14 @@ public class EditorInfo implements InputType, Parcelable {
         if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_DELETE)
                 == HandwritingGesture.GESTURE_TYPE_DELETE) {
             list.add(DeleteGesture.class);
+        }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE)
+                == HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE) {
+            list.add(RemoveSpaceGesture.class);
+        }
+        if ((mSupportedHandwritingGestureTypes & HandwritingGesture.GESTURE_TYPE_JOIN_OR_SPLIT)
+                == HandwritingGesture.GESTURE_TYPE_JOIN_OR_SPLIT) {
+            list.add(JoinOrSplitGesture.class);
         }
         return list;
     }

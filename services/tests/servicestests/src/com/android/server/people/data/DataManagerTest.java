@@ -93,7 +93,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.people.PeopleService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import com.google.common.collect.Iterables;
 

@@ -15128,7 +15128,7 @@ package android.graphics {
     field @NonNull public static final android.os.Parcelable.Creator<android.graphics.ParcelableColorSpace> CREATOR;
   }
 
-  public class Path implements java.lang.Iterable<android.graphics.PathIterator.Segment> {
+  public class Path {
     ctor public Path();
     ctor public Path(@Nullable android.graphics.Path);
     method public void addArc(@NonNull android.graphics.RectF, float, float);
@@ -15155,6 +15155,7 @@ package android.graphics {
     method public void cubicTo(float, float, float, float, float, float);
     method @NonNull public android.graphics.Path.FillType getFillType();
     method public int getGenerationId();
+    method @NonNull public android.graphics.PathIterator getPathIterator();
     method public void incReserve(int);
     method public boolean interpolate(@NonNull android.graphics.Path, float, @NonNull android.graphics.Path);
     method @Deprecated public boolean isConvex();
@@ -15162,7 +15163,6 @@ package android.graphics {
     method public boolean isInterpolatable(@NonNull android.graphics.Path);
     method public boolean isInverseFillType();
     method public boolean isRect(@Nullable android.graphics.RectF);
-    method @NonNull public android.graphics.PathIterator iterator();
     method public void lineTo(float, float);
     method public void moveTo(float, float);
     method public void offset(float, float, @Nullable android.graphics.Path);
@@ -16896,6 +16896,7 @@ package android.hardware {
     field public static final int DATASPACE_DEPTH = 4096; // 0x1000
     field public static final int DATASPACE_DISPLAY_P3 = 143261696; // 0x88a0000
     field public static final int DATASPACE_DYNAMIC_DEPTH = 4098; // 0x1002
+    field public static final int DATASPACE_HEIF = 4100; // 0x1004
     field public static final int DATASPACE_JFIF = 146931712; // 0x8c20000
     field public static final int DATASPACE_SCRGB = 411107328; // 0x18810000
     field public static final int DATASPACE_SCRGB_LINEAR = 406913024; // 0x18410000
@@ -53160,7 +53161,9 @@ package android.view.inputmethod {
     method @Nullable public String getFallbackText();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
+    field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
     field public static final int GESTURE_TYPE_NONE = 0; // 0x0
+    field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8
     field public static final int GESTURE_TYPE_SELECT = 1; // 0x1
     field public static final int GRANULARITY_CHARACTER = 2; // 0x2
     field public static final int GRANULARITY_WORD = 1; // 0x1
@@ -53499,6 +53502,35 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setFallbackText(@Nullable String);
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setInsertionPoint(@NonNull android.graphics.PointF);
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setTextToInsert(@NonNull String);
+  }
+
+  public final class JoinOrSplitGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.PointF getJoinOrSplitPoint();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.JoinOrSplitGesture> CREATOR;
+  }
+
+  public static final class JoinOrSplitGesture.Builder {
+    ctor public JoinOrSplitGesture.Builder();
+    method @NonNull public android.view.inputmethod.JoinOrSplitGesture build();
+    method @NonNull public android.view.inputmethod.JoinOrSplitGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.JoinOrSplitGesture.Builder setJoinOrSplitPoint(@NonNull android.graphics.PointF);
+  }
+
+  public final class RemoveSpaceGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.PointF getEndPoint();
+    method @NonNull public android.graphics.PointF getStartPoint();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.RemoveSpaceGesture> CREATOR;
+  }
+
+  public static final class RemoveSpaceGesture.Builder {
+    ctor public RemoveSpaceGesture.Builder();
+    method @NonNull public android.view.inputmethod.RemoveSpaceGesture build();
+    method @NonNull public android.view.inputmethod.RemoveSpaceGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.RemoveSpaceGesture.Builder setPoints(@NonNull android.graphics.PointF, @NonNull android.graphics.PointF);
   }
 
   public final class SelectGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {

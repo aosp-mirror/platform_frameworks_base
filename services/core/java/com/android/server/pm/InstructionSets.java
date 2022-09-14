@@ -21,9 +21,6 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-
 import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;

@@ -533,7 +533,9 @@ public class InternalResourceService extends SystemService {
 
     void onPackageForceStopped(final int userId, @NonNull final String pkgName) {
         synchronized (mLock) {
-            // TODO: reduce ARC count by some amount
+            // Remove all credits if the user force stops the app. It will slowly regain them
+            // in response to different events.
+            mAgent.reclaimAllAssetsLocked(userId, pkgName, EconomicPolicy.REGULATION_FORCE_STOP);
         }
     }
 
@@ -576,17 +578,15 @@ public class InternalResourceService extends SystemService {
     void onUserRemoved(final int userId) {
         synchronized (mLock) {
             mVipOverrides.delete(userId);
-            ArrayList<String> removedPkgs = new ArrayList<>();
             final int uIdx = mPkgCache.indexOfKey(userId);
             if (uIdx >= 0) {
                 for (int p = mPkgCache.numElementsForKeyAt(uIdx) - 1; p >= 0; --p) {
                     final InstalledPackageInfo pkgInfo = mPkgCache.valueAt(uIdx, p);
-                    removedPkgs.add(pkgInfo.packageName);
                     mUidToPackageCache.remove(pkgInfo.uid);
                 }
             }
             mPkgCache.delete(userId);
-            mAgent.onUserRemovedLocked(userId, removedPkgs);
+            mAgent.onUserRemovedLocked(userId);
         }
     }
 

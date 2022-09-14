@@ -811,6 +811,12 @@ public final class FlexibilityController extends StateController {
 
     @Override
     @GuardedBy("mLock")
+    public void dumpConstants(IndentingPrintWriter pw) {
+        mFcConfig.dump(pw);
+    }
+
+    @Override
+    @GuardedBy("mLock")
     public void dumpControllerStateLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
         pw.println("# Constraints Satisfied: " + Integer.bitCount(mSatisfiedFlexibleConstraints));
         pw.print("Satisfied Flexible Constraints: ");
@@ -821,7 +827,5 @@ public final class FlexibilityController extends StateController {
         mFlexibilityTracker.dump(pw, predicate);
         pw.println();
         mFlexibilityAlarmQueue.dump(pw);
-        pw.println();
-        mFcConfig.dump(pw);
     }
 }

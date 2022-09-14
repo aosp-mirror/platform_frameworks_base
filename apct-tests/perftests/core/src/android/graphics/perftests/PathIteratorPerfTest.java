@@ -58,7 +58,7 @@ public class PathIteratorPerfTest {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         Path path = constructCircularPath(numSegments);
         while (state.keepRunning()) {
-            PathIterator iterator = path.iterator();
+            PathIterator iterator = path.getPathIterator();
             PathIterator.Segment segment = iterator.next();
             while (segment.getVerb() != VERB_DONE) {
                 segment = iterator.next();
@@ -71,7 +71,7 @@ public class PathIteratorPerfTest {
         float[] points = new float[8];
         Path path = constructCircularPath(numSegments);
         while (state.keepRunning()) {
-            PathIterator iterator = path.iterator();
+            PathIterator iterator = path.getPathIterator();
             int verb = iterator.next(points, 0);
             while (verb != VERB_DONE) {
                 verb = iterator.next(points, 0);

@@ -18,8 +18,8 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 /**
  * The set of data needed to successfully install the prepared package. This includes data that

@@ -40,7 +40,6 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.R;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
 import com.android.server.pm.pkg.component.ParsedAttribution;
@@ -66,7 +65,7 @@ import java.util.Set;
  * @hide
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface AndroidPackageApi {
+public interface AndroidPackage {
 
     /**
      * @see ApplicationInfo#areAttributionsUserVisible()

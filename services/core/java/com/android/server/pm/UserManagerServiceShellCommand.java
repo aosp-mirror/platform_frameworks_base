@@ -35,7 +35,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
-import android.view.Display;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
@@ -374,21 +373,16 @@ public class UserManagerServiceShellCommand extends ShellCommand {
     })
     private int runIsUserVisible() {
         PrintWriter pw = getOutPrintWriter();
-        int displayId = Display.INVALID_DISPLAY;
+        Integer displayId = null;
         String opt;
         while ((opt = getNextOption()) != null) {
-            boolean invalidOption = false;
             switch (opt) {
                 case "--display":
                     displayId = Integer.parseInt(getNextArgRequired());
-                    invalidOption = displayId == Display.INVALID_DISPLAY;
                     break;
                 default:
-                    invalidOption = true;
-            }
-            if (invalidOption) {
-                pw.println("Invalid option: " + opt);
-                return -1;
+                    pw.println("Invalid option: " + opt);
+                    return -1;
             }
         }
         int userId = UserHandle.parseUserArg(getNextArgRequired());
@@ -404,7 +398,7 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         }
 
         boolean isVisible;
-        if (displayId != Display.INVALID_DISPLAY) {
+        if (displayId != null) {
             isVisible = mService.isUserVisibleOnDisplay(userId, displayId);
         } else {
             isVisible = getUserManagerForUser(userId).isUserVisible();

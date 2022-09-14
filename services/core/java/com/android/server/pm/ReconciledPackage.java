@@ -22,7 +22,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.util.ArrayMap;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.ArrayList;
 import java.util.List;
