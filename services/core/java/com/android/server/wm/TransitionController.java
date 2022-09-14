@@ -67,7 +67,7 @@ class TransitionController {
 
     /** Which sync method to use for transition syncs. */
     static final int SYNC_METHOD =
-            android.os.SystemProperties.getBoolean("persist.wm.debug.shell_transit_blast", true)
+            android.os.SystemProperties.getBoolean("persist.wm.debug.shell_transit_blast", false)
                     ? BLASTSyncEngine.METHOD_BLAST : BLASTSyncEngine.METHOD_NONE;
 
     /** The same as legacy APP_TRANSITION_TIMEOUT_MS. */
