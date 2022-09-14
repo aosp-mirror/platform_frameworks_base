@@ -21,10 +21,14 @@
 #include <string>
 
 #include "ResourceTable.h"
+#include "android-base/file.h"
 #include "test/Test.h"
 
 using ::aapt::test::GetValue;
+using ::testing::AnyOf;
 using ::testing::Eq;
+using ::testing::HasSubstr;
+using ::testing::IsTrue;
 using ::testing::Not;
 using ::testing::NotNull;
 
@@ -234,6 +238,62 @@ TEST(ObfuscatorTest, IsEnabledWithShortenPathAndCollapseStringPoolOption) {
   options.table_flattener_options.collapse_key_stringpool = true;
   Obfuscator obfuscatorWithCollapseStringPoolOption(options);
   ASSERT_THAT(obfuscatorWithCollapseStringPoolOption.IsEnabled(), Eq(true));
+}
+
+static std::unique_ptr<ResourceTable> getProtocolBufferTableUnderTest() {
+  std::string original_xml_path = "res/drawable/xmlfile.xml";
+  std::string original_png_path = "res/drawable/pngfile.png";
+
+  return test::ResourceTableBuilder()
+      .AddFileReference("com.app.test:drawable/xmlfile", original_xml_path)
+      .AddFileReference("com.app.test:drawable/pngfile", original_png_path)
+      .AddValue("com.app.test:color/mycolor", aapt::ResourceId(0x7f020000),
+                aapt::util::make_unique<aapt::BinaryPrimitive>(
+                    uint8_t(android::Res_value::TYPE_INT_COLOR_ARGB8), 0xffaabbcc))
+      .AddString("com.app.test:string/mystring", ResourceId(0x7f030000), "hello world")
+      .Build();
+}
+
+TEST(ObfuscatorTest, WriteObfuscationMapInProtocolBufferFormat) {
+  OptimizeOptions options{.shorten_resource_paths = true};
+  options.table_flattener_options.collapse_key_stringpool = true;
+  Obfuscator obfuscator(options);
+  ASSERT_TRUE(obfuscator.Consume(test::ContextBuilder().Build().get(),
+                                 getProtocolBufferTableUnderTest().get()));
+
+  obfuscator.WriteObfuscationMap("obfuscated_map.pb");
+
+  std::string pbOut;
+  android::base::ReadFileToString("obfuscated_map.pb", &pbOut, false /* follow_symlinks */);
+  EXPECT_THAT(pbOut, HasSubstr("drawable/xmlfile.xml"));
+  EXPECT_THAT(pbOut, HasSubstr("drawable/pngfile.png"));
+  EXPECT_THAT(pbOut, HasSubstr("mycolor"));
+  EXPECT_THAT(pbOut, HasSubstr("mystring"));
+  pb::ResourceMappings resourceMappings;
+  EXPECT_THAT(resourceMappings.ParseFromString(pbOut), IsTrue());
+  EXPECT_THAT(resourceMappings.collapsed_names().resource_names_size(), Eq(2));
+  auto& resource_names = resourceMappings.collapsed_names().resource_names();
+  EXPECT_THAT(resource_names.at(0).name(), AnyOf(Eq("mycolor"), Eq("mystring")));
+  EXPECT_THAT(resource_names.at(1).name(), AnyOf(Eq("mycolor"), Eq("mystring")));
+  auto& shortened_paths = resourceMappings.shortened_paths();
+  EXPECT_THAT(shortened_paths.resource_paths_size(), Eq(2));
+  EXPECT_THAT(shortened_paths.resource_paths(0).original_path(),
+              AnyOf(Eq("res/drawable/pngfile.png"), Eq("res/drawable/xmlfile.xml")));
+  EXPECT_THAT(shortened_paths.resource_paths(1).original_path(),
+              AnyOf(Eq("res/drawable/pngfile.png"), Eq("res/drawable/xmlfile.xml")));
+}
+
+TEST(ObfuscatorTest, WriteObfuscatingMapWithNonEnabledOption) {
+  OptimizeOptions options;
+  Obfuscator obfuscator(options);
+  ASSERT_TRUE(obfuscator.Consume(test::ContextBuilder().Build().get(),
+                                 getProtocolBufferTableUnderTest().get()));
+
+  obfuscator.WriteObfuscationMap("obfuscated_map.pb");
+
+  std::string pbOut;
+  android::base::ReadFileToString("obfuscated_map.pb", &pbOut, false /* follow_symlinks */);
+  ASSERT_THAT(pbOut, Eq(""));
 }
 
 }  // namespace aapt

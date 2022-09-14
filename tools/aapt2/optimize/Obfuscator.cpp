@@ -16,6 +16,7 @@
 
 #include "optimize/Obfuscator.h"
 
+#include <fstream>
 #include <map>
 #include <set>
 #include <string>
@@ -190,6 +191,29 @@ bool Obfuscator::Consume(IAaptContext* context, ResourceTable* table) {
     return HandleShortenFilePaths(table, options_.shortened_path_map);
   }
   return true;
+}
+
+bool Obfuscator::WriteObfuscationMap(const std::string& file_path) const {
+  pb::ResourceMappings resourceMappings;
+  for (const auto& [id, name] : options_.id_resource_map) {
+    auto* collapsedNameMapping = resourceMappings.mutable_collapsed_names()->add_resource_names();
+    collapsedNameMapping->set_id(id);
+    collapsedNameMapping->set_name(name);
+  }
+
+  for (const auto& [original_path, shortened_path] : options_.shortened_path_map) {
+    auto* resource_path = resourceMappings.mutable_shortened_paths()->add_resource_paths();
+    resource_path->set_original_path(original_path);
+    resource_path->set_shortened_path(shortened_path);
+  }
+
+  {  // RAII style, output the pb content to file and close fout in destructor
+    std::ofstream fout(file_path, std::ios::out | std::ios::trunc | std::ios::binary);
+    if (!fout.is_open()) {
+      return false;
+    }
+    return resourceMappings.SerializeToOstream(&fout);
+  }
 }
 
 /**

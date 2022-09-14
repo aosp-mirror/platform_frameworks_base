@@ -161,6 +161,15 @@ class Optimizer {
                                           << "failed shortening resource paths");
         return 1;
       }
+
+      if (options_.obfuscation_map_path &&
+          !obfuscator.WriteObfuscationMap(options_.obfuscation_map_path.value())) {
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed to write the obfuscation map to file");
+        return 1;
+      }
+
+      // TODO(b/246489170): keep the old option and format until transform to the new one
       if (options_.shortened_paths_map_path
           && !WriteShortenedPathsMap(options_.table_flattener_options.shortened_path_map,
                                       options_.shortened_paths_map_path.value())) {
@@ -292,6 +301,7 @@ class Optimizer {
                                         ArchiveEntry::kAlign, writer);
   }
 
+  // TODO(b/246489170): keep the old option and format until transform to the new one
   bool WriteShortenedPathsMap(const std::map<std::string, std::string> &path_map,
                                const std::string &file_path) {
     std::stringstream ss;
