@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -59,6 +60,16 @@ public abstract class BroadcastQueue {
         mConstants.startObserving(mHandler, resolver);
     }
 
+    static void checkState(boolean state, String msg) {
+        if (!state) {
+            Slog.wtf(TAG, msg, new Throwable());
+        }
+    }
+
+    static void logv(String msg) {
+        Slog.v(TAG, msg);
+    }
+
     @Override
     public String toString() {
         return mQueueName;
@@ -74,6 +85,7 @@ public abstract class BroadcastQueue {
      *         otherwise {@link ProcessList#SCHED_GROUP_UNDEFINED} if this queue
      *         has no opinion.
      */
+    @GuardedBy("mService")
     public abstract int getPreferredSchedulingGroupLocked(@NonNull ProcessRecord app);
 
     /**

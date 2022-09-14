@@ -1409,7 +1409,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 info.activityInfo.applicationInfo, true,
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                 new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST, r.curComponent,
-                        r.intent.getAction(), getHostingRecordTriggerType(r)),
+                        r.intent.getAction(), r.getHostingRecordTriggerType()),
                 isActivityCapable ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
                 (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false);
         if (r.curApp == null) {
@@ -1430,17 +1430,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         maybeAddAllowBackgroundActivityStartsToken(r.curApp, r);
         mPendingBroadcast = r;
         mPendingBroadcastRecvIndex = recIdx;
-    }
-
-    private String getHostingRecordTriggerType(BroadcastRecord r) {
-        if (r.alarm) {
-            return HostingRecord.TRIGGER_TYPE_ALARM;
-        } else if (r.pushMessage) {
-            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE;
-        } else if (r.pushMessageOverQuota) {
-            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA;
-        }
-        return HostingRecord.TRIGGER_TYPE_UNKNOWN;
     }
 
     @Nullable
