@@ -60,7 +60,7 @@ public class RemoteAnimationTargetCompat {
     public static final int ACTIVITY_TYPE_ASSISTANT = WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
     public final int activityType;
 
-    public int taskId;
+    public final int taskId;
     public final SurfaceControl leash;
     public final boolean isTranslucent;
     public final Rect clipRect;
@@ -72,7 +72,7 @@ public class RemoteAnimationTargetCompat {
     public final Rect startScreenSpaceBounds;
     public final boolean isNotInRecents;
     public final Rect contentInsets;
-    public ActivityManager.RunningTaskInfo taskInfo;
+    public final ActivityManager.RunningTaskInfo taskInfo;
     public final boolean allowEnterPip;
     public final int rotationChange;
     public final int windowType;
@@ -102,7 +102,7 @@ public class RemoteAnimationTargetCompat {
         activityType = app.windowConfiguration.getActivityType();
         taskInfo = app.taskInfo;
         allowEnterPip = app.allowEnterPip;
-        rotationChange = 0;
+        rotationChange = app.rotationChange;
 
         mStartLeash = app.startLeash;
         windowType = app.windowType;
@@ -131,6 +131,7 @@ public class RemoteAnimationTargetCompat {
                 isNotInRecents, mStartLeash, startBounds, taskInfo, allowEnterPip, windowType
         );
         target.setWillShowImeOnTarget(willShowImeOnTarget);
+        target.setRotationChange(rotationChange);
         return target;
     }
 

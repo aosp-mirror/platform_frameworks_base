@@ -241,6 +241,8 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public boolean willShowImeOnTarget;
 
+    public int rotationChange;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
@@ -302,6 +304,7 @@ public class RemoteAnimationTarget implements Parcelable {
         backgroundColor = in.readInt();
         showBackdrop = in.readBoolean();
         willShowImeOnTarget = in.readBoolean();
+        rotationChange = in.readInt();
     }
 
     public void setShowBackdrop(boolean shouldShowBackdrop) {
@@ -314,6 +317,14 @@ public class RemoteAnimationTarget implements Parcelable {
 
     public boolean willShowImeOnTarget() {
         return willShowImeOnTarget;
+    }
+
+    public void setRotationChange(int rotationChange) {
+        this.rotationChange = rotationChange;
+    }
+
+    public int getRotationChange() {
+        return rotationChange;
     }
 
     @Override
@@ -345,6 +356,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeInt(backgroundColor);
         dest.writeBoolean(showBackdrop);
         dest.writeBoolean(willShowImeOnTarget);
+        dest.writeInt(rotationChange);
     }
 
     public void dump(PrintWriter pw, String prefix) {
