@@ -133,6 +133,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @VisibleForTesting
     LocalMediaManager mLocalMediaManager;
     private MediaOutputMetricLogger mMetricLogger;
+    private int mCurrentState;
 
     private int mColorItemContent;
     private int mColorSeekbarProgress;
@@ -207,6 +208,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
                     mMediaController = controller;
                     mMediaController.unregisterCallback(mCb);
+                    if (mMediaController.getPlaybackState() != null) {
+                        mCurrentState = mMediaController.getPlaybackState().getState();
+                    }
                     mMediaController.registerCallback(mCb);
                     break;
                 }
@@ -1003,10 +1007,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
         @Override
         public void onPlaybackStateChanged(PlaybackState playbackState) {
-            final int state = playbackState.getState();
-            if (state == PlaybackState.STATE_STOPPED || state == PlaybackState.STATE_PAUSED) {
+            final int newState =
+                    playbackState == null ? PlaybackState.STATE_STOPPED : playbackState.getState();
+            if (mCurrentState == newState) {
+                return;
+            }
+
+            if (newState == PlaybackState.STATE_STOPPED || newState == PlaybackState.STATE_PAUSED) {
                 mCallback.onMediaStoppedOrPaused();
             }
+            mCurrentState = newState;
         }
     };
 
