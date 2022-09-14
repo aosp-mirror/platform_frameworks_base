@@ -586,13 +586,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +607,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"지문 인식 하드웨어를 사용할 수 없습니다."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"지문을 설정할 수 없음"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"사용자가 지문 인식 작업을 취소했습니다."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"시도 횟수가 너무 많습니다. 화면 잠금을 대신 사용하세요."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"다시 시도해 보세요."</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"등록된 지문이 없습니다."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"기기에 지문 센서가 없습니다."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"센서가 일시적으로 사용 중지되었습니다."</string>
@@ -1251,8 +1257,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"부팅 완료"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"전원 버튼을 눌렀습니다. 이러면 보통 화면이 꺼집니다.\n\n지문 설정 중에 가볍게 탭하세요."</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"탭하여 화면 끄기"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"화면 끄기"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"지문 인증을 계속할까요?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"전원 버튼을 눌렀습니다. 이러면 보통 화면이 꺼집니다.\n\n지문을 인식하려면 화면을 가볍게 탭하세요."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"화면 끄기"</string>

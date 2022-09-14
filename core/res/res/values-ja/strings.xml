@@ -586,13 +586,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"画面ロックの使用"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"続行するには画面ロックを入力してください"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"センサーにしっかりと押し当ててください"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"指紋認証センサーの汚れを取り除いて、もう一度お試しください"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"センサーの汚れを取り除いて、もう一度お試しください"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"センサーにしっかりと押し当ててください"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"指の動きが遅すぎました。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"別の指紋をお試しください"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"明るすぎます"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"調整してみてください"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"毎回、指を置く位置を少し変えてください"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +607,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋認証ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"指紋を設定できません"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"指紋の操作がユーザーによりキャンセルされました。"</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"所定の回数以上間違えました。しばらくしてからもう一度お試しください。"</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"もう一度お試しください。"</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"センサーが一時的に無効になっています。"</string>
@@ -637,8 +643,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"修理業者に調整を依頼してください。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"顔モデルを作成できません。もう一度お試しください。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"明るすぎます。もっと暗い場所でお試しください。"</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"十分な光がありません"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"スマートフォンをもっと離してください"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"スマートフォンをもっと近づけてください"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"スマートフォンをもっと上げてください"</string>
@@ -1251,8 +1256,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"アプリを起動しています。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ブートを終了しています。"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"電源ボタンを押しました。通常、この操作で画面が OFF になります。\n\n指紋を設定する場合は電源ボタンに軽く触れてみましょう。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"タップして画面を OFF にする"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"画面を OFF にする"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"指紋の確認を続行しますか？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"電源ボタンを押しました。通常、この操作で画面が OFF になります。\n\n指紋を確認するには、電源ボタンに軽く触れてみましょう。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"画面を OFF にする"</string>

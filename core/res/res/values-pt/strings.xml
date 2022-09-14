@@ -587,13 +587,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueio de tela"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Insira seu bloqueio de tela para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pressione o sensor com firmeza"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpe o sensor de impressão digital e tente novamente"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpe o sensor e tente novamente"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pressione o sensor com firmeza"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"O movimento do dedo está muito lento. Tente novamente."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Use outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Claro demais"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ajuste a posição do dedo"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude a posição do dedo ligeiramente a cada momento"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -605,12 +608,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado, pressione \"Confirmar\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware de impressão digital não disponível."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Não foi possível configurar a impressão digital"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Tempo máximo para captura da impressão digital atingido. Tente novamente."</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operação de impressão digital cancelada."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operação de impressão digital cancelada pelo usuário."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Excesso de tentativas. Tente novamente mais tarde."</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Excesso de tentativas. Use o bloqueio de tela."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Tente novamente."</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nenhuma impressão digital registrada."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem um sensor de impressão digital."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor desativado temporariamente."</string>
@@ -638,8 +644,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Entre em contato com uma assistência técnica."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Falha ao criar o modelo de rosto. Tente de novo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Muito iluminado. Diminua a iluminação."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Não há luz suficiente"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afaste o smartphone"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Aproxime o smartphone do seu rosto"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Mova o smartphone para cima"</string>
@@ -1252,8 +1257,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela durante a configuração da impressão digital."</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Toque para desligar a tela"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Desligar a tela"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuar a verificação da digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela para verificar sua impressão digital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Desligar a tela"</string>
