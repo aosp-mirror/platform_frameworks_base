@@ -586,13 +586,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"തുടരാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് നൽകുക"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"സെൻസറിന് മുകളിൽ ശക്തിയായി അമർത്തുക"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ഫിംഗർപ്രിന്റ് പ്രോസസ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ഫിംഗർപ്രിന്റ് സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"സെൻസറിന് മുകളിൽ ശക്തിയായി അമർത്തുക"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"മറ്റൊരു ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് നോക്കുക"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"തെളിച്ചം വളരെയധികമാണ്"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"അൽപ്പം നീക്കി നോക്കൂ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ഓരോ തവണയും നിങ്ങളുടെ വിരലിന്റെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +607,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു, സ്ഥിരീകരിക്കുക അമർത്തുക"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കാനാകില്ല"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ഫിംഗർപ്രിന്റ് നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"വീണ്ടും ശ്രമിക്കൂ."</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -637,8 +643,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"വളരെയധികം തെളിച്ചം. സൗമ്യതയേറിയ പ്രകാശം ശ്രമിക്കൂ."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"വേണ്ടത്ര പ്രകാശമില്ല"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ഫോൺ കൂടുതൽ ദൂരേയ്ക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ഫോൺ അടുത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
@@ -1251,8 +1256,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കുമ്പോൾ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"സ്ക്രീൻ ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"സ്ക്രീൻ ഓഫാക്കുക"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കൽ തുടരണോ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കാൻ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"സ്ക്രീൻ ഓഫാക്കുക"</string>
