@@ -227,7 +227,6 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
         verify(mMainStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
-        verify(mSideStage).dismiss(any(WindowContainerTransaction.class), eq(false));
         verify(mMainStage).resetBounds(any(WindowContainerTransaction.class));
     }
 
@@ -241,7 +240,6 @@ public class StageCoordinatorTests extends ShellTestCase {
         verify(mSideStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
         verify(mSideStage).resetBounds(any(WindowContainerTransaction.class));
-        verify(mMainStage).dismiss(any(WindowContainerTransaction.class), eq(false));
     }
 
     @Test
