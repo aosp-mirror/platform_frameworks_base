@@ -524,10 +524,15 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            mPkgCache.add(userId, pkgName, new InstalledPackageInfo(packageInfo));
+            final InstalledPackageInfo ipo = new InstalledPackageInfo(packageInfo);
+            mPkgCache.add(userId, pkgName, ipo);
             mUidToPackageCache.add(uid, pkgName);
             // TODO: only do this when the user first launches the app (app leaves stopped state)
             mAgent.grantBirthrightLocked(userId, pkgName);
+            if (ipo.installerPackageName != null) {
+                mAgent.noteInstantaneousEventLocked(userId, ipo.installerPackageName,
+                        JobSchedulerEconomicPolicy.REWARD_APP_INSTALL, null);
+            }
         }
     }
 
