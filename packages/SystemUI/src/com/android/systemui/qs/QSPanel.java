@@ -49,7 +49,6 @@ import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable {
@@ -291,7 +290,16 @@ public class QSPanel extends LinearLayout implements Tunable {
                 } else {
                     topOffset = tileHeightOffset;
                 }
-                int top = Objects.requireNonNull(mChildrenLayoutTop.get(child));
+                // Animation can occur before the layout pass, meaning setSquishinessFraction() gets
+                // called before onLayout(). So, a child view could be null because it has not
+                // been added to mChildrenLayoutTop yet (which happens in onLayout()).
+                // We use a continue statement here to catch this NPE because, on the layout pass,
+                // this code will be called again from onLayout() with the populated children views.
+                Integer childLayoutTop = mChildrenLayoutTop.get(child);
+                if (childLayoutTop == null) {
+                    continue;
+                }
+                int top = childLayoutTop;
                 child.setLeftTopRightBottom(child.getLeft(), top + topOffset,
                         child.getRight(), top + topOffset + child.getHeight());
             }
