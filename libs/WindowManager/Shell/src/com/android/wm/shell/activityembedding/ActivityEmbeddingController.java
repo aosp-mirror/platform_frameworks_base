@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import static java.util.Objects.requireNonNull;
@@ -84,12 +85,23 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        // TODO(b/207070762) Handle AE animation as a part of other transitions.
+        boolean containsEmbeddingSplit = false;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
                 // Only animate the transition if all changes are in a Task with ActivityEmbedding.
                 return false;
             }
+            if (!containsEmbeddingSplit && !change.hasFlags(FLAG_FILLS_TASK)) {
+                // Whether the Task contains any ActivityEmbedding split before or after the
+                // transition.
+                containsEmbeddingSplit = true;
+            }
+        }
+        if (!containsEmbeddingSplit) {
+            // Let the system to play the default animation if there is no ActivityEmbedding split
+            // window. This allows to play the app customized animation when there is no embedding,
+            // such as the device is in a folded state.
+            return false;
         }
 
         // Start ActivityEmbedding animation.
