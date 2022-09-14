@@ -220,6 +220,7 @@ public class KeyguardBouncer {
                     && !mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                             KeyguardUpdateMonitor.getCurrentUser())
                     && !needsFullscreenBouncer()
+                    && !mKeyguardUpdateMonitor.isFaceLockedOut()
                     && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
                     && !mKeyguardBypassController.getBypassEnabled()) {
                 mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
