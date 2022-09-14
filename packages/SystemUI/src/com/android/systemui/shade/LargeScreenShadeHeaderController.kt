@@ -30,6 +30,7 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -308,6 +309,14 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (disabled == qsDisabled) return
         qsDisabled = disabled
         updateVisibility()
+    }
+
+    fun startCustomizingAnimation(show: Boolean, duration: Long) {
+        header.animate()
+                .setDuration(duration)
+                .alpha(if (show) 0f else 1f)
+                .setInterpolator(if (show) Interpolators.ALPHA_OUT else Interpolators.ALPHA_IN)
+                .start()
     }
 
     private fun loadConstraints() {
