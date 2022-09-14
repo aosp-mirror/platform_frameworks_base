@@ -1221,7 +1221,7 @@
 
     <!-- The fraction at which the QS "squish" transition should start during the lockscreen shade
          expansion. 0 is fully collapsed, 1 is fully expanded. -->
-    <item type="dimen" format="float" name="lockscreen_shade_qs_squish_start_fraction">0</item>
+    <item type="dimen" format="float" name="lockscreen_shade_qs_squish_start_fraction">0.5</item>
 
     <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
          change.  -->

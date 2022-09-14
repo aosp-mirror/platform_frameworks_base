@@ -66,8 +66,6 @@
     <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_notifications_scrim_transition_distance</dimen>
     <dimen name="lockscreen_shade_qs_transition_delay">@dimen/lockscreen_shade_notifications_scrim_transition_delay</dimen>
     <dimen name="lockscreen_shade_qs_squish_transition_distance">@dimen/lockscreen_shade_qs_transition_distance</dimen>
-    <!-- On split-shade, the QS squish transition should start from half height.  -->
-    <item name="lockscreen_shade_qs_squish_start_fraction" type="dimen" format="float" >0.5</item>
     <!-- On split-shade, there should be no depth effect, so setting the value to 0.  -->
     <dimen name="lockscreen_shade_depth_controller_transition_distance">0dp</dimen>
     <dimen name="lockscreen_shade_udfps_keyguard_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
