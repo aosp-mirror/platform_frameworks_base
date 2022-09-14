@@ -23,14 +23,14 @@ import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
-import com.android.server.pm.pkg.component.ParsedPermission;
 import android.os.Build;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.component.ParsedPermission;
 
 import libcore.util.EmptyArray;
 

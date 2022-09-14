@@ -49,9 +49,8 @@ import android.util.SparseArray;
 
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.SharedUserApi;
@@ -155,7 +154,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Nullable
     @Override
     @Deprecated
-    public final AndroidPackageApi getAndroidPackage(@NonNull String packageName) {
+    public final AndroidPackage getAndroidPackage(@NonNull String packageName) {
         return snapshot().getPackage(packageName);
     }
 

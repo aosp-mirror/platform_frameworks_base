@@ -218,6 +218,12 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         if (dcTarget == null || mImeRequester == null) {
             return false;
         }
+        // Not ready to show if there is no IME control target.
+        final InsetsControlTarget controlTarget = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
+        if (controlTarget == null) {
+            return false;
+        }
+
         ProtoLog.d(WM_DEBUG_IME, "dcTarget: %s mImeRequester: %s",
                 dcTarget.getWindow().getName(), mImeRequester.getWindow() == null
                         ? mImeRequester : mImeRequester.getWindow().getName());

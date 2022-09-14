@@ -218,5 +218,8 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_SOFTWARE_CURSOR_KEYBOARD_SHIFT_ENABLED,
         Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
         Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME
     };
 }

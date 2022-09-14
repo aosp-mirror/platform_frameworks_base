@@ -40,7 +40,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.QuadFunction;
 import com.android.server.om.OverlayReferenceMapper;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.SnapshotCache;

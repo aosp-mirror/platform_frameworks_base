@@ -20,6 +20,7 @@ package com.android.wm.shell.flicker
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.traces.layers.LayerTraceEntrySubject
 import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.server.wm.traces.common.IComponentMatcher
@@ -99,15 +100,9 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
     portraitPosTop: Boolean
 ) {
     assertLayers {
-        // TODO(b/242025948): Use SPLIT_SCREEN_DIVIDER_COMPONENT.or(component) for notContains
-        // and isInvisible when they are ready.
-        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT)
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
             .then()
-            .notContains(component, isOptional = true)
-            .then()
-            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT, isOptional = true)
-            .then()
-            .isInvisible(component, isOptional = true)
+            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
             .then()
             .splitAppLayerBoundsSnapToDivider(
                 component, landscapePosLeft, portraitPosTop, endRotation)
@@ -118,18 +113,25 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisibleByDrag(
     component: IComponentMatcher
 ) {
     assertLayers {
-        // TODO(b/242025948): Use SPLIT_SCREEN_DIVIDER_COMPONENT.or(component) for notContains
-        // and isInvisible when they are ready.
-        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT)
-            .then()
-            .notContains(component, isOptional = true)
-            .then()
-            .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT, isOptional = true)
-            .then()
-            .isInvisible(component, isOptional = true)
-            .then()
-            // TODO(b/245472831): Verify the component should snap to divider.
-            .isVisible(component)
+        if (isShellTransitionsEnabled) {
+            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+                .then()
+                .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+                .then()
+                // TODO(b/245472831): Verify the component should snap to divider.
+                .isVisible(component)
+        } else {
+            this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+                .then()
+                .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+                .then()
+                // TODO(b/245472831): Verify the component should snap to divider.
+                .isVisible(component)
+                .then()
+                .isInvisible(component, isOptional = true)
+                .then()
+                .isVisible(component)
+        }
     }
 }
 

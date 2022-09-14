@@ -34,8 +34,8 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;

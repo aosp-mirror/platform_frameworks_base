@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरे की पहचान नहीं हुई. फ़िंगरप्रिंट इस्तेमाल करें."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"चेहरे की पहचान नहीं हुई"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"फ़िंगरप्रिंट इस्तेमाल करें"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लूटूथ कनेक्ट किया गया."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"इस बारे में जानकारी नहीं है कि अभी बैटरी कितने प्रतिशत चार्ज है."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> से कनेक्ट किया गया."</string>
@@ -419,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"कैप्शन ऊपर लगाएं"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"चालू करें"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"बंद करें"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"आवाज़ और वाइब्रेशन"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिंग"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ऐप्लिकेशन पिन किया गया है"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"इससे वह तब तक दिखता रहता है, जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
@@ -594,7 +598,8 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"चालू"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"बंद"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध नहीं है"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"बंद है"</string>
+    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"नेविगेशन बार"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"कुछ और बाएं बटन के प्रकार"</string>
@@ -667,8 +672,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"फ़ोन के ठंडा होने तक कुछ सुविधाएं काम नहीं करतीं.\nज़्यादा जानकारी के लिए टैप करें"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अब भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"डिवाइस के रखरखाव के तरीके देखें"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"चार्जर निकालें"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"इस डिवाइस को चार्ज करने में समस्या हुई. पावर अडैप्टर का प्लग निकालें. ऐसा करते समय सावधानी बरतें क्योंकि तार गर्म हो सकता है."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"प्रबंधन से जुड़े चरण देखें"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"बायां शॉर्टकट"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"दायां शॉर्टकट"</string>

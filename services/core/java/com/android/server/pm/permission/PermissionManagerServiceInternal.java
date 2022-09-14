@@ -23,7 +23,7 @@ import android.app.AppOpsManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.ArrayList;
 import java.util.Collections;

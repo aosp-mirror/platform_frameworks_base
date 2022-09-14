@@ -21,6 +21,11 @@ import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,15 +33,16 @@ import android.content.res.XmlResourceParser;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.power.ModemPowerProfile;
 import com.android.internal.util.XmlUtils;
 
-import junit.framework.TestCase;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /*
  * Keep this file in sync with frameworks/base/core/res/res/xml/power_profile_test.xml and
@@ -46,7 +52,8 @@ import org.junit.Test;
  *     atest com.android.internal.os.PowerProfileTest
  */
 @SmallTest
-public class PowerProfileTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class PowerProfileTest {
 
     static final String TAG_TEST_MODEM = "test-modem";
     static final String ATTR_NAME = "name";
@@ -515,5 +522,67 @@ public class PowerProfileTest extends TestCase {
         }
         fail("Unanable to find element " + element + " with name " + elementName);
         return null;
+    }
+
+    private void assertEquals(int expected, int actual) {
+        Assert.assertEquals(expected, actual);
+    }
+
+    private void assertEquals(double expected, double actual) {
+        Assert.assertEquals(expected, actual, 0.1);
+    }
+
+
+    @Test
+    public void powerBrackets_specifiedInPowerProfile() {
+        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test_power_brackets);
+        mProfile.initCpuPowerBrackets(8);
+
+        int cpuPowerBracketCount = mProfile.getCpuPowerBracketCount();
+        assertThat(cpuPowerBracketCount).isEqualTo(2);
+        assertThat(new int[]{
+                mProfile.getPowerBracketForCpuCore(0, 0),
+                mProfile.getPowerBracketForCpuCore(1, 0),
+                mProfile.getPowerBracketForCpuCore(1, 1),
+        }).isEqualTo(new int[]{1, 1, 0});
+    }
+
+    @Test
+    public void powerBrackets_automatic() {
+        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+
+        assertThat(mProfile.getCpuPowerBracketCount()).isEqualTo(3);
+        assertThat(mProfile.getCpuPowerBracketDescription(0))
+                .isEqualTo("0/300(10.0)");
+        assertThat(mProfile.getCpuPowerBracketDescription(1))
+                .isEqualTo("0/1000(20.0), 0/2000(30.0), 1/300(25.0)");
+        assertThat(mProfile.getCpuPowerBracketDescription(2))
+                .isEqualTo("1/1000(35.0), 1/2500(50.0), 1/3000(60.0)");
+        assertThat(new int[]{
+                mProfile.getPowerBracketForCpuCore(0, 0),
+                mProfile.getPowerBracketForCpuCore(0, 1),
+                mProfile.getPowerBracketForCpuCore(0, 2),
+                mProfile.getPowerBracketForCpuCore(1, 0),
+                mProfile.getPowerBracketForCpuCore(1, 1),
+                mProfile.getPowerBracketForCpuCore(1, 2),
+                mProfile.getPowerBracketForCpuCore(1, 3),
+        }).isEqualTo(new int[]{0, 1, 1, 1, 2, 2, 2});
+    }
+
+    @Test
+    public void powerBrackets_moreBracketsThanStates() {
+        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+        mProfile.initCpuPowerBrackets(8);
+
+        assertThat(mProfile.getCpuPowerBracketCount()).isEqualTo(7);
+        assertThat(new int[]{
+                mProfile.getPowerBracketForCpuCore(0, 0),
+                mProfile.getPowerBracketForCpuCore(0, 1),
+                mProfile.getPowerBracketForCpuCore(0, 2),
+                mProfile.getPowerBracketForCpuCore(1, 0),
+                mProfile.getPowerBracketForCpuCore(1, 1),
+                mProfile.getPowerBracketForCpuCore(1, 2),
+                mProfile.getPowerBracketForCpuCore(1, 3),
+        }).isEqualTo(new int[]{0, 1, 2, 3, 4, 5, 6});
     }
 }

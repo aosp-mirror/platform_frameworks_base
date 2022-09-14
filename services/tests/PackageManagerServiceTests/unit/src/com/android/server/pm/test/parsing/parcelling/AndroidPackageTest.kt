@@ -31,8 +31,8 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
-import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.component.ParsedActivityImpl
 import com.android.server.pm.pkg.component.ParsedApexSystemServiceImpl
 import com.android.server.pm.pkg.component.ParsedAttributionImpl

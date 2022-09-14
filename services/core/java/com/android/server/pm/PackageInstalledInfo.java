@@ -22,7 +22,7 @@ import android.apex.ApexInfo;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.ArrayList;
 

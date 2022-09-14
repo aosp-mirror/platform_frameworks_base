@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.Collections;
 import java.util.Map;

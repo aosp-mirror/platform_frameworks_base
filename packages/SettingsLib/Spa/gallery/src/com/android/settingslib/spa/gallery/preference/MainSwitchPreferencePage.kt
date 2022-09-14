@@ -22,6 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.SettingsEntry
+import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
@@ -37,6 +40,38 @@ private const val TITLE = "Sample MainSwitchPreference"
 object MainSwitchPreferencePageProvider : SettingsPageProvider {
     override val name = "MainSwitchPreference"
 
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = SettingsPage.create(name)
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            SettingsEntryBuilder.create( "MainSwitchPreference", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleMainSwitchPreference()
+                }.build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create( "MainSwitchPreference not changeable", owner)
+                .setIsAllowSearch(true)
+                .setUiLayoutFn {
+                    SampleNotChangeableMainSwitchPreference()
+                }.build()
+        )
+
+        return entryList
+    }
+
+    fun buildInjectEntry(): SettingsEntryBuilder {
+        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+            .setIsAllowSearch(true)
+            .setUiLayoutFn {
+                Preference(object : PreferenceModel {
+                    override val title = TITLE
+                    override val onClick = navigator(name)
+                })
+            }
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         MainSwitchPreferencePage()
@@ -44,18 +79,16 @@ object MainSwitchPreferencePageProvider : SettingsPageProvider {
 
     @Composable
     fun EntryItem() {
-        Preference(object : PreferenceModel {
-            override val title = TITLE
-            override val onClick = navigator(name)
-        })
+        buildInjectEntry().build().uiLayout.let { it() }
     }
 }
 
 @Composable
 private fun MainSwitchPreferencePage() {
     RegularScaffold(title = TITLE) {
-        SampleMainSwitchPreference()
-        SampleNotChangeableMainSwitchPreference()
+        for (entry in MainSwitchPreferencePageProvider.buildEntry(arguments = null)) {
+            entry.uiLayout()
+        }
     }
 }
 

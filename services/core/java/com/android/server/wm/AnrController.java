@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.server.wm.ActivityRecord.INVALID_PID;
+import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
@@ -72,6 +73,33 @@ class AnrController {
                         + ". Dropping notifyNoFocusedWindowAnr request");
                 return;
             }
+
+            // App is unresponsive, but we are actively trying to give focus to a window.
+            // Blame the window if possible since the window may not belong to the app.
+            DisplayContent display = mService.mRoot.getDisplayContent(activity.getDisplayId());
+            IBinder focusToken = display == null ? null : display.getInputMonitor().mInputFocus;
+            InputTarget focusTarget = mService.getInputTargetFromToken(focusToken);
+
+            if (focusTarget != null) {
+                // Check if we have a recent focus request, newer than the dispatch timeout, then
+                // ignore the focus request.
+                WindowState targetWindowState = focusTarget.getWindowState();
+                boolean requestIsValid = SystemClock.uptimeMillis()
+                        - display.getInputMonitor().mInputFocusRequestTimeMillis
+                        >= getInputDispatchingTimeoutMillisLocked(
+                                targetWindowState.getActivityRecord());
+
+                if (requestIsValid) {
+                    if (notifyWindowUnresponsive(focusToken, timeoutRecord)) {
+                        Slog.i(TAG_WM, "Blamed " + focusTarget.getWindowState().getName()
+                                + " using pending focus request. Focused activity: "
+                                + activity.getName());
+                        return;
+                    }
+                }
+            }
+
+
             Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: " + timeoutRecord.mReason);
             dumpAnrStateLocked(activity, null /* windowState */, timeoutRecord.mReason);
             mUnresponsiveAppByDisplay.put(activity.getDisplayId(), activity);
@@ -208,6 +236,7 @@ class AnrController {
             }
         }
         mService.mAmInternal.inputDispatchingResumed(unresponsiveApp.getPid());
+        mUnresponsiveAppByDisplay.remove(newFocus.getDisplayId());
     }
 
     /**

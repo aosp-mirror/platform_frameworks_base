@@ -42,7 +42,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
@@ -157,9 +157,11 @@ public final class SuspendPackageHelper {
                 }
             }
 
-            // If size one, the package will be unsuspended from this call
-            boolean packageUnsuspended =
-                    !suspended && CollectionUtils.size(suspendParamsMap) <= 1;
+            // If only the callingPackage is suspending this package,
+            // it will be unsuspended when this change is committed
+            boolean packageUnsuspended = !suspended
+                    && CollectionUtils.size(suspendParamsMap) == 1
+                    && suspendParamsMap.containsKey(callingPackage);
             if (suspended || packageUnsuspended) {
                 changedPackagesList.add(packageName);
                 changedUids.add(UserHandle.getUid(userId, packageState.getAppId()));

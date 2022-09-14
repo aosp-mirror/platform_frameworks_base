@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Kan nie gesig herken nie. Gebruik eerder vingerafdruk."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Kan nie gesig herken nie"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Gebruik eerder vingerafdruk"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth gekoppel."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batterypersentasie is onbekend."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Gekoppel aan <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -419,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Onderskrifteoorlegger"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktiveer"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiveer"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"Klank en vibrasie"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Instellings"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Program is vasgespeld"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Terug en Oorsig om dit te ontspeld."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Terug en Tuis om dit te ontspeld."</string>
@@ -594,7 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Aan"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Af"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Onbeskikbaar"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Gedeaktiveer"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"kom meer te wete"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigasiebalk"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Uitleg"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Ekstra linksknoppie-tipe"</string>
@@ -667,8 +671,10 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Sommige kenmerke is beperk terwyl foon afkoel.\nTik vir meer inligting"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Jou foon sal outomaties probeer om af te koel. Jy kan steeds jou foon gebruik, maar dit sal dalk stadiger wees.\n\nJou foon sal normaalweg werk nadat dit afgekoel het."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Sien versorgingstappe"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Trek laaier uit"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Kan nie hierdie toestel laai nie. Trek die kragprop uit, en wees versigtig, want die kabel kan warm wees."</string>
+    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
+    <skip />
+    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
+    <skip />
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Sien versorgingstappe"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Links-kortpad"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Regs-kortpad"</string>

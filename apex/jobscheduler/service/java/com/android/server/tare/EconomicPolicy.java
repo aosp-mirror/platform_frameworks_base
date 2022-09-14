@@ -70,6 +70,7 @@ public abstract class EconomicPolicy {
     /** App is fully restricted from running in the background. */
     static final int REGULATION_BG_RESTRICTED = TYPE_REGULATION | 5;
     static final int REGULATION_BG_UNRESTRICTED = TYPE_REGULATION | 6;
+    static final int REGULATION_FORCE_STOP = TYPE_REGULATION | 8;
 
     static final int REWARD_NOTIFICATION_SEEN = TYPE_REWARD | 0;
     static final int REWARD_NOTIFICATION_INTERACTION = TYPE_REWARD | 1;
@@ -409,6 +410,8 @@ public abstract class EconomicPolicy {
                 return "BG_RESTRICTED";
             case REGULATION_BG_UNRESTRICTED:
                 return "BG_UNRESTRICTED";
+            case REGULATION_FORCE_STOP:
+                return "FORCE_STOP";
         }
         return "UNKNOWN_REGULATION:" + Integer.toHexString(eventId);
     }

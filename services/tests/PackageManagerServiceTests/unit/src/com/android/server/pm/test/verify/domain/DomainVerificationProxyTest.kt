@@ -29,7 +29,7 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.util.ArraySet
 import com.android.server.DeviceIdleInternal
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.verify.domain.DomainVerificationCollector
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy

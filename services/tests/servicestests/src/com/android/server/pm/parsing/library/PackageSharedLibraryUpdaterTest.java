@@ -18,8 +18,8 @@ package com.android.server.pm.parsing.library;
 
 import static org.junit.Assert.assertEquals;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.function.Supplier;
 

@@ -52,7 +52,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArrayMap;
 
@@ -227,7 +227,7 @@ final class InitAppsHelper {
             }
         }
         final OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
-                consumer -> mPm.forEachPackage(mPm.snapshotComputer(),
+                consumer -> mPm.forEachPackageInternal(mPm.snapshotComputer(),
                         pkg -> consumer.accept(pkg, pkg.isSystem(),
                                 apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
 

@@ -27,6 +27,7 @@ android_library {
         "androidx.compose.material3_material3",
         "androidx.compose.material_material-icons-extended",
         "androidx.compose.runtime_runtime",
+        "androidx.compose.runtime_runtime-livedata",
         "androidx.compose.ui_ui-tooling-preview",
         "androidx.navigation_navigation-compose",
         "com.google.android.material_material",

@@ -18,6 +18,7 @@ package com.android.server.tare;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.tare.TareTestUtils.assertLedgersEqual;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,7 +31,6 @@ import android.content.pm.PackageInfo;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArrayMap;
-import android.util.SparseLongArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -345,43 +345,6 @@ public class ScribeTest {
         assertEquals(900, mScribeUnderTest.getRemainingConsumableCakesLocked());
     }
 
-    private void assertLedgersEqual(Ledger expected, Ledger actual) {
-        if (expected == null) {
-            assertNull(actual);
-            return;
-        }
-        assertNotNull(actual);
-        assertEquals(expected.getCurrentBalance(), actual.getCurrentBalance());
-
-        List<Ledger.Transaction> expectedTransactions = expected.getTransactions();
-        List<Ledger.Transaction> actualTransactions = actual.getTransactions();
-        assertEquals(expectedTransactions.size(), actualTransactions.size());
-        for (int i = 0; i < expectedTransactions.size(); ++i) {
-            assertTransactionsEqual(expectedTransactions.get(i), actualTransactions.get(i));
-        }
-
-        List<Ledger.RewardBucket> expectedRewardBuckets = expected.getRewardBuckets();
-        List<Ledger.RewardBucket> actualRewardBuckets = actual.getRewardBuckets();
-        assertEquals(expectedRewardBuckets.size(), actualRewardBuckets.size());
-        for (int i = 0; i < expectedRewardBuckets.size(); ++i) {
-            assertRewardBucketsEqual(expectedRewardBuckets.get(i), actualRewardBuckets.get(i));
-        }
-    }
-
-    private void assertSparseLongArraysEqual(SparseLongArray expected, SparseLongArray actual) {
-        if (expected == null) {
-            assertNull(actual);
-            return;
-        }
-        assertNotNull(actual);
-        final int size = expected.size();
-        assertEquals(size, actual.size());
-        for (int i = 0; i < size; ++i) {
-            assertEquals(expected.keyAt(i), actual.keyAt(i));
-            assertEquals(expected.valueAt(i), actual.valueAt(i));
-        }
-    }
-
     private void assertReportListsEqual(List<Analyst.Report> expected,
             List<Analyst.Report> actual) {
         if (expected == null) {
@@ -423,31 +386,6 @@ public class ScribeTest {
             assertEquals("Reports #" + i + " numNegativeRegulations are not equal",
                     eReport.numNegativeRegulations, aReport.numNegativeRegulations);
         }
-    }
-
-    private void assertRewardBucketsEqual(Ledger.RewardBucket expected,
-            Ledger.RewardBucket actual) {
-        if (expected == null) {
-            assertNull(actual);
-            return;
-        }
-        assertNotNull(actual);
-        assertEquals(expected.startTimeMs, actual.startTimeMs);
-        assertSparseLongArraysEqual(expected.cumulativeDelta, actual.cumulativeDelta);
-    }
-
-    private void assertTransactionsEqual(Ledger.Transaction expected, Ledger.Transaction actual) {
-        if (expected == null) {
-            assertNull(actual);
-            return;
-        }
-        assertNotNull(actual);
-        assertEquals(expected.startTimeMs, actual.startTimeMs);
-        assertEquals(expected.endTimeMs, actual.endTimeMs);
-        assertEquals(expected.eventId, actual.eventId);
-        assertEquals(expected.tag, actual.tag);
-        assertEquals(expected.delta, actual.delta);
-        assertEquals(expected.ctp, actual.ctp);
     }
 
     private void addInstalledPackage(int userId, String pkgName) {

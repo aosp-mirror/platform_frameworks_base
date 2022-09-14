@@ -102,9 +102,12 @@ public class CsipDeviceManager {
     }
 
     private CachedBluetoothDevice getCachedDevice(int groupId) {
+        log("getCachedDevice: groupId: " + groupId);
         for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
             CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
             if (cachedDevice.getGroupId() == groupId) {
+                log("getCachedDevice: found cachedDevice with the groupId: "
+                        + cachedDevice.getDevice().getAnonymizedAddress());
                 return cachedDevice;
             }
         }

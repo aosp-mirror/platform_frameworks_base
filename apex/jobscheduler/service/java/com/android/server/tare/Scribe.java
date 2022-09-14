@@ -157,6 +157,12 @@ public class Scribe {
     }
 
     @GuardedBy("mIrs.getLock()")
+    void discardLedgersLocked(final int userId) {
+        mLedgers.delete(userId);
+        postWrite();
+    }
+
+    @GuardedBy("mIrs.getLock()")
     long getSatiatedConsumptionLimitLocked() {
         return mSatiatedConsumptionLimit;
     }
