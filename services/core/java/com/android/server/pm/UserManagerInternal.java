@@ -46,6 +46,15 @@ public abstract class UserManagerInternal {
     public @interface OwnerType {
     }
 
+    // TODO(b/245963156): move to Display.java (and @hide) if we decide to support profiles on MUMD
+    /**
+     * Used only when starting a profile (on systems that
+     * {@link android.os.UserManager#isUsersOnSecondaryDisplaysSupported() support users running on
+     * secondary displays}), to indicate the profile should be started in the same display as its
+     * parent user.
+     */
+    public static final int PARENT_DISPLAY = -2;
+
     public interface UserRestrictionsListener {
         /**
          * Called when a user restriction changes.
