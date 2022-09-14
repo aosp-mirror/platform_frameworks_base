@@ -106,7 +106,7 @@ class MediaTttChipControllerSender @Inject constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
+            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER.name)
         } else {
             displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
         }
@@ -180,6 +180,9 @@ class MediaTttChipControllerSender @Inject constructor(
                 transferStatus == TransferStatus.SUCCEEDED) &&
             removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT
         ) {
+            logger.logRemovalBypass(
+                removalReason, bypassReason = "transferStatus=${transferStatus.name}"
+            )
             return
         }
         super.removeView(removalReason)

@@ -52,6 +52,23 @@ class MediaTttLogger(
             { "Package $str1 could not be found" }
         )
     }
+
+    /**
+     * Logs that a removal request has been bypassed (ignored).
+     *
+     * @param removalReason the reason that the chip removal was requested.
+     * @param bypassReason the reason that the request was bypassed.
+     */
+    fun logRemovalBypass(removalReason: String, bypassReason: String) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = removalReason
+                str2 = bypassReason
+            },
+            { "Chip removal requested due to $str1; however, removal was ignored because $str2" })
+    }
 }
 
 private const val BASE_TAG = "MediaTtt"
