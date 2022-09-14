@@ -96,6 +96,9 @@ public class DisplayResolutionTracker {
 
     private void updateDisplay(int displayId) {
         DisplayInfo info = mManager.getDisplayInfo(displayId);
+        if (info == null) {
+            return;
+        }
         @Resolution int resolution = getResolution(info);
 
         synchronized (mLock) {
