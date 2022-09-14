@@ -598,8 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Միացված է"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Անջատված է"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Հասանելի չէ"</string>
-    <!-- no translation found for accessibility_tile_disabled_by_policy_action_description (6958422730461646926) -->
-    <skip />
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"Իմանալ ավելին"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Նավիգացիայի գոտի"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Դասավորություն"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Լրացուցիչ ձախ կոճակի տեսակ"</string>
