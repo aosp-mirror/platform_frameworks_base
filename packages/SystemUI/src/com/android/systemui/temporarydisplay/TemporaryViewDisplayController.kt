@@ -49,6 +49,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor
  *
  * @property windowTitle the title to use for the window that displays the temporary view. Should be
  *   normally cased, like "Window Title".
+ * @property wakeReason a string used for logging if we needed to wake the screen in order to
+ *   display the temporary view. Should be screaming snake cased, like WAKE_REASON.
  */
 abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
     internal val context: Context,
@@ -60,6 +62,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
     private val powerManager: PowerManager,
     @LayoutRes private val viewLayoutRes: Int,
     private val windowTitle: String,
+    private val wakeReason: String,
 ) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -114,7 +117,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
                 powerManager.wakeUp(
                         SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_APPLICATION,
-                        "com.android.systemui:media_tap_to_transfer_activated"
+                        "com.android.systemui:$wakeReason",
                 )
             }
 

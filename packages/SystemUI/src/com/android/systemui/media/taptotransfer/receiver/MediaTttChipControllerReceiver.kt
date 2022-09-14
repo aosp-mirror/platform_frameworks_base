@@ -72,6 +72,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         powerManager,
         R.layout.media_ttt_chip_receiver,
         MediaTttUtils.WINDOW_TITLE,
+        MediaTttUtils.WAKE_REASON,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {

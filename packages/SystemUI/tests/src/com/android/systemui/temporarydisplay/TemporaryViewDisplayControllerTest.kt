@@ -232,6 +232,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         powerManager,
         R.layout.media_ttt_chip,
         "Window Title",
+        "WAKE_REASON",
     ) {
         var mostRecentViewInfo: ViewInfo? = null
 

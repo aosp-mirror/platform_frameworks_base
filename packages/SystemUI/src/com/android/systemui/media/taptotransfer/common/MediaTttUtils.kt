@@ -29,6 +29,7 @@ class MediaTttUtils {
         // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
         // UpdateMediaTapToTransferReceiverDisplayTest
         const val WINDOW_TITLE = "Media Transfer Chip View"
+        const val WAKE_REASON = "MEDIA_TRANSFER_ACTIVATED"
 
         /**
          * Returns the information needed to display the icon.

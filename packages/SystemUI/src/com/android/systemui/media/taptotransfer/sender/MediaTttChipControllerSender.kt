@@ -68,6 +68,7 @@ class MediaTttChipControllerSender @Inject constructor(
         powerManager,
         R.layout.media_ttt_chip,
         MediaTttUtils.WINDOW_TITLE,
+        MediaTttUtils.WAKE_REASON,
 ) {
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
