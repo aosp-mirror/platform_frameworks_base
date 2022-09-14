@@ -2869,6 +2869,17 @@ public class Editor {
         }
     }
 
+    /**
+     *
+     * @return whether the Blink runnable is blinking or not, if null return false.
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean isBlinking() {
+        if (mBlink == null) return false;
+        return !mBlink.mCancelled;
+    }
+
     private class Blink implements Runnable {
         private boolean mCancelled;
 
