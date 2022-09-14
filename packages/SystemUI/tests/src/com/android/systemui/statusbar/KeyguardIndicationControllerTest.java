@@ -629,6 +629,19 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transientIndication_visibleWhenDozing_ignoresPowerPressed() {
+        createController();
+
+        mController.setVisible(true);
+        reset(mRotateTextViewController);
+        mController.getKeyguardCallback().onBiometricError(
+                FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "foo",
+                BiometricSourceType.FINGERPRINT);
+
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
     public void transientIndication_swipeUpToRetry() {
         createController();
         String message = mContext.getString(R.string.keyguard_retry);
