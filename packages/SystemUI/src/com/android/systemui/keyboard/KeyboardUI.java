@@ -601,7 +601,7 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
 
     private final class BluetoothCallbackHandler implements BluetoothCallback {
         @Override
-        public void onBluetoothStateChanged(int bluetoothState) {
+        public void onBluetoothStateChanged(@BluetoothCallback.AdapterState int bluetoothState) {
             mHandler.obtainMessage(MSG_ON_BLUETOOTH_STATE_CHANGED,
                     bluetoothState, 0).sendToTarget();
         }
