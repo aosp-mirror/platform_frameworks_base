@@ -158,7 +158,6 @@ public class UserSwitcherController implements Dumpable {
     @VisibleForTesting
     Dialog mAddUserDialog;
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
-    private boolean mResumeUserOnGuestLogout = true;
     private boolean mSimpleUserSwitcher;
     // When false, there won't be any visual affordance to add a new user from the keyguard even if
     // the user is unlocked
@@ -431,38 +430,41 @@ public class UserSwitcherController implements Dumpable {
         });
     }
 
-    boolean systemCanCreateUsers() {
+    private boolean systemCanCreateUsers() {
         return !mUserManager.hasBaseUserRestriction(
                 UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
     }
 
-    boolean currentUserCanCreateUsers() {
+    private boolean currentUserCanCreateUsers() {
         UserInfo currentUser = mUserTracker.getUserInfo();
         return currentUser != null
                 && (currentUser.isAdmin() || mUserTracker.getUserId() == UserHandle.USER_SYSTEM)
                 && systemCanCreateUsers();
     }
 
-    boolean anyoneCanCreateUsers() {
+    private boolean anyoneCanCreateUsers() {
         return systemCanCreateUsers() && mAddUsersFromLockScreen.getValue();
     }
 
+    @VisibleForTesting
     boolean canCreateGuest(boolean hasExistingGuest) {
         return mUserSwitcherEnabled
                 && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
                 && !hasExistingGuest;
     }
 
+    @VisibleForTesting
     boolean canCreateUser() {
         return mUserSwitcherEnabled
                 && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
                 && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
     }
 
-    boolean createIsRestricted() {
+    private boolean createIsRestricted() {
         return !mAddUsersFromLockScreen.getValue();
     }
 
+    @VisibleForTesting
     boolean canCreateSupervisedUser() {
         return !TextUtils.isEmpty(mCreateSupervisedUserPackage) && canCreateUser();
     }
@@ -489,28 +491,12 @@ public class UserSwitcherController implements Dumpable {
         return mSimpleUserSwitcher;
     }
 
-    public void setResumeUserOnGuestLogout(boolean resume) {
-        mResumeUserOnGuestLogout = resume;
-    }
-
     /**
      * Returns whether the current user is a system user.
      */
-    public boolean isSystemUser() {
+    @VisibleForTesting
+    boolean isSystemUser() {
         return mUserTracker.getUserId() == UserHandle.USER_SYSTEM;
-    }
-
-    public void removeUserId(int userId) {
-        if (userId == UserHandle.USER_SYSTEM) {
-            Log.w(TAG, "User " + userId + " could not removed.");
-            return;
-        }
-        if (mUserTracker.getUserId() == userId) {
-            switchToUserId(UserHandle.USER_SYSTEM);
-        }
-        if (mUserManager.removeUser(userId)) {
-            refreshUsers(UserHandle.USER_NULL);
-        }
     }
 
     /**
@@ -604,7 +590,7 @@ public class UserSwitcherController implements Dumpable {
         switchToUserId(id);
     }
 
-    protected void switchToUserId(int id) {
+    private void switchToUserId(int id) {
         try {
             if (mView != null) {
                 mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
@@ -621,7 +607,7 @@ public class UserSwitcherController implements Dumpable {
 
     private void showExitGuestDialog(int id, boolean isGuestEphemeral, DialogShower dialogShower) {
         int newId = UserHandle.USER_SYSTEM;
-        if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
+        if (mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
             if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
                 newId = info.id;
@@ -818,12 +804,10 @@ public class UserSwitcherController implements Dumpable {
         refreshUsers(UserHandle.USER_ALL);
     }
 
-    @VisibleForTesting
     public void addAdapter(WeakReference<BaseUserAdapter> adapter) {
         mAdapters.add(adapter);
     }
 
-    @VisibleForTesting
     public ArrayList<UserRecord> getUsers() {
         return mUsers;
     }
@@ -921,7 +905,7 @@ public class UserSwitcherController implements Dumpable {
         int newUserId = UserHandle.USER_SYSTEM;
         if (targetUserId == UserHandle.USER_NULL) {
             // when target user is not specified switch to last non guest user
-            if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
+            if (mLastNonGuestUser != UserHandle.USER_SYSTEM) {
                 UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
                 if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
                     newUserId = info.id;
@@ -1014,7 +998,7 @@ public class UserSwitcherController implements Dumpable {
      * @return The multi-user user ID of the newly created guest user, or
      * {@link UserHandle#USER_NULL} if the guest couldn't be created.
      */
-    public @UserIdInt int createGuest() {
+    private @UserIdInt int createGuest() {
         UserInfo guest;
         try {
             guest = mUserManager.createGuest(mContext);
@@ -1036,9 +1020,9 @@ public class UserSwitcherController implements Dumpable {
         mView = view;
     }
 
-    @VisibleForTesting
-    public KeyguardStateController getKeyguardStateController() {
-        return mKeyguardStateController;
+    /** Returns {@code true} if the keyguard is showing; {@code false} otherwise */
+    public boolean isKeyguardShowing() {
+        return mKeyguardStateController.isShowing();
     }
 
     /**
@@ -1059,11 +1043,9 @@ public class UserSwitcherController implements Dumpable {
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
-        private final KeyguardStateController mKeyguardStateController;
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            mKeyguardStateController = controller.getKeyguardStateController();
             controller.addAdapter(new WeakReference<>(this));
         }
 
@@ -1081,7 +1063,7 @@ public class UserSwitcherController implements Dumpable {
         }
 
         private int countUsers(boolean includeGuest) {
-            boolean keyguardShowing = mKeyguardStateController.isShowing();
+            boolean keyguardShowing = mController.isKeyguardShowing();
             final int userSize = getUsers().size();
             int count = 0;
             for (int i = 0; i < userSize; i++) {
