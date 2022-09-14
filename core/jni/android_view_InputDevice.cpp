@@ -57,9 +57,6 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
 
     const InputDeviceIdentifier& ident = deviceInfo.getIdentifier();
 
-    // Not sure why, but JNI is complaining when I pass this through directly.
-    jboolean hasMic = deviceInfo.hasMic() ? JNI_TRUE : JNI_FALSE;
-
     ScopedLocalRef<jobject>
             inputDeviceObj(env,
                            env->NewObject(gInputDeviceClassInfo.clazz, gInputDeviceClassInfo.ctor,
@@ -70,8 +67,9 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                           deviceInfo.isExternal(), deviceInfo.getSources(),
                                           deviceInfo.getKeyboardType(), kcmObj.get(),
                                           deviceInfo.getCountryCode(), deviceInfo.hasVibrator(),
-                                          hasMic, deviceInfo.hasButtonUnderPad(),
-                                          deviceInfo.hasSensor(), deviceInfo.hasBattery()));
+                                          deviceInfo.hasMic(), deviceInfo.hasButtonUnderPad(),
+                                          deviceInfo.hasSensor(), deviceInfo.hasBattery(),
+                                          deviceInfo.supportsUsi()));
 
     const std::vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (const InputDeviceInfo::MotionRange& range: ranges) {
@@ -94,7 +92,7 @@ int register_android_view_InputDevice(JNIEnv* env)
     gInputDeviceClassInfo.ctor =
             GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
                              "(IIILjava/lang/String;IILjava/lang/"
-                             "String;ZIILandroid/view/KeyCharacterMap;IZZZZZ)V");
+                             "String;ZIILandroid/view/KeyCharacterMap;IZZZZZZ)V");
 
     gInputDeviceClassInfo.addMotionRange = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz,
             "addMotionRange", "(IIFFFFF)V");
