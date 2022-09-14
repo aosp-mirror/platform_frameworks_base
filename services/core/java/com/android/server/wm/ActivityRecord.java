@@ -2747,6 +2747,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final StartingSurfaceController.StartingSurface surface;
         final StartingData startingData = mStartingData;
+        final WindowState startingWindow = mStartingWindow;
         if (mStartingData != null) {
             surface = mStartingSurface;
             mStartingData = null;
@@ -2765,21 +2766,31 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
                 + " startingView=%s Callers=%s", this, mStartingWindow, mStartingSurface,
                 Debug.getCallers(5));
-
+        final boolean removeWithAnimate = prepareAnimation && startingData.needRevealAnimation();
         final Runnable removeSurface = () -> {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
             try {
-                surface.remove(prepareAnimation && startingData.needRevealAnimation());
+                surface.remove(removeWithAnimate);
             } catch (Exception e) {
                 Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
         };
-
-        removeSurface.run();
+        if (removeWithAnimate && mTransitionController.inCollectingTransition(startingWindow)
+                && startingWindow.cancelAndRedraw()) {
+            // Defer remove starting window after transition start.
+            // If splash screen window was in collecting, the client side is unable to draw because
+            // of Session#cancelDraw, which will blocking the remove animation.
+            startingWindow.mSyncTransaction.addTransactionCommittedListener(Runnable::run, () -> {
+                synchronized (mAtmService.mGlobalLock) {
+                    removeSurface.run();
+                }
+            });
+        } else {
+            removeSurface.run();
+        }
     }
 
     /**
