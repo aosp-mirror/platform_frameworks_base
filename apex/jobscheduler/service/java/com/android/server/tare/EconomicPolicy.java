@@ -120,6 +120,7 @@ public abstract class EconomicPolicy {
             REWARD_NOTIFICATION_INTERACTION,
             REWARD_WIDGET_INTERACTION,
             REWARD_OTHER_USER_INTERACTION,
+            JobSchedulerEconomicPolicy.REWARD_APP_INSTALL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UtilityReward {
@@ -430,6 +431,8 @@ public abstract class EconomicPolicy {
                 return "REWARD_WIDGET_INTERACTION";
             case REWARD_OTHER_USER_INTERACTION:
                 return "REWARD_OTHER_USER_INTERACTION";
+            case JobSchedulerEconomicPolicy.REWARD_APP_INSTALL:
+                return "REWARD_JOB_APP_INSTALL";
         }
         return "UNKNOWN_REWARD:" + Integer.toHexString(eventId);
     }

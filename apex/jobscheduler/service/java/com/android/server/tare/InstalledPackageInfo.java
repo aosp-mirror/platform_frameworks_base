@@ -17,9 +17,12 @@
 package com.android.server.tare;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
-import android.os.UserHandle;
+import android.os.RemoteException;
 
 /** POJO to cache only the information about installed packages that TARE cares about. */
 class InstalledPackageInfo {
@@ -28,11 +31,21 @@ class InstalledPackageInfo {
     public final int uid;
     public final String packageName;
     public final boolean hasCode;
+    @Nullable
+    public final String installerPackageName;
 
     InstalledPackageInfo(@NonNull PackageInfo packageInfo) {
         final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-        this.uid = applicationInfo == null ? NO_UID : applicationInfo.uid;
-        this.packageName = packageInfo.packageName;
-        this.hasCode = applicationInfo != null && applicationInfo.hasCode();
+        uid = applicationInfo == null ? NO_UID : applicationInfo.uid;
+        packageName = packageInfo.packageName;
+        hasCode = applicationInfo != null && applicationInfo.hasCode();
+        InstallSourceInfo installSourceInfo = null;
+        try {
+            installSourceInfo = AppGlobals.getPackageManager().getInstallSourceInfo(packageName);
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+        }
+        installerPackageName =
+                installSourceInfo == null ? null : installSourceInfo.getInstallingPackageName();
     }
 }
