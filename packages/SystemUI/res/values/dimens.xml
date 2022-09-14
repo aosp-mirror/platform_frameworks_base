@@ -945,6 +945,8 @@
     <dimen name="biometric_dialog_medium_to_large_translation_offset">100dp</dimen>
     <!-- Y translation for credential contents when animating in -->
     <dimen name="biometric_dialog_credential_translation_offset">60dp</dimen>
+    <dimen name="biometric_dialog_width">240dp</dimen>
+    <dimen name="biometric_dialog_height">240dp</dimen>
 
     <!-- Starting text size in sp of batteryLevel for wireless charging animation -->
     <item name="wireless_charging_anim_battery_level_text_size_start" format="float" type="dimen">
@@ -1209,6 +1211,17 @@
     <!-- Distance that the full shade transition takes in order for the Quick Settings to fully
          fade and expand. -->
     <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance delay for the QS transition to start during the lockscreen shade expansion. -->
+    <dimen name="lockscreen_shade_qs_transition_delay">0dp</dimen>
+
+    <!-- Distance that it takes to complete the QS "squish" transition during the lockscreen shade
+         expansion. -->
+    <dimen name="lockscreen_shade_qs_squish_transition_distance">@dimen/lockscreen_shade_qs_transition_distance</dimen>
+
+    <!-- The fraction at which the QS "squish" transition should start during the lockscreen shade
+         expansion. 0 is fully collapsed, 1 is fully expanded. -->
+    <item type="dimen" format="float" name="lockscreen_shade_qs_squish_start_fraction">0</item>
 
     <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
          change.  -->

@@ -31,6 +31,7 @@ object GalleryAppScreens {
     val Typography = ChildScreen("typography") { TypographyScreen() }
     val MaterialColors = ChildScreen("material_colors") { MaterialColorsScreen() }
     val AndroidColors = ChildScreen("android_colors") { AndroidColorsScreen() }
+    val Buttons = ChildScreen("buttons") { ButtonsScreen() }
     val ExampleFeature = ChildScreen("example_feature") { ExampleFeatureScreen() }
 
     val PeopleEmpty =
@@ -63,6 +64,7 @@ object GalleryAppScreens {
                 "Material colors" to MaterialColors,
                 "Android colors" to AndroidColors,
                 "Example feature" to ExampleFeature,
+                "Buttons" to Buttons,
                 "People" to People,
             )
         )
