@@ -52,6 +52,7 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.am.ActivityManagerService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -100,6 +101,38 @@ final class ResolveIntentHelper {
         mInstantAppInstallerActivitySupplier = instantAppInstallerActivitySupplier;
     }
 
+    private static void filterNonExportedComponents(Intent intent, int filterCallingUid,
+            List<ResolveInfo> query, PlatformCompat platformCompat, Computer computer) {
+        if (query == null
+                || intent.getPackage() != null
+                || intent.getComponent() != null
+                || ActivityManager.canAccessUnexportedComponents(filterCallingUid)) {
+            return;
+        }
+        AndroidPackage caller = computer.getPackage(filterCallingUid);
+        String callerPackage = caller == null ? "Not specified" : caller.getPackageName();
+        for (int i = query.size() - 1; i >= 0; i--) {
+            if (!query.get(i).getComponentInfo().exported) {
+                if (!platformCompat.isChangeEnabledByUid(
+                        ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
+                        filterCallingUid)) {
+                    Slog.w(TAG, "Non-exported component not filtered out "
+                            + "(will be filtered out once the app targets U+)- intent: "
+                            + intent.getAction() + ", component: "
+                            + query.get(i).getComponentInfo()
+                            .getComponentName().flattenToShortString()
+                            + ", starter: " + callerPackage);
+                    return;
+                }
+                Slog.w(TAG, "Non-exported component filtered out - intent: "
+                        + intent.getAction() + ", component: "
+                        + query.get(i).getComponentInfo().getComponentName().flattenToShortString()
+                        + ", starter: " + callerPackage);
+                query.remove(i);
+            }
+        }
+    }
+
     /**
      * Normally instant apps can only be resolved when they're visible to the caller.
      * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
@@ -109,6 +142,20 @@ final class ResolveIntentHelper {
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
             boolean resolveForStart, int filterCallingUid) {
+        return resolveIntentInternal(computer, intent, resolvedType, flags,
+                privateResolveFlags, userId, resolveForStart, filterCallingUid, false);
+    }
+
+    /**
+     * Normally instant apps can only be resolved when they're visible to the caller.
+     * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
+     * since we need to allow the system to start any installed application.
+     * Allows picking exported components only.
+     */
+    public ResolveInfo resolveIntentInternal(Computer computer, Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags,
+            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
+            boolean resolveForStart, int filterCallingUid, boolean exportedComponentsOnly) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
@@ -124,6 +171,10 @@ final class ResolveIntentHelper {
             final List<ResolveInfo> query = computer.queryIntentActivitiesInternal(intent,
                     resolvedType, flags, privateResolveFlags, filterCallingUid, userId,
                     resolveForStart, true /*allowDynamicSplits*/);
+            if (exportedComponentsOnly) {
+                filterNonExportedComponents(intent, filterCallingUid, query,
+                        mPlatformCompat, computer);
+            }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final boolean queryMayBeFiltered =

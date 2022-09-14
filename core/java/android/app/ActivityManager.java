@@ -4216,13 +4216,23 @@ public class ActivityManager {
         }
     }*/
 
+    /** @hide
+     * Determines whether the given UID can access unexported components
+     * @param uid the calling UID
+     * @return true if the calling UID is ROOT or SYSTEM
+     */
+    public static boolean canAccessUnexportedComponents(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID);
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static int checkComponentPermission(String permission, int uid,
             int owningUid, boolean exported) {
         // Root, system server get to do everything.
         final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
+        if (canAccessUnexportedComponents(uid)) {
             return PackageManager.PERMISSION_GRANTED;
         }
         // Isolated processes don't get any permissions.
