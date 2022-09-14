@@ -17,7 +17,7 @@
 package com.android.wm.shell.activityembedding;
 
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,7 +57,7 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
     public void testStartAnimation() {
         final TransitionInfo info = new TransitionInfo(TRANSIT_OPEN, 0);
         final TransitionInfo.Change embeddingChange = createChange();
-        embeddingChange.setFlags(FLAG_IS_EMBEDDED);
+        embeddingChange.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
         info.addChange(embeddingChange);
         doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any());
 

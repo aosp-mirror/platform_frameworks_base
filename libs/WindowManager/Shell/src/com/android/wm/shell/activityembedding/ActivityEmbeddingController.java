@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.activityembedding;
 
-import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import static java.util.Objects.requireNonNull;
 
@@ -85,9 +85,9 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         // TODO(b/207070762) Handle AE animation as a part of other transitions.
-        // Only handle the transition if all containers are embedded.
         for (TransitionInfo.Change change : info.getChanges()) {
-            if (!isEmbedded(change)) {
+            if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                // Only animate the transition if all changes are in a Task with ActivityEmbedding.
                 return false;
             }
         }
@@ -118,9 +118,5 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             throw new IllegalStateException("No finish callback found");
         }
         callback.onTransitionFinished(null /* wct */, null /* wctCB */);
-    }
-
-    private static boolean isEmbedded(@NonNull TransitionInfo.Change change) {
-        return (change.getFlags() & FLAG_IS_EMBEDDED) != 0;
     }
 }
