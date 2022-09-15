@@ -17,6 +17,7 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
@@ -289,43 +290,60 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
      * they were pushed.
      * <li>Events can be flushed via {@link #flush()}. This will block until all events pushed prior
      * to this call have been fully processed.
+     * TODO(b/246584464) Remove and replace with Handler (and other concurrency fixes).
      * </ul>
      */
-    private static class CallbackThread {
+    private static class CallbackThread implements Runnable {
         private final Queue<Runnable> mList = new LinkedList<>();
         private int mPushCount = 0;
         private int mProcessedCount = 0;
-
+        private boolean mQuitting = false;
+        private final Thread mThread;
         /**
          * Ctor. Starts the thread.
          */
         CallbackThread() {
-            new Thread(() -> {
-                try {
-                    while (true) {
-                        pop().run();
-                        synchronized (mList) {
-                            mProcessedCount++;
-                            mList.notifyAll();
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    // If interrupted, exit.
-                }
-            }).start();
+            mThread = new Thread(this , "STHAL Concurrent Capture Handler Callback");
+            mThread.start();
         }
-
+        /**
+         * Consume items in the queue until quit is called.
+         */
+        public void run() {
+            try {
+                while (true) {
+                    Runnable toRun = pop();
+                    if (toRun == null) {
+                      // There are no longer any runnables to run,
+                      // and quit() has been called.
+                      return;
+                    }
+                    toRun.run();
+                    synchronized (mList) {
+                        mProcessedCount++;
+                        mList.notifyAll();
+                    }
+                }
+            } catch (InterruptedException e) {
+                // If interrupted, exit.
+                // Note, this is dangerous wrt to flush.
+            }
+        }
         /**
          * Push a new runnable to the queue, with no deduping.
+         * If quit has been called, the runnable will not be pushed.
          *
          * @param runnable The runnable to push.
+         * @return If the runnable was successfully pushed.
          */
-        void push(Runnable runnable) {
+        boolean push(Runnable runnable) {
             synchronized (mList) {
+                if (mQuitting) return false;
                 mList.add(runnable);
                 mPushCount++;
                 mList.notifyAll();
             }
+            return true;
         }
 
         /**
@@ -343,11 +361,26 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
             }
         }
 
-        private Runnable pop() throws InterruptedException {
+        /**
+         * Quit processing after the queue is cleared.
+         * All subsequent calls to push will fail.
+         * Note, this does not flush.
+         */
+        void quit() {
+            synchronized(mList) {
+                mQuitting = true;
+                mList.notifyAll();
+            }
+        }
+
+        // Returns the next runnable when available.
+        // Returns null iff the list is empty and quit has been called.
+        private @Nullable Runnable pop() throws InterruptedException {
             synchronized (mList) {
-                while (mList.isEmpty()) {
+                while (mList.isEmpty() && !mQuitting) {
                     mList.wait();
                 }
+                if (mList.isEmpty() && mQuitting) return null;
                 return mList.remove();
             }
         }
@@ -372,6 +405,7 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     public void detach() {
         mDelegate.detach();
         mNotifier.unregisterListener(this);
+        mCallbackThread.quit();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

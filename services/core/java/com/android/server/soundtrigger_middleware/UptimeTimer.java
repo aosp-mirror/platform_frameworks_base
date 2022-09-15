@@ -18,9 +18,7 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.os.Handler;
-import android.os.Looper;
-
-import java.util.concurrent.atomic.AtomicReference;
+import android.os.HandlerThread;
 
 /**
  * A simple timer, similar to java.util.Timer, but using the "uptime clock".
@@ -33,58 +31,45 @@ import java.util.concurrent.atomic.AtomicReference;
  * task.cancel();
  */
 class UptimeTimer {
-    private Handler mHandler = null;
+    private final Handler mHandler;
+    private final HandlerThread mHandlerThread;
 
     interface Task {
         void cancel();
     }
 
     UptimeTimer(String threadName) {
-        new Thread(this::threadFunc, threadName).start();
-        synchronized (this) {
-            while (mHandler == null) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        mHandlerThread = new HandlerThread(threadName);
+        mHandlerThread.start();
+        // Blocks until looper init
+        mHandler = new Handler(mHandlerThread.getLooper());
     }
 
+    // Note, this method is not internally synchronized.
+    // This is safe since Handlers are internally synchronized.
     Task createTask(@NonNull Runnable runnable, long uptimeMs) {
-        TaskImpl task = new TaskImpl(runnable);
-        mHandler.postDelayed(task, uptimeMs);
+        Object token = new Object();
+        TaskImpl task = new TaskImpl(mHandler, token);
+        mHandler.postDelayed(runnable, token, uptimeMs);
         return task;
     }
 
-    private void threadFunc() {
-        Looper.prepare();
-        synchronized (this) {
-            mHandler = new Handler(Looper.myLooper());
-            notifyAll();
-        }
-        Looper.loop();
+    void quit() {
+        mHandlerThread.quitSafely();
     }
 
-    private static class TaskImpl implements Task, Runnable {
-        private AtomicReference<Runnable> mRunnable = new AtomicReference<>();
+    private static class TaskImpl implements Task {
+        private final Handler mHandler;
+        private final Object mToken;
 
-        TaskImpl(@NonNull Runnable runnable) {
-            mRunnable.set(runnable);
+        public TaskImpl(Handler handler, Object token) {
+            mHandler = handler;
+            mToken = token;
         }
 
         @Override
         public void cancel() {
-            mRunnable.set(null);
+            mHandler.removeCallbacksAndMessages(mToken);
         }
-
-        @Override
-        public void run() {
-            Runnable runnable = mRunnable.get();
-            if (runnable != null) {
-                runnable.run();
-            }
-        }
-    }
+    };
 }

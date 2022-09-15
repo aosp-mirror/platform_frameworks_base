@@ -150,6 +150,8 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     @Override
     public void detach() {
         mUnderlying.detach();
+        // We should no longer have any pending calls
+        mTimer.quit();
     }
 
     private class Watchdog implements AutoCloseable {
