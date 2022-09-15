@@ -187,6 +187,9 @@ public class Flags {
     // 802 - wallpaper rendering
     public static final UnreleasedFlag USE_CANVAS_RENDERER = new UnreleasedFlag(802);
 
+    // 803 - screen contents translation
+    public static final UnreleasedFlag SCREEN_CONTENTS_TRANSLATION = new UnreleasedFlag(803);
+
     /***************************************/
     // 900 - media
     public static final ReleasedFlag MEDIA_TAP_TO_TRANSFER = new ReleasedFlag(900);
