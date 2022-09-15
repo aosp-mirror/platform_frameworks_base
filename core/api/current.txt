@@ -53061,6 +53061,24 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.DeleteGesture.Builder setGranularity(int);
   }
 
+  public final class DeleteRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.RectF getDeletionEndArea();
+    method @NonNull public android.graphics.RectF getDeletionStartArea();
+    method public int getGranularity();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.DeleteRangeGesture> CREATOR;
+  }
+
+  public static final class DeleteRangeGesture.Builder {
+    ctor public DeleteRangeGesture.Builder();
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture build();
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setDeletionEndArea(@NonNull android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setDeletionStartArea(@NonNull android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setGranularity(int);
+  }
+
   public final class EditorBoundsInfo implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.graphics.RectF getEditorBounds();
@@ -53160,11 +53178,13 @@ package android.view.inputmethod {
   public abstract class HandwritingGesture {
     method @Nullable public String getFallbackText();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
+    field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
     field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
     field public static final int GESTURE_TYPE_NONE = 0; // 0x0
     field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8
     field public static final int GESTURE_TYPE_SELECT = 1; // 0x1
+    field public static final int GESTURE_TYPE_SELECT_RANGE = 32; // 0x20
     field public static final int GRANULARITY_CHARACTER = 2; // 0x2
     field public static final int GRANULARITY_WORD = 1; // 0x1
   }
@@ -53547,6 +53567,24 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setFallbackText(@Nullable String);
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setGranularity(int);
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setSelectionArea(@NonNull android.graphics.RectF);
+  }
+
+  public final class SelectRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getGranularity();
+    method @NonNull public android.graphics.RectF getSelectionEndArea();
+    method @NonNull public android.graphics.RectF getSelectionStartArea();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SelectRangeGesture> CREATOR;
+  }
+
+  public static final class SelectRangeGesture.Builder {
+    ctor public SelectRangeGesture.Builder();
+    method @NonNull public android.view.inputmethod.SelectRangeGesture build();
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setGranularity(int);
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setSelectionEndArea(@NonNull android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setSelectionStartArea(@NonNull android.graphics.RectF);
   }
 
   public final class SurroundingText implements android.os.Parcelable {

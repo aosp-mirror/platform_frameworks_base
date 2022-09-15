@@ -557,10 +557,14 @@ public class EditorInfo implements InputType, Parcelable {
             Objects.requireNonNull(gesture);
             if (gesture.equals(SelectGesture.class)) {
                 supportedTypes |= HandwritingGesture.GESTURE_TYPE_SELECT;
+            } else if (gesture.equals(SelectRangeGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_SELECT_RANGE;
             } else if (gesture.equals(InsertGesture.class)) {
                 supportedTypes |= HandwritingGesture.GESTURE_TYPE_INSERT;
             } else if (gesture.equals(DeleteGesture.class)) {
                 supportedTypes |= HandwritingGesture.GESTURE_TYPE_DELETE;
+            } else if (gesture.equals(DeleteRangeGesture.class)) {
+                supportedTypes |= HandwritingGesture.GESTURE_TYPE_DELETE_RANGE;
             } else if (gesture.equals(RemoveSpaceGesture.class)) {
                 supportedTypes |= HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE;
             } else if (gesture.equals(JoinOrSplitGesture.class)) {
