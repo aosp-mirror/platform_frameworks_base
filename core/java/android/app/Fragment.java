@@ -258,6 +258,11 @@ import java.lang.reflect.InvocationTargetException;
  * pressing back will pop it to return the user to whatever previous state
  * the activity UI was in.
  *
+ * <p>
+ * Fragments appearing or disappearing do not generate system events for accessibility, so set a
+ * title on your fragments with {@link View#setAccessibilityPaneTitle(CharSequence)} to notify
+ * accessibility users of these UI transitions.
+ *
  * @deprecated Use the <a href="{@docRoot}jetpack">Jetpack Fragment Library</a>
  *      {@link androidx.fragment.app.Fragment} for consistent behavior across all devices
  *      and access to <a href="{@docRoot}topic/libraries/architecture/lifecycle.html">Lifecycle</a>.
