@@ -22,8 +22,10 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
+import android.util.Slog;
 
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -76,8 +78,10 @@ class RootDisplayArea extends DisplayArea.Dimmable {
     /**
      * Places the IME container below this root, so that it's bounds and config will be updated to
      * match the root.
+     *
+     * @return {@code true} if the IME container is reparented to this root.
      */
-    void placeImeContainer(DisplayArea.Tokens imeContainer) {
+    boolean placeImeContainer(DisplayArea.Tokens imeContainer) {
         final RootDisplayArea previousRoot = imeContainer.getRootDisplayArea();
 
         List<Feature> features = mFeatures;
@@ -94,11 +98,23 @@ class RootDisplayArea extends DisplayArea.Dimmable {
                 previousRoot.updateImeContainerForLayers(null /* imeContainer */);
                 imeContainer.reparent(imeDisplayAreas.get(0), POSITION_TOP);
                 updateImeContainerForLayers(imeContainer);
-                return;
+                return true;
             }
         }
-        throw new IllegalStateException(
-                "There is no FEATURE_IME_PLACEHOLDER in this root to place the IME container");
+
+        // Some device UX may not have the need to update the IME bounds and position for IME target
+        // in a child DisplayArea, so instead of throwing exception, we just allow the IME container
+        // to remain in its previous root.
+        if (!isDescendantOf(previousRoot)) {
+            // When this RootDisplayArea is a descendant of the current RootDisplayArea, it will be
+            // at the APPLICATION_LAYER, and the IME container will always be on top and have bounds
+            // equal or larger than the input target.
+            // If it is not a descendant, the DisplayAreaPolicy owner should make sure the IME is
+            // working correctly. Print a warning in case they are not.
+            Slog.w(TAG_WM, "The IME target is not in the same root as the IME container, but there "
+                    + "is no DisplayArea of FEATURE_IME_PLACEHOLDER in the target RootDisplayArea");
+        }
+        return false;
     }
 
     /**

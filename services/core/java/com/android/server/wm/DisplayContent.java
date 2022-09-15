@@ -4164,7 +4164,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
-        final boolean layeringTargetChanged = target != mImeLayeringTarget;
+        boolean shouldUpdateImeParent = target != mImeLayeringTarget;
         mImeLayeringTarget = target;
 
         // 1. Reparent the IME container window to the target root DA to get the correct bounds and
@@ -4172,10 +4172,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // is not organized (see FEATURE_IME and updateImeParent).
         if (target != null && !mImeWindowsContainer.isOrganized()) {
             RootDisplayArea targetRoot = target.getRootDisplayArea();
-            if (targetRoot != null && targetRoot != mImeWindowsContainer.getRootDisplayArea()) {
-                // Reposition the IME container to the target root to get the correct bounds and
-                // config.
-                targetRoot.placeImeContainer(mImeWindowsContainer);
+            if (targetRoot != null && targetRoot != mImeWindowsContainer.getRootDisplayArea()
+                    // Try reparent the IME container to the target root to get the bounds and
+                    // config that match the target window.
+                    && targetRoot.placeImeContainer(mImeWindowsContainer)) {
+                // Update the IME surface parent since the IME container window has been reparented.
+                shouldUpdateImeParent = true;
                 // Directly hide the IME window so it doesn't flash immediately after reparenting.
                 // InsetsController will make IME visible again before animating it.
                 if (mInputMethodWindow != null) {
@@ -4192,7 +4194,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
-        updateImeControlTarget(layeringTargetChanged);
+        updateImeControlTarget(shouldUpdateImeParent);
     }
 
     @VisibleForTesting

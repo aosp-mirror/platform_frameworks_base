@@ -213,7 +213,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
     public void testImeSwitchDialogWindowTokenRemovedOnDualDisplayContent_ListenToImeContainer() {
         // Let the Display to be created with the DualDisplay policy.
         final DisplayAreaPolicy.Provider policyProvider =
-                new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
+                new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider(mWm);
         doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
         // Create a DisplayContent with dual RootDisplayArea
         DualDisplayAreaGroupPolicyTest.DualDisplayContent dualDisplayContent =
