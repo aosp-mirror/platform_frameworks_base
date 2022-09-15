@@ -20,7 +20,8 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_label"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true">
