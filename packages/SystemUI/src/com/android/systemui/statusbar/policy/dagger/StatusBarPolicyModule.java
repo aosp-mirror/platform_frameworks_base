@@ -59,7 +59,7 @@ import com.android.systemui.statusbar.policy.SecurityControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.UserSwitcherControllerOldImpl;
+import com.android.systemui.statusbar.policy.UserSwitcherControllerImpl;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.statusbar.policy.WalletControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -201,5 +201,5 @@ public interface StatusBarPolicyModule {
 
     /** Binds {@link UserSwitcherController} to its implementation. */
     @Binds
-    UserSwitcherController bindUserSwitcherController(UserSwitcherControllerOldImpl impl);
+    UserSwitcherController bindUserSwitcherController(UserSwitcherControllerImpl impl);
 }
