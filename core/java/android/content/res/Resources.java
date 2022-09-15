@@ -43,6 +43,7 @@ import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.loader.ResourcesLoader;
@@ -2181,17 +2182,19 @@ public class Resources {
     }
 
     /**
-     * Return the current display metrics that are in effect for this resource
+     * Returns the current display metrics that are in effect for this resource
      * object. The returned object should be treated as read-only.
      *
      * <p>Note that the reported value may be different than the window this application is
      * interested in.</p>
      *
-     * <p>Best practices are to obtain metrics from {@link WindowManager#getCurrentWindowMetrics()}
-     * for window bounds, {@link Display#getRealMetrics(DisplayMetrics)} for display bounds and
-     * obtain density from {@link Configuration#densityDpi}. The value obtained from this API may be
-     * wrong if the {@link Resources} is from the context which is different than the window is
-     * attached such as {@link Application#getResources()}.
+     * <p>The best practices is to obtain metrics from
+     * {@link WindowManager#getCurrentWindowMetrics()} for window bounds. The value obtained from
+     * this API may be wrong if {@link Context#getResources()} is from
+     * non-{@link android.annotation.UiContext}.
+     * For example, use the {@link DisplayMetrics} obtained from {@link Application#getResources()}
+     * to build {@link android.app.Activity} UI elements especially when the
+     * {@link android.app.Activity} is in the multi-window mode or on the secondary {@link Display}.
      * <p/>
      *
      * @return The resource's current display metrics.
