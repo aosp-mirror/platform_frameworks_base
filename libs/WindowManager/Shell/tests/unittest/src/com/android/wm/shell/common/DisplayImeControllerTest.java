@@ -97,7 +97,7 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
     @Test
     public void showInsets_schedulesNoWorkOnExecutor() {
-        mPerDisplay.showInsets(ime(), true);
+        mPerDisplay.showInsets(ime(), true, null /* statsToken */);
         verifyZeroInteractions(mExecutor);
     }
 

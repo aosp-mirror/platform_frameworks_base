@@ -244,7 +244,7 @@ public class InputMethodManagerServiceTestBase {
                     .setCurrentMethodVisible();
         }
         verify(mMockInputMethod, times(showSoftInput ? 1 : 0))
-                .showSoftInput(any(), anyInt(), any());
+                .showSoftInput(any(), any(), anyInt(), any());
     }
 
     protected void verifyHideSoftInput(boolean setNotVisible, boolean hideSoftInput)

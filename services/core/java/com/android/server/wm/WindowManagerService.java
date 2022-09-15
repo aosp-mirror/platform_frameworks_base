@@ -292,6 +292,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
@@ -8022,7 +8023,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void showImePostLayout(IBinder imeTargetWindowToken) {
+        public void showImePostLayout(IBinder imeTargetWindowToken,
+                @Nullable ImeTracker.Token statsToken) {
             synchronized (mGlobalLock) {
                 InputTarget imeTarget = getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget == null) {
@@ -8036,7 +8038,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent dc = imeTarget != null
                         ? imeTarget.getDisplayContent() : getDefaultDisplayContentLocked();
                 dc.getInsetsStateController().getImeSourceProvider()
-                        .scheduleShowImePostLayout(controlTarget);
+                        .scheduleShowImePostLayout(controlTarget, statsToken);
             }
         }
 

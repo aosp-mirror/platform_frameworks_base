@@ -1000,7 +1000,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1037,7 +1037,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
