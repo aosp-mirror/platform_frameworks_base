@@ -352,8 +352,11 @@ class ActivityLaunchAnimator(
          * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
          * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
          * before the cancellation.
+         *
+         * If this launch animation affected the occlusion state of the keyguard, WM will provide
+         * us with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
          */
-        fun onLaunchAnimationCancelled() {}
+        fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
     }
 
     @VisibleForTesting
@@ -667,7 +670,7 @@ class ActivityLaunchAnimator(
             removeTimeout()
             context.mainExecutor.execute {
                 animation?.cancel()
-                controller.onLaunchAnimationCancelled()
+                controller.onLaunchAnimationCancelled(newKeyguardOccludedState = isKeyguardOccluded)
             }
         }
 
