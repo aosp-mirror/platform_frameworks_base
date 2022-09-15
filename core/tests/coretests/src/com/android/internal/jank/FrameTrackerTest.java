@@ -124,6 +124,7 @@ public class FrameTrackerTest {
         when(config.isSurfaceOnly()).thenReturn(surfaceOnly);
         when(config.getSurfaceControl()).thenReturn(mSurfaceControl);
         when(config.shouldDeferMonitor()).thenReturn(true);
+        when(config.getDisplayId()).thenReturn(42);
         View view = mRule.getActivity().getWindow().getDecorView();
         Handler spyHandler = spy(new Handler(handler.getLooper()));
         when(config.getView()).thenReturn(surfaceOnly ? null : view);
@@ -168,6 +169,7 @@ public class FrameTrackerTest {
         verify(tracker).removeObservers();
         verify(tracker, never()).triggerPerfetto();
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -204,6 +206,7 @@ public class FrameTrackerTest {
         verify(tracker).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -240,6 +243,7 @@ public class FrameTrackerTest {
         verify(tracker, never()).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -276,6 +280,7 @@ public class FrameTrackerTest {
         verify(tracker).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -315,6 +320,7 @@ public class FrameTrackerTest {
         verify(tracker).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -356,6 +362,7 @@ public class FrameTrackerTest {
         verify(tracker).removeObservers();
         verify(tracker, never()).triggerPerfetto();
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -483,6 +490,7 @@ public class FrameTrackerTest {
         verify(tracker).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -519,6 +527,7 @@ public class FrameTrackerTest {
         verify(tracker, never()).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -555,6 +564,7 @@ public class FrameTrackerTest {
         verify(tracker, never()).triggerPerfetto();
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -585,6 +595,7 @@ public class FrameTrackerTest {
         verify(mSurfaceControlWrapper).removeJankStatsListener(any());
         verify(tracker).triggerPerfetto();
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(42), /* displayId */
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(6L) /* totalFrames */,
                 eq(5L) /* missedFrames */,

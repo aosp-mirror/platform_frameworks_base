@@ -48,6 +48,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
@@ -64,7 +65,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -90,6 +90,7 @@ import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
@@ -177,10 +178,16 @@ public class UserControllerTest {
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
+            mockIsUsersOnSecondaryDisplaysEnabled(false);
             // All UserController params are set to default.
             mUserController = new UserController(mInjector);
+
+            // TODO(b/232452368): need to explicitly call setAllowUserUnlocking(), otherwise most
+            // tests would fail. But we might need to disable it for the onBootComplete() test (i.e,
+            // to make sure the users are unlocked at the right time)
+            mUserController.setAllowUserUnlocking(true);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
-            setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated=*/ true, null);
+            setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated= */ true, null);
         });
     }
 
@@ -199,11 +206,37 @@ public class UserControllerTest {
         verify(mInjector.getWindowManager()).setSwitchingUser(true);
         verify(mInjector).clearAllLockedTasks(anyString());
         startForegroundUserAssertions();
+        verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
     }
 
     @Test
     public void testStartUser_background() {
-        mUserController.startUser(TEST_USER_ID, false /* foreground */);
+        boolean started = mUserController.startUser(TEST_USER_ID, /* foreground= */ false);
+        assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
+        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
+        verify(mInjector, never()).clearAllLockedTasks(anyString());
+        startBackgroundUserAssertions();
+        verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testStartUserOnSecondaryDisplay_defaultDisplay() {
+        assertThrows(IllegalArgumentException.class, () -> mUserController
+                .startUserOnSecondaryDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY));
+
+        verifyUserNeverAssignedToDisplay();
+    }
+
+    @Test
+    public void testStartUserOnSecondaryDisplay() {
+        boolean started = mUserController.startUserOnSecondaryDisplay(TEST_USER_ID, 42);
+
+        assertWithMessage("startUserOnSecondaryDisplay(%s, %s)", TEST_USER_ID, 42).that(started)
+                .isTrue();
+        verifyUserAssignedToDisplay(TEST_USER_ID, 42);
+
+        // TODO(b/239982558): might need to change assertions
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
@@ -600,6 +633,16 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testUserNotUnlockedBeforeAllowed() throws Exception {
+        mUserController.setAllowUserUnlocking(false);
+
+        mUserController.startUser(TEST_USER_ID, /* foreground= */ false);
+
+        verify(mInjector.mStorageManagerMock, never())
+                .unlockUserKey(eq(TEST_USER_ID), anyInt(), any());
+    }
+
+    @Test
     public void testStartProfile_fullUserFails() {
         setUpUser(TEST_USER_ID1, 0);
         assertThrows(IllegalArgumentException.class,
@@ -611,6 +654,7 @@ public class UserControllerTest {
         setUpAndStartUserInBackground(TEST_USER_ID1);
         assertThrows(IllegalArgumentException.class,
                 () -> mUserController.stopProfile(TEST_USER_ID1));
+        verifyUserUnassignedFromDisplayNeverCalled(TEST_USER_ID);
     }
 
     @Test
@@ -623,13 +667,26 @@ public class UserControllerTest {
     @Test
     public void testStartProfile() throws Exception {
         setUpAndStartProfileInBackground(TEST_USER_ID1);
+
         startBackgroundUserAssertions();
+        verifyUserAssignedToDisplay(TEST_USER_ID1, Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testStartProfile_whenUsersOnSecondaryDisplaysIsEnabled() throws Exception {
+        mockIsUsersOnSecondaryDisplaysEnabled(true);
+
+        setUpAndStartProfileInBackground(TEST_USER_ID1);
+
+        startBackgroundUserAssertions();
+        verifyUserAssignedToDisplay(TEST_USER_ID1, UserManagerInternal.PARENT_DISPLAY);
     }
 
     @Test
     public void testStopProfile() throws Exception {
         setUpAndStartProfileInBackground(TEST_USER_ID1);
         assertProfileLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* expectLocking= */ true);
+        verifyUserUnassignedFromDisplay(TEST_USER_ID1);
     }
 
     /** Tests handleIncomingUser() for a variety of permissions and situations. */
@@ -680,7 +737,7 @@ public class UserControllerTest {
                 eq(INTERACT_ACROSS_PROFILES), anyInt(), anyInt(), any())).thenReturn(false);
 
         checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL, true);
-        checkHandleIncomingUser(user1a.id, user2.id,  ALLOW_NON_FULL_IN_PROFILE, false);
+        checkHandleIncomingUser(user1a.id, user2.id, ALLOW_NON_FULL_IN_PROFILE, false);
         checkHandleIncomingUser(user1a.id, user2.id, ALLOW_FULL_ONLY, false);
         checkHandleIncomingUser(user1a.id, user2.id, ALLOW_PROFILES_OR_NON_FULL, true);
 
@@ -874,6 +931,26 @@ public class UserControllerTest {
             });
             lock.wait(waitTimeMs);
         }
+    }
+
+    private void mockIsUsersOnSecondaryDisplaysEnabled(boolean value) {
+        when(mInjector.isUsersOnSecondaryDisplaysEnabled()).thenReturn(value);
+    }
+
+    private void verifyUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
+        verify(mInjector.getUserManagerInternal()).assignUserToDisplay(userId, displayId);
+    }
+
+    private void verifyUserNeverAssignedToDisplay() {
+        verify(mInjector.getUserManagerInternal(), never()).assignUserToDisplay(anyInt(), anyInt());
+    }
+
+    private void verifyUserUnassignedFromDisplay(@UserIdInt int userId) {
+        verify(mInjector.getUserManagerInternal()).unassignUserFromDisplay(userId);
+    }
+
+    private void verifyUserUnassignedFromDisplayNeverCalled(@UserIdInt int userId) {
+        verify(mInjector.getUserManagerInternal(), never()).unassignUserFromDisplay(userId);
     }
 
     // Should be public to allow mocking

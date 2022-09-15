@@ -25,6 +25,7 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
+import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
@@ -39,52 +40,28 @@ object HomePageProvider : SettingsPageProvider {
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val owner = SettingsPage.create(name)
-        val entryList = mutableListOf<SettingsEntry>()
-        entryList.add(
-            PreferenceMainPageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build()
+        return listOf(
+            PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            ArgumentPageProvider.buildInjectEntry("foo")!!.setLink(fromPage = owner).build(),
+            SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            SpinnerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            SettingsPagerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            FooterPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
-        entryList.add(
-            SliderPageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build()
-        )
-        entryList.add(
-            SpinnerPageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build()
-        )
-        entryList.add(
-            SettingsPagerPageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build()
-        )
-        entryList.add(
-            FooterPageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build()
-        )
-        entryList.add(
-            IllustrationPageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build()
-        )
-
-        return entryList
     }
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        HomePage()
-    }
-}
-
-@Composable
-private fun HomePage() {
-    HomeScaffold(title = stringResource(R.string.app_name)) {
-        PreferenceMainPageProvider.EntryItem()
-        ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
-
-        SliderPageProvider.EntryItem()
-        SpinnerPageProvider.EntryItem()
-        SettingsPagerPageProvider.EntryItem()
-        FooterPageProvider.EntryItem()
-        IllustrationPageProvider.EntryItem()
+        HomeScaffold(title = stringResource(R.string.app_name)) {
+            for (entry in buildEntry(arguments)) {
+                if (entry.name.startsWith(ArgumentPageModel.name)) {
+                    entry.UiLayout(ArgumentPageModel.buildArgument(intParam = 0))
+                } else {
+                    entry.UiLayout()
+                }
+            }
+        }
     }
 }
 
@@ -92,6 +69,6 @@ private fun HomePage() {
 @Composable
 private fun HomeScreenPreview() {
     SettingsTheme {
-        HomePage()
+        HomePageProvider.Page(null)
     }
 }

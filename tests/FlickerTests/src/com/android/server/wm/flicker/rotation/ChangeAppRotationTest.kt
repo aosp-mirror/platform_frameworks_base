@@ -127,12 +127,6 @@ class ChangeAppRotationTest(
     override fun navBarLayerPositionAtStartAndEnd() =
         super.navBarLayerPositionAtStartAndEnd()
 
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
     companion object {
         /**
          * Creates the test configurations.

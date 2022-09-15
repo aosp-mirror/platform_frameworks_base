@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -29,7 +28,6 @@ import com.android.server.wm.flicker.traces.region.RegionSubject
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -83,12 +81,6 @@ class MovePipUpShelfHeightChangeTest(
     override fun assertRegionMovement(previous: RegionSubject, current: RegionSubject) {
         current.isLowerOrEqual(previous.region)
     }
-
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
 
     companion object {
         /**

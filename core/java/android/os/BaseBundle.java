@@ -27,6 +27,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -396,6 +397,20 @@ public class BaseBundle {
     final <T> T getValueAt(int i, @Nullable Class<T> clazz, @Nullable Class<?>... itemTypes) {
         Object object = mMap.valueAt(i);
         if (object instanceof BiFunction<?, ?, ?>) {
+            synchronized (this) {
+                object = unwrapLazyValueFromMapLocked(i, clazz, itemTypes);
+            }
+        }
+        return (clazz != null) ? clazz.cast(object) : (T) object;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @GuardedBy("this")
+    private Object unwrapLazyValueFromMapLocked(int i, @Nullable Class<?> clazz,
+            @Nullable Class<?>... itemTypes) {
+        Object object = mMap.valueAt(i);
+        if (object instanceof BiFunction<?, ?, ?>) {
             try {
                 object = ((BiFunction<Class<?>, Class<?>[], ?>) object).apply(clazz, itemTypes);
             } catch (BadParcelableException e) {
@@ -409,7 +424,8 @@ public class BaseBundle {
             mMap.setValueAt(i, object);
             mLazyValues--;
             if (mOwnsLazyValues) {
-                Preconditions.checkState(mLazyValues >= 0, "Lazy values ref count below 0");
+                Preconditions.checkState(mLazyValues >= 0,
+                        "Lazy values ref count below 0");
                 // No more lazy values in mMap, so we can recycle the parcel early rather than
                 // waiting for the next GC run
                 if (mLazyValues == 0) {
@@ -420,7 +436,7 @@ public class BaseBundle {
                 }
             }
         }
-        return (clazz != null) ? clazz.cast(object) : (T) object;
+        return object;
     }
 
     private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean ownsParcel,

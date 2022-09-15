@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,23 +11,21 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
+ *
  */
 
-package com.android.systemui.shared.system;
+package com.android.systemui.common.ui.compose
 
-import android.content.Context;
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.android.systemui.common.shared.model.Text
 
-import com.android.internal.util.LatencyTracker;
-
-/**
- * @see LatencyTracker
- */
-public class LatencyTrackerCompat {
-
-    /** @see LatencyTracker */
-    public static void logToggleRecents(Context context, int duration) {
-        LatencyTracker.getInstance(context).logAction(LatencyTracker.ACTION_TOGGLE_RECENTS,
-                duration);
+/** Returns the loaded [String] or `null` if there isn't one. */
+@Composable
+fun Text.load(): String? {
+    return when (this) {
+        is Text.Loaded -> text
+        is Text.Resource -> stringResource(res)
     }
 }

@@ -306,6 +306,7 @@ public class InteractionJankMonitor {
     @GuardedBy("mLock")
     private final SparseArray<Runnable> mTimeoutActions;
     private final HandlerThread mWorker;
+    private final DisplayResolutionTracker mDisplayResolutionTracker;
     private final Object mLock = new Object();
 
     private volatile boolean mEnabled = DEFAULT_ENABLED;
@@ -408,6 +409,7 @@ public class InteractionJankMonitor {
         mWorker = worker;
         mWorker.start();
         mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
+        mDisplayResolutionTracker = new DisplayResolutionTracker(worker.getThreadHandler());
 
         // Post initialization to the background in case we're running on the main
         // thread.
@@ -443,7 +445,8 @@ public class InteractionJankMonitor {
         final FrameMetricsWrapper frameMetrics = new FrameMetricsWrapper();
 
         return new FrameTracker(this, session, config.getHandler(), threadedRenderer, viewRoot,
-                surfaceControl, choreographer, frameMetrics, new FrameTracker.StatsLogWrapper(),
+                surfaceControl, choreographer, frameMetrics,
+                new FrameTracker.StatsLogWrapper(mDisplayResolutionTracker),
                 mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
                 eventsListener, config);
     }
@@ -1097,6 +1100,14 @@ public class InteractionJankMonitor {
         @VisibleForTesting
         public Handler getHandler() {
             return mHandler;
+        }
+
+        /**
+         * @return the ID of the display this interaction in on.
+         */
+        @VisibleForTesting
+        public int getDisplayId() {
+            return (mSurfaceOnly ? mContext.getDisplay() : mView.getDisplay()).getDisplayId();
         }
     }
 

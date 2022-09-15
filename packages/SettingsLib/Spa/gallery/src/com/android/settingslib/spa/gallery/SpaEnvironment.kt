@@ -52,7 +52,7 @@ object SpaEnvironment {
             ),
             rootPages = listOf(
                 SettingsPage.create(HomePageProvider.name)
-            ) + ArgumentPageProvider.buildRootPages()
+            )
         )
     }
 

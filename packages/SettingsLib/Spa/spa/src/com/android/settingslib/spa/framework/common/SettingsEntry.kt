@@ -19,9 +19,9 @@ package com.android.settingslib.spa.framework.common
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavType
 import com.android.settingslib.spa.framework.BrowseActivity
 import com.android.settingslib.spa.framework.util.navLink
-import com.android.settingslib.spa.framework.util.normalize
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
@@ -85,6 +85,10 @@ data class SettingsPage(
                 "?${BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME}=$highlightEntryName"
         return name + parameter.navLink(arguments) + highlightParam
     }
+
+    fun hasRuntimeParam(): Boolean {
+        return parameter.hasRuntimeParam(arguments)
+    }
 }
 
 /**
@@ -139,7 +143,7 @@ data class SettingsEntry(
      * injected entry. In the long term, we may deprecate the @Composable Page() API in SPP, and
      * use each entries' UI rendering function in the page instead.
      */
-    val uiLayout: (@Composable () -> Unit) = {},
+    val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
 ) {
     fun formatAll(): String {
         val content = listOf<String>(
@@ -150,10 +154,25 @@ data class SettingsEntry(
         return content.joinToString("\n")
     }
 
+    private fun getDisplayPage(): SettingsPage {
+        // Display the entry on its from-page, or on its owner page if the from-page is unset.
+        return fromPage ?: owner
+    }
+
     fun buildRoute(): String {
-        // Open entry in its fromPage.
-        val page = fromPage ?: owner
-        return page.buildRoute(name)
+        return getDisplayPage().buildRoute(name)
+    }
+
+    fun hasRuntimeParam(): Boolean {
+        return getDisplayPage().hasRuntimeParam()
+    }
+
+    @Composable
+    fun UiLayout(runtimeArguments: Bundle? = null) {
+        val arguments = Bundle()
+        if (owner.arguments != null) arguments.putAll(owner.arguments)
+        if (runtimeArguments != null) arguments.putAll(runtimeArguments)
+        uiLayoutImpl(arguments)
     }
 }
 
@@ -196,7 +215,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     private var isAllowSearch: Boolean? = null
 
     private var searchDataFn: () -> SearchData? = { null }
-    private var uiLayoutFn: (@Composable () -> Unit) = {}
+    private var uiLayoutFn: (@Composable (arguments: Bundle?) -> Unit) = {}
 
     fun build(): SettingsEntry {
         return SettingsEntry(
@@ -214,7 +233,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
             // functions
             searchData = searchDataFn,
-            uiLayout = uiLayoutFn,
+            uiLayoutImpl = uiLayoutFn,
         )
     }
 
@@ -237,7 +256,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
-    fun setUiLayoutFn(fn: @Composable () -> Unit): SettingsEntryBuilder {
+    fun setUiLayoutFn(fn: @Composable (arguments: Bundle?) -> Unit): SettingsEntryBuilder {
         this.uiLayoutFn = fn
         return this
     }
@@ -271,4 +290,34 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
 
 private fun String.toUniqueId(): Int {
     return this.hashCode()
+}
+
+private fun List<NamedNavArgument>.normalize(arguments: Bundle? = null): Bundle? {
+    if (this.isEmpty()) return null
+    val normArgs = Bundle()
+    for (navArg in this) {
+        when (navArg.argument.type) {
+            NavType.StringType -> {
+                val value = arguments?.getString(navArg.name)
+                if (value != null)
+                    normArgs.putString(navArg.name, value)
+                else
+                    normArgs.putString("unset_" + navArg.name, null)
+            }
+            NavType.IntType -> {
+                if (arguments != null && arguments.containsKey(navArg.name))
+                    normArgs.putInt(navArg.name, arguments.getInt(navArg.name))
+                else
+                    normArgs.putString("unset_" + navArg.name, null)
+            }
+        }
+    }
+    return normArgs
+}
+
+private fun List<NamedNavArgument>.hasRuntimeParam(arguments: Bundle? = null): Boolean {
+    for (navArg in this) {
+        if (arguments == null || !arguments.containsKey(navArg.name)) return true
+    }
+    return false
 }
