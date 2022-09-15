@@ -611,6 +611,33 @@
          2 - Override the setting to never bypass keyguard -->
     <integer name="config_face_unlock_bypass_override">0</integer>
 
+    <!-- Messages that should NOT be shown to the user during face authentication on keyguard.
+         This includes both lockscreen and bouncer. This should be used to hide messages that may be
+         too chatty or messages that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal.
+
+         Although not visibly shown to the user, these acquired messages (sent per face auth frame)
+         are still counted towards the total frames to determine whether a deferred message
+         (see config_face_help_msgs_defer_until_timeout) meets the threshold % of frames to show on
+         face timeout. -->
+     <integer-array name="config_face_acquire_device_entry_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Which face help messages to defer until face auth times out. If face auth is cancelled
+         or ends on another error, then the message is never surfaced. May also never surface
+         if it doesn't meet a threshold % of authentication frames specified by.
+         config_face_help_msgs_defer_until_timeout_threshold. -->
+    <integer-array name="config_face_help_msgs_defer_until_timeout">
+    </integer-array>
+
+    <!-- Percentage of face auth frames received required to show a deferred message at
+         FACE_ERROR_TIMEOUT. See config_face_help_msgs_defer_until_timeout for messages
+         that are deferred.-->
+    <item name="config_face_help_msgs_defer_until_timeout_threshold"
+          translatable="false" format="float" type="dimen">
+        .75
+    </item>
+
     <!-- Which face help messages to surface when fingerprint is also enrolled.
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">

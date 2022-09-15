@@ -19,8 +19,10 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
@@ -86,6 +88,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
@@ -166,6 +169,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private FaceHelpMessageDeferral mFaceHelpMessageDeferral;
     @Mock
     private ScreenLifecycle mScreenLifecycle;
     @Captor
@@ -259,7 +264,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
                 mUserManager, mExecutor, mExecutor,  mFalsingManager, mLockPatternUtils,
-                mScreenLifecycle, mKeyguardBypassController, mAccessibilityManager);
+                mScreenLifecycle, mKeyguardBypassController, mAccessibilityManager,
+                mFaceHelpMessageDeferral);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -535,7 +541,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         mController.setVisible(true);
         mController.getKeyguardCallback().onBiometricHelp(
-                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
+                BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
                 BiometricSourceType.FACE);
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
         reset(mRotateTextViewController);
@@ -582,7 +588,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN there's a face not recognized message
         mController.getKeyguardCallback().onBiometricHelp(
-                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED,
+                BIOMETRIC_HELP_FACE_NOT_RECOGNIZED,
                 message,
                 BiometricSourceType.FACE);
 
@@ -748,8 +754,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                 0)).thenReturn(false);
 
-        // WHEN help message received
+        // WHEN help message received and deferred message is valid
         final String helpString = "helpMsg";
+        when(mFaceHelpMessageDeferral.getDeferredMessage()).thenReturn(helpString);
+        when(mFaceHelpMessageDeferral.shouldDefer(FACE_ACQUIRED_TOO_DARK)).thenReturn(true);
         mKeyguardUpdateMonitorCallback.onBiometricHelp(
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
                 helpString,
@@ -777,8 +785,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                 0)).thenReturn(true);
 
-        // WHEN help message received
+        // WHEN help message received and deferredMessage is valid
         final String helpString = "helpMsg";
+        when(mFaceHelpMessageDeferral.getDeferredMessage()).thenReturn(helpString);
+        when(mFaceHelpMessageDeferral.shouldDefer(FACE_ACQUIRED_TOO_DARK)).thenReturn(true);
         mKeyguardUpdateMonitorCallback.onBiometricHelp(
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
                 helpString,
@@ -1126,7 +1136,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, pressToOpen);
     }
 
-
     @Test
     public void coEx_faceSuccess_touchExplorationEnabled_showsFaceUnlockedSwipeToOpen() {
         // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y enabled
@@ -1271,6 +1280,87 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         String swipeToOpen = mContext.getString(R.string.keyguard_unlock);
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, swipeToOpen);
     }
+
+    @Test
+    public void faceOnAcquired_processFrame() {
+        createController();
+
+        // WHEN face sends an acquired message
+        final int acquireInfo = 1;
+        mKeyguardUpdateMonitorCallback.onBiometricAcquired(BiometricSourceType.FACE, acquireInfo);
+
+        // THEN face help message deferral should process the acquired frame
+        verify(mFaceHelpMessageDeferral).processFrame(acquireInfo);
+    }
+
+    @Test
+    public void fingerprintOnAcquired_noProcessFrame() {
+        createController();
+
+        // WHEN fingerprint sends an acquired message
+        mKeyguardUpdateMonitorCallback.onBiometricAcquired(BiometricSourceType.FINGERPRINT, 1);
+
+        // THEN face help message deferral should NOT process any acquired frames
+        verify(mFaceHelpMessageDeferral, never()).processFrame(anyInt());
+    }
+
+    @Test
+    public void onBiometricHelp_fingerprint_faceHelpMessageDeferralDoesNothing() {
+        createController();
+
+        // WHEN fingerprint sends an onBiometricHelp
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                1,
+                "placeholder",
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN face help message deferral is NOT: reset, updated, or checked for shouldDefer
+        verify(mFaceHelpMessageDeferral, never()).reset();
+        verify(mFaceHelpMessageDeferral, never()).updateMessage(anyInt(), anyString());
+        verify(mFaceHelpMessageDeferral, never()).shouldDefer(anyInt());
+    }
+
+    @Test
+    public void onBiometricFailed_resetFaceHelpMessageDeferral() {
+        createController();
+
+        // WHEN face sends an onBiometricHelp BIOMETRIC_HELP_FACE_NOT_RECOGNIZED
+        mKeyguardUpdateMonitorCallback.onBiometricAuthFailed(BiometricSourceType.FACE);
+
+        // THEN face help message deferral is reset
+        verify(mFaceHelpMessageDeferral).reset();
+    }
+
+    @Test
+    public void onBiometricError_resetFaceHelpMessageDeferral() {
+        createController();
+
+        // WHEN face has an error
+        mKeyguardUpdateMonitorCallback.onBiometricError(4, "string",
+                BiometricSourceType.FACE);
+
+        // THEN face help message deferral is reset
+        verify(mFaceHelpMessageDeferral).reset();
+    }
+
+    @Test
+    public void onBiometricHelp_faceAcquiredInfo_faceHelpMessageDeferral() {
+        createController();
+
+        // WHEN face sends an onBiometricHelp BIOMETRIC_HELP_FACE_NOT_RECOGNIZED
+        final int msgId = 1;
+        final String helpString = "test";
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                msgId,
+                "test",
+                BiometricSourceType.FACE);
+
+        // THEN face help message deferral is NOT reset and message IS updated
+        verify(mFaceHelpMessageDeferral, never()).reset();
+        verify(mFaceHelpMessageDeferral).updateMessage(msgId, helpString);
+    }
+
+
 
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
