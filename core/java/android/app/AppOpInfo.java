@@ -26,6 +26,7 @@ import java.util.Objects;
  * Information about a particular app op.
  */
 class AppOpInfo {
+
     /**
      * A unique constant identifying this app op.
      */
@@ -91,6 +92,11 @@ class AppOpInfo {
      */
     public final boolean restrictRead;
 
+    /**
+     * Whether to collect noteOp instances, and send them to callbacks.
+     */
+    public final boolean forceCollectNotes;
+
     AppOpInfo(int code,
             int switchCode,
             @NonNull String name,
@@ -100,7 +106,8 @@ class AppOpInfo {
             AppOpsManager.RestrictionBypass allowSystemRestrictionBypass,
             int defaultMode,
             boolean disableReset,
-            boolean restrictRead) {
+            boolean restrictRead,
+            boolean forceCollectNotes) {
         if (code < OP_NONE) throw new IllegalArgumentException();
         if (switchCode < OP_NONE) throw new IllegalArgumentException();
         Objects.requireNonNull(name);
@@ -115,6 +122,7 @@ class AppOpInfo {
         this.defaultMode = defaultMode;
         this.disableReset = disableReset;
         this.restrictRead = restrictRead;
+        this.forceCollectNotes = forceCollectNotes;
     }
 
     static class Builder {
@@ -128,6 +136,7 @@ class AppOpInfo {
         private int mDefaultMode = AppOpsManager.MODE_DEFAULT;
         private boolean mDisableReset = false;
         private boolean mRestrictRead = false;
+        private boolean mForceCollectNotes = false;
 
         Builder(int code, @NonNull String name, @NonNull String simpleName) {
             if (code < OP_NONE) throw new IllegalArgumentException();
@@ -190,9 +199,15 @@ class AppOpInfo {
             return this;
         }
 
+        public Builder setForceCollectNotes(boolean value) {
+            this.mForceCollectNotes = value;
+            return this;
+        }
+
         public AppOpInfo build() {
             return new AppOpInfo(mCode, mSwitchCode, mName, mSimpleName, mPermission, mRestriction,
-                mAllowSystemRestrictionBypass, mDefaultMode, mDisableReset, mRestrictRead);
+                mAllowSystemRestrictionBypass, mDefaultMode, mDisableReset, mRestrictRead,
+                    mForceCollectNotes);
         }
     }
 }
