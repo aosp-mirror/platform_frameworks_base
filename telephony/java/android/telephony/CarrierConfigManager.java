@@ -39,7 +39,6 @@ import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.data.ApnSetting;
-import android.telephony.data.DataCallResponse;
 import android.telephony.gba.TlsParams;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
@@ -1136,47 +1135,11 @@ public class CarrierConfigManager {
     public static final String KEY_DEFAULT_MTU_INT = "default_mtu_int";
 
     /**
-     * The data call retry configuration for different types of APN.
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS =
-            "carrier_data_call_retry_config_strings";
-
-    /**
-     * Delay in milliseconds between trying APN from the pool
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG =
-            "carrier_data_call_apn_delay_default_long";
-
-    /**
-     * Faster delay in milliseconds between trying APN from the pool
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
-            "carrier_data_call_apn_delay_faster_long";
-
-    /**
      * Delay in milliseconds for retrying APN after disconnect
      * @hide
      */
     public static final String KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG =
             "carrier_data_call_apn_retry_after_disconnect_long";
-
-    /**
-     * The maximum times for telephony to retry data setup on the same APN requested by
-     * network through the data setup response retry timer
-     * {@link DataCallResponse#getRetryDurationMillis()}. This is to prevent that network keeps
-     * asking device to retry data setup forever and causes power consumption issue. For infinite
-     * retring same APN, configure this as 2147483647 (i.e. {@link Integer#MAX_VALUE}).
-     *
-     * Note if network does not suggest any retry timer, frameworks uses the retry configuration
-     * from {@link #KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS}, and the maximum retry times could
-     * be configured there.
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT =
-            "carrier_data_call_retry_network_requested_max_count_int";
 
     /**
      * Data call setup permanent failure causes by the carrier
@@ -1238,19 +1201,6 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS =
             "carrier_metered_roaming_apn_types_strings";
 
-    /**
-     * APN types that are not allowed on cellular
-     * @hide
-     */
-    public static final String KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
-            "carrier_wwan_disallowed_apn_types_string_array";
-
-    /**
-     * APN types that are not allowed on IWLAN
-     * @hide
-     */
-    public static final String KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
-            "carrier_wlan_disallowed_apn_types_string_array";
     /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
@@ -8470,7 +8420,6 @@ public class CarrierConfigManager {
      * "1800000, maximum_retries=20" means for those capabilities, retry happens in 2.5s, 3s, 5s,
      * 10s, 15s, 20s, 40s, 1m, 2m, 4m, 10m, 20m, 30m, 30m, 30m, until reaching 20 retries.
      *
-     * // TODO: remove KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS
      * @hide
      */
     public static final String KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY =
@@ -8872,27 +8821,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putInt(KEY_DEFAULT_MTU_INT, 1500);
-        sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
-                "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
-                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
-                "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
-                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
-                "ims:max_retries=10, 5000, 5000, 5000",
-                "others:max_retries=3, 5000, 5000, 5000"});
-        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
-        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 3000);
-        sDefaults.putInt(KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT, 3);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
-        sDefaults.putStringArray(KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
-                new String[]{""});
-        sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
-                new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[] {TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_1xRTT,
                         TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_EVDO_A,
