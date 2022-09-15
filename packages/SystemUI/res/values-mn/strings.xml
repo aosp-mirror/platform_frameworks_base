@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Утсыг хөрөх үед зарим онцлогийг хязгаарлана.\nДэлгэрэнгүй мэдээлэл авах бол товшино уу"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Таны утас автоматаар хөрөх болно. Та утсаа ашиглаж болох хэдий ч удаан ажиллаж болзошгүй.\n\nТаны утас хөрсний дараагаар хэвийн ажиллана."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Хянамж болгоомжийн алхмыг харах"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Төхөөрөмжөө салгана уу"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Таны төхөөрөмж цэнэглэх портын ойролцоо халж байна. Хэрэв төхөөрөмжийг цэнэглэгч эсвэл USB дагалдах хэрэгсэлд холбосон бол төхөөрөмжийг салгаж, кабель нь халуун байж болзошгүй тул болгоомжтой байгаарай."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Хянамж болгоомжийн алхмыг харна уу"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Зүүн товчлол"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Баруун товчлол"</string>

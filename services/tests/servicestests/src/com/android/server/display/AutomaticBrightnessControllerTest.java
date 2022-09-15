@@ -82,6 +82,8 @@ public class AutomaticBrightnessControllerTest {
     @Mock BrightnessMappingStrategy mIdleBrightnessMappingStrategy;
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
+    @Mock HysteresisLevels mAmbientBrightnessThresholdsIdle;
+    @Mock HysteresisLevels mScreenBrightnessThresholdsIdle;
     @Mock Handler mNoOpHandler;
     @Mock HighBrightnessModeController mHbmController;
     @Mock BrightnessThrottler mBrightnessThrottler;
@@ -129,6 +131,7 @@ public class AutomaticBrightnessControllerTest {
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
                 mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
+                mAmbientBrightnessThresholdsIdle, mScreenBrightnessThresholdsIdle,
                 mContext, mHbmController, mBrightnessThrottler, mIdleBrightnessMappingStrategy,
                 AMBIENT_LIGHT_HORIZON_SHORT, AMBIENT_LIGHT_HORIZON_LONG
         );
@@ -314,8 +317,9 @@ public class AutomaticBrightnessControllerTest {
 
         // Now let's do the same for idle mode
         mController.switchToIdleMode();
-        // Called once for init, and once when switching
-        verify(mBrightnessMappingStrategy, times(2)).isForIdleMode();
+        // Called once for init, and once when switching,
+        // setAmbientLux() is called twice and once in updateAutoBrightness()
+        verify(mBrightnessMappingStrategy, times(5)).isForIdleMode();
         // Ensure, after switching, original BMS is not used anymore
         verifyNoMoreInteractions(mBrightnessMappingStrategy);
 

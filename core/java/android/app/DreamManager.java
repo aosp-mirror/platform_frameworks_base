@@ -87,6 +87,25 @@ public class DreamManager {
     /**
      * Starts dreaming.
      *
+     * This API is equivalent to {@link DreamManager#startDream()} but with a nullable component
+     * name to be compatible with TM CTS tests.
+     *
+     * <p>This is only used for testing the dream service APIs.
+     *
+     * @see DreamManager#startDream()
+     *
+     * @hide
+     */
+    @TestApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void startDream(@Nullable ComponentName name) {
+        startDream();
+    }
+
+    /**
+     * Starts dreaming.
+     *
      * The system dream component, if set by {@link DreamManager#setSystemDreamComponent}, will be
      * started.
      * Otherwise, starts the active dream set by {@link DreamManager#setActiveDream}.

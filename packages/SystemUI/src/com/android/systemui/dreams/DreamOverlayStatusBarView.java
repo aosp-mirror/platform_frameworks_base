@@ -61,6 +61,7 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
 
     private final Map<Integer, View> mStatusIcons = new HashMap<>();
     private ViewGroup mSystemStatusViewGroup;
+    private ViewGroup mExtraSystemStatusViewGroup;
 
     public DreamOverlayStatusBarView(Context context) {
         this(context, null);
@@ -98,7 +99,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
         mStatusIcons.put(STATUS_ICON_PRIORITY_MODE_ON,
                 fetchStatusIconForResId(R.id.dream_overlay_priority_mode));
 
-        mSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);
+        mSystemStatusViewGroup = findViewById(R.id.dream_overlay_system_status);
+        mExtraSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);
     }
 
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
@@ -110,11 +112,12 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
             icon.setContentDescription(contentDescription);
         }
         icon.setVisibility(show ? View.VISIBLE : View.GONE);
+        mSystemStatusViewGroup.setVisibility(areAnyStatusIconsVisible() ? View.VISIBLE : View.GONE);
     }
 
     void setExtraStatusBarItemViews(List<View> views) {
-        removeAllStatusBarItemViews();
-        views.forEach(view -> mSystemStatusViewGroup.addView(view));
+        removeAllExtraStatusBarItemViews();
+        views.forEach(view -> mExtraSystemStatusViewGroup.addView(view));
     }
 
     private View fetchStatusIconForResId(int resId) {
@@ -122,7 +125,16 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
         return Objects.requireNonNull(statusIcon);
     }
 
-    void removeAllStatusBarItemViews() {
-        mSystemStatusViewGroup.removeAllViews();
+    void removeAllExtraStatusBarItemViews() {
+        mExtraSystemStatusViewGroup.removeAllViews();
+    }
+
+    private boolean areAnyStatusIconsVisible() {
+        for (int i = 0; i < mSystemStatusViewGroup.getChildCount(); i++) {
+            if (mSystemStatusViewGroup.getChildAt(i).getVisibility() == View.VISIBLE) {
+                return true;
+            }
+        }
+        return false;
     }
 }
