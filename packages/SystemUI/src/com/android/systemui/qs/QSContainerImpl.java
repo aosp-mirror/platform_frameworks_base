@@ -131,6 +131,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         updateClippingPath();
     }
 
+    public NonInterceptingScrollView getQSPanelContainer() {
+        return mQSPanelContainer;
+    }
+
     public void disable(int state1, int state2, boolean animate) {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
