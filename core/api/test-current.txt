@@ -288,6 +288,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setScreensaverEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setSystemDreamComponent(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream();
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
