@@ -447,6 +447,7 @@ public final class SurfaceControl implements Parcelable {
     private String mName;
 
      /**
+     * Note: do not rename, this field is used by native code.
      * @hide
      */
     public long mNativeObject;
