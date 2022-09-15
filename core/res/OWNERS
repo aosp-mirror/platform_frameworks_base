@@ -36,6 +36,9 @@ per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 # Car
 per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
 
+# Device Idle
+per-file res/values/config_device_idle.xml = file:/apex/jobscheduler/OWNERS
+
 # Wear
 per-file res/*-watch/* = file:/WEAR_OWNERS
 
