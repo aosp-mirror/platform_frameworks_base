@@ -16,9 +16,6 @@
 
 package com.android.server.appop;
 
-import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
 import static android.app.AppOpsManager.ATTRIBUTION_FLAG_TRUSTED;
 import static android.app.AppOpsManager.CALL_BACK_ON_SWITCHED_OP;
@@ -56,13 +53,6 @@ import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM_OPS;
 import static android.app.AppOpsManager.SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE;
-import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
-import static android.app.AppOpsManager.UID_STATE_CACHED;
-import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
-import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
-import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
-import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
-import static android.app.AppOpsManager.UID_STATE_TOP;
 import static android.app.AppOpsManager._NUM_OP;
 import static android.app.AppOpsManager.extractFlagsFromKey;
 import static android.app.AppOpsManager.extractUidStateFromKey;
@@ -72,15 +62,12 @@ import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
 import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
-import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
-
-import static java.lang.Long.max;
 
 import android.Manifest;
 import android.annotation.IntRange;
@@ -167,6 +154,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.os.Clock;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -236,31 +224,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     // Constant meaning that any UID should be matched when dispatching callbacks
     private static final int UID_ANY = -2;
 
-    // Map from process states to the uid states we track.
-    private static final int[] PROCESS_STATE_TO_UID_STATE = new int[] {
-        UID_STATE_PERSISTENT,           // ActivityManager.PROCESS_STATE_PERSISTENT
-        UID_STATE_PERSISTENT,           // ActivityManager.PROCESS_STATE_PERSISTENT_UI
-        UID_STATE_TOP,                  // ActivityManager.PROCESS_STATE_TOP
-        UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_TOP
-        UID_STATE_FOREGROUND_SERVICE,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
-        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_BACKUP
-        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_SERVICE
-        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_RECEIVER
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_TOP_SLEEPING
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_HOME
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_RECENT
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_EMPTY
-        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_NONEXISTENT
-    };
-
     private static final int[] OPS_RESTRICTED_ON_SUSPEND = {
             OP_PLAY_AUDIO,
             OP_RECORD_AUDIO,
@@ -270,6 +233,13 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
+
+    /*
+     * TODO b/246429313
+     * android.app.appops.cts.AppOpEventCollectionTest#switchUidStateWhileOpsAreRunning breaks when
+     * set to true
+     */
+    private static final boolean USE_DELAYED_UID_STATE_CHANGES_FOR_ATTR_OP_UPDATES = false;
 
     final Context mContext;
     final AtomicFile mFile;
@@ -342,8 +312,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
     volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
 
-    long mLastRealtime;
-
     /*
      * These are app op restrictions imposed per user from various parties.
      */
@@ -404,6 +372,21 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     /** Interface for app-op modes.*/
     @VisibleForTesting AppOpsServiceInterface mAppOpsServiceInterface;
 
+    private AppOpsUidStateTracker mUidStateTracker;
+
+    /** Hands the definition of foreground and uid states */
+    @GuardedBy("this")
+    public AppOpsUidStateTracker getUidStateTracker() {
+        if (mUidStateTracker == null) {
+            mUidStateTracker = new AppOpsUidStateTrackerImpl(
+                    LocalServices.getService(ActivityManagerInternal.class), mHandler,
+                    Clock.SYSTEM_CLOCK, mConstants);
+
+            mUidStateTracker.addUidStateChangedCallback(mHandler, this::onUidStateChanged);
+        }
+        return mUidStateTracker;
+    }
+
     /**
      * An unsynchronized pool of {@link OpEventProxyInfo} objects.
      */
@@ -463,7 +446,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
      * global Settings. Any access to this class or its fields should be done while
      * holding the AppOpsService lock.
      */
-    @VisibleForTesting
     final class Constants extends ContentObserver {
 
         /**
@@ -551,14 +533,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     final class UidState {
         public final int uid;
 
-        public int state = UID_STATE_CACHED;
-        public int pendingState = UID_STATE_CACHED;
-        public long pendingStateCommitTime;
-        public int capability;
-        public int pendingCapability;
-        public boolean appWidgetVisible;
-        public boolean pendingAppWidgetVisible;
-
         public ArrayMap<String, Ops> pkgOps;
 
         // true indicates there is an interested observer, false there isn't but it has such an op
@@ -592,10 +566,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 }
             }
             return (pkgOps == null || pkgOps.isEmpty())
-                    && (state == UID_STATE_CACHED
-                    && (pendingState == UID_STATE_CACHED))
-                    && (mAppOpsServiceInterface.areUidModesDefault(uid)
-                    && areAllPackageModesDefault);
+                    && mAppOpsServiceInterface.areUidModesDefault(uid)
+                    && areAllPackageModesDefault;
         }
 
         // Functions for uid mode access and manipulation.
@@ -611,52 +583,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             return mAppOpsServiceInterface.setUidMode(uid, op, mode);
         }
 
+        @SuppressWarnings("GuardedBy")
         int evalMode(int op, int mode) {
-            if (mode == MODE_FOREGROUND) {
-                if (appWidgetVisible) {
-                    return MODE_ALLOWED;
-                } else if (mActivityManagerInternal != null
-                        && mActivityManagerInternal.isPendingTopUid(uid)) {
-                    return MODE_ALLOWED;
-                } else if (mActivityManagerInternal != null
-                        && mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid)) {
-                    return MODE_ALLOWED;
-                } else if (state <= UID_STATE_TOP) {
-                    // process is in TOP.
-                    return MODE_ALLOWED;
-                } else if (state <= AppOpsManager.resolveFirstUnrestrictedUidState(op)) {
-                    // process is in foreground, check its capability.
-                    switch (op) {
-                        case AppOpsManager.OP_FINE_LOCATION:
-                        case AppOpsManager.OP_COARSE_LOCATION:
-                        case AppOpsManager.OP_MONITOR_LOCATION:
-                        case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
-                            if ((capability & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
-                                return MODE_ALLOWED;
-                            } else {
-                                return MODE_IGNORED;
-                            }
-                        case OP_CAMERA:
-                            if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
-                                return MODE_ALLOWED;
-                            } else {
-                                return MODE_IGNORED;
-                            }
-                        case OP_RECORD_AUDIO:
-                            if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
-                                return MODE_ALLOWED;
-                            } else {
-                                return MODE_IGNORED;
-                            }
-                        default:
-                            return MODE_ALLOWED;
-                    }
-                } else {
-                    // process is not in foreground.
-                    return MODE_IGNORED;
-                }
-            }
-            return mode;
+            return getUidStateTracker().evalMode(uid, op, mode);
         }
 
         public void evalForegroundOps() {
@@ -678,6 +607,16 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     }
                 }
             }
+        }
+
+        @SuppressWarnings("GuardedBy")
+        public int getState() {
+            return getUidStateTracker().getUidState(uid);
+        }
+
+        @SuppressWarnings("GuardedBy")
+        public void dump(PrintWriter pw, long nowElapsed) {
+            getUidStateTracker().dumpUidState(pw, uid, nowElapsed);
         }
     }
 
@@ -706,7 +645,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
     }
 
-    /** Returned from {@link #verifyAndGetBypass(int, String, String, String, boolean)}. */
+    /** Returned from {@link #verifyAndGetBypass(int, String, String, String)}. */
     private static final class PackageVerificationResult {
 
         final RestrictionBypass bypass;
@@ -1477,10 +1416,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     UserHandle.getUserId(this.uid));
         }
 
-        int evalMode() {
-            return uidState.evalMode(op, getMode());
-        }
-
         void removeAttributionsWithNoTime() {
             for (int i = mAttributions.size() - 1; i >= 0; i--) {
                 if (!mAttributions.valueAt(i).hasAnyTime()) {
@@ -2092,59 +2027,58 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
     }
 
-    /**
-     * Update the pending state for the uid
-     *
-     * @param currentTime The current elapsed real time
-     * @param uid The uid that has a pending state
-     */
-    private void updatePendingState(long currentTime, int uid) {
+    // The callback method from ForegroundPolicyInterface
+    private void onUidStateChanged(int uid, int state, boolean foregroundModeMayChange) {
         synchronized (this) {
-            mLastRealtime = max(currentTime, mLastRealtime);
-            updatePendingStateIfNeededLocked(mUidStates.get(uid));
-        }
-    }
+            UidState uidState = getUidStateLocked(uid, true);
 
-    public void updateUidProcState(int uid, int procState,
-            @ActivityManager.ProcessCapability int capability) {
-        synchronized (this) {
-            final UidState uidState = getUidStateLocked(uid, true);
-            final int newState = PROCESS_STATE_TO_UID_STATE[procState];
-            if (uidState != null && (uidState.pendingState != newState
-                    || uidState.pendingCapability != capability)) {
-                final int oldPendingState = uidState.pendingState;
-                uidState.pendingState = newState;
-                uidState.pendingCapability = capability;
-                if (newState < uidState.state
-                        || (newState <= UID_STATE_MAX_LAST_NON_RESTRICTED
-                                && uidState.state > UID_STATE_MAX_LAST_NON_RESTRICTED)) {
-                    // We are moving to a more important state, or the new state may be in the
-                    // foreground and the old state is in the background, then always do it
-                    // immediately.
-                    commitUidPendingStateLocked(uidState);
-                } else if (newState == uidState.state && capability != uidState.capability) {
-                    // No change on process state, but process capability has changed.
-                    commitUidPendingStateLocked(uidState);
-                } else if (uidState.pendingStateCommitTime == 0) {
-                    // We are moving to a less important state for the first time,
-                    // delay the application for a bit.
-                    final long settleTime;
-                    if (uidState.state <= UID_STATE_TOP) {
-                        settleTime = mConstants.TOP_STATE_SETTLE_TIME;
-                    } else if (uidState.state <= UID_STATE_FOREGROUND_SERVICE) {
-                        settleTime = mConstants.FG_SERVICE_STATE_SETTLE_TIME;
-                    } else {
-                        settleTime = mConstants.BG_STATE_SETTLE_TIME;
+            if (uidState != null && foregroundModeMayChange && uidState.hasForegroundWatchers) {
+                for (int fgi = uidState.foregroundOps.size() - 1; fgi >= 0; fgi--) {
+                    if (!uidState.foregroundOps.valueAt(fgi)) {
+                        continue;
                     }
-                    final long commitTime = SystemClock.elapsedRealtime() + settleTime;
-                    uidState.pendingStateCommitTime = commitTime;
+                    final int code = uidState.foregroundOps.keyAt(fgi);
 
-                    mHandler.sendMessageDelayed(
-                            PooledLambda.obtainMessage(AppOpsService::updatePendingState, this,
-                                    commitTime + 1, uid), settleTime + 1);
+                    if (uidState.getUidMode(code) != AppOpsManager.opToDefaultMode(code)
+                            && uidState.getUidMode(code) == AppOpsManager.MODE_FOREGROUND) {
+                        mHandler.sendMessage(PooledLambda.obtainMessage(
+                                AppOpsService::notifyOpChangedForAllPkgsInUid,
+                                this, code, uidState.uid, true, null));
+                    } else if (uidState.pkgOps != null) {
+                        final ArraySet<OnOpModeChangedListener> listenerSet =
+                                mAppOpsServiceInterface.getOpModeChangedListeners(code);
+                        if (listenerSet != null) {
+                            for (int cbi = listenerSet.size() - 1; cbi >= 0; cbi--) {
+                                final OnOpModeChangedListener listener = listenerSet.valueAt(cbi);
+                                if ((listener.getFlags()
+                                        & AppOpsManager.WATCH_FOREGROUND_CHANGES) == 0
+                                        || !listener.isWatchingUid(uidState.uid)) {
+                                    continue;
+                                }
+                                for (int pkgi = uidState.pkgOps.size() - 1; pkgi >= 0; pkgi--) {
+                                    final Op op = uidState.pkgOps.valueAt(pkgi).get(code);
+                                    if (op == null) {
+                                        continue;
+                                    }
+                                    if (op.getMode() == AppOpsManager.MODE_FOREGROUND) {
+                                        mHandler.sendMessage(PooledLambda.obtainMessage(
+                                                AppOpsService::notifyOpChanged,
+                                                this, listenerSet.valueAt(cbi), code, uidState.uid,
+                                                uidState.pkgOps.keyAt(pkgi)));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+            }
 
-                if (uidState.pkgOps != null) {
+            if (USE_DELAYED_UID_STATE_CHANGES_FOR_ATTR_OP_UPDATES) {
+                // Proposed behavior change, previously there were two rounds of UID state change
+                // operations. It seems like there is no need for
+                // attributedOp.onUidStateChanged(state) to update before settle time is reached,
+                // which if true then this is the preferred route.
+                if (uidState != null && uidState.pkgOps != null) {
                     int numPkgs = uidState.pkgOps.size();
                     for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
                         Ops ops = uidState.pkgOps.valueAt(pkgNum);
@@ -2159,7 +2093,50 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                                 AttributedOp attributedOp = op.mAttributions.valueAt(
                                         attributionNum);
 
-                                attributedOp.onUidStateChanged(newState);
+                                attributedOp.onUidStateChanged(state);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Notify the proc state or capability has changed for a certain UID.
+     */
+    public void updateUidProcState(int uid, int procState,
+            @ActivityManager.ProcessCapability int capability) {
+        synchronized (this) {
+            getUidStateTracker().updateUidProcState(uid, procState, capability);
+            if (!mUidStates.contains(uid)) {
+                UidState uidState = new UidState(uid);
+                mUidStates.put(uid, uidState);
+                onUidStateChanged(uid,
+                        AppOpsUidStateTracker.processStateToUidState(procState), false);
+            }
+
+            if (!USE_DELAYED_UID_STATE_CHANGES_FOR_ATTR_OP_UPDATES) {
+                UidState uidState = mUidStates.get(uid);
+
+                if (uidState != null && uidState.pkgOps != null) {
+                    int numPkgs = uidState.pkgOps.size();
+                    for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                        Ops ops = uidState.pkgOps.valueAt(pkgNum);
+
+                        int numOps = ops.size();
+                        for (int opNum = 0; opNum < numOps; opNum++) {
+                            Op op = ops.valueAt(opNum);
+
+                            int numAttributions = op.mAttributions.size();
+                            for (int attributionNum = 0; attributionNum < numAttributions;
+                                    attributionNum++) {
+                                AttributedOp attributedOp = op.mAttributions.valueAt(
+                                        attributionNum);
+
+                                attributedOp.onUidStateChanged(
+                                        AppOpsUidStateTracker.processStateToUidState(
+                                                procState));
                             }
                         }
                     }
@@ -3158,7 +3135,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
-            return raw ? op.getMode() : op.evalMode();
+            return raw ? op.getMode() : op.uidState.evalMode(op.op, op.getMode());
         }
     }
 
@@ -3376,7 +3353,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
             if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass, false)) {
-                attributedOp.rejected(uidState.state, flags);
+                attributedOp.rejected(uidState.getState(), flags);
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
                 return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
@@ -3390,7 +3367,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName + " flags: " + AppOpsManager.flagsToString(flags));
-                    attributedOp.rejected(uidState.state, flags);
+                    attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                             uidMode);
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
@@ -3398,12 +3375,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
                         : op;
-                final int mode = switchOp.evalMode();
+                final int mode = switchOp.uidState.evalMode(switchOp.op, switchOp.getMode());
                 if (mode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName + " flags: " + AppOpsManager.flagsToString(flags));
-                    attributedOp.rejected(uidState.state, flags);
+                    attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                             mode);
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
@@ -3418,7 +3395,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             }
             scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                     AppOpsManager.MODE_ALLOWED);
-            attributedOp.accessed(proxyUid, proxyPackageName, proxyAttributionTag, uidState.state,
+            attributedOp.accessed(proxyUid, proxyPackageName, proxyAttributionTag,
+                    uidState.getState(),
                     flags);
 
             if (shouldCollectAsyncNotedOp) {
@@ -3909,7 +3887,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                                 + packageName + " flags: " + AppOpsManager.flagsToString(flags));
                     }
                     if (!dryRun) {
-                        attributedOp.rejected(uidState.state, flags);
+                        attributedOp.rejected(uidState.getState(), flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                                 flags, uidMode, startType, attributionFlags, attributionChainId);
                     }
@@ -3918,14 +3896,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
                         : op;
-                final int mode = switchOp.evalMode();
+                final int mode = switchOp.uidState.evalMode(switchOp.op, switchOp.getMode());
                 if (mode != AppOpsManager.MODE_ALLOWED
                         && (!startIfModeDefault || mode != MODE_DEFAULT)) {
                     if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName + " flags: " + AppOpsManager.flagsToString(flags));
                     if (!dryRun) {
-                        attributedOp.rejected(uidState.state, flags);
+                        attributedOp.rejected(uidState.getState(), flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                                 flags, mode, startType, attributionFlags, attributionChainId);
                     }
@@ -3939,12 +3917,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 try {
                     if (isRestricted) {
                         attributedOp.createPaused(clientId, proxyUid, proxyPackageName,
-                                proxyAttributionTag, uidState.state, flags, attributionFlags,
-                                attributionChainId);
+                                proxyAttributionTag, uidState.getState(), flags,
+                                attributionFlags, attributionChainId);
                     } else {
                         attributedOp.started(clientId, proxyUid, proxyPackageName,
-                                proxyAttributionTag, uidState.state, flags, attributionFlags,
-                                attributionChainId);
+                                proxyAttributionTag, uidState.getState(), flags,
+                                attributionFlags, attributionChainId);
                         startType = START_TYPE_STARTED;
                     }
                 } catch (RemoteException e) {
@@ -4358,101 +4336,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             }
             uidState = new UidState(uid);
             mUidStates.put(uid, uidState);
-        } else {
-            updatePendingStateIfNeededLocked(uidState);
         }
+
         return uidState;
-    }
-
-    /**
-     * Check if the pending state should be updated and do so if needed
-     *
-     * @param uidState The uidState that might have a pending state
-     */
-    private void updatePendingStateIfNeededLocked(@NonNull UidState uidState) {
-        if (uidState != null) {
-            if (uidState.pendingStateCommitTime != 0) {
-                if (uidState.pendingStateCommitTime < mLastRealtime) {
-                    commitUidPendingStateLocked(uidState);
-                } else {
-                    mLastRealtime = SystemClock.elapsedRealtime();
-                    if (uidState.pendingStateCommitTime < mLastRealtime) {
-                        commitUidPendingStateLocked(uidState);
-                    }
-                }
-            }
-        }
-    }
-
-    private void commitUidPendingStateLocked(UidState uidState) {
-        if (uidState.hasForegroundWatchers) {
-            for (int fgi = uidState.foregroundOps.size() - 1; fgi >= 0; fgi--) {
-                if (!uidState.foregroundOps.valueAt(fgi)) {
-                    continue;
-                }
-                final int code = uidState.foregroundOps.keyAt(fgi);
-                // For location ops we consider fg state only if the fg service
-                // is of location type, for all other ops any fg service will do.
-                final long firstUnrestrictedUidState = resolveFirstUnrestrictedUidState(code);
-                final boolean resolvedLastFg = uidState.state <= firstUnrestrictedUidState;
-                final boolean resolvedNowFg = uidState.pendingState <= firstUnrestrictedUidState;
-                if (resolvedLastFg == resolvedNowFg
-                        && uidState.capability == uidState.pendingCapability
-                        && uidState.appWidgetVisible == uidState.pendingAppWidgetVisible) {
-                    continue;
-                }
-
-                if (uidState.getUidMode(code) != AppOpsManager.opToDefaultMode(code)
-                        && uidState.getUidMode(code) == AppOpsManager.MODE_FOREGROUND) {
-                    mHandler.sendMessage(PooledLambda.obtainMessage(
-                            AppOpsService::notifyOpChangedForAllPkgsInUid,
-                            this, code, uidState.uid, true, null));
-                } else if (uidState.pkgOps != null) {
-                    final ArraySet<OnOpModeChangedListener> listenerSet =
-                            mAppOpsServiceInterface.getOpModeChangedListeners(code);
-                    if (listenerSet != null) {
-                        for (int cbi = listenerSet.size() - 1; cbi >= 0; cbi--) {
-                            final OnOpModeChangedListener listener = listenerSet.valueAt(cbi);
-                            if ((listener.getFlags()
-                                    & AppOpsManager.WATCH_FOREGROUND_CHANGES) == 0
-                                    || !listener.isWatchingUid(uidState.uid)) {
-                                continue;
-                            }
-                            for (int pkgi = uidState.pkgOps.size() - 1; pkgi >= 0; pkgi--) {
-                                final Op op = uidState.pkgOps.valueAt(pkgi).get(code);
-                                if (op == null) {
-                                    continue;
-                                }
-                                if (op.getMode() == AppOpsManager.MODE_FOREGROUND) {
-                                    mHandler.sendMessage(PooledLambda.obtainMessage(
-                                            AppOpsService::notifyOpChanged,
-                                            this, listenerSet.valueAt(cbi), code, uidState.uid,
-                                            uidState.pkgOps.keyAt(pkgi)));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        uidState.state = uidState.pendingState;
-        uidState.capability = uidState.pendingCapability;
-        uidState.appWidgetVisible = uidState.pendingAppWidgetVisible;
-        uidState.pendingStateCommitTime = 0;
     }
 
     private void updateAppWidgetVisibility(SparseArray<String> uidPackageNames, boolean visible) {
         synchronized (this) {
-            for (int i = uidPackageNames.size() - 1; i >= 0; i--) {
-                final int uid = uidPackageNames.keyAt(i);
-                final UidState uidState = getUidStateLocked(uid, true);
-                if (uidState != null && (uidState.pendingAppWidgetVisible != visible)) {
-                    uidState.pendingAppWidgetVisible = visible;
-                    if (uidState.pendingAppWidgetVisible != uidState.appWidgetVisible) {
-                        commitUidPendingStateLocked(uidState);
-                    }
-                }
-            }
+            getUidStateTracker().updateAppWidgetVisibility(uidPackageNames, visible);
         }
     }
 
@@ -5881,6 +5772,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         boolean includeDiscreteOps = false;
         int nDiscreteOps = 10;
         @HistoricalOpsRequestFilter int dumpFilter = 0;
+        boolean dumpAll = false;
 
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
@@ -5890,6 +5782,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     return;
                 } else if ("-a".equals(arg)) {
                     // dump all data
+                    dumpAll = true;
                 } else if ("--op".equals(arg)) {
                     i++;
                     if (i >= args.length) {
@@ -6203,31 +6096,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 }
 
                 pw.print("  Uid "); UserHandle.formatUid(pw, uidState.uid); pw.println(":");
-                pw.print("    state=");
-                pw.println(AppOpsManager.getUidStateName(uidState.state));
-                if (uidState.state != uidState.pendingState) {
-                    pw.print("    pendingState=");
-                    pw.println(AppOpsManager.getUidStateName(uidState.pendingState));
-                }
-                pw.print("    capability=");
-                ActivityManager.printCapabilitiesFull(pw, uidState.capability);
-                pw.println();
-                if (uidState.capability != uidState.pendingCapability) {
-                    pw.print("    pendingCapability=");
-                    ActivityManager.printCapabilitiesFull(pw, uidState.pendingCapability);
-                    pw.println();
-                }
-                pw.print("    appWidgetVisible=");
-                pw.println(uidState.appWidgetVisible);
-                if (uidState.appWidgetVisible != uidState.pendingAppWidgetVisible) {
-                    pw.print("    pendingAppWidgetVisible=");
-                    pw.println(uidState.pendingAppWidgetVisible);
-                }
-                if (uidState.pendingStateCommitTime != 0) {
-                    pw.print("    pendingStateCommitTime=");
-                    TimeUtils.formatDuration(uidState.pendingStateCommitTime, nowElapsed, pw);
-                    pw.println();
-                }
+                uidState.dump(pw, nowElapsed);
                 if (uidState.foregroundOps != null && (dumpMode < 0
                         || dumpMode == AppOpsManager.MODE_FOREGROUND)) {
                     pw.println("    foregroundOps:");
@@ -6445,6 +6314,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             pw.println("Discrete accesses: ");
             mHistoricalRegistry.dumpDiscreteData(pw, dumpUid, dumpPackage, dumpAttributionTag,
                     dumpFilter, dumpOp, sdf, date, "  ", nDiscreteOps);
+        }
+
+        if (dumpAll) {
+            pw.println();
+            pw.println("Uid State Changes Event Log:");
+            if (mUidStateTracker != null) {
+                mUidStateTracker.dumpEvents(pw);
+            }
         }
     }
 

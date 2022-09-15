@@ -554,7 +554,7 @@ public class AppOpsManager {
      * @hide
      */
     public static int resolveFirstUnrestrictedUidState(int op) {
-        return UID_STATE_FOREGROUND;
+        return UID_STATE_MAX_LAST_NON_RESTRICTED;
     }
 
     /**
