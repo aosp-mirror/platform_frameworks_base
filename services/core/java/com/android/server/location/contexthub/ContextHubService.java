@@ -1054,7 +1054,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
         pw.println("");
         pw.println("=================== EVENTS ====================");
-        pw.println(ContextHubEventLogger.getInstance().dump());
+        pw.println(ContextHubEventLogger.getInstance());
 
         // dump eventLog
     }
