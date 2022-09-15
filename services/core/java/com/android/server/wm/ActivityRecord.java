@@ -2746,6 +2746,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final StartingSurfaceController.StartingSurface surface;
+        final WindowState startingWindow = mStartingWindow;
         final boolean animate;
         if (mStartingData != null) {
             animate = prepareAnimation && mStartingData.needRevealAnimation()
@@ -2770,7 +2771,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        surface.remove(animate);
+        if (animate && mTransitionController.inCollectingTransition(startingWindow)
+                && startingWindow.cancelAndRedraw()) {
+            // Defer remove starting window after transition start.
+            // If splash screen window was in collecting, the client side is unable to draw because
+            // of Session#cancelDraw, which will blocking the remove animation.
+            startingWindow.mSyncTransaction.addTransactionCommittedListener(Runnable::run, () -> {
+                synchronized (mAtmService.mGlobalLock) {
+                    surface.remove(true);
+                }
+            });
+        } else {
+            surface.remove(animate);
+        }
     }
 
     /**
