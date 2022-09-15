@@ -986,6 +986,21 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSwipe_exactlyToTarget_notifiesNssl() {
+        // No over-expansion
+        mNotificationPanelViewController.setOverExpansion(0f);
+        // Fling to a target that is equal to the current position (i.e. a no-op fling).
+        mNotificationPanelViewController.flingToHeight(
+                0f,
+                true,
+                mNotificationPanelViewController.mExpandedHeight,
+                1f,
+                false);
+        // Verify that the NSSL is notified that the panel is *not* flinging.
+        verify(mNotificationStackScrollLayoutController).setPanelFlinging(false);
+    }
+
+    @Test
     public void testDoubleTapRequired_Keyguard() {
         FalsingManager.FalsingTapListener listener = getFalsingTapListener();
         mStatusBarStateController.setState(KEYGUARD);

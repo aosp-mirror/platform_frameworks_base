@@ -398,18 +398,7 @@ public class AppPredictionPerUserService extends
         final IBinder.DeathRecipient mDeathRecipient;
 
         private final RemoteCallbackList<IPredictionCallback> mCallbacks =
-                new RemoteCallbackList<IPredictionCallback>() {
-                    @Override
-                    public void onCallbackDied(IPredictionCallback callback) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Binder died for session Id=" + mSessionId
-                                    + " and callback=" + callback.asBinder());
-                        }
-                        if (mCallbacks.getRegisteredCallbackCount() == 0) {
-                            destroy();
-                        }
-                    }
-                };
+                new RemoteCallbackList<>();
 
         AppPredictionSessionInfo(
                 @NonNull final AppPredictionSessionId id,
