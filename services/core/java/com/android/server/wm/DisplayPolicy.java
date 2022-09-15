@@ -2111,10 +2111,12 @@ public class DisplayPolicy {
             }
         }
 
+        // TODO (b/235842600): Use public type once we can treat task bar as navigation bar.
         static final int[] INTERNAL_DECOR_TYPES;
         static {
             final ArraySet<Integer> decorTypes = InsetsState.toInternalType(
                     Type.displayCutout() | Type.navigationBars());
+            decorTypes.remove(ITYPE_EXTRA_NAVIGATION_BAR);
             INTERNAL_DECOR_TYPES = new int[decorTypes.size()];
             for (int i = 0; i < INTERNAL_DECOR_TYPES.length; i++) {
                 INTERNAL_DECOR_TYPES[i] = decorTypes.valueAt(i);
@@ -2147,6 +2149,7 @@ public class DisplayPolicy {
             }
         }
 
+        // TODO (b/235842600): Remove this method once we can treat task bar as navigation bar.
         private static Insets calculateDecorInsetsWithInternalTypes(InsetsState state) {
             final Rect frame = state.getDisplayFrame();
             Insets insets = Insets.NONE;
