@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ফোন ঠাণ্ডা না হওয়া পর্যন্ত কিছু ফিচার কাজ করে না।\nআরও তথ্যের জন্য ট্যাপ করুন"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপনার ফোনটি নিজে থেকেই ঠাণ্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠাণ্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"আপনার ডিভাইস আনপ্লাগ করা"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"চার্জিং পোর্টের কাছে আপনার ডিভাইসটি গরম হচ্ছে। এটি চার্জার বা ইউএসবি অ্যাক্সেসরির সাথে কানেক্ট করা থাকলে, আনপ্লাগ করুন এবং সতর্ক থাকুন কারণ কেবেলটিও গরম হতে পারে।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"কী করতে হবে ধাপে ধাপে দেখুন"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"বাঁদিকের শর্টকাট"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"ডানদিকের শর্টকাট"</string>

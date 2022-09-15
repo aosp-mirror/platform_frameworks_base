@@ -97,6 +97,16 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Set of thresholds that dictate the change needed for screen brightness
+                adaptations while in idle mode -->
+                <xs:element type="thresholds" name="displayBrightnessChangeThresholdsIdle" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Set of thresholds that dictate the change needed for ambient brightness
+                adaptations while in idle mode -->
+                <xs:element type="thresholds" name="ambientBrightnessChangeThresholdsIdle" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -319,13 +329,13 @@
     <!-- Thresholds for brightness changes. -->
     <xs:complexType name="thresholds">
         <xs:sequence>
-            <!-- Brightening thresholds. -->
+            <!-- Brightening thresholds for active screen brightness mode. -->
             <xs:element name="brighteningThresholds" type="brightnessThresholds" minOccurs="0"
                         maxOccurs="1" >
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
-            <!-- Darkening thresholds. -->
+            <!-- Darkening thresholds for active screen brightness mode. -->
             <xs:element name="darkeningThresholds" type="brightnessThresholds" minOccurs="0"
                         maxOccurs="1" >
                 <xs:annotation name="nonnull"/>

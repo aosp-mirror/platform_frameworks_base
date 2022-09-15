@@ -586,13 +586,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"የማያ ገጽ መቆለፊን ይጠቀሙ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ለመቀጠል የማያ ገጽ ቁልፍዎን ያስገቡ"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ዳሳሹን በደንብ ይጫኑት"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ጣት አሻራን መስራት አልተቻለም። እባክዎ እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"የጣት አሻራ ዳሳሽን ያጽዱ እና እንደገና ይሞክሩ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ዳሳሹን ያጽዱ እና እንደገና ይሞክሩ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ዳሳሹን ጠበቅ አድርገው ይጫኑት"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ጣት ከልክ በላይ ተንቀራፎ ተንቀሳቅሷል። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ሌላ የጣት አሻራ ይሞክሩ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"በጣም ብርሃናማ"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ለማስተካከል ይሞክሩ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"በእያንዳንዱ ጊዜ የጣትዎን ቦታ በትንሹ ይለዋውጡ"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +607,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ፊት ተረጋግጧል፣ እባክዎ አረጋግጥን ይጫኑ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"የጣት አሻራ ሃርድዌር አይገኝም።"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"የጣት አሻራን ማዋቀር አልተቻለም"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"የጣት አሻራ ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"የጣት አሻራ ስርዓተ ክወና ተትቷል።"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"የጣት አሻራ ክወና በተጠቃሚ ተሰርዟል።"</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"በጣም ብዙ ሙከራዎች። በምትኩ የማያ ገጽ መቆለፊያን ይጠቀሙ።"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ምንም የጣት አሻራዎች አልተመዘገቡም።"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ይህ መሣሪያ የጣት አሻራ ዳሳሽ የለውም።"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ዳሳሽ ለጊዜው ተሰናክሏል።"</string>
@@ -1251,8 +1257,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"መተግበሪያዎችን በማስጀመር ላይ፡፡"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"አጨራረስ ማስነሻ፡፡"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"የማብሪያ/ማጥፊያ ቁልፉን ተጭነዋል — ይህ ብዙውን ጊዜ ማያ ገጹን ያጠፋል።\n\nየጣት አሻራዎን በሚያዋቅሩበት ጊዜ በትንሹ መታ ለማድረግ ይሞክሩ።"</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"ማያ ገጽን ለማጥፋት መታ ያድርጉ"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"ማያ ገጽን አጥፋ"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"የጣት አሻራዎን ማረጋገጥ ይቀጥሉ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"የማብሪያ/ማጥፊያ ቁልፉን ተጭነዋል - ይህ ብዙውን ጊዜ ማያ ገጹን ያጠፋል። \n\n የጣት አሻራዎን ለማረጋገጥ በትንሹ መታ ለማድረግ ይሞክሩ።"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ማያ ገጽን አጥፋ"</string>

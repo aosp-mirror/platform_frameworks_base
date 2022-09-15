@@ -408,6 +408,16 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.hide(false /* destroyView */);
         verify(mHandler).removeCallbacks(eq(showRunnable.getValue()));
     }
+
+    @Test
+    public void testShow_doesNotDelaysIfFaceAuthIsLockedOut() {
+        when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceLockedOut()).thenReturn(true);
+        mBouncer.show(true /* reset */);
+
+        verify(mHandler, never()).postDelayed(any(), anyLong());
+    }
+
     @Test
     public void testShow_delaysIfFaceAuthIsRunning_unlessBypassEnabled() {
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);

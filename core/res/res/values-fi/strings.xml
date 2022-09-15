@@ -586,13 +586,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Käytä näytön lukitusta"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jatka lisäämällä näytön lukituksen avaustapa"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Paina anturia voimakkaasti"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Kokeile muuttaa asentoa"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Liikuta sormeasi hieman joka kerralla"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +607,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Kasvot tunnistettu, valitse Vahvista"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Sormenjälkilaitteisto ei ole käytettävissä."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Sormenjälkeä ei voi ottaa käyttöön"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sormenjälkitunnistimen toiminta aikakatkaistiin. Yritä uudelleen."</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Sormenjälkitoiminto peruutettiin."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Käyttäjä peruutti sormenjälkitoiminnon."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Liian monta yritystä. Käytä näytön lukituksen avaustapaa."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Yritä uudelleen."</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Sormenjälkiä ei ole otettu käyttöön."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Laitteessa ei ole sormenjälkitunnistinta."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Tunnistin poistettu väliaikaisesti käytöstä."</string>
@@ -1251,8 +1257,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Käynnistetään sovelluksia."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Viimeistellään päivitystä."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nKosketa painiketta kevyesti tallentaessasi sormenjälkeä."</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Sammuta näyttö napauttamalla"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Sammuta näyttö"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Jatketaanko sormenjäljen vahvistamista?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nVahvista sormenjälki koskettamalla painiketta kevyesti."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sammuta näyttö"</string>

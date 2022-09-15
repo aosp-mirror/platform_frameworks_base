@@ -985,6 +985,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrighteningThresholds, screenDarkeningThresholds, screenThresholdLevels,
                     screenDarkeningMinThreshold, screenBrighteningMinThreshold);
 
+            // Idle screen thresholds
+            float screenDarkeningMinThresholdIdle =
+                    mDisplayDeviceConfig.getScreenDarkeningMinThresholdIdle();
+            float screenBrighteningMinThresholdIdle =
+                    mDisplayDeviceConfig.getScreenBrighteningMinThresholdIdle();
+            HysteresisLevels screenBrightnessThresholdsIdle = new HysteresisLevels(
+                    screenBrighteningThresholds, screenDarkeningThresholds, screenThresholdLevels,
+                    screenDarkeningMinThresholdIdle, screenBrighteningMinThresholdIdle);
+
+            // Idle ambient thresholds
+            float ambientDarkeningMinThresholdIdle =
+                    mDisplayDeviceConfig.getAmbientLuxDarkeningMinThresholdIdle();
+            float ambientBrighteningMinThresholdIdle =
+                    mDisplayDeviceConfig.getAmbientLuxBrighteningMinThresholdIdle();
+            HysteresisLevels ambientBrightnessThresholdsIdle = new HysteresisLevels(
+                    ambientBrighteningThresholds, ambientDarkeningThresholds,
+                    ambientThresholdLevels, ambientDarkeningMinThresholdIdle,
+                    ambientBrighteningMinThresholdIdle);
+
             long brighteningLightDebounce = mDisplayDeviceConfig
                     .getAutoBrightnessBrighteningLightDebounce();
             long darkeningLightDebounce = mDisplayDeviceConfig
@@ -1020,7 +1039,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, dozeScaleFactor,
                     lightSensorRate, initialLightSensorRate, brighteningLightDebounce,
                     darkeningLightDebounce, autoBrightnessResetAmbientLuxAfterWarmUp,
-                    ambientBrightnessThresholds, screenBrightnessThresholds, mContext,
+                    ambientBrightnessThresholds, screenBrightnessThresholds,
+                    ambientBrightnessThresholdsIdle, screenBrightnessThresholdsIdle, mContext,
                     mHbmController, mBrightnessThrottler, mIdleModeBrightnessMapper,
                     mDisplayDeviceConfig.getAmbientHorizonShort(),
                     mDisplayDeviceConfig.getAmbientHorizonLong());
