@@ -2843,7 +2843,6 @@ public class UserManager {
     /**
      * @hide
      */
-    @TestApi
     public static boolean isUsersOnSecondaryDisplaysEnabled() {
         return SystemProperties.getBoolean("fw.users_on_secondary_displays",
                 Resources.getSystem()
@@ -2853,10 +2852,12 @@ public class UserManager {
     /**
      * Returns whether the device allows users to run (and launch activities) on secondary displays.
      *
-     * @return {@code false} for most devices, except automotive vehicles with passenger displays.
+     * @return {@code false} for most devices, except on automotive builds for vehiches with
+     * passenger displays.
      *
      * @hide
      */
+    @TestApi
     public boolean isUsersOnSecondaryDisplaysSupported() {
         return isUsersOnSecondaryDisplaysEnabled();
     }
