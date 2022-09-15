@@ -224,8 +224,6 @@ final class VibrationSettings {
 
     public void onSystemReady() {
         PowerManagerInternal pm = LocalServices.getService(PowerManagerInternal.class);
-        VirtualDeviceManagerInternal vdm = LocalServices.getService(
-                VirtualDeviceManagerInternal.class);
         AudioManager am = mContext.getSystemService(AudioManager.class);
         int ringerMode = am.getRingerModeInternal();
 
@@ -263,9 +261,11 @@ final class VibrationSettings {
                     }
                 });
 
-        if (vdm != null){
-          vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
-          vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
+        VirtualDeviceManagerInternal vdm = LocalServices.getService(
+                VirtualDeviceManagerInternal.class);
+        if (vdm != null) {
+            vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
+            vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
         }
 
         registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
@@ -791,33 +791,35 @@ final class VibrationSettings {
                 mAppsOnVirtualDevice.clear();
                 mAppsOnVirtualDevice.addAll(allRunningUids);
             }
-
-
         }
 
         /**
          * @param uid:       uid of the calling app.
          * @param displayId: the id of a Display.
          * @return Returns true if:
-         * 1) the displayId is valid, and it's owned by a virtual device
-         * 2) the displayId is invalid, and the calling app (uid) is running on a virtual device.
+         * <ul>
+         *   <li> the displayId is valid, and it's owned by a virtual device.</li>
+         *   <li> the displayId is invalid, and the calling app (uid) is running on a virtual
+         *        device.</li>
+         * </ul>
          */
         public boolean isAppOrDisplayOnAnyVirtualDevice(int uid, int displayId) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                // The default display is the primary physical display on the phone.
+                return false;
+            }
+
             synchronized (mLock) {
-                switch (displayId) {
-                    case Display.DEFAULT_DISPLAY:
-                        // The default display is the primary physical display on the phone.
-                        return false;
-                    case Display.INVALID_DISPLAY:
-                        // There is no Display object associated with the Context of calling
-                        // {@link SystemVibratorManager}, checking the calling UID instead.
-                        return mAppsOnVirtualDevice.contains(uid);
-                    default:
-                        // Other valid display IDs representing valid logical displays will be
-                        // checked
-                        // against the active virtual displays set built with the registered
-                        // {@link VirtualDisplayListener}.
-                        return mVirtualDisplays.contains(displayId);
+                if (displayId == Display.INVALID_DISPLAY) {
+                    // There is no Display object associated with the Context of calling
+                    // {@link SystemVibratorManager}, checking the calling UID instead.
+                    return mAppsOnVirtualDevice.contains(uid);
+                } else {
+                    // Other valid display IDs representing valid logical displays will be
+                    // checked
+                    // against the active virtual displays set built with the registered
+                    // {@link VirtualDisplayListener}.
+                    return mVirtualDisplays.contains(displayId);
                 }
             }
         }
