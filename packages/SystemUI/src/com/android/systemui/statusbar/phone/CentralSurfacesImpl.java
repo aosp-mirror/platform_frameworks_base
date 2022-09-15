@@ -99,11 +99,14 @@ import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -509,9 +512,16 @@ public class CentralSurfacesImpl extends CoreStartable implements
     private CentralSurfacesComponent mCentralSurfacesComponent;
 
     // Flags for disabling the status bar
-    // Two variables becaseu the first one evidently ran out of room for new flags.
+    // Two variables because the first one evidently ran out of room for new flags.
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
+
+    /**
+     * This keeps track of whether we have (or haven't) registered the predictive back callback.
+     * Since we can have visible -> visible transitions, we need to avoid
+     * double-registering (or double-unregistering) our callback.
+     */
+    private boolean mIsBackCallbackRegistered = false;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
     private @Appearance int mAppearance;
@@ -636,6 +646,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     private final InteractionJankMonitor mJankMonitor;
 
+    private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
+        if (DEBUG) {
+            Log.d(TAG, "mOnBackInvokedCallback() called");
+        }
+        onBackPressed();
+    };
 
     /**
      * Public constructor for CentralSurfaces.
@@ -2731,9 +2747,38 @@ public class CentralSurfacesImpl extends CoreStartable implements
         if (visibleToUser) {
             handleVisibleToUserChangedImpl(visibleToUser);
             mNotificationLogger.startNotificationLogging();
+
+            if (!mIsBackCallbackRegistered) {
+                ViewRootImpl viewRootImpl = getViewRootImpl();
+                if (viewRootImpl != null) {
+                    viewRootImpl.getOnBackInvokedDispatcher()
+                            .registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                                    mOnBackInvokedCallback);
+                    mIsBackCallbackRegistered = true;
+                    if (DEBUG) Log.d(TAG, "is now VISIBLE to user AND callback registered");
+                }
+            } else {
+                if (DEBUG) Log.d(TAG, "is now VISIBLE to user, BUT callback ALREADY unregistered");
+            }
         } else {
             mNotificationLogger.stopNotificationLogging();
             handleVisibleToUserChangedImpl(visibleToUser);
+
+            if (mIsBackCallbackRegistered) {
+                ViewRootImpl viewRootImpl = getViewRootImpl();
+                if (viewRootImpl != null) {
+                    viewRootImpl.getOnBackInvokedDispatcher()
+                            .unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+                    mIsBackCallbackRegistered = false;
+                    if (DEBUG) Log.d(TAG, "is NOT VISIBLE to user, AND callback unregistered");
+                }
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG,
+                            "is NOT VISIBLE to user, BUT NO callback (or callback ALREADY "
+                                    + "unregistered)");
+                }
+            }
         }
     }
 
@@ -3444,6 +3489,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
         return mNotificationPanelViewController.getKeyguardBottomAreaView();
     }
 
+    protected ViewRootImpl getViewRootImpl()  {
+        NotificationShadeWindowView nswv = getNotificationShadeWindowView();
+        if (nswv != null) return nswv.getViewRootImpl();
+
+        return null;
+    }
     /**
      * Propagation of the bouncer state, indicating that it's fully visible.
      */
@@ -3759,6 +3810,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
     public void notifyBiometricAuthModeChanged() {
         mDozeServiceHost.updateDozing();
         updateScrimController();
+    }
+
+    @VisibleForTesting
+    public void setNotificationShadeWindowViewController(
+            NotificationShadeWindowViewController nswvc) {
+        mNotificationShadeWindowViewController = nswvc;
     }
 
     /**
