@@ -52951,7 +52951,7 @@ package android.view.displayhash {
 package android.view.inputmethod {
 
   public class BaseInputConnection implements android.view.inputmethod.InputConnection {
-    ctor public BaseInputConnection(android.view.View, boolean);
+    ctor public BaseInputConnection(@NonNull android.view.View, boolean);
     method public boolean beginBatchEdit();
     method public boolean clearMetaKeyStates(int);
     method @CallSuper public void closeConnection();
@@ -52963,24 +52963,24 @@ package android.view.inputmethod {
     method public boolean deleteSurroundingTextInCodePoints(int, int);
     method public boolean endBatchEdit();
     method public boolean finishComposingText();
-    method public static int getComposingSpanEnd(android.text.Spannable);
-    method public static int getComposingSpanStart(android.text.Spannable);
+    method public static int getComposingSpanEnd(@NonNull android.text.Spannable);
+    method public static int getComposingSpanStart(@NonNull android.text.Spannable);
     method public int getCursorCapsMode(int);
-    method public android.text.Editable getEditable();
-    method public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
-    method public android.os.Handler getHandler();
-    method public CharSequence getSelectedText(int);
+    method @Nullable public android.text.Editable getEditable();
+    method @Nullable public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
+    method @Nullable public android.os.Handler getHandler();
+    method @Nullable public CharSequence getSelectedText(int);
     method @Nullable public CharSequence getTextAfterCursor(@IntRange(from=0) int, int);
     method @Nullable public CharSequence getTextBeforeCursor(@IntRange(from=0) int, int);
     method public boolean performContextMenuAction(int);
     method public boolean performEditorAction(int);
     method public boolean performPrivateCommand(String, android.os.Bundle);
-    method public static final void removeComposingSpans(android.text.Spannable);
+    method public static final void removeComposingSpans(@NonNull android.text.Spannable);
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
-    method public static void setComposingSpans(android.text.Spannable);
+    method public static void setComposingSpans(@NonNull android.text.Spannable);
     method public boolean setComposingText(CharSequence, int);
     method public boolean setSelection(int, int);
   }
