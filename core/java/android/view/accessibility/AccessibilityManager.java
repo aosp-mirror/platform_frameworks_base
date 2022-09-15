@@ -602,9 +602,18 @@ public final class AccessibilityManager {
      */
     public boolean isEnabled() {
         synchronized (mLock) {
-            return mIsEnabled || (mAccessibilityPolicy != null
-                    && mAccessibilityPolicy.isEnabled(mIsEnabled));
+            return mIsEnabled || hasAnyDirectConnection()
+                    || (mAccessibilityPolicy != null && mAccessibilityPolicy.isEnabled(mIsEnabled));
         }
+    }
+
+    /**
+     * @see AccessibilityInteractionClient#hasAnyDirectConnection
+     * @hide
+     */
+    @TestApi
+    public boolean hasAnyDirectConnection() {
+        return AccessibilityInteractionClient.hasAnyDirectConnection();
     }
 
     /**
@@ -1942,8 +1951,13 @@ public final class AccessibilityManager {
 
     /**
      * Notifies the registered {@link AccessibilityStateChangeListener}s.
+     *
+     * Note: this method notifies only the listeners of this single instance.
+     * AccessibilityManagerService is responsible for calling this method on all of
+     * its AccessibilityManager clients in order to notify all listeners.
+     * @hide
      */
-    private void notifyAccessibilityStateChanged() {
+    public void notifyAccessibilityStateChanged() {
         final boolean isEnabled;
         final ArrayMap<AccessibilityStateChangeListener, Handler> listeners;
         synchronized (mLock) {
