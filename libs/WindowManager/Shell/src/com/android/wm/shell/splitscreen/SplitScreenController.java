@@ -154,7 +154,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private StageCoordinator mStageCoordinator;
     // Only used for the legacy recents animation from splitscreen to allow the tasks to be animated
     // outside the bounds of the roots by being reparented into a higher level fullscreen container
-    private SurfaceControl mSplitTasksContainerLayer;
+    private SurfaceControl mGoingToRecentsTasksLayer;
+    private SurfaceControl mStartingSplitTasksLayer;
 
     public SplitScreenController(Context context,
             ShellInit shellInit,
@@ -489,19 +490,53 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {
+        if (ENABLE_SHELL_TRANSITIONS) return null;
+
         if (isSplitScreenVisible()) {
             // Evict child tasks except the top visible one under split root to ensure it could be
             // launched as full screen when switching to it on recents.
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             mStageCoordinator.prepareEvictInvisibleChildTasks(wct);
             mSyncQueue.queue(wct);
+        } else {
+            return null;
         }
-        return reparentSplitTasksForAnimation(apps, false /* enterSplitScreen */);
+
+        SurfaceControl.Transaction t = mTransactionPool.acquire();
+        if (mGoingToRecentsTasksLayer != null) {
+            t.remove(mGoingToRecentsTasksLayer);
+        }
+        mGoingToRecentsTasksLayer = reparentSplitTasksForAnimation(apps, t,
+                "SplitScreenController#onGoingToRecentsLegacy" /* callsite */);
+        t.apply();
+        mTransactionPool.release(t);
+
+        return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
     }
 
     RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
+        if (ENABLE_SHELL_TRANSITIONS) return null;
+
+        int openingApps = 0;
+        for (int i = 0; i < apps.length; ++i) {
+            if (apps[i].mode == MODE_OPENING) openingApps++;
+        }
+        if (openingApps < 2) {
+            // Not having enough apps to enter split screen
+            return null;
+        }
+
+        SurfaceControl.Transaction t = mTransactionPool.acquire();
+        if (mStartingSplitTasksLayer != null) {
+            t.remove(mStartingSplitTasksLayer);
+        }
+        mStartingSplitTasksLayer = reparentSplitTasksForAnimation(apps, t,
+                "SplitScreenController#onStartingSplitLegacy" /* callsite */);
+        t.apply();
+        mTransactionPool.release(t);
+
         try {
-            return reparentSplitTasksForAnimation(apps, true /* enterSplitScreen */);
+            return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
         } finally {
             for (RemoteAnimationTarget appTarget : apps) {
                 if (appTarget.leash != null) {
@@ -511,45 +546,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    private RemoteAnimationTarget[] reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
-            boolean enterSplitScreen) {
-        if (ENABLE_SHELL_TRANSITIONS) return null;
-
-        if (enterSplitScreen) {
-            int openingApps = 0;
-            for (int i = 0; i < apps.length; ++i) {
-                if (apps[i].mode == MODE_OPENING) openingApps++;
-            }
-            if (openingApps < 2) {
-                // Not having enough apps to enter split screen
-                return null;
-            }
-        } else if (!isSplitScreenVisible()) {
-            return null;
-        }
-
-        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
-        if (mSplitTasksContainerLayer != null) {
-            // Remove the previous layer before recreating
-            transaction.remove(mSplitTasksContainerLayer);
-        }
+    private SurfaceControl reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
+            SurfaceControl.Transaction t, String callsite) {
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
                 .setName("RecentsAnimationSplitTasks")
                 .setHidden(false)
-                .setCallsite("SplitScreenController#onGoingtoRecentsLegacy");
+                .setCallsite(callsite);
         mRootTDAOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, builder);
-        mSplitTasksContainerLayer = builder.build();
+        final SurfaceControl splitTasksLayer = builder.build();
 
         for (int i = 0; i < apps.length; ++i) {
             final RemoteAnimationTarget appTarget = apps[i];
-            transaction.reparent(appTarget.leash, mSplitTasksContainerLayer);
-            transaction.setPosition(appTarget.leash, appTarget.screenSpaceBounds.left,
+            t.reparent(appTarget.leash, splitTasksLayer);
+            t.setPosition(appTarget.leash, appTarget.screenSpaceBounds.left,
                     appTarget.screenSpaceBounds.top);
         }
-        transaction.apply();
-        mTransactionPool.release(transaction);
-        return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
+        return splitTasksLayer;
     }
     /**
      * Sets drag info to be logged when splitscreen is entered.
