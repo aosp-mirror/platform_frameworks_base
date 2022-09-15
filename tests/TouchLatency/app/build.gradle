@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 33
     buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "com.prefabulated.touchlatency"
         minSdkVersion 28
-        targetSdkVersion 28
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
