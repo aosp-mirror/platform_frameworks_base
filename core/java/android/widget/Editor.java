@@ -4587,7 +4587,6 @@ public class Editor {
      */
     private final class CursorAnchorInfoNotifier implements TextViewPositionListener {
         final CursorAnchorInfo.Builder mSelectionInfoBuilder = new CursorAnchorInfo.Builder();
-        final int[] mTmpIntOffset = new int[2];
         final Matrix mViewToScreenMatrix = new Matrix();
 
         @Override
@@ -4635,9 +4634,8 @@ public class Editor {
             builder.setSelectionRange(selectionStart, mTextView.getSelectionEnd());
 
             // Construct transformation matrix from view local coordinates to screen coordinates.
-            mViewToScreenMatrix.set(mTextView.getMatrix());
-            mTextView.getLocationOnScreen(mTmpIntOffset);
-            mViewToScreenMatrix.postTranslate(mTmpIntOffset[0], mTmpIntOffset[1]);
+            mViewToScreenMatrix.reset();
+            mTextView.transformMatrixToGlobal(mViewToScreenMatrix);
             builder.setMatrix(mViewToScreenMatrix);
 
             if (includeEditorBounds) {
