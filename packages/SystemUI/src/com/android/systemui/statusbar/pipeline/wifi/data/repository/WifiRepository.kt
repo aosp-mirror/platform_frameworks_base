@@ -43,24 +43,18 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-/**
- * Provides data related to the wifi state.
- */
+/** Provides data related to the wifi state. */
 interface WifiRepository {
-    /**
-     * Observable for the current wifi network.
-     */
-    val wifiNetwork: Flow<WifiNetworkModel>
+    /** Observable for the current wifi network. */
+    val wifiNetwork: StateFlow<WifiNetworkModel>
 
-    /**
-     * Observable for the current wifi network activity.
-     */
-    val wifiActivity: Flow<WifiActivityModel>
+    /** Observable for the current wifi network activity. */
+    val wifiActivity: StateFlow<WifiActivityModel>
 }
 
 /** Real implementation of [WifiRepository]. */
@@ -74,7 +68,7 @@ class WifiRepositoryImpl @Inject constructor(
     @Application scope: CoroutineScope,
     wifiManager: WifiManager?,
 ) : WifiRepository {
-    override val wifiNetwork: Flow<WifiNetworkModel> = conflatedCallbackFlow {
+    override val wifiNetwork: StateFlow<WifiNetworkModel> = conflatedCallbackFlow {
         var currentWifi: WifiNetworkModel = WIFI_NETWORK_DEFAULT
 
         val callback = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
@@ -132,7 +126,7 @@ class WifiRepositoryImpl @Inject constructor(
             initialValue = WIFI_NETWORK_DEFAULT
         )
 
-    override val wifiActivity: Flow<WifiActivityModel> =
+    override val wifiActivity: StateFlow<WifiActivityModel> =
             if (wifiManager == null) {
                 Log.w(SB_LOGGING_TAG, "Null WifiManager; skipping activity callback")
                 flowOf(ACTIVITY_DEFAULT)
@@ -142,13 +136,15 @@ class WifiRepositoryImpl @Inject constructor(
                         logger.logInputChange("onTrafficStateChange", prettyPrintActivity(state))
                         trySend(trafficStateToWifiActivityModel(state))
                     }
-
-                    trySend(ACTIVITY_DEFAULT)
                     wifiManager.registerTrafficStateCallback(mainExecutor, callback)
-
                     awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
                 }
             }
+                .stateIn(
+                    scope,
+                    started = SharingStarted.WhileSubscribed(),
+                    initialValue = ACTIVITY_DEFAULT
+                )
 
     companion object {
         val ACTIVITY_DEFAULT = WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
