@@ -46,6 +46,7 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_RESUMED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -265,6 +266,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             OP_PLAY_AUDIO,
             OP_RECORD_AUDIO,
             OP_CAMERA,
+            OP_VIBRATE,
     };
 
     private static final int MAX_UNFORWARDED_OPS = 10;
