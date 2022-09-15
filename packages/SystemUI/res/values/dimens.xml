@@ -1464,7 +1464,7 @@
     <dimen name="dream_overlay_camera_mic_off_indicator_size">8dp</dimen>
     <dimen name="dream_overlay_notification_indicator_size">6dp</dimen>
     <dimen name="dream_overlay_grey_chip_width">56dp</dimen>
-    <dimen name="dream_overlay_status_bar_extra_margin">16dp</dimen>
+    <dimen name="dream_overlay_status_bar_extra_margin">8dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
     <dimen name="dream_overlay_complication_clock_time_text_size">86sp</dimen>
