@@ -88,6 +88,42 @@ public final class UserManagerServiceTest extends UserManagerServiceOrInternalTe
                 .that(mUms.isCurrentUserOrRunningProfileOfCurrentUser(PROFILE_USER_ID)).isFalse();
     }
 
+    @Test
+    public void testIsUserRunning_StartedUserShouldReturnTrue() {
+        addUser(USER_ID);
+        startUser(USER_ID);
+
+        assertWithMessage("isUserRunning(%s)", USER_ID)
+                .that(mUms.isUserRunning(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void testIsUserRunning_StoppedUserShouldReturnFalse() {
+        addUser(USER_ID);
+        stopUser(USER_ID);
+
+        assertWithMessage("isUserRunning(%s)", USER_ID)
+                .that(mUms.isUserRunning(USER_ID)).isFalse();
+    }
+
+    @Test
+    public void testIsUserRunning_CurrentUserStartedWorkProfileShouldReturnTrue() {
+        addDefaultProfileAndParent();
+        startDefaultProfile();
+
+        assertWithMessage("isUserRunning(%s)", PROFILE_USER_ID)
+                .that(mUms.isUserRunning(PROFILE_USER_ID)).isTrue();
+    }
+
+    @Test
+    public void testIsUserRunning_CurrentUserStoppedWorkProfileShouldReturnFalse() {
+        addDefaultProfileAndParent();
+        stopDefaultProfile();
+
+        assertWithMessage("isUserRunning(%s)", PROFILE_USER_ID)
+                .that(mUms.isUserRunning(PROFILE_USER_ID)).isFalse();
+    }
+
     @Override
     protected boolean isUserVisible(int userId) {
         return mUms.isUserVisibleUnchecked(userId);
