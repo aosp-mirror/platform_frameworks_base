@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.activityembedding;
 
-import static android.graphics.Matrix.MSCALE_X;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 
@@ -42,31 +41,45 @@ class ActivityEmbeddingAnimationAdapter {
      */
     private static final int LAYER_NO_OVERRIDE = -1;
 
+    @NonNull
     final Animation mAnimation;
+    @NonNull
     final TransitionInfo.Change mChange;
+    @NonNull
     final SurfaceControl mLeash;
+    /** Area in absolute coordinate that the animation surface shouldn't go beyond. */
+    @NonNull
+    private final Rect mWholeAnimationBounds = new Rect();
 
+    @NonNull
     final Transformation mTransformation = new Transformation();
+    @NonNull
     final float[] mMatrix = new float[9];
+    @NonNull
     final float[] mVecs = new float[4];
+    @NonNull
     final Rect mRect = new Rect();
     private boolean mIsFirstFrame = true;
     private int mOverrideLayer = LAYER_NO_OVERRIDE;
 
     ActivityEmbeddingAnimationAdapter(@NonNull Animation animation,
             @NonNull TransitionInfo.Change change) {
-        this(animation, change, change.getLeash());
+        this(animation, change, change.getLeash(), change.getEndAbsBounds());
     }
 
     /**
      * @param leash the surface to animate, which is not necessary the same as
-     * {@link TransitionInfo.Change#getLeash()}, it can be a screenshot for example.
+     *              {@link TransitionInfo.Change#getLeash()}, it can be a screenshot for example.
+     * @param wholeAnimationBounds  area in absolute coordinate that the animation surface shouldn't
+     *                              go beyond.
      */
     ActivityEmbeddingAnimationAdapter(@NonNull Animation animation,
-            @NonNull TransitionInfo.Change change, @NonNull SurfaceControl leash) {
+            @NonNull TransitionInfo.Change change, @NonNull SurfaceControl leash,
+            @NonNull Rect wholeAnimationBounds) {
         mAnimation = animation;
         mChange = change;
         mLeash = leash;
+        mWholeAnimationBounds.set(wholeAnimationBounds);
     }
 
     /**
@@ -96,23 +109,31 @@ class ActivityEmbeddingAnimationAdapter {
 
     /** To be overridden by subclasses to adjust the animation surface change. */
     void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
+        // Update the surface position and alpha.
         final Point offset = mChange.getEndRelOffset();
         mTransformation.getMatrix().postTranslate(offset.x, offset.y);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
-        // Get current animation position.
+
+        // Get current surface bounds in absolute coordinate.
+        // positionX/Y are in local coordinate, so minus the local offset to get the slide amount.
         final int positionX = Math.round(mMatrix[MTRANS_X]);
         final int positionY = Math.round(mMatrix[MTRANS_Y]);
-        // The exiting surface starts at position: Change#getEndRelOffset() and moves with
-        // positionX varying. Offset our crop region by the amount we have slided so crop
-        // regions stays exactly on the original container in split.
-        final int cropOffsetX = offset.x - positionX;
-        final int cropOffsetY = offset.y - positionY;
-        final Rect cropRect = new Rect();
-        cropRect.set(mChange.getEndAbsBounds());
-        // Because window crop uses absolute position.
-        cropRect.offsetTo(0, 0);
-        cropRect.offset(cropOffsetX, cropOffsetY);
+        final Rect cropRect = new Rect(mChange.getEndAbsBounds());
+        cropRect.offset(positionX - offset.x, positionY - offset.y);
+
+        // Store the current offset of the surface top left from (0,0) in absolute coordinate.
+        final int offsetX = cropRect.left;
+        final int offsetY = cropRect.top;
+
+        // Intersect to make sure the animation happens within the whole animation bounds.
+        if (!cropRect.intersect(mWholeAnimationBounds)) {
+            // Hide the surface when it is outside of the animation area.
+            t.setAlpha(mLeash, 0);
+        }
+
+        // cropRect is in absolute coordinate, so we need to translate it to surface top left.
+        cropRect.offset(-offsetX, -offsetY);
         t.setCrop(mLeash, cropRect);
     }
 
@@ -127,53 +148,6 @@ class ActivityEmbeddingAnimationAdapter {
     }
 
     /**
-     * Should be used when the {@link TransitionInfo.Change} is in split with others, and wants to
-     * animate together as one. This adapter will offset the animation leash to make the animate of
-     * two windows look like a single window.
-     */
-    static class SplitAdapter extends ActivityEmbeddingAnimationAdapter {
-        private final boolean mIsLeftHalf;
-        private final int mWholeAnimationWidth;
-
-        /**
-         * @param isLeftHalf whether this is the left half of the animation.
-         * @param wholeAnimationWidth the whole animation windows width.
-         */
-        SplitAdapter(@NonNull Animation animation, @NonNull TransitionInfo.Change change,
-                boolean isLeftHalf, int wholeAnimationWidth) {
-            super(animation, change);
-            mIsLeftHalf = isLeftHalf;
-            mWholeAnimationWidth = wholeAnimationWidth;
-            if (wholeAnimationWidth == 0) {
-                throw new IllegalArgumentException("SplitAdapter must provide wholeAnimationWidth");
-            }
-        }
-
-        @Override
-        void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
-            final Point offset = mChange.getEndRelOffset();
-            float posX = offset.x;
-            final float posY = offset.y;
-            // This window is half of the whole animation window. Offset left/right to make it
-            // look as one with the other half.
-            mTransformation.getMatrix().getValues(mMatrix);
-            final int changeWidth = mChange.getEndAbsBounds().width();
-            final float scaleX = mMatrix[MSCALE_X];
-            final float totalOffset = mWholeAnimationWidth * (1 - scaleX) / 2;
-            final float curOffset = changeWidth * (1 - scaleX) / 2;
-            final float offsetDiff = totalOffset - curOffset;
-            if (mIsLeftHalf) {
-                posX += offsetDiff;
-            } else {
-                posX -= offsetDiff;
-            }
-            mTransformation.getMatrix().postTranslate(posX, posY);
-            t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
-            t.setAlpha(mLeash, mTransformation.getAlpha());
-        }
-    }
-
-    /**
      * Should be used for the animation of the snapshot of a {@link TransitionInfo.Change} that has
      * size change.
      */
@@ -181,7 +155,7 @@ class ActivityEmbeddingAnimationAdapter {
 
         SnapshotAdapter(@NonNull Animation animation, @NonNull TransitionInfo.Change change,
                 @NonNull SurfaceControl snapshotLeash) {
-            super(animation, change, snapshotLeash);
+            super(animation, change, snapshotLeash, change.getEndAbsBounds());
         }
 
         @Override
@@ -196,7 +170,9 @@ class ActivityEmbeddingAnimationAdapter {
         void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
             super.onAnimationEnd(t);
             // Remove the screenshot leash after animation is finished.
-            t.remove(mLeash);
+            if (mLeash.isValid()) {
+                t.remove(mLeash);
+            }
         }
     }
 

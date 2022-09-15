@@ -131,6 +131,8 @@ class AutomaticBrightnessController {
     // Configuration object for determining thresholds to change brightness dynamically
     private final HysteresisLevels mAmbientBrightnessThresholds;
     private final HysteresisLevels mScreenBrightnessThresholds;
+    private final HysteresisLevels mAmbientBrightnessThresholdsIdle;
+    private final HysteresisLevels mScreenBrightnessThresholdsIdle;
 
     private boolean mLoggingEnabled;
 
@@ -242,7 +244,9 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, Context context,
+            HysteresisLevels screenBrightnessThresholds,
+            HysteresisLevels ambientBrightnessThresholdsIdle,
+            HysteresisLevels screenBrightnessThresholdsIdle, Context context,
             HighBrightnessModeController hbmController, BrightnessThrottler brightnessThrottler,
             BrightnessMappingStrategy idleModeBrightnessMapper, int ambientLightHorizonShort,
             int ambientLightHorizonLong) {
@@ -251,7 +255,8 @@ class AutomaticBrightnessController {
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, context,
+                ambientBrightnessThresholds, screenBrightnessThresholds,
+                ambientBrightnessThresholdsIdle, screenBrightnessThresholdsIdle, context,
                 hbmController, brightnessThrottler, idleModeBrightnessMapper,
                 ambientLightHorizonShort, ambientLightHorizonLong
         );
@@ -265,7 +270,9 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, Context context,
+            HysteresisLevels screenBrightnessThresholds,
+            HysteresisLevels ambientBrightnessThresholdsIdle,
+            HysteresisLevels screenBrightnessThresholdsIdle, Context context,
             HighBrightnessModeController hbmController, BrightnessThrottler brightnessThrottler,
             BrightnessMappingStrategy idleModeBrightnessMapper, int ambientLightHorizonShort,
             int ambientLightHorizonLong) {
@@ -289,7 +296,9 @@ class AutomaticBrightnessController {
         mAmbientLightHorizonShort = ambientLightHorizonShort;
         mWeightingIntercept = ambientLightHorizonLong;
         mAmbientBrightnessThresholds = ambientBrightnessThresholds;
+        mAmbientBrightnessThresholdsIdle = ambientBrightnessThresholdsIdle;
         mScreenBrightnessThresholds = screenBrightnessThresholds;
+        mScreenBrightnessThresholdsIdle = screenBrightnessThresholdsIdle;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
         mHandler = new AutomaticBrightnessHandler(looper);
@@ -585,6 +594,8 @@ class AutomaticBrightnessController {
         pw.println();
         mAmbientBrightnessThresholds.dump(pw);
         mScreenBrightnessThresholds.dump(pw);
+        mScreenBrightnessThresholdsIdle.dump(pw);
+        mScreenBrightnessThresholdsIdle.dump(pw);
     }
 
     private String configStateToString(int state) {
@@ -679,8 +690,17 @@ class AutomaticBrightnessController {
             lux = 0;
         }
         mAmbientLux = lux;
-        mAmbientBrighteningThreshold = mAmbientBrightnessThresholds.getBrighteningThreshold(lux);
-        mAmbientDarkeningThreshold = mAmbientBrightnessThresholds.getDarkeningThreshold(lux);
+        if (isInIdleMode()) {
+            mAmbientBrighteningThreshold =
+                    mAmbientBrightnessThresholdsIdle.getBrighteningThreshold(lux);
+            mAmbientDarkeningThreshold =
+                    mAmbientBrightnessThresholdsIdle.getDarkeningThreshold(lux);
+        } else {
+            mAmbientBrighteningThreshold =
+                    mAmbientBrightnessThresholds.getBrighteningThreshold(lux);
+            mAmbientDarkeningThreshold =
+                    mAmbientBrightnessThresholds.getDarkeningThreshold(lux);
+        }
         mHbmController.onAmbientLuxChange(mAmbientLux);
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
@@ -902,10 +922,20 @@ class AutomaticBrightnessController {
                 mPreThresholdBrightness = mScreenAutoBrightness;
             }
             mScreenAutoBrightness = newScreenAutoBrightness;
-            mScreenBrighteningThreshold = clampScreenBrightness(
-                    mScreenBrightnessThresholds.getBrighteningThreshold(newScreenAutoBrightness));
-            mScreenDarkeningThreshold = clampScreenBrightness(
-                    mScreenBrightnessThresholds.getDarkeningThreshold(newScreenAutoBrightness));
+            if (isInIdleMode()) {
+                mScreenBrighteningThreshold = clampScreenBrightness(
+                        mScreenBrightnessThresholdsIdle.getBrighteningThreshold(
+                                newScreenAutoBrightness));
+                mScreenDarkeningThreshold = clampScreenBrightness(
+                        mScreenBrightnessThresholdsIdle.getDarkeningThreshold(
+                                newScreenAutoBrightness));
+            } else {
+                mScreenBrighteningThreshold = clampScreenBrightness(
+                        mScreenBrightnessThresholds.getBrighteningThreshold(
+                                newScreenAutoBrightness));
+                mScreenDarkeningThreshold = clampScreenBrightness(
+                        mScreenBrightnessThresholds.getDarkeningThreshold(newScreenAutoBrightness));
+            }
 
             if (sendUpdate) {
                 mCallbacks.updateBrightness();

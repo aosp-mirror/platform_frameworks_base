@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Handler;
@@ -683,10 +682,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         final boolean fingerprintLockout = biometricSourceType == BiometricSourceType.FINGERPRINT
                 && (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
                 || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT);
-        final boolean faceLockout = biometricSourceType == BiometricSourceType.FACE
-                && (msgId == FaceManager.FACE_ERROR_LOCKOUT
-                || msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT);
-        if (fingerprintLockout || faceLockout) {
+        if (fingerprintLockout) {
             startWakeAndUnlock(MODE_SHOW_BOUNCER);
             UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN, getSessionId());
         }
