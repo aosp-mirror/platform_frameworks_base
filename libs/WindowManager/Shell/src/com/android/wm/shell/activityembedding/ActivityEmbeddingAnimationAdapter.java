@@ -170,7 +170,9 @@ class ActivityEmbeddingAnimationAdapter {
         void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
             super.onAnimationEnd(t);
             // Remove the screenshot leash after animation is finished.
-            t.remove(mLeash);
+            if (mLeash.isValid()) {
+                t.remove(mLeash);
+            }
         }
     }
 
