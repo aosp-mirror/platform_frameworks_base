@@ -5503,6 +5503,7 @@ public final class Settings implements Watchable, Snappable {
                                     + "set before trying to update the fingerprint.");
                 }
                 mFingerprints.put(userId, mExtendedFingerprint);
+                mPermissionUpgradeNeeded.put(userId, false);
                 writeStateForUserAsync(userId);
             }
         }
