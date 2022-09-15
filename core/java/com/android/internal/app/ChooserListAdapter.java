@@ -86,7 +86,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private final ChooserActivityLogger mChooserActivityLogger;
 
     private int mNumShortcutResults = 0;
-    private Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
     private boolean mApplySharingAppLimits;
 
     // Reserve spots for incoming direct share targets by adding placeholders
@@ -265,31 +264,20 @@ public class ChooserListAdapter extends ResolverListAdapter {
             return;
         }
 
-        if (!(info instanceof DisplayResolveInfo)) {
-            holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
-            holder.bindIcon(info);
-
-            if (info instanceof SelectableTargetInfo) {
-                // direct share targets should append the application name for a better readout
-                DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
-                CharSequence appName = rInfo != null ? rInfo.getDisplayLabel() : "";
-                CharSequence extendedInfo = info.getExtendedInfo();
-                String contentDescription = String.join(" ", info.getDisplayLabel(),
-                        extendedInfo != null ? extendedInfo : "", appName);
-                holder.updateContentDescription(contentDescription);
-            }
-        } else {
+        holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
+        holder.bindIcon(info);
+        if (info instanceof SelectableTargetInfo) {
+            // direct share targets should append the application name for a better readout
+            DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
+            CharSequence appName = rInfo != null ? rInfo.getDisplayLabel() : "";
+            CharSequence extendedInfo = info.getExtendedInfo();
+            String contentDescription = String.join(" ", info.getDisplayLabel(),
+                    extendedInfo != null ? extendedInfo : "", appName);
+            holder.updateContentDescription(contentDescription);
+        } else if (info instanceof DisplayResolveInfo) {
             DisplayResolveInfo dri = (DisplayResolveInfo) info;
-            holder.bindLabel(dri.getDisplayLabel(), dri.getExtendedInfo(), alwaysShowSubLabel());
-            LoadIconTask task = mIconLoaders.get(dri);
-            if (task == null) {
-                task = new LoadIconTask(dri, holder);
-                mIconLoaders.put(dri, task);
-                task.execute();
-            } else {
-                // The holder was potentially changed as the underlying items were
-                // reshuffled, so reset the target holder
-                task.setViewHolder(holder);
+            if (!dri.hasDisplayIcon()) {
+                loadIcon(dri);
             }
         }
 
