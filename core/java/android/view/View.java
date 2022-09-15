@@ -24512,8 +24512,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Set the current default focus highlight.
      * @param highlight the highlight drawable, or {@code null} if it's no longer needed.
+     * @hide
      */
-    private void setDefaultFocusHighlight(Drawable highlight) {
+    void setDefaultFocusHighlight(Drawable highlight) {
         mDefaultFocusHighlight = highlight;
         mDefaultFocusHighlightSizeChanged = true;
         if (highlight != null) {
