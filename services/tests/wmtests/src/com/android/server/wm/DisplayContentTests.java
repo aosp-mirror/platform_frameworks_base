@@ -139,6 +139,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
+import android.window.ScreenCapture;
 import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
@@ -2109,8 +2110,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Preparation: Simulate snapshot IME surface.
         spyOn(mWm.mTaskSnapshotController);
-        SurfaceControl.ScreenshotHardwareBuffer mockHwBuffer = mock(
-                SurfaceControl.ScreenshotHardwareBuffer.class);
+        ScreenCapture.ScreenshotHardwareBuffer mockHwBuffer = mock(
+                ScreenCapture.ScreenshotHardwareBuffer.class);
         doReturn(mock(HardwareBuffer.class)).when(mockHwBuffer).getHardwareBuffer();
         doReturn(mockHwBuffer).when(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(any());
 

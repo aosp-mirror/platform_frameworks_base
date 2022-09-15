@@ -622,7 +622,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         setInitialSurfaceControlProperties(makeSurface());
     }
 
-    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+    void setInitialSurfaceControlProperties(Builder b) {
         setSurfaceControl(b.setCallsite("WindowContainer.setInitialSurfaceControlProperties").build());
         if (showSurfaceOnCreation()) {
             getSyncTransaction().show(mSurfaceControl);
@@ -652,7 +652,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastSurfacePosition.set(0, 0);
         mLastDeltaRotation = Surface.ROTATION_0;
 
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
+        final Builder b = mWmService.makeSurfaceBuilder(null)
                 .setContainerLayer()
                 .setName(getName());
 
@@ -2437,7 +2437,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         } while (current != null);
     }
 
-    SurfaceControl.Builder makeSurface() {
+    Builder makeSurface() {
         final WindowContainer p = getParent();
         return p.makeChildSurface(this);
     }
@@ -2446,7 +2446,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param child The WindowContainer this child surface is for, or null if the Surface
      *              is not assosciated with a WindowContainer (e.g. a surface used for Dimming).
      */
-    SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+    Builder makeChildSurface(WindowContainer child) {
         final WindowContainer p = getParent();
         // Give the parent a chance to set properties. In hierarchy v1 we rely
         // on this to set full-screen dimensions on all our Surface-less Layers.

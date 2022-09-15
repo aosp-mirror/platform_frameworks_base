@@ -44,6 +44,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
+import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
@@ -474,7 +475,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
      * Take a screenshot of a task.
      */
     public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
-            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
+            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
         final TaskAppearedInfo info = mTasks.get(taskInfo.taskId);
         if (info == null) {
             return;

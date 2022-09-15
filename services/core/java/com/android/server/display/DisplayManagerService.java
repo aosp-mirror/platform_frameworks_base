@@ -118,6 +118,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.DisplayWindowPolicyController;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2051,8 +2052,8 @@ public final class DisplayManagerService extends SystemService {
         return null;
     }
 
-    private SurfaceControl.ScreenshotHardwareBuffer systemScreenshotInternal(int displayId) {
-        final SurfaceControl.DisplayCaptureArgs captureArgs;
+    private ScreenCapture.ScreenshotHardwareBuffer systemScreenshotInternal(int displayId) {
+        final ScreenCapture.DisplayCaptureArgs captureArgs;
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
@@ -2064,27 +2065,27 @@ public final class DisplayManagerService extends SystemService {
             }
 
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            captureArgs = new SurfaceControl.DisplayCaptureArgs.Builder(token)
+            captureArgs = new ScreenCapture.DisplayCaptureArgs.Builder(token)
                     .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
                     .setUseIdentityTransform(true)
                     .setCaptureSecureLayers(true)
                     .setAllowProtected(true)
                     .build();
         }
-        return SurfaceControl.captureDisplay(captureArgs);
+        return ScreenCapture.captureDisplay(captureArgs);
     }
 
-    private SurfaceControl.ScreenshotHardwareBuffer userScreenshotInternal(int displayId) {
+    private ScreenCapture.ScreenshotHardwareBuffer userScreenshotInternal(int displayId) {
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
                 return null;
             }
 
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(token)
+            final ScreenCapture.DisplayCaptureArgs captureArgs =
+                    new ScreenCapture.DisplayCaptureArgs.Builder(token)
                             .build();
-            return SurfaceControl.captureDisplay(captureArgs);
+            return ScreenCapture.captureDisplay(captureArgs);
         }
     }
 
@@ -3575,12 +3576,12 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId) {
+        public ScreenCapture.ScreenshotHardwareBuffer systemScreenshot(int displayId) {
             return systemScreenshotInternal(displayId);
         }
 
         @Override
-        public SurfaceControl.ScreenshotHardwareBuffer userScreenshot(int displayId) {
+        public ScreenCapture.ScreenshotHardwareBuffer userScreenshot(int displayId) {
             return userScreenshotInternal(displayId);
         }
 

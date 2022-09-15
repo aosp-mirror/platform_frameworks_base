@@ -96,6 +96,7 @@ import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
@@ -630,16 +631,16 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 .setBufferSize(extensionRect.width(), extensionRect.height())
                 .build();
 
-        SurfaceControl.LayerCaptureArgs captureArgs =
-                new SurfaceControl.LayerCaptureArgs.Builder(surfaceToExtend)
+        ScreenCapture.LayerCaptureArgs captureArgs =
+                new ScreenCapture.LayerCaptureArgs.Builder(surfaceToExtend)
                         .setSourceCrop(edgeBounds)
                         .setFrameScale(1)
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
                         .setAllowProtected(true)
                         .build();
-        final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
-                SurfaceControl.captureLayers(captureArgs);
+        final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =
+                ScreenCapture.captureLayers(captureArgs);
 
         if (edgeBuffer == null) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,

@@ -45,6 +45,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -433,16 +434,16 @@ class SurfaceAnimationRunner {
     private void doCreateExtensionSurface(SurfaceControl leash, Rect edgeBounds,
             Rect extensionRect, int xPos, int yPos, String layerName,
             Transaction startTransaction) {
-        SurfaceControl.LayerCaptureArgs captureArgs =
-                new SurfaceControl.LayerCaptureArgs.Builder(leash /* surfaceToExtend */)
+        ScreenCapture.LayerCaptureArgs captureArgs =
+                new ScreenCapture.LayerCaptureArgs.Builder(leash /* surfaceToExtend */)
                         .setSourceCrop(edgeBounds)
                         .setFrameScale(1)
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
                         .setAllowProtected(true)
                         .build();
-        final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
-                SurfaceControl.captureLayers(captureArgs);
+        final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =
+                ScreenCapture.captureLayers(captureArgs);
 
         if (edgeBuffer == null) {
             // The leash we are trying to screenshot may have been removed by this point, which is

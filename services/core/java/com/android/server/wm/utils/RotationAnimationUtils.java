@@ -30,6 +30,7 @@ import android.media.ImageReader;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.window.ScreenCapture;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -118,8 +119,8 @@ public class RotationAnimationUtils {
         Point size = new Point();
         display.getSize(size);
         Rect crop = new Rect(0, 0, size.x, size.y);
-        SurfaceControl.ScreenshotHardwareBuffer buffer =
-                SurfaceControl.captureLayers(surfaceControl, crop, 1);
+        ScreenCapture.ScreenshotHardwareBuffer buffer =
+                ScreenCapture.captureLayers(surfaceControl, crop, 1);
         if (buffer == null) {
             return 0;
         }

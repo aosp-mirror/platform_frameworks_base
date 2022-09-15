@@ -46,6 +46,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 
 import com.android.internal.R;
@@ -144,14 +145,14 @@ class ScreenRotationAnimation {
                 t.reparent(mScreenshotLayer, mAnimLeash);
                 mStartLuma = change.getSnapshotLuma();
             } else {
-                SurfaceControl.LayerCaptureArgs args =
-                        new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
+                ScreenCapture.LayerCaptureArgs args =
+                        new ScreenCapture.LayerCaptureArgs.Builder(mSurfaceControl)
                                 .setCaptureSecureLayers(true)
                                 .setAllowProtected(true)
                                 .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
                                 .build();
-                SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                        SurfaceControl.captureLayers(args);
+                ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                        ScreenCapture.captureLayers(args);
                 if (screenshotBuffer == null) {
                     Slog.w(TAG, "Unable to take screenshot of display");
                     return;
@@ -481,8 +482,8 @@ class ScreenRotationAnimation {
         }
 
         Rect crop = new Rect(0, 0, bounds.width(), bounds.height());
-        SurfaceControl.ScreenshotHardwareBuffer buffer =
-                SurfaceControl.captureLayers(surfaceControl, crop, 1);
+        ScreenCapture.ScreenshotHardwareBuffer buffer =
+                ScreenCapture.captureLayers(surfaceControl, crop, 1);
         if (buffer == null) {
             return 0;
         }
