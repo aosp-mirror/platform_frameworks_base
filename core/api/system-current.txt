@@ -1318,6 +1318,7 @@ package android.app.ambientcontext {
     method @NonNull public java.time.Instant getStartTime();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEvent> CREATOR;
+    field public static final int EVENT_BACK_DOUBLE_TAP = 3; // 0x3
     field public static final int EVENT_COUGH = 1; // 0x1
     field public static final int EVENT_SNORE = 2; // 0x2
     field public static final int EVENT_UNKNOWN = 0; // 0x0

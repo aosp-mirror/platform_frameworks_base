@@ -63,8 +63,6 @@ public final class AmbientContextEvent implements Parcelable {
      * The integer indicating a double-tap event was detected.
      * For detecting this event type, there's no specific consent activity to request access, but
      * the consent is implied through the double tap toggle in the Settings app.
-     *
-     * @hide
      */
     public static final int EVENT_BACK_DOUBLE_TAP = 3;
 
