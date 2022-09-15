@@ -1595,12 +1595,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         boolean pauseImmediately = false;
         boolean shouldAutoPip = false;
         if (resuming != null) {
+            // We do not want to trigger auto-PiP upon launch of a translucent activity.
+            final boolean resumingOccludesParent = resuming.occludesParent();
             // Resuming the new resume activity only if the previous activity can't go into Pip
             // since we want to give Pip activities a chance to enter Pip before resuming the
             // next activity.
             final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
                     "shouldAutoPipWhilePausing", userLeaving);
-            if (userLeaving && lastResumedCanPip
+            if (userLeaving && resumingOccludesParent && lastResumedCanPip
                     && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
