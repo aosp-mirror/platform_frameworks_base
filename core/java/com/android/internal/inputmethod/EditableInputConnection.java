@@ -231,7 +231,9 @@ public final class EditableInputConnection extends BaseInputConnection
                 | InputConnection.CURSOR_UPDATE_MONITOR;
         final int knownFilterFlags = InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
                 | InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER
-                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS;
+                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_TEXT_APPEARANCE;
 
         // It is possible that any other bit is used as a valid flag in a future release.
         // We should reject the entire request in such a case.
