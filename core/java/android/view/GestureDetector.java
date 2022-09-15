@@ -653,7 +653,7 @@ public class GestureDetector {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if ((mCurrentDownEvent == null) || mInLongPress || mInContextClick) {
+                if (mInLongPress || mInContextClick) {
                     break;
                 }
 
@@ -736,9 +736,6 @@ public class GestureDetector {
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (mCurrentDownEvent == null) {
-                    break;
-                }
                 mStillDown = false;
                 MotionEvent currentUpEvent = MotionEvent.obtain(ev);
                 if (mIsDoubleTapping) {
