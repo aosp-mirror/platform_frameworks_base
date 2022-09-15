@@ -238,7 +238,7 @@ constructor(
                 }
             }
 
-            override fun onLaunchAnimationCancelled() {
+            override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
                 controller.onLaunchAnimationCancelled()
                 enableDialogDismiss()
                 dialog.dismiss()
