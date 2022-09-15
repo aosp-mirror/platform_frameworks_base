@@ -1310,6 +1310,22 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.control.availableSettingsOverrides", int[].class);
 
     /**
+     * <p>Whether the camera device supports {@link CaptureRequest#CONTROL_AUTOFRAMING android.control.autoframing}.</p>
+     * <p>Will be <code>false</code> if auto-framing is not available.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Boolean> CONTROL_AUTOFRAMING_AVAILABLE =
+            new Key<Boolean>("android.control.autoframingAvailable", boolean.class);
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support

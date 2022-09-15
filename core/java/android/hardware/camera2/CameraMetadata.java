@@ -3244,6 +3244,28 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SETTINGS_OVERRIDE_VENDOR_START = 0x4000;
 
     //
+    // Enumeration values for CaptureRequest#CONTROL_AUTOFRAMING
+    //
+
+    /**
+     * <p>Disable autoframing.</p>
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     */
+    public static final int CONTROL_AUTOFRAMING_OFF = 0;
+
+    /**
+     * <p>Enable autoframing to keep people in the frame's field of view.</p>
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     */
+    public static final int CONTROL_AUTOFRAMING_ON = 1;
+
+    /**
+     * <p>Automatically select ON or OFF based on the system level preferences.</p>
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     */
+    public static final int CONTROL_AUTOFRAMING_AUTO = 2;
+
+    //
     // Enumeration values for CaptureRequest#EDGE_MODE
     //
 
@@ -3995,6 +4017,29 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureResult#CONTROL_AF_SCENE_CHANGE
      */
     public static final int CONTROL_AF_SCENE_CHANGE_DETECTED = 1;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_AUTOFRAMING_STATE
+    //
+
+    /**
+     * <p>Auto-framing is inactive.</p>
+     * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
+     */
+    public static final int CONTROL_AUTOFRAMING_STATE_INACTIVE = 0;
+
+    /**
+     * <p>Auto-framing is in process - either zooming in, zooming out or pan is taking place.</p>
+     * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
+     */
+    public static final int CONTROL_AUTOFRAMING_STATE_FRAMING = 1;
+
+    /**
+     * <p>Auto-framing has reached a stable state (frame/fov is not being adjusted). The state
+     * may transition back to FRAMING if the scene changes.</p>
+     * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
+     */
+    public static final int CONTROL_AUTOFRAMING_STATE_CONVERGED = 2;
 
     //
     // Enumeration values for CaptureResult#FLASH_STATE
