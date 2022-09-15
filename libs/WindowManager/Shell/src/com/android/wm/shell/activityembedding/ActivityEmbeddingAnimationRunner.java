@@ -22,7 +22,6 @@ import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.Log;
@@ -169,15 +168,12 @@ class ActivityEmbeddingAnimationRunner {
         final Rect openingWholeScreenBounds = new Rect();
         final Rect closingWholeScreenBounds = new Rect();
         for (TransitionInfo.Change change : info.getChanges()) {
-            final Rect bounds = new Rect(change.getEndAbsBounds());
-            final Point offset = change.getEndRelOffset();
-            bounds.offsetTo(offset.x, offset.y);
             if (Transitions.isOpeningType(change.getMode())) {
                 openingChanges.add(change);
-                openingWholeScreenBounds.union(bounds);
+                openingWholeScreenBounds.union(change.getEndAbsBounds());
             } else {
                 closingChanges.add(change);
-                closingWholeScreenBounds.union(bounds);
+                closingWholeScreenBounds.union(change.getEndAbsBounds());
             }
         }
 
@@ -210,22 +206,8 @@ class ActivityEmbeddingAnimationRunner {
             @NonNull BiFunction<TransitionInfo.Change, Rect, Animation> animationProvider,
             @NonNull Rect wholeAnimationBounds) {
         final Animation animation = animationProvider.apply(change, wholeAnimationBounds);
-        final Rect bounds = new Rect(change.getEndAbsBounds());
-        final Point offset = change.getEndRelOffset();
-        bounds.offsetTo(offset.x, offset.y);
-        if (bounds.left == wholeAnimationBounds.left
-                && bounds.right != wholeAnimationBounds.right) {
-            // This is the left split of the whole animation window.
-            return new ActivityEmbeddingAnimationAdapter.SplitAdapter(animation, change,
-                    true /* isLeftHalf */, wholeAnimationBounds.width());
-        } else if (bounds.left != wholeAnimationBounds.left
-                && bounds.right == wholeAnimationBounds.right) {
-            // This is the right split of the whole animation window.
-            return new ActivityEmbeddingAnimationAdapter.SplitAdapter(animation, change,
-                    false /* isLeftHalf */, wholeAnimationBounds.width());
-        }
-        // Open/close window that fills the whole animation.
-        return new ActivityEmbeddingAnimationAdapter(animation, change);
+        return new ActivityEmbeddingAnimationAdapter(animation, change, change.getLeash(),
+                wholeAnimationBounds);
     }
 
     @NonNull
