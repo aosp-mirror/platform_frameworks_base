@@ -573,7 +573,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setInSplitShade(boolean inSplitShade) {
         mInSplitShade = inSplitShade;
-        mQSAnimator.setTranslateWhileExpanding(inSplitShade);
         updateShowCollapsedOnKeyguard();
         updateQsState();
     }
@@ -669,7 +668,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
-        mQSPanelScrollView.setTranslationY(translationScaleY * heightDiff);
+
+        float qsScrollViewTranslation =
+                onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
+        mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
+
         if (fullyCollapsed) {
             mQSPanelScrollView.setScrollY(0);
         }
