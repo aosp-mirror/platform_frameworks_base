@@ -7136,6 +7136,7 @@ package android.media.tv.tuner {
     field public static final int TUNER_VERSION_1_0 = 65536; // 0x10000
     field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
     field public static final int TUNER_VERSION_2_0 = 131072; // 0x20000
+    field public static final int TUNER_VERSION_3_0 = 196608; // 0x30000
     field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
   }
 
@@ -7153,6 +7154,7 @@ package android.media.tv.tuner.dvr {
     method public long read(@NonNull byte[], long, long);
     method public long seek(long);
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int setPlaybackBufferStatusCheckIntervalHint(long);
     method public int start();
     method public int stop();
     field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
@@ -7168,6 +7170,7 @@ package android.media.tv.tuner.dvr {
     method public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
     method public int flush();
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int setRecordBufferStatusCheckIntervalHint(long);
     method public int start();
     method public int stop();
     method public long write(long);
