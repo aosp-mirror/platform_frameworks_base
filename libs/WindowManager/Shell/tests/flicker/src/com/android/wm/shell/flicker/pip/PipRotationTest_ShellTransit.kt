@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -59,4 +60,10 @@ class PipRotationTest_ShellTransit(testSpec: FlickerTestParameter) : PipRotation
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
+
+    /** {@inheritDoc}  */
+    @FlakyTest
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() =
+        super.navBarLayerPositionAtStartAndEnd()
 }

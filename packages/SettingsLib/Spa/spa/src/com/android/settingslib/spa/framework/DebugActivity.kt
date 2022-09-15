@@ -60,6 +60,17 @@ open class DebugActivity(
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
 
+        val packageName = browseActivityClass.packageName
+        val className = browseActivityClass.toString().removePrefix("class $packageName")
+        for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
+            if (pageWithEntry.page.hasRuntimeParam()) continue
+            val route = pageWithEntry.page.buildRoute()
+            Log.d(
+                "DEBUG ACTIVITY",
+                "adb shell am start -n $packageName/$className -e $KEY_DESTINATION $route"
+            )
+        }
+
         setContent {
             SettingsTheme {
                 MainContent()
@@ -136,6 +147,7 @@ open class DebugActivity(
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"
+                override val enabled = (!pageWithEntry.page.hasRuntimeParam()).toState()
                 override val onClick = openPage(pageWithEntry.page)
             })
             EntryList(pageWithEntry.entries)
@@ -149,6 +161,7 @@ open class DebugActivity(
         RegularScaffold(title = "Entry ${entry.displayName}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
+                override val enabled = (!entry.hasRuntimeParam()).toState()
                 override val onClick = openEntry(entry)
             })
             Text(text = entry.formatAll())
@@ -168,7 +181,8 @@ open class DebugActivity(
     }
 
     @Composable
-    private fun openPage(page: SettingsPage): () -> Unit {
+    private fun openPage(page: SettingsPage): (() -> Unit)? {
+        if (page.hasRuntimeParam()) return null
         val route = page.buildRoute()
         val context = LocalContext.current
         val intent = Intent(context, browseActivityClass).apply {
@@ -181,7 +195,8 @@ open class DebugActivity(
     }
 
     @Composable
-    private fun openEntry(entry: SettingsEntry): () -> Unit {
+    private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
+        if (entry.hasRuntimeParam()) return null
         val route = entry.buildRoute()
         val context = LocalContext.current
         val intent = Intent(context, browseActivityClass).apply {

@@ -121,20 +121,10 @@ object SliderPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        SliderPage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun SliderPage() {
-    RegularScaffold(title = TITLE) {
-        for (entry in SliderPageProvider.buildEntry(arguments = null)) {
-            entry.uiLayout()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
         }
     }
 }
@@ -143,6 +133,6 @@ private fun SliderPage() {
 @Composable
 private fun SliderPagePreview() {
     SettingsTheme {
-        SliderPage()
+        SliderPageProvider.Page(null)
     }
 }

@@ -19,6 +19,8 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.pm.UserManagerInternal.PARENT_DISPLAY;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
@@ -119,9 +121,6 @@ public final class UserManagerInternalTest extends UserManagerServiceOrInternalT
                 () -> mUmi.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
-        assertWithMessage("exception (%s) message", e).that(e).hasMessageThat()
-                .matches("Cannot.*" + PROFILE_USER_ID + ".*" + SECONDARY_DISPLAY_ID
-                        + ".*parent.*current.*" + PARENT_USER_ID + ".*");
         assertNoUserAssignedToDisplay();
     }
 
@@ -136,10 +135,6 @@ public final class UserManagerInternalTest extends UserManagerServiceOrInternalT
                 () -> mUmi.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
-        assertWithMessage("exception (%s) message", e).that(e).hasMessageThat()
-                .matches("Cannot.*" + PROFILE_USER_ID + ".*" + SECONDARY_DISPLAY_ID
-                        + ".*parent.*current.*" + PARENT_USER_ID + ".*");
-
         assertNoUserAssignedToDisplay();
     }
 
@@ -173,7 +168,7 @@ public final class UserManagerInternalTest extends UserManagerServiceOrInternalT
         addDefaultProfileAndParent();
 
         mUmi.assignUserToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        mUmi.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        mUmi.assignUserToDisplay(PROFILE_USER_ID, PARENT_DISPLAY);
 
         assertUsersAssignedToDisplays(PARENT_USER_ID, SECONDARY_DISPLAY_ID,
                 pair(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
@@ -185,13 +180,10 @@ public final class UserManagerInternalTest extends UserManagerServiceOrInternalT
         addDefaultProfileAndParent();
 
         mUmi.assignUserToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        IllegalStateException e = assertThrows(IllegalStateException.class,
-                () -> mUmi.assignUserToDisplay(PROFILE_USER_ID, OTHER_SECONDARY_DISPLAY_ID));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> mUmi.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
-        assertWithMessage("exception (%s) message", e).that(e).hasMessageThat()
-                .matches("Cannot.*" + PROFILE_USER_ID + ".*" + OTHER_SECONDARY_DISPLAY_ID
-                        + ".*parent.*" + PARENT_USER_ID + ".*" + SECONDARY_DISPLAY_ID + ".*");
         assertUserAssignedToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
     }
 

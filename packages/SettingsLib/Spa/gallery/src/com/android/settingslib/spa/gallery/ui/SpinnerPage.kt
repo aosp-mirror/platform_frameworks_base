@@ -51,28 +51,20 @@ object SpinnerPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        SpinnerPage()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun SpinnerPage() {
-    RegularScaffold(title = TITLE) {
-        val selectedIndex = rememberSaveable { mutableStateOf(0) }
-        Spinner(
-            options = (1..3).map { "Option $it" },
-            selectedIndex = selectedIndex.value,
-            setIndex = { selectedIndex.value = it },
-        )
-        Preference(object : PreferenceModel {
-            override val title = "Selected index"
-            override val summary = remember { derivedStateOf { selectedIndex.value.toString() } }
-        })
+        RegularScaffold(title = TITLE) {
+            val selectedIndex = rememberSaveable { mutableStateOf(0) }
+            Spinner(
+                options = (1..3).map { "Option $it" },
+                selectedIndex = selectedIndex.value,
+                setIndex = { selectedIndex.value = it },
+            )
+            Preference(object : PreferenceModel {
+                override val title = "Selected index"
+                override val summary = remember {
+                    derivedStateOf { selectedIndex.value.toString() }
+                }
+            })
+        }
     }
 }
 
@@ -80,6 +72,6 @@ private fun SpinnerPage() {
 @Composable
 private fun SpinnerPagePreview() {
     SettingsTheme {
-        SpinnerPage()
+        SpinnerPageProvider.Page(null)
     }
 }

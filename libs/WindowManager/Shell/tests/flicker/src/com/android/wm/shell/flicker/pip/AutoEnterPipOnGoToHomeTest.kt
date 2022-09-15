@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -83,6 +83,7 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
             }
         }
 
+    @FlakyTest
     @Test
     override fun pipLayerReduces() {
         testSpec.assertLayers {
@@ -96,6 +97,7 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
     /**
      * Checks that [pipApp] window is animated towards default position in right bottom corner
      */
+    @Presubmit
     @Test
     fun pipLayerMovesTowardsRightBottomCorner() {
         // in gestural nav the swipe makes PiP first go upwards
@@ -111,66 +113,11 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
         }
     }
 
+    @Presubmit
     @Test
     override fun focusChanges() {
         // in gestural nav the focus goes to different activity on swipe up
         Assume.assumeFalse(testSpec.isGesturalNavigation)
         super.focusChanges()
     }
-
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    @Postsubmit
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    @Postsubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    @Postsubmit
-    @Test
-    override fun pipAppLayerAlwaysVisible() = super.pipAppLayerAlwaysVisible()
-
-    @Postsubmit
-    @Test
-    override fun pipLayerRemainInsideVisibleBounds() = super.pipLayerRemainInsideVisibleBounds()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    @Postsubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }

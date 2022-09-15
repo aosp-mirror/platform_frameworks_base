@@ -111,7 +111,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     /**
      * Checks that the visible region of [pipApp] always expands during the animation
      */
-    @FlakyTest(bugId = 228012337)
+    @Presubmit
     @Test
     fun pipLayerExpands() {
         testSpec.assertLayers {

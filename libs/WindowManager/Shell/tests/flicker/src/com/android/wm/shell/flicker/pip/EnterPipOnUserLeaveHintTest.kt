@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -81,7 +80,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun pipAppLayerAlwaysVisible() {
         if (!testSpec.isGesturalNavigation) super.pipAppLayerAlwaysVisible() else {
@@ -94,7 +93,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun pipLayerReduces() {
         // in gestural nav the pip enters through alpha animation
@@ -102,18 +101,13 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
         super.pipLayerReduces()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun focusChanges() {
         // in gestural nav the focus goes to different activity on swipe up
         Assume.assumeFalse(testSpec.isGesturalNavigation)
         super.focusChanges()
     }
-
-    /** {@inheritDoc}  */
-    @Postsubmit
-    @Test
-    override fun pipAppWindowAlwaysVisible() = super.pipAppWindowAlwaysVisible()
 
     @Presubmit
     @Test
@@ -129,7 +123,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
         super.entireScreenCovered()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun pipLayerRemainInsideVisibleBounds() {
         if (!testSpec.isGesturalNavigation) super.pipLayerRemainInsideVisibleBounds() else {

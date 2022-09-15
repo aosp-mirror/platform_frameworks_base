@@ -64,7 +64,6 @@ public final class DeleteGesture extends HandwritingGesture implements Parcelabl
      * Returns the deletion area {@link RectF} in screen coordinates.
      *
      * Getter for deletion area set with {@link DeleteGesture.Builder#setDeletionArea(RectF)}.
-     * {@code null} if area was not set.
      */
     @NonNull
     public RectF getDeletionArea() {
@@ -145,7 +144,8 @@ public final class DeleteGesture extends HandwritingGesture implements Parcelabl
     /**
      * Used to make this class parcelable.
      */
-    public static final @android.annotation.NonNull Creator<DeleteGesture> CREATOR =
+    @NonNull
+    public static final Creator<DeleteGesture> CREATOR =
             new Creator<DeleteGesture>() {
         @Override
         public DeleteGesture createFromParcel(Parcel source) {

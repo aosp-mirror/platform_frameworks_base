@@ -33,25 +33,16 @@ object PreferenceMainPageProvider : SettingsPageProvider {
     override val name = "PreferenceMain"
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val entryList = mutableListOf<SettingsEntry>()
-        entryList.add(
+        return listOf(
             PreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build()
-        )
-        entryList.add(
+                .setLink(fromPage = SettingsPage.create(name)).build(),
             SwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build()
-        )
-        entryList.add(
+                .setLink(fromPage = SettingsPage.create(name)).build(),
             MainSwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build()
-        )
-        entryList.add(
+                .setLink(fromPage = SettingsPage.create(name)).build(),
             TwoTargetSwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = SettingsPage.create(name)).build()
+                .setLink(fromPage = SettingsPage.create(name)).build(),
         )
-
-        return entryList
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
@@ -67,21 +58,10 @@ object PreferenceMainPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        PreferenceMain()
-    }
-
-    @Composable
-    fun EntryItem() {
-        buildInjectEntry().build().uiLayout.let { it() }
-    }
-}
-
-@Composable
-private fun PreferenceMain() {
-    RegularScaffold(title = TITLE) {
-        PreferencePageProvider.EntryItem()
-        SwitchPreferencePageProvider.EntryItem()
-        MainSwitchPreferencePageProvider.EntryItem()
-        TwoTargetSwitchPreferencePageProvider.EntryItem()
+        RegularScaffold(title = TITLE) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
+        }
     }
 }
