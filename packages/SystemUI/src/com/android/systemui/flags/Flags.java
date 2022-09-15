@@ -104,6 +104,10 @@ public class Flags {
     public static final UnreleasedFlag MODERN_USER_SWITCHER_ACTIVITY =
             new UnreleasedFlag(209, true);
 
+    /** Whether the new implementation of UserSwitcherController should be used. */
+    public static final UnreleasedFlag REFACTORED_USER_SWITCHER_CONTROLLER =
+            new UnreleasedFlag(210, false);
+
     /***************************************/
     // 300 - power menu
     public static final ReleasedFlag POWER_MENU_LITE =
