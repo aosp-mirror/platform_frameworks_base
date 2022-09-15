@@ -96,6 +96,7 @@ public abstract class PanelViewController {
     private float mMinExpandHeight;
     private boolean mPanelUpdateWhenAnimatorEnds;
     private final boolean mVibrateOnOpening;
+    private boolean mHasVibratedOnOpen = false;
     protected boolean mIsLaunchAnimationRunning;
     private int mFixedDuration = NO_FIXED_DURATION;
     protected float mOverExpansion;
@@ -353,8 +354,8 @@ public abstract class PanelViewController {
 
     private void startOpening(MotionEvent event) {
         updatePanelExpansionAndVisibility();
-        maybeVibrateOnOpening();
-
+        // Reset at start so haptic can be triggered as soon as panel starts to open.
+        mHasVibratedOnOpen = false;
         //TODO: keyguard opens QS a different way; log that too?
 
         // Log the position of the swipe that opened the panel
@@ -368,9 +369,18 @@ public abstract class PanelViewController {
                 .log(LockscreenUiEvent.LOCKSCREEN_UNLOCKED_NOTIFICATION_PANEL_EXPAND);
     }
 
-    protected void maybeVibrateOnOpening() {
+    /**
+     * Maybe vibrate as panel is opened.
+     *
+     * @param openingWithTouch Whether the panel is being opened with touch. If the panel is instead
+     * being opened programmatically (such as by the open panel gesture), we always play haptic.
+     */
+    protected void maybeVibrateOnOpening(boolean openingWithTouch) {
         if (mVibrateOnOpening) {
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+            if (!openingWithTouch || !mHasVibratedOnOpen) {
+                mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+                mHasVibratedOnOpen = true;
+            }
         }
     }
 
@@ -1371,6 +1381,9 @@ public abstract class PanelViewController {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     addMovement(event);
+                    if (!isFullyCollapsed()) {
+                        maybeVibrateOnOpening(true /* openingWithTouch */);
+                    }
                     float h = y - mInitialExpandY;
 
                     // If the panel was collapsed when touching, we only need to check for the

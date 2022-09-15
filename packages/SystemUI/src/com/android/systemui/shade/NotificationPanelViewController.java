@@ -2217,7 +2217,8 @@ public final class NotificationPanelViewController extends PanelViewController {
             if (cancel) {
                 collapse(false /* delayed */, 1.0f /* speedUpFactor */);
             } else {
-                maybeVibrateOnOpening();
+                // Window never will receive touch events that typically trigger haptic on open.
+                maybeVibrateOnOpening(false /* openingWithTouch */);
                 fling(velocity > 1f ? 1000f * velocity : 0, true /* expand */);
             }
             onTrackingStopped(false);
