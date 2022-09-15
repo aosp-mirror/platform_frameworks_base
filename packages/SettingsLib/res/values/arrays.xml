@@ -158,18 +158,6 @@
         <item>Opus</item>
     </string-array>
 
-    <!-- Values for Bluetooth Audio Codec selection preference. -->
-    <string-array name="bluetooth_a2dp_codec_values" translatable="false" >
-        <item>1000000</item>
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-    </string-array>
-
     <!-- Summaries for Bluetooth Audio Codec selection preference. [CHAR LIMIT=50]-->
     <string-array name="bluetooth_a2dp_codec_summaries" >
         <item>Use System Selection (Default)</item>
@@ -191,15 +179,6 @@
         <item>96.0 kHz</item>
     </string-array>
 
-    <!-- Values for Bluetooth Audio Codec Sample Rate selection preference. -->
-    <string-array name="bluetooth_a2dp_codec_sample_rate_values" translatable="false" >
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>4</item>
-        <item>8</item>
-    </string-array>
-
     <!-- Summaries for Bluetooth Audio Codec Sample Rate selection preference. [CHAR LIMIT=50]-->
     <string-array name="bluetooth_a2dp_codec_sample_rate_summaries" >
         <item>Use System Selection (Default)</item>
@@ -217,14 +196,6 @@
         <item>32 bits/sample</item>
     </string-array>
 
-    <!-- Values for Bluetooth Audio Codec Bits Per Sample selection preference. -->
-    <string-array name="bluetooth_a2dp_codec_bits_per_sample_values" translatable="false" >
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>4</item>
-    </string-array>
-
     <!-- Summaries for Bluetooth Audio Codec Bits Per Sample selection preference. [CHAR LIMIT=50]-->
     <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries" >
         <item>Use System Selection (Default)</item>
@@ -240,13 +211,6 @@
         <item>Stereo</item>
     </string-array>
 
-    <!-- Values for Bluetooth Audio Codec Channel Mode selection preference. -->
-    <string-array name="bluetooth_a2dp_codec_channel_mode_values" translatable="false" >
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-
     <!-- Summaries for Bluetooth Audio Codec Channel Mode selection preference. [CHAR LIMIT=50]-->
     <string-array name="bluetooth_a2dp_codec_channel_mode_summaries" >
         <item>Use System Selection (Default)</item>
@@ -260,14 +224,6 @@
         <item>Balanced Audio And Connection Quality (660kbps/606kbps)</item>
         <item>Optimized for Connection Quality (330kbps/303kbps)</item>
         <item>Best Effort (Adaptive Bit Rate)</item>
-    </string-array>
-
-    <!-- Values for Bluetooth Audio Codec LDAC Playback Quaility selection preference. -->
-    <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_values" translatable="false" >
-        <item>1000</item>
-        <item>1001</item>
-        <item>1002</item>
-        <item>1003</item>
     </string-array>
 
     <!-- Summaries for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=70]-->
