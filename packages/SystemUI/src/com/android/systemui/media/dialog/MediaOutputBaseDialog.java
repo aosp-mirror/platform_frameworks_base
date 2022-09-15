@@ -310,6 +310,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             if (icon.getType() != Icon.TYPE_BITMAP && icon.getType() != Icon.TYPE_ADAPTIVE_BITMAP) {
                 // icon doesn't support getBitmap, use default value for color scheme
                 updateButtonBackgroundColorFilter();
+                updateDialogBackgroundColor();
             } else {
                 Configuration config = mContext.getResources().getConfiguration();
                 int currentNightMode = config.uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -319,11 +320,14 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 if (colorSetUpdated) {
                     mAdapter.updateColorScheme(wallpaperColors, isDarkThemeOn);
                     updateButtonBackgroundColorFilter();
+                    updateDialogBackgroundColor();
                 }
             }
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageIcon(icon);
         } else {
+            updateButtonBackgroundColorFilter();
+            updateDialogBackgroundColor();
             mHeaderIcon.setVisibility(View.GONE);
         }
         if (appSourceIcon != null) {
@@ -381,11 +385,16 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     private void updateButtonBackgroundColorFilter() {
         ColorFilter buttonColorFilter = new PorterDuffColorFilter(
-                mAdapter.getController().getColorButtonBackground(),
+                mMediaOutputController.getColorButtonBackground(),
                 PorterDuff.Mode.SRC_IN);
         mDoneButton.getBackground().setColorFilter(buttonColorFilter);
         mStopButton.getBackground().setColorFilter(buttonColorFilter);
-        mDoneButton.setTextColor(mAdapter.getController().getColorPositiveButtonText());
+        mDoneButton.setTextColor(mMediaOutputController.getColorPositiveButtonText());
+    }
+
+    private void updateDialogBackgroundColor() {
+        getDialogView().getBackground().setTint(mMediaOutputController.getColorDialogBackground());
+        mDeviceListLayout.setBackgroundColor(mMediaOutputController.getColorDialogBackground());
     }
 
     private Drawable resizeDrawable(Drawable drawable, int size) {
