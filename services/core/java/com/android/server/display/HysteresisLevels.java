@@ -18,15 +18,12 @@ package com.android.server.display;
 
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
  * A helper class for handling access to illuminance hysteresis level values.
  */
-@VisibleForTesting
 public class HysteresisLevels {
     private static final String TAG = "HysteresisLevels";
 

@@ -40,7 +40,6 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginEnd="@dimen/dream_overlay_status_bar_extra_margin"
         app:layout_constraintEnd_toStartOf="@+id/dream_overlay_system_status" />
 
     <LinearLayout
@@ -48,14 +47,15 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:layout_marginStart="@dimen/dream_overlay_status_bar_extra_margin"
+        android:paddingStart="@dimen/dream_overlay_status_bar_extra_margin"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/dream_overlay_alarm_set"
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
             android:src="@drawable/ic_alarm"
             android:tint="@android:color/white"
             android:visibility="gone"
@@ -65,7 +65,7 @@
             android:id="@+id/dream_overlay_priority_mode"
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
             android:src="@drawable/ic_qs_dnd_on"
             android:tint="@android:color/white"
             android:visibility="gone"
@@ -75,7 +75,7 @@
             android:id="@+id/dream_overlay_wifi_status"
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
             android:src="@drawable/ic_signal_wifi_off"
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_wifi_off" />
@@ -84,7 +84,7 @@
             android:id="@+id/dream_overlay_mic_off"
             android:layout_width="@dimen/dream_overlay_grey_chip_width"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
             android:src="@drawable/dream_overlay_mic_off"
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_mic_off" />
@@ -93,7 +93,7 @@
             android:id="@+id/dream_overlay_camera_off"
             android:layout_width="@dimen/dream_overlay_grey_chip_width"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
             android:src="@drawable/dream_overlay_camera_off"
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_camera_off" />
@@ -102,7 +102,7 @@
             android:id="@+id/dream_overlay_camera_mic_off"
             android:layout_width="@dimen/dream_overlay_grey_chip_width"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
             android:src="@drawable/dream_overlay_mic_and_camera_off"
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_camera_mic_off" />

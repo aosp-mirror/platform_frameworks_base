@@ -586,13 +586,16 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Nota skjálás"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Sláðu inn skjálásinn þinn til að halda áfram"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Ýttu ákveðið á lesarann"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ekki var hægt að vinna úr fingrafarinu. Reyndu aftur."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hreinsaðu fingrafaralesarann og reyndu aftur"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Hreinsaðu lesarann og reyndu aftur"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Ýttu ákveðið á lesarann"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Fingurinn hreyfðist of hægt. Reyndu aftur."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prófaðu annað fingrafar"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Of bjart"</string>
+    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
+    <skip />
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prófaðu að breyta stöðu fingursins"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Breyttu stöðu fingursins örlítið í hvert skipti"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +607,15 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Andlit staðfest, ýttu til að staðfesta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Fingrafarsvélbúnaður ekki til staðar."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ekki er hægt að setja upp fingrafar"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Tímamörk runnu út fyrir fingrafar. Reyndu aftur."</string>
+    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
+    <skip />
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Hætt við fingrafarsaðgerð."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Notandi hætti við að nota fingrafar."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Of margar tilraunir. Reyndu aftur síðar."</string>
+    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
+    <skip />
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Of margar tilraunir. Notaðu skjálás í staðinn."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Reyndu aftur."</string>
+    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
+    <skip />
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Engin fingraför hafa verið skráð."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Þetta tæki er ekki með fingrafaralesara."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Slökkt tímabundið á skynjara."</string>
@@ -1251,8 +1257,10 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Ræsir forrit."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Lýkur ræsingu."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Þú ýttir á aflrofann. Yfirleitt slekkur það á skjánum.\n\nPrófaðu að ýta laust þegar þú setur upp fingrafarið."</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Ýttu til að slökkva á skjá"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"Slökkva á skjá"</string>
+    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
+    <skip />
+    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
+    <skip />
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Halda áfram að staðfesta fingrafarið?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Þú ýttir á aflrofann. Yfirleitt slekkur það á skjánum.\n\nPrófaðu að ýta laust til að staðfesta fingrafarið þitt."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Slökkva á skjá"</string>

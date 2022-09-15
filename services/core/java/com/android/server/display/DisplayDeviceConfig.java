@@ -188,8 +188,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <ambientLightHorizonLong>10001</ambientLightHorizonLong>
  *      <ambientLightHorizonShort>2001</ambientLightHorizonShort>
  *
- *      <displayBrightnessChangeThresholds>
- *        <brighteningThresholds>
+ *      <displayBrightnessChangeThresholds> // Thresholds for screen changes
+ *        <brighteningThresholds>     // Thresholds for active mode brightness changes.
  *          <minimum>0.001</minimum>  // Minimum change needed in screen brightness to brighten.
  *        </brighteningThresholds>
  *        <darkeningThresholds>
@@ -197,14 +197,32 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *        </darkeningThresholds>
  *      </displayBrightnessChangeThresholds>
  *
- *      <ambientBrightnessChangeThresholds>
- *        <brighteningThresholds>
+ *      <ambientBrightnessChangeThresholds> // Thresholds for lux changes
+ *        <brighteningThresholds>     // Thresholds for active mode brightness changes.
  *          <minimum>0.003</minimum>  // Minimum change needed in ambient brightness to brighten.
  *        </brighteningThresholds>
  *        <darkeningThresholds>
  *          <minimum>0.004</minimum>  // Minimum change needed in ambient brightness to darken.
  *        </darkeningThresholds>
  *      </ambientBrightnessChangeThresholds>
+ *
+ *      <displayBrightnessChangeThresholdsIdle> // Thresholds for screen changes in idle mode
+ *        <brighteningThresholds>     // Thresholds for idle mode brightness changes.
+ *          <minimum>0.001</minimum>  // Minimum change needed in screen brightness to brighten.
+ *        </brighteningThresholds>
+ *        <darkeningThresholds>
+ *          <minimum>0.002</minimum>  // Minimum change needed in screen brightness to darken.
+ *        </darkeningThresholds>
+ *      </displayBrightnessChangeThresholdsIdle>
+ *
+ *      <ambientBrightnessChangeThresholdsIdle> // Thresholds for lux changes in idle mode
+ *        <brighteningThresholds>     // Thresholds for idle mode brightness changes.
+ *          <minimum>0.003</minimum>  // Minimum change needed in ambient brightness to brighten.
+ *        </brighteningThresholds>
+ *        <darkeningThresholds>
+ *          <minimum>0.004</minimum>  // Minimum change needed in ambient brightness to darken.
+ *        </darkeningThresholds>
+ *      </ambientBrightnessChangeThresholdsIdle>
  *
  *    </displayConfiguration>
  *  }
@@ -319,9 +337,13 @@ public class DisplayDeviceConfig {
     private int mAmbientHorizonLong = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
     private int mAmbientHorizonShort = AMBIENT_LIGHT_SHORT_HORIZON_MILLIS;
     private float mScreenBrighteningMinThreshold = 0.0f;     // Retain behaviour as though there is
-    private float mScreenDarkeningMinThreshold = 0.0f;       // no minimum threshold for change in
-    private float mAmbientLuxBrighteningMinThreshold = 0.0f; // screen brightness or ambient
-    private float mAmbientLuxDarkeningMinThreshold = 0.0f;   // brightness.
+    private float mScreenBrighteningMinThresholdIdle = 0.0f; // no minimum threshold for change in
+    private float mScreenDarkeningMinThreshold = 0.0f;       // screen brightness or ambient
+    private float mScreenDarkeningMinThresholdIdle = 0.0f;   // brightness.
+    private float mAmbientLuxBrighteningMinThreshold = 0.0f;
+    private float mAmbientLuxBrighteningMinThresholdIdle = 0.0f;
+    private float mAmbientLuxDarkeningMinThreshold = 0.0f;
+    private float mAmbientLuxDarkeningMinThresholdIdle = 0.0f;
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
     private Spline mBacklightToNitsSpline;
@@ -625,20 +647,74 @@ public class DisplayDeviceConfig {
         return mAmbientHorizonShort;
     }
 
+    /**
+     * The minimum value for the screen brightness increase to actually occur.
+     * @return float value in brightness scale of 0 - 1.
+     */
     public float getScreenBrighteningMinThreshold() {
         return mScreenBrighteningMinThreshold;
     }
 
+    /**
+     * The minimum value for the screen brightness decrease to actually occur.
+     * @return float value in brightness scale of 0 - 1.
+     */
     public float getScreenDarkeningMinThreshold() {
         return mScreenDarkeningMinThreshold;
     }
 
+    /**
+     * The minimum value for the screen brightness increase to actually occur while in idle screen
+     * brightness mode.
+     * @return float value in brightness scale of 0 - 1.
+     */
+    public float getScreenBrighteningMinThresholdIdle() {
+        return mScreenBrighteningMinThresholdIdle;
+    }
+
+    /**
+     * The minimum value for the screen brightness decrease to actually occur while in idle screen
+     * brightness mode.
+     * @return float value in brightness scale of 0 - 1.
+     */
+    public float getScreenDarkeningMinThresholdIdle() {
+        return mScreenDarkeningMinThresholdIdle;
+    }
+
+    /**
+     * The minimum value for the ambient lux increase for a screen brightness change to actually
+     * occur.
+     * @return float value in brightness scale of 0 - 1.
+     */
     public float getAmbientLuxBrighteningMinThreshold() {
         return mAmbientLuxBrighteningMinThreshold;
     }
 
+    /**
+     * The minimum value for the ambient lux decrease for a screen brightness change to actually
+     * occur.
+     * @return float value in brightness scale of 0 - 1.
+     */
     public float getAmbientLuxDarkeningMinThreshold() {
         return mAmbientLuxDarkeningMinThreshold;
+    }
+
+    /**
+     * The minimum value for the ambient lux increase for a screen brightness change to actually
+     * occur while in idle screen brightness mode.
+     * @return float value in brightness scale of 0 - 1.
+     */
+    public float getAmbientLuxBrighteningMinThresholdIdle() {
+        return mAmbientLuxBrighteningMinThresholdIdle;
+    }
+
+    /**
+     * The minimum value for the ambient lux decrease for a screen brightness change to actually
+     * occur while in idle screen brightness mode.
+     * @return float value in brightness scale of 0 - 1.
+     */
+    public float getAmbientLuxDarkeningMinThresholdIdle() {
+        return mAmbientLuxDarkeningMinThresholdIdle;
     }
 
     SensorData getAmbientLightSensor() {
@@ -745,9 +821,14 @@ public class DisplayDeviceConfig {
                 + ", mAmbientHorizonLong=" + mAmbientHorizonLong
                 + ", mAmbientHorizonShort=" + mAmbientHorizonShort
                 + ", mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
+                + ", mScreenDarkeningMinThresholdIdle=" + mScreenDarkeningMinThresholdIdle
                 + ", mScreenBrighteningMinThreshold=" + mScreenBrighteningMinThreshold
+                + ", mScreenBrighteningMinThresholdIdle=" + mScreenBrighteningMinThresholdIdle
                 + ", mAmbientLuxDarkeningMinThreshold=" + mAmbientLuxDarkeningMinThreshold
+                + ", mAmbientLuxDarkeningMinThresholdIdle=" + mAmbientLuxDarkeningMinThresholdIdle
                 + ", mAmbientLuxBrighteningMinThreshold=" + mAmbientLuxBrighteningMinThreshold
+                + ", mAmbientLuxBrighteningMinThresholdIdle="
+                + mAmbientLuxBrighteningMinThresholdIdle
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
@@ -1376,24 +1457,34 @@ public class DisplayDeviceConfig {
     private void loadBrightnessChangeThresholds(DisplayConfiguration config) {
         Thresholds displayBrightnessThresholds = config.getDisplayBrightnessChangeThresholds();
         Thresholds ambientBrightnessThresholds = config.getAmbientBrightnessChangeThresholds();
+        Thresholds displayBrightnessThresholdsIdle =
+                config.getDisplayBrightnessChangeThresholdsIdle();
+        Thresholds ambientBrightnessThresholdsIdle =
+                config.getAmbientBrightnessChangeThresholdsIdle();
 
+        loadDisplayBrightnessThresholds(displayBrightnessThresholds);
+        loadAmbientBrightnessThresholds(ambientBrightnessThresholds);
+        loadIdleDisplayBrightnessThresholds(displayBrightnessThresholdsIdle);
+        loadIdleAmbientBrightnessThresholds(ambientBrightnessThresholdsIdle);
+    }
+
+    private void loadDisplayBrightnessThresholds(Thresholds displayBrightnessThresholds) {
         if (displayBrightnessThresholds != null) {
             BrightnessThresholds brighteningScreen =
                     displayBrightnessThresholds.getBrighteningThresholds();
             BrightnessThresholds darkeningScreen =
                     displayBrightnessThresholds.getDarkeningThresholds();
 
-            final BigDecimal screenBrighteningThreshold = brighteningScreen.getMinimum();
-            final BigDecimal screenDarkeningThreshold = darkeningScreen.getMinimum();
-
-            if (screenBrighteningThreshold != null) {
-                mScreenBrighteningMinThreshold = screenBrighteningThreshold.floatValue();
+            if (brighteningScreen != null && brighteningScreen.getMinimum() != null) {
+                mScreenBrighteningMinThreshold = brighteningScreen.getMinimum().floatValue();
             }
-            if (screenDarkeningThreshold != null) {
-                mScreenDarkeningMinThreshold = screenDarkeningThreshold.floatValue();
+            if (darkeningScreen != null && darkeningScreen.getMinimum() != null) {
+                mScreenDarkeningMinThreshold = darkeningScreen.getMinimum().floatValue();
             }
         }
+    }
 
+    private void loadAmbientBrightnessThresholds(Thresholds ambientBrightnessThresholds) {
         if (ambientBrightnessThresholds != null) {
             BrightnessThresholds brighteningAmbientLux =
                     ambientBrightnessThresholds.getBrighteningThresholds();
@@ -1408,6 +1499,44 @@ public class DisplayDeviceConfig {
             }
             if (ambientDarkeningThreshold != null) {
                 mAmbientLuxDarkeningMinThreshold = ambientDarkeningThreshold.floatValue();
+            }
+        }
+    }
+
+    private void loadIdleDisplayBrightnessThresholds(Thresholds idleDisplayBrightnessThresholds) {
+        if (idleDisplayBrightnessThresholds != null) {
+            BrightnessThresholds brighteningScreenIdle =
+                    idleDisplayBrightnessThresholds.getBrighteningThresholds();
+            BrightnessThresholds darkeningScreenIdle =
+                    idleDisplayBrightnessThresholds.getDarkeningThresholds();
+
+            if (brighteningScreenIdle != null
+                    && brighteningScreenIdle.getMinimum() != null) {
+                mScreenBrighteningMinThresholdIdle =
+                        brighteningScreenIdle.getMinimum().floatValue();
+            }
+            if (darkeningScreenIdle != null && darkeningScreenIdle.getMinimum() != null) {
+                mScreenDarkeningMinThresholdIdle =
+                        darkeningScreenIdle.getMinimum().floatValue();
+            }
+        }
+    }
+
+    private void loadIdleAmbientBrightnessThresholds(Thresholds idleAmbientBrightnessThresholds) {
+        if (idleAmbientBrightnessThresholds != null) {
+            BrightnessThresholds brighteningAmbientLuxIdle =
+                    idleAmbientBrightnessThresholds.getBrighteningThresholds();
+            BrightnessThresholds darkeningAmbientLuxIdle =
+                    idleAmbientBrightnessThresholds.getDarkeningThresholds();
+
+            if (brighteningAmbientLuxIdle != null
+                    && brighteningAmbientLuxIdle.getMinimum() != null) {
+                mAmbientLuxBrighteningMinThresholdIdle =
+                        brighteningAmbientLuxIdle.getMinimum().floatValue();
+            }
+            if (darkeningAmbientLuxIdle != null && darkeningAmbientLuxIdle.getMinimum() != null) {
+                mAmbientLuxDarkeningMinThresholdIdle =
+                        darkeningAmbientLuxIdle.getMinimum().floatValue();
             }
         }
     }

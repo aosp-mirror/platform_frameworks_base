@@ -310,7 +310,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Test
     public void testOnViewDetachedRemovesViews() {
         mController.onViewDetached();
-        verify(mView).removeAllStatusBarItemViews();
+        verify(mView).removeAllExtraStatusBarItemViews();
     }
 
     @Test
