@@ -42,7 +42,8 @@ public class Device {
     private static final int MSG_OPEN_DEVICE = 1;
     private static final int MSG_SEND_REPORT = 2;
     private static final int MSG_SEND_GET_FEATURE_REPORT_REPLY = 3;
-    private static final int MSG_CLOSE_DEVICE = 4;
+    private static final int MSG_SEND_SET_REPORT_REPLY = 4;
+    private static final int MSG_CLOSE_DEVICE = 5;
 
     // Sync with linux uhid_event_type::UHID_OUTPUT
     private static final byte UHID_EVENT_TYPE_UHID_OUTPUT = 6;
@@ -56,21 +57,45 @@ public class Device {
     private final Map<ByteBuffer, byte[]> mOutputs;
     private final OutputStream mOutputStream;
     private long mTimeToSend;
-
     private final Object mCond = new Object();
+    /**
+     * The report id of the report received in UHID_EVENT_TYPE_SET_REPORT.
+     * Used for SET_REPORT_REPLY.
+     * This field gets overridden each time SET_REPORT is received.
+     */
+    private int mResponseId;
 
     static {
         System.loadLibrary("hidcommand_jni");
     }
 
-    private static native long nativeOpenDevice(String name, int id, int vid, int pid, int bus,
-            byte[] descriptor, DeviceCallback callback);
+    private static native long nativeOpenDevice(
+            String name,
+            int id,
+            int vid,
+            int pid,
+            int bus,
+            byte[] descriptor,
+            DeviceCallback callback);
+
     private static native void nativeSendReport(long ptr, byte[] data);
+
     private static native void nativeSendGetFeatureReportReply(long ptr, int id, byte[] data);
+
+    private static native void nativeSendSetReportReply(long ptr, int id, boolean success);
+
     private static native void nativeCloseDevice(long ptr);
 
-    public Device(int id, String name, int vid, int pid, int bus, byte[] descriptor,
-            byte[] report, SparseArray<byte[]> featureReports, Map<ByteBuffer, byte[]> outputs) {
+    public Device(
+            int id,
+            String name,
+            int vid,
+            int pid,
+            int bus,
+            byte[] descriptor,
+            byte[] report,
+            SparseArray<byte[]> featureReports,
+            Map<ByteBuffer, byte[]> outputs) {
         mId = id;
         mThread = new HandlerThread("HidDeviceHandler");
         mThread.start();
@@ -100,6 +125,17 @@ public class Device {
         mHandler.sendMessageAtTime(msg, mTimeToSend);
     }
 
+    public void setGetReportResponse(byte[] report) {
+        mFeatureReports.put(report[0], report);
+    }
+
+    public void sendSetReportReply(boolean success) {
+        Message msg =
+                mHandler.obtainMessage(MSG_SEND_SET_REPORT_REPLY, mResponseId, success ? 1 : 0);
+
+        mHandler.sendMessageAtTime(msg, mTimeToSend);
+    }
+
     public void addDelay(int delay) {
         mTimeToSend = Math.max(SystemClock.uptimeMillis(), mTimeToSend) + delay;
     }
@@ -111,7 +147,8 @@ public class Device {
             synchronized (mCond) {
                 mCond.wait();
             }
-        } catch (InterruptedException ignore) {}
+        } catch (InterruptedException ignore) {
+        }
     }
 
     private class DeviceHandler extends Handler {
@@ -127,8 +164,15 @@ public class Device {
             switch (msg.what) {
                 case MSG_OPEN_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    mPtr = nativeOpenDevice((String) args.arg1, args.argi1, args.argi2, args.argi3,
-                            args.argi4, (byte[]) args.arg2, new DeviceCallback());
+                    mPtr =
+                            nativeOpenDevice(
+                                    (String) args.arg1,
+                                    args.argi1,
+                                    args.argi2,
+                                    args.argi3,
+                                    args.argi4,
+                                    (byte[]) args.arg2,
+                                    new DeviceCallback());
                     pauseEvents();
                     break;
                 case MSG_SEND_REPORT:
@@ -143,6 +187,14 @@ public class Device {
                         nativeSendGetFeatureReportReply(mPtr, msg.arg1, (byte[]) msg.obj);
                     } else {
                         Log.e(TAG, "Tried to send feature report reply to closed device.");
+                    }
+                    break;
+                case MSG_SEND_SET_REPORT_REPLY:
+                    if (mPtr != 0) {
+                        final boolean success = msg.arg2 == 1;
+                        nativeSendSetReportReply(mPtr, msg.arg1, success);
+                    } else {
+                        Log.e(TAG, "Tried to send set report reply to closed device.");
                     }
                     break;
                 case MSG_CLOSE_DEVICE:
@@ -173,14 +225,18 @@ public class Device {
     }
 
     private class DeviceCallback {
+
         public void onDeviceOpen() {
             mHandler.resumeEvents();
         }
 
         public void onDeviceGetReport(int requestId, int reportId) {
             if (mFeatureReports == null) {
-                Log.e(TAG, "Received GET_REPORT request for reportId=" + reportId
-                        + ", but 'feature_reports' section is not found");
+                Log.e(
+                        TAG,
+                        "Received GET_REPORT request for reportId="
+                                + reportId
+                                + ", but 'feature_reports' section is not found");
                 return;
             }
             byte[] report = mFeatureReports.get(reportId);
@@ -220,14 +276,15 @@ public class Device {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
         }
 
         // native callback
-        public void onDeviceSetReport(byte rtype, byte[] data) {
+        public void onDeviceSetReport(int id, byte rType, byte[] data) {
+            // Used by sendSetReportReply()
+            mResponseId = id;
             // We don't need to reply for the SET_REPORT but just send it to HID output for test
             // verification.
-            sendReportOutput(UHID_EVENT_TYPE_SET_REPORT, rtype, data);
+            sendReportOutput(UHID_EVENT_TYPE_SET_REPORT, rType, data);
         }
 
         // native callback
@@ -239,7 +296,8 @@ public class Device {
             }
             byte[] response = mOutputs.get(ByteBuffer.wrap(data));
             if (response == null) {
-                Log.i(TAG,
+                Log.i(
+                        TAG,
                         "Requested response for output " + Arrays.toString(data) + " is not found");
                 return;
             }

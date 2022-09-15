@@ -157,7 +157,8 @@ private:
     class CaptureThread : public Thread
     {
     public:
-        CaptureThread(Visualizer* visualizer, uint32_t captureRate, bool bCanCallJava = false);
+        CaptureThread(const sp<Visualizer>& visualizer,
+                uint32_t captureRate, bool bCanCallJava = false);
 
     private:
         friend class Visualizer;

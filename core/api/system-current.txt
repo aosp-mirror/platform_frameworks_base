@@ -5956,7 +5956,7 @@ package android.location {
     method public int getEphemerisSource();
     method @FloatRange public double getIonoDelayMeters();
     method @IntRange(from=0, to=1023) public int getIssueOfDataClock();
-    method @IntRange(from=0, to=255) public int getIssueOfDataEphemeris();
+    method @IntRange(from=0, to=1023) public int getIssueOfDataEphemeris();
     method @Nullable public android.location.SatellitePvt.PositionEcef getPositionEcef();
     method @IntRange(from=0) public long getTimeOfClockSeconds();
     method @IntRange(from=0) public long getTimeOfEphemerisSeconds();
@@ -5984,7 +5984,7 @@ package android.location {
     method @NonNull public android.location.SatellitePvt.Builder setEphemerisSource(int);
     method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataClock(@IntRange(from=0, to=1023) int);
-    method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataEphemeris(@IntRange(from=0, to=255) int);
+    method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataEphemeris(@IntRange(from=0, to=1023) int);
     method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
     method @NonNull public android.location.SatellitePvt.Builder setTimeOfClockSeconds(@IntRange(from=0) long);
     method @NonNull public android.location.SatellitePvt.Builder setTimeOfEphemerisSeconds(@IntRange(from=0) long);
