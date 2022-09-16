@@ -68,6 +68,7 @@ import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DREAM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
@@ -1446,6 +1447,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     boolean canLaunchDreamActivity(String packageName) {
         if (!mDreaming || packageName == null) {
+            ProtoLog.e(WM_DEBUG_DREAM, "Cannot launch dream activity due to invalid state. "
+                    + "dreaming: %b packageName: %s", mDreaming, packageName);
             return false;
         }
         final DreamManagerInternal dreamManager =
@@ -1461,6 +1464,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (activeDoze != null && packageName.equals(activeDoze.getPackageName())) {
             return true;
         }
+        ProtoLog.e(WM_DEBUG_DREAM,
+                "Dream packageName does not match active dream. Package %s does not match %s or %s",
+                packageName, String.valueOf(activeDream), String.valueOf(activeDoze));
         return false;
     }
 
