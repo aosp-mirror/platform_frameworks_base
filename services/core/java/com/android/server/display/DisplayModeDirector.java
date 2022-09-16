@@ -33,7 +33,7 @@ import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IThermalEventListener;
@@ -2359,39 +2359,39 @@ public class DisplayModeDirector {
         }
     }
 
-    private class UdfpsObserver extends IUdfpsHbmListener.Stub {
-        private final SparseBooleanArray mLocalHbmEnabled = new SparseBooleanArray();
+    private class UdfpsObserver extends IUdfpsRefreshRateRequestCallback.Stub {
+        private final SparseBooleanArray mUdfpsRefreshRateEnabled = new SparseBooleanArray();
 
         public void observe() {
             StatusBarManagerInternal statusBar =
                     LocalServices.getService(StatusBarManagerInternal.class);
             if (statusBar != null) {
-                statusBar.setUdfpsHbmListener(this);
+                statusBar.setUdfpsRefreshRateCallback(this);
             }
         }
 
         @Override
-        public void onHbmEnabled(int displayId) {
+        public void onRequestEnabled(int displayId) {
             synchronized (mLock) {
-                updateHbmStateLocked(displayId, true /*enabled*/);
+                updateRefreshRateStateLocked(displayId, true /*enabled*/);
             }
         }
 
         @Override
-        public void onHbmDisabled(int displayId) {
+        public void onRequestDisabled(int displayId) {
             synchronized (mLock) {
-                updateHbmStateLocked(displayId, false /*enabled*/);
+                updateRefreshRateStateLocked(displayId, false /*enabled*/);
             }
         }
 
-        private void updateHbmStateLocked(int displayId, boolean enabled) {
-            mLocalHbmEnabled.put(displayId, enabled);
+        private void updateRefreshRateStateLocked(int displayId, boolean enabled) {
+            mUdfpsRefreshRateEnabled.put(displayId, enabled);
             updateVoteLocked(displayId);
         }
 
         private void updateVoteLocked(int displayId) {
             final Vote vote;
-            if (mLocalHbmEnabled.get(displayId)) {
+            if (mUdfpsRefreshRateEnabled.get(displayId)) {
                 Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
                 float maxRefreshRate = 0f;
                 for (Display.Mode mode : modes) {
@@ -2409,10 +2409,10 @@ public class DisplayModeDirector {
 
         void dumpLocked(PrintWriter pw) {
             pw.println("  UdfpsObserver");
-            pw.println("    mLocalHbmEnabled: ");
-            for (int i = 0; i < mLocalHbmEnabled.size(); i++) {
-                final int displayId = mLocalHbmEnabled.keyAt(i);
-                final String enabled = mLocalHbmEnabled.valueAt(i) ? "enabled" : "disabled";
+            pw.println("    mUdfpsRefreshRateEnabled: ");
+            for (int i = 0; i < mUdfpsRefreshRateEnabled.size(); i++) {
+                final int displayId = mUdfpsRefreshRateEnabled.keyAt(i);
+                final String enabled = mUdfpsRefreshRateEnabled.valueAt(i) ? "enabled" : "disabled";
                 pw.println("      Display " + displayId + ": " + enabled);
             }
         }

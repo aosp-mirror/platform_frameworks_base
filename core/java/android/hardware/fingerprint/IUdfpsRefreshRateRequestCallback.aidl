@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,28 @@
 package android.hardware.fingerprint;
 
 /**
- * A listener for the high-brightness mode (HBM) transitions. This allows other components to
- * perform certain actions when the HBM is toggled on or off. For example, a display manager
- * implementation can subscribe to these events from UdfpsController and adjust the display's
- * refresh rate when the HBM is enabled.
+ * A callback for UDFPS refresh rate. This allows other components to
+ * perform certain actions when the refresh rate is enabled or disabled.
+ * For example, a display manager implementation can subscribe to these
+ * events from UdfpsController when refresh rate is enabled or disabled.
  *
  * @hide
  */
-oneway interface IUdfpsHbmListener {
+oneway interface IUdfpsRefreshRateRequestCallback {
     /**
-     * UdfpsController will call this method when the HBM is enabled.
+     * Sets the appropriate display refresh rate for UDFPS.
      *
-     * @param displayId The displayId for which the HBM is enabled. See
+     * @param displayId The displayId for which the refresh rate should be set. See
      *        {@link android.view.Display#getDisplayId()}.
      */
-    void onHbmEnabled(int displayId);
+    void onRequestEnabled(int displayId);
 
     /**
-     * UdfpsController will call this method when the HBM is disabled.
+     * Unsets the appropriate display refresh rate for UDFPS.
      *
-     * @param displayId The displayId for which the HBM is disabled. See
+     * @param displayId The displayId for which the refresh rate should be unset. See
      *        {@link android.view.Display#getDisplayId()}.
      */
-    void onHbmDisabled(int displayId);
+    void onRequestDisabled(int displayId);
 }
 
