@@ -39,6 +39,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.IndentingPrintWriter;
@@ -48,6 +49,8 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.TimeoutRecord;
+import com.android.server.am.BroadcastRecord.DeliveryState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -68,15 +71,17 @@ import java.util.concurrent.CountDownLatch;
  */
 class BroadcastQueueModernImpl extends BroadcastQueue {
     BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
-            BroadcastConstants constants) {
-        this(service, handler, constants, new BroadcastSkipPolicy(service),
+            BroadcastConstants fgConstants, BroadcastConstants bgConstants) {
+        this(service, handler, fgConstants, bgConstants, new BroadcastSkipPolicy(service),
                 new BroadcastHistory());
     }
 
     BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
-            BroadcastConstants constants, BroadcastSkipPolicy skipPolicy,
-            BroadcastHistory history) {
-        super(service, handler, "modern", constants, skipPolicy, history);
+            BroadcastConstants fgConstants, BroadcastConstants bgConstants,
+            BroadcastSkipPolicy skipPolicy, BroadcastHistory history) {
+        super(service, handler, "modern", skipPolicy, history);
+        mFgConstants = Objects.requireNonNull(fgConstants);
+        mBgConstants = Objects.requireNonNull(bgConstants);
         mLocalHandler = new Handler(handler.getLooper(), mLocalCallback);
     }
 
@@ -151,7 +156,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final ArrayList<CountDownLatch> mWaitingForIdle = new ArrayList<>();
 
+    private final BroadcastConstants mFgConstants;
+    private final BroadcastConstants mBgConstants;
+
     private static final int MSG_UPDATE_RUNNING_LIST = 1;
+    private static final int MSG_DELIVERY_TIMEOUT = 2;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -165,6 +174,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             case MSG_UPDATE_RUNNING_LIST: {
                 synchronized (mService) {
                     updateRunningList();
+                }
+                return true;
+            }
+            case MSG_DELIVERY_TIMEOUT: {
+                synchronized (mService) {
+                    finishReceiverLocked((BroadcastProcessQueue) msg.obj,
+                            BroadcastRecord.DELIVERY_TIMEOUT);
                 }
                 return true;
             }
@@ -418,7 +434,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final BroadcastRecord r = queue.getActive();
         final Object receiver = queue.getActiveReceiver();
 
-        // TODO: schedule ANR timeout trigger event
+        if (!r.timeoutExempt) {
+            final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
+            mLocalHandler.sendMessageDelayed(
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT, queue), timeout);
+        }
+
         // TODO: apply temp allowlist exemptions
         // TODO: apply background activity launch exemptions
 
@@ -473,16 +494,26 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return finishReceiverLocked(queue, BroadcastRecord.DELIVERY_DELIVERED);
     }
 
-    private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue, int deliveryState) {
+    private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
+            @DeliveryState int deliveryState) {
         checkState(queue.isActive(), "isActive");
-
-        if (deliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
-            Slog.w(TAG, "Failed delivery of " + queue.getActive() + " to " + queue);
-        }
 
         queue.setActiveDeliveryState(deliveryState);
 
-        // TODO: cancel any outstanding ANR timeout
+        if (deliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
+            Slog.w(TAG, "Delivery state of " + queue.getActive() + " to " + queue + " changed to "
+                    + BroadcastRecord.deliveryStateToString(deliveryState));
+        }
+
+        if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
+            if (queue.app != null && !queue.app.isDebugging()) {
+                mService.appNotResponding(queue.app, TimeoutRecord
+                        .forBroadcastReceiver("Broadcast of " + queue.getActive().toShortString()));
+            }
+        } else {
+            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT, queue);
+        }
+
         // TODO: if we're the last receiver of this broadcast, record to history
 
         // Even if we have more broadcasts, if we've made reasonable progress
@@ -516,8 +547,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @Override
-    void start(@NonNull ContentResolver resolver) {
-        super.start(resolver);
+    public void start(@NonNull ContentResolver resolver) {
+        mFgConstants.startObserving(mHandler, resolver);
+        mBgConstants.startObserving(mHandler, resolver);
 
         mService.registerUidObserver(new UidObserver() {
             @Override

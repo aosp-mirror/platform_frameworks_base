@@ -2440,7 +2440,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (mEnableModernQueue) {
             mBroadcastQueues = new BroadcastQueue[1];
-            mBroadcastQueues[0] = new BroadcastQueueModernImpl(this, mHandler, foreConstants);
+            mBroadcastQueues[0] = new BroadcastQueueModernImpl(this, mHandler,
+                    foreConstants, backConstants);
         } else {
             mBroadcastQueues = new BroadcastQueue[4];
             mBroadcastQueues[BROADCAST_QUEUE_FG] = new BroadcastQueueImpl(this, mHandler,
@@ -6555,6 +6556,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAnrHelper.appNotResponding(app, null, app.info, null, null, false,
                     timeoutRecord);
         }
+    }
+
+    void appNotResponding(@NonNull ProcessRecord anrProcess, @NonNull TimeoutRecord timeoutRecord) {
+        mAnrHelper.appNotResponding(anrProcess, timeoutRecord);
     }
 
     void startPersistentApps(int matchFlags) {

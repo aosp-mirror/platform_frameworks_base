@@ -60,7 +60,8 @@ public class BroadcastQueueModernImplTest {
         mHandlerThread = new HandlerThread(getClass().getSimpleName());
         mHandlerThread.start();
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-                new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS));
+                new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS),
+                new BroadcastConstants(Settings.Global.BROADCAST_BG_CONSTANTS));
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
