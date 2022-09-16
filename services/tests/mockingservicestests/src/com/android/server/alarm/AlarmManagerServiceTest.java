@@ -168,6 +168,7 @@ import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.SystemService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -345,10 +346,6 @@ public class AlarmManagerServiceTest {
         }
 
         @Override
-        void setKernelTime(long millis) {
-        }
-
-        @Override
         int getSystemUiUid(PackageManagerInternal unused) {
             return SYSTEM_UI_UID;
         }
@@ -360,7 +357,18 @@ public class AlarmManagerServiceTest {
         }
 
         @Override
-        long getElapsedRealtime() {
+        void initializeTimeIfRequired() {
+            // No-op
+        }
+
+        @Override
+        void setCurrentTimeMillis(long unixEpochMillis,
+                @TimeConfidence int confidence, String logMsg) {
+            mNowRtcTest = unixEpochMillis;
+        }
+
+        @Override
+        long getElapsedRealtimeMillis() {
             return mNowElapsedTest;
         }
 

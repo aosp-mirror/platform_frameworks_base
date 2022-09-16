@@ -16,16 +16,21 @@
 
 package com.android.server.timedetector;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
-import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Slog;
 
+import com.android.server.AlarmManagerInternal;
+import com.android.server.LocalServices;
+import com.android.server.SystemClockTime;
+import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -38,7 +43,7 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     @NonNull private final Handler mHandler;
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final PowerManager.WakeLock mWakeLock;
-    @NonNull private final AlarmManager mAlarmManager;
+    @NonNull private final AlarmManagerInternal mAlarmManagerInternal;
 
     EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
@@ -49,7 +54,8 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
         mWakeLock = Objects.requireNonNull(
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG));
 
-        mAlarmManager = Objects.requireNonNull(context.getSystemService(AlarmManager.class));
+        mAlarmManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(AlarmManagerInternal.class));
     }
 
     @Override
@@ -84,9 +90,22 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     }
 
     @Override
-    public void setSystemClock(long newTimeMillis) {
+    public @TimeConfidence int systemClockConfidence() {
+        return SystemClockTime.getTimeConfidence();
+    }
+
+    @Override
+    public void setSystemClock(
+            @CurrentTimeMillisLong long newTimeMillis, @TimeConfidence int confidence,
+            @NonNull String logMsg) {
         checkWakeLockHeld();
-        mAlarmManager.setTime(newTimeMillis);
+        mAlarmManagerInternal.setTime(newTimeMillis, confidence, logMsg);
+    }
+
+    @Override
+    public void setSystemClockConfidence(@TimeConfidence int confidence, @NonNull String logMsg) {
+        checkWakeLockHeld();
+        SystemClockTime.setConfidence(confidence, logMsg);
     }
 
     @Override
@@ -100,4 +119,13 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
             Slog.wtf(LOG_TAG, "WakeLock " + mWakeLock + " not held");
         }
     }
-}
+
+    @Override
+    public void addDebugLogEntry(@NonNull String logMsg) {
+        SystemClockTime.addDebugLogEntry(logMsg);
+    }
+
+    @Override
+    public void dumpDebugLog(@NonNull PrintWriter printWriter) {
+        SystemClockTime.dump(printWriter);
+    }}
