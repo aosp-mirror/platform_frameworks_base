@@ -644,7 +644,7 @@ public final class FlexibilityController extends StateController {
         static final String KEY_FALLBACK_FLEXIBILITY_DEADLINE =
                 FC_CONFIG_PREFIX + "fallback_flexibility_deadline_ms";
         static final String KEY_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS =
-                FC_CONFIG_PREFIX + "min_alarm_time_flexibility_ms";
+                FC_CONFIG_PREFIX + "min_time_between_flexibility_alarms_ms";
         static final String KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
                 FC_CONFIG_PREFIX + "percents_to_drop_num_flexible_constraints";
         static final String KEY_MAX_RESCHEDULED_DEADLINE_MS =
