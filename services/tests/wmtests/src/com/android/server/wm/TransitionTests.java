@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
@@ -31,6 +32,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
@@ -1108,6 +1110,51 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(info.getChanges().get(0).hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY));
         assertTrue(info.getChanges().get(1).hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY));
         assertTrue(info.getChanges().get(2).hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY));
+    }
+
+    @Test
+    public void testFlagFillsTask() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        // Set to multi-windowing mode in order to set bounds.
+        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        final Rect taskBounds = new Rect(0, 0, 500, 1000);
+        task.setBounds(taskBounds);
+        final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final TaskFragment embeddedTf = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .build();
+        final ActivityRecord embeddedActivity = embeddedTf.getTopMostActivity();
+        // Start states.
+        changes.put(task, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(true /* vis */,
+                false /* exChg */));
+        changes.put(embeddedTf, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        // End states.
+        nonEmbeddedActivity.mVisibleRequested = false;
+        embeddedActivity.mVisibleRequested = true;
+        embeddedTf.setBounds(new Rect(0, 0, 500, 500));
+
+        participants.add(nonEmbeddedActivity);
+        participants.add(embeddedTf);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, changes, mMockT);
+
+        // The embedded with bounds overridden should not have the flag.
+        assertEquals(2, info.getChanges().size());
+        assertFalse(info.getChanges().get(0).hasFlags(FLAG_FILLS_TASK));
+        assertEquals(embeddedTf.getBounds(), info.getChanges().get(0).getEndAbsBounds());
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_FILLS_TASK));
     }
 
     @Test

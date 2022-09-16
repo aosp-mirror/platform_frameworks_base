@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.window.TransitionInfo.FLAG_FILLS_TASK;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertNotNull;
@@ -24,6 +27,8 @@ import static org.mockito.Mockito.mock;
 
 import android.animation.Animator;
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -79,5 +84,24 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
     static TransitionInfo.Change createChange() {
         return new TransitionInfo.Change(mock(WindowContainerToken.class),
                 mock(SurfaceControl.class));
+    }
+
+    /**
+     * Creates a mock {@link TransitionInfo.Change} with
+     * {@link TransitionInfo#FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY} flag.
+     */
+    static TransitionInfo.Change createEmbeddedChange(@NonNull Rect startBounds,
+            @NonNull Rect endBounds, @NonNull Rect taskBounds) {
+        final TransitionInfo.Change change = createChange();
+        change.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+        change.setStartAbsBounds(startBounds);
+        change.setEndAbsBounds(endBounds);
+        if (taskBounds.width() == startBounds.width()
+                && taskBounds.height() == startBounds.height()
+                && taskBounds.width() == endBounds.width()
+                && taskBounds.height() == endBounds.height()) {
+            change.setFlags(FLAG_FILLS_TASK);
+        }
+        return change;
     }
 }
