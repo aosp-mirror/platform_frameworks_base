@@ -236,13 +236,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
-    /*
-     * TODO b/246429313
-     * android.app.appops.cts.AppOpEventCollectionTest#switchUidStateWhileOpsAreRunning breaks when
-     * set to true
-     */
-    private static final boolean USE_DELAYED_UID_STATE_CHANGES_FOR_ATTR_OP_UPDATES = false;
-
     final Context mContext;
     final AtomicFile mFile;
     private final @Nullable File mNoteOpCallerStacktracesFile;
@@ -2075,28 +2068,22 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 }
             }
 
-            if (USE_DELAYED_UID_STATE_CHANGES_FOR_ATTR_OP_UPDATES) {
-                // Proposed behavior change, previously there were two rounds of UID state change
-                // operations. It seems like there is no need for
-                // attributedOp.onUidStateChanged(state) to update before settle time is reached,
-                // which if true then this is the preferred route.
-                if (uidState != null && uidState.pkgOps != null) {
-                    int numPkgs = uidState.pkgOps.size();
-                    for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
-                        Ops ops = uidState.pkgOps.valueAt(pkgNum);
+            if (uidState != null && uidState.pkgOps != null) {
+                int numPkgs = uidState.pkgOps.size();
+                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                    Ops ops = uidState.pkgOps.valueAt(pkgNum);
 
-                        int numOps = ops.size();
-                        for (int opNum = 0; opNum < numOps; opNum++) {
-                            Op op = ops.valueAt(opNum);
+                    int numOps = ops.size();
+                    for (int opNum = 0; opNum < numOps; opNum++) {
+                        Op op = ops.valueAt(opNum);
 
-                            int numAttributions = op.mAttributions.size();
-                            for (int attributionNum = 0; attributionNum < numAttributions;
-                                    attributionNum++) {
-                                AttributedOp attributedOp = op.mAttributions.valueAt(
-                                        attributionNum);
+                        int numAttributions = op.mAttributions.size();
+                        for (int attributionNum = 0; attributionNum < numAttributions;
+                                attributionNum++) {
+                            AttributedOp attributedOp = op.mAttributions.valueAt(
+                                    attributionNum);
 
-                                attributedOp.onUidStateChanged(state);
-                            }
+                            attributedOp.onUidStateChanged(state);
                         }
                     }
                 }
@@ -2116,33 +2103,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 mUidStates.put(uid, uidState);
                 onUidStateChanged(uid,
                         AppOpsUidStateTracker.processStateToUidState(procState), false);
-            }
-
-            if (!USE_DELAYED_UID_STATE_CHANGES_FOR_ATTR_OP_UPDATES) {
-                UidState uidState = mUidStates.get(uid);
-
-                if (uidState != null && uidState.pkgOps != null) {
-                    int numPkgs = uidState.pkgOps.size();
-                    for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
-                        Ops ops = uidState.pkgOps.valueAt(pkgNum);
-
-                        int numOps = ops.size();
-                        for (int opNum = 0; opNum < numOps; opNum++) {
-                            Op op = ops.valueAt(opNum);
-
-                            int numAttributions = op.mAttributions.size();
-                            for (int attributionNum = 0; attributionNum < numAttributions;
-                                    attributionNum++) {
-                                AttributedOp attributedOp = op.mAttributions.valueAt(
-                                        attributionNum);
-
-                                attributedOp.onUidStateChanged(
-                                        AppOpsUidStateTracker.processStateToUidState(
-                                                procState));
-                            }
-                        }
-                    }
-                }
             }
         }
     }
