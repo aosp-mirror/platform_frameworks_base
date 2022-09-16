@@ -147,10 +147,10 @@ public interface FalsingManager {
     }
 
     /**
-     * Listener that is alerted when a double tap is required to confirm a single tap.
+     * Listener that is alerted when an additional tap is required to confirm a single tap.
      **/
     interface FalsingTapListener {
-        void onDoubleTapRequired();
+        void onAdditionalTapRequired();
     }
 
     /** Passed to {@link FalsingManager#onProximityEvent}. */
