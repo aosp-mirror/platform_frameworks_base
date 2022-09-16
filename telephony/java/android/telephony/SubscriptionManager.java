@@ -486,18 +486,14 @@ public class SubscriptionManager {
     public static final String TP_MESSAGE_REF = SimInfo.COLUMN_TP_MESSAGE_REF;
 
     /**
-     * TelephonyProvider column name data_enabled_override_rules.
-     * It's a list of rules for overriding data enabled settings. The syntax is
-     * For example, "mms=nonDefault" indicates enabling data for mms in non-default subscription.
-     * "default=nonDefault&inVoiceCall" indicates enabling data for internet in non-default
-     * subscription and while is in voice call.
+     * TelephonyProvider column name enabled_mobile_data_policies.
+     * A list of mobile data policies, each of which represented by an integer and joint by ",".
      *
      * Default value is empty string.
-     *
      * @hide
      */
-    public static final String DATA_ENABLED_OVERRIDE_RULES =
-            SimInfo.COLUMN_DATA_ENABLED_OVERRIDE_RULES;
+    public static final String ENABLED_MOBILE_DATA_POLICIES =
+            SimInfo.COLUMN_ENABLED_MOBILE_DATA_POLICIES;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
