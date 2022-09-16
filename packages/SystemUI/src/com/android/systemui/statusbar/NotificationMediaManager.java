@@ -43,7 +43,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -89,11 +88,9 @@ public class NotificationMediaManager implements Dumpable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
 
-    private final StatusBarStateController mStatusBarStateController
-            = Dependency.get(StatusBarStateController.class);
-    private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
-    private final KeyguardStateController mKeyguardStateController = Dependency.get(
-            KeyguardStateController.class);
+    private final StatusBarStateController mStatusBarStateController;
+    private final SysuiColorExtractor mColorExtractor;
+    private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private static final HashSet<Integer> PAUSED_MEDIA_STATES = new HashSet<>();
     private static final HashSet<Integer> CONNECTING_MEDIA_STATES = new HashSet<>();
@@ -179,6 +176,9 @@ public class NotificationMediaManager implements Dumpable {
             NotifCollection notifCollection,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
+            StatusBarStateController statusBarStateController,
+            SysuiColorExtractor colorExtractor,
+            KeyguardStateController keyguardStateController,
             DumpManager dumpManager) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
@@ -192,6 +192,9 @@ public class NotificationMediaManager implements Dumpable {
         mMediaDataManager = mediaDataManager;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
+        mStatusBarStateController = statusBarStateController;
+        mColorExtractor = colorExtractor;
+        mKeyguardStateController = keyguardStateController;
 
         setupNotifPipeline();
 
