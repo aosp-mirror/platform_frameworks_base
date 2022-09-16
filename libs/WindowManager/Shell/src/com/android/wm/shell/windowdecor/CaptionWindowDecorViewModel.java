@@ -36,6 +36,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.transition.Transitions;
 
@@ -80,6 +81,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
+        if (!shouldShowWindowDecor(taskInfo)) return null;
         final CaptionWindowDecoration windowDecoration = new CaptionWindowDecoration(
                 mContext,
                 mDisplayController,
@@ -101,9 +103,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
 
     @Override
     public CaptionWindowDecoration adoptWindowDecoration(AutoCloseable windowDecor) {
-        return (windowDecor instanceof CaptionWindowDecoration)
-                ? (CaptionWindowDecoration) windowDecor
-                : null;
+        if (!(windowDecor instanceof CaptionWindowDecoration)) return null;
+        final CaptionWindowDecoration captionWindowDecor = (CaptionWindowDecoration) windowDecor;
+        if (!shouldShowWindowDecor(captionWindowDecor.mTaskInfo)) {
+            return null;
+        }
+        return captionWindowDecor;
     }
 
     @Override
@@ -230,5 +235,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 }
             }
         }
+    }
+
+    private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
+        return DesktopMode.IS_SUPPORTED
+                && mDisplayController.getDisplayContext(taskInfo.displayId)
+                .getResources().getConfiguration().smallestScreenWidthDp >= 600;
     }
 }
