@@ -37,6 +37,8 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     val pageTitleResId: Int
     val switchTitleResId: Int
     val footerResId: Int
+    val switchRestrictionKeys: List<String>
+        get() = emptyList()
 
     /**
      * Loads the extra info for the App List, and generates the [AppRecord] List.

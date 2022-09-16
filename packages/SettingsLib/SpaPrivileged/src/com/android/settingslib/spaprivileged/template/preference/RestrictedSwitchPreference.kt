@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -55,6 +56,20 @@ fun RestrictedSwitchPreference(model: SwitchPreferenceModel, restrictions: Restr
     }
 }
 
+object RestrictedSwitchPreference {
+    fun getSummary(
+        context: Context,
+        restrictedMode: RestrictedMode?,
+        noRestrictedSummary: State<String>,
+        checked: State<Boolean?>,
+    ): State<String> = when (restrictedMode) {
+        is NoRestricted -> noRestrictedSummary
+        is BaseUserRestricted -> stateOf(context.getString(R.string.disabled))
+        is BlockedByAdmin -> derivedStateOf { restrictedMode.getSummary(checked.value) }
+        null -> stateOf(context.getString(R.string.summary_placeholder))
+    }
+}
+
 private class RestrictedSwitchPreferenceModel(
     private val context: Context,
     model: SwitchPreferenceModel,
@@ -62,11 +77,12 @@ private class RestrictedSwitchPreferenceModel(
 ) : SwitchPreferenceModel {
     override val title = model.title
 
-    override val summary = when (restrictedMode) {
-        is NoRestricted -> model.summary
-        is BaseUserRestricted -> stateOf(context.getString(R.string.disabled))
-        is BlockedByAdmin -> derivedStateOf { restrictedMode.getSummary(model.checked.value) }
-    }
+    override val summary = RestrictedSwitchPreference.getSummary(
+        context = context,
+        restrictedMode = restrictedMode,
+        noRestrictedSummary = model.summary,
+        checked = model.checked,
+    )
 
     override val checked = when (restrictedMode) {
         is NoRestricted -> model.checked
