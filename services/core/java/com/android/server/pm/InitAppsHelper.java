@@ -33,11 +33,9 @@ import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
-import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_FRAMEWORK_RES_SPLITS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -119,29 +117,6 @@ final class InitAppsHelper {
         mSystemParseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         mSystemScanFlags = mScanFlags | SCAN_AS_SYSTEM;
         mExecutorService = ParallelPackageParser.makeExecutorService();
-    }
-
-    private List<File> getFrameworkResApkSplitFiles() {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanFrameworkResApkSplits");
-        try {
-            final List<File> splits = new ArrayList<>();
-            final List<ApexManager.ActiveApexInfo> activeApexInfos =
-                    mPm.mApexManager.getActiveApexInfos();
-            for (int i = 0; i < activeApexInfos.size(); i++) {
-                ApexManager.ActiveApexInfo apexInfo = activeApexInfos.get(i);
-                File splitsFolder = new File(apexInfo.apexDirectory, "etc/splits");
-                if (splitsFolder.isDirectory()) {
-                    for (File file : splitsFolder.listFiles()) {
-                        if (ApkLiteParseUtils.isApkFile(file)) {
-                            splits.add(file);
-                        }
-                    }
-                }
-            }
-            return splits;
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
     }
 
     private List<ScanPartition> getSystemScanPartitions() {
@@ -270,7 +245,7 @@ final class InitAppsHelper {
             long startTime) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                 SystemClock.uptimeMillis());
-        scanDirTracedLI(mPm.getAppInstallDir(), /* frameworkSplits= */ null, 0,
+        scanDirTracedLI(mPm.getAppInstallDir(), 0,
                 mScanFlags | SCAN_REQUIRE_KNOWN, packageParser, mExecutorService);
 
         List<Runnable> unfinishedTasks = mExecutorService.shutdownNow();
@@ -338,15 +313,13 @@ final class InitAppsHelper {
             if (partition.getOverlayFolder() == null) {
                 continue;
             }
-            scanDirTracedLI(partition.getOverlayFolder(), /* frameworkSplits= */ null,
+            scanDirTracedLI(partition.getOverlayFolder(),
                     mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
                     packageParser, executorService);
         }
 
-        List<File> frameworkSplits = getFrameworkResApkSplitFiles();
-        scanDirTracedLI(frameworkDir, frameworkSplits,
-                mSystemParseFlags | PARSE_FRAMEWORK_RES_SPLITS,
-                mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
+        scanDirTracedLI(frameworkDir,
+                mSystemParseFlags, mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
                 packageParser, executorService);
         if (!mPm.mPackages.containsKey("android")) {
             throw new IllegalStateException(
@@ -356,12 +329,12 @@ final class InitAppsHelper {
         for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
             final ScanPartition partition = mDirsToScanAsSystem.get(i);
             if (partition.getPrivAppFolder() != null) {
-                scanDirTracedLI(partition.getPrivAppFolder(), /* frameworkSplits= */ null,
+                scanDirTracedLI(partition.getPrivAppFolder(),
                         mSystemParseFlags,
                         mSystemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag,
                         packageParser, executorService);
             }
-            scanDirTracedLI(partition.getAppFolder(), /* frameworkSplits= */ null,
+            scanDirTracedLI(partition.getAppFolder(),
                     mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
                     packageParser, executorService);
         }
@@ -379,7 +352,7 @@ final class InitAppsHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private void scanDirTracedLI(File scanDir, List<File> frameworkSplits,
+    private void scanDirTracedLI(File scanDir,
             int parseFlags, int scanFlags,
             PackageParser2 packageParser, ExecutorService executorService) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
@@ -388,7 +361,7 @@ final class InitAppsHelper {
                 // when scanning apk in apexes, we want to check the maxSdkVersion
                 parseFlags |= PARSE_APK_IN_APEX;
             }
-            mInstallPackageHelper.installPackagesFromDir(scanDir, frameworkSplits, parseFlags,
+            mInstallPackageHelper.installPackagesFromDir(scanDir, parseFlags,
                     scanFlags, packageParser, executorService);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);

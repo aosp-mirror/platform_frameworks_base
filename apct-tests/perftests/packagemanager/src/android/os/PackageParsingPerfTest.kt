@@ -28,16 +28,16 @@ import androidx.test.filters.LargeTest
 import com.android.internal.util.ConcurrentUtils
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
+import java.io.File
+import java.io.FileOutputStream
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeUnit
 import libcore.io.IoUtils
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.io.File
-import java.io.FileOutputStream
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.TimeUnit
 
 @LargeTest
 @RunWith(Parameterized::class)
@@ -180,8 +180,8 @@ public class PackageParsingPerfTest {
         protected abstract fun parseImpl(file: File): PackageType
     }
 
-    class ParallelParser1(private val cacher: PackageCacher1? = null)
-        : ParallelParser<PackageParser.Package>(cacher) {
+    class ParallelParser1(private val cacher: PackageCacher1? = null) :
+        ParallelParser<PackageParser.Package>(cacher) {
         val parser = PackageParser().apply {
             setCallback { true }
         }
@@ -189,8 +189,8 @@ public class PackageParsingPerfTest {
         override fun parseImpl(file: File) = parser.parsePackage(file, 0, cacher != null)
     }
 
-    class ParallelParser2(cacher: PackageCacher2? = null)
-        : ParallelParser<PackageImpl>(cacher) {
+    class ParallelParser2(cacher: PackageCacher2? = null) :
+        ParallelParser<PackageImpl>(cacher) {
         val input = ThreadLocal.withInitial {
             // For testing, just disable enforcement to avoid hooking up to compat framework
             ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
@@ -218,7 +218,7 @@ public class PackageParsingPerfTest {
             })
 
         override fun parseImpl(file: File) =
-                parser.parsePackage(input.get()!!.reset(), file, 0, null).result
+                parser.parsePackage(input.get()!!.reset(), file, 0).result
                         as PackageImpl
     }
 

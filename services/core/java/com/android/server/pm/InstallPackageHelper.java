@@ -3467,7 +3467,7 @@ final class InstallPackageHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public void installPackagesFromDir(File scanDir, List<File> frameworkSplits, int parseFlags,
+    public void installPackagesFromDir(File scanDir, int parseFlags,
             int scanFlags, PackageParser2 packageParser,
             ExecutorService executorService) {
         final File[] files = scanDir.listFiles();
@@ -3481,7 +3481,7 @@ final class InstallPackageHelper {
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
         ParallelPackageParser parallelPackageParser =
-                new ParallelPackageParser(packageParser, executorService, frameworkSplits);
+                new ParallelPackageParser(packageParser, executorService);
 
         // Submit files for parsing in parallel
         int fileCount = 0;

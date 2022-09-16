@@ -78,7 +78,6 @@ public class ApkLiteParseUtils {
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
     private static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
     private static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
-    private static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
     private static final String TAG_APPLICATION = "application";
     private static final String TAG_PACKAGE_VERIFIER = "package-verifier";
     private static final String TAG_PROFILEABLE = "profileable";
@@ -103,7 +102,7 @@ public class ApkLiteParseUtils {
     public static ParseResult<PackageLite> parsePackageLite(ParseInput input,
             File packageFile, int flags) {
         if (packageFile.isDirectory()) {
-            return parseClusterPackageLite(input, packageFile, /* frameworkSplits= */ null, flags);
+            return parseClusterPackageLite(input, packageFile, flags);
         } else {
             return parseMonolithicPackageLite(input, packageFile, flags);
         }
@@ -137,38 +136,19 @@ public class ApkLiteParseUtils {
     /**
      * Parse lightweight details about a directory of APKs.
      *
-     * @param packageDirOrApk is the folder that contains split apks for a regular app or the
-     *                        framework-res.apk for framwork-res splits (in which case the
-     *                        splits come in the <code>frameworkSplits</code> parameter)
+     * @param packageDir is the folder that contains split apks for a regular app
      */
     public static ParseResult<PackageLite> parseClusterPackageLite(ParseInput input,
-            File packageDirOrApk, List<File> frameworkSplits, int flags) {
+            File packageDir, int flags) {
         final File[] files;
-        final boolean parsingFrameworkSplits = (flags & PARSE_FRAMEWORK_RES_SPLITS) != 0;
-        if (parsingFrameworkSplits) {
-            if (ArrayUtils.isEmpty(frameworkSplits)) {
-                return input.error(PackageManager.INSTALL_PARSE_FAILED_NOT_APK,
-                        "No packages found in split");
-            }
-            files = frameworkSplits.toArray(new File[frameworkSplits.size() + 1]);
-            // we also want to process the base apk so add it to the array
-            files[files.length - 1] = packageDirOrApk;
-        } else {
-            files = packageDirOrApk.listFiles();
-            if (ArrayUtils.isEmpty(files)) {
-                return input.error(PackageManager.INSTALL_PARSE_FAILED_NOT_APK,
-                        "No packages found in split");
-            }
-            // Apk directory is directly nested under the current directory
-            if (files.length == 1 && files[0].isDirectory()) {
-                return parseClusterPackageLite(input, files[0], frameworkSplits, flags);
-            }
+        files = packageDir.listFiles();
+        if (ArrayUtils.isEmpty(files)) {
+            return input.error(PackageManager.INSTALL_PARSE_FAILED_NOT_APK,
+                    "No packages found in split");
         }
-
-        if (parsingFrameworkSplits) {
-            // disable the flag for checking the certificates of the splits. We know they
-            // won't match, but we rely on the mainline apex to be safe if it was installed
-            flags = flags & ~PARSE_COLLECT_CERTIFICATES;
+        // Apk directory is directly nested under the current directory
+        if (files.length == 1 && files[0].isDirectory()) {
+            return parseClusterPackageLite(input, files[0], flags);
         }
 
         String packageName = null;
@@ -186,10 +166,6 @@ public class ApkLiteParseUtils {
                     }
 
                     final ApkLite lite = result.getResult();
-                    if (parsingFrameworkSplits && file == files[files.length - 1]) {
-                        baseApk = lite;
-                        break;
-                    }
                     // Assert that all package names and version codes are
                     // consistent with the first one we encounter.
                     if (packageName == null) {
@@ -201,8 +177,7 @@ public class ApkLiteParseUtils {
                                     "Inconsistent package " + lite.getPackageName() + " in " + file
                                             + "; expected " + packageName);
                         }
-                        // we allow version codes that do not match for framework splits
-                        if (!parsingFrameworkSplits && versionCode != lite.getVersionCode()) {
+                        if (versionCode != lite.getVersionCode()) {
                             return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
                                     "Inconsistent version " + lite.getVersionCode() + " in " + file
                                             + "; expected " + versionCode);
@@ -217,15 +192,11 @@ public class ApkLiteParseUtils {
                     }
                 }
             }
-            // baseApk is set in the last iteration of the for each loop when we are parsing
-            // frameworkRes splits or needs to be done now otherwise
-            if (!parsingFrameworkSplits) {
-                baseApk = apks.remove(null);
-            }
+            baseApk = apks.remove(null);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-        return composePackageLiteFromApks(input, packageDirOrApk, baseApk, apks);
+        return composePackageLiteFromApks(input, packageDir, baseApk, apks);
     }
 
     /**
