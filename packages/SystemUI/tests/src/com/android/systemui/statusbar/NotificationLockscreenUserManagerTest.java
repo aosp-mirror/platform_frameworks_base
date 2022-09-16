@@ -52,6 +52,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -87,6 +88,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private NotificationClickNotifier mClickNotifier;
+    @Mock
+    private OverviewProxyService mOverviewProxyService;
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
@@ -344,6 +347,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     (() -> mVisibilityProvider),
                     (() -> mNotifCollection),
                     mClickNotifier,
+                    (() -> mOverviewProxyService),
                     NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController,
                     Handler.createAsync(Looper.myLooper()),

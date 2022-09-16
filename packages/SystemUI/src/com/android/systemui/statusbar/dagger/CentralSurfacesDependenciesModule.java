@@ -26,6 +26,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -130,6 +131,9 @@ public interface CentralSurfacesDependenciesModule {
             NotifCollection notifCollection,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
+            StatusBarStateController statusBarStateController,
+            SysuiColorExtractor colorExtractor,
+            KeyguardStateController keyguardStateController,
             DumpManager dumpManager) {
         return new NotificationMediaManager(
                 context,
@@ -142,6 +146,9 @@ public interface CentralSurfacesDependenciesModule {
                 notifCollection,
                 mainExecutor,
                 mediaDataManager,
+                statusBarStateController,
+                colorExtractor,
+                keyguardStateController,
                 dumpManager);
     }
 
