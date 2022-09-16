@@ -32,7 +32,6 @@ import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
 import androidx.annotation.CallSuper
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 
@@ -45,14 +44,14 @@ import com.android.systemui.util.concurrency.DelayableExecutor
  * The generic type T is expected to contain all the information necessary for the subclasses to
  * display the view in a certain state, since they receive <T> in [updateView].
  *
- * TODO(b/245610654): Remove all the media-specific logic from this class.
- *
  * @property windowTitle the title to use for the window that displays the temporary view. Should be
  *   normally cased, like "Window Title".
+ * @property wakeReason a string used for logging if we needed to wake the screen in order to
+ *   display the temporary view. Should be screaming snake cased, like WAKE_REASON.
  */
-abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
+abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : TemporaryViewLogger>(
     internal val context: Context,
-    internal val logger: MediaTttLogger,
+    internal val logger: U,
     internal val windowManager: WindowManager,
     @Main private val mainExecutor: DelayableExecutor,
     private val accessibilityManager: AccessibilityManager,
@@ -60,6 +59,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
     private val powerManager: PowerManager,
     @LayoutRes private val viewLayoutRes: Int,
     private val windowTitle: String,
+    private val wakeReason: String,
 ) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -114,10 +114,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
                 powerManager.wakeUp(
                         SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_APPLICATION,
-                        "com.android.systemui:media_tap_to_transfer_activated"
+                        "com.android.systemui:$wakeReason",
                 )
             }
-
+            logger.logChipAddition()
             inflateAndUpdateView(newInfo)
         }
 
