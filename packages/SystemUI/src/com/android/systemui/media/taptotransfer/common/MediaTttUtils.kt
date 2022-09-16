@@ -26,6 +26,10 @@ import com.android.systemui.R
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
     companion object {
+        // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
+        // UpdateMediaTapToTransferReceiverDisplayTest
+        const val WINDOW_TITLE = "Media Transfer Chip View"
+
         /**
          * Returns the information needed to display the icon.
          *
