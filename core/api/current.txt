@@ -52951,7 +52951,7 @@ package android.view.displayhash {
 package android.view.inputmethod {
 
   public class BaseInputConnection implements android.view.inputmethod.InputConnection {
-    ctor public BaseInputConnection(android.view.View, boolean);
+    ctor public BaseInputConnection(@NonNull android.view.View, boolean);
     method public boolean beginBatchEdit();
     method public boolean clearMetaKeyStates(int);
     method @CallSuper public void closeConnection();
@@ -52963,24 +52963,24 @@ package android.view.inputmethod {
     method public boolean deleteSurroundingTextInCodePoints(int, int);
     method public boolean endBatchEdit();
     method public boolean finishComposingText();
-    method public static int getComposingSpanEnd(android.text.Spannable);
-    method public static int getComposingSpanStart(android.text.Spannable);
+    method public static int getComposingSpanEnd(@NonNull android.text.Spannable);
+    method public static int getComposingSpanStart(@NonNull android.text.Spannable);
     method public int getCursorCapsMode(int);
-    method public android.text.Editable getEditable();
-    method public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
-    method public android.os.Handler getHandler();
-    method public CharSequence getSelectedText(int);
+    method @Nullable public android.text.Editable getEditable();
+    method @Nullable public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
+    method @Nullable public android.os.Handler getHandler();
+    method @Nullable public CharSequence getSelectedText(int);
     method @Nullable public CharSequence getTextAfterCursor(@IntRange(from=0) int, int);
     method @Nullable public CharSequence getTextBeforeCursor(@IntRange(from=0) int, int);
     method public boolean performContextMenuAction(int);
     method public boolean performEditorAction(int);
     method public boolean performPrivateCommand(String, android.os.Bundle);
-    method public static final void removeComposingSpans(android.text.Spannable);
+    method public static final void removeComposingSpans(@NonNull android.text.Spannable);
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
-    method public static void setComposingSpans(android.text.Spannable);
+    method public static void setComposingSpans(@NonNull android.text.Spannable);
     method public boolean setComposingText(CharSequence, int);
     method public boolean setSelection(int, int);
   }
@@ -53059,6 +53059,24 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.DeleteGesture.Builder setDeletionArea(@NonNull android.graphics.RectF);
     method @NonNull public android.view.inputmethod.DeleteGesture.Builder setFallbackText(@Nullable String);
     method @NonNull public android.view.inputmethod.DeleteGesture.Builder setGranularity(int);
+  }
+
+  public final class DeleteRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.graphics.RectF getDeletionEndArea();
+    method @NonNull public android.graphics.RectF getDeletionStartArea();
+    method public int getGranularity();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.DeleteRangeGesture> CREATOR;
+  }
+
+  public static final class DeleteRangeGesture.Builder {
+    ctor public DeleteRangeGesture.Builder();
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture build();
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setDeletionEndArea(@NonNull android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setDeletionStartArea(@NonNull android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.DeleteRangeGesture.Builder setGranularity(int);
   }
 
   public final class EditorBoundsInfo implements android.os.Parcelable {
@@ -53160,11 +53178,13 @@ package android.view.inputmethod {
   public abstract class HandwritingGesture {
     method @Nullable public String getFallbackText();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
+    field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
     field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
     field public static final int GESTURE_TYPE_NONE = 0; // 0x0
     field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8
     field public static final int GESTURE_TYPE_SELECT = 1; // 0x1
+    field public static final int GESTURE_TYPE_SELECT_RANGE = 32; // 0x20
     field public static final int GRANULARITY_CHARACTER = 2; // 0x2
     field public static final int GRANULARITY_WORD = 1; // 0x1
   }
@@ -53547,6 +53567,24 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setFallbackText(@Nullable String);
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setGranularity(int);
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setSelectionArea(@NonNull android.graphics.RectF);
+  }
+
+  public final class SelectRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getGranularity();
+    method @NonNull public android.graphics.RectF getSelectionEndArea();
+    method @NonNull public android.graphics.RectF getSelectionStartArea();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SelectRangeGesture> CREATOR;
+  }
+
+  public static final class SelectRangeGesture.Builder {
+    ctor public SelectRangeGesture.Builder();
+    method @NonNull public android.view.inputmethod.SelectRangeGesture build();
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setGranularity(int);
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setSelectionEndArea(@NonNull android.graphics.RectF);
+    method @NonNull public android.view.inputmethod.SelectRangeGesture.Builder setSelectionStartArea(@NonNull android.graphics.RectF);
   }
 
   public final class SurroundingText implements android.os.Parcelable {

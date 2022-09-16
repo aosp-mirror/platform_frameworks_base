@@ -272,11 +272,17 @@ public final class InputMethodDebug {
         if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_SELECT) != 0) {
             joiner.add("SELECT");
         }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_SELECT_RANGE) != 0) {
+            joiner.add("SELECT_RANGE");
+        }
         if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_INSERT) != 0) {
             joiner.add("INSERT");
         }
         if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_DELETE) != 0) {
             joiner.add("DELETE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_DELETE_RANGE) != 0) {
+            joiner.add("DELETE_RANGE");
         }
         if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE) != 0) {
             joiner.add("REMOVE_SPACE");
@@ -284,7 +290,6 @@ public final class InputMethodDebug {
         if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_JOIN_OR_SPLIT) != 0) {
             joiner.add("JOIN_OR_SPLIT");
         }
-
         return joiner.setEmptyValue("(none)").toString();
     }
 

@@ -52,6 +52,7 @@ import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
+import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.protolog.common.ProtoLog;
@@ -167,7 +168,7 @@ class ScreenRotationAnimation {
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
 
         try {
-            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer;
+            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
             if (isSizeChanged) {
                 final DisplayAddress address = displayInfo.address;
                 if (!(address instanceof DisplayAddress.Physical)) {
@@ -186,22 +187,22 @@ class ScreenRotationAnimation {
                 // the whole display to include the rounded corner overlays.
                 setSkipScreenshotForRoundedCornerOverlays(false, t);
                 mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
-                final SurfaceControl.DisplayCaptureArgs captureArgs =
-                        new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                final ScreenCapture.DisplayCaptureArgs captureArgs =
+                        new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
                                 .setSourceCrop(new Rect(0, 0, width, height))
                                 .setAllowProtected(true)
                                 .setCaptureSecureLayers(true)
                                 .build();
-                screenshotBuffer = SurfaceControl.captureDisplay(captureArgs);
+                screenshotBuffer = ScreenCapture.captureDisplay(captureArgs);
             } else {
-                SurfaceControl.LayerCaptureArgs captureArgs =
-                        new SurfaceControl.LayerCaptureArgs.Builder(
+                ScreenCapture.LayerCaptureArgs captureArgs =
+                        new ScreenCapture.LayerCaptureArgs.Builder(
                                 displayContent.getSurfaceControl())
                                 .setCaptureSecureLayers(true)
                                 .setAllowProtected(true)
                                 .setSourceCrop(new Rect(0, 0, width, height))
                                 .build();
-                screenshotBuffer = SurfaceControl.captureLayers(captureArgs);
+                screenshotBuffer = ScreenCapture.captureLayers(captureArgs);
             }
 
             if (screenshotBuffer == null) {

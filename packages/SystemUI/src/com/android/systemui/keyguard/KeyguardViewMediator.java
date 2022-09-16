@@ -831,7 +831,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {}
 
                 @Override
-                public void onLaunchAnimationCancelled() {
+                public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
                     Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: "
                             + mOccluded);
                 }
@@ -2580,18 +2580,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("DismissPanel"));
 
-                // Apply the opening animation on root task if exists
-                RemoteAnimationTarget aniTarget = apps[0];
-                for (RemoteAnimationTarget tmpTarget : apps) {
-                    if (tmpTarget.taskId != -1 && !tmpTarget.hasAnimatingParent) {
-                        aniTarget = tmpTarget;
-                        break;
-                    }
-                }
                 // Pass the surface and metadata to the unlock animation controller.
                 mKeyguardUnlockAnimationControllerLazy.get()
                         .notifyStartSurfaceBehindRemoteAnimation(
-                                aniTarget, startTime, mSurfaceBehindRemoteAnimationRequested);
+                                apps, startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("RemoteAnimationDisabled"));

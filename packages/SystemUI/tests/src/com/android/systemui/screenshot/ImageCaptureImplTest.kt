@@ -23,7 +23,7 @@ import android.os.Binder
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.Display
-import android.view.SurfaceControl.ScreenshotHardwareBuffer
+import android.window.ScreenCapture.ScreenshotHardwareBuffer
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -84,7 +84,12 @@ class ImageCaptureImplTest : SysuiTestCase() {
             this.width = width
             this.height = height
             this.crop = crop
-            return ScreenshotHardwareBuffer(null, null, false, false)
+            return ScreenshotHardwareBuffer(
+                null,
+                null,
+                false,
+                false
+            )
         }
     }
 }

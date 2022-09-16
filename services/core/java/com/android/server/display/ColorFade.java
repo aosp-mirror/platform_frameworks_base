@@ -39,6 +39,7 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.window.ScreenCapture;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
@@ -181,7 +182,7 @@ final class ColorFade {
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
         mPrepared = true;
 
-        final SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
+        final ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
         if (hardwareBuffer == null) {
             dismiss();
             return false;
@@ -508,7 +509,7 @@ final class ColorFade {
     }
 
     private boolean setScreenshotTextureAndSetViewport(
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer) {
         if (!attachEglContext()) {
             return false;
         }
@@ -559,8 +560,8 @@ final class ColorFade {
         }
     }
 
-    private SurfaceControl.ScreenshotHardwareBuffer captureScreen() {
-        SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+    private ScreenCapture.ScreenshotHardwareBuffer captureScreen() {
+        ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                 mDisplayManagerInternal.systemScreenshot(mDisplayId);
         if (screenshotBuffer == null) {
             Slog.e(TAG, "Failed to take screenshot. Buffer is null");

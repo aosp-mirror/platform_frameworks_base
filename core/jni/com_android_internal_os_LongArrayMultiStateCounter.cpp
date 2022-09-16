@@ -244,6 +244,38 @@ static void native_getValues_LongArrayContainer(JNIEnv *env, jobject self, jlong
     std::copy(vector->data(), vector->data() + vector->size(), scopedArray.get());
 }
 
+static jboolean native_combineValues_LongArrayContainer(JNIEnv *env, jobject self, jlong nativePtr,
+                                                        jlongArray jarray, jintArray jindexMap) {
+    std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
+    ScopedLongArrayRW scopedArray(env, jarray);
+    ScopedIntArrayRO scopedIndexMap(env, jindexMap);
+
+    const uint64_t *data = vector->data();
+    uint64_t *array = reinterpret_cast<uint64_t *>(scopedArray.get());
+    const uint8_t size = scopedArray.size();
+
+    for (int i = 0; i < size; i++) {
+        array[i] = 0;
+    }
+
+    bool nonZero = false;
+    for (int i = 0; i < vector->size(); i++) {
+        jint index = scopedIndexMap[i];
+        if (index < 0 || index >= size) {
+            jniThrowExceptionFmt(env, "java/lang/IndexOutOfBoundsException",
+                                 "Index %d is out of bounds: [0, %d]", index, size - 1);
+            return false;
+        }
+
+        if (data[i] != 0L) {
+            array[index] += data[i];
+            nonZero = true;
+        }
+    }
+
+    return nonZero;
+}
+
 static const JNINativeMethod g_LongArrayContainer_methods[] = {
         // @CriticalNative
         {"native_init", "(I)J", (void *)native_init_LongArrayContainer},
@@ -253,6 +285,8 @@ static const JNINativeMethod g_LongArrayContainer_methods[] = {
         {"native_setValues", "(J[J)V", (void *)native_setValues_LongArrayContainer},
         // @FastNative
         {"native_getValues", "(J[J)V", (void *)native_getValues_LongArrayContainer},
+        // @FastNative
+        {"native_combineValues", "(J[J[I)Z", (void *)native_combineValues_LongArrayContainer},
 };
 
 int register_com_android_internal_os_LongArrayMultiStateCounter(JNIEnv *env) {

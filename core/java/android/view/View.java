@@ -3095,7 +3095,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * Accessibility interactions from services without {@code isAccessibilityTool} set to true are
      * disallowed for any of the following conditions:
-     * <li>this view's window sets {@link WindowManager.LayoutParams#FLAG_SECURE}.</li>
      * <li>this view sets {@link #getFilterTouchesWhenObscured()}.</li>
      * <li>any parent of this view returns true from {@link #isAccessibilityDataPrivate()}.</li>
      * </p>
@@ -8326,10 +8325,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Visually distinct portion of a window with window-like semantics are considered panes for
-     * accessibility purposes. One example is the content view of a fragment that is replaced.
+     * accessibility purposes. One example is the content view of a large fragment that is replaced.
      * In order for accessibility services to understand a pane's window-like behavior, panes
-     * should have descriptive titles. Views with pane titles produce {@link AccessibilityEvent}s
-     * when they appear, disappear, or change title.
+     * should have descriptive titles. Views with pane titles produce
+     * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}s when they appear, disappear, or change
+     * title.
+     *
+     * <p>
+     * When transitioning from one Activity to another, instead of using
+     * setAccessibilityPaneTitle(), set a descriptive title for its window by using android:label
+     * for the matching <activity> entry in your application’s manifest or updating the title at
+     * runtime with{@link android.app.Activity#setTitle(CharSequence)}.
      *
      * @param accessibilityPaneTitle The pane's title. Setting to {@code null} indicates that this
      *                               View is not a pane.
@@ -14524,9 +14530,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Use the explicit value if set.
         if (mExplicitAccessibilityDataPrivate != ACCESSIBILITY_DATA_PRIVATE_AUTO) {
             mInferredAccessibilityDataPrivate = mExplicitAccessibilityDataPrivate;
-        } else if (mAttachInfo != null && mAttachInfo.mWindowSecure) {
-            // Views inside FLAG_SECURE windows default to accessibilityDataPrivate.
-            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
         } else if (getFilterTouchesWhenObscured()) {
             // Views that set filterTouchesWhenObscured default to accessibilityDataPrivate.
             mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
@@ -24512,8 +24515,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Set the current default focus highlight.
      * @param highlight the highlight drawable, or {@code null} if it's no longer needed.
+     * @hide
      */
-    private void setDefaultFocusHighlight(Drawable highlight) {
+    void setDefaultFocusHighlight(Drawable highlight) {
         mDefaultFocusHighlight = highlight;
         mDefaultFocusHighlightSizeChanged = true;
         if (highlight != null) {
@@ -30252,11 +30256,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * The current visibility of the window.
          */
         int mWindowVisibility;
-
-        /**
-         * Indicates whether the view's window sets {@link WindowManager.LayoutParams#FLAG_SECURE}.
-         */
-        boolean mWindowSecure;
 
         /**
          * Indicates the time at which drawing started to occur.

@@ -2838,7 +2838,6 @@ public final class ViewRootImpl implements ViewParent,
             // However, windows are now always 32 bits by default, so choose 32 bits
             mAttachInfo.mUse32BitDrawingCache = true;
             mAttachInfo.mWindowVisibility = viewVisibility;
-            mAttachInfo.mWindowSecure = (lp.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
             mAttachInfo.mRecomputeGlobalAttributes = false;
             mLastConfigurationFromResources.setTo(config);
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
@@ -3814,6 +3813,13 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
                 if (mAttachInfo.mTooltipHost != null) {
                     mAttachInfo.mTooltipHost.hideTooltip();
+                }
+                if (!hasWindowFocus) {
+                    // Clear focus highlight if its window lost focus.
+                    final View focused = mView.findFocus();
+                    if (focused != null) {
+                        focused.setDefaultFocusHighlight(null);
+                    }
                 }
             }
 
@@ -5846,7 +5852,13 @@ public final class ViewRootImpl implements ViewParent,
             // be when the window is first being added, and mFocused isn't
             // set yet.
             final View focused = mView.findFocus();
-            if (focused != null && !focused.isFocusableInTouchMode()) {
+            if (focused == null) {
+                return false;
+            }
+
+            // Clear default focus highlight if it entered touch mode.
+            focused.setDefaultFocusHighlight(null);
+            if (!focused.isFocusableInTouchMode()) {
                 final ViewGroup ancestorToTakeFocus = findAncestorToTakeFocusInTouchMode(focused);
                 if (ancestorToTakeFocus != null) {
                     // there is an ancestor that wants focus after its

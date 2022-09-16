@@ -58,12 +58,29 @@ object Fakes {
                                     (0 until userCount).map { index ->
                                         UserModel(
                                             id = index,
-                                            name = Text.Loaded("user_$index"),
+                                            name =
+                                                Text.Loaded(
+                                                    when (index % 6) {
+                                                        0 -> "Ross Geller"
+                                                        1 -> "Phoebe Buffay"
+                                                        2 -> "Monica Geller"
+                                                        3 -> "Rachel Greene"
+                                                        4 -> "Chandler Bing"
+                                                        else -> "Joey Tribbiani"
+                                                    }
+                                                ),
                                             image =
                                                 checkNotNull(
                                                     AppCompatResources.getDrawable(
                                                         context,
-                                                        R.drawable.ic_avatar_guest_user
+                                                        when (index % 6) {
+                                                            0 -> R.drawable.kitten1
+                                                            1 -> R.drawable.kitten2
+                                                            2 -> R.drawable.kitten3
+                                                            3 -> R.drawable.kitten4
+                                                            4 -> R.drawable.kitten5
+                                                            else -> R.drawable.kitten6
+                                                        },
                                                     )
                                                 ),
                                             isSelected = index == 0,

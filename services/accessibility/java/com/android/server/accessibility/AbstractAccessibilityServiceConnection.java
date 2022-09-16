@@ -75,7 +75,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.SurfaceControl.ScreenshotHardwareBuffer;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
@@ -84,6 +83,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.inputmethod.EditorInfo;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;

@@ -28,9 +28,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.DisplayWindowPolicyController;
+import android.window.ScreenCapture;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -118,7 +118,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId);
+    public abstract ScreenCapture.ScreenshotHardwareBuffer systemScreenshot(int displayId);
 
     /**
      * General screenshot functionality that excludes secure layers and applies appropriate
@@ -127,7 +127,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotHardwareBuffer userScreenshot(int displayId);
+    public abstract ScreenCapture.ScreenshotHardwareBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.

@@ -45,6 +45,7 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
+import android.window.ScreenCapture;
 
 import libcore.io.IoUtils;
 
@@ -220,13 +221,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             int width = crop.width();
             int height = crop.height();
             final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+            final ScreenCapture.DisplayCaptureArgs captureArgs =
+                    new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
                             .setSourceCrop(crop)
                             .setSize(width, height)
                             .build();
-            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureDisplay(captureArgs);
+            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                    ScreenCapture.captureDisplay(captureArgs);
             return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -242,11 +243,11 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfNotConnectedLocked();
         }
 
-        SurfaceControl.ScreenshotHardwareBuffer captureBuffer;
+        ScreenCapture.ScreenshotHardwareBuffer captureBuffer;
         final long identity = Binder.clearCallingIdentity();
         try {
-            captureBuffer = SurfaceControl.captureLayers(
-                    new SurfaceControl.LayerCaptureArgs.Builder(surfaceControl)
+            captureBuffer = ScreenCapture.captureLayers(
+                    new ScreenCapture.LayerCaptureArgs.Builder(surfaceControl)
                             .setChildrenOnly(false)
                             .build());
         } finally {

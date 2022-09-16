@@ -2709,7 +2709,7 @@ package android.util {
 
   public class SparseArrayMap<K, V> {
     ctor public SparseArrayMap();
-    method public void add(int, @NonNull K, @Nullable V);
+    method public V add(int, @NonNull K, @Nullable V);
     method public void clear();
     method public boolean contains(int, @NonNull K);
     method public void delete(int);

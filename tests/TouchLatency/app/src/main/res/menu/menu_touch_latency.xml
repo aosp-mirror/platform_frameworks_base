@@ -25,4 +25,10 @@
         android:showAsAction="ifRoom"
         android:title="@string/display_mode"
         android:visible="false"/>
+
+    <item
+        android:id="@+id/multi_display"
+        android:showAsAction="ifRoom"
+        android:title="@string/multi_display"
+        android:visible="false"/>
 </menu>

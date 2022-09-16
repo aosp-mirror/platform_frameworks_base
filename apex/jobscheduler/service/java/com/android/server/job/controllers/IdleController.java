@@ -96,6 +96,8 @@ public final class IdleController extends RestrictingController implements Idlen
     @Override
     public void reportNewIdleState(boolean isIdle) {
         synchronized (mLock) {
+            logDeviceWideConstraintStateToStatsd(JobStatus.CONSTRAINT_IDLE, isIdle);
+
             final long nowElapsed = sElapsedRealtimeClock.millis();
             mFlexibilityController.setConstraintSatisfied(
                     JobStatus.CONSTRAINT_IDLE, isIdle, nowElapsed);

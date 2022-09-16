@@ -1150,18 +1150,29 @@ public final class PlaybackActivityMonitor
                     }
                     return builder.toString();
                 case AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED:
-                    builder.append(" muteFromMasterMute:").append(
-                            (mEventValue & PLAYER_MUTE_MASTER) != 0);
-                    builder.append(" muteFromStreamVolume:").append(
-                            (mEventValue & PLAYER_MUTE_STREAM_VOLUME) != 0);
-                    builder.append(" muteFromStreamMute:").append(
-                            (mEventValue & PLAYER_MUTE_STREAM_MUTED) != 0);
-                    builder.append(" muteFromPlaybackRestricted:").append(
-                            (mEventValue & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0);
-                    builder.append(" muteFromClientVolume:").append(
-                            (mEventValue & PLAYER_MUTE_CLIENT_VOLUME) != 0);
-                    builder.append(" muteFromVolumeShaper:").append(
-                            (mEventValue & PLAYER_MUTE_VOLUME_SHAPER) != 0);
+                    builder.append(" source:");
+                    if (mEventValue <= 0) {
+                        builder.append("none ");
+                    } else {
+                        if ((mEventValue & PLAYER_MUTE_MASTER) != 0) {
+                            builder.append("masterMute ");
+                        }
+                        if ((mEventValue & PLAYER_MUTE_STREAM_VOLUME) != 0) {
+                            builder.append("streamVolume ");
+                        }
+                        if ((mEventValue & PLAYER_MUTE_STREAM_MUTED) != 0) {
+                            builder.append("streamMute ");
+                        }
+                        if ((mEventValue & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0) {
+                            builder.append("playbackRestricted ");
+                        }
+                        if ((mEventValue & PLAYER_MUTE_CLIENT_VOLUME) != 0) {
+                            builder.append("clientVolume ");
+                        }
+                        if ((mEventValue & PLAYER_MUTE_VOLUME_SHAPER) != 0) {
+                            builder.append("volumeShaper ");
+                        }
+                    }
                     return builder.toString();
                 default:
                     return builder.toString();
