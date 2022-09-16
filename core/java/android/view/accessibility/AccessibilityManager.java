@@ -585,6 +585,18 @@ public final class AccessibilityManager {
 
     /**
      * Returns if the accessibility in the system is enabled.
+     * <p>
+     * <b>Note:</b> This query is used for sending {@link AccessibilityEvent}s, since events are
+     * only needed if accessibility is on. Avoid changing UI or app behavior based on the state of
+     * accessibility. While well-intentioned, doing this creates brittle, less
+     * well-maintained code that works for some users but not others. Shared code leads to more
+     * equitable experiences and less technical debt.
+     *
+     *<p>
+     * For example, if you want to expose a unique interaction with your app, use
+     * ViewCompat#addAccessibilityAction in AndroidX to make this interaction - ideally
+     * with the same code path used for non-accessibility users - available to accessibility
+     * services. Services can then expose this action in the way best fit for their users.
      *
      * @return True if accessibility is enabled, false otherwise.
      */
@@ -597,6 +609,13 @@ public final class AccessibilityManager {
 
     /**
      * Returns if the touch exploration in the system is enabled.
+     * <p>
+     * <b>Note:</b> This query is used for dispatching hover events, such as
+     * {@link android.view.MotionEvent#ACTION_HOVER_ENTER}, to accessibility services to manage
+     * touch exploration. Avoid changing UI or app behavior based on the state of accessibility.
+     * While well-intentioned, doing this creates brittle, less well-maintained code that works for
+     * som users but not others. Shared code leads to more equitable experiences and less technical
+     * debt.
      *
      * @return True if touch exploration is enabled, false otherwise.
      */
