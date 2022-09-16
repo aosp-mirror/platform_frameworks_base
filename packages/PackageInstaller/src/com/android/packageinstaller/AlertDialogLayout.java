@@ -16,7 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -52,7 +51,6 @@ public class AlertDialogLayout extends LinearLayout {
         super(context);
     }
 
-    @UnsupportedAppUsage
     public AlertDialogLayout(@Nullable Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
@@ -344,10 +342,6 @@ public class AlertDialogLayout extends LinearLayout {
                     default:
                         childLeft = paddingLeft + lp.leftMargin;
                         break;
-                }
-
-                if (hasDividerBeforeChildAt(i)) {
-                    childTop += dividerHeight;
                 }
 
                 childTop += lp.topMargin;
