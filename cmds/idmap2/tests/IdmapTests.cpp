@@ -47,10 +47,11 @@ namespace android::idmap2 {
   ASSERT_EQ((entry).target_id, (target_resid));                 \
   ASSERT_EQ((entry).overlay_id, (overlay_resid))
 
-#define ASSERT_TARGET_INLINE_ENTRY(entry, target_resid, expected_type, expected_value) \
-  ASSERT_EQ((entry).target_id, target_resid);                                          \
-  ASSERT_EQ((entry).value.data_type, (expected_type));                                 \
-  ASSERT_EQ((entry).value.data_value, (expected_value))
+#define ASSERT_TARGET_INLINE_ENTRY(entry, target_resid, ex_config, expected_type, expected_value) \
+  ASSERT_EQ((entry).target_id, target_resid);                                                     \
+  ASSERT_EQ((entry).values.begin()->first.to_string(), (ex_config));                              \
+  ASSERT_EQ((entry).values.begin()->second.data_type, (expected_type));                           \
+  ASSERT_EQ((entry).values.begin()->second.data_value, (expected_value))
 
 #define ASSERT_OVERLAY_ENTRY(entry, overlay_resid, target_resid) \
   ASSERT_EQ((entry).overlay_id, (overlay_resid));                \
@@ -67,7 +68,7 @@ TEST(IdmapTests, CreateIdmapHeaderFromBinaryStream) {
   std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(stream);
   ASSERT_THAT(header, NotNull());
   ASSERT_EQ(header->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(header->GetVersion(), 0x08U);
+  ASSERT_EQ(header->GetVersion(), 0x09U);
   ASSERT_EQ(header->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(header->GetOverlayCrc(), 0x5678U);
   ASSERT_EQ(header->GetFulfilledPolicies(), 0x11);
@@ -122,8 +123,8 @@ TEST(IdmapTests, CreateIdmapDataFromBinaryStream) {
 
   const auto& target_inline_entries = data->GetTargetInlineEntries();
   ASSERT_EQ(target_inline_entries.size(), 1U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], 0x7f040000, Res_value::TYPE_INT_HEX,
-                             0x12345678);
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], 0x7f040000,  "land-xxhdpi-v7",
+                             Res_value::TYPE_INT_HEX, 0x12345678);
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(target_entries.size(), 3U);
@@ -142,7 +143,7 @@ TEST(IdmapTests, CreateIdmapFromBinaryStream) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x08U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x09U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x5678U);
   ASSERT_EQ(idmap->GetHeader()->GetFulfilledPolicies(), kIdmapRawDataPolicies);
@@ -165,8 +166,8 @@ TEST(IdmapTests, CreateIdmapFromBinaryStream) {
 
   const auto& target_inline_entries = data->GetTargetInlineEntries();
   ASSERT_EQ(target_inline_entries.size(), 1U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], 0x7f040000, Res_value::TYPE_INT_HEX,
-                             0x12345678);
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], 0x7f040000,  "land-xxhdpi-v7",
+                             Res_value::TYPE_INT_HEX, 0x12345678);
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(target_entries.size(), 3U);
@@ -203,7 +204,7 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x08U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x09U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), android::idmap2::TestConstants::TARGET_CRC);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), android::idmap2::TestConstants::OVERLAY_CRC);
   ASSERT_EQ(idmap->GetHeader()->GetFulfilledPolicies(), PolicyFlags::PUBLIC);
@@ -261,9 +262,9 @@ TEST(IdmapTests, FabricatedOverlay) {
 
   auto frro = FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "test.target")
                   .SetOverlayable("TestResources")
-                  .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "")
-                  .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "")
-                  .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "")
+                  .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "land-xxhdpi-v7")
+                  .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "land")
+                  .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "xxhdpi-v7")
                   .Build();
 
   ASSERT_TRUE(frro);
@@ -295,11 +296,11 @@ TEST(IdmapTests, FabricatedOverlay) {
 
   const auto& target_inline_entries = data->GetTargetInlineEntries();
   ASSERT_EQ(target_inline_entries.size(), 3U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::integer::int1,
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::integer::int1, "land-xxhdpi-v7",
                              Res_value::TYPE_INT_DEC, 2U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::string::str1,
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::string::str1, "land",
                              Res_value::TYPE_REFERENCE, 0x7f010000);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[2], R::target::string::str2,
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[2], R::target::string::str2, "xxhdpi-v7",
                              Res_value::TYPE_STRING,
                              (uint32_t) (string_pool.indexOfString(u"foobar", 6)).value_or(-1));
 }
@@ -442,9 +443,9 @@ TEST(IdmapTests, CreateIdmapDataInlineResources) {
   constexpr size_t overlay_string_pool_size = 10U;
   const auto& target_inline_entries = data->GetTargetInlineEntries();
   ASSERT_EQ(target_inline_entries.size(), 2U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::integer::int1,
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::integer::int1, std::string(),
                              Res_value::TYPE_INT_DEC, 73U);  // -> 73
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::string::str1,
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::string::str1, std::string(),
                              Res_value::TYPE_STRING,
                              overlay_string_pool_size + 0U);  // -> "Hello World"
 

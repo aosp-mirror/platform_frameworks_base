@@ -46,6 +46,10 @@ struct TargetValue {
 struct TargetValueWithConfig {
   TargetValue value;
   std::string config;
+
+  [[nodiscard]] std::pair<std::string, TargetValue> to_pair() const {
+    return std::make_pair(config, value);
+  }
 };
 
 namespace utils {
