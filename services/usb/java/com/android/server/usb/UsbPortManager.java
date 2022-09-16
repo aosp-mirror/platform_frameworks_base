@@ -73,6 +73,7 @@ import android.service.ServiceProtoEnums;
 import android.service.usb.UsbPortInfoProto;
 import android.service.usb.UsbPortManagerProto;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 
@@ -87,6 +88,7 @@ import com.android.server.usb.hal.port.RawPortInfo;
 import com.android.server.usb.hal.port.UsbPortHal;
 import com.android.server.usb.hal.port.UsbPortHalInstance;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -754,6 +756,31 @@ public class UsbPortManager {
         }
     }
 
+    /**
+     * Sets Compliance Warnings for simulated USB port objects.
+     */
+    public void simulateComplianceWarnings(String portId, String complianceWarningsString,
+            IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            final RawPortInfo portInfo = mSimulatedPorts.get(portId);
+            if (portInfo == null) {
+                pw.println("Simulated port not found");
+                return;
+            }
+
+            IntArray complianceWarnings = new IntArray();
+            for (String s : complianceWarningsString.split("[, ]")) {
+                if (s.length() > 0) {
+                    complianceWarnings.add(Integer.parseInt(s));
+                }
+            }
+            pw.println("Simulating Compliance Warnings: portId=" + portId
+                    + " Warnings=" + complianceWarningsString);
+            portInfo.complianceWarnings = complianceWarnings.toArray();
+            updatePortsLocked(pw, null);
+        }
+    }
+
     public void disconnectSimulatedPort(String portId, IndentingPrintWriter pw) {
         synchronized (mLock) {
             final RawPortInfo portInfo = mSimulatedPorts.get(portId);
@@ -842,7 +869,10 @@ public class UsbPortManager {
                         portInfo.contaminantDetectionStatus,
                         portInfo.usbDataStatus,
                         portInfo.powerTransferLimited,
-                        portInfo.powerBrickConnectionStatus, pw);
+                        portInfo.powerBrickConnectionStatus,
+                        portInfo.supportsComplianceWarnings,
+                        portInfo.complianceWarnings,
+                        pw);
             }
         } else {
             for (RawPortInfo currentPortInfo : newPortInfo) {
@@ -857,7 +887,10 @@ public class UsbPortManager {
                         currentPortInfo.contaminantDetectionStatus,
                         currentPortInfo.usbDataStatus,
                         currentPortInfo.powerTransferLimited,
-                        currentPortInfo.powerBrickConnectionStatus, pw);
+                        currentPortInfo.powerBrickConnectionStatus,
+                        currentPortInfo.supportsComplianceWarnings,
+                        currentPortInfo.complianceWarnings,
+                        pw);
             }
         }
 
@@ -880,6 +913,9 @@ public class UsbPortManager {
                     handlePortRemovedLocked(portInfo, pw);
                     break;
             }
+            if (portInfo.mComplianceWarningChange == portInfo.COMPLIANCE_WARNING_CHANGED) {
+                handlePortComplianceWarningLocked(portInfo, pw);
+            }
         }
     }
 
@@ -896,6 +932,8 @@ public class UsbPortManager {
             int usbDataStatus,
             boolean powerTransferLimited,
             int powerBrickConnectionStatus,
+            boolean supportsComplianceWarnings,
+            @NonNull int[] complianceWarnings,
             IndentingPrintWriter pw) {
         // Only allow mode switch capability for dual role ports.
         // Validate that the current mode matches the supported modes we expect.
@@ -949,13 +987,15 @@ public class UsbPortManager {
             portInfo = new PortInfo(mContext.getSystemService(UsbManager.class),
                 portId, supportedModes, supportedContaminantProtectionModes,
                 supportsEnableContaminantPresenceProtection,
-                supportsEnableContaminantPresenceDetection);
+                supportsEnableContaminantPresenceDetection,
+                supportsComplianceWarnings);
             portInfo.setStatus(currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
                     currentDataRole, canChangeDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
                     contaminantDetectionStatus, usbDataStatus,
-                    powerTransferLimited, powerBrickConnectionStatus);
+                    powerTransferLimited, powerBrickConnectionStatus,
+                    complianceWarnings);
             mPorts.put(portId, portInfo);
         } else {
             // Validate that ports aren't changing definition out from under us.
@@ -987,13 +1027,13 @@ public class UsbPortManager {
                         + ", current=" + supportsEnableContaminantPresenceDetection);
             }
 
-
             if (portInfo.setStatus(currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
                     currentDataRole, canChangeDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
                     contaminantDetectionStatus, usbDataStatus,
-                    powerTransferLimited, powerBrickConnectionStatus)) {
+                    powerTransferLimited, powerBrickConnectionStatus,
+                    complianceWarnings)) {
                 portInfo.mDisposition = PortInfo.DISPOSITION_CHANGED;
             } else {
                 portInfo.mDisposition = PortInfo.DISPOSITION_READY;
@@ -1017,6 +1057,11 @@ public class UsbPortManager {
         enableContaminantDetectionIfNeeded(portInfo, pw);
         disableLimitPowerTransferIfNeeded(portInfo, pw);
         handlePortLocked(portInfo, pw);
+    }
+
+    private void handlePortComplianceWarningLocked(PortInfo portInfo, IndentingPrintWriter pw) {
+        logAndPrint(Log.INFO, pw, "USB port compliance warning changed: " + portInfo);
+        sendComplianceWarningBroadcastLocked(portInfo);
     }
 
     private void handlePortRemovedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
@@ -1044,6 +1089,23 @@ public class UsbPortManager {
 
     private void sendPortChangedBroadcastLocked(PortInfo portInfo) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_CHANGED);
+        intent.addFlags(
+                Intent.FLAG_RECEIVER_FOREGROUND |
+                        Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        intent.putExtra(UsbManager.EXTRA_PORT, ParcelableUsbPort.of(portInfo.mUsbPort));
+        intent.putExtra(UsbManager.EXTRA_PORT_STATUS, portInfo.mUsbPortStatus);
+
+        // Guard against possible reentrance by posting the broadcast from the handler
+        // instead of from within the critical section.
+        mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                Manifest.permission.MANAGE_USB));
+    }
+
+    private void sendComplianceWarningBroadcastLocked(PortInfo portInfo) {
+        if (portInfo.mComplianceWarningChange == portInfo.COMPLIANCE_WARNING_UNCHANGED) {
+            return;
+        }
+        final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
         intent.addFlags(
                 Intent.FLAG_RECEIVER_FOREGROUND |
                         Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
@@ -1180,6 +1242,9 @@ public class UsbPortManager {
         public static final int DISPOSITION_READY = 2;
         public static final int DISPOSITION_REMOVED = 3;
 
+        public static final int COMPLIANCE_WARNING_UNCHANGED = 0;
+        public static final int COMPLIANCE_WARNING_CHANGED = 1;
+
         public final UsbPort mUsbPort;
         public UsbPortStatus mUsbPortStatus;
         public boolean mCanChangeMode;
@@ -1191,15 +1256,29 @@ public class UsbPortManager {
         public long mConnectedAtMillis;
         // 0 when port is connected. Else reports the last connected duration
         public long mLastConnectDurationMillis;
+        // default initialized to 0 which means no changes reported
+        public int mComplianceWarningChange;
 
         PortInfo(@NonNull UsbManager usbManager, @NonNull String portId, int supportedModes,
                 int supportedContaminantProtectionModes,
                 boolean supportsEnableContaminantPresenceDetection,
-                boolean supportsEnableContaminantPresenceProtection) {
+                boolean supportsEnableContaminantPresenceProtection,
+                boolean supportsComplianceWarnings) {
             mUsbPort = new UsbPort(usbManager, portId, supportedModes,
                     supportedContaminantProtectionModes,
                     supportsEnableContaminantPresenceDetection,
-                    supportsEnableContaminantPresenceProtection);
+                    supportsEnableContaminantPresenceProtection,
+                    supportsComplianceWarnings);
+            mComplianceWarningChange = COMPLIANCE_WARNING_UNCHANGED;
+        }
+
+        public boolean complianceWarningsChanged(@NonNull int[] complianceWarnings) {
+            if (Arrays.equals(complianceWarnings, mUsbPortStatus.getComplianceWarnings())) {
+                mComplianceWarningChange = COMPLIANCE_WARNING_UNCHANGED;
+                return false;
+            }
+            mComplianceWarningChange = COMPLIANCE_WARNING_CHANGED;
+            return true;
         }
 
         public boolean setStatus(int currentMode, boolean canChangeMode,
@@ -1221,7 +1300,8 @@ public class UsbPortManager {
                         supportedRoleCombinations, UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
                         UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED,
                         UsbPortStatus.DATA_STATUS_UNKNOWN, false,
-                        UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN);
+                        UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN,
+                        new int[] {});
                 dispositionChanged = true;
             }
 
@@ -1266,8 +1346,65 @@ public class UsbPortManager {
                 mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                         supportedRoleCombinations, contaminantProtectionStatus,
                         contaminantDetectionStatus, usbDataStatus,
-                        powerTransferLimited, powerBrickConnectionStatus);
+                        powerTransferLimited, powerBrickConnectionStatus,
+                        new int[] {});
                 dispositionChanged = true;
+            }
+
+            if (mUsbPortStatus.isConnected() && mConnectedAtMillis == 0) {
+                mConnectedAtMillis = SystemClock.elapsedRealtime();
+                mLastConnectDurationMillis = 0;
+            } else if (!mUsbPortStatus.isConnected() && mConnectedAtMillis != 0) {
+                mLastConnectDurationMillis = SystemClock.elapsedRealtime() - mConnectedAtMillis;
+                mConnectedAtMillis = 0;
+            }
+
+            return dispositionChanged;
+        }
+
+        public boolean setStatus(int currentMode, boolean canChangeMode,
+                int currentPowerRole, boolean canChangePowerRole,
+                int currentDataRole, boolean canChangeDataRole,
+                int supportedRoleCombinations, int contaminantProtectionStatus,
+                int contaminantDetectionStatus, int usbDataStatus,
+                boolean powerTransferLimited, int powerBrickConnectionStatus,
+                @NonNull int[] complianceWarnings) {
+            boolean dispositionChanged = false;
+
+            mCanChangeMode = canChangeMode;
+            mCanChangePowerRole = canChangePowerRole;
+            mCanChangeDataRole = canChangeDataRole;
+            if (mUsbPortStatus == null
+                    || mUsbPortStatus.getCurrentMode() != currentMode
+                    || mUsbPortStatus.getCurrentPowerRole() != currentPowerRole
+                    || mUsbPortStatus.getCurrentDataRole() != currentDataRole
+                    || mUsbPortStatus.getSupportedRoleCombinations()
+                    != supportedRoleCombinations
+                    || mUsbPortStatus.getContaminantProtectionStatus()
+                    != contaminantProtectionStatus
+                    || mUsbPortStatus.getContaminantDetectionStatus()
+                    != contaminantDetectionStatus
+                    || mUsbPortStatus.getUsbDataStatus()
+                    != usbDataStatus
+                    || mUsbPortStatus.isPowerTransferLimited()
+                    != powerTransferLimited
+                    || mUsbPortStatus.getPowerBrickConnectionStatus()
+                    != powerBrickConnectionStatus) {
+                if (mUsbPortStatus == null && complianceWarnings.length > 0) {
+                    mComplianceWarningChange = COMPLIANCE_WARNING_CHANGED;
+                }
+                mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
+                        supportedRoleCombinations, contaminantProtectionStatus,
+                        contaminantDetectionStatus, usbDataStatus,
+                        powerTransferLimited, powerBrickConnectionStatus,
+                        complianceWarnings);
+                dispositionChanged = true;
+            } else if (complianceWarningsChanged(complianceWarnings)) {
+                mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
+                        supportedRoleCombinations, contaminantProtectionStatus,
+                        contaminantDetectionStatus, usbDataStatus,
+                        powerTransferLimited, powerBrickConnectionStatus,
+                        complianceWarnings);
             }
 
             if (mUsbPortStatus.isConnected() && mConnectedAtMillis == 0) {

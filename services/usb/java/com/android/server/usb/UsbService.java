@@ -1076,6 +1076,23 @@ public class UsbService extends IUsbManager.Stub {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
                 }
+            } else if ("set-compliance-reasons".equals(args[0]) && args.length == 3) {
+                final String portId = args[1];
+                final String complianceWarnings = args[2];
+                if (mPortManager != null) {
+                    mPortManager.simulateComplianceWarnings(portId, complianceWarnings, pw);
+                    pw.println();
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
+                }
+            } else if ("clear-compliance-reasons".equals(args[0]) && args.length == 2) {
+                final String portId = args[1];
+                if (mPortManager != null) {
+                    mPortManager.simulateComplianceWarnings(portId, "", pw);
+                    pw.println();
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
+                }
             } else if ("ports".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
@@ -1124,6 +1141,17 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb add-port \"matrix\" ufp");
                 pw.println("  dumpsys usb set-contaminant-status \"matrix\" true");
                 pw.println("  dumpsys usb set-contaminant-status \"matrix\" false");
+                pw.println();
+                pw.println("Example simulate compliance warnings:");
+                pw.println("  dumpsys usb add-port \"matrix\" dual");
+                pw.println("  dumpsys usb set-compliance-reasons \"matrix\" <reason-list>");
+                pw.println("  dumpsys usb clear-compliance-reasons \"matrix\"");
+                pw.println("<reason-list> is expected to be formatted as \"1, ..., 4\"");
+                pw.println("with reasons that need to be simulated.");
+                pw.println("  1: debug accessory");
+                pw.println("  2: bc12");
+                pw.println("  3: missing rp");
+                pw.println("  4: type c");
                 pw.println();
                 pw.println("Example USB device descriptors:");
                 pw.println("  dumpsys usb dump-descriptors -dump-short");
