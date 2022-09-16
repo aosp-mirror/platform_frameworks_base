@@ -50,27 +50,11 @@ class MediaTttLoggerTest : SysuiTestCase() {
 
         logger.logStateChange(stateName, id, packageName)
 
-        val stringWriter = StringWriter()
-        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
-        val actualString = stringWriter.toString()
-
+        val actualString = getStringFromBuffer()
         assertThat(actualString).contains(DEVICE_TYPE_TAG)
         assertThat(actualString).contains(stateName)
         assertThat(actualString).contains(id)
         assertThat(actualString).contains(packageName)
-    }
-
-    @Test
-    fun logChipRemoval_bufferHasDeviceTypeAndReason() {
-        val reason = "test reason"
-        logger.logChipRemoval(reason)
-
-        val stringWriter = StringWriter()
-        buffer.dump(PrintWriter(stringWriter), tailLength = 0)
-        val actualString = stringWriter.toString()
-
-        assertThat(actualString).contains(DEVICE_TYPE_TAG)
-        assertThat(actualString).contains(reason)
     }
 
     @Test
@@ -79,11 +63,26 @@ class MediaTttLoggerTest : SysuiTestCase() {
 
         logger.logPackageNotFound(packageName)
 
+        val actualString = getStringFromBuffer()
+        assertThat(actualString).contains(packageName)
+    }
+
+    @Test
+    fun logRemovalBypass_bufferHasReasons() {
+        val removalReason = "fakeRemovalReason"
+        val bypassReason = "fakeBypassReason"
+
+        logger.logRemovalBypass(removalReason, bypassReason)
+
+        val actualString = getStringFromBuffer()
+        assertThat(actualString).contains(removalReason)
+        assertThat(actualString).contains(bypassReason)
+    }
+
+    private fun getStringFromBuffer(): String {
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
-        val actualString = stringWriter.toString()
-
-        assertThat(actualString).contains(packageName)
+        return stringWriter.toString()
     }
 }
 

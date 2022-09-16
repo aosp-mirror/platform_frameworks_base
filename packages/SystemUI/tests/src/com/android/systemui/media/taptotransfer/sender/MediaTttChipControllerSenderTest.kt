@@ -587,6 +587,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -601,6 +602,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -622,6 +624,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -646,6 +649,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -656,6 +660,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -680,6 +685,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -690,6 +696,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
@@ -714,6 +721,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
