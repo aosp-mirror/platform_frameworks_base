@@ -29,9 +29,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.controller.ControlsController;
@@ -40,6 +43,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent;
+import com.android.systemui.plugins.ActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +82,15 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<ControlsListingController.ControlsListingCallback> mCallbackCaptor;
+
+    @Mock
+    private ImageView mView;
+
+    @Mock
+    private ActivityStarter mActivityStarter;
+
+    @Mock
+    UiEventLogger mUiEventLogger;
 
     @Before
     public void setup() {
@@ -149,6 +162,30 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         setServiceAvailable(true);
 
         verify(mDreamOverlayStateController).addComplication(mComplication);
+    }
+
+    /**
+     * Ensures clicking home controls chip logs UiEvent.
+     */
+    @Test
+    public void testClick_logsUiEvent() {
+        final DreamHomeControlsComplication.DreamHomeControlsChipViewController viewController =
+                new DreamHomeControlsComplication.DreamHomeControlsChipViewController(
+                        mView,
+                        mActivityStarter,
+                        mContext,
+                        mControlsComponent,
+                        mUiEventLogger);
+        viewController.onViewAttached();
+
+        final ArgumentCaptor<View.OnClickListener> clickListenerCaptor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+        verify(mView).setOnClickListener(clickListenerCaptor.capture());
+
+        clickListenerCaptor.getValue().onClick(mView);
+        verify(mUiEventLogger).log(
+                DreamHomeControlsComplication.DreamHomeControlsChipViewController
+                        .DreamOverlayEvent.DREAM_HOME_CONTROLS_TAPPED);
     }
 
     private void setHaveFavorites(boolean value) {
