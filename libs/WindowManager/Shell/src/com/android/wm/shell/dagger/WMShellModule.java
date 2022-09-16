@@ -599,12 +599,12 @@ public abstract class WMShellModule {
             Context context, ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
-            @ShellMainThread Handler mainHandler
+            @ShellMainThread Handler mainHandler,
+            Transitions transitions
     ) {
         if (DesktopMode.IS_SUPPORTED) {
             return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
-                    rootDisplayAreaOrganizer,
-                    mainHandler));
+                    rootDisplayAreaOrganizer, mainHandler, transitions));
         } else {
             return Optional.empty();
         }
