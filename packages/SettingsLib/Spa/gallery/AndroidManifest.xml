@@ -35,5 +35,13 @@
             android:name=".GalleryDebugActivity"
             android:exported="true">
         </activity>
+
+        <provider
+            android:name=".GalleryEntryProvider"
+            android:authorities="com.android.spa.gallery.provider"
+            android:enabled="true"
+            android:exported="false">
+        </provider>
+
     </application>
 </manifest>
