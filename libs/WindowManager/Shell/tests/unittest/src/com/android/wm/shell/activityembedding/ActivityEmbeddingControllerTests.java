@@ -17,7 +17,7 @@
 package com.android.wm.shell.activityembedding;
 
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 
@@ -78,7 +78,7 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
     public void testStartAnimation_containsNonActivityEmbeddingChange() {
         final TransitionInfo info = new TransitionInfo(TRANSIT_OPEN, 0);
         final TransitionInfo.Change embeddingChange = createChange();
-        embeddingChange.setFlags(FLAG_IS_EMBEDDED);
+        embeddingChange.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
         final TransitionInfo.Change nonEmbeddingChange = createChange();
         info.addChange(embeddingChange);
         info.addChange(nonEmbeddingChange);
@@ -96,7 +96,7 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
     public void testStartAnimation_onlyActivityEmbeddingChange() {
         final TransitionInfo info = new TransitionInfo(TRANSIT_OPEN, 0);
         final TransitionInfo.Change embeddingChange = createChange();
-        embeddingChange.setFlags(FLAG_IS_EMBEDDED);
+        embeddingChange.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
         info.addChange(embeddingChange);
 
         // No-op
@@ -116,7 +116,7 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
 
         final TransitionInfo info = new TransitionInfo(TRANSIT_OPEN, 0);
         final TransitionInfo.Change embeddingChange = createChange();
-        embeddingChange.setFlags(FLAG_IS_EMBEDDED);
+        embeddingChange.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
         info.addChange(embeddingChange);
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
