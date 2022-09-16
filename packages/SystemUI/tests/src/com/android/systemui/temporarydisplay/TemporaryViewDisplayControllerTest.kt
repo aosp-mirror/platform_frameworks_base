@@ -231,6 +231,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         configurationController,
         powerManager,
         R.layout.media_ttt_chip,
+        "Window Title",
     ) {
         var mostRecentViewInfo: ViewInfo? = null
 
