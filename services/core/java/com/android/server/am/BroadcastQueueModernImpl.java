@@ -102,6 +102,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MAX_RUNNING_PROCESS_QUEUES = 4;
 
     /**
+     * Maximum number of active broadcasts to dispatch to a "running" process
+     * queue before we retire them back to being "runnable" to give other
+     * processes a chance to run.
+     */
+    // TODO: shift hard-coded defaults to BroadcastConstants
+    private static final int MAX_RUNNING_ACTIVE_BROADCASTS = 16;
+
+    /**
      * Map from UID to per-process broadcast queues. If a UID hosts more than
      * one process, each additional process is stored as a linked list using
      * {@link BroadcastProcessQueue#next}.
@@ -475,10 +483,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         queue.setActiveDeliveryState(deliveryState);
 
         // TODO: cancel any outstanding ANR timeout
-        // TODO: limit number of broadcasts in a row to avoid starvation
         // TODO: if we're the last receiver of this broadcast, record to history
 
-        if (queue.isRunnable() && queue.isProcessWarm()) {
+        // Even if we have more broadcasts, if we've made reasonable progress
+        // and someone else is waiting, retire ourselves to avoid starvation
+        final boolean shouldRetire = (mRunnableHead != null)
+                && (queue.getActiveCountSinceIdle() > MAX_RUNNING_ACTIVE_BROADCASTS);
+
+        if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
             queue.makeActiveNextPending();
             scheduleReceiverWarmLocked(queue);

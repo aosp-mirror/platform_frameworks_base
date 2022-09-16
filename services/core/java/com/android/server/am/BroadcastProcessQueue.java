@@ -95,6 +95,15 @@ class BroadcastProcessQueue {
      */
     private int mActiveIndex;
 
+    /**
+     * Count of {@link #mActive} broadcasts that have been dispatched since this
+     * queue was last idle.
+     */
+    private int mActiveCountSinceIdle;
+
+    /**
+     * Count of {@link #mPending} broadcasts of these various flavors.
+     */
     private int mCountForeground;
     private int mCountOrdered;
     private int mCountAlarm;
@@ -171,6 +180,14 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Count of {@link #mActive} broadcasts that have been dispatched since this
+     * queue was last idle.
+     */
+    public int getActiveCountSinceIdle() {
+        return mActiveCountSinceIdle;
+    }
+
+    /**
      * Set the currently active broadcast to the next pending broadcast.
      */
     public void makeActiveNextPending() {
@@ -179,6 +196,7 @@ class BroadcastProcessQueue {
         final SomeArgs next = mPending.removeFirst();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
+        mActiveCountSinceIdle++;
         next.recycle();
         if (mActive.isForeground()) {
             mCountForeground--;
@@ -198,6 +216,7 @@ class BroadcastProcessQueue {
     public void makeActiveIdle() {
         mActive = null;
         mActiveIndex = 0;
+        mActiveCountSinceIdle = 0;
     }
 
     public void setActiveDeliveryState(int deliveryState) {
