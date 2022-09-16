@@ -291,7 +291,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                         FalsingClassifier.Result.falsed(
                                 0, getClass().getSimpleName(), "bad history"));
                 logDebug("False Single Tap: true (bad history)");
-                mFalsingTapListeners.forEach(FalsingTapListener::onDoubleTapRequired);
+                mFalsingTapListeners.forEach(FalsingTapListener::onAdditionalTapRequired);
                 return true;
             } else {
                 mPriorResults = getPassedResult(0.1);
@@ -321,7 +321,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 mHistoryTracker.falseBelief(),
                 mHistoryTracker.falseConfidence());
         mPriorResults = Collections.singleton(result);
-        logDebug("False Double Tap: " + result.isFalse());
+        logDebug("False Double Tap: " + result.isFalse() + " reason=" + result.getReason());
         return result.isFalse();
     }
 
