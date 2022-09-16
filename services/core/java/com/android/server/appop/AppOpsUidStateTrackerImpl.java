@@ -66,6 +66,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     private SparseBooleanArray mVisibleAppWidget = new SparseBooleanArray();
     private SparseBooleanArray mPendingVisibleAppWidget = new SparseBooleanArray();
     private SparseLongArray mPendingCommitTime = new SparseLongArray();
+    private SparseBooleanArray mPendingGone = new SparseBooleanArray();
 
     private ArrayMap<UidStateChangedCallback, Handler> mUidStateChangedCallbacks = new ArrayMap<>();
 
@@ -185,16 +186,6 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     @Override
     public void updateUidProcState(int uid, int procState, int capability) {
         mEventLog.logUpdateUidProcState(uid, procState, capability);
-        if (procState == PROCESS_STATE_NONEXISTENT) {
-            mUidStates.delete(uid);
-            mPendingUidStates.delete(uid);
-            mCapability.delete(uid);
-            mPendingCapability.delete(uid);
-            mVisibleAppWidget.delete(uid);
-            mPendingVisibleAppWidget.delete(uid);
-            mPendingCommitTime.delete(uid);
-            return;
-        }
 
         int uidState = processStateToUidState(procState);
 
@@ -205,7 +196,10 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             mPendingUidStates.put(uid, uidState);
             mPendingCapability.put(uid, capability);
 
-            if (uidState < prevUidState
+            if (procState == PROCESS_STATE_NONEXISTENT) {
+                mPendingGone.put(uid, true);
+                commitUidPendingState(uid);
+            } else if (uidState < prevUidState
                     || (uidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
                     && prevUidState > UID_STATE_MAX_LAST_NON_RESTRICTED)) {
                 // We are moving to a more important state, or the new state may be in the
@@ -312,7 +306,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
                 || capability != pendingCapability
                 || visibleAppWidget != pendingVisibleAppWidget) {
             boolean foregroundChange = uidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
-                    != pendingUidState > UID_STATE_MAX_LAST_NON_RESTRICTED
+                    != pendingUidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
                     || capability != pendingCapability
                     || visibleAppWidget != pendingVisibleAppWidget;
 
@@ -327,13 +321,20 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
                 Handler h = mUidStateChangedCallbacks.valueAt(i);
 
                 h.sendMessage(PooledLambda.obtainMessage(UidStateChangedCallback::onUidStateChanged,
-                        cb, uid, uidState, foregroundChange));
+                        cb, uid, pendingUidState, foregroundChange));
             }
         }
 
-        mUidStates.put(uid, pendingUidState);
-        mCapability.put(uid, pendingCapability);
-        mVisibleAppWidget.put(uid, pendingVisibleAppWidget);
+        if (mPendingGone.get(uid, false)) {
+            mUidStates.delete(uid);
+            mCapability.delete(uid);
+            mVisibleAppWidget.delete(uid);
+            mPendingGone.delete(uid);
+        } else {
+            mUidStates.put(uid, pendingUidState);
+            mCapability.put(uid, pendingCapability);
+            mVisibleAppWidget.put(uid, pendingVisibleAppWidget);
+        }
 
         mPendingUidStates.delete(uid);
         mPendingCapability.delete(uid);
