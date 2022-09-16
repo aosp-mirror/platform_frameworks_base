@@ -28,26 +28,39 @@ class MediaTttLogger(
     private val deviceTypeTag: String,
     private val buffer: LogBuffer
 ){
+    private val bufferTag = BASE_TAG + deviceTypeTag
+
     /** Logs a change in the chip state for the given [mediaRouteId]. */
-    fun logStateChange(stateName: String, mediaRouteId: String) {
+    fun logStateChange(stateName: String, mediaRouteId: String, packageName: String?) {
         buffer.log(
-            BASE_TAG + deviceTypeTag,
+            bufferTag,
             LogLevel.DEBUG,
             {
                 str1 = stateName
                 str2 = mediaRouteId
+                str3 = packageName
             },
-            { "State changed to $str1 for ID=$str2" }
+            { "State changed to $str1 for ID=$str2 package=$str3" }
         )
     }
 
     /** Logs that we removed the chip for the given [reason]. */
     fun logChipRemoval(reason: String) {
         buffer.log(
-            BASE_TAG + deviceTypeTag,
+            bufferTag,
             LogLevel.DEBUG,
             { str1 = reason },
             { "Chip removed due to $str1" }
+        )
+    }
+
+    /** Logs that we couldn't find information for [packageName]. */
+    fun logPackageNotFound(packageName: String) {
+        buffer.log(
+            bufferTag,
+            LogLevel.DEBUG,
+            { str1 = packageName },
+            { "Package $str1 could not be found" }
         )
     }
 }
