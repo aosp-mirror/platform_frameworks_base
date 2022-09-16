@@ -144,9 +144,10 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = mManager.isNightDisplayActivated();
         state.label = mContext.getString(R.string.quick_settings_night_display_label);
-        state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.icon = ResourceIcon.get(state.value ? R.drawable.qs_nightlight_icon_on
+                : R.drawable.qs_nightlight_icon_off);
         state.secondaryLabel = getSecondaryLabel(state.value);
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
                 ? state.label
