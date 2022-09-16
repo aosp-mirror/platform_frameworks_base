@@ -264,8 +264,23 @@ public class WindowManagerShellCommand extends ShellCommand {
 
     private int runDisplayDensity(PrintWriter pw) throws RemoteException {
         String densityStr = getNextArg();
+        String option = getNextOption();
+        String arg = getNextArg();
         int density;
-        final int displayId = getDisplayId(densityStr);
+        int displayId = Display.DEFAULT_DISPLAY;
+        if ("-d".equals(option) && arg != null) {
+            try {
+                displayId = Integer.parseInt(arg);
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: bad number " + e);
+            }
+        } else if ("-u".equals(option) && arg != null) {
+            displayId = mInterface.getDisplayIdByUniqueId(arg);
+            if (displayId == Display.INVALID_DISPLAY) {
+                getErrPrintWriter().println("Error: the uniqueId is invalid ");
+                return -1;
+            }
+        }
 
         if (densityStr == null) {
             printInitialDisplayDensity(pw, displayId);
@@ -1312,7 +1327,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("  size [reset|WxH|WdpxHdp] [-d DISPLAY_ID]");
         pw.println("    Return or override display size.");
         pw.println("    width and height in pixels unless suffixed with 'dp'.");
-        pw.println("  density [reset|DENSITY] [-d DISPLAY_ID]");
+        pw.println("  density [reset|DENSITY] [-d DISPLAY_ID] [-u UNIQUE_ID]");
         pw.println("    Return or override display density.");
         pw.println("  folded-area [reset|LEFT,TOP,RIGHT,BOTTOM]");
         pw.println("    Return or override folded area.");
