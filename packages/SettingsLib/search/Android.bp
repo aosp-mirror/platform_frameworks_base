@@ -19,11 +19,11 @@ java_plugin {
     name: "SettingsLib-annotation-processor",
     processor_class: "com.android.settingslib.search.IndexableProcessor",
     static_libs: [
-        "javapoet-prebuilt-jar",
+        "javapoet",
     ],
     srcs: [
         "processor-src/**/*.java",
-        "src/com/android/settingslib/search/SearchIndexable.java"
+        "src/com/android/settingslib/search/SearchIndexable.java",
     ],
     java_resource_dirs: ["resources"],
 }
