@@ -34,8 +34,7 @@ import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
  * @property stateInt the integer from [StatusBarManager] corresponding with this state.
  * @property stringResId the res ID of the string that should be displayed in the chip. Null if the
  *   state should not have the chip be displayed.
- * @property isMidTransfer true if the state represents that a transfer is currently ongoing.
- * @property isTransferFailure true if the state represents that the transfer has failed.
+ * @property transferStatus the transfer status that the chip state represents.
  * @property timeout the amount of time this chip should display on the screen before it times out
  *   and disappears.
  */
@@ -43,8 +42,7 @@ enum class ChipStateSender(
     @StatusBarManager.MediaTransferSenderState val stateInt: Int,
     val uiEvent: UiEventLogger.UiEventEnum,
     @StringRes val stringResId: Int?,
-    val isMidTransfer: Boolean = false,
-    val isTransferFailure: Boolean = false,
+    val transferStatus: TransferStatus,
     val timeout: Long = DEFAULT_TIMEOUT_MILLIS
 ) {
     /**
@@ -56,6 +54,7 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_START_CAST,
         R.string.media_move_closer_to_start_cast,
+        transferStatus = TransferStatus.NOT_STARTED,
     ),
 
     /**
@@ -68,6 +67,7 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_END_CAST,
         R.string.media_move_closer_to_end_cast,
+        transferStatus = TransferStatus.NOT_STARTED,
     ),
 
     /**
@@ -78,7 +78,7 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_TRIGGERED,
         R.string.media_transfer_playing_different_device,
-        isMidTransfer = true,
+        transferStatus = TransferStatus.IN_PROGRESS,
         timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
     ),
 
@@ -90,7 +90,7 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
         R.string.media_transfer_playing_this_device,
-        isMidTransfer = true,
+        transferStatus = TransferStatus.IN_PROGRESS,
         timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
     ),
 
@@ -100,7 +100,8 @@ enum class ChipStateSender(
     TRANSFER_TO_RECEIVER_SUCCEEDED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED,
-        R.string.media_transfer_playing_different_device
+        R.string.media_transfer_playing_different_device,
+        transferStatus = TransferStatus.SUCCEEDED,
     ) {
         override fun undoClickListener(
             controllerSender: MediaTttChipControllerSender,
@@ -135,7 +136,8 @@ enum class ChipStateSender(
     TRANSFER_TO_THIS_DEVICE_SUCCEEDED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
-        R.string.media_transfer_playing_this_device
+        R.string.media_transfer_playing_this_device,
+        transferStatus = TransferStatus.SUCCEEDED,
     ) {
         override fun undoClickListener(
             controllerSender: MediaTttChipControllerSender,
@@ -169,7 +171,7 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED,
         R.string.media_transfer_failed,
-        isTransferFailure = true
+        transferStatus = TransferStatus.FAILED,
     ),
 
     /** A state representing that a transfer back to this device has failed. */
@@ -177,14 +179,15 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED,
         R.string.media_transfer_failed,
-        isTransferFailure = true
+        transferStatus = TransferStatus.FAILED,
     ),
 
     /** A state representing that this device is far away from any receiver device. */
     FAR_FROM_RECEIVER(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_FAR_FROM_RECEIVER,
-        stringResId = null
+        stringResId = null,
+        transferStatus = TransferStatus.TOO_FAR,
     );
 
     /**
