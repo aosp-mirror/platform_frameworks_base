@@ -934,13 +934,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Expand to top side split as full screen for fading out decor animation and dismiss
             // another side split(Moving its children to bottom).
             mIsExiting = true;
-            final StageTaskListener tempFullStage = childrenToTop;
-            final StageTaskListener dismissStage = mMainStage == childrenToTop
-                    ? mSideStage : mMainStage;
-            tempFullStage.resetBounds(wct);
-            wct.setSmallestScreenWidthDp(tempFullStage.mRootTaskInfo.token,
+            childrenToTop.resetBounds(wct);
+            wct.reorder(childrenToTop.mRootTaskInfo.token, true);
+            wct.setSmallestScreenWidthDp(childrenToTop.mRootTaskInfo.token,
                     SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
-            dismissStage.dismiss(wct, false /* toTop */);
         }
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
@@ -957,7 +954,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 childrenToTop.fadeOutDecor(() -> {
                     WindowContainerTransaction finishedWCT = new WindowContainerTransaction();
                     mIsExiting = false;
-                    childrenToTop.dismiss(finishedWCT, true /* toTop */);
+                    mMainStage.deactivate(finishedWCT, childrenToTop == mMainStage /* toTop */);
+                    mSideStage.removeAllTasks(finishedWCT, childrenToTop == mSideStage /* toTop */);
                     finishedWCT.reorder(mRootTaskInfo.token, false /* toTop */);
                     finishedWCT.setForceTranslucent(mRootTaskInfo.token, true);
                     finishedWCT.setBounds(mSideStage.mRootTaskInfo.token, mTempRect1);
