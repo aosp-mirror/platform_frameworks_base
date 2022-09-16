@@ -107,6 +107,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.overlay.OverlayPaths;
@@ -2989,6 +2990,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @Override
     public void notifyPackageRemoved(String packageName, int uid) {
         mPackageObserverHelper.notifyRemoved(packageName, uid);
+        UserPackage.removeFromCache(UserHandle.getUserId(uid), packageName);
     }
 
     void sendPackageAddedForUser(@NonNull Computer snapshot, String packageName,
