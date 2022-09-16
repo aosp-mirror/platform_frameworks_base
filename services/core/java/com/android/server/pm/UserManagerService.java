@@ -1785,16 +1785,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     @VisibleForTesting
     int getUserAssignedToDisplay(int displayId) {
-        if (displayId == Display.DEFAULT_DISPLAY) {
+        if (displayId == Display.DEFAULT_DISPLAY || !mUsersOnSecondaryDisplaysEnabled) {
             return getCurrentUserId();
-        }
-
-        if (!mUsersOnSecondaryDisplaysEnabled) {
-            int currentUserId = getCurrentUserId();
-            Slogf.w(LOG_TAG, "getUsersAssignedToDisplay(%d) called with non-DEFAULT_DISPLAY on "
-                    + "system that doesn't support that; returning current user (%d)", displayId,
-                    currentUserId);
-            return currentUserId;
         }
 
         synchronized (mUsersOnSecondaryDisplays) {
@@ -6844,20 +6836,22 @@ public class UserManagerService extends IUserManager.Stub {
 
                 // Check if display is available
                 for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
-                    // Make sure display is not used by other users...
-                    // TODO(b/240736142); currently, if a user was started in a display, it
-                    // would need to be stopped first, so "switching" a user on secondary
-                    // diplay requires 2 non-atomic operations (stop and start). Once this logic
-                    // is refactored, it should be atomic.
-                    if (mUsersOnSecondaryDisplays.valueAt(i) == displayId) {
-                        throw new IllegalStateException("Cannot assign " + userId + " to "
-                                + "display " + displayId + " as it's already assigned to "
-                                + "user " + mUsersOnSecondaryDisplays.keyAt(i));
+                    int assignedUserId = mUsersOnSecondaryDisplays.keyAt(i);
+                    int assignedDisplayId = mUsersOnSecondaryDisplays.valueAt(i);
+                    if (DBG_MUMD) {
+                        Slogf.d(LOG_TAG, "%d: assignedUserId=%d, assignedDisplayId=%d",
+                                i, assignedUserId, assignedDisplayId);
                     }
-                    // TODO(b/239982558) also check that user is not already assigned to other
-                    // display (including 0). That would be harder to tested under CTS though
-                    // (for example, would need to add a new AM method to start user in bg on
-                    // main display), so it's better to test on unit tests
+                    if (displayId == assignedDisplayId) {
+                        throw new IllegalStateException("Cannot assign user " + userId + " to "
+                                + "display " + displayId + " because such display is already "
+                                + "assigned to user " + assignedUserId);
+                    }
+                    if (userId == assignedUserId) {
+                        throw new IllegalStateException("Cannot assign user " + userId + " to "
+                                + "display " + displayId + " because such user is as already "
+                                + "assigned to display " + assignedDisplayId);
+                    }
                 }
 
                 if (DBG_MUMD) {
