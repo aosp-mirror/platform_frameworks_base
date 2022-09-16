@@ -19,12 +19,10 @@ package com.android.systemui.temporarydisplay
 import android.annotation.LayoutRes
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.PowerManager
 import android.os.SystemClock
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -33,9 +31,6 @@ import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
 import androidx.annotation.CallSuper
-import com.android.internal.widget.CachingIconView
-import com.android.settingslib.Utils
-import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -192,79 +187,11 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
      * appears.
      */
     open fun animateViewIn(view: ViewGroup) {}
-
-    /**
-     * Returns the size that the icon should be, or null if no size override is needed.
-     */
-    open fun getIconSize(isAppIcon: Boolean): Int? = null
-
-    /**
-     * An internal method to set the icon on the view.
-     *
-     * This is in the common superclass since both the sender and the receiver show an icon.
-     *
-     * @param appPackageName the package name of the app playing the media. Will be used to fetch
-     *   the app icon and app name if overrides aren't provided.
-     *
-     * @return the content description of the icon.
-     */
-    internal fun setIcon(
-        currentView: ViewGroup,
-        appPackageName: String?,
-        appIconDrawableOverride: Drawable? = null,
-        appNameOverride: CharSequence? = null,
-    ): CharSequence {
-        val appIconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
-        val iconInfo = getIconInfo(appPackageName)
-
-        getIconSize(iconInfo.isAppIcon)?.let { size ->
-            val lp = appIconView.layoutParams
-            lp.width = size
-            lp.height = size
-            appIconView.layoutParams = lp
-        }
-
-        appIconView.contentDescription = appNameOverride ?: iconInfo.iconName
-        appIconView.setImageDrawable(appIconDrawableOverride ?: iconInfo.icon)
-        return appIconView.contentDescription
-    }
-
-    /**
-     * Returns the information needed to display the icon.
-     *
-     * The information will either contain app name and icon of the app playing media, or a default
-     * name and icon if we can't find the app name/icon.
-     */
-    private fun getIconInfo(appPackageName: String?): IconInfo {
-        if (appPackageName != null) {
-            try {
-                return IconInfo(
-                    iconName = context.packageManager.getApplicationInfo(
-                        appPackageName, PackageManager.ApplicationInfoFlags.of(0)
-                    ).loadLabel(context.packageManager).toString(),
-                    icon = context.packageManager.getApplicationIcon(appPackageName),
-                    isAppIcon = true
-                )
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.w(TAG, "Cannot find package $appPackageName", e)
-            }
-        }
-        return IconInfo(
-            iconName = context.getString(R.string.media_output_dialog_unknown_launch_app_name),
-            icon = context.resources.getDrawable(R.drawable.ic_cast).apply {
-                this.setTint(
-                    Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-                )
-            },
-            isAppIcon = false
-        )
-    }
 }
 
 // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
-private val TAG = TemporaryViewDisplayController::class.simpleName!!
 
 object TemporaryDisplayRemovalReason {
     const val REASON_TIMEOUT = "TIMEOUT"
