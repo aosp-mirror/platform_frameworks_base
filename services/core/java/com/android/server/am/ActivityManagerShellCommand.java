@@ -367,6 +367,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runGetCurrentForegroundProcess(pw, mInternal, mTaskInterface);
                 case "reset-dropbox-rate-limiter":
                     return runResetDropboxRateLimiter();
+                case "list-secondary-displays-for-starting-users":
+                    return runListSecondaryDisplaysForStartingUsers(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2068,6 +2070,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             success = mInterface.startUserInBackgroundWithListener(userId, waiter);
             displaySuffix = "";
         } else {
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+                pw.println("Not supported");
+                return -1;
+            }
             success = mInterface.startUserInBackgroundOnSecondaryDisplay(userId, displayId);
             displaySuffix = " on display " + displayId;
         }
@@ -3591,6 +3597,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runListSecondaryDisplaysForStartingUsers(PrintWriter pw) throws RemoteException {
+        int[] displayIds = mInterface.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        pw.println(displayIds == null || displayIds.length == 0
+                ? "none"
+                : Arrays.toString(displayIds));
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3951,6 +3965,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         Set an app's background restriction level which in turn map to a app standby bucket.");
             pw.println("  get-bg-restriction-level [--user <USER_ID>] <PACKAGE>");
             pw.println("         Get an app's background restriction level.");
+            pw.println("  list-secondary-displays-for-starting-users");
+            pw.println("         Lists the id of displays that can be used to start users on "
+                    + "background.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

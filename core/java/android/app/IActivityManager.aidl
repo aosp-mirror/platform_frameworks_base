@@ -770,4 +770,10 @@ interface IActivityManager {
             "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
     boolean startUserInBackgroundOnSecondaryDisplay(int userid, int displayId);
 
+    /**
+     * Gets the ids of displays that can be used on {@link #startUserInBackgroundOnSecondaryDisplay(int userId, int displayId)}.
+     *
+     * <p>Typically used only by automotive builds when the vehicle has multiple displays.
+     */
+    @nullable int[] getSecondaryDisplayIdsForStartingBackgroundUsers();
 }

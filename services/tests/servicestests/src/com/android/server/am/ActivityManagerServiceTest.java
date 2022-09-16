@@ -37,11 +37,14 @@ import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,7 +65,6 @@ import android.app.SyncNotedAppOp;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -74,6 +76,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.IntArray;
+import android.util.Log;
+import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
@@ -116,6 +120,7 @@ public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
 
     private static final int TEST_UID = 11111;
+    private static final int USER_ID = 666;
 
     private static final long TEST_PROC_STATE_SEQ1 = 555;
     private static final long TEST_PROC_STATE_SEQ2 = 556;
@@ -147,8 +152,8 @@ public class ActivityManagerServiceTest {
     @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
 
     private Context mContext = getInstrumentation().getTargetContext();
+
     @Mock private AppOpsService mAppOpsService;
-    @Mock private PackageManager mPackageManager;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -828,6 +833,57 @@ public class ActivityManagerServiceTest {
                 true); // expectWait
     }
 
+    @Test
+    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers() {
+        mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{4, 8, 15, 16, 23, 42};
+
+        int [] displayIds = mAms.getSecondaryDisplayIdsForStartingBackgroundUsers();
+
+        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+                .that(displayIds).asList().containsExactly(4, 8, 15, 16, 23, 42);
+    }
+
+    @Test
+    public void testStartUserInBackgroundOnSecondaryDisplay_invalidDisplay() {
+        mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{4, 8, 15, 16, 23, 42};
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mAms.startUserInBackgroundOnSecondaryDisplay(USER_ID, 666));
+
+        assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
+                .that(mInjector.usersStartedOnSecondaryDisplays).isEmpty();
+    }
+
+    @Test
+    public void testStartUserInBackgroundOnSecondaryDisplay_validDisplay_failed() {
+        mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{ 4, 8, 15, 16, 23, 42 };
+        mInjector.returnValueForstartUserOnSecondaryDisplay = false;
+
+        boolean started = mAms.startUserInBackgroundOnSecondaryDisplay(USER_ID, 42);
+        Log.v(TAG, "Started: " + started);
+
+        assertWithMessage("mAms.startUserInBackgroundOnSecondaryDisplay(%s, 42)", USER_ID)
+                .that(started).isFalse();
+        assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
+                .that(mInjector.usersStartedOnSecondaryDisplays)
+                .containsExactly(new Pair<>(USER_ID, 42));
+    }
+
+    @Test
+    public void testStartUserInBackgroundOnSecondaryDisplay_validDisplay_success() {
+        mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{ 4, 8, 15, 16, 23, 42 };
+        mInjector.returnValueForstartUserOnSecondaryDisplay = true;
+
+        boolean started = mAms.startUserInBackgroundOnSecondaryDisplay(USER_ID, 42);
+        Log.v(TAG, "Started: " + started);
+
+        assertWithMessage("mAms.startUserInBackgroundOnSecondaryDisplay(%s, 42)", USER_ID)
+                .that(started).isTrue();
+        assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
+                .that(mInjector.usersStartedOnSecondaryDisplays)
+                .containsExactly(new Pair<>(USER_ID, 42));
+    }
+
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,
             long lastNetworkUpdatedProcStateSeq,
             final long procStateSeqToWait, boolean expectWait) throws Exception {
@@ -922,7 +978,11 @@ public class ActivityManagerServiceTest {
     }
 
     private class TestInjector extends Injector {
-        private boolean mRestricted = true;
+        public boolean restricted = true;
+        public int[] secondaryDisplayIdsForStartingBackgroundUsers;
+
+        public boolean returnValueForstartUserOnSecondaryDisplay;
+        public List<Pair<Integer, Integer>> usersStartedOnSecondaryDisplays = new ArrayList<>();
 
         TestInjector(Context context) {
             super(context);
@@ -940,11 +1000,18 @@ public class ActivityManagerServiceTest {
 
         @Override
         public boolean isNetworkRestrictedForUid(int uid) {
-            return mRestricted;
+            return restricted;
         }
 
-        public void setNetworkRestrictedForUid(boolean restricted) {
-            mRestricted = restricted;
+        @Override
+        public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+            return secondaryDisplayIdsForStartingBackgroundUsers;
+        }
+
+        @Override
+        public boolean startUserOnSecondaryDisplay(int userId, int displayId) {
+            usersStartedOnSecondaryDisplays.add(new Pair<>(userId, displayId));
+            return returnValueForstartUserOnSecondaryDisplay;
         }
     }
 }
