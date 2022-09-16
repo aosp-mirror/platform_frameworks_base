@@ -46,6 +46,8 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_LAUNCHER;
+import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_MULTI_INSTANCE;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
@@ -671,7 +673,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void setEnterInstanceId(InstanceId instanceId) {
         if (instanceId != null) {
-            mLogger.enterRequested(instanceId);
+            mLogger.enterRequested(instanceId, ENTER_REASON_LAUNCHER);
         }
     }
 
@@ -1477,6 +1479,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             updateRecentTasksSplitPair();
 
             if (!mLogger.hasStartedSession()) {
+                if (!mLogger.hasValidEnterSessionId()) {
+                    mLogger.enterRequested(null /*enterSessionId*/, ENTER_REASON_MULTI_INSTANCE);
+                }
                 mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
                         getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                         getSideStagePosition(), mSideStage.getTopChildTaskUid(),
