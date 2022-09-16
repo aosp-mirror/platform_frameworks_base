@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -32,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
+import com.android.settingslib.spa.framework.EntryProvider.Companion.PAGE_INFO_QUERY
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 import com.android.settingslib.spa.framework.common.SettingsPage
@@ -55,26 +57,41 @@ private const val PARAM_NAME_ENTRY_ID = "eid"
 open class DebugActivity(
     private val entryRepository: SettingsEntryRepository,
     private val browseActivityClass: Class<*>,
+    private val entryProviderAuthorities: String? = null,
 ) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_SpaLib_DayNight)
         super.onCreate(savedInstanceState)
-
-        val packageName = browseActivityClass.packageName
-        val className = browseActivityClass.toString().removePrefix("class $packageName")
-        for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
-            if (pageWithEntry.page.hasRuntimeParam()) continue
-            val route = pageWithEntry.page.buildRoute()
-            Log.d(
-                "DEBUG ACTIVITY",
-                "adb shell am start -n $packageName/$className -e $KEY_DESTINATION $route"
-            )
-        }
+        displayDebugMessage()
 
         setContent {
             SettingsTheme {
                 MainContent()
             }
+        }
+    }
+
+    private fun displayDebugMessage() {
+        if (entryProviderAuthorities == null) return
+
+        try {
+            contentResolver.query(
+                Uri.parse("content://$entryProviderAuthorities/${PAGE_INFO_QUERY.queryPath}"),
+                null, null, null
+            ).use { cursor ->
+                while (cursor != null && cursor.moveToNext()) {
+                    val route = cursor.getString(PAGE_INFO_QUERY.getIndex(ColumnName.PAGE_ROUTE))
+                    val entryCount = cursor.getInt(PAGE_INFO_QUERY.getIndex(ColumnName.ENTRY_COUNT))
+                    val hasRuntimeParam =
+                        cursor.getInt(PAGE_INFO_QUERY.getIndex(ColumnName.HAS_RUNTIME_PARAM)) == 1
+                    Log.d(
+                        "DEBUG ACTIVITY", "Page Info: $route ($entryCount) " +
+                            (if (hasRuntimeParam) "with" else "no") + "-runtime-params"
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DEBUG ACTIVITY", "Provider querying exception:", e)
         }
     }
 
@@ -122,7 +139,7 @@ open class DebugActivity(
             for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
                 Preference(object : PreferenceModel {
                     override val title =
-                        "${pageWithEntry.page.displayName} (${pageWithEntry.entries.size})"
+                        "${pageWithEntry.page.name} (${pageWithEntry.entries.size})"
                     override val summary = pageWithEntry.page.formatArguments().toState()
                     override val onClick =
                         navigator(route = ROUTE_PAGE + "/${pageWithEntry.page.id}")
@@ -142,7 +159,7 @@ open class DebugActivity(
     fun OnePage(arguments: Bundle?) {
         val id = arguments!!.getInt(PARAM_NAME_PAGE_ID)
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
-        RegularScaffold(title = "Page ${pageWithEntry.page.displayName}") {
+        RegularScaffold(title = "Page ${pageWithEntry.page.name}") {
             Text(text = pageWithEntry.page.formatArguments())
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
@@ -158,7 +175,7 @@ open class DebugActivity(
     fun OneEntry(arguments: Bundle?) {
         val id = arguments!!.getInt(PARAM_NAME_ENTRY_ID)
         val entry = entryRepository.getEntry(id)!!
-        RegularScaffold(title = "Entry ${entry.displayName}") {
+        RegularScaffold(title = "Entry ${entry.displayName()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
                 override val enabled = (!entry.hasRuntimeParam()).toState()
@@ -172,9 +189,9 @@ open class DebugActivity(
     private fun EntryList(entries: Collection<SettingsEntry>) {
         for (entry in entries) {
             Preference(object : PreferenceModel {
-                override val title = entry.displayName
+                override val title = entry.displayName()
                 override val summary =
-                    "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}".toState()
+                    "${entry.fromPage?.name} -> ${entry.toPage?.name}".toState()
                 override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id}")
             })
         }
