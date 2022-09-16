@@ -21,6 +21,7 @@ import static com.android.server.am.BroadcastQueue.checkState;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 
@@ -76,6 +77,11 @@ class BroadcastProcessQueue {
      * when the process isn't actively running.
      */
     @Nullable ProcessRecord app;
+
+    /**
+     * Track name to use for {@link Trace} events.
+     */
+    @Nullable String traceTrackName;
 
     /**
      * Ordered collection of broadcasts that are waiting to be dispatched to
@@ -219,9 +225,41 @@ class BroadcastProcessQueue {
         mActiveCountSinceIdle = 0;
     }
 
+    public void traceStartingBegin() {
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, toShortString() + " starting", hashCode());
+    }
+
+    public void traceRunningBegin() {
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, toShortString() + " running", hashCode());
+    }
+
+    public void traceEnd() {
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                traceTrackName, hashCode());
+    }
+
     public void setActiveDeliveryState(int deliveryState) {
         checkState(isActive(), "isActive");
         mActive.setDeliveryState(mActiveIndex, deliveryState);
+
+        // Emit tracing events for the broadcast we're dispatching; the cookie
+        // here is unique within the track
+        final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
+        switch (deliveryState) {
+            case BroadcastRecord.DELIVERY_SCHEDULED:
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        traceTrackName, mActive.toShortString() + " scheduled", cookie);
+                break;
+            case BroadcastRecord.DELIVERY_DELIVERED:
+            case BroadcastRecord.DELIVERY_SKIPPED:
+            case BroadcastRecord.DELIVERY_TIMEOUT:
+            case BroadcastRecord.DELIVERY_FAILURE:
+                Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        traceTrackName, cookie);
+                break;
+        }
     }
 
     public @NonNull BroadcastRecord getActive() {

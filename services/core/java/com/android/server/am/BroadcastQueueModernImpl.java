@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -89,7 +90,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     // TODO: add support for replacing pending broadcasts
     // TODO: add support for merging pending broadcasts
 
-    // TODO: add trace points for debugging broadcast flows
     // TODO: record broadcast state change timing statistics
     // TODO: record historical broadcast statistics
 
@@ -136,11 +136,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private BroadcastProcessQueue mRunnableHead = null;
 
     /**
-     * Collection of queues which are "running". This will never be larger than
-     * {@link #MAX_RUNNING_PROCESS_QUEUES}.
+     * Array of queues which are currently "running", which may have gaps that
+     * are {@code null}.
+     *
+     * @see #getRunningSize
+     * @see #getRunningIndexOf
      */
     @GuardedBy("mService")
-    private final ArrayList<BroadcastProcessQueue> mRunning = new ArrayList<>();
+    private final BroadcastProcessQueue[] mRunning =
+            new BroadcastProcessQueue[MAX_RUNNING_PROCESS_QUEUES];
 
     /**
      * Single queue which is "running" but is awaiting a cold start to be
@@ -189,6 +193,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     };
 
     /**
+     * Return the total number of active queues contained inside
+     * {@link #mRunning}.
+     */
+    private int getRunningSize() {
+        int size = 0;
+        for (int i = 0; i < mRunning.length; i++) {
+            if (mRunning[i] != null) size++;
+        }
+        return size;
+    }
+
+    /**
+     * Return the first index of the given value contained inside
+     * {@link #mRunning}, otherwise {@code -1}.
+     */
+    private int getRunningIndexOf(@Nullable BroadcastProcessQueue test) {
+        for (int i = 0; i < mRunning.length; i++) {
+            if (mRunning[i] == test) return i;
+        }
+        return -1;
+    }
+
+    /**
      * Consider updating the list of "runnable" queues, specifically with
      * relation to the given queue.
      * <p>
@@ -198,7 +225,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @GuardedBy("mService")
     private void updateRunnableList(@NonNull BroadcastProcessQueue queue) {
-        if (mRunning.contains(queue)) {
+        if (getRunningIndexOf(queue) >= 0) {
             // Already running; they'll be reinserted into the runnable list
             // once they finish running, so no need to update them now
             return;
@@ -215,9 +242,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         ? queue.runnableAtPrev.getRunnableAt() <= queue.getRunnableAt() : true;
                 final boolean nextHigher = (queue.runnableAtNext != null)
                         ? queue.runnableAtNext.getRunnableAt() >= queue.getRunnableAt() : true;
-                if (prevLower && nextHigher) {
-                    return;
-                } else {
+                if (!prevLower || !nextHigher) {
                     mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
                     mRunnableHead = insertIntoRunnableList(mRunnableHead, queue);
                 }
@@ -238,9 +263,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @GuardedBy("mService")
     private void updateRunningList() {
-        int avail = MAX_RUNNING_PROCESS_QUEUES - mRunning.size();
+        int avail = MAX_RUNNING_PROCESS_QUEUES - getRunningSize();
         if (avail == 0) return;
 
+        final int cookie = traceBegin(TAG, "updateRunningList");
         final long now = SystemClock.uptimeMillis();
 
         // If someone is waiting to go idle, everything is runnable now
@@ -285,19 +311,24 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     + " from runnable to running; process is " + queue.app);
 
             // Allocate this available permit and start running!
-            mRunning.add(queue);
+            final int index = getRunningIndexOf(null);
+            mRunning[index] = queue;
             avail--;
 
             // Remove ourselves from linked list of runnable things
             mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
 
-            queue.makeActiveNextPending();
+            // Emit all trace events for this process into a consistent track
+            queue.traceTrackName = TAG + ".mRunning[" + index + "]";
 
             // If we're already warm, schedule it; otherwise we'll wait for the
             // cold start to circle back around
+            queue.makeActiveNextPending();
             if (processWarm) {
+                queue.traceRunningBegin();
                 scheduleReceiverWarmLocked(queue);
             } else {
+                queue.traceStartingBegin();
                 scheduleReceiverColdLocked(queue);
             }
 
@@ -316,6 +347,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mWaitingForIdle.forEach((latch) -> latch.countDown());
             mWaitingForIdle.clear();
         }
+
+        traceEnd(TAG, cookie);
     }
 
     @Override
@@ -324,8 +357,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if ((mRunningColdStart != null) && (mRunningColdStart.app == app)) {
             // We've been waiting for this app to cold start, and it's ready
             // now; dispatch its next broadcast and clear the slot
-            scheduleReceiverWarmLocked(mRunningColdStart);
+            final BroadcastProcessQueue queue = mRunningColdStart;
             mRunningColdStart = null;
+
+            queue.traceEnd();
+            queue.traceRunningBegin();
+            scheduleReceiverWarmLocked(queue);
 
             // We might be willing to kick off another cold start
             enqueueUpdateRunningList();
@@ -374,7 +411,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     public int getPreferredSchedulingGroupLocked(@NonNull ProcessRecord app) {
         final BroadcastProcessQueue queue = getProcessQueue(app);
-        if ((queue != null) && mRunning.contains(queue)) {
+        if ((queue != null) && getRunningIndexOf(queue) >= 0) {
             return queue.getPreferredSchedulingGroupLocked();
         }
         return ProcessList.SCHED_GROUP_UNDEFINED;
@@ -429,6 +466,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
+        queue.setActiveDeliveryState(BroadcastRecord.DELIVERY_SCHEDULED);
 
         final ProcessRecord app = queue.app;
         final BroadcastRecord r = queue.getActive();
@@ -458,7 +496,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final IApplicationThread thread = app.getThread();
         if (thread != null) {
             try {
-                queue.setActiveDeliveryState(BroadcastRecord.DELIVERY_SCHEDULED);
                 if (receiver instanceof BroadcastFilter) {
                     thread.scheduleRegisteredReceiver(
                             ((BroadcastFilter) receiver).receiverList.receiver, receiverIntent,
@@ -497,7 +534,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState) {
         checkState(queue.isActive(), "isActive");
-
         queue.setActiveDeliveryState(deliveryState);
 
         if (deliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
@@ -529,12 +565,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         } else {
             // We've drained running broadcasts; maybe move back to runnable
             queue.makeActiveIdle();
-            mRunning.remove(queue);
+            queue.traceEnd();
+
+            final int index = getRunningIndexOf(queue);
+            mRunning[index] = null;
+            updateRunnableList(queue);
+            enqueueUpdateRunningList();
+
             // App is no longer running a broadcast, so update its OOM
             // adjust during our next pass; no need for an immediate update
             mService.enqueueOomAdjTargetLocked(queue.app);
-            updateRunnableList(queue);
-            enqueueUpdateRunningList();
             return false;
         }
     }
@@ -569,7 +609,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public boolean isIdleLocked() {
-        return (mRunnableHead == null) && mRunning.isEmpty();
+        return (mRunnableHead == null) && (getRunningSize() == 0);
     }
 
     @Override
@@ -594,7 +634,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public String describeStateLocked() {
-        return mRunning.size() + " running";
+        return getRunningSize() + " running";
     }
 
     @Override
@@ -606,6 +646,18 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     public void backgroundServicesFinishedLocked(int userId) {
         // TODO: implement
+    }
+
+    private int traceBegin(String trackName, String methodName) {
+        final int cookie = methodName.hashCode();
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                trackName, methodName, cookie);
+        return cookie;
+    }
+
+    private void traceEnd(String trackName, int cookie) {
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                trackName, cookie);
     }
 
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
@@ -703,7 +755,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.println();
         ipw.println("🏃 Running:");
         ipw.increaseIndent();
-        if (mRunning.isEmpty()) {
+        if (getRunningSize() == 0) {
             ipw.println("(none)");
         } else {
             for (BroadcastProcessQueue queue : mRunning) {
