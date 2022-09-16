@@ -550,7 +550,10 @@ public final class InputMethodManager {
      */
     @Deprecated
     @GuardedBy("mH")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 236937383,
+            maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            publicAlternatives = "Apps should not change behavior based on the currently connected"
+                    + " IME. If absolutely needed, use {@link InputMethodInfo#getId()} instead.")
     String mCurId;
 
     /**
@@ -561,7 +564,9 @@ public final class InputMethodManager {
     @Deprecated
     @GuardedBy("mH")
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 236937383,
+            maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            publicAlternatives = "Use methods on {@link InputMethodManager} instead.")
     IInputMethodSession mCurMethod;
 
     /**
