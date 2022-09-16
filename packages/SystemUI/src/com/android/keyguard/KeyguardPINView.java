@@ -48,6 +48,9 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private ConstraintLayout mContainer;
     private int mDisappearYTranslation;
     private View[][] mViews;
+    private int mYTrans;
+    private int mYTransOffset;
+    private View mBouncerMessageView;
     @DevicePostureInt private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
 
     public KeyguardPINView(Context context) {
@@ -67,6 +70,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                         mContext, android.R.interpolator.fast_out_linear_in));
         mDisappearYTranslation = getResources().getDimensionPixelSize(
                 R.dimen.disappear_y_translation);
+        mYTrans = getResources().getDimensionPixelSize(R.dimen.pin_view_trans_y_entry);
+        mYTransOffset = getResources().getDimensionPixelSize(R.dimen.pin_view_trans_y_entry_offset);
     }
 
     @Override
@@ -138,6 +143,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         super.onFinishInflate();
 
         mContainer = findViewById(R.id.pin_container);
+        mBouncerMessageView = findViewById(R.id.bouncer_message_area);
         mViews = new View[][]{
                 new View[]{
                         findViewById(R.id.row0), null, null
@@ -206,6 +212,12 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     /** Animate subviews according to expansion or time. */
     private void animate(float progress) {
+        Interpolator standardDecelerate = Interpolators.STANDARD_DECELERATE;
+        Interpolator legacyDecelerate = Interpolators.LEGACY_DECELERATE;
+
+        mBouncerMessageView.setTranslationY(
+                mYTrans - mYTrans * standardDecelerate.getInterpolation(progress));
+
         for (int i = 0; i < mViews.length; i++) {
             View[] row = mViews[i];
             for (View view : row) {
@@ -213,14 +225,15 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                     continue;
                 }
 
-                float scaledProgress = MathUtils.constrain(
+                float scaledProgress = legacyDecelerate.getInterpolation(MathUtils.constrain(
                         (progress - 0.075f * i) / (1f - 0.075f * mViews.length),
                         0f,
                         1f
-                );
+                ));
                 view.setAlpha(scaledProgress);
-                Interpolator interpolator = Interpolators.STANDARD_ACCELERATE;
-                view.setTranslationY(40 - (40 * interpolator.getInterpolation(scaledProgress)));
+                int yDistance = mYTrans + mYTransOffset * i;
+                view.setTranslationY(
+                        yDistance - (yDistance * standardDecelerate.getInterpolation(progress)));
                 if (view instanceof NumPadAnimationListener) {
                     ((NumPadAnimationListener) view).setProgress(scaledProgress);
                 }

@@ -86,7 +86,7 @@ class NumPadAnimator {
 
     public void setProgress(float progress) {
         mBackground.setCornerRadius(mEndRadius + (mStartRadius - mEndRadius) * progress);
-        int height = (int) (mHeight * 0.8f + mHeight * 0.2 * progress);
+        int height = (int) (mHeight * 0.7f + mHeight * 0.3 * progress);
         int difference = mHeight - height;
         mBackground.setBounds(0, difference / 2, mHeight, mHeight - difference / 2);
     }

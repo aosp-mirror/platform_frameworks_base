@@ -1701,6 +1701,8 @@
     <string name="fingerprint_acquired_already_enrolled">Try another fingerprint</string>
     <!-- Message shown during fingerprint acquisition when fingerprint sensor detected too much light.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_too_bright">Too bright</string>
+    <!-- Message shown during fingerprint acquisition when a Power press has been detected.[CHAR LIMIT=50] -->
+    <string name="fingerprint_acquired_power_press">Power press detected</string>
     <!-- Message shown during fingerprint acquisition when a fingerprint must be adjusted.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_try_adjusting">Try adjusting</string>
     <!-- Message shown during fingerprint acquisition when a fingeprint area has already been captured during enrollment [CHAR LIMIT=100] -->
@@ -3574,11 +3576,11 @@
 
     <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
     is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_title">Tap to turn off screen</string>
+    <string name="fp_power_button_enrollment_title">To end setup, turn off screen</string>
 
     <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
     power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_button_text">Turn off screen</string>
+    <string name="fp_power_button_enrollment_button_text">Turn off</string>
 
     <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
     is pressed during biometric prompt when a side fingerprint sensor is present. -->

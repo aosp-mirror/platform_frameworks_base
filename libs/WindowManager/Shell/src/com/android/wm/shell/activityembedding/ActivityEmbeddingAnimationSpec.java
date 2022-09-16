@@ -185,8 +185,10 @@ class ActivityEmbeddingAnimationSpec {
         animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                 ? R.anim.task_fragment_open_enter
                 : R.anim.task_fragment_open_exit);
-        final Rect bounds = change.getEndAbsBounds();
-        animation.initialize(bounds.width(), bounds.height(),
+        // Use the whole animation bounds instead of the change bounds, so that when multiple change
+        // targets are opening at the same time, the animation applied to each will be the same.
+        // Otherwise, we may see gap between the activities that are launching together.
+        animation.initialize(wholeAnimationBounds.width(), wholeAnimationBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         return animation;
@@ -203,8 +205,10 @@ class ActivityEmbeddingAnimationSpec {
         animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                 ? R.anim.task_fragment_close_enter
                 : R.anim.task_fragment_close_exit);
-        final Rect bounds = change.getEndAbsBounds();
-        animation.initialize(bounds.width(), bounds.height(),
+        // Use the whole animation bounds instead of the change bounds, so that when multiple change
+        // targets are closing at the same time, the animation applied to each will be the same.
+        // Otherwise, we may see gap between the activities that are finishing together.
+        animation.initialize(wholeAnimationBounds.width(), wholeAnimationBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         return animation;

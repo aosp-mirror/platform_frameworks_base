@@ -2612,6 +2612,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
         final boolean onlyFaceEnrolled = isOnlyFaceEnrolled();
+        final boolean fpOrFaceIsLockedOut = isFaceLockedOut() || fpLockedout;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2628,7 +2629,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
                 && !faceAuthenticated
-                && !fpLockedout;
+                && !fpOrFaceIsLockedOut;
 
         // Aggregate relevant fields for debug logging.
         maybeLogListenerModelData(
@@ -2643,6 +2644,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mBouncerIsOrWillBeShowing,
                     faceAuthenticated,
                     faceDisabledForUser,
+                    isFaceLockedOut(),
+                    fpLockedout,
                     mGoingToSleep,
                     awakeKeyguardExcludingBouncerShowing,
                     mKeyguardGoingAway,

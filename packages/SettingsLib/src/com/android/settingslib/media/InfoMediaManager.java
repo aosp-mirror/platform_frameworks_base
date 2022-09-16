@@ -407,7 +407,7 @@ public class InfoMediaManager extends MediaManager {
                 || sessionInfo.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
     }
 
-    private void refreshDevices() {
+    private synchronized void refreshDevices() {
         mMediaDevices.clear();
         mCurrentConnectedDevice = null;
         if (TextUtils.isEmpty(mPackageName)) {
@@ -437,7 +437,7 @@ public class InfoMediaManager extends MediaManager {
         return infos;
     }
 
-    private void buildAvailableRoutes() {
+    private synchronized void buildAvailableRoutes() {
         for (MediaRoute2Info route : getAvailableRoutes(mPackageName)) {
             if (DEBUG) {
                 Log.d(TAG, "buildAvailableRoutes() route : " + route.getName() + ", volume : "
@@ -447,7 +447,7 @@ public class InfoMediaManager extends MediaManager {
         }
     }
 
-    private List<MediaRoute2Info> getAvailableRoutes(String packageName) {
+    private synchronized List<MediaRoute2Info> getAvailableRoutes(String packageName) {
         final List<MediaRoute2Info> infos = new ArrayList<>();
         RoutingSessionInfo routingSessionInfo = getRoutingSessionInfo(packageName);
         if (routingSessionInfo != null) {
@@ -571,7 +571,7 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
-            dispatchDataChanged();
+            refreshDevices();
         }
     }
 }

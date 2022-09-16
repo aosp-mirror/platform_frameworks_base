@@ -162,6 +162,21 @@ public final class Slogf {
     }
 
     /**
+     * Logs a {@link Log.VEBOSE} message with an exception
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#VERBOSE} logging
+     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
+     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
+     * you're calling this method in a critical path, make sure to explicitly do the check before
+     * calling it.
+     */
+    public static void v(String tag, Exception exception, String format, @Nullable Object... args) {
+        if (!isLoggable(tag, Log.VERBOSE)) return;
+
+        v(tag, getMessage(format, args), exception);
+    }
+
+    /**
      * Logs a {@link Log.DEBUG} message.
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#DEBUG} logging is
@@ -177,6 +192,21 @@ public final class Slogf {
     }
 
     /**
+     * Logs a {@link Log.DEBUG} message with an exception
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#DEBUG} logging
+     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
+     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
+     * you're calling this method in a critical path, make sure to explicitly do the check before
+     * calling it.
+     */
+    public static void d(String tag, Exception exception, String format, @Nullable Object... args) {
+        if (!isLoggable(tag, Log.DEBUG)) return;
+
+        d(tag, getMessage(format, args), exception);
+    }
+
+    /**
      * Logs a {@link Log.INFO} message.
      *
      * <p><strong>Note: </strong>the message will only be formatted if {@link Log#INFO} logging is
@@ -189,6 +219,21 @@ public final class Slogf {
         if (!isLoggable(tag, Log.INFO)) return;
 
         i(tag, getMessage(format, args));
+    }
+
+    /**
+     * Logs a {@link Log.INFO} message with an exception
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#INFO} logging
+     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
+     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
+     * you're calling this method in a critical path, make sure to explicitly do the check before
+     * calling it.
+     */
+    public static void i(String tag, Exception exception, String format, @Nullable Object... args) {
+        if (!isLoggable(tag, Log.INFO)) return;
+
+        i(tag, getMessage(format, args), exception);
     }
 
     /**
@@ -220,6 +265,7 @@ public final class Slogf {
 
         w(tag, getMessage(format, args), exception);
     }
+
     /**
      * Logs a {@link Log.ERROR} message.
      *

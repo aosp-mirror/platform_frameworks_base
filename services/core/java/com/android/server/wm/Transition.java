@@ -77,6 +77,7 @@ import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.RemoteTransition;
+import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -2105,14 +2106,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
             Rect cropBounds = new Rect(bounds);
             cropBounds.offsetTo(0, 0);
-            SurfaceControl.LayerCaptureArgs captureArgs =
-                    new SurfaceControl.LayerCaptureArgs.Builder(wc.getSurfaceControl())
+            ScreenCapture.LayerCaptureArgs captureArgs =
+                    new ScreenCapture.LayerCaptureArgs.Builder(wc.getSurfaceControl())
                             .setSourceCrop(cropBounds)
                             .setCaptureSecureLayers(true)
                             .setAllowProtected(true)
                             .build();
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureLayers(captureArgs);
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                    ScreenCapture.captureLayers(captureArgs);
             final HardwareBuffer buffer = screenshotBuffer == null ? null
                     : screenshotBuffer.getHardwareBuffer();
             if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {

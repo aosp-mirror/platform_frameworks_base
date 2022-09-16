@@ -27,9 +27,11 @@ import android.widget.TextView;
 import java.util.Objects;
 
 /**
- * A sub-class of {@link HandwritingGesture} for selecting an area of text.
+ * A sub-class of {@link HandwritingGesture} for selecting an area of text using single rectangle.
  * This class holds the information required for selection of text in
  * toolkit widgets like {@link TextView}.
+ * <p>Note: This selects all text <em>within</em> the given area. To select a range <em>between</em>
+ * two areas, use {@link SelectRangeGesture}.</p>
  */
 public final class SelectGesture extends HandwritingGesture implements Parcelable {
 

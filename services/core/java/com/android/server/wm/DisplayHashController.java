@@ -53,9 +53,9 @@ import android.service.displayhash.IDisplayHashingService;
 import android.util.Size;
 import android.util.Slog;
 import android.view.MagnificationSpec;
-import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -194,7 +194,7 @@ public class DisplayHashController {
         return true;
     }
 
-    void generateDisplayHash(SurfaceControl.LayerCaptureArgs.Builder args,
+    void generateDisplayHash(ScreenCapture.LayerCaptureArgs.Builder args,
             Rect boundsInWindow, String hashAlgorithm, int uid, RemoteCallback callback) {
         if (!allowedToGenerateHash(uid)) {
             sendDisplayHashError(callback, DISPLAY_HASH_ERROR_TOO_MANY_REQUESTS);
@@ -217,8 +217,8 @@ public class DisplayHashController {
 
         args.setGrayscale(displayHashParams.isGrayscaleBuffer());
 
-        SurfaceControl.ScreenshotHardwareBuffer screenshotHardwareBuffer =
-                SurfaceControl.captureLayers(args.build());
+        ScreenCapture.ScreenshotHardwareBuffer screenshotHardwareBuffer =
+                ScreenCapture.captureLayers(args.build());
         if (screenshotHardwareBuffer == null
                 || screenshotHardwareBuffer.getHardwareBuffer() == null) {
             Slog.w(TAG, "Failed to generate DisplayHash. Couldn't capture content");

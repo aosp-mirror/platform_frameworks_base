@@ -783,6 +783,14 @@ public final class DeviceConfig {
     @TestApi
     public static final String NAMESPACE_INPUT_METHOD_MANAGER = "input_method_manager";
 
+    /**
+     * Namespace for backup and restore service related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_BACKUP_AND_RESTORE = "backup_and_restore";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

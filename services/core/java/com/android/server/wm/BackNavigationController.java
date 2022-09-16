@@ -36,6 +36,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.BackNavigationInfo;
 import android.window.OnBackInvokedCallbackInfo;
+import android.window.ScreenCapture;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -422,7 +423,7 @@ class BackNavigationController {
             ComponentName activityComponent) {
         // Check if we have a screenshot of the previous activity, indexed by its
         // component name.
-        SurfaceControl.ScreenshotHardwareBuffer backBuffer = task.mBackScreenshots
+        ScreenCapture.ScreenshotHardwareBuffer backBuffer = task.mBackScreenshots
                 .get(activityComponent.flattenToString());
         return backBuffer != null ? backBuffer.getHardwareBuffer() : null;
 

@@ -97,6 +97,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITransitionPlayer;
+import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskFragmentOrganizer;
@@ -946,8 +947,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Mocks the behavior of taking a snapshot. */
     void mockSurfaceFreezerSnapshot(SurfaceFreezer surfaceFreezer) {
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                mock(SurfaceControl.ScreenshotHardwareBuffer.class);
+        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                mock(ScreenCapture.ScreenshotHardwareBuffer.class);
         final HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
         spyOn(surfaceFreezer);
         doReturn(screenshotBuffer).when(surfaceFreezer)

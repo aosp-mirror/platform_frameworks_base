@@ -24,8 +24,9 @@ import android.os.IBinder
 import android.util.Log
 import android.view.DisplayAddress
 import android.view.SurfaceControl
-import android.view.SurfaceControl.DisplayCaptureArgs
-import android.view.SurfaceControl.ScreenshotHardwareBuffer
+import android.window.ScreenCapture
+import android.window.ScreenCapture.DisplayCaptureArgs
+import android.window.ScreenCapture.ScreenshotHardwareBuffer
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -84,6 +85,6 @@ open class ImageCaptureImpl @Inject constructor(
                 .setSize(width, height)
                 .setSourceCrop(crop)
                 .build()
-        return SurfaceControl.captureDisplay(captureArgs)
+        return ScreenCapture.captureDisplay(captureArgs)
     }
 }

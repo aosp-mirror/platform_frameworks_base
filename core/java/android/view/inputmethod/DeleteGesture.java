@@ -27,9 +27,11 @@ import android.widget.TextView;
 import java.util.Objects;
 
 /**
- * A sub-class of {@link HandwritingGesture} for deleting an area of text.
+ * A sub-class of {@link HandwritingGesture} for deleting an area of text using single rectangle.
  * This class holds the information required for deletion of text in
  * toolkit widgets like {@link TextView}.
+ * <p>Note: This deletes all text <em>within</em> the given area. To delete a range <em>between</em>
+ * two areas, use {@link DeleteRangeGesture}.</p>
  */
 public final class DeleteGesture extends HandwritingGesture implements Parcelable {
 

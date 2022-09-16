@@ -235,6 +235,15 @@ public class EconomyManager {
     public static final String KEY_JS_HARD_CONSUMPTION_LIMIT = "js_hard_consumption_limit";
     // TODO: Add JobScheduler modifier keys
     /** @hide */
+    public static final String KEY_JS_REWARD_APP_INSTALL_INSTANT =
+            "js_reward_app_install_instant";
+    /** @hide */
+    public static final String KEY_JS_REWARD_APP_INSTALL_ONGOING =
+            "js_reward_app_install_ongoing";
+    /** @hide */
+    public static final String KEY_JS_REWARD_APP_INSTALL_MAX =
+            "js_reward_app_install_max";
+    /** @hide */
     public static final String KEY_JS_REWARD_TOP_ACTIVITY_INSTANT =
             "js_reward_top_activity_instant";
     /** @hide */
@@ -462,6 +471,12 @@ public class EconomyManager {
     // TODO: set hard limit based on device type (phone vs tablet vs etc) + battery size
     public static final long DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(250_000);
     // TODO: add JobScheduler modifier default values
+    /** @hide */
+    public static final long DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES = arcToCake(408);
+    /** @hide */
+    public static final long DEFAULT_JS_REWARD_APP_INSTALL_ONGOING_CAKES = arcToCake(0);
+    /** @hide */
+    public static final long DEFAULT_JS_REWARD_APP_INSTALL_MAX_CAKES = arcToCake(4000);
     /** @hide */
     public static final long DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT_CAKES = arcToCake(0);
     /** @hide */

@@ -147,7 +147,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     private static class HierarchyRecordingBuilderFactory implements Function<SurfaceSession,
-                SurfaceControl.Builder> {
+            SurfaceControl.Builder> {
         private LayerRecordingTransaction mTransaction;
 
         HierarchyRecordingBuilderFactory(LayerRecordingTransaction transaction) {

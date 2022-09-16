@@ -677,21 +677,39 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     @Override
     public String toString() {
-        return "AudioPlaybackConfiguration piid:" + mPlayerIId
-                + " deviceId:" + mDeviceId
-                + " type:" + toLogFriendlyPlayerType(mPlayerType)
-                + " u/pid:" + mClientUid + "/" + mClientPid
-                + " state:" + toLogFriendlyPlayerState(mPlayerState)
-                + " attr:" + mPlayerAttr
-                + " sessionId:" + mSessionId
-                + " mutedState:"
-                + " muteFromMasterMute=" + ((mMutedState & PLAYER_MUTE_MASTER) != 0)
-                + " muteFromStreamVolume=" + ((mMutedState & PLAYER_MUTE_STREAM_VOLUME) != 0)
-                + " muteFromStreamMuted=" + ((mMutedState & PLAYER_MUTE_STREAM_MUTED) != 0)
-                + " muteFromPlaybackRestricted=" + ((mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED)
-                != 0)
-                + " muteFromClientVolume=" + ((mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0)
-                + " muteFromVolumeShaper=" + ((mMutedState & PLAYER_MUTE_VOLUME_SHAPER) != 0);
+        StringBuilder apcToString = new StringBuilder();
+        apcToString.append("AudioPlaybackConfiguration piid:").append(mPlayerIId).append(
+                " deviceId:").append(mDeviceId).append(" type:").append(
+                toLogFriendlyPlayerType(mPlayerType)).append(" u/pid:").append(mClientUid).append(
+                "/").append(mClientPid).append(" state:").append(
+                toLogFriendlyPlayerState(mPlayerState)).append(" attr:").append(mPlayerAttr).append(
+                " sessionId:").append(mSessionId).append(" mutedState:");
+        if (mMutedState == PLAYER_MUTE_INVALID) {
+            apcToString.append("invalid ");
+        } else if (mMutedState == 0) {
+            apcToString.append("none ");
+        } else {
+            if ((mMutedState & PLAYER_MUTE_MASTER) != 0) {
+                apcToString.append("master ");
+            }
+            if ((mMutedState & PLAYER_MUTE_STREAM_VOLUME) != 0) {
+                apcToString.append("streamVolume ");
+            }
+            if ((mMutedState & PLAYER_MUTE_STREAM_MUTED) != 0) {
+                apcToString.append("streamMute ");
+            }
+            if ((mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0) {
+                apcToString.append("playbackRestricted ");
+            }
+            if ((mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0) {
+                apcToString.append("clientVolume ");
+            }
+            if ((mMutedState & PLAYER_MUTE_VOLUME_SHAPER) != 0) {
+                apcToString.append("volumeShaper ");
+            }
+        }
+
+        return apcToString.toString();
     }
 
     //=====================================================================

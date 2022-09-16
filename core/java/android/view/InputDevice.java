@@ -1072,7 +1072,8 @@ public final class InputDevice implements Parcelable {
      *
      * @return The lights manager associated with the device, never null.
      */
-    public @NonNull LightsManager getLightsManager() {
+    @NonNull
+    public LightsManager getLightsManager() {
         if (mLightsManager == null) {
             mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
         }
@@ -1090,7 +1091,8 @@ public final class InputDevice implements Parcelable {
      *
      * @return The sensor manager service associated with the device, never null.
      */
-    public @NonNull SensorManager getSensorManager() {
+    @NonNull
+    public SensorManager getSensorManager() {
         synchronized (mMotionRanges) {
             if (mSensorManager == null) {
                 mSensorManager = InputManager.getInstance().getInputDeviceSensorManager(mId);

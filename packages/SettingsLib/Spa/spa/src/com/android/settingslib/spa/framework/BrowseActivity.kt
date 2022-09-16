@@ -22,7 +22,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -50,9 +53,6 @@ open class BrowseActivity(
 
     @Composable
     private fun MainContent() {
-        val destination =
-            intent?.getStringExtra(KEY_DESTINATION) ?: sppRepository.getDefaultStartPageName()
-
         val navController = rememberNavController()
         CompositionLocalProvider(navController.localNavController()) {
             NavHost(navController, ROOT_PAGE_NAME) {
@@ -70,13 +70,23 @@ open class BrowseActivity(
                     }
                 }
             }
+        }
 
+        InitialDestinationNavigator(navController)
+    }
+
+    @Composable
+    private fun InitialDestinationNavigator(navController: NavHostController) {
+        val destinationNavigated = rememberSaveable { mutableStateOf(false) }
+        if (destinationNavigated.value) return
+        destinationNavigated.value = true
+        LaunchedEffect(Unit) {
+            val destination =
+                intent?.getStringExtra(KEY_DESTINATION) ?: sppRepository.getDefaultStartPageName()
             if (destination.isNotEmpty()) {
-                LaunchedEffect(Unit) {
-                    navController.navigate(destination) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
-                        }
+                navController.navigate(destination) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
                     }
                 }
             }

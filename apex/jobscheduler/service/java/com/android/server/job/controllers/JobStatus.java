@@ -170,13 +170,12 @@ public final class JobStatus {
      */
     private static final int STATSD_CONSTRAINTS_TO_LOG = CONSTRAINT_CONTENT_TRIGGER
             | CONSTRAINT_DEADLINE
-            | CONSTRAINT_IDLE
             | CONSTRAINT_PREFETCH
             | CONSTRAINT_TARE_WEALTH
             | CONSTRAINT_TIMING_DELAY
             | CONSTRAINT_WITHIN_QUOTA;
 
-    // TODO(b/129954980)
+    // TODO(b/129954980): ensure this doesn't spam statsd, especially at boot
     private static final boolean STATS_LOG_ENABLED = false;
 
     // No override.
@@ -1982,7 +1981,7 @@ public final class JobStatus {
     }
 
     /** Returns a {@link JobServerProtoEnums.Constraint} enum value for the given constraint. */
-    private int getProtoConstraint(int constraint) {
+    static int getProtoConstraint(int constraint) {
         switch (constraint) {
             case CONSTRAINT_BACKGROUND_NOT_RESTRICTED:
                 return JobServerProtoEnums.CONSTRAINT_BACKGROUND_NOT_RESTRICTED;
@@ -1998,10 +1997,16 @@ public final class JobStatus {
                 return JobServerProtoEnums.CONSTRAINT_DEADLINE;
             case CONSTRAINT_DEVICE_NOT_DOZING:
                 return JobServerProtoEnums.CONSTRAINT_DEVICE_NOT_DOZING;
+            case CONSTRAINT_FLEXIBLE:
+                return JobServerProtoEnums.CONSTRAINT_FLEXIBILITY;
             case CONSTRAINT_IDLE:
                 return JobServerProtoEnums.CONSTRAINT_IDLE;
+            case CONSTRAINT_PREFETCH:
+                return JobServerProtoEnums.CONSTRAINT_PREFETCH;
             case CONSTRAINT_STORAGE_NOT_LOW:
                 return JobServerProtoEnums.CONSTRAINT_STORAGE_NOT_LOW;
+            case CONSTRAINT_TARE_WEALTH:
+                return JobServerProtoEnums.CONSTRAINT_TARE_WEALTH;
             case CONSTRAINT_TIMING_DELAY:
                 return JobServerProtoEnums.CONSTRAINT_TIMING_DELAY;
             case CONSTRAINT_WITHIN_QUOTA:

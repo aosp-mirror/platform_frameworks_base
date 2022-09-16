@@ -139,6 +139,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
     }
 
+    @Override
+    public void setSplitAttributesCalculator(@NonNull SplitAttributesCalculator calculator) {
+        // TODO: Implement this method
+    }
+
+    @Override
+    public void clearSplitAttributesCalculator() {
+        // TODO: Implement this method
+    }
+
     @NonNull
     List<EmbeddingRule> getSplitRules() {
         return mSplitRules;
@@ -1516,13 +1526,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         .toActivityStack();
                 final ActivityStack secondaryContainer = container.getSecondaryContainer()
                         .toActivityStack();
+                final SplitAttributes.SplitType splitType = shouldShowSideBySide(container)
+                        ? new SplitAttributes.SplitType.RatioSplitType(
+                                container.getSplitRule().getSplitRatio())
+                        : new SplitAttributes.SplitType.ExpandContainersSplitType();
                 final SplitInfo splitState = new SplitInfo(primaryContainer, secondaryContainer,
                         // Splits that are not showing side-by-side are reported as having 0 split
                         // ratio, since by definition in the API the primary container occupies no
                         // width of the split when covered by the secondary.
-                        shouldShowSideBySide(container)
-                                ? container.getSplitRule().getSplitRatio()
-                                : 0.0f);
+                        // TODO(b/241042437): use v2 APIs for splitAttributes
+                        new SplitAttributes.Builder()
+                                .setSplitType(splitType)
+                                .setLayoutDirection(container.getSplitRule().getLayoutDirection())
+                                .build()
+                        );
                 splitStates.add(splitState);
             }
         }
