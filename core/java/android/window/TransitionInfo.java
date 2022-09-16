@@ -113,8 +113,8 @@ public final class TransitionInfo implements Parcelable {
     /** The container is in a Task with embedded activity. */
     public static final int FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY = 1 << 9;
 
-    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 10;
+    /** The container fills its parent Task before and after the transition. */
+    public static final int FLAG_FILLS_TASK = 1 << 10;
 
     /** The container is going to show IME on its task after the transition. */
     public static final int FLAG_WILL_IME_SHOWN = 1 << 11;
@@ -124,6 +124,9 @@ public final class TransitionInfo implements Parcelable {
 
     /** The container attaches work profile thumbnail for cross profile animation. */
     public static final int FLAG_CROSS_PROFILE_WORK_THUMBNAIL = 1 << 13;
+
+    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
+    public static final int FLAG_FIRST_CUSTOM = 1 << 14;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -138,8 +141,11 @@ public final class TransitionInfo implements Parcelable {
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
             FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY,
-            FLAG_FIRST_CUSTOM,
-            FLAG_WILL_IME_SHOWN
+            FLAG_FILLS_TASK,
+            FLAG_WILL_IME_SHOWN,
+            FLAG_CROSS_PROFILE_OWNER_THUMBNAIL,
+            FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
+            FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
 
@@ -341,6 +347,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IN_TASK_WITH_EMBEDDED_ACTIVITY");
+        }
+        if ((flags & FLAG_FILLS_TASK) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FILLS_TASK");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
