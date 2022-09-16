@@ -27,6 +27,8 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
@@ -707,7 +709,26 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                return r != null && r.setOccludesParent(true);
+                // Create a transition if the activity is playing in case the below activity didn't
+                // commit invisible. That's because if any activity below this one has changed its
+                // visibility while playing transition, there won't able to commit visibility until
+                // the running transition finish.
+                final Transition transition = r != null
+                        && r.mTransitionController.inPlayingTransition(r)
+                        ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
+                if (transition != null) {
+                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
+                            null /* remoteTransition */, null /* displayChange */);
+                }
+                final boolean changed = r != null && r.setOccludesParent(true);
+                if (transition != null) {
+                    if (changed) {
+                        r.mTransitionController.setReady(r.getDisplayContent());
+                    } else {
+                        transition.abort();
+                    }
+                }
+                return changed;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -728,7 +749,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (under != null) {
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
-                return r.setOccludesParent(false);
+                // Create a transition if the activity is playing in case the current activity
+                // didn't commit invisible. That's because if this activity has changed its
+                // visibility while playing transition, there won't able to commit visibility until
+                // the running transition finish.
+                final Transition transition = r.mTransitionController.inPlayingTransition(r)
+                        ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
+                if (transition != null) {
+                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
+                            null /* remoteTransition */, null /* displayChange */);
+                }
+                final boolean changed = r.setOccludesParent(false);
+                if (transition != null) {
+                    if (changed) {
+                        r.mTransitionController.setReady(r.getDisplayContent());
+                    } else {
+                        transition.abort();
+                    }
+                }
+                return changed;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

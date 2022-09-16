@@ -132,8 +132,11 @@ public final class TransitionInfo implements Parcelable {
      */
     public static final int FLAG_IS_BEHIND_STARTING_WINDOW = 1 << 14;
 
+    /** This change happened underneath something else. */
+    public static final int FLAG_IS_OCCLUDED = 1 << 15;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 15;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 16;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -153,6 +156,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_CROSS_PROFILE_OWNER_THUMBNAIL,
             FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
             FLAG_IS_BEHIND_STARTING_WINDOW,
+            FLAG_IS_OCCLUDED,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -361,6 +365,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_BEHIND_STARTING_WINDOW) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IS_BEHIND_STARTING_WINDOW");
+        }
+        if ((flags & FLAG_IS_OCCLUDED) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_OCCLUDED");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
