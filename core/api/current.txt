@@ -43368,7 +43368,7 @@ package android.telephony {
     method public void setSubscriptionOverrideUnmetered(int, boolean, @NonNull int[], long);
     method @Deprecated public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
     method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>, long);
-    method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
+    method @Deprecated @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
     field public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
