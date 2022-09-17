@@ -170,7 +170,7 @@ public class DateFormat {
      * mean using 12-hour in some locales and, in this case, is duplicated as the 'a' field.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long DISALLOW_DUPLICATE_FIELD_IN_SKELETON = 170233598L;
 
     /**
