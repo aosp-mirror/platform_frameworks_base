@@ -136,7 +136,7 @@ class NotificationLaunchAnimatorController(
         headsUpManager.removeNotification(notificationKey, true /* releaseImmediately */, animate)
     }
 
-    override fun onLaunchAnimationCancelled() {
+    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
         notificationShadeWindowViewController.setExpandAnimationRunning(false)

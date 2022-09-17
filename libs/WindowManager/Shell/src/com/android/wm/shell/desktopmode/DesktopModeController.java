@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 
@@ -37,6 +38,7 @@ import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * Handles windowing changes when desktop mode system setting changes
@@ -47,15 +49,18 @@ public class DesktopModeController {
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final RootDisplayAreaOrganizer mRootDisplayAreaOrganizer;
     private final SettingsObserver mSettingsObserver;
+    private final Transitions mTransitions;
 
     public DesktopModeController(Context context, ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
-            @ShellMainThread Handler mainHandler) {
+            @ShellMainThread Handler mainHandler,
+            Transitions transitions) {
         mContext = context;
         mShellTaskOrganizer = shellTaskOrganizer;
         mRootDisplayAreaOrganizer = rootDisplayAreaOrganizer;
         mSettingsObserver = new SettingsObserver(mContext, mainHandler);
+        mTransitions = transitions;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -89,7 +94,11 @@ public class DesktopModeController {
         }
         wct.merge(mRootDisplayAreaOrganizer.prepareWindowingModeChange(displayId,
                 targetWindowingMode), true /* transfer */);
-        mRootDisplayAreaOrganizer.applyTransaction(wct);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
+        } else {
+            mRootDisplayAreaOrganizer.applyTransaction(wct);
+        }
     }
 
     /**

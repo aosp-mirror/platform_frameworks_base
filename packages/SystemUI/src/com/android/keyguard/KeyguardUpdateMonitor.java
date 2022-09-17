@@ -157,6 +157,7 @@ import com.google.android.collect.Lists;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -167,6 +168,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -281,6 +283,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final AuthController mAuthController;
     private final StatusBarStateController mStatusBarStateController;
     private final UiEventLogger mUiEventLogger;
+    private final Set<Integer> mFaceAcquiredInfoIgnoreList;
     private int mStatusBarState;
     private final StatusBarStateController.StateListener mStatusBarStateControllerListener =
             new StatusBarStateController.StateListener() {
@@ -1023,6 +1026,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleFaceAuthFailed() {
         Assert.isMainThread();
+        mLogger.d("onFaceAuthFailed");
         mFaceCancelSignal = null;
         setFaceRunningState(BIOMETRIC_STATE_STOPPED);
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1639,6 +1643,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
                 @Override
                 public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+                    if (mFaceAcquiredInfoIgnoreList.contains(helpMsgId)) {
+                        return;
+                    }
                     handleFaceHelp(helpMsgId, helpString.toString());
                 }
 
@@ -1931,6 +1938,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mActiveUnlockConfig.setKeyguardUpdateMonitor(this);
         mWakeOnFingerprintAcquiredStart = context.getResources()
                         .getBoolean(com.android.internal.R.bool.kg_wake_on_acquire_start);
+        mFaceAcquiredInfoIgnoreList = Arrays.stream(
+                mContext.getResources().getIntArray(
+                        R.array.config_face_acquire_device_entry_ignorelist))
+                .boxed()
+                .collect(Collectors.toSet());
 
         mHandler = new Handler(mainLooper) {
             @Override

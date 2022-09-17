@@ -49,8 +49,11 @@ object LegacyUserUiHelper {
         isAddUser: Boolean,
         isGuest: Boolean,
         isAddSupervisedUser: Boolean,
+        isTablet: Boolean = false,
     ): Int {
-        return if (isAddUser) {
+        return if (isAddUser && isTablet) {
+            R.drawable.ic_account_circle_filled
+        } else if (isAddUser) {
             R.drawable.ic_add
         } else if (isGuest) {
             R.drawable.ic_account_circle
@@ -67,6 +70,7 @@ object LegacyUserUiHelper {
         record: UserRecord,
         isGuestUserAutoCreated: Boolean,
         isGuestUserResetting: Boolean,
+        isTablet: Boolean = false,
     ): String {
         val resourceId: Int? = getGuestUserRecordNameResourceId(record)
         return when {
@@ -80,6 +84,7 @@ object LegacyUserUiHelper {
                         isGuestUserResetting = isGuestUserResetting,
                         isAddUser = record.isAddUser,
                         isAddSupervisedUser = record.isAddSupervisedUser,
+                        isTablet = isTablet,
                     )
                 )
         }
@@ -108,12 +113,14 @@ object LegacyUserUiHelper {
         isGuestUserResetting: Boolean,
         isAddUser: Boolean,
         isAddSupervisedUser: Boolean,
+        isTablet: Boolean = false,
     ): Int {
         check(isGuest || isAddUser || isAddSupervisedUser)
 
         return when {
             isGuest && isGuestUserAutoCreated && isGuestUserResetting ->
                 com.android.settingslib.R.string.guest_resetting
+            isGuest && isTablet -> com.android.settingslib.R.string.guest_new_guest
             isGuest && isGuestUserAutoCreated -> com.android.internal.R.string.guest_name
             isGuest -> com.android.internal.R.string.guest_name
             isAddUser -> com.android.settingslib.R.string.user_add_user

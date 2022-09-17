@@ -42,6 +42,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -601,13 +603,14 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
 
     private final class BluetoothCallbackHandler implements BluetoothCallback {
         @Override
-        public void onBluetoothStateChanged(int bluetoothState) {
+        public void onBluetoothStateChanged(@BluetoothCallback.AdapterState int bluetoothState) {
             mHandler.obtainMessage(MSG_ON_BLUETOOTH_STATE_CHANGED,
                     bluetoothState, 0).sendToTarget();
         }
 
         @Override
-        public void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState) {
+        public void onDeviceBondStateChanged(
+                @NonNull CachedBluetoothDevice cachedDevice, int bondState) {
             mHandler.obtainMessage(MSG_ON_DEVICE_BOND_STATE_CHANGED,
                     bondState, 0, cachedDevice).sendToTarget();
         }

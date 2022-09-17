@@ -33,6 +33,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_Q
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
+import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
@@ -62,6 +63,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.Trace;
 import android.os.UserManager;
 import android.os.VibrationEffect;
@@ -235,6 +237,9 @@ public final class NotificationPanelViewController extends PanelViewController {
     private static final boolean DEBUG_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean SPEW_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private static final boolean DEBUG_DRAWABLE = false;
+
+    private static final VibrationEffect ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_STRENGTH_MEDIUM, false);
 
     /**
      * The parallax amount of the quick settings translation when dragging down the panel
@@ -682,14 +687,22 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     private final FalsingTapListener mFalsingTapListener = new FalsingTapListener() {
         @Override
-        public void onDoubleTapRequired() {
+        public void onAdditionalTapRequired() {
             if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED) {
                 mTapAgainViewController.show();
             } else {
                 mKeyguardIndicationController.showTransientIndication(
                         R.string.notification_tap_again);
             }
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+
+            if (!mStatusBarStateController.isDozing()) {
+                mVibratorHelper.vibrate(
+                        Process.myUid(),
+                        mView.getContext().getPackageName(),
+                        ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT,
+                        "falsing-additional-tap-required",
+                        TOUCH_VIBRATION_ATTRIBUTES);
+            }
         }
     };
 

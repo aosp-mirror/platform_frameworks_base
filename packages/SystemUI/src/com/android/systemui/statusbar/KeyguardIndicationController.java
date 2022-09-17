@@ -19,9 +19,6 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_MANAGEMENT_DISCLOSURE;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
-import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_FIRST_FRAME_RECEIVED;
-import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_GOOD;
-import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.view.View.GONE;
@@ -53,6 +50,7 @@ import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -82,7 +80,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.BiometricMessageDeferral;
+import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -184,6 +182,7 @@ public class KeyguardIndicationController {
     private long mChargingTimeRemaining;
     private String mBiometricErrorMessageToShowOnScreenOn;
     private final Set<Integer> mCoExFaceAcquisitionMsgIdsToShow;
+    private final FaceHelpMessageDeferral mFaceAcquiredMessageDeferral;
     private boolean mInited;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -233,7 +232,8 @@ public class KeyguardIndicationController {
             LockPatternUtils lockPatternUtils,
             ScreenLifecycle screenLifecycle,
             KeyguardBypassController keyguardBypassController,
-            AccessibilityManager accessibilityManager) {
+            AccessibilityManager accessibilityManager,
+            FaceHelpMessageDeferral faceHelpMessageDeferral) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mDevicePolicyManager = devicePolicyManager;
@@ -254,6 +254,7 @@ public class KeyguardIndicationController {
         mScreenLifecycle = screenLifecycle;
         mScreenLifecycle.addObserver(mScreenObserver);
 
+        mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
         int[] msgIds = context.getResources().getIntArray(
                 com.android.systemui.R.array.config_face_help_msgs_when_fingerprint_enrolled);
@@ -1041,8 +1042,22 @@ public class KeyguardIndicationController {
         }
 
         @Override
+        public void onBiometricAcquired(BiometricSourceType biometricSourceType, int acquireInfo) {
+            if (biometricSourceType == FACE) {
+                mFaceAcquiredMessageDeferral.processFrame(acquireInfo);
+            }
+        }
+
+        @Override
         public void onBiometricHelp(int msgId, String helpString,
                 BiometricSourceType biometricSourceType) {
+            if (biometricSourceType == FACE) {
+                mFaceAcquiredMessageDeferral.updateMessage(msgId, helpString);
+                if (mFaceAcquiredMessageDeferral.shouldDefer(msgId)) {
+                    return;
+                }
+            }
+
             // TODO(b/141025588): refactor to reduce repetition of code/comments
             // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
             // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
@@ -1051,17 +1066,6 @@ public class KeyguardIndicationController {
             if (!mKeyguardUpdateMonitor
                     .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)) {
                 return;
-            }
-
-            if (biometricSourceType == FACE) {
-                if (msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED) {
-                    mFaceAcquiredMessageDeferral.reset();
-                } else {
-                    mFaceAcquiredMessageDeferral.processMessage(msgId, helpString);
-                    if (mFaceAcquiredMessageDeferral.shouldDefer(msgId)) {
-                        return;
-                    }
-                }
             }
 
             final boolean faceAuthSoftError = biometricSourceType == FACE
@@ -1109,11 +1113,23 @@ public class KeyguardIndicationController {
         }
 
         @Override
+        public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
+            if (biometricSourceType == FACE) {
+                mFaceAcquiredMessageDeferral.reset();
+            }
+        }
+
+        @Override
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
             CharSequence deferredFaceMessage = null;
             if (biometricSourceType == FACE) {
-                deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
+                if (msgId == BiometricFaceConstants.FACE_ERROR_TIMEOUT) {
+                    deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
+                    if (DEBUG) {
+                        Log.d(TAG, "showDeferredFaceMessage msgId=" + deferredFaceMessage);
+                    }
+                }
                 mFaceAcquiredMessageDeferral.reset();
             }
 
@@ -1308,14 +1324,4 @@ public class KeyguardIndicationController {
             }
         }
     };
-
-    private final BiometricMessageDeferral mFaceAcquiredMessageDeferral =
-            new BiometricMessageDeferral(
-                    Set.of(
-                            FACE_ACQUIRED_GOOD,
-                            FACE_ACQUIRED_START,
-                            FACE_ACQUIRED_FIRST_FRAME_RECEIVED
-                    ),
-                    Set.of(FACE_ACQUIRED_TOO_DARK)
-            );
 }

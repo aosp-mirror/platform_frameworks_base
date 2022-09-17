@@ -43,6 +43,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,6 +64,8 @@ public class DesktopModeControllerTest extends ShellTestCase {
     private ShellExecutor mTestExecutor;
     @Mock
     private Handler mMockHandler;
+    @Mock
+    private Transitions mMockTransitions;
 
     private DesktopModeController mController;
     private ShellInit mShellInit;
@@ -72,7 +75,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
         mShellInit = Mockito.spy(new ShellInit(mTestExecutor));
 
         mController = new DesktopModeController(mContext, mShellInit, mShellTaskOrganizer,
-                mRootDisplayAreaOrganizer, mMockHandler);
+                mRootDisplayAreaOrganizer, mMockHandler, mMockTransitions);
 
         mShellInit.init();
     }
