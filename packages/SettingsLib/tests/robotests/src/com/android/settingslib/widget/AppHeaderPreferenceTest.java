@@ -65,7 +65,6 @@ public class AppHeaderPreferenceTest {
 
     @Test
     public void setIsInstantApp_shouldUpdateInstallType() {
-
         mPreference.onBindViewHolder(mHolder);
         mPreference.setIsInstantApp(true);
 
@@ -77,8 +76,8 @@ public class AppHeaderPreferenceTest {
     public void setSecondSummary_shouldUpdateSecondSummary() {
         final String defaultTestText = "Test second summary";
 
-        mPreference.onBindViewHolder(mHolder);
         mPreference.setSecondSummary(defaultTestText);
+        mPreference.onBindViewHolder(mHolder);
 
         assertThat(((TextView) mRootView.findViewById(R.id.second_summary)).getText().toString())
                 .isEqualTo(defaultTestText);

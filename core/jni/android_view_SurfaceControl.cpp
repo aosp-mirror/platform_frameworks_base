@@ -974,20 +974,6 @@ static jobject nativeGetDisplayedContentSample(JNIEnv* env, jclass clazz, jobjec
                           histogramComponent3);
 }
 
-static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj,
-        jboolean secure) {
-    ScopedUtfChars name(env, nameObj);
-    sp<IBinder> token(SurfaceComposerClient::createDisplay(
-            String8(name.c_str()), bool(secure)));
-    return javaObjectForIBinder(env, token);
-}
-
-static void nativeDestroyDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return;
-    SurfaceComposerClient::destroyDisplay(token);
-}
-
 static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
         jlong transactionObj,
         jobject tokenObj, jlong nativeSurfaceObject) {
@@ -2001,10 +1987,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
             (void*)nativeGetPhysicalDisplayToken },
-    {"nativeCreateDisplay", "(Ljava/lang/String;Z)Landroid/os/IBinder;",
-            (void*)nativeCreateDisplay },
-    {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
-            (void*)nativeDestroyDisplay },
     {"nativeSetDisplaySurface", "(JLandroid/os/IBinder;J)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(JLandroid/os/IBinder;I)V",

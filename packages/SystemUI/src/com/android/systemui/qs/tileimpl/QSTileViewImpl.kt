@@ -100,14 +100,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
             Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorOnAccent)
     private val colorLabelInactive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-    private val colorLabelUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorLabelInactive)
+    private val colorLabelUnavailable =
+        Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorTertiary)
 
     private val colorSecondaryLabelActive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondaryInverse)
     private val colorSecondaryLabelInactive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary)
     private val colorSecondaryLabelUnavailable =
-            Utils.applyAlpha(UNAVAILABLE_ALPHA, colorSecondaryLabelInactive)
+        Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorTertiary)
 
     private lateinit var label: TextView
     protected lateinit var secondaryLabel: TextView

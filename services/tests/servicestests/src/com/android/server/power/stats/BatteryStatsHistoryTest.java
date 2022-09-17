@@ -148,6 +148,25 @@ public class BatteryStatsHistoryTest {
     }
 
     @Test
+    public void testAtraceInstantEvent() {
+        mHistory.forceRecordAllHistory();
+
+        InOrder inOrder = Mockito.inOrder(mTracer);
+        Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
+
+        mHistory.recordEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                HistoryItem.EVENT_WAKEUP_AP, "", 1234);
+        mHistory.recordEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                HistoryItem.EVENT_JOB_START, "jobname", 2468);
+        mHistory.recordEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                HistoryItem.EVENT_JOB_FINISH, "jobname", 2468);
+
+        inOrder.verify(mTracer).traceInstantEvent("battery_stats.wakeupap", "wakeupap=1234:\"\"");
+        inOrder.verify(mTracer).traceInstantEvent("battery_stats.job", "+job=2468:\"jobname\"");
+        inOrder.verify(mTracer).traceInstantEvent("battery_stats.job", "-job=2468:\"jobname\"");
+    }
+
+    @Test
     public void testConstruct() {
         createActiveFile(mHistory);
         verifyFileNumbers(mHistory, Arrays.asList(0));

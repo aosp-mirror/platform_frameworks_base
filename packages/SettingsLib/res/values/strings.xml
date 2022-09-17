@@ -91,10 +91,6 @@
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
     <string name="wifi_disabled_network_failure">IP Configuration Failure</string>
-    <!-- Status for networks disabled by the network recommendation provider -->
-    <string name="wifi_disabled_by_recommendation_provider">Not connected due to low quality network</string>
-    <!-- Status for networked disabled from a wifi association failure -->
-    <string name="wifi_disabled_wifi_failure">WiFi Connection Failure</string>
     <!-- Status for networks disabled from authentication failure (wrong password
          or certificate). -->
     <string name="wifi_disabled_password_failure">Authentication problem</string>
@@ -114,20 +110,14 @@
     <string name="wifi_no_internet">No internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Summary for connect to metered access point [CHAR LIMIT=NONE] -->
-    <string name="connected_to_metered_access_point">Connected to metered network</string>
 
 
     <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is automatically connected by a default network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
-    <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_passpoint">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is connected by a app (via suggestion or network request). [CHAR LIMIT=NONE] -->
     <string name="connected_via_app">Connected via <xliff:g id="name" example="Wifi App">%1$s</xliff:g></string>
-    <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
-    <string name="available_via_passpoint">Available via %1$s</string>
     <!-- Status message of OSU Provider network when not connected. [CHAR LIMIT=NONE] -->
     <string name="tap_to_sign_up">Tap to sign up</string>
     <!-- Package name for Settings app-->
@@ -153,11 +143,6 @@
     <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
     <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
 
-    <!-- Status message of Wi-Fi when it is connected to a Carrier Network. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_carrier">Connected via %1$s</string>
-    <!-- Status message of Wi-Fi when an available network is a carrier network. [CHAR LIMIT=NONE] -->
-    <string name="available_via_carrier">Available via %1$s</string>
-
     <!-- Status message of OSU Provider upon initiating provisioning flow [CHAR LIMIT=NONE] -->
     <string name="osu_opening_provider">Opening <xliff:g id="passpointProvider" example="Passpoint Provider">%1$s</xliff:g></string>
     <!-- Status message of OSU Provider when connection fails [CHAR LIMIT=NONE] -->
@@ -169,14 +154,10 @@
     <!-- Status message of OSU Provider on completing provisioning. [CHAR LIMIT=NONE] -->
     <string name="osu_sign_up_complete">Sign-up complete. Connecting\u2026</string>
 
-    <!-- Speed label for very slow network speed -->
-    <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
     <string name="speed_label_slow">Slow</string>
     <!-- Speed label for okay network speed -->
     <string name="speed_label_okay">OK</string>
-    <!-- Speed label for medium network speed -->
-    <string name="speed_label_medium">Medium</string>
     <!-- Speed label for fast network speed -->
     <string name="speed_label_fast">Fast</string>
     <!-- Speed label for very fast network speed -->
@@ -203,8 +184,6 @@
     <string name="bluetooth_connected_no_headset">Connected (no phone)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_a2dp">Connected (no media)<xliff:g id="active_device">%1$s</xliff:g></string>
-    <!-- Bluetooth settings.  Message when connected to a device, except for map. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_map">Connected (no message access)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)<xliff:g id="active_device">%1$s</xliff:g></string>
 

@@ -70,12 +70,35 @@ void BinaryStreamVisitor::visit(const IdmapData& data) {
   }
 
   static constexpr uint16_t kValueSize = 8U;
+  std::vector<std::pair<ConfigDescription, TargetValue>> target_values;
+  target_values.reserve(data.GetHeader()->GetTargetInlineEntryValueCount());
   for (const auto& target_entry : data.GetTargetInlineEntries()) {
     Write32(target_entry.target_id);
+    Write32(target_values.size());
+    Write32(target_entry.values.size());
+    target_values.insert(
+        target_values.end(), target_entry.values.begin(), target_entry.values.end());
+  }
+
+  std::vector<ConfigDescription> configs;
+  configs.reserve(data.GetHeader()->GetConfigCount());
+  for (const auto& target_entry_value : target_values) {
+    auto config_it = find(configs.begin(), configs.end(), target_entry_value.first);
+    if (config_it != configs.end()) {
+      Write32(config_it - configs.begin());
+    } else {
+      Write32(configs.size());
+      configs.push_back(target_entry_value.first);
+    }
     Write16(kValueSize);
     Write8(0U);  // padding
-    Write8(target_entry.value.data_type);
-    Write32(target_entry.value.data_value);
+    Write8(target_entry_value.second.data_type);
+    Write32(target_entry_value.second.data_value);
+  }
+
+  for( auto& cd : configs) {
+    cd.swapHtoD();
+    stream_.write(reinterpret_cast<char*>(&cd), sizeof(cd));
   }
 
   for (const auto& overlay_entry : data.GetOverlayEntries()) {
@@ -89,6 +112,8 @@ void BinaryStreamVisitor::visit(const IdmapData& data) {
 void BinaryStreamVisitor::visit(const IdmapData::Header& header) {
   Write32(header.GetTargetEntryCount());
   Write32(header.GetTargetInlineEntryCount());
+  Write32(header.GetTargetInlineEntryValueCount());
+  Write32(header.GetConfigCount());
   Write32(header.GetOverlayEntryCount());
   Write32(header.GetStringPoolIndexOffset());
 }

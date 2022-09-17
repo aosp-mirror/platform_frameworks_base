@@ -519,6 +519,7 @@ final class OverlayManagerServiceImpl {
             throws OperationFailedException {
         final OverlayIdentifier overlayIdentifier = new OverlayIdentifier(
                 info.packageName, info.overlayName);
+
         final Set<PackageAndUser> updatedTargets = new ArraySet<>();
         OverlayInfo oi = mSettings.getNullableOverlayInfo(overlayIdentifier, userId);
         if (oi != null) {

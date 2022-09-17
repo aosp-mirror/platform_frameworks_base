@@ -34,11 +34,12 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
 import com.android.settingslib.spaprivileged.model.app.toRoute
+import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
+import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
 import kotlinx.coroutines.Dispatchers
 
 private const val ENTRY_NAME = "AllowControl"
@@ -105,7 +106,7 @@ private fun TogglePermissionAppInfoPage(
         LaunchedEffect(model, Dispatchers.Default) {
             model.initState()
         }
-        SwitchPreference(model)
+        RestrictedSwitchPreference(model, Restrictions(userId, listModel.switchRestrictionKeys))
     }
 }
 

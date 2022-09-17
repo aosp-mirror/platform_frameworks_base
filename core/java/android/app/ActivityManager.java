@@ -4216,13 +4216,23 @@ public class ActivityManager {
         }
     }*/
 
+    /** @hide
+     * Determines whether the given UID can access unexported components
+     * @param uid the calling UID
+     * @return true if the calling UID is ROOT or SYSTEM
+     */
+    public static boolean canAccessUnexportedComponents(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID);
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static int checkComponentPermission(String permission, int uid,
             int owningUid, boolean exported) {
         // Root, system server get to do everything.
         final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
+        if (canAccessUnexportedComponents(uid)) {
             return PackageManager.PERMISSION_GRANTED;
         }
         // Isolated processes don't get any permissions.
@@ -4350,20 +4360,28 @@ public class ActivityManager {
     }
 
     /**
-     * Starts the given user in background and associate the user with the given display.
+     * Starts the given user in background and assign the user to the given display.
      *
      * <p>This method will allow the user to launch activities on that display, and it's typically
      * used only on automotive builds when the vehicle has multiple displays (you can verify if it's
-     * supported by calling {@link UserManager#isBackgroundUsersOnSecondaryDisplaysSupported()}).
+     * supported by calling {@link UserManager#isUsersOnSecondaryDisplaysSupported()}).
      *
-     * @return whether the user was started.
+     * <p><b>NOTE:</b> differently from {@link #switchUser(int)}, which stops the current foreground
+     * user before starting a new one, this method does not stop the previous user running in
+     * background in the display, and it will return {@code false} in this case. It's up to the
+     * caller to call {@link #stopUser(int, boolean)} before starting a new user.
+     *
+     * @param userId user to be started in the display. It will return {@code false} if the user is
+     * a profile, the {@link #getCurrentUser()}, the {@link UserHandle#SYSTEM system user}, or
+     * does not exist.
+     *
+     * @param displayId id of the display, it must exist.
+     *
+     * @return whether the operation succeeded. Notice that if the user was already started in such
+     * display before, it will return {@code false}.
      *
      * @throws UnsupportedOperationException if the device does not support background users on
      * secondary displays.
-     * @throws IllegalArgumentException if the display does not exist.
-     * @throws IllegalStateException if the user cannot be started on that display (for example, if
-     * there's already a user using that display or if the user is already associated with other
-     * display).
      *
      * @hide
      */
@@ -4372,6 +4390,10 @@ public class ActivityManager {
             android.Manifest.permission.CREATE_USERS})
     public boolean startUserInBackgroundOnSecondaryDisplay(@UserIdInt int userId,
             int displayId) {
+        if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+            throw new UnsupportedOperationException(
+                    "device does not support users on secondary displays");
+        }
         try {
             return getService().startUserInBackgroundOnSecondaryDisplay(userId, displayId);
         } catch (RemoteException e) {
@@ -4531,6 +4553,10 @@ public class ActivityManager {
 
     /**
      * Stops the given {@code userId}.
+     *
+     * <p><b>NOTE:</b> on systems that support
+     * {@link UserManager#isUsersOnSecondaryDisplaysSupported() background users on secondary
+     * displays}, this method will also unassign the user from the display it was started on.
      *
      * @hide
      */

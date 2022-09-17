@@ -163,6 +163,23 @@ public final class UserManagerInternalTest extends UserManagerServiceOrInternalT
     }
 
     @Test
+    public void testAssignUserToDisplay_userAlreadyAssigned() {
+        enableUsersOnSecondaryDisplays();
+
+        mUmi.assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> mUmi.assignUserToDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID));
+
+        Log.v(TAG, "Exception: " + e);
+        assertWithMessage("exception (%s) message", e).that(e).hasMessageThat()
+                .matches("Cannot.*" + USER_ID + ".*" + OTHER_SECONDARY_DISPLAY_ID + ".*already.*"
+                        + SECONDARY_DISPLAY_ID + ".*");
+
+        assertUserAssignedToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+    }
+
+    @Test
     public void testAssignUserToDisplay_profileOnSameDisplayAsParent() {
         enableUsersOnSecondaryDisplays();
         addDefaultProfileAndParent();
