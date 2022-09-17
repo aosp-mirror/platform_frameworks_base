@@ -1829,7 +1829,7 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
-                if (mUserProfiles.canProfileUseBoundServices(userId)) {
+                if (!mUserProfiles.isProfileUser(userId)) {
                     // reload per-user settings
                     mSettingsObserver.update(null);
                     // Refresh managed services
@@ -1843,7 +1843,7 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 if (userId != USER_NULL) {
                     mUserProfiles.updateCache(context);
-                    if (mUserProfiles.canProfileUseBoundServices(userId)) {
+                    if (!mUserProfiles.isProfileUser(userId)) {
                         allowDefaultApprovedServices(userId);
                     }
                 }
@@ -1861,7 +1861,7 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
                 mAssistants.onUserUnlocked(userId);
-                if (mUserProfiles.canProfileUseBoundServices(userId)) {
+                if (!mUserProfiles.isProfileUser(userId)) {
                     mConditionProviders.onUserUnlocked(userId);
                     mListeners.onUserUnlocked(userId);
                     mZenModeHelper.onUserUnlocked(userId);
