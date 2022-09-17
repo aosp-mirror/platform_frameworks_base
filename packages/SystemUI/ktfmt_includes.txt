@@ -498,7 +498,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherContainer.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherFeatureController.kt
--packages/SystemUI/src/com/android/systemui/statusbar/pipeline/ConnectivityInfoProcessor.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/dagger/StatusBarPipelineModule.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/shared/ConnectivityPipelineLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/data/model/WifiActivityModel.kt

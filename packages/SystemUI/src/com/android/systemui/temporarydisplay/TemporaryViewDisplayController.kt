@@ -19,12 +19,10 @@ package com.android.systemui.temporarydisplay
 import android.annotation.LayoutRes
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.PowerManager
 import android.os.SystemClock
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -33,11 +31,7 @@ import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
 import androidx.annotation.CallSuper
-import com.android.internal.widget.CachingIconView
-import com.android.settingslib.Utils
-import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 
@@ -50,17 +44,22 @@ import com.android.systemui.util.concurrency.DelayableExecutor
  * The generic type T is expected to contain all the information necessary for the subclasses to
  * display the view in a certain state, since they receive <T> in [updateView].
  *
- * TODO(b/245610654): Remove all the media-specific logic from this class.
+ * @property windowTitle the title to use for the window that displays the temporary view. Should be
+ *   normally cased, like "Window Title".
+ * @property wakeReason a string used for logging if we needed to wake the screen in order to
+ *   display the temporary view. Should be screaming snake cased, like WAKE_REASON.
  */
-abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
+abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : TemporaryViewLogger>(
     internal val context: Context,
-    internal val logger: MediaTttLogger,
+    internal val logger: U,
     internal val windowManager: WindowManager,
     @Main private val mainExecutor: DelayableExecutor,
     private val accessibilityManager: AccessibilityManager,
     private val configurationController: ConfigurationController,
     private val powerManager: PowerManager,
     @LayoutRes private val viewLayoutRes: Int,
+    private val windowTitle: String,
+    private val wakeReason: String,
 ) {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -72,7 +71,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        title = WINDOW_TITLE
+        title = windowTitle
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -115,10 +114,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
                 powerManager.wakeUp(
                         SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_APPLICATION,
-                        "com.android.systemui:media_tap_to_transfer_activated"
+                        "com.android.systemui:$wakeReason",
                 )
             }
-
+            logger.logChipAddition()
             inflateAndUpdateView(newInfo)
         }
 
@@ -192,79 +191,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo>(
      * appears.
      */
     open fun animateViewIn(view: ViewGroup) {}
-
-    /**
-     * Returns the size that the icon should be, or null if no size override is needed.
-     */
-    open fun getIconSize(isAppIcon: Boolean): Int? = null
-
-    /**
-     * An internal method to set the icon on the view.
-     *
-     * This is in the common superclass since both the sender and the receiver show an icon.
-     *
-     * @param appPackageName the package name of the app playing the media. Will be used to fetch
-     *   the app icon and app name if overrides aren't provided.
-     *
-     * @return the content description of the icon.
-     */
-    internal fun setIcon(
-        currentView: ViewGroup,
-        appPackageName: String?,
-        appIconDrawableOverride: Drawable? = null,
-        appNameOverride: CharSequence? = null,
-    ): CharSequence {
-        val appIconView = currentView.requireViewById<CachingIconView>(R.id.app_icon)
-        val iconInfo = getIconInfo(appPackageName)
-
-        getIconSize(iconInfo.isAppIcon)?.let { size ->
-            val lp = appIconView.layoutParams
-            lp.width = size
-            lp.height = size
-            appIconView.layoutParams = lp
-        }
-
-        appIconView.contentDescription = appNameOverride ?: iconInfo.iconName
-        appIconView.setImageDrawable(appIconDrawableOverride ?: iconInfo.icon)
-        return appIconView.contentDescription
-    }
-
-    /**
-     * Returns the information needed to display the icon.
-     *
-     * The information will either contain app name and icon of the app playing media, or a default
-     * name and icon if we can't find the app name/icon.
-     */
-    private fun getIconInfo(appPackageName: String?): IconInfo {
-        if (appPackageName != null) {
-            try {
-                return IconInfo(
-                    iconName = context.packageManager.getApplicationInfo(
-                        appPackageName, PackageManager.ApplicationInfoFlags.of(0)
-                    ).loadLabel(context.packageManager).toString(),
-                    icon = context.packageManager.getApplicationIcon(appPackageName),
-                    isAppIcon = true
-                )
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.w(TAG, "Cannot find package $appPackageName", e)
-            }
-        }
-        return IconInfo(
-            iconName = context.getString(R.string.media_output_dialog_unknown_launch_app_name),
-            icon = context.resources.getDrawable(R.drawable.ic_cast).apply {
-                this.setTint(
-                    Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-                )
-            },
-            isAppIcon = false
-        )
-    }
 }
-
-// Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
-// UpdateMediaTapToTransferReceiverDisplayTest
-private const val WINDOW_TITLE = "Media Transfer Chip View"
-private val TAG = TemporaryViewDisplayController::class.simpleName!!
 
 object TemporaryDisplayRemovalReason {
     const val REASON_TIMEOUT = "TIMEOUT"

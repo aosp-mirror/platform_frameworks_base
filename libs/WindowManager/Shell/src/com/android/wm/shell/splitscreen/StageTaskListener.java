@@ -106,11 +106,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
-    /**
-     * General function for dismiss this stage.
-     */
-    void dismiss(WindowContainerTransaction wct, boolean toTop) {}
-
     int getChildCount() {
         return mChildrenTaskInfo.size();
     }

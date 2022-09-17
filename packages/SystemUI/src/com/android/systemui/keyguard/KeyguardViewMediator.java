@@ -831,7 +831,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {}
 
                 @Override
-                public void onLaunchAnimationCancelled() {
+                public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
                     Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: "
                             + mOccluded);
                 }
