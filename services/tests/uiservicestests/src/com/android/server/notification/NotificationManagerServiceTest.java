@@ -5937,6 +5937,43 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAddAutomaticZenRule_systemCallTakesPackageFromOwner() throws Exception {
+        mService.isSystemUid = true;
+        ZenModeHelper mockZenModeHelper = mock(ZenModeHelper.class);
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.setZenHelper(mockZenModeHelper);
+        ComponentName owner = new ComponentName("android", "ProviderName");
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
+        boolean isEnabled = true;
+        AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, isEnabled);
+        mBinderService.addAutomaticZenRule(rule, "com.android.settings");
+
+        // verify that zen mode helper gets passed in a package name of "android"
+        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString());
+    }
+
+    @Test
+    public void testAddAutomaticZenRule_nonSystemCallTakesPackageFromArg() throws Exception {
+        mService.isSystemUid = false;
+        ZenModeHelper mockZenModeHelper = mock(ZenModeHelper.class);
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.setZenHelper(mockZenModeHelper);
+        ComponentName owner = new ComponentName("android", "ProviderName");
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
+        boolean isEnabled = true;
+        AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, isEnabled);
+        mBinderService.addAutomaticZenRule(rule, "another.package");
+
+        // verify that zen mode helper gets passed in the package name from the arg, not the owner
+        verify(mockZenModeHelper).addAutomaticZenRule(
+                eq("another.package"), eq(rule), anyString());
+    }
+
+    @Test
     public void testAreNotificationsEnabledForPackage_crossUser() throws Exception {
         try {
             mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
