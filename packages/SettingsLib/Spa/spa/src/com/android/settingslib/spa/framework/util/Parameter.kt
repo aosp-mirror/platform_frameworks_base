@@ -25,9 +25,12 @@ fun List<NamedNavArgument>.navRoute(): String {
 }
 
 fun List<NamedNavArgument>.navLink(arguments: Bundle? = null): String {
-    if (arguments == null) return ""
     val argsArray = mutableListOf<String>()
     for (navArg in this) {
+        if (arguments == null || !arguments.containsKey(navArg.name)) {
+            argsArray.add("[rt]")
+            continue
+        }
         when (navArg.argument.type) {
             NavType.StringType -> {
                 argsArray.add(arguments.getString(navArg.name, ""))

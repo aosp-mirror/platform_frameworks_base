@@ -56,6 +56,8 @@ struct Idmap_header {
 struct Idmap_data_header {
   uint32_t target_entry_count;
   uint32_t target_inline_entry_count;
+  uint32_t target_inline_entry_value_count;
+  uint32_t configuration_count;
   uint32_t overlay_entry_count;
 
   uint32_t string_pool_index_offset;
@@ -68,6 +70,12 @@ struct Idmap_target_entry {
 
 struct Idmap_target_entry_inline {
   uint32_t target_id;
+  uint32_t start_value_index;
+  uint32_t value_count;
+};
+
+struct Idmap_target_entry_inline_value {
+  uint32_t config_index;
   Res_value value;
 };
 
@@ -138,11 +146,15 @@ status_t OverlayDynamicRefTable::lookupResourceIdNoRewrite(uint32_t* resId) cons
 IdmapResMap::IdmapResMap(const Idmap_data_header* data_header,
                          const Idmap_target_entry* entries,
                          const Idmap_target_entry_inline* inline_entries,
+                         const Idmap_target_entry_inline_value* inline_entry_values,
+                         const ConfigDescription* configs,
                          uint8_t target_assigned_package_id,
                          const OverlayDynamicRefTable* overlay_ref_table)
     : data_header_(data_header),
       entries_(entries),
       inline_entries_(inline_entries),
+      inline_entry_values_(inline_entry_values),
+      configurations_(configs),
       target_assigned_package_id_(target_assigned_package_id),
       overlay_ref_table_(overlay_ref_table) { }
 
@@ -183,7 +195,13 @@ IdmapResMap::Result IdmapResMap::Lookup(uint32_t target_res_id) const {
 
   if (inline_entry != end_inline_entry &&
       (0x00FFFFFFU & dtohl(inline_entry->target_id)) == target_res_id) {
-    return Result(inline_entry->value);
+    std::map<ConfigDescription, Res_value> values_map;
+    for (int i = 0; i < inline_entry->value_count; i++) {
+      const auto& value = inline_entry_values_[inline_entry->start_value_index + i];
+      const auto& config = configurations_[value.config_index];
+      values_map[config] = value.value;
+    }
+    return Result(values_map);
   }
   return {};
 }
@@ -237,6 +255,8 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
                          const Idmap_data_header* data_header,
                          const Idmap_target_entry* target_entries,
                          const Idmap_target_entry_inline* target_inline_entries,
+                         const Idmap_target_entry_inline_value* inline_entry_values,
+                         const ConfigDescription* configs,
                          const Idmap_overlay_entry* overlay_entries,
                          std::unique_ptr<ResStringPool>&& string_pool,
                          std::string_view overlay_apk_path,
@@ -245,6 +265,8 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
        data_header_(data_header),
        target_entries_(target_entries),
        target_inline_entries_(target_inline_entries),
+       inline_entry_values_(inline_entry_values),
+       configurations_(configs),
        overlay_entries_(overlay_entries),
        string_pool_(std::move(string_pool)),
        idmap_path_(std::move(idmap_path)),
@@ -303,6 +325,21 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
   if (target_inline_entries == nullptr) {
     return {};
   }
+
+  auto target_inline_entry_values = ReadType<Idmap_target_entry_inline_value>(
+      &data_ptr, &data_size, "target inline values",
+      dtohl(data_header->target_inline_entry_value_count));
+  if (target_inline_entry_values == nullptr) {
+    return {};
+  }
+
+  auto configurations = ReadType<ConfigDescription>(
+      &data_ptr, &data_size, "configurations",
+      dtohl(data_header->configuration_count));
+  if (configurations == nullptr) {
+    return {};
+  }
+
   auto overlay_entries = ReadType<Idmap_overlay_entry>(&data_ptr, &data_size, "target inline",
                                                        dtohl(data_header->overlay_entry_count));
   if (overlay_entries == nullptr) {
@@ -329,8 +366,8 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
   // Can't use make_unique because LoadedIdmap constructor is private.
   return std::unique_ptr<LoadedIdmap>(
       new LoadedIdmap(idmap_path.to_string(), header, data_header, target_entries,
-                      target_inline_entries, overlay_entries, std::move(idmap_string_pool),
-                      *target_path, *overlay_path));
+                      target_inline_entries, target_inline_entry_values, configurations,
+                      overlay_entries, std::move(idmap_string_pool), *target_path, *overlay_path));
 }
 
 bool LoadedIdmap::IsUpToDate() const {

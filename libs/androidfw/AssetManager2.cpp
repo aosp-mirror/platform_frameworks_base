@@ -601,10 +601,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     return base::unexpected(result.error());
   }
 
-  if (type_idx == 0x1c) {
-    LOG(ERROR) << base::StringPrintf("foobar first result %s", result->package_name->c_str());
-  }
-
   bool overlaid = false;
   if (!stop_at_first_match && !ignore_configuration && !apk_assets_[result->cookie]->IsLoader()) {
     for (const auto& id_map : package_group.overlays_) {
@@ -615,7 +611,21 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
       }
       if (overlay_entry.IsInlineValue()) {
         // The target resource is overlaid by an inline value not represented by a resource.
-        result->entry = overlay_entry.GetInlineValue();
+        ConfigDescription best_frro_config;
+        Res_value best_frro_value;
+        bool frro_found = false;
+        for( const auto& [config, value] : overlay_entry.GetInlineValue()) {
+          if ((!frro_found || config.isBetterThan(best_frro_config, desired_config))
+              && config.match(*desired_config)) {
+            frro_found = true;
+            best_frro_config = config;
+            best_frro_value = value;
+          }
+        }
+        if (!frro_found) {
+          continue;
+        }
+        result->entry = best_frro_value;
         result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
         result->cookie = id_map.cookie;
 

@@ -40,8 +40,9 @@ import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+import static android.window.TransitionInfo.FLAG_FILLS_TASK;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
-import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -1839,13 +1840,35 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     flags |= FLAG_WILL_IME_SHOWN;
                 }
             }
+            Task parentTask = null;
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {
+                parentTask = record.getTask();
                 if (record.mUseTransferredAnimation) {
                     flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
                 }
                 if (record.mVoiceInteraction) {
                     flags |= FLAG_IS_VOICE_INTERACTION;
+                }
+            }
+            final TaskFragment taskFragment = wc.asTaskFragment();
+            if (taskFragment != null && task == null) {
+                parentTask = taskFragment.getTask();
+            }
+            if (parentTask != null) {
+                if (parentTask.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+                    // Whether this is in a Task with embedded activity.
+                    flags |= FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+                }
+                final Rect taskBounds = parentTask.getBounds();
+                final Rect startBounds = mAbsoluteBounds;
+                final Rect endBounds = wc.getBounds();
+                if (taskBounds.width() == startBounds.width()
+                        && taskBounds.height() == startBounds.height()
+                        && taskBounds.width() == endBounds.width()
+                        && taskBounds.height() == endBounds.height()) {
+                    // Whether the container fills the Task bounds before and after the transition.
+                    flags |= FLAG_FILLS_TASK;
                 }
             }
             final DisplayContent dc = wc.asDisplayContent();
@@ -1863,9 +1886,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             if (occludesKeyguard(wc)) {
                 flags |= FLAG_OCCLUDES_KEYGUARD;
-            }
-            if (wc.isEmbedded()) {
-                flags |= FLAG_IS_EMBEDDED;
             }
             return flags;
         }

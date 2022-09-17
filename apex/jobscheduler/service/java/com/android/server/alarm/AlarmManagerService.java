@@ -676,6 +676,9 @@ public class AlarmManagerService extends SystemService {
         private static final String KEY_TIME_TICK_ALLOWED_WHILE_IDLE =
                 "time_tick_allowed_while_idle";
 
+        private static final String KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF =
+                "delay_nonwakeup_alarms_while_screen_off";
+
         @VisibleForTesting
         static final String KEY_ALLOW_WHILE_IDLE_QUOTA = "allow_while_idle_quota";
 
@@ -742,6 +745,8 @@ public class AlarmManagerService extends SystemService {
         private static final boolean DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = true;
 
         private static final int DEFAULT_TEMPORARY_QUOTA_BUMP = 0;
+
+        private static final boolean DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF = true;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -834,6 +839,9 @@ public class AlarmManagerService extends SystemService {
          * This quota is tracked per package and expires after {@link #TEMPORARY_QUOTA_DURATION}.
          */
         public int TEMPORARY_QUOTA_BUMP = DEFAULT_TEMPORARY_QUOTA_BUMP;
+
+        public boolean DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF =
+                DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
         private int mVersion = 0;
@@ -1010,6 +1018,11 @@ public class AlarmManagerService extends SystemService {
                         case KEY_TEMPORARY_QUOTA_BUMP:
                             TEMPORARY_QUOTA_BUMP = properties.getInt(KEY_TEMPORARY_QUOTA_BUMP,
                                     DEFAULT_TEMPORARY_QUOTA_BUMP);
+                            break;
+                        case KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF:
+                            DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF = properties.getBoolean(
+                                    KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF,
+                                    DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF);
                             break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
@@ -1247,6 +1260,10 @@ public class AlarmManagerService extends SystemService {
             pw.println();
 
             pw.print(KEY_TEMPORARY_QUOTA_BUMP, TEMPORARY_QUOTA_BUMP);
+            pw.println();
+
+            pw.print(KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF,
+                    DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF);
             pw.println();
 
             pw.decreaseIndent();
@@ -4360,7 +4377,11 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     boolean checkAllowNonWakeupDelayLocked(long nowELAPSED) {
+        if (!mConstants.DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF) {
+            return false;
+        }
         if (mInteractive) {
             return false;
         }

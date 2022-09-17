@@ -5811,6 +5811,21 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
+    /**
+     * Return the display Id that has the given uniqueId. Unique ID is defined in
+     * {@link DisplayInfo#uniqueId}.
+     */
+    @Override
+    public int getDisplayIdByUniqueId(String uniqueId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(uniqueId);
+            if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
+                return displayContent.mDisplayId;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public void setForcedDisplayDensityForUser(int displayId, int density, int userId) {
         if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)

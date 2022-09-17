@@ -173,7 +173,8 @@ public class KeyguardService extends Service {
         }
     }
 
-    // Wrap Keyguard going away animation
+    // Wrap Keyguard going away animation.
+    // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
     private static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
             final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
@@ -353,6 +354,27 @@ public class KeyguardService extends Service {
         f = new TransitionFilter();
         f.mTypeSet = new int[]{TRANSIT_KEYGUARD_UNOCCLUDE};
         mShellTransitions.registerRemote(f, unoccludeTransition);
+
+        Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_OCCLUDE for DREAM");
+        // Register for occluding by Dream
+        f = new TransitionFilter();
+        f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
+        f.mRequirements = new TransitionFilter.Requirement[]{
+                new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
+        // First require at-least one app of type DREAM showing that occludes.
+        f.mRequirements[0].mActivityType = WindowConfiguration.ACTIVITY_TYPE_DREAM;
+        f.mRequirements[0].mMustBeIndependent = false;
+        f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
+        f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+        // Then require that we aren't closing any occludes (because this would mean a
+        // regular task->task or activity->activity animation not involving keyguard).
+        f.mRequirements[1].mNot = true;
+        f.mRequirements[1].mMustBeIndependent = false;
+        f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
+        f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
+        mShellTransitions.registerRemote(f, new RemoteTransition(
+                wrap(mKeyguardViewMediator.getOccludeByDreamAnimationRunner()),
+                getIApplicationThread()));
     }
 
     @Override

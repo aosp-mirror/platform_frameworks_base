@@ -6666,6 +6666,15 @@ package android.media.musicrecognition {
 
 }
 
+package android.media.projection {
+
+  public class MediaProjectionGlobal {
+    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface);
+    method @NonNull public static android.media.projection.MediaProjectionGlobal getInstance();
+  }
+
+}
+
 package android.media.session {
 
   public final class MediaSessionManager {

@@ -2838,7 +2838,6 @@ public final class ViewRootImpl implements ViewParent,
             // However, windows are now always 32 bits by default, so choose 32 bits
             mAttachInfo.mUse32BitDrawingCache = true;
             mAttachInfo.mWindowVisibility = viewVisibility;
-            mAttachInfo.mWindowSecure = (lp.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
             mAttachInfo.mRecomputeGlobalAttributes = false;
             mLastConfigurationFromResources.setTo(config);
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
@@ -8226,6 +8225,7 @@ public final class ViewRootImpl implements ViewParent,
                     mLastSyncSeqId, mTmpFrames, mPendingMergedConfiguration, mSurfaceControl,
                     mTempInsets, mTempControls, mRelayoutBundle);
             mRelayoutRequested = true;
+
             final int maybeSyncSeqId = mRelayoutBundle.getInt("seqid");
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
@@ -8264,6 +8264,12 @@ public final class ViewRootImpl implements ViewParent,
                 // to resume them
                 mDirty.set(0, 0, mWidth, mHeight);
             }
+        }
+
+        if (mSurfaceControl.isValid() && !HardwareRenderer.isDrawingEnabled()) {
+            // When drawing is disabled the window layer won't have a valid buffer.
+            // Set a window crop so input can get delivered to the window.
+            mTransaction.setWindowCrop(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y).apply();
         }
 
         mLastTransformHint = transformHint;

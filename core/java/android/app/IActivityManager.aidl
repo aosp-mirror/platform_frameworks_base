@@ -766,6 +766,8 @@ interface IActivityManager {
      *
      * <p>Typically used only by automotive builds when the vehicle has multiple displays.
      */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
     boolean startUserInBackgroundOnSecondaryDisplay(int userid, int displayId);
 
 }

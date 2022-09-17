@@ -1,43 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 The Android Open Source Project
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
+     Copyright (C) 2020 The Android Open Source Project
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <solid
-                android:color="@color/magnification_drag_handle_color" />
-            <size
-                android:height="@dimen/magnification_drag_view_size"
-                android:width="@dimen/magnification_drag_view_size"/>
-            <corners android:topLeftRadius="12dp"/>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
 
-        </shape>
-    </item>
-    <item
-        android:gravity="center">
+          http://www.apache.org/licenses/LICENSE-2.0
 
-        <vector xmlns:android="http://schemas.android.com/apk/res/android"
-            android:viewportWidth="24"
-            android:viewportHeight="24"
-            android:width="24dp"
-            android:height="24dp">
-            <path
-                android:pathData="M13.2217 21.7734C12.8857 22.1094 12.288 22.712 12 23C12 23 11.1143 22.1094 10.7783 21.7734L8.33494 19.3301L9.55662 18.1084L12 20.5518L14.4434 18.1084L15.665 19.3301L13.2217 21.7734ZM19.3301 15.665L18.1084 14.4433L20.5518 12L18.1084 9.5566L19.3301 8.33492L21.7735 10.7783C22.1094 11.1142 22.4241 11.4241 23 12C22.4241 12.5759 22.3963 12.5988 21.7735 13.2217L19.3301 15.665ZM14.4434 14.4433C13.7714 15.1153 12.957 15.4512 12 15.4512C11.043 15.4512 10.2285 15.1153 9.55662 14.4433C8.88469 13.7714 8.54873 12.957 8.54873 12C8.54873 11.043 8.88469 10.2285 9.55662 9.5566C10.2285 8.88468 11.043 8.54871 12 8.54871C12.957 8.54871 13.7714 8.88467 14.4434 9.5566C15.1153 10.2285 15.4512 11.043 15.4512 12C15.4512 12.957 15.1153 13.7714 14.4434 14.4433ZM4.66988 15.665L2.22651 13.2217C1.89055 12.8857 1.28791 12.288 1 12C1.28791 11.712 1.89055 11.1143 2.22651 10.7783L4.66988 8.33492L5.89157 9.5566L3.4482 12L5.89157 14.4433L4.66988 15.665ZM14.4434 5.89155L12 3.44818L9.55662 5.89155L8.33494 4.66987L10.7783 2.2265C11.1389 1.86592 11.2963 1.70369 12 1C12.5758 1.57585 12.8857 1.89053 13.2217 2.2265L15.665 4.66986L14.4434 5.89155Z"
-                android:fillColor="#ffffff" />
-        </vector>
-    </item>
-</layer-list>
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M12,15Q10.75,15 9.875,14.125Q9,13.25 9,12Q9,10.75 9.875,9.875Q10.75,9 12,9Q13.25,9 14.125,9.875Q15,10.75 15,12Q15,13.25 14.125,14.125Q13.25,15 12,15ZM12,22 L7.75,17.75 9.15,16.35 12,19.15 14.85,16.35 16.25,17.75ZM6.25,16.25 L2,12 6.25,7.75 7.65,9.15 4.85,12 7.65,14.85ZM9.15,7.65 L7.75,6.25 12,2 16.25,6.25 14.85,7.65 12,4.85ZM17.75,16.25 L16.35,14.85 19.15,12 16.35,9.15 17.75,7.75 22,12Z"/>
+</vector>

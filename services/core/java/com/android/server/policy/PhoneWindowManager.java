@@ -3052,6 +3052,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 break;
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_PRIMARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL:
+                Slog.wtf(TAG, "KEYCODE_STYLUS_BUTTON_* should be handled in"
+                        + " interceptKeyBeforeQueueing");
+                return key_consumed;
         }
 
         if (isValidGlobalKey(keyCode)
@@ -4101,6 +4108,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DEMO_APP_3:
             case KeyEvent.KEYCODE_DEMO_APP_4: {
                 // Just drop if keys are not intercepted for direct key.
+                result &= ~ACTION_PASS_TO_USER;
+                break;
+            }
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_PRIMARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL: {
+                // TODO(go/android-stylus-buttons): Handle stylus button presses.
                 result &= ~ACTION_PASS_TO_USER;
                 break;
             }

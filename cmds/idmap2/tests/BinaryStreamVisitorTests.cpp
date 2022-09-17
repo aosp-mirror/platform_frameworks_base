@@ -84,8 +84,10 @@ TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
   const auto& target_inline_entries2 = data2->GetTargetInlineEntries();
   ASSERT_EQ(target_inline_entries1.size(), target_inline_entries2.size());
   ASSERT_EQ(target_inline_entries1[0].target_id, target_inline_entries2[0].target_id);
-  ASSERT_EQ(target_inline_entries1[0].value.data_type, target_inline_entries2[0].value.data_type);
-  ASSERT_EQ(target_inline_entries1[0].value.data_value, target_inline_entries2[0].value.data_value);
+  ASSERT_EQ(target_inline_entries1[0].values.begin()->second.data_type,
+      target_inline_entries2[0].values.begin()->second.data_type);
+  ASSERT_EQ(target_inline_entries1[0].values.begin()->second.data_value,
+      target_inline_entries2[0].values.begin()->second.data_value);
 
   const auto& overlay_entries1 = data1->GetOverlayEntries();
   const auto& overlay_entries2 = data2->GetOverlayEntries();

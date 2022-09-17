@@ -47,10 +47,6 @@ data class SettingsPage(
     // The name of the page, which is used to compute the unique id, and need to be stable.
     val name: String,
 
-    // The display name of the page, for better readability.
-    // By default, it is the same as name.
-    val displayName: String,
-
     // Defined parameters of this page.
     val parameter: List<NamedNavArgument> = emptyList(),
 
@@ -74,7 +70,7 @@ data class SettingsPage(
     }
 
     fun formatAll(): String {
-        return "$displayName ${formatArguments()}"
+        return "$name ${formatArguments()}"
     }
 
     fun buildRoute(highlightEntryName: String? = null): String {
@@ -103,10 +99,6 @@ data class SettingsEntry(
 
     // The owner page of this entry.
     val owner: SettingsPage,
-
-    // The display name of the entry, for better readability.
-    // By default, it is $owner:$name
-    val displayName: String,
 
     // Defines linking of Settings entries
     val fromPage: SettingsPage? = null,
@@ -146,12 +138,17 @@ data class SettingsEntry(
     val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
 ) {
     fun formatAll(): String {
-        val content = listOf<String>(
+        val content = listOf(
             "owner = ${owner.formatAll()}",
             "linkFrom = ${fromPage?.formatAll()}",
             "linkTo = ${toPage?.formatAll()}",
         )
         return content.joinToString("\n")
+    }
+
+    // The display name of the entry, for better readability.
+    fun displayName(): String {
+        return "${owner.name}:$name"
     }
 
     private fun getDisplayPage(): SettingsPage {
@@ -185,7 +182,6 @@ class SettingsPageBuilder(
     private val name: String,
     private val parameter: List<NamedNavArgument> = emptyList()
 ) {
-    private var displayName: String? = null
     private var arguments: Bundle? = null
 
     fun build(): SettingsPage {
@@ -193,7 +189,6 @@ class SettingsPageBuilder(
         return SettingsPage(
             id = "$name:${normArguments?.toString()}".toUniqueId(),
             name = name,
-            displayName = displayName ?: name,
             parameter = parameter,
             arguments = arguments,
         )
@@ -209,7 +204,6 @@ class SettingsPageBuilder(
  * The helper to build a Settings Entry instance.
  */
 class SettingsEntryBuilder(private val name: String, private val owner: SettingsPage) {
-    private var displayName: String? = null
     private var fromPage: SettingsPage? = null
     private var toPage: SettingsPage? = null
     private var isAllowSearch: Boolean? = null
@@ -220,7 +214,6 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     fun build(): SettingsEntry {
         return SettingsEntry(
             id = "$name:${owner.id}(${fromPage?.id}-${toPage?.id})".toUniqueId(),
-            displayName = displayName ?: "${owner.displayName}:$name",
             name = name,
             owner = owner,
 

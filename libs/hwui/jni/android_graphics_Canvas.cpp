@@ -713,9 +713,10 @@ static void setCompatibilityVersion(JNIEnv* env, jobject, jint apiLevel) {
 }
 
 static void punchHole(JNIEnv* env, jobject, jlong canvasPtr, jfloat left, jfloat top, jfloat right,
-        jfloat bottom, jfloat rx, jfloat ry) {
+        jfloat bottom, jfloat rx, jfloat ry, jfloat alpha) {
     auto canvas = reinterpret_cast<Canvas*>(canvasPtr);
-    canvas->punchHole(SkRRect::MakeRectXY(SkRect::MakeLTRB(left, top, right, bottom), rx, ry));
+    canvas->punchHole(SkRRect::MakeRectXY(SkRect::MakeLTRB(left, top, right, bottom), rx, ry),
+                      alpha);
 }
 
 }; // namespace CanvasJNI
@@ -790,7 +791,7 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJ)V", (void*) CanvasJNI::drawTextRunString},
     {"nDrawTextOnPath","(J[CIIJFFIJ)V", (void*) CanvasJNI::drawTextOnPathChars},
     {"nDrawTextOnPath","(JLjava/lang/String;JFFIJ)V", (void*) CanvasJNI::drawTextOnPathString},
-    {"nPunchHole", "(JFFFFFF)V", (void*) CanvasJNI::punchHole}
+    {"nPunchHole", "(JFFFFFFF)V", (void*) CanvasJNI::punchHole}
 };
 
 int register_android_graphics_Canvas(JNIEnv* env) {

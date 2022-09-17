@@ -287,6 +287,17 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for use by
+     * {@link com.android.systemui.biometrics.FaceHelpMessageDeferral}.
+     */
+    @Provides
+    @SysUISingleton
+    @BiometricMessagesLog
+    public static LogBuffer provideBiometricMessagesLogBuffer(LogBufferFactory factory) {
+        return factory.create("BiometricMessagesLog", 150);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for use by the status bar network controller.
      */
     @Provides

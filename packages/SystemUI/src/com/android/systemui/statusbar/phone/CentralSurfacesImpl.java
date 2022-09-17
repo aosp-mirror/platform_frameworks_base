@@ -1719,13 +1719,18 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 }
 
                 @Override
-                public void onLaunchAnimationCancelled() {
+                public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
+                    if (newKeyguardOccludedState != null) {
+                        mKeyguardViewMediator.setOccluded(
+                                newKeyguardOccludedState, false /* animate */);
+                    }
+
                     // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
                     // animation so that we can assume that mIsLaunchingActivityOverLockscreen
                     // being true means that we will collapse the shade (or at least run the
                     // post collapse runnables) later on.
                     CentralSurfacesImpl.this.mIsLaunchingActivityOverLockscreen = false;
-                    getDelegate().onLaunchAnimationCancelled();
+                    getDelegate().onLaunchAnimationCancelled(newKeyguardOccludedState);
                 }
             };
         } else if (dismissShade) {
@@ -3603,6 +3608,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
+            mStatusBarTouchableRegionManager.updateTouchableRegion();
 
             // The unlocked screen off and fold to aod animations might use our LightRevealScrim -
             // we need to be expanded for it to be visible.
@@ -3631,6 +3637,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 // once we fully woke up.
                 updateRevealEffect(true /* wakingUp */);
                 updateNotificationPanelTouchState();
+                mStatusBarTouchableRegionManager.updateTouchableRegion();
 
                 // If we are waking up during the screen off animation, we should undo making the
                 // expanded visible (we did that so the LightRevealScrim would be visible).

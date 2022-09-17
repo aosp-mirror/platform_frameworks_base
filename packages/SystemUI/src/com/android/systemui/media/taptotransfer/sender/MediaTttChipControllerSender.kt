@@ -34,6 +34,7 @@ import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryDisplayRemovalReason
@@ -57,7 +58,7 @@ class MediaTttChipControllerSender @Inject constructor(
         configurationController: ConfigurationController,
         powerManager: PowerManager,
         private val uiEventLogger: MediaTttSenderUiEventLogger
-) : TemporaryViewDisplayController<ChipSenderInfo>(
+) : TemporaryViewDisplayController<ChipSenderInfo, MediaTttLogger>(
         context,
         logger,
         windowManager,
@@ -66,6 +67,8 @@ class MediaTttChipControllerSender @Inject constructor(
         configurationController,
         powerManager,
         R.layout.media_ttt_chip,
+        MediaTttUtils.WINDOW_TITLE,
+        MediaTttUtils.WAKE_REASON,
 ) {
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
@@ -94,7 +97,7 @@ class MediaTttChipControllerSender @Inject constructor(
     ) {
         val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
         val stateName = chipState?.name ?: "Invalid"
-        logger.logStateChange(stateName, routeInfo.id)
+        logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
             Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
@@ -103,7 +106,7 @@ class MediaTttChipControllerSender @Inject constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
+            removeView(removalReason = ChipStateSender.FAR_FROM_RECEIVER.name)
         } else {
             displayView(ChipSenderInfo(chipState, routeInfo, undoCallback))
         }
@@ -118,7 +121,14 @@ class MediaTttChipControllerSender @Inject constructor(
         val chipState = newInfo.state
 
         // App icon
-        val iconName = setIcon(currentView, newInfo.routeInfo.clientPackageName)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context, newInfo.routeInfo.clientPackageName, logger
+        )
+        MediaTttUtils.setIcon(
+            currentView.requireViewById(R.id.app_icon),
+            iconInfo.drawable,
+            iconInfo.contentDescription
+        )
 
         // Text
         val otherDeviceName = newInfo.routeInfo.name.toString()
@@ -127,7 +137,7 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Loading
         currentView.requireViewById<View>(R.id.loading).visibility =
-            chipState.isMidTransfer.visibleIfTrue()
+            (chipState.transferStatus == TransferStatus.IN_PROGRESS).visibleIfTrue()
 
         // Undo
         val undoView = currentView.requireViewById<View>(R.id.undo)
@@ -139,12 +149,12 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Failure
         currentView.requireViewById<View>(R.id.failure_icon).visibility =
-            chipState.isTransferFailure.visibleIfTrue()
+            (chipState.transferStatus == TransferStatus.FAILED).visibleIfTrue()
 
         // For accessibility
         currentView.requireViewById<ViewGroup>(
                 R.id.media_ttt_sender_chip_inner
-        ).contentDescription = "$iconName $chipText"
+        ).contentDescription = "${iconInfo.contentDescription} $chipText"
     }
 
     override fun animateViewIn(view: ViewGroup) {
@@ -162,10 +172,17 @@ class MediaTttChipControllerSender @Inject constructor(
     }
 
     override fun removeView(removalReason: String) {
-        // Don't remove the chip if we're mid-transfer since the user should still be able to
-        // see the status of the transfer. (But do remove it if it's finally timed out.)
-        if (info?.state?.isMidTransfer == true &&
-                removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT) {
+        // Don't remove the chip if we're in progress or succeeded, since the user should still be
+        // able to see the status of the transfer. (But do remove it if it's finally timed out.)
+        val transferStatus = info?.state?.transferStatus
+        if (
+            (transferStatus == TransferStatus.IN_PROGRESS ||
+                transferStatus == TransferStatus.SUCCEEDED) &&
+            removalReason != TemporaryDisplayRemovalReason.REASON_TIMEOUT
+        ) {
+            logger.logRemovalBypass(
+                removalReason, bypassReason = "transferStatus=${transferStatus.name}"
+            )
             return
         }
         super.removeView(removalReason)

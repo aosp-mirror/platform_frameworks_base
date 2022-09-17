@@ -17,6 +17,7 @@
 package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
@@ -57,6 +58,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
     private static class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
 
+        /** Both the display and split-state (enter/exit) is changing */
+        static final int TYPE_DISPLAY_AND_SPLIT_CHANGE = 2;
+
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
 
@@ -69,6 +73,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
 
         Transitions.TransitionFinishCallback mFinishCallback = null;
         Transitions.TransitionHandler mLeftoversHandler = null;
+        WindowContainerTransaction mFinishWCT = null;
 
         /**
          * Mixed transitions are made up of multiple "parts". This keeps track of how many
@@ -95,6 +100,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 mPipHandler = pipTouchHandlerOptional.get().getTransitionHandler();
                 mSplitHandler = splitScreenControllerOptional.get().getTransitionHandler();
                 mPlayer.addHandler(this);
+                if (mSplitHandler != null) {
+                    mSplitHandler.setMixedHandler(this);
+                }
             }, this);
         }
     }
@@ -122,10 +130,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
     }
 
     private TransitionInfo subCopy(@NonNull TransitionInfo info,
-            @WindowManager.TransitionType int newType) {
-        final TransitionInfo out = new TransitionInfo(newType, info.getFlags());
-        for (int i = 0; i < info.getChanges().size(); ++i) {
-            out.getChanges().add(info.getChanges().get(i));
+            @WindowManager.TransitionType int newType, boolean withChanges) {
+        final TransitionInfo out = new TransitionInfo(newType, withChanges ? info.getFlags() : 0);
+        if (withChanges) {
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                out.getChanges().add(info.getChanges().get(i));
+            }
         }
         out.setRootLeash(info.getRootLeash(), info.getRootOffset().x, info.getRootOffset().y);
         out.setAnimationOptions(info.getAnimationOptions());
@@ -157,6 +167,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
             return animateEnterPipFromSplit(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
+        } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
+            return false;
         } else {
             mActiveTransitions.remove(mixed);
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
@@ -173,7 +185,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 + "entering PIP while Split-Screen is active.");
         TransitionInfo.Change pipChange = null;
         TransitionInfo.Change wallpaper = null;
-        final TransitionInfo everythingElse = subCopy(info, TRANSIT_TO_BACK);
+        final TransitionInfo everythingElse = subCopy(info, TRANSIT_TO_BACK, true /* changes */);
         boolean homeIsOpening = false;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             TransitionInfo.Change change = info.getChanges().get(i);
@@ -254,6 +266,87 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         return true;
     }
 
+    private void unlinkMissingParents(TransitionInfo from) {
+        for (int i = 0; i < from.getChanges().size(); ++i) {
+            final TransitionInfo.Change chg = from.getChanges().get(i);
+            if (chg.getParent() == null) continue;
+            if (from.getChange(chg.getParent()) == null) {
+                from.getChanges().get(i).setParent(null);
+            }
+        }
+    }
+
+    private boolean isWithinTask(TransitionInfo info, TransitionInfo.Change chg) {
+        TransitionInfo.Change curr = chg;
+        while (curr != null) {
+            if (curr.getTaskInfo() != null) return true;
+            if (curr.getParent() == null) break;
+            curr = info.getChange(curr.getParent());
+        }
+        return false;
+    }
+
+    /**
+     * This is intended to be called by SplitCoordinator as a helper to mix an already-pending
+     * split transition with a display-change. The use-case for this is when a display
+     * change/rotation gets collected into a split-screen enter/exit transition which has already
+     * been claimed by StageCoordinator.handleRequest . This happens during launcher tests.
+     */
+    public boolean animatePendingSplitWithDisplayChange(@NonNull IBinder transition,
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        final TransitionInfo everythingElse = subCopy(info, info.getType(), true /* withChanges */);
+        final TransitionInfo displayPart = subCopy(info, TRANSIT_CHANGE, false /* withChanges */);
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (isWithinTask(info, change)) continue;
+            displayPart.addChange(change);
+            everythingElse.getChanges().remove(i);
+        }
+        if (displayPart.getChanges().isEmpty()) return false;
+        unlinkMissingParents(everythingElse);
+        final MixedTransition mixed = new MixedTransition(
+                MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE, transition);
+        mixed.mFinishCallback = finishCallback;
+        mActiveTransitions.add(mixed);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animation is a mix of display change "
+                + "and split change.");
+        // We need to split the transition into 2 parts: the split part and the display part.
+        mixed.mInFlightSubAnimations = 2;
+
+        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+            --mixed.mInFlightSubAnimations;
+            if (wctCB != null) {
+                throw new IllegalArgumentException("Can't mix transitions that require finish"
+                        + " sync callback");
+            }
+            if (wct != null) {
+                if (mixed.mFinishWCT == null) {
+                    mixed.mFinishWCT = wct;
+                } else {
+                    mixed.mFinishWCT.merge(wct, true /* transfer */);
+                }
+            }
+            if (mixed.mInFlightSubAnimations > 0) return;
+            mActiveTransitions.remove(mixed);
+            mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, null /* wctCB */);
+        };
+
+        // Dispatch the display change. This will most-likely be taken by the default handler.
+        // Do this first since the first handler used will apply the startT; the display change
+        // needs to take a screenshot before that happens so we need it to be the first handler.
+        mixed.mLeftoversHandler = mPlayer.dispatchTransition(mixed.mTransition, displayPart,
+                startT, finishT, finishCB, mSplitHandler);
+
+        // Note: at this point, startT has probably already been applied, so we are basically
+        // giving splitHandler an empty startT. This is currently OK because display-change will
+        // grab a screenshot and paste it on top anyways.
+        mSplitHandler.startPendingAnimation(
+                transition, everythingElse, startT, finishT, finishCB);
+        return true;
+    }
+
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
@@ -279,6 +372,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 } else {
                     mPipHandler.end();
                 }
+            } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
+                // queue
             } else {
                 throw new IllegalStateException("Playing a mixed transition with unknown type? "
                         + mixed.mType);

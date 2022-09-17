@@ -65,7 +65,7 @@ public:
         LOG_ALWAYS_FATAL("SkiaCanvas does not support enableZ");
     }
 
-    virtual void punchHole(const SkRRect& rect) override;
+    virtual void punchHole(const SkRRect& rect, float alpha) override;
 
     virtual void setBitmap(const SkBitmap& bitmap) override;
 
