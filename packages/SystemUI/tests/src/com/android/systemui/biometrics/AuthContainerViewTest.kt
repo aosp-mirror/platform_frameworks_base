@@ -29,6 +29,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -89,6 +90,21 @@ class AuthContainerViewTest : SysuiTestCase() {
     fun testNotifiesAnimatedIn() {
         initializeFingerprintContainer()
         verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+    }
+
+    @Test
+    fun testDismissesOnBack() {
+        val container = initializeFingerprintContainer(addToView = true)
+        assertThat(container.parent).isNotNull()
+        val root = container.rootView
+
+        // Simulate back invocation
+        container.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK))
+        container.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK))
+        waitForIdleSync()
+
+        assertThat(container.parent).isNull()
+        assertThat(root.isAttachedToWindow).isFalse()
     }
 
     @Test
