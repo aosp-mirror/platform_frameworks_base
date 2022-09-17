@@ -44,6 +44,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
@@ -53,19 +54,20 @@ import com.android.wm.shell.util.SplitBounds;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Manages the recent task list from the system, caching it as necessary.
  */
 public class RecentTasksController implements TaskStackListenerCallback,
-        RemoteCallable<RecentTasksController> {
+        RemoteCallable<RecentTasksController>, DesktopModeTaskRepository.Listener {
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
     private final ShellCommandHandler mShellCommandHandler;
+    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasks mImpl = new RecentTasksImpl();
@@ -84,15 +86,6 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private final Map<Integer, SplitBounds> mTaskSplitBoundsMap = new HashMap<>();
 
     /**
-     * Set of taskId's that have been launched in freeform mode.
-     * This includes tasks that are currently running, visible and in freeform mode. And also
-     * includes tasks that are running in the background, are no longer visible, but at some point
-     * were visible to the user.
-     * This is used to decide which freeform apps belong to the user's desktop.
-     */
-    private final HashSet<Integer> mActiveFreeformTasks = new HashSet<>();
-
-    /**
      * Creates {@link RecentTasksController}, returns {@code null} if the feature is not
      * supported.
      */
@@ -102,24 +95,27 @@ public class RecentTasksController implements TaskStackListenerCallback,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         if (!context.getResources().getBoolean(com.android.internal.R.bool.config_hasRecents)) {
             return null;
         }
         return new RecentTasksController(context, shellInit, shellCommandHandler, taskStackListener,
-                mainExecutor);
+                desktopModeTaskRepository, mainExecutor);
     }
 
     RecentTasksController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
+        mDesktopModeTaskRepository = desktopModeTaskRepository;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -131,6 +127,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private void onInit() {
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
+        mDesktopModeTaskRepository.ifPresent(it -> it.addListener(this));
     }
 
     /**
@@ -217,19 +214,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRecentTasksChanged();
     }
 
-    /**
-     * Mark a task with given {@code taskId} as active in freeform
-     */
-    public void addActiveFreeformTask(int taskId) {
-        mActiveFreeformTasks.add(taskId);
-        notifyRecentTasksChanged();
-    }
-
-    /**
-     * Remove task with given {@code taskId} from active freeform tasks
-     */
-    public void removeActiveFreeformTask(int taskId) {
-        mActiveFreeformTasks.remove(taskId);
+    @Override
+    public void onActiveTasksChanged() {
         notifyRecentTasksChanged();
     }
 
@@ -312,7 +298,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (desktopModeActive && mActiveFreeformTasks.contains(taskInfo.taskId)) {
+            if (desktopModeActive && mDesktopModeTaskRepository.isPresent()
+                    && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 freeformTasks.add(taskInfo);
                 continue;
