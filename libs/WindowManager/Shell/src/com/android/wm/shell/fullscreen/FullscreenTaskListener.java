@@ -256,7 +256,7 @@ public class FullscreenTaskListener<T extends AutoCloseable>
             windowDecor =
                     mWindowDecorOfVanishedTasks.removeReturnOld(taskInfo.taskId);
         }
-        if (mWindowDecorViewModelOptional.isPresent()) {
+        if (mWindowDecorViewModelOptional.isPresent() && windowDecor != null) {
             mWindowDecorViewModelOptional.get().setupWindowDecorationForTransition(
                     taskInfo, startT, finishT, windowDecor);
         }
