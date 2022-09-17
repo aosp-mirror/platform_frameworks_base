@@ -55,6 +55,8 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -477,11 +479,12 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellCommandHandler,
-                        taskStackListener, mainExecutor));
+                        taskStackListener, desktopModeTaskRepository, mainExecutor));
     }
 
     //
@@ -663,6 +666,24 @@ public abstract class WMShellBaseModule {
             ShellCommandHandler shellCommandHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new ShellController(shellInit, shellCommandHandler, mainExecutor);
+    }
+
+    //
+    // Desktop mode (optional feature)
+    //
+
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract DesktopModeTaskRepository optionalDesktopModeTaskRepository();
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopModeTaskRepository> providesDesktopModeTaskRepository(
+            @DynamicOverride Optional<DesktopModeTaskRepository> desktopModeTaskRepository) {
+        if (DesktopMode.IS_SUPPORTED) {
+            return desktopModeTaskRepository;
+        }
+        return Optional.empty();
     }
 
     //
