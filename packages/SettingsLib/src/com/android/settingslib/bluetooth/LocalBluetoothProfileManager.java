@@ -352,6 +352,8 @@ public class LocalBluetoothProfileManager {
                         cachedDevice.setHiSyncId(newHiSyncId);
                     }
                 }
+
+                HearingAidStatsLogUtils.logHearingAidInfo(cachedDevice);
             }
 
             if (getCsipSetCoordinatorProfile() != null
