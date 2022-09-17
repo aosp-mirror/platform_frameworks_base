@@ -1704,8 +1704,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testInfoIsPermittedForProfile_notAllowed() {
-        when(mUserProfiles.canProfileUseBoundServices(anyInt())).thenReturn(false);
+    public void testInfoIsPermittedForProfile_notProfile() {
+        when(mUserProfiles.isProfileUser(anyInt())).thenReturn(false);
 
         IInterface service = mock(IInterface.class);
         when(service.asBinder()).thenReturn(mock(IBinder.class));
@@ -1714,12 +1714,12 @@ public class ManagedServicesTest extends UiServiceTestCase {
         services.registerSystemService(service, null, 10, 1000);
         ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
 
-        assertFalse(info.isPermittedForProfile(0));
+        assertTrue(info.isPermittedForProfile(0));
     }
 
     @Test
-    public void testInfoIsPermittedForProfile_allows() {
-        when(mUserProfiles.canProfileUseBoundServices(anyInt())).thenReturn(true);
+    public void testInfoIsPermittedForProfile_profileAndDpmAllows() {
+        when(mUserProfiles.isProfileUser(anyInt())).thenReturn(true);
         when(mDpm.isNotificationListenerServicePermitted(anyString(), anyInt())).thenReturn(true);
 
         IInterface service = mock(IInterface.class);
@@ -1731,6 +1731,22 @@ public class ManagedServicesTest extends UiServiceTestCase {
         info.component = new ComponentName("a","b");
 
         assertTrue(info.isPermittedForProfile(0));
+    }
+
+    @Test
+    public void testInfoIsPermittedForProfile_profileAndDpmDenies() {
+        when(mUserProfiles.isProfileUser(anyInt())).thenReturn(true);
+        when(mDpm.isNotificationListenerServicePermitted(anyString(), anyInt())).thenReturn(false);
+
+        IInterface service = mock(IInterface.class);
+        when(service.asBinder()).thenReturn(mock(IBinder.class));
+        ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                mIpm, APPROVAL_BY_PACKAGE);
+        services.registerSystemService(service, null, 10, 1000);
+        ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
+        info.component = new ComponentName("a","b");
+
+        assertFalse(info.isPermittedForProfile(0));
     }
 
     @Test
@@ -1750,9 +1766,9 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ManagedServices.UserProfiles profiles = new ManagedServices.UserProfiles();
         profiles.updateCache(mContext);
 
-        assertTrue(profiles.canProfileUseBoundServices(ActivityManager.getCurrentUser()));
-        assertFalse(profiles.canProfileUseBoundServices(12));
-        assertFalse(profiles.canProfileUseBoundServices(13));
+        assertFalse(profiles.isProfileUser(ActivityManager.getCurrentUser()));
+        assertTrue(profiles.isProfileUser(12));
+        assertTrue(profiles.isProfileUser(13));
     }
 
     private void resetComponentsAndPackages() {

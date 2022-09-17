@@ -299,7 +299,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             null
         )
 
-        verify(logger).logStateChange(any(), any())
+        verify(logger).logStateChange(any(), any(), any())
     }
 
     @Test
@@ -587,15 +587,29 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
-    fun transferToReceiverTriggeredThenFarFromReceiver_eventuallyTimesOut() {
-        val state = transferToReceiverTriggered()
-        controllerSender.displayView(state)
-        fakeClock.advanceTime(1000L)
-        controllerSender.removeView("fakeRemovalReason")
+    fun transferToReceiverTriggeredThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverTriggered())
 
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToReceiverTriggeredThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToReceiverTriggered())
+
+        controllerSender.removeView("fakeRemovalReason")
         fakeClock.advanceTime(TIMEOUT + 1L)
 
         verify(windowManager).removeView(any())
@@ -610,18 +624,104 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
-    fun transferToThisDeviceTriggeredThenFarFromReceiver_eventuallyTimesOut() {
-        val state = transferToThisDeviceTriggered()
-        controllerSender.displayView(state)
-        fakeClock.advanceTime(1000L)
-        controllerSender.removeView("fakeRemovalReason")
+    fun transferToThisDeviceTriggeredThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToThisDeviceTriggered())
 
+        controllerSender.removeView("fakeRemovalReason")
         fakeClock.advanceTime(TIMEOUT + 1L)
 
         verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceTriggeredThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceTriggered())
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToReceiverSucceededThenRemoveView_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToReceiverSucceededThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToReceiverSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToReceiverSucceededThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverSucceeded())
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToThisDeviceSucceededThenRemoveView_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToThisDeviceSucceededThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToThisDeviceSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceSucceededThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceSucceeded())
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)

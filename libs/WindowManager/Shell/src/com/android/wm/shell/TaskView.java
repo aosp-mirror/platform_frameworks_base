@@ -517,7 +517,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
     }
 
-    ActivityManager.RunningTaskInfo getTaskInfo() {
+    /** Returns the task info for the task in the TaskView. */
+    @Nullable
+    public ActivityManager.RunningTaskInfo getTaskInfo() {
         return mTaskInfo;
     }
 

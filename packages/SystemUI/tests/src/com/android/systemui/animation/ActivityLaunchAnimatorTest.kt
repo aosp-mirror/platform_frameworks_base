@@ -161,7 +161,18 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled()
+        verify(controller).onLaunchAnimationCancelled(false /* newKeyguardOccludedState */)
+        verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+    }
+
+    @Test
+    fun passesOccludedStateToLaunchAnimationCancelled_ifTrue() {
+        val runner = activityLaunchAnimator.createRunner(controller)
+        runner.onAnimationCancelled(true /* isKeyguardOccluded */)
+        runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
+
+        waitForIdleSync()
+        verify(controller).onLaunchAnimationCancelled(true /* newKeyguardOccludedState */)
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
     }
 
@@ -253,7 +264,7 @@ private class TestLaunchAnimatorController(override var launchContainer: ViewGro
         assertOnMainThread()
     }
 
-    override fun onLaunchAnimationCancelled() {
+    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         assertOnMainThread()
     }
 }

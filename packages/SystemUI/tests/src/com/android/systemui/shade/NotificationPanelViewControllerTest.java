@@ -1022,7 +1022,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         FalsingManager.FalsingTapListener listener = getFalsingTapListener();
         mStatusBarStateController.setState(KEYGUARD);
 
-        listener.onDoubleTapRequired();
+        listener.onAdditionalTapRequired();
 
         verify(mKeyguardIndicationController).showTransientIndication(anyInt());
     }
@@ -1032,7 +1032,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         FalsingManager.FalsingTapListener listener = getFalsingTapListener();
         mStatusBarStateController.setState(SHADE_LOCKED);
 
-        listener.onDoubleTapRequired();
+        listener.onAdditionalTapRequired();
 
         verify(mTapAgainViewController).show();
     }

@@ -1122,11 +1122,19 @@ public class UserSwitcherController implements Dumpable {
         }
 
         public String getName(Context context, UserRecord item) {
+            return getName(context, item, false);
+        }
+
+        /**
+         * Returns the name for the given {@link UserRecord}.
+         */
+        public String getName(Context context, UserRecord item, boolean isTablet) {
             return LegacyUserUiHelper.getUserRecordName(
                     context,
                     item,
                     mController.isGuestUserAutoCreated(),
-                    mController.isGuestUserResetting());
+                    mController.isGuestUserResetting(),
+                    isTablet);
         }
 
         protected static ColorFilter getDisabledUserAvatarColorFilter() {
@@ -1136,8 +1144,12 @@ public class UserSwitcherController implements Dumpable {
         }
 
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
+            return getIconDrawable(context, item, false);
+        }
+        protected static Drawable getIconDrawable(Context context, UserRecord item,
+                boolean isTablet) {
             int iconRes = LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
-                    item.isAddUser, item.isGuest, item.isAddSupervisedUser);
+                    item.isAddUser, item.isGuest, item.isAddSupervisedUser, isTablet);
             return context.getDrawable(iconRes);
         }
 
