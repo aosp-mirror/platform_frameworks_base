@@ -17,24 +17,21 @@
 package com.android.systemui.dreams.complication;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.TextClock;
 
 import com.android.systemui.R;
+import com.android.systemui.dreams.complication.DoubleShadowTextHelper.ShadowInfo;
+
+import kotlin.Unit;
 
 /**
  * Extension of {@link TextClock} which draws two shadows on the text (ambient and key shadows)
  */
 public class DoubleShadowTextClock extends TextClock {
-    private final float mAmbientShadowBlur;
-    private final int mAmbientShadowColor;
-    private final float mKeyShadowBlur;
-    private final float mKeyShadowOffsetX;
-    private final float mKeyShadowOffsetY;
-    private final int mKeyShadowColor;
-    private final float mAmbientShadowOffsetX;
-    private final float mAmbientShadowOffsetY;
+    private final DoubleShadowTextHelper mShadowHelper;
 
     public DoubleShadowTextClock(Context context) {
         this(context, null);
@@ -46,38 +43,28 @@ public class DoubleShadowTextClock extends TextClock {
 
     public DoubleShadowTextClock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mKeyShadowBlur = context.getResources()
-                .getDimensionPixelSize(R.dimen.dream_overlay_clock_key_text_shadow_radius);
-        mKeyShadowOffsetX = context.getResources()
-                .getDimensionPixelSize(R.dimen.dream_overlay_clock_key_text_shadow_dx);
-        mKeyShadowOffsetY = context.getResources()
-                .getDimensionPixelSize(R.dimen.dream_overlay_clock_key_text_shadow_dy);
-        mKeyShadowColor = context.getResources().getColor(
-                R.color.dream_overlay_clock_key_text_shadow_color);
-        mAmbientShadowBlur = context.getResources()
-                .getDimensionPixelSize(R.dimen.dream_overlay_clock_ambient_text_shadow_radius);
-        mAmbientShadowColor = context.getResources().getColor(
-                R.color.dream_overlay_clock_ambient_text_shadow_color);
-        mAmbientShadowOffsetX = context.getResources()
-                .getDimensionPixelSize(R.dimen.dream_overlay_clock_ambient_text_shadow_dx);
-        mAmbientShadowOffsetY = context.getResources()
-                .getDimensionPixelSize(R.dimen.dream_overlay_clock_ambient_text_shadow_dy);
+
+        final Resources resources = context.getResources();
+        final ShadowInfo keyShadowInfo = new ShadowInfo(
+                resources.getDimensionPixelSize(R.dimen.dream_overlay_clock_key_text_shadow_radius),
+                resources.getDimensionPixelSize(R.dimen.dream_overlay_clock_key_text_shadow_dx),
+                resources.getDimensionPixelSize(R.dimen.dream_overlay_clock_key_text_shadow_dy),
+                resources.getColor(R.color.dream_overlay_clock_key_text_shadow_color));
+
+        final ShadowInfo ambientShadowInfo = new ShadowInfo(
+                resources.getDimensionPixelSize(
+                        R.dimen.dream_overlay_clock_ambient_text_shadow_radius),
+                resources.getDimensionPixelSize(R.dimen.dream_overlay_clock_ambient_text_shadow_dx),
+                resources.getDimensionPixelSize(R.dimen.dream_overlay_clock_ambient_text_shadow_dy),
+                resources.getColor(R.color.dream_overlay_clock_ambient_text_shadow_color));
+        mShadowHelper = new DoubleShadowTextHelper(keyShadowInfo, ambientShadowInfo);
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-        // We enhance the shadow by drawing the shadow twice
-        getPaint().setShadowLayer(mAmbientShadowBlur, mAmbientShadowOffsetX, mAmbientShadowOffsetY,
-                mAmbientShadowColor);
-        super.onDraw(canvas);
-        canvas.save();
-        canvas.clipRect(getScrollX(), getScrollY() + getExtendedPaddingTop(),
-                getScrollX() + getWidth(),
-                getScrollY() + getHeight());
-
-        getPaint().setShadowLayer(
-                mKeyShadowBlur, mKeyShadowOffsetX, mKeyShadowOffsetY, mKeyShadowColor);
-        super.onDraw(canvas);
-        canvas.restore();
+        mShadowHelper.applyShadows(this, canvas, () -> {
+            super.onDraw(canvas);
+            return Unit.INSTANCE;
+        });
     }
 }

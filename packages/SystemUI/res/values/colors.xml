@@ -245,6 +245,10 @@
     <color name="dream_overlay_aqi_very_unhealthy">#AD1457</color>
     <color name="dream_overlay_aqi_hazardous">#880E4F</color>
     <color name="dream_overlay_aqi_unknown">#BDC1C6</color>
+
+    <!-- Dream overlay text shadows -->
     <color name="dream_overlay_clock_key_text_shadow_color">#4D000000</color>
     <color name="dream_overlay_clock_ambient_text_shadow_color">#4D000000</color>
+    <color name="dream_overlay_status_bar_key_text_shadow_color">#66000000</color>
+    <color name="dream_overlay_status_bar_ambient_text_shadow_color">#59000000</color>
 </resources>
