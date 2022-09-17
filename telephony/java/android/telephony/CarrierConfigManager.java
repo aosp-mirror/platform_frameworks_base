@@ -8666,7 +8666,7 @@ public class CarrierConfigManager {
      *     or EIMS-->
      *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
      *     <!-- Handover is always allowed in any condition. -->
-     *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
+     *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN|UNKNOWN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
      * </string-array>
      *
