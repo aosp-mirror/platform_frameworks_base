@@ -1009,7 +1009,9 @@ public final class OverlayManagerService extends SystemService {
                 }
                 opti++;
 
-                if ("-h".equals(opt)) {
+                if ("-a".equals(opt)) {
+                    // dumpsys will pass in -a; silently ignore it
+                } else if ("-h".equals(opt)) {
                     pw.println("dump [-h] [--verbose] [--user USER_ID] [[FIELD] PACKAGE]");
                     pw.println("  Print debugging information about the overlay manager.");
                     pw.println("  With optional parameter PACKAGE, limit output to the specified");

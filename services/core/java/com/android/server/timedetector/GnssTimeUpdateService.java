@@ -260,10 +260,11 @@ public final class GnssTimeUpdateService extends Binder {
     private void suggestGnssTime(LocationTime locationTime) {
         logDebug("suggestGnssTime()");
 
-        long gnssTime = locationTime.getTime();
+        long gnssUnixEpochTimeMillis = locationTime.getUnixEpochTimeMillis();
         long elapsedRealtimeMs = locationTime.getElapsedRealtimeNanos() / 1_000_000L;
 
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(elapsedRealtimeMs, gnssTime);
+        TimestampedValue<Long> timeSignal =
+                new TimestampedValue<>(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
         mLastSuggestedGnssTime = timeSignal;
 
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);

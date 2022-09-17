@@ -118,6 +118,84 @@ internal class SettingsTonalPalette(
     val tertiary0: Color,
 )
 
+/** Static colors in Material. */
+internal fun tonalPalette() = SettingsTonalPalette(
+    // The neutral static tonal range.
+    neutral100 = Color(red = 255, green = 255, blue = 255),
+    neutral99 = Color(red = 255, green = 251, blue = 254),
+    neutral95 = Color(red = 244, green = 239, blue = 244),
+    neutral90 = Color(red = 230, green = 225, blue = 229),
+    neutral80 = Color(red = 201, green = 197, blue = 202),
+    neutral70 = Color(red = 174, green = 170, blue = 174),
+    neutral60 = Color(red = 147, green = 144, blue = 148),
+    neutral50 = Color(red = 120, green = 117, blue = 121),
+    neutral40 = Color(red = 96, green = 93, blue = 98),
+    neutral30 = Color(red = 72, green = 70, blue = 73),
+    neutral20 = Color(red = 49, green = 48, blue = 51),
+    neutral10 = Color(red = 28, green = 27, blue = 31),
+    neutral0 = Color(red = 0, green = 0, blue = 0),
+
+    // The neutral variant static tonal range, sometimes called "neutral 2".
+    neutralVariant100 = Color(red = 255, green = 255, blue = 255),
+    neutralVariant99 = Color(red = 255, green = 251, blue = 254),
+    neutralVariant95 = Color(red = 245, green = 238, blue = 250),
+    neutralVariant90 = Color(red = 231, green = 224, blue = 236),
+    neutralVariant80 = Color(red = 202, green = 196, blue = 208),
+    neutralVariant70 = Color(red = 174, green = 169, blue = 180),
+    neutralVariant60 = Color(red = 147, green = 143, blue = 153),
+    neutralVariant50 = Color(red = 121, green = 116, blue = 126),
+    neutralVariant40 = Color(red = 96, green = 93, blue = 102),
+    neutralVariant30 = Color(red = 73, green = 69, blue = 79),
+    neutralVariant20 = Color(red = 50, green = 47, blue = 55),
+    neutralVariant10 = Color(red = 29, green = 26, blue = 34),
+    neutralVariant0 = Color(red = 0, green = 0, blue = 0),
+
+    // The primary static tonal range.
+    primary100 = Color(red = 255, green = 255, blue = 255),
+    primary99 = Color(red = 255, green = 251, blue = 254),
+    primary95 = Color(red = 246, green = 237, blue = 255),
+    primary90 = Color(red = 234, green = 221, blue = 255),
+    primary80 = Color(red = 208, green = 188, blue = 255),
+    primary70 = Color(red = 182, green = 157, blue = 248),
+    primary60 = Color(red = 154, green = 130, blue = 219),
+    primary50 = Color(red = 127, green = 103, blue = 190),
+    primary40 = Color(red = 103, green = 80, blue = 164),
+    primary30 = Color(red = 79, green = 55, blue = 139),
+    primary20 = Color(red = 56, green = 30, blue = 114),
+    primary10 = Color(red = 33, green = 0, blue = 93),
+    primary0 = Color(red = 33, green = 0, blue = 93),
+
+    // The secondary static tonal range.
+    secondary100 = Color(red = 255, green = 255, blue = 255),
+    secondary99 = Color(red = 255, green = 251, blue = 254),
+    secondary95 = Color(red = 246, green = 237, blue = 255),
+    secondary90 = Color(red = 232, green = 222, blue = 248),
+    secondary80 = Color(red = 204, green = 194, blue = 220),
+    secondary70 = Color(red = 176, green = 167, blue = 192),
+    secondary60 = Color(red = 149, green = 141, blue = 165),
+    secondary50 = Color(red = 122, green = 114, blue = 137),
+    secondary40 = Color(red = 98, green = 91, blue = 113),
+    secondary30 = Color(red = 74, green = 68, blue = 88),
+    secondary20 = Color(red = 51, green = 45, blue = 65),
+    secondary10 = Color(red = 29, green = 25, blue = 43),
+    secondary0 = Color(red = 0, green = 0, blue = 0),
+
+    // The tertiary static tonal range.
+    tertiary100 = Color(red = 255, green = 255, blue = 255),
+    tertiary99 = Color(red = 255, green = 251, blue = 250),
+    tertiary95 = Color(red = 255, green = 236, blue = 241),
+    tertiary90 = Color(red = 255, green = 216, blue = 228),
+    tertiary80 = Color(red = 239, green = 184, blue = 200),
+    tertiary70 = Color(red = 210, green = 157, blue = 172),
+    tertiary60 = Color(red = 181, green = 131, blue = 146),
+    tertiary50 = Color(red = 152, green = 105, blue = 119),
+    tertiary40 = Color(red = 125, green = 82, blue = 96),
+    tertiary30 = Color(red = 99, green = 59, blue = 72),
+    tertiary20 = Color(red = 73, green = 37, blue = 50),
+    tertiary10 = Color(red = 49, green = 17, blue = 29),
+    tertiary0 = Color(red = 0, green = 0, blue = 0),
+)
+
 /** Dynamic colors in Material. */
 internal fun dynamicTonalPalette(context: Context) = SettingsTonalPalette(
     // The neutral tonal range from the generated dynamic color palette.

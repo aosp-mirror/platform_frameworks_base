@@ -73,7 +73,7 @@ public class NotificationShadeWindowViewController {
     private final AmbientState mAmbientState;
     private final PulsingGestureListener mPulsingGestureListener;
 
-    private GestureDetector mGestureDetector;
+    private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
@@ -149,7 +149,8 @@ public class NotificationShadeWindowViewController {
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
-        mGestureDetector = new GestureDetector(mView.getContext(), mPulsingGestureListener);
+        mPulsingWakeupGestureHandler = new GestureDetector(mView.getContext(),
+                mPulsingGestureListener);
 
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
@@ -196,7 +197,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
-                mGestureDetector.onTouchEvent(ev);
+                mPulsingWakeupGestureHandler.onTouchEvent(ev);
                 mStatusBarKeyguardViewManager.onTouch(ev);
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {

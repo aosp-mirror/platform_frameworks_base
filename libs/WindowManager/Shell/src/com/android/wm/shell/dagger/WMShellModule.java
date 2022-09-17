@@ -51,6 +51,7 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeController;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -220,14 +221,14 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<RecentTasksController> recentTasksController,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             WindowDecorViewModel<?> windowDecorViewModel) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
         ShellInit init = FreeformComponents.isFreeformEnabled(context)
                 ? shellInit
                 : null;
-        return new FreeformTaskListener<>(init, shellTaskOrganizer, recentTasksController,
+        return new FreeformTaskListener<>(init, shellTaskOrganizer, desktopModeTaskRepository,
                 windowDecorViewModel);
     }
 
@@ -599,15 +600,22 @@ public abstract class WMShellModule {
             Context context, ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
-            @ShellMainThread Handler mainHandler
+            @ShellMainThread Handler mainHandler,
+            Transitions transitions
     ) {
         if (DesktopMode.IS_SUPPORTED) {
             return Optional.of(new DesktopModeController(context, shellInit, shellTaskOrganizer,
-                    rootDisplayAreaOrganizer,
-                    mainHandler));
+                    rootDisplayAreaOrganizer, mainHandler, transitions));
         } else {
             return Optional.empty();
         }
+    }
+
+    @WMSingleton
+    @Provides
+    @DynamicOverride
+    static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
+        return new DesktopModeTaskRepository();
     }
 
     //
