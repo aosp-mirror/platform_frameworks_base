@@ -88,6 +88,7 @@ interface IVirtualDevice {
             IBinder token,
             in Point screenSize);
     void unregisterInputDevice(IBinder token);
+    int getInputDeviceId(IBinder token);
     boolean sendDpadKeyEvent(IBinder token, in VirtualKeyEvent event);
     boolean sendKeyEvent(IBinder token, in VirtualKeyEvent event);
     boolean sendButtonEvent(IBinder token, in VirtualMouseButtonEvent event);
