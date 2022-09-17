@@ -173,8 +173,8 @@ open class UserSwitcherActivity @Inject constructor(
             this,
             R.layout.user_switcher_fullscreen_popup_item,
             layoutInflater,
-            { item: UserRecord -> adapter.getName(this@UserSwitcherActivity, item) },
-            { item: UserRecord -> adapter.findUserIcon(item).mutate().apply {
+            { item: UserRecord -> adapter.getName(this@UserSwitcherActivity, item, true) },
+            { item: UserRecord -> adapter.findUserIcon(item, true).mutate().apply {
                 setTint(resources.getColor(
                     R.color.user_switcher_fullscreen_popup_item_tint,
                     getTheme()
@@ -322,6 +322,9 @@ open class UserSwitcherActivity @Inject constructor(
         return flags.isEnabled(Flags.MODERN_USER_SWITCHER_ACTIVITY)
     }
 
+    /**
+     * Provides views to populate the option menu.
+     */
     private class ItemAdapter(
         val parentContext: Context,
         val resource: Int,
@@ -375,20 +378,20 @@ open class UserSwitcherActivity @Inject constructor(
             return view
         }
 
-        override fun getName(context: Context, item: UserRecord): String {
+        override fun getName(context: Context, item: UserRecord, isTablet: Boolean): String {
             return if (item == manageUserRecord) {
                 getString(R.string.manage_users)
             } else {
-                super.getName(context, item)
+                super.getName(context, item, isTablet)
             }
         }
 
-        fun findUserIcon(item: UserRecord): Drawable {
+        fun findUserIcon(item: UserRecord, isTablet: Boolean = false): Drawable {
             if (item == manageUserRecord) {
                 return getDrawable(R.drawable.ic_manage_users)
             }
             if (item.info == null) {
-                return getIconDrawable(this@UserSwitcherActivity, item)
+                return getIconDrawable(this@UserSwitcherActivity, item, isTablet)
             }
             val userIcon = userManager.getUserIcon(item.info.id)
             if (userIcon != null) {

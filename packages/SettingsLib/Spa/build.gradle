@@ -16,7 +16,7 @@
 
 buildscript {
     ext {
-        spa_min_sdk = 31
+        spa_min_sdk = 21
         jetpack_compose_version = '1.2.0-alpha04'
         jetpack_compose_material3_version = '1.0.0-alpha06'
     }
