@@ -129,7 +129,10 @@ object UserSwitcherViewBinder {
                     viewModel.users.collect { users ->
                         val viewPool =
                             view.children.filter { it.tag == USER_VIEW_TAG }.toMutableList()
-                        viewPool.forEach { view.removeView(it) }
+                        viewPool.forEach {
+                            view.removeView(it)
+                            flowWidget.removeView(it)
+                        }
                         users.forEach { userViewModel ->
                             val userView =
                                 if (viewPool.isNotEmpty()) {
