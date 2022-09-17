@@ -110,11 +110,11 @@ public final class TransitionInfo implements Parcelable {
     /** The container is an input-method window. */
     public static final int FLAG_IS_INPUT_METHOD = 1 << 8;
 
-    /** The container is ActivityEmbedding embedded. */
-    public static final int FLAG_IS_EMBEDDED = 1 << 9;
+    /** The container is in a Task with embedded activity. */
+    public static final int FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY = 1 << 9;
 
-    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 10;
+    /** The container fills its parent Task before and after the transition. */
+    public static final int FLAG_FILLS_TASK = 1 << 10;
 
     /** The container is going to show IME on its task after the transition. */
     public static final int FLAG_WILL_IME_SHOWN = 1 << 11;
@@ -124,6 +124,9 @@ public final class TransitionInfo implements Parcelable {
 
     /** The container attaches work profile thumbnail for cross profile animation. */
     public static final int FLAG_CROSS_PROFILE_WORK_THUMBNAIL = 1 << 13;
+
+    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
+    public static final int FLAG_FIRST_CUSTOM = 1 << 14;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -137,9 +140,12 @@ public final class TransitionInfo implements Parcelable {
             FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
-            FLAG_IS_EMBEDDED,
-            FLAG_FIRST_CUSTOM,
-            FLAG_WILL_IME_SHOWN
+            FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY,
+            FLAG_FILLS_TASK,
+            FLAG_WILL_IME_SHOWN,
+            FLAG_CROSS_PROFILE_OWNER_THUMBNAIL,
+            FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
+            FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
 
@@ -322,28 +328,31 @@ public final class TransitionInfo implements Parcelable {
             sb.append("IS_INPUT_METHOD");
         }
         if ((flags & FLAG_TRANSLUCENT) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "TRANSLUCENT");
+            sb.append(sb.length() == 0 ? "" : "|").append("TRANSLUCENT");
         }
         if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "STARTING_WINDOW_TRANSFER");
+            sb.append(sb.length() == 0 ? "" : "|").append("STARTING_WINDOW_TRANSFER");
         }
         if ((flags & FLAG_IS_VOICE_INTERACTION) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "IS_VOICE_INTERACTION");
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_VOICE_INTERACTION");
         }
         if ((flags & FLAG_IS_DISPLAY) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "IS_DISPLAY");
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_DISPLAY");
         }
         if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "OCCLUDES_KEYGUARD");
+            sb.append(sb.length() == 0 ? "" : "|").append("OCCLUDES_KEYGUARD");
         }
         if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "DISPLAY_HAS_ALERT_WINDOWS");
+            sb.append(sb.length() == 0 ? "" : "|").append("DISPLAY_HAS_ALERT_WINDOWS");
         }
-        if ((flags & FLAG_IS_EMBEDDED) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "IS_EMBEDDED");
+        if ((flags & FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("IN_TASK_WITH_EMBEDDED_ACTIVITY");
+        }
+        if ((flags & FLAG_FILLS_TASK) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FILLS_TASK");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");
+            sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
         }
         return sb.toString();
     }

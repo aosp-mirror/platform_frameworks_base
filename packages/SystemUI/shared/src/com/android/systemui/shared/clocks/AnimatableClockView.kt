@@ -151,8 +151,6 @@ class AnimatableClockView @JvmOverloads constructor(
         // relayout if the text didn't actually change.
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
-            lastTextUpdate = getTimestamp()
-
             // Because the TextLayout may mutate under the hood as a result of the new text, we
             // notify the TextAnimator that it may have changed and request a measure/layout. A
             // crash will occur on the next invocation of setTextStyle if the layout is mutated
@@ -161,6 +159,7 @@ class AnimatableClockView @JvmOverloads constructor(
                 textAnimator?.updateLayout(layout)
             }
             requestLayout()
+            lastTextUpdate = getTimestamp()
         }
     }
 

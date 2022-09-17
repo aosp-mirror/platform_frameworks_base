@@ -90,6 +90,9 @@ class DefaultClock(
     override lateinit var animations: ClockAnimations
         private set
 
+    private var smallRegionDarkness = false
+    private var largeRegionDarkness = false
+
     init {
         val parent = FrameLayout(ctx)
 
@@ -148,8 +151,14 @@ class DefaultClock(
                 smallClockIsDark: Boolean,
                 largeClockIsDark: Boolean
         ) {
-            updateClockColor(smallClock, smallClockIsDark)
-            updateClockColor(largeClock, largeClockIsDark)
+            if (smallRegionDarkness != smallClockIsDark) {
+                smallRegionDarkness = smallClockIsDark
+                updateClockColor(smallClock, smallClockIsDark)
+            }
+            if (largeRegionDarkness != largeClockIsDark) {
+                largeRegionDarkness = largeClockIsDark
+                updateClockColor(largeClock, largeClockIsDark)
+            }
         }
 
         override fun onLocaleChanged(locale: Locale) {

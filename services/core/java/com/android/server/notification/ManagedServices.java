@@ -1786,8 +1786,8 @@ abstract public class ManagedServices {
          * from receiving events from the profile.
          */
         public boolean isPermittedForProfile(int userId) {
-            if (!mUserProfiles.canProfileUseBoundServices(userId)) {
-                return false;
+            if (!mUserProfiles.isProfileUser(userId)) {
+                return true;
             }
             DevicePolicyManager dpm =
                     (DevicePolicyManager) mContext.getSystemService(DEVICE_POLICY_SERVICE);
@@ -1862,16 +1862,16 @@ abstract public class ManagedServices {
             }
         }
 
-        public boolean canProfileUseBoundServices(int userId) {
+        public boolean isProfileUser(int userId) {
             synchronized (mCurrentProfiles) {
                 UserInfo user = mCurrentProfiles.get(userId);
                 if (user == null) {
                     return false;
                 }
                 if (user.isManagedProfile() || user.isCloneProfile()) {
-                    return false;
+                    return true;
                 }
-                return true;
+                return false;
             }
         }
     }

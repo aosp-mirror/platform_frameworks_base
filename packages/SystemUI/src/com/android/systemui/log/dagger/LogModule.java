@@ -287,6 +287,17 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for use by
+     * {@link com.android.systemui.biometrics.FaceHelpMessageDeferral}.
+     */
+    @Provides
+    @SysUISingleton
+    @BiometricMessagesLog
+    public static LogBuffer provideBiometricMessagesLogBuffer(LogBufferFactory factory) {
+        return factory.create("BiometricMessagesLog", 150);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for use by the status bar network controller.
      */
     @Provides
@@ -304,5 +315,15 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 200);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for bluetooth-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @BluetoothLog
+    public static LogBuffer providerBluetoothLogBuffer(LogBufferFactory factory) {
+        return factory.create("BluetoothLog", 50);
     }
 }
