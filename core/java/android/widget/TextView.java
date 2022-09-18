@@ -195,6 +195,8 @@ import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
@@ -238,6 +240,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A user interface element that displays text to the user.
@@ -1032,6 +1036,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private @StringRes int mHintId = Resources.ID_NULL;
     //
     // End of autofill-related attributes
+
+    private Pattern mWhitespacePattern;
 
     /**
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -9090,6 +9096,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 gestures.add(SelectGesture.class);
                 gestures.add(DeleteGesture.class);
                 gestures.add(InsertGesture.class);
+                gestures.add(RemoveSpaceGesture.class);
+                gestures.add(JoinOrSplitGesture.class);
                 outAttrs.setSupportedHandwritingGestures(gestures);
                 return ic;
             }
@@ -9303,7 +9311,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingSelectGesture(@NonNull SelectGesture gesture) {
-        int[] range = getRangeForRect(gesture.getSelectionArea(), gesture.getGranularity());
+        int[] range = getRangeForRect(
+                convertFromScreenToContentCoordinates(gesture.getSelectionArea()),
+                gesture.getGranularity());
         if (range == null) {
             return handleGestureFailure(gesture);
         }
@@ -9314,7 +9324,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
-        int[] range = getRangeForRect(gesture.getDeletionArea(), gesture.getGranularity());
+        int[] range = getRangeForRect(
+                convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
+                gesture.getGranularity());
         if (range == null) {
             return handleGestureFailure(gesture);
         }
@@ -9326,13 +9338,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingInsertGesture(@NonNull InsertGesture gesture) {
-        PointF point = gesture.getInsertionPoint();
-        // The coordinates provided are screen coordinates - transform to content coordinates.
-        int[] screenToViewport = getLocationOnScreen();
-        point.offset(
-                -(screenToViewport[0] + viewportToContentHorizontalOffset()),
-                -(screenToViewport[1] + viewportToContentVerticalOffset()));
-
+        PointF point = convertFromScreenToContentCoordinates(gesture.getInsertionPoint());
         int line = mLayout.getLineForVertical((int) point.y);
         if (point.y < mLayout.getLineTop(line)
                 || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
@@ -9349,6 +9355,105 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
+    /** @hide */
+    public int performHandwritingRemoveSpaceGesture(@NonNull RemoveSpaceGesture gesture) {
+        PointF startPoint = convertFromScreenToContentCoordinates(gesture.getStartPoint());
+        PointF endPoint = convertFromScreenToContentCoordinates(gesture.getEndPoint());
+
+        // The operation should be applied to the first line of text touched by the line joining
+        // the points.
+        int yMin = (int) Math.min(startPoint.y, endPoint.y);
+        int yMax = (int) Math.max(startPoint.y, endPoint.y);
+        int line = mLayout.getLineForVertical(yMin);
+        if (yMax < mLayout.getLineTop(line)) {
+            // Both points are above the top of the first line.
+            return handleGestureFailure(gesture);
+        }
+        if (yMin > mLayout.getLineBottomWithoutSpacing(line)) {
+            if (line == mLayout.getLineCount() - 1 || yMax < mLayout.getLineTop(line + 1)) {
+                // The points are below the last line, or they are between two lines.
+                return handleGestureFailure(gesture);
+            } else {
+                // Apply the operation to the next line.
+                line++;
+            }
+        }
+        if (Math.max(startPoint.x, endPoint.x) < mLayout.getLineLeft(line)
+                || Math.min(startPoint.x, endPoint.x) > mLayout.getLineRight(line)) {
+            return handleGestureFailure(gesture);
+        }
+
+        // The operation should be applied to all characters touched by the line joining the points.
+        int startOffset = mLayout.getOffsetForHorizontal(line, startPoint.x);
+        int endOffset = mLayout.getOffsetForHorizontal(line, endPoint.x);
+        if (startOffset == endOffset) {
+            return handleGestureFailure(gesture);
+        } else if (startOffset > endOffset) {
+            int tmp = startOffset;
+            startOffset = endOffset;
+            endOffset = tmp;
+        }
+        // TODO(b/247557062): The boundary offsets might be off by one. We should check which side
+        // of the offset the point is on, and adjust if necessary.
+        // TODO(b/247557062): This doesn't handle bidirectional text correctly.
+
+        Pattern whitespacePattern = getWhitespacePattern();
+        Matcher matcher = whitespacePattern.matcher(mText.subSequence(startOffset, endOffset));
+        int lastRemoveOffset = -1;
+        while (matcher.find()) {
+            lastRemoveOffset = startOffset + matcher.start();
+            getEditableText().delete(lastRemoveOffset, startOffset + matcher.end());
+            startOffset = lastRemoveOffset;
+            endOffset -= matcher.end() - matcher.start();
+            if (startOffset == endOffset) {
+                break;
+            }
+            matcher = whitespacePattern.matcher(mText.subSequence(startOffset, endOffset));
+        }
+        if (lastRemoveOffset == -1) {
+            return handleGestureFailure(gesture);
+        }
+        Selection.setSelection(getEditableText(), lastRemoveOffset);
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+    }
+
+    /** @hide */
+    public int performHandwritingJoinOrSplitGesture(@NonNull JoinOrSplitGesture gesture) {
+        PointF point = convertFromScreenToContentCoordinates(gesture.getJoinOrSplitPoint());
+
+        int line = mLayout.getLineForVertical((int) point.y);
+        if (point.y < mLayout.getLineTop(line)
+                || point.y > mLayout.getLineBottomWithoutSpacing(line)) {
+            return handleGestureFailure(gesture);
+        }
+        if (point.x < mLayout.getLineLeft(line) || point.x > mLayout.getLineRight(line)) {
+            return handleGestureFailure(gesture);
+        }
+
+        int startOffset = mLayout.getOffsetForHorizontal(line, point.x);
+        if (mLayout.isLevelBoundary(startOffset)) {
+            // TODO(b/247551937): Support gesture at level boundaries.
+            return handleGestureFailure(gesture);
+        }
+
+        int endOffset = startOffset;
+        while (startOffset > 0 && Character.isWhitespace(mText.charAt(startOffset - 1))) {
+            startOffset--;
+        }
+        while (endOffset < mText.length() && Character.isWhitespace(mText.charAt(endOffset))) {
+            endOffset++;
+        }
+        if (startOffset < endOffset) {
+            getEditableText().delete(startOffset, endOffset);
+            Selection.setSelection(getEditableText(), startOffset);
+        } else {
+            // No whitespace found, so insert a space.
+            getEditableText().insert(startOffset, " ");
+            Selection.setSelection(getEditableText(), startOffset + 1);
+        }
+        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+    }
+
     private int handleGestureFailure(HandwritingGesture gesture) {
         if (!TextUtils.isEmpty(gesture.getFallbackText())) {
             getEditableText()
@@ -9360,13 +9465,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Nullable
     private int[] getRangeForRect(@NonNull RectF area, int granularity) {
-        // The coordinates provided are screen coordinates - transform to content coordinates.
-        int[] screenToViewport = getLocationOnScreen();
-        area = new RectF(area);
-        area.offset(
-                -(screenToViewport[0] + viewportToContentHorizontalOffset()),
-                -(screenToViewport[1] + viewportToContentVerticalOffset()));
-
         SegmentIterator segmentIterator;
         if (granularity == HandwritingGesture.GRANULARITY_WORD) {
             WordIterator wordIterator = getWordIterator();
@@ -9377,6 +9475,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return mLayout.getRangeForRect(area, segmentIterator);
+    }
+
+    private Pattern getWhitespacePattern() {
+        if (mWhitespacePattern == null) {
+            mWhitespacePattern = Pattern.compile("\\s+");
+        }
+        return mWhitespacePattern;
     }
 
     /** @hide */
@@ -10629,6 +10734,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int verticalOffset = viewportToContentVerticalOffset();
         r.top += verticalOffset;
         r.bottom += verticalOffset;
+    }
+
+    private PointF convertFromScreenToContentCoordinates(PointF point) {
+        int[] screenToViewport = getLocationOnScreen();
+        PointF copy = new PointF(point);
+        copy.offset(
+                -(screenToViewport[0] + viewportToContentHorizontalOffset()),
+                -(screenToViewport[1] + viewportToContentVerticalOffset()));
+        return copy;
+    }
+
+    private RectF convertFromScreenToContentCoordinates(RectF rect) {
+        int[] screenToViewport = getLocationOnScreen();
+        RectF copy = new RectF(rect);
+        copy.offset(
+                -(screenToViewport[0] + viewportToContentHorizontalOffset()),
+                -(screenToViewport[1] + viewportToContentVerticalOffset()));
+        return copy;
     }
 
     int viewportToContentHorizontalOffset() {
