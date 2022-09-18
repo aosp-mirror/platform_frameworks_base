@@ -29,8 +29,8 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -49,7 +49,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
     private static final String TAG = "FreeformTaskListener";
 
     private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final Optional<RecentTasksController> mRecentTasksOptional;
+    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
     private final WindowDecorViewModel<T> mWindowDecorationViewModel;
 
     private final SparseArray<State<T>> mTasks = new SparseArray<>();
@@ -64,11 +64,11 @@ public class FreeformTaskListener<T extends AutoCloseable>
     public FreeformTaskListener(
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<RecentTasksController> recentTasksController,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             WindowDecorViewModel<T> windowDecorationViewModel) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
-        mRecentTasksOptional = recentTasksController;
+        mDesktopModeTaskRepository = desktopModeTaskRepository;
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
         }
@@ -93,7 +93,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
         if (DesktopMode.IS_SUPPORTED && taskInfo.isVisible) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "Adding active freeform task: #%d", taskInfo.taskId);
-            mRecentTasksOptional.ifPresent(rt -> rt.addActiveFreeformTask(taskInfo.taskId));
+            mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTask(taskInfo.taskId));
         }
     }
 
@@ -126,7 +126,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
         if (DesktopMode.IS_SUPPORTED) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "Removing active freeform task: #%d", taskInfo.taskId);
-            mRecentTasksOptional.ifPresent(rt -> rt.removeActiveFreeformTask(taskInfo.taskId));
+            mDesktopModeTaskRepository.ifPresent(it -> it.removeActiveTask(taskInfo.taskId));
         }
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -154,7 +154,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
             if (taskInfo.isVisible) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                         "Adding active freeform task: #%d", taskInfo.taskId);
-                mRecentTasksOptional.ifPresent(rt -> rt.addActiveFreeformTask(taskInfo.taskId));
+                mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTask(taskInfo.taskId));
             }
         }
     }
