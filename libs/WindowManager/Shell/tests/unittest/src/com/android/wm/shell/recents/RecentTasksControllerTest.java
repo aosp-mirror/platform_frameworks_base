@@ -55,6 +55,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopMode;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
@@ -82,6 +83,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
     private ShellCommandHandler mShellCommandHandler;
+    @Mock
+    private DesktopModeTaskRepository mDesktopModeTaskRepository;
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
@@ -94,7 +97,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
         mRecentTasksController = spy(new RecentTasksController(mContext, mShellInit,
-                mShellCommandHandler, mTaskStackListener, mMainExecutor));
+                mShellCommandHandler, mTaskStackListener, Optional.of(mDesktopModeTaskRepository),
+                mMainExecutor));
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
@@ -195,8 +199,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
         setRawList(t1, t2, t3, t4);
 
-        mRecentTasksController.addActiveFreeformTask(1);
-        mRecentTasksController.addActiveFreeformTask(3);
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
