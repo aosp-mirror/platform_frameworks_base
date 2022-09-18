@@ -771,10 +771,10 @@ public final class InputMethodManager {
         }
 
         /**
-         * For {@link ImeFocusController} to start input asynchronously when focus gain.
+         * For {@link ImeFocusController} to start input when gaining the window focus.
          */
         @Override
-        public void startInputAsyncOnWindowFocusGain(View focusedView,
+        public void startInputOnWindowFocusGain(View focusedView,
                 @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
             int startInputFlags = getStartInputFlags(focusedView, 0);
             startInputFlags |= StartInputFlags.WINDOW_GAINED_FOCUS;
@@ -787,6 +787,15 @@ public final class InputMethodManager {
             if (controller == null) {
                 return;
             }
+
+            synchronized (mH) {
+                if (mRestartOnNextWindowFocus) {
+                    if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus as true");
+                    mRestartOnNextWindowFocus = false;
+                    forceNewFocus = true;
+                }
+            }
+
             if (controller.checkFocus(forceNewFocus, false)) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
@@ -856,20 +865,6 @@ public final class InputMethodManager {
         public boolean isCurrentRootView(ViewRootImpl rootView) {
             synchronized (mH) {
                 return mCurRootView == rootView;
-            }
-        }
-
-        /**
-         * For {@link ImeFocusController#checkFocus} if needed to force check new focus.
-         */
-        @Override
-        public boolean isRestartOnNextWindowFocus(boolean reset) {
-            synchronized (mH) {
-                final boolean result = mRestartOnNextWindowFocus;
-                if (reset) {
-                    mRestartOnNextWindowFocus = false;
-                }
-                return result;
             }
         }
 

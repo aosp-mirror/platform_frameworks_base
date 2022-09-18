@@ -137,12 +137,6 @@ public final class ImeFocusController {
         boolean forceFocus = false;
         final InputMethodManagerDelegate immDelegate = getImmDelegate();
         synchronized (immDelegate.getLockObject()) {
-            // TODO(b/244504062): Remove isRestartOnNextWindowFocus.
-            if (immDelegate.isRestartOnNextWindowFocus(true /* reset */)) {
-                if (DEBUG) Log.v(TAG, "Restarting due to isRestartOnNextWindowFocus as true");
-                forceFocus = true;
-            }
-
             // Update mNextServedView when focusedView changed.
             onViewFocusChanged(viewForWindowFocus, true);
 
@@ -155,7 +149,7 @@ public final class ImeFocusController {
             }
         }
 
-        immDelegate.startInputAsyncOnWindowFocusGain(viewForWindowFocus,
+        immDelegate.startInputOnWindowFocusGain(viewForWindowFocus,
                 windowAttribute.softInputMode, windowAttribute.flags, forceFocus);
     }
 
@@ -321,7 +315,7 @@ public final class ImeFocusController {
          * {@link InputMethodManagerDelegate#getLockObject()} while {@link InputMethodManager}
          * calling into app-code in different threads.
          */
-        void startInputAsyncOnWindowFocusGain(View rootView,
+        void startInputOnWindowFocusGain(View rootView,
                 @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode, int windowFlags,
                 boolean forceNewFocus);
         void finishInput();
@@ -330,7 +324,6 @@ public final class ImeFocusController {
         void finishComposingText();
         void setCurrentRootView(ViewRootImpl rootView);
         boolean isCurrentRootView(ViewRootImpl rootView);
-        boolean isRestartOnNextWindowFocus(boolean reset);
         boolean hasActiveConnection(View view);
 
         /**
