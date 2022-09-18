@@ -54,6 +54,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -127,6 +129,7 @@ public class AuthContainerView extends LinearLayout
     private final float mTranslationY;
     @ContainerState private int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
+    private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     private final @Background DelayableExecutor mBackgroundExecutor;
     private int mOrientation;
@@ -362,8 +365,7 @@ public class AuthContainerView extends LinearLayout
                 return false;
             }
             if (event.getAction() == KeyEvent.ACTION_UP) {
-                sendEarlyUserCanceled();
-                animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
+                onBackInvoked();
             }
             return true;
         });
@@ -371,6 +373,11 @@ public class AuthContainerView extends LinearLayout
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         setFocusableInTouchMode(true);
         requestFocus();
+    }
+
+    private void onBackInvoked() {
+        sendEarlyUserCanceled();
+        animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
     }
 
     void sendEarlyUserCanceled() {
@@ -520,6 +527,11 @@ public class AuthContainerView extends LinearLayout
                         .start();
             });
         }
+        OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
+        if (dispatcher != null) {
+            dispatcher.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
+        }
     }
 
     private Animator.AnimatorListener getJankListener(View v, String type, long timeout) {
@@ -618,6 +630,10 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onDetachedFromWindow() {
+        OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
+        if (dispatcher != null) {
+            findOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
+        }
         super.onDetachedFromWindow();
         mWakefulnessLifecycle.removeObserver(this);
     }
