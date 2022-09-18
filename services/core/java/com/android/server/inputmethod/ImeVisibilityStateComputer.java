@@ -201,6 +201,14 @@ public final class ImeVisibilityStateComputer {
         return state;
     }
 
+    void setRequestImeTokenToWindow(IBinder windowToken, IBinder token) {
+        ImeTargetWindowState state = getWindowStateOrNull(windowToken);
+        if (state != null) {
+            state.setRequestImeToken(token);
+            setWindowState(windowToken, state);
+        }
+    }
+
     void setWindowState(IBinder windowToken, ImeTargetWindowState newState) {
         if (DEBUG) Slog.d(TAG, "setWindowState, windowToken=" + windowToken
                 + ", state=" + newState);
@@ -214,7 +222,8 @@ public final class ImeVisibilityStateComputer {
                 return windowToken;
             }
         }
-        return null;
+        // Fallback to the focused window for some edge cases (e.g. relaunching the activity)
+        return mService.mCurFocusedWindow;
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

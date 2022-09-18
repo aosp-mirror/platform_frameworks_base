@@ -46,10 +46,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 
-import static com.android.server.EventLogTags.IMF_HIDE_IME;
-import static com.android.server.EventLogTags.IMF_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
@@ -299,6 +296,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     @NonNull private final ImeVisibilityStateComputer mVisibilityStateComputer;
+
+    @GuardedBy("ImfLock.class")
+    @NonNull private final DefaultImeVisibilityApplier mVisibilityApplier;
 
     /**
      * Cache the result of {@code LocalServices.getService(AudioManagerInternal.class)}.
@@ -963,22 +963,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
     }
-
-    /**
-     * Map of generated token to windowToken that is requesting
-     * {@link InputMethodManager#showSoftInput(View, int)}.
-     * This map tracks origin of showSoftInput requests.
-     */
-    @GuardedBy("ImfLock.class")
-    private final WeakHashMap<IBinder, IBinder> mShowRequestWindowMap = new WeakHashMap<>();
-
-    /**
-     * Map of generated token to windowToken that is requesting
-     * {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}.
-     * This map tracks origin of hideSoftInput requests.
-     */
-    @GuardedBy("ImfLock.class")
-    private final WeakHashMap<IBinder, IBinder> mHideRequestWindowMap = new WeakHashMap<>();
 
     /**
      * A ring buffer to store the history of {@link StartInputInfo}.
@@ -1740,6 +1724,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mAutofillController = new AutofillSuggestionsController(this);
 
         mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
+        mVisibilityApplier = new DefaultImeVisibilityApplier(this);
 
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
@@ -3357,6 +3342,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @GuardedBy("ImfLock.class")
+    void setRequestImeTokenToWindow(IBinder windowToken, IBinder token) {
+        mVisibilityStateComputer.setRequestImeTokenToWindow(windowToken, token);
+    }
+
     @BinderThread
     @Override
     public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
@@ -3411,38 +3401,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Ensure binding the connection when IME is going to show.
         mBindingController.setCurrentMethodVisible();
         final IInputMethodInvoker curMethod = getCurMethodLocked();
+        ImeTracker.get().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
         if (curMethod != null) {
-            // create a placeholder token for IMS so that IMS cannot inject windows into client app.
-            Binder showInputToken = new Binder();
-            mShowRequestWindowMap.put(showInputToken, windowToken);
-            ImeTracker.get().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
             mCurStatsToken = null;
-            final int showFlags = mVisibilityStateComputer.getImeShowFlags();
-            if (DEBUG) {
-                Slog.v(TAG, "Calling " + curMethod + ".showSoftInput(" + showInputToken
-                        + ", " + showFlags + ", " + resultReceiver + ") for reason: "
-                        + InputMethodDebug.softInputDisplayReasonToString(reason));
-            }
 
             if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
                 curMethod.updateEditorToolType(lastClickToolType);
             }
-            // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
-            if (curMethod.showSoftInput(showInputToken, statsToken, showFlags, resultReceiver)) {
-                if (DEBUG_IME_VISIBILITY) {
-                    EventLog.writeEvent(IMF_SHOW_IME, statsToken.getTag(),
-                            Objects.toString(mCurFocusedWindow),
-                            InputMethodDebug.softInputDisplayReasonToString(reason),
-                            InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
-                }
-                onShowHideSoftInputRequested(true /* show */, windowToken, reason, statsToken);
-            }
+            mVisibilityApplier.performShowIme(windowToken, statsToken,
+                    mVisibilityStateComputer.getImeShowFlags(), resultReceiver, reason);
             // TODO(b/246309664): make mInputShown tracked by the Ime visibility computer.
             mInputShown = true;
             return true;
         } else {
-            ImeTracker.get().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = statsToken;
         }
@@ -3516,29 +3488,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         mVisibilityStateComputer.requestImeVisibility(windowToken, false);
         if (shouldHideSoftInput) {
-            final Binder hideInputToken = new Binder();
-            mHideRequestWindowMap.put(hideInputToken, windowToken);
             // The IME will report its visible state again after the following message finally
             // delivered to the IME process as an IPC.  Hence the inconsistency between
             // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
             // the final state.
             ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
-            if (DEBUG) {
-                Slog.v(TAG, "Calling " + curMethod + ".hideSoftInput(0, " + hideInputToken
-                        + ", " + resultReceiver + ") for reason: "
-                        + InputMethodDebug.softInputDisplayReasonToString(reason));
-            }
-            // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
-            if (curMethod.hideSoftInput(hideInputToken, statsToken, 0 /* flags */,
-                    resultReceiver)) {
-                if (DEBUG_IME_VISIBILITY) {
-                    EventLog.writeEvent(IMF_HIDE_IME, statsToken.getTag(),
-                            Objects.toString(mCurFocusedWindow),
-                            InputMethodDebug.softInputDisplayReasonToString(reason),
-                            InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
-                }
-                onShowHideSoftInputRequested(false /* show */, windowToken, reason, statsToken);
-            }
+            mVisibilityApplier.performHideIme(windowToken, statsToken, resultReceiver, reason);
         } else {
             ImeTracker.get().onCancelled(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
         }
@@ -4758,14 +4713,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 return;
             }
+            final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(windowToken);
             if (!setVisible) {
                 if (mCurClient != null) {
                     ImeTracker.get().onProgress(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
-
-                    mWindowManagerInternal.hideIme(
-                            mHideRequestWindowMap.get(windowToken),
-                            mCurClient.mSelfReportedDisplayId, statsToken);
+                    mWindowManagerInternal.hideIme(requestToken, mCurClient.mSelfReportedDisplayId,
+                            statsToken);
                 } else {
                     ImeTracker.get().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
@@ -4774,8 +4728,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 ImeTracker.get().onProgress(statsToken,
                         ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 // Send to window manager to show IME after IME layout finishes.
-                mWindowManagerInternal.showImePostLayout(mShowRequestWindowMap.get(windowToken),
-                        statsToken);
+                mWindowManagerInternal.showImePostLayout(requestToken, statsToken);
             }
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -4820,7 +4773,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     /** Called right after {@link com.android.internal.inputmethod.IInputMethod#showSoftInput}. */
     @GuardedBy("ImfLock.class")
-    private void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
+    void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
             @SoftInputShowHideReason int reason, @Nullable ImeTracker.Token statsToken) {
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
