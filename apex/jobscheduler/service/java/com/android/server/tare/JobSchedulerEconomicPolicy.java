@@ -42,6 +42,7 @@ import static android.app.tare.EconomyManager.DEFAULT_JS_HARD_CONSUMPTION_LIMIT_
 import static android.app.tare.EconomyManager.DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_APP_INSTALL_MAX_CAKES;
@@ -87,6 +88,7 @@ import static android.app.tare.EconomyManager.KEY_JS_HARD_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_INITIAL_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED;
+import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP;
 import static android.app.tare.EconomyManager.KEY_JS_REWARD_APP_INSTALL_INSTANT;
 import static android.app.tare.EconomyManager.KEY_JS_REWARD_APP_INSTALL_MAX;
@@ -154,6 +156,7 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     private long mMinSatiatedBalanceExempted;
     private long mMinSatiatedBalanceOther;
+    private long mMinSatiatedBalanceIncrementalAppUpdater;
     private long mMaxSatiatedBalance;
     private long mInitialSatiatedConsumptionLimit;
     private long mHardSatiatedConsumptionLimit;
@@ -183,11 +186,20 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         if (mIrs.isPackageRestricted(userId, pkgName)) {
             return 0;
         }
+
+        final long baseBalance;
         if (mIrs.isPackageExempted(userId, pkgName)) {
-            return mMinSatiatedBalanceExempted;
+            baseBalance = mMinSatiatedBalanceExempted;
+        } else {
+            baseBalance = mMinSatiatedBalanceOther;
         }
-        // TODO: take other exemptions into account
-        return mMinSatiatedBalanceOther;
+
+        long minBalance = baseBalance;
+
+        final int updateResponsibilityCount = mIrs.getAppUpdateResponsibilityCount(userId, pkgName);
+        minBalance += updateResponsibilityCount * mMinSatiatedBalanceIncrementalAppUpdater;
+
+        return Math.min(minBalance, mMaxSatiatedBalance);
     }
 
     @Override
@@ -242,6 +254,9 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
             KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED, DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
             mMinSatiatedBalanceOther);
+        mMinSatiatedBalanceIncrementalAppUpdater = getConstantAsCake(mParser, properties,
+                KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER,
+                DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES);
         mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
             KEY_JS_MAX_SATIATED_BALANCE, DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES,
             Math.max(arcToCake(1), mMinSatiatedBalanceExempted));
@@ -397,10 +412,11 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     @Override
     void dump(IndentingPrintWriter pw) {
-        pw.println("Min satiated balances:");
+        pw.println("Min satiated balance:");
         pw.increaseIndent();
         pw.print("Exempted", cakeToString(mMinSatiatedBalanceExempted)).println();
         pw.print("Other", cakeToString(mMinSatiatedBalanceOther)).println();
+        pw.print("+App Updater", cakeToString(mMinSatiatedBalanceIncrementalAppUpdater)).println();
         pw.decreaseIndent();
         pw.print("Max satiated balance", cakeToString(mMaxSatiatedBalance)).println();
         pw.print("Consumption limits: [");
