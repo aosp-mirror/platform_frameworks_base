@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"연결 끊김"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP 설정 실패"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"저품질 네트워크로 인해 연결되지 않음"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi 연결 실패"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"인증 문제"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"연결할 수 없음"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'에 연결할 수 없음"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"자동으로 연결되지 않습니다."</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"인터넷에 연결되어 있지 않음"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 저장됨"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"데이터 전송량 제한이 있는 네트워크에 연결됨"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s을(를) 통해 자동으로 연결됨"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"네트워크 평가 제공업체를 통해 자동으로 연결됨"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s을(를) 통해 연결됨"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g>을(를) 통해 연결됨"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s을(를) 통해 사용 가능"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"탭하여 가입"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"인터넷 연결 없음"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"비공개 DNS 서버에 액세스할 수 없습니다."</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"인터넷 연결 없음"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"로그인 필요"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"액세스 포인트가 일시적으로 가득 참"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s을(를) 통해 연결됨"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s을(를) 통해 사용 가능"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> 여는 중"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"연결할 수 없음"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"가입 완료 중…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"가입을 완료할 수 없습니다. 다시 시도하려면 탭하세요."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"가입이 완료되었습니다. 연결 중…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"매우 느림"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"느림"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"보통"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"보통"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"빠름"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"매우 빠름"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"만료됨"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"페어링 중..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"연결됨(전화 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"연결됨(미디어 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"연결됨(메시지 액세스 권한 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"연결됨(전화 또는 미디어 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"연결됨, 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"연결됨(전화 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>

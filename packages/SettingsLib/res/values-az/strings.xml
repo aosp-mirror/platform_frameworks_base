@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Bağlantı kəsildi"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Deaktiv"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP Konfiqurasiya Uğursuzluğu"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Şəbəkə keyfiyyəti aşağı olduğuna görə qoşulmadı"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi Bağlantı Uğursuzluğu"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Autentifikasiya problemi"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Qoşulmaq mümkün deyil"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\"<xliff:g id="AP_NAME">%1$s</xliff:g>\" şəbəkəsinə qoşulmaq mümkün deyil"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Avtomatik qoşulmayacaq"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"İnternet girişi yoxdur"</string>
     <string name="saved_network" msgid="7143698034077223645">"Yadda saxlayan: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Ölçülən şəbəkəyə qoşulub"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s üzərindən avtomatik qoşuldu"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Avtomatik olaraq şəbəkə reytinq provayderi ilə qoşuludur"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s vasitəsilə qoşuludur"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> ilə qoşulub"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s vasitəsilə əlçatandır"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Qeydiyyatdan keçmək üçün klikləyin"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"İnternet yoxdur"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Özəl DNS serverinə giriş mümkün deyil"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"İnternet yoxdur"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Giriş tələb olunur"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Giriş nöqtəsi müvəqqəti olaraq doludur"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s ilə qoşuludur"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s vasitəsilə əlçatandır"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> açılır"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Qoşulmaq mümkün olmadı"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Qeydiyyat tamamlanır…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Qeydiyyat tamamlanmadı. Yenidən cəhd etmək üçün klikləyin."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Qeydiyyat tamamlandı. Qoşulur…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Çox Yavaş"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Yavaş"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Orta"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Sürətli"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Çox Sürətli"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Vaxtı keçib"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Birləşdirilir..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Qoşuludur (telefon yoxdur)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Qoşuludur (media yoxdur)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Qoşuludur (mesaj girişi yoxdur)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Qoşuludur (telefon və ya media yoxdur)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Qoşuludur, batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Qoşuludur (telefon yoxdur), batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
