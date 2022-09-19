@@ -366,7 +366,7 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getNumFailures());
             // Use the context's ID to distinguish traces since there'll only be one job running
             // per context.
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, job.getBatteryName(), getId());
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, job.getTag(), getId());
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -1030,7 +1030,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getJob().getPriority(),
                 completedJob.getEffectivePriority(),
                 completedJob.getNumFailures());
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_SYSTEM_SERVER, completedJob.getBatteryName(), getId());
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_SYSTEM_SERVER, completedJob.getTag(), getId());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     internalStopReason);
