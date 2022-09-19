@@ -119,14 +119,11 @@ import java.util.ArrayList;
  */
 public class ClipboardOverlayController {
     private static final String TAG = "ClipboardOverlayCtrlr";
-    private static final String REMOTE_COPY_ACTION = "android.intent.action.REMOTE_COPY";
 
     /** Constants for screenshot/copy deconflicting */
     public static final String SCREENSHOT_ACTION = "com.android.systemui.SCREENSHOT";
     public static final String SELF_PERMISSION = "com.android.systemui.permission.SELF";
     public static final String COPY_OVERLAY_ACTION = "com.android.systemui.COPY";
-
-    private static final String EXTRA_EDIT_SOURCE_CLIPBOARD = "edit_source_clipboard";
 
     private static final int CLIPBOARD_DEFAULT_TIMEOUT_MILLIS = 6000;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
@@ -383,7 +380,7 @@ public class ClipboardOverlayController {
                     mTextPreview);
             accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         }
-        Intent remoteCopyIntent = getRemoteCopyIntent(clipData);
+        Intent remoteCopyIntent = IntentCreator.getRemoteCopyIntent(clipData, mContext);
         // Only show remote copy if it's available.
         PackageManager packageManager = mContext.getPackageManager();
         if (packageManager.resolveActivity(
@@ -500,41 +497,19 @@ public class ClipboardOverlayController {
 
     private void editImage(Uri uri) {
         mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_EDIT_TAPPED);
-        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
-        Intent editIntent = new Intent(Intent.ACTION_EDIT);
-        if (!TextUtils.isEmpty(editorPackage)) {
-            editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
-        }
-        editIntent.setDataAndType(uri, "image/*");
-        editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        editIntent.putExtra(EXTRA_EDIT_SOURCE_CLIPBOARD, true);
-        mContext.startActivity(editIntent);
+        mContext.startActivity(IntentCreator.getImageEditIntent(uri, mContext));
         animateOut();
     }
 
     private void editText() {
         mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_EDIT_TAPPED);
-        Intent editIntent = new Intent(mContext, EditTextActivity.class);
-        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivity(editIntent);
+        mContext.startActivity(IntentCreator.getTextEditorIntent(mContext));
         animateOut();
     }
 
     private void shareContent(ClipData clip) {
         mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_SHARE_TAPPED);
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setDataAndType(
-                clip.getItemAt(0).getUri(), clip.getDescription().getMimeType(0));
-        shareIntent.putExtra(Intent.EXTRA_TEXT, clip.getItemAt(0).getText().toString());
-        if (clip.getItemAt(0).getUri() != null) {
-            shareIntent.putExtra(Intent.EXTRA_STREAM, clip.getItemAt(0).getUri());
-            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
-        Intent chooserIntent = Intent.createChooser(shareIntent, null)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        mContext.startActivity(chooserIntent);
+        mContext.startActivity(IntentCreator.getShareIntent(clip, mContext));
         animateOut();
     }
 
@@ -665,20 +640,6 @@ public class ClipboardOverlayController {
         ViewCompat.replaceAccessibilityAction(view,
                 AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
                 mContext.getString(R.string.clipboard_edit), null);
-    }
-
-    private Intent getRemoteCopyIntent(ClipData clipData) {
-        Intent nearbyIntent = new Intent(REMOTE_COPY_ACTION);
-
-        String remoteCopyPackage = mContext.getString(R.string.config_remoteCopyPackage);
-        if (!TextUtils.isEmpty(remoteCopyPackage)) {
-            nearbyIntent.setComponent(ComponentName.unflattenFromString(remoteCopyPackage));
-        }
-
-        nearbyIntent.setClipData(clipData);
-        nearbyIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        nearbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        return nearbyIntent;
     }
 
     private void animateIn() {
