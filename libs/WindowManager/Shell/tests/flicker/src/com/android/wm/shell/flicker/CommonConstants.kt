@@ -24,3 +24,7 @@ val APP_PAIR_SPLIT_DIVIDER_COMPONENT = ComponentNameMatcher("", "AppPairSplitDiv
 val DOCKED_STACK_DIVIDER_COMPONENT = ComponentNameMatcher("", "DockedStackDivider#")
 val SPLIT_SCREEN_DIVIDER_COMPONENT = ComponentNameMatcher("", "StageCoordinatorSplitDivider#")
 val SPLIT_DECOR_MANAGER = ComponentNameMatcher("", "SplitDecorManager#")
+
+enum class Direction {
+    UP, DOWN, LEFT, RIGHT
+}

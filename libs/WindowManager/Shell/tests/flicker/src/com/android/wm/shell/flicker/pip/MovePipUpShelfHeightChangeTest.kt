@@ -16,31 +16,30 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.RequiresDevice
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.traces.region.RegionSubject
-import org.junit.Assume
-import org.junit.Before
+import com.android.wm.shell.flicker.Direction
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip movement with Launcher shelf height change (increase).
+ * Test Pip movement with Launcher shelf height change (decrease).
  *
- * To run this test: `atest WMShellFlickerTests:MovePipUpShelfHeightChangeTest`
+ * To run this test: `atest WMShellFlickerTests:MovePipDownShelfHeightChangeTest`
  *
  * Actions:
  *     Launch [pipApp] in pip mode
- *     Press home
  *     Launch [testApp]
+ *     Press home
  *     Check if pip window moves up (visually)
  *
  * Notes:
@@ -56,31 +55,38 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class MovePipUpShelfHeightChangeTest(
+open class MovePipUpShelfHeightChangeTest(
     testSpec: FlickerTestParameter
 ) : MovePipShelfHeightTransition(testSpec) {
-    @Before
-    fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
     /**
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            teardown {
-                tapl.pressHome()
-                testApp.exit(wmHelper)
+        get() = buildTransition() {
+            setup {
+                testApp.launchViaIntent(wmHelper)
             }
             transitions {
-                testApp.launchViaIntent(wmHelper)
+                tapl.pressHome()
+            }
+            teardown {
+                testApp.exit(wmHelper)
             }
         }
 
-    override fun assertRegionMovement(previous: RegionSubject, current: RegionSubject) {
-        current.isLowerOrEqual(previous.region)
-    }
+    /**
+     * Checks that the visible region of [pipApp] window always moves up during the animation.
+     */
+    @Presubmit
+    @Test
+    fun pipWindowMovesUp() = pipWindowMoves(Direction.UP)
+
+    /**
+     * Checks that the visible region of [pipApp] layer always moves up during the animation.
+     */
+    @Presubmit
+    @Test
+    fun pipLayerMovesUp() = pipLayerMoves(Direction.UP)
 
     companion object {
         /**
