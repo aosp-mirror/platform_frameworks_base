@@ -17,14 +17,20 @@
 package com.android.internal.content.om;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.om.OverlayManagerTransaction.Request.BUNDLE_FABRICATED_OVERLAY;
+import static android.content.om.OverlayManagerTransaction.Request.TYPE_REGISTER_FABRICATED;
+import static android.content.om.OverlayManagerTransaction.Request.TYPE_UNREGISTER_FABRICATED;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.internal.content.om.OverlayConfig.DEFAULT_PRIORITY;
 
 import android.annotation.NonNull;
+import android.annotation.NonUiContext;
 import android.content.Context;
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
@@ -48,6 +54,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -129,10 +136,9 @@ public class OverlayManagerImpl {
         }
     }
 
-    /**
-     * Ensure the base dir for self-targeting is valid.
-     */
+    /** Ensure the base dir for self-targeting is valid. */
     @VisibleForTesting
+    @NonUiContext
     public void ensureBaseDir() {
         final String baseApkPath = mContext.getApplicationInfo().getBaseCodePath();
         final Path baseApkFolderName = Path.of(baseApkPath).getParent().getFileName();
@@ -217,6 +223,7 @@ public class OverlayManagerImpl {
      *
      * @param overlayInternal the FabricatedOverlayInternal to be saved.
      */
+    @NonUiContext
     public void registerFabricatedOverlay(@NonNull FabricatedOverlayInternal overlayInternal)
             throws IOException, PackageManager.NameNotFoundException {
         ensureBaseDir();
@@ -263,6 +270,7 @@ public class OverlayManagerImpl {
      *
      * @param overlayName the specific name
      */
+    @NonUiContext
     public void unregisterFabricatedOverlay(@NonNull String overlayName) {
         ensureBaseDir();
         checkOverlayNameValid(overlayName);
@@ -274,6 +282,46 @@ public class OverlayManagerImpl {
         }
         if (!idmapPath.toFile().delete()) {
             Log.w(TAG, "Failed to delete file " + idmapPath);
+        }
+    }
+
+    /**
+     * Commit the overlay manager transaction
+     *
+     * @param transaction the overlay manager transaction
+     */
+    @NonUiContext
+    public void commit(@NonNull OverlayManagerTransaction transaction)
+            throws PackageManager.NameNotFoundException, IOException {
+        Objects.requireNonNull(transaction);
+
+        for (Iterator<OverlayManagerTransaction.Request> it = transaction.iterator();
+                it.hasNext(); ) {
+            final OverlayManagerTransaction.Request request = it.next();
+            if (request.type == TYPE_REGISTER_FABRICATED) {
+                final FabricatedOverlayInternal fabricatedOverlayInternal =
+                        Objects.requireNonNull(
+                                request.extras.getParcelable(
+                                        BUNDLE_FABRICATED_OVERLAY,
+                                        FabricatedOverlayInternal.class));
+
+                // populate the mandatory data
+                if (TextUtils.isEmpty(fabricatedOverlayInternal.packageName)) {
+                    fabricatedOverlayInternal.packageName = mContext.getPackageName();
+                } else {
+                    if (!TextUtils.equals(
+                            fabricatedOverlayInternal.packageName, mContext.getPackageName())) {
+                        throw new IllegalArgumentException("Unknown package name in transaction");
+                    }
+                }
+
+                registerFabricatedOverlay(fabricatedOverlayInternal);
+            } else if (request.type == TYPE_UNREGISTER_FABRICATED) {
+                final OverlayIdentifier overlayIdentifier = Objects.requireNonNull(request.overlay);
+                unregisterFabricatedOverlay(overlayIdentifier.getOverlayName());
+            } else {
+                throw new IllegalArgumentException("Unknown request in transaction " + request);
+            }
         }
     }
 
