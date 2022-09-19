@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery
+package com.android.settingslib.spa.framework.common
 
-import com.android.settingslib.spa.framework.DebugActivity
-
-class GalleryDebugActivity : DebugActivity(
-    SpaEnvironment.EntryRepository,
-    MainActivity::class.java,
-    "com.android.spa.gallery.provider",
-)
+/**
+ * Defines Search data of one Settings entry.
+ */
+data class EntrySearchData(
+    val title: String = "",
+    val keyword: List<String> = emptyList(),
+) {
+    fun format(): String {
+        val content = listOf(
+            "search_title = $title",
+            "search_keyword = $keyword",
+        )
+        return content.joinToString("\n")
+    }
+}

@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery
+package com.android.settingslib.spa.framework.common
 
-import com.android.settingslib.spa.framework.DebugActivity
+import androidx.compose.runtime.Composable
 
-class GalleryDebugActivity : DebugActivity(
-    SpaEnvironment.EntryRepository,
-    MainActivity::class.java,
-    "com.android.spa.gallery.provider",
-)
+/**
+ * Defines interface of a entry marco, which contains all entry functions to support different
+ * scenarios, such as browsing (UiLayout), search, etc.
+ * SPA team will rebuild some entry marcos, in order to make the entry creation easier.
+ */
+interface EntryMarco {
+    @Composable
+    fun UiLayout() {}
+    fun getSearchData(): EntrySearchData? = null
+}

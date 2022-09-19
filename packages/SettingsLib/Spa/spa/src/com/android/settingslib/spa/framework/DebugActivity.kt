@@ -25,6 +25,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,7 +34,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.BrowseActivity.Companion.KEY_DESTINATION
-import com.android.settingslib.spa.framework.EntryProvider.Companion.PAGE_INFO_QUERY
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 import com.android.settingslib.spa.framework.common.SettingsPage
@@ -54,6 +54,12 @@ private const val ROUTE_ENTRY = "entry"
 private const val PARAM_NAME_PAGE_ID = "pid"
 private const val PARAM_NAME_ENTRY_ID = "eid"
 
+/**
+ * The Debug Activity to display all Spa Pages & Entries.
+ * One can open the debug activity by:
+ *   $ adb shell am start -n <Activity>
+ * For gallery, Activity = com.android.settingslib.spa.gallery/.GalleryDebugActivity
+ */
 open class DebugActivity(
     private val entryRepository: SettingsEntryRepository,
     private val browseActivityClass: Class<*>,
@@ -75,15 +81,16 @@ open class DebugActivity(
         if (entryProviderAuthorities == null) return
 
         try {
+            val query = EntryProvider.QueryEnum.PAGE_INFO_QUERY
             contentResolver.query(
-                Uri.parse("content://$entryProviderAuthorities/${PAGE_INFO_QUERY.queryPath}"),
+                Uri.parse("content://$entryProviderAuthorities/${query.queryPath}"),
                 null, null, null
             ).use { cursor ->
                 while (cursor != null && cursor.moveToNext()) {
-                    val route = cursor.getString(PAGE_INFO_QUERY.getIndex(ColumnName.PAGE_ROUTE))
-                    val entryCount = cursor.getInt(PAGE_INFO_QUERY.getIndex(ColumnName.ENTRY_COUNT))
+                    val route = cursor.getString(query, EntryProvider.ColumnEnum.PAGE_ROUTE)
+                    val entryCount = cursor.getInt(query, EntryProvider.ColumnEnum.ENTRY_COUNT)
                     val hasRuntimeParam =
-                        cursor.getInt(PAGE_INFO_QUERY.getIndex(ColumnName.HAS_RUNTIME_PARAM)) == 1
+                        cursor.getBoolean(query, EntryProvider.ColumnEnum.HAS_RUNTIME_PARAM)
                     Log.d(
                         "DEBUG ACTIVITY", "Page Info: $route ($entryCount) " +
                             (if (hasRuntimeParam) "with" else "no") + "-runtime-params"
@@ -106,13 +113,13 @@ open class DebugActivity(
                 composable(
                     route = "$ROUTE_PAGE/{$PARAM_NAME_PAGE_ID}",
                     arguments = listOf(
-                        navArgument(PARAM_NAME_PAGE_ID) { type = NavType.IntType },
+                        navArgument(PARAM_NAME_PAGE_ID) { type = NavType.StringType },
                     )
                 ) { navBackStackEntry -> OnePage(navBackStackEntry.arguments) }
                 composable(
                     route = "$ROUTE_ENTRY/{$PARAM_NAME_ENTRY_ID}",
                     arguments = listOf(
-                        navArgument(PARAM_NAME_ENTRY_ID) { type = NavType.IntType },
+                        navArgument(PARAM_NAME_ENTRY_ID) { type = NavType.StringType },
                     )
                 ) { navBackStackEntry -> OneEntry(navBackStackEntry.arguments) }
             }
@@ -121,13 +128,15 @@ open class DebugActivity(
 
     @Composable
     fun RootPage() {
+        val allPageWithEntry = remember { entryRepository.getAllPageWithEntry() }
+        val allEntry = remember { entryRepository.getAllEntries() }
         HomeScaffold(title = "Settings Debug") {
             Preference(object : PreferenceModel {
-                override val title = "List All Pages"
+                override val title = "List All Pages (${allPageWithEntry.size})"
                 override val onClick = navigator(route = ROUTE_All_PAGES)
             })
             Preference(object : PreferenceModel {
-                override val title = "List All Entries"
+                override val title = "List All Entries (${allEntry.size})"
                 override val onClick = navigator(route = ROUTE_All_ENTRIES)
             })
         }
@@ -135,14 +144,15 @@ open class DebugActivity(
 
     @Composable
     fun AllPages() {
-        RegularScaffold(title = "All Pages") {
-            for (pageWithEntry in entryRepository.getAllPageWithEntry()) {
+        val allPageWithEntry = remember { entryRepository.getAllPageWithEntry() }
+        RegularScaffold(title = "All Pages (${allPageWithEntry.size})") {
+            for (pageWithEntry in allPageWithEntry) {
                 Preference(object : PreferenceModel {
                     override val title =
-                        "${pageWithEntry.page.name} (${pageWithEntry.entries.size})"
+                        "${pageWithEntry.page.displayName} (${pageWithEntry.entries.size})"
                     override val summary = pageWithEntry.page.formatArguments().toState()
                     override val onClick =
-                        navigator(route = ROUTE_PAGE + "/${pageWithEntry.page.id}")
+                        navigator(route = ROUTE_PAGE + "/${pageWithEntry.page.id()}")
                 })
             }
         }
@@ -150,16 +160,18 @@ open class DebugActivity(
 
     @Composable
     fun AllEntries() {
-        RegularScaffold(title = "All Entries") {
-            EntryList(entryRepository.getAllEntries())
+        val allEntry = remember { entryRepository.getAllEntries() }
+        RegularScaffold(title = "All Entries (${allEntry.size})") {
+            EntryList(allEntry)
         }
     }
 
     @Composable
     fun OnePage(arguments: Bundle?) {
-        val id = arguments!!.getInt(PARAM_NAME_PAGE_ID)
+        val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
-        RegularScaffold(title = "Page ${pageWithEntry.page.name}") {
+        RegularScaffold(title = "Page - ${pageWithEntry.page.displayName}") {
+            Text(text = pageWithEntry.page.id().toString())
             Text(text = pageWithEntry.page.formatArguments())
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
@@ -173,15 +185,16 @@ open class DebugActivity(
 
     @Composable
     fun OneEntry(arguments: Bundle?) {
-        val id = arguments!!.getInt(PARAM_NAME_ENTRY_ID)
+        val id = arguments!!.getString(PARAM_NAME_ENTRY_ID, "")
         val entry = entryRepository.getEntry(id)!!
-        RegularScaffold(title = "Entry ${entry.displayName()}") {
+        val entryContent = remember { entry.formatContent() }
+        RegularScaffold(title = "Entry - ${entry.displayTitle()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
                 override val enabled = (!entry.hasRuntimeParam()).toState()
                 override val onClick = openEntry(entry)
             })
-            Text(text = entry.formatAll())
+            Text(text = entryContent)
         }
     }
 
@@ -189,10 +202,10 @@ open class DebugActivity(
     private fun EntryList(entries: Collection<SettingsEntry>) {
         for (entry in entries) {
             Preference(object : PreferenceModel {
-                override val title = entry.displayName()
+                override val title = entry.displayTitle()
                 override val summary =
-                    "${entry.fromPage?.name} -> ${entry.toPage?.name}".toState()
-                override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id}")
+                    "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}".toState()
+                override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id()}")
             })
         }
     }

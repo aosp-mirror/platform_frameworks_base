@@ -16,6 +16,8 @@
 
 package com.android.settingslib.spa.gallery
 
+import android.os.Bundle
+import androidx.navigation.NamedNavArgument
 import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
@@ -33,6 +35,32 @@ import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvid
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
+
+/**
+ * Enum to define all SPP name here.
+ * Since the SPP name would be used in log, DO NOT change it once it is set. One can still change
+ * the display name for better readability if necessary.
+ */
+enum class SettingsPageProviderEnum(val displayName: String) {
+    HOME("home"),
+    PREFERENCE("preference"),
+    ARGUMENT("argument"),
+
+    // Add your SPPs
+}
+
+fun createSettingsPage(
+    SppName: SettingsPageProviderEnum,
+    parameter: List<NamedNavArgument> = emptyList(),
+    arguments: Bundle? = null
+): SettingsPage {
+    return SettingsPage(
+        name = SppName.name,
+        displayName = SppName.displayName,
+        parameter = parameter,
+        arguments = arguments,
+    )
+}
 
 object SpaEnvironment {
     val PageProviderRepository: SettingsPageProviderRepository by
@@ -55,7 +83,7 @@ object SpaEnvironment {
                 ActionButtonPageProvider,
             ),
             rootPages = listOf(
-                SettingsPage.create(HomePageProvider.name)
+                createSettingsPage(SettingsPageProviderEnum.HOME)
             )
         )
     }

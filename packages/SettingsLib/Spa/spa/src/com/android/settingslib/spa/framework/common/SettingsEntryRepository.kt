@@ -21,15 +21,20 @@ import java.util.LinkedList
 
 private const val MAX_ENTRY_SIZE = 5000
 
+data class SettingsPageWithEntry(
+    val page: SettingsPage,
+    val entries: List<SettingsEntry>,
+)
+
 /**
  * The repository to maintain all Settings entries
  */
 class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
     // Map of entry unique Id to entry
-    private val entryMap: Map<Int, SettingsEntry>
+    private val entryMap: Map<String, SettingsEntry>
 
     // Map of Settings page to its contained entries.
-    private val pageWithEntryMap: Map<Int, SettingsPageWithEntry>
+    private val pageWithEntryMap: Map<String, SettingsPageWithEntry>
 
     init {
         logMsg("Initialize")
@@ -39,23 +44,29 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
             val rootEntry = SettingsEntryBuilder.createRoot(owner = page).build()
-            if (!entryMap.containsKey(rootEntry.id)) {
+            val rootEntryId = rootEntry.id()
+            if (!entryMap.containsKey(rootEntryId)) {
                 entryQueue.push(rootEntry)
-                entryMap.put(rootEntry.id, rootEntry)
+                entryMap.put(rootEntryId, rootEntry)
             }
         }
 
         while (entryQueue.isNotEmpty() && entryMap.size < MAX_ENTRY_SIZE) {
             val entry = entryQueue.pop()
             val page = entry.toPage
-            if (page == null || pageWithEntryMap.containsKey(page.id)) continue
+            val pageId = page?.id()
+            if (pageId == null || pageWithEntryMap.containsKey(pageId)) continue
             val spp = sppRepository.getProviderOrNull(page.name) ?: continue
-            val newEntries = spp.buildEntry(page.arguments)
-            pageWithEntryMap[page.id] = SettingsPageWithEntry(page, newEntries)
+            val newEntries = spp.buildEntry(page.arguments).map {
+                // Set from-page if it is missing.
+                if (it.fromPage == null) it.copy(fromPage = page) else it
+            }
+            pageWithEntryMap[pageId] = SettingsPageWithEntry(page, newEntries)
             for (newEntry in newEntries) {
-                if (!entryMap.containsKey(newEntry.id)) {
+                val newEntryId = newEntry.id()
+                if (!entryMap.containsKey(newEntryId)) {
                     entryQueue.push(newEntry)
-                    entryMap.put(newEntry.id, newEntry)
+                    entryMap.put(newEntryId, newEntry)
                 }
             }
         }
@@ -67,7 +78,7 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         return pageWithEntryMap.values
     }
 
-    fun getPageWithEntry(pageId: Int): SettingsPageWithEntry? {
+    fun getPageWithEntry(pageId: String): SettingsPageWithEntry? {
         return pageWithEntryMap[pageId]
     }
 
@@ -75,7 +86,7 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         return entryMap.values
     }
 
-    fun getEntry(entryId: Int): SettingsEntry? {
+    fun getEntry(entryId: String): SettingsEntry? {
         return entryMap[entryId]
     }
 }
