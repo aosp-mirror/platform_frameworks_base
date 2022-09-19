@@ -60,13 +60,15 @@ open class MovePipDownShelfHeightChangeTest(
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = false) {
-            teardown {
+        get() = buildTransition() {
+            setup {
                 testApp.launchViaIntent(wmHelper)
-                testApp.exit(wmHelper)
             }
             transitions {
                 tapl.pressHome()
+            }
+            teardown {
+                testApp.exit(wmHelper)
             }
         }
 

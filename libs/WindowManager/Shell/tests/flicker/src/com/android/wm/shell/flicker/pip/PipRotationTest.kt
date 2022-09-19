@@ -72,7 +72,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     }
 
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = false) {
+        get() = buildTransition {
             setup {
                 fixedApp.launchViaIntent(wmHelper)
                 setRotation(testSpec.startRotation)

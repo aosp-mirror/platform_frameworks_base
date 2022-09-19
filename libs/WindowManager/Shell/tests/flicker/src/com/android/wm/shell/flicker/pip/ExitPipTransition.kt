@@ -30,7 +30,7 @@ import org.junit.Test
  */
 abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true) {
+        get() = buildTransition {
             setup {
                 this.setRotation(testSpec.startRotation)
             }
