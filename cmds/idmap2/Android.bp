@@ -41,6 +41,7 @@ cc_defaults {
         "-modernize-return-braced-init-list",
         "-modernize-use-default-member-init",
         "-modernize-use-equals-default",
+        "-modernize-use-emplace",
         "-modernize-use-nodiscard",
         "-modernize-use-override",
         "-modernize-use-trailing-return-type",
