@@ -24,7 +24,7 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:label="@string/app_name" android:name="AudioPolicyTest"
+        <activity android:label="@string/app_name" android:name="AudioPolicyTestActivity"
                   android:screenOrientation="landscape" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,11 +32,6 @@
             </intent-filter>
         </activity>
     </application>
-
-    <!--instrumentation android:name=".AudioPolicyTestRunner"
-            android:targetPackage="com.android.audiopolicytest"
-            android:label="AudioManager policy oriented integration tests InstrumentationRunner">
-    </instrumentation-->
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
             android:targetPackage="com.android.audiopolicytest"

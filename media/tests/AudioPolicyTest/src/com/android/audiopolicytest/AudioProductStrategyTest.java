@@ -16,25 +16,43 @@
 
 package com.android.audiopolicytest;
 
+import static com.android.audiopolicytest.AudioVolumeTestUtil.INVALID_ATTRIBUTES;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 
-public class AudioProductStrategyTest extends AudioVolumesTestBase {
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class AudioProductStrategyTest {
     private static final String TAG = "AudioProductStrategyTest";
+
+    @Rule
+    public final AudioVolumesTestRule rule = new AudioVolumesTestRule();
 
     //-----------------------------------------------------------------
     // Test getAudioProductStrategies and validate strategies
     //-----------------------------------------------------------------
-    public void testGetProductStrategies() throws Exception {
+    @Test
+    public void testGetProductStrategies() {
         List<AudioProductStrategy> audioProductStrategies =
                 AudioProductStrategy.getAudioProductStrategies();
 
@@ -65,6 +83,7 @@ public class AudioProductStrategyTest extends AudioVolumesTestBase {
     //-----------------------------------------------------------------
     // Test stream to/from attributes conversion
     //-----------------------------------------------------------------
+    @Test
     public void testAudioAttributesFromStreamTypes() throws Exception {
         List<AudioProductStrategy> audioProductStrategies =
                 AudioProductStrategy.getAudioProductStrategies();
@@ -81,7 +100,7 @@ public class AudioProductStrategyTest extends AudioVolumesTestBase {
             // hosting this stream type; Bailing out the test, just ensure that any request
             // for reciproque API with the unknown attributes would return default stream
             // for volume control, aka STREAM_MUSIC.
-            if (aaFromStreamType.equals(sInvalidAttributes)) {
+            if (aaFromStreamType.equals(INVALID_ATTRIBUTES)) {
                 assertEquals(AudioSystem.STREAM_MUSIC,
                         AudioProductStrategy.getLegacyStreamTypeForStrategyWithAudioAttributes(
                             aaFromStreamType));
@@ -139,7 +158,8 @@ public class AudioProductStrategyTest extends AudioVolumesTestBase {
         }
     }
 
-    public void testAudioAttributesToStreamTypes() throws Exception {
+    @Test
+    public void testAudioAttributesToStreamTypes() {
         List<AudioProductStrategy> audioProductStrategies =
                 AudioProductStrategy.getAudioProductStrategies();
 
