@@ -1481,7 +1481,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"同步"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"无障碍"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"壁纸"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"更改壁纸"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"更换壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"通知侦听器"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR 监听器"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"条件提供程序"</string>
