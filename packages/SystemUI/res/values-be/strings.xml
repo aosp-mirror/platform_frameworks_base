@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Некаторыя функцыі абмежаваны, пакуль тэлефон не астыне.\nНацісніце, каб даведацца больш"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ваш тэлефон аўтаматычна паспрабуе астыць. Вы можаце па-ранейшаму карыстацца сваім тэлефонам, але ён можа працаваць больш павольна.\n\nПасля таго як ваш тэлефон астыне, ён будзе працаваць у звычайным рэжыме."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Глядзець паэтапную дапамогу"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Адключыце прыладу"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Ваша прылада моцна награваецца ў месцы, дзе знаходзіцца зарадны порт. Калі яна падключана да зараднай прылады ці USB-прылады, адключыце яе і будзьце асцярожнымі з кабелем, які таксама можа награвацца."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Глядзець паэтапную дапамогу"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Ярлык \"улева\""</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Ярлык \"управа\""</string>

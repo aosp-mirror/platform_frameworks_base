@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Sumir eiginleikar eru takmarkaðir meðan síminn kælir sig.\nÝttu til að fá frekari upplýsingar"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Síminn reynir sjálfkrafa að kæla sig. Þú getur enn notað símann en hann gæti verið hægvirkari.\n\nEftir að síminn hefur kælt sig niður virkar hann eðlilega."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Sjá varúðarskref"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Taktu tækið úr sambandi"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Tækið er að hitna nálægt hleðslutenginu. Ef það er tengt við hleðslutæki eða USB-aukahlut skaltu taka það úr sambandi og hafa í huga að snúran gæti einnig verið heit."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Sjá varúðarskref"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Flýtilykill til vinstri"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Flýtilykill til hægri"</string>
