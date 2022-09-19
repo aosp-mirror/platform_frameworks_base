@@ -65,7 +65,6 @@ abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec
      */
     @JvmOverloads
     protected open fun buildTransition(
-        eachRun: Boolean,
         stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true"),
         extraSpec: FlickerBuilder.() -> Unit = {}
     ): FlickerBuilder.() -> Unit {
@@ -73,25 +72,12 @@ abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec
             setup {
                 setRotation(Surface.ROTATION_0)
                 removeAllTasksButHome()
-
-                if (!eachRun) {
-                    pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-                }
-                if (eachRun) {
-                    pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-                }
+                pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
             }
             teardown {
                 setRotation(Surface.ROTATION_0)
                 removeAllTasksButHome()
                 pipApp.exit(wmHelper)
-
-                if (eachRun) {
-                    pipApp.exit(wmHelper)
-                }
-                if (!eachRun) {
-                    pipApp.exit(wmHelper)
-                }
             }
 
             extraSpec(this)
