@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.appWindowBecomesVisible
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
@@ -53,7 +52,7 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
 
                 tapl.goHome()
                 wmHelper.StateSyncBuilder()
@@ -64,7 +63,7 @@ class SwitchBackToSplitFromRecent(testSpec: FlickerTestParameter) : SplitScreenB
                 tapl.workspace.switchToOverview()
                     .currentTask
                     .open()
-                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
 

@@ -28,7 +28,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesInvisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesInvisible
 import com.android.wm.shell.flicker.splitScreenDividerBecomesInvisible
@@ -56,7 +55,7 @@ class DismissSplitScreenByGoHome(
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
             }
             transitions {
                 tapl.goHome()

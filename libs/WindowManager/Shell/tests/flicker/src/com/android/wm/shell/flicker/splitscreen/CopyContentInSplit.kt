@@ -28,7 +28,6 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowKeepVisible
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsKeepVisible
 import org.junit.FixMethodOrder
@@ -48,16 +47,16 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
 class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
-    private val textEditApp = SplitScreenHelper.getIme(instrumentation)
+    private val textEditApp = SplitScreenUtils.getIme(instrumentation)
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, textEditApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, textEditApp)
             }
             transitions {
-                SplitScreenHelper.copyContentInSplit(
+                SplitScreenUtils.copyContentInSplit(
                     instrumentation, device, primaryApp, textEditApp)
             }
         }

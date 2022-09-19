@@ -28,8 +28,7 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.testapp.ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME
-import com.android.server.wm.flicker.testapp.ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.SPLASH_SCREEN
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
@@ -105,7 +104,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     }
 
     /**
-     * Check that the [ComponentMatcher.LAUNCHER] window is never visible when performing task
+     * Check that the [ComponentNameMatcher.LAUNCHER] window is never visible when performing task
      * transitions.
      * A solid color background should be shown above it.
      */
@@ -118,7 +117,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     }
 
     /**
-     * Checks that the [ComponentMatcher.LAUNCHER] layer is never visible when performing task
+     * Checks that the [ComponentNameMatcher.LAUNCHER] layer is never visible when performing task
      * transitions.
      * A solid color background should be shown above it.
      */
@@ -246,8 +245,8 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
 
     companion object {
         private val LAUNCH_NEW_TASK_ACTIVITY =
-            LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
-        private val SIMPLE_ACTIVITY = SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
+            ActivityOptions.LaunchNewActivity.COMPONENT.toFlickerComponent()
+        private val SIMPLE_ACTIVITY = ActivityOptions.SimpleActivity.COMPONENT.toFlickerComponent()
 
         private fun getWallpaperPackage(instrumentation: Instrumentation): IComponentMatcher? {
             val wallpaperManager = WallpaperManager.getInstance(instrumentation.targetContext)

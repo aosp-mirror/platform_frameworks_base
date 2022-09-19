@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.bubble
 import android.app.INotificationManager
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.ServiceManager
 import android.view.Surface
 import androidx.test.uiautomator.By
@@ -28,9 +29,9 @@ import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.LaunchBubbleHelper
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
 import com.android.wm.shell.flicker.BaseTest
-import com.android.wm.shell.flicker.helpers.LaunchBubbleHelper
 import org.junit.runners.Parameterized
 
 /**
@@ -47,7 +48,7 @@ abstract class BaseBubbleScreen(
             ServiceManager.getService(Context.NOTIFICATION_SERVICE))
 
     private val uid = context.packageManager.getApplicationInfo(
-            testApp.`package`, 0).uid
+            testApp.`package`, PackageManager.ApplicationInfoFlags.of(0)).uid
 
     @JvmOverloads
     protected open fun buildTransition(

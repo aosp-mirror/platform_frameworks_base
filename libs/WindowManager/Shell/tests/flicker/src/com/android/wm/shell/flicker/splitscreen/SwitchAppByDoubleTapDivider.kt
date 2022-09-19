@@ -29,7 +29,6 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
@@ -55,10 +54,10 @@ class SwitchAppByDoubleTapDivider (testSpec: FlickerTestParameter) : SplitScreen
         get() = {
             super.transition(this)
             setup {
-                SplitScreenHelper.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
             }
             transitions {
-                SplitScreenHelper.doubleTapDividerToSwitch(device)
+                SplitScreenUtils.doubleTapDividerToSwitch(device)
                 wmHelper.StateSyncBuilder()
                     .withAppTransitionIdle()
                     .waitForAndVerify()

@@ -90,7 +90,7 @@ open class SeamlessAppRotationTest(
                 testApp.launchViaIntent(
                     wmHelper,
                     stringExtras = mapOf(
-                        ActivityOptions.EXTRA_STARVE_UI_THREAD
+                        ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD
                             to testSpec.starveUiThread.toString()
                     )
                 )
@@ -164,20 +164,23 @@ open class SeamlessAppRotationTest(
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
-    override fun statusBarLayerPositionAtStartAndEnd() { }
+    override fun statusBarLayerPositionAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() { }
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+    }
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
-    override fun statusBarWindowIsAlwaysVisible() { }
+    override fun statusBarWindowIsAlwaysVisible() {
+    }
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] window is invisible during the whole
+     * Checks that the [ComponentNameMatcher.STATUS_BAR] window is invisible during the whole
      * transition
      */
     @Presubmit
@@ -189,7 +192,7 @@ open class SeamlessAppRotationTest(
     }
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] layer is invisible during the whole
+     * Checks that the [ComponentNameMatcher.STATUS_BAR] layer is invisible during the whole
      * transition
      */
     @Presubmit
@@ -218,14 +221,17 @@ open class SeamlessAppRotationTest(
 
     companion object {
         private val FlickerTestParameter.starveUiThread
-            get() = config.getOrDefault(ActivityOptions.EXTRA_STARVE_UI_THREAD, false) as Boolean
+            get() = config.getOrDefault(
+                ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD, false) as Boolean
 
         private fun createConfig(
             sourceConfig: FlickerTestParameter,
             starveUiThread: Boolean
         ): FlickerTestParameter {
             val newConfig = sourceConfig.config.toMutableMap()
-                .also { it[ActivityOptions.EXTRA_STARVE_UI_THREAD] = starveUiThread }
+                .also {
+                    it[ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD] = starveUiThread
+                }
             val nameExt = if (starveUiThread) "_BUSY_UI_THREAD" else ""
             return FlickerTestParameter(newConfig, nameOverride = "$sourceConfig$nameExt")
         }
@@ -233,8 +239,8 @@ open class SeamlessAppRotationTest(
         /**
          * Creates the test configurations for seamless rotation based on the default rotation
          * tests from [FlickerTestParameterFactory.getConfigRotationTests], but adding an
-         * additional flag ([ActivityOptions.EXTRA_STARVE_UI_THREAD]) to indicate if the app
-         * should starve the UI thread of not
+         * additional flag ([ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD]) to indicate
+         * if the app should starve the UI thread of not
          */
         @JvmStatic
         private fun getConfigurations(): List<FlickerTestParameter> {

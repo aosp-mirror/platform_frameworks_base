@@ -26,7 +26,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.appWindowBecomesVisible
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
@@ -64,8 +63,8 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
                     .waitForAndVerify()
             }
             transitions {
-                SplitScreenHelper.splitFromOverview(tapl)
-                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                SplitScreenUtils.splitFromOverview(tapl)
+                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
 

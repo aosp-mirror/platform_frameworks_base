@@ -40,7 +40,7 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 
-internal object SplitScreenHelper {
+internal object SplitScreenUtils {
     internal const val TIMEOUT_MS = 3_000L
     private const val DRAG_DURATION_MS = 1_000L
     private const val NOTIFICATION_SCROLLER = "notification_stack_scroller"
