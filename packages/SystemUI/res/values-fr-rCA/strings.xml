@@ -207,6 +207,7 @@
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> autre notification à l\'intérieur.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
     </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"L\'écran est verrouillé en mode paysage."</string>
@@ -257,6 +258,7 @@
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Écon. données activé"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="one">%d appareil</item>
+      <item quantity="many">%d devices</item>
       <item quantity="other">%d appareils</item>
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampe de poche"</string>
@@ -354,6 +356,7 @@
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite d\'utilisateurs atteinte"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> utilisateur.</item>
+      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> utilisateurs.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
@@ -543,10 +546,12 @@
     <string name="snoozed_for_time" msgid="7586689374860469469">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d heure</item>
+      <item quantity="many">%d hours</item>
       <item quantity="other">%d heures</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
       <item quantity="one">%d minute</item>
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économiseur de pile"</string>
@@ -773,6 +778,7 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'application pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
@@ -933,6 +939,7 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> application est active</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> d\'applications sont actives</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> applications sont actives</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nouvelle information"</string>
@@ -962,5 +969,5 @@
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode priorité"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"L\'alarme a été réglée"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"L\'appareil photo et le micro sont désactivés"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}one{# notification}other{# notifications}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}one{# notification}many{# de notifications}other{# notifications}}"</string>
 </resources>
