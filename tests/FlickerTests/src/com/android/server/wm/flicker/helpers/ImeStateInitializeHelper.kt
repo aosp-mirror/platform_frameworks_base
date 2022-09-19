@@ -25,10 +25,9 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 
 class ImeStateInitializeHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.IME_ACTIVITY_INITIALIZE_LAUNCHER_NAME,
+    launcherName: String = ActivityOptions.Ime.StateInitializeActivity.LABEL,
     component: ComponentNameMatcher =
-        ActivityOptions.IME_ACTIVITY_INITIALIZE_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
+        ActivityOptions.Ime.StateInitializeActivity.COMPONENT.toFlickerComponent(),
+    launcherStrategy: ILauncherStrategy =
+        LauncherStrategyFactory.getInstance(instr).launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy)

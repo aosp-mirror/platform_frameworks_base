@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.helpers
+package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.wm.shell.flicker.testapp.Components
 
-class FixedAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
+class LaunchBubbleHelper(instrumentation: Instrumentation) : StandardAppHelper(
     instrumentation,
-    Components.FixedActivity.LABEL,
-    Components.FixedActivity.COMPONENT.toFlickerComponent()
+    ActivityOptions.Bubbles.LaunchBubble.LABEL,
+    ActivityOptions.Bubbles.LaunchBubble.COMPONENT.toFlickerComponent()
 )

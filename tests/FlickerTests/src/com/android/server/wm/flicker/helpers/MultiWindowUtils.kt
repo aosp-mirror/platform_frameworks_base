@@ -14,20 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.helpers
+package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
 import android.content.Context
 import android.provider.Settings
+import android.util.Log
+import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import java.io.IOException
 
-class MultiWindowHelper(
+class MultiWindowUtils(
     instrumentation: Instrumentation,
     activityLabel: String,
     componentsInfo: ComponentNameMatcher
-) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
+) : StandardAppHelper(instrumentation, activityLabel, componentsInfo) {
 
     companion object {
+        fun executeShellCommand(instrumentation: Instrumentation, cmd: String) {
+            try {
+                SystemUtil.runShellCommand(instrumentation, cmd)
+            } catch (e: IOException) {
+                Log.e(MultiWindowUtils::class.simpleName, "executeShellCommand error! $e")
+            }
+        }
+
         fun getDevEnableNonResizableMultiWindow(context: Context): Int =
                 Settings.Global.getInt(context.contentResolver,
                         Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)

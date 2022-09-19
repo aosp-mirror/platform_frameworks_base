@@ -14,28 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.helpers
+package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
-import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
-import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
-import com.android.wm.shell.flicker.testapp.Components
 
-class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
+open class PipAppHelper(instrumentation: Instrumentation) : StandardAppHelper(
     instrumentation,
-    Components.PipActivity.LABEL,
-    Components.PipActivity.COMPONENT.toFlickerComponent()
+    ActivityOptions.Pip.LABEL,
+    ActivityOptions.Pip.COMPONENT.toFlickerComponent()
 ) {
     private val mediaSessionManager: MediaSessionManager
         get() = context.getSystemService(MediaSessionManager::class.java)
@@ -46,16 +41,11 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
             it.packageName == `package`
         }
 
-    fun clickObject(resId: String) {
+    open fun clickObject(resId: String) {
         val selector = By.res(`package`, resId)
         val obj = uiDevice.findObject(selector) ?: error("Could not find `$resId` object")
 
-        if (!isTelevision) {
-            obj.click()
-        } else {
-            focusOnObject(selector) || error("Could not focus on `$resId` object")
-            uiDevice.pressDPadCenter()
-        }
+        obj.click()
     }
 
     /**
@@ -84,20 +74,6 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
      */
     fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
         launchViaIntentAndWaitShown(wmHelper)
-
-    private fun focusOnObject(selector: BySelector): Boolean {
-        // We expect all the focusable UI elements to be arranged in a way so that it is possible
-        // to "cycle" over all them by clicking the D-Pad DOWN button, going back up to "the top"
-        // from "the bottom".
-        repeat(FOCUS_ATTEMPTS) {
-            uiDevice.findObject(selector)?.apply { if (isFocusedOrHasFocusedChild) return true }
-                ?: error("The object we try to focus on is gone.")
-
-            uiDevice.pressDPadDown()
-            uiDevice.waitForIdle()
-        }
-        return false
-    }
 
     fun clickEnterPipButton(wmHelper: WindowManagerStateHelper) {
         clickObject(ENTER_PIP_BUTTON_ID)
@@ -140,12 +116,8 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         "Use PipAppHelper.closePipWindow(wmHelper) instead",
         ReplaceWith("closePipWindow(wmHelper)")
     )
-    fun closePipWindow() {
-        if (isTelevision) {
-            uiDevice.closeTvPipWindow()
-        } else {
-            closePipWindow(WindowManagerStateHelper(mInstrumentation))
-        }
+    open fun closePipWindow() {
+        closePipWindow(WindowManagerStateHelper(mInstrumentation))
     }
 
     private fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
@@ -159,20 +131,16 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     /**
      * Taps the pip window and dismisses it by clicking on the X button.
      */
-    fun closePipWindow(wmHelper: WindowManagerStateHelper) {
-        if (isTelevision) {
-            uiDevice.closeTvPipWindow()
-        } else {
-            val windowRect = getWindowRect(wmHelper)
-            uiDevice.click(windowRect.centerX(), windowRect.centerY())
-            // search and interact with the dismiss button
-            val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
-            uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
-            val dismissPipObject = uiDevice.findObject(dismissSelector)
-                ?: error("PIP window dismiss button not found")
-            val dismissButtonBounds = dismissPipObject.visibleBounds
-            uiDevice.click(dismissButtonBounds.centerX(), dismissButtonBounds.centerY())
-        }
+    open fun closePipWindow(wmHelper: WindowManagerStateHelper) {
+        val windowRect = getWindowRect(wmHelper)
+        uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        // search and interact with the dismiss button
+        val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
+        uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
+        val dismissPipObject = uiDevice.findObject(dismissSelector)
+            ?: error("PIP window dismiss button not found")
+        val dismissButtonBounds = dismissPipObject.visibleBounds
+        uiDevice.click(dismissButtonBounds.centerX(), dismissButtonBounds.centerY())
 
         // Wait for animation to complete.
         wmHelper.StateSyncBuilder()
@@ -213,7 +181,6 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     }
 
     companion object {
-        private const val FOCUS_ATTEMPTS = 20
         private const val ENTER_PIP_BUTTON_ID = "enter_pip"
         private const val WITH_CUSTOM_ACTIONS_BUTTON_ID = "with_custom_actions"
         private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"

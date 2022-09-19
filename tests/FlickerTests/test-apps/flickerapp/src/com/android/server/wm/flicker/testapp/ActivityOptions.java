@@ -136,7 +136,7 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".LaunchNewActivity");
     }
 
-    public static class PipActivity {
+    public static class Pip {
         // Test App > Pip Activity
         public static final String LABEL = "PipActivity";
         public static final String MENU_ACTION_NO_OP = "No-Op";
@@ -163,7 +163,7 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".PipActivity");
     }
 
-    public static class SplitScreenActivity {
+    public static class SplitScreen {
         public static class Primary {
             public static final String LABEL = "SplitScreenPrimaryActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
