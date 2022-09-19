@@ -18919,8 +18919,8 @@ package android.inputmethodservice {
     method public android.view.View onCreateCandidatesView();
     method public android.view.View onCreateExtractTextView();
     method @Nullable public android.view.inputmethod.InlineSuggestionsRequest onCreateInlineSuggestionsRequest(@NonNull android.os.Bundle);
-    method public android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
-    method public android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
+    method @Deprecated public android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
+    method @Deprecated public android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
     method public android.view.View onCreateInputView();
     method protected void onCurrentInputMethodSubtypeChanged(android.view.inputmethod.InputMethodSubtype);
     method public void onDisplayCompletions(android.view.inputmethod.CompletionInfo[]);
