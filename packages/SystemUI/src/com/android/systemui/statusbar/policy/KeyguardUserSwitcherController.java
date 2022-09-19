@@ -505,7 +505,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
-            v.setDisabledByAdmin(getController().isDisabledByAdmin(item));
+            v.setDisabledByAdmin(item.isDisabledByAdmin());
             v.setEnabled(item.isSwitchToEnabled);
             UserSwitcherController.setSelectableAlpha(v);
 

@@ -40,7 +40,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -49,7 +48,6 @@ import android.view.WindowManagerGlobal;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.collection.SimpleArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -139,9 +137,6 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final SimpleArrayMap<UserRecord, EnforcedAdmin> mEnforcedAdminByUserRecord =
-            new SimpleArrayMap<>();
-    private final ArraySet<UserRecord> mDisabledByAdmin = new ArraySet<>();
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -346,7 +341,7 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent, false /* isAddUser */,
                                 false /* isRestricted */, canSwitchUsers,
-                                false /* isAddSupervisedUser */);
+                                false /* isAddSupervisedUser */, null /* enforcedAdmin */);
                     } else if (info.supportsSwitchToByUser()) {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
@@ -361,7 +356,8 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                         }
                         records.add(new UserRecord(info, picture, false /* isGuest */,
                                 isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                switchToEnabled, false /* isAddSupervisedUser */));
+                                switchToEnabled, false /* isAddSupervisedUser */,
+                                null /* enforcedAdmin */));
                     }
                 }
             }
@@ -372,18 +368,28 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
                     // we will just use it as an indicator for "Resetting guest...".
                     // Otherwise, default to canSwitchUsers.
                     boolean isSwitchToGuestEnabled = !mGuestIsResetting.get() && canSwitchUsers;
-                    guestRecord = new UserRecord(null /* info */, null /* picture */,
-                            true /* isGuest */, false /* isCurrent */,
-                            false /* isAddUser */, false /* isRestricted */,
-                            isSwitchToGuestEnabled, false /* isAddSupervisedUser */);
-                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
+                    guestRecord = new UserRecord(
+                            null /* info */,
+                            null /* picture */,
+                            true /* isGuest */,
+                            false /* isCurrent */,
+                            false /* isAddUser */,
+                            false /* isRestricted */,
+                            isSwitchToGuestEnabled,
+                            false /* isAddSupervisedUser */,
+                            getEnforcedAdmin());
                     records.add(guestRecord);
                 } else if (canCreateGuest(guestRecord != null)) {
-                    guestRecord = new UserRecord(null /* info */, null /* picture */,
-                            true /* isGuest */, false /* isCurrent */,
-                            false /* isAddUser */, createIsRestricted(), canSwitchUsers,
-                            false /* isAddSupervisedUser */);
-                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
+                    guestRecord = new UserRecord(
+                            null /* info */,
+                            null /* picture */,
+                            true /* isGuest */,
+                            false /* isCurrent */,
+                            false /* isAddUser */,
+                            createIsRestricted(),
+                            canSwitchUsers,
+                            false /* isAddSupervisedUser */,
+                            getEnforcedAdmin());
                     records.add(guestRecord);
                 }
             } else {
@@ -391,19 +397,30 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
             }
 
             if (canCreateUser()) {
-                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                        false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                        createIsRestricted(), canSwitchUsers,
-                        false /* isAddSupervisedUser */);
-                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                UserRecord addUserRecord = new UserRecord(
+                        null /* info */,
+                        null /* picture */,
+                        false /* isGuest */,
+                        false /* isCurrent */,
+                        true /* isAddUser */,
+                        createIsRestricted(),
+                        canSwitchUsers,
+                        false /* isAddSupervisedUser */,
+                        getEnforcedAdmin());
                 records.add(addUserRecord);
             }
 
             if (canCreateSupervisedUser()) {
-                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                        false /* isGuest */, false /* isCurrent */, false /* isAddUser */,
-                        createIsRestricted(), canSwitchUsers, true /* isAddSupervisedUser */);
-                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                UserRecord addUserRecord = new UserRecord(
+                        null /* info */,
+                        null /* picture */,
+                        false /* isGuest */,
+                        false /* isCurrent */,
+                        false /* isAddUser */,
+                        createIsRestricted(),
+                        canSwitchUsers,
+                        true /* isAddSupervisedUser */,
+                        getEnforcedAdmin());
                 records.add(addUserRecord);
             }
 
@@ -964,27 +981,19 @@ public class UserSwitcherControllerOldImpl implements UserSwitcherController {
         return mKeyguardStateController.isShowing();
     }
 
-    @Override
     @Nullable
-    public EnforcedAdmin getEnforcedAdmin(UserRecord record) {
-        return mEnforcedAdminByUserRecord.get(record);
-    }
-
-    @Override
-    public boolean isDisabledByAdmin(UserRecord record) {
-        return mDisabledByAdmin.contains(record);
-    }
-
-    private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
-        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
-                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId());
-        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
-                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId())) {
-            mDisabledByAdmin.add(record);
-            mEnforcedAdminByUserRecord.put(record, admin);
+    private EnforcedAdmin getEnforcedAdmin() {
+        final EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
+                mContext,
+                UserManager.DISALLOW_ADD_USER,
+                mUserTracker.getUserId());
+        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(
+                mContext,
+                UserManager.DISALLOW_ADD_USER,
+                mUserTracker.getUserId())) {
+            return admin;
         } else {
-            mDisabledByAdmin.remove(record);
-            mEnforcedAdminByUserRecord.put(record, null);
+            return null;
         }
     }
 

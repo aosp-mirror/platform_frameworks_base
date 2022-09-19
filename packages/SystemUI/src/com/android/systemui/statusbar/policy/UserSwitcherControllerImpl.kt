@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy
 
 import android.content.Intent
 import android.view.View
-import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.qs.user.UserSwitchDialogController
@@ -210,22 +209,6 @@ constructor(
             } else {
                 _oldImpl.isKeyguardShowing
             }
-
-    override fun getEnforcedAdmin(record: UserRecord): RestrictedLockUtils.EnforcedAdmin? {
-        return if (isNewImpl) {
-            notYetImplemented()
-        } else {
-            _oldImpl.getEnforcedAdmin(record)
-        }
-    }
-
-    override fun isDisabledByAdmin(record: UserRecord): Boolean {
-        return if (isNewImpl) {
-            notYetImplemented()
-        } else {
-            _oldImpl.isDisabledByAdmin(record)
-        }
-    }
 
     override fun startActivity(intent: Intent) {
         if (isNewImpl) {

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy
 import android.annotation.UserIdInt
 import android.content.Intent
 import android.view.View
-import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
 import com.android.systemui.Dumpable
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower
 import com.android.systemui.user.data.source.UserRecord
@@ -129,12 +128,6 @@ interface UserSwitcherController : Dumpable {
 
     /** Whether keyguard is showing. */
     val isKeyguardShowing: Boolean
-
-    /** Returns the [EnforcedAdmin] for the given record, or `null` if there isn't one. */
-    fun getEnforcedAdmin(record: UserRecord): EnforcedAdmin?
-
-    /** Returns `true` if the given record is disabled by the admin; `false` otherwise. */
-    fun isDisabledByAdmin(record: UserRecord): Boolean
 
     /** Starts an activity with the given [Intent]. */
     fun startActivity(intent: Intent)
