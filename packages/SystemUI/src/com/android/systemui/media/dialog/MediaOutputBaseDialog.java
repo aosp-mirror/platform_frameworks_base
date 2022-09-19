@@ -99,6 +99,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private Button mStopButton;
     private Button mAppButton;
     private int mListMaxHeight;
+    private int mItemHeight;
     private WallpaperColors mWallpaperColors;
     private Executor mExecutor;
     private boolean mShouldLaunchLeBroadcastDialog;
@@ -106,10 +107,12 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     MediaOutputBaseAdapter mAdapter;
 
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
+        ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
+        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight;
+        int correctHeight = Math.min(totalItemsHeight, mListMaxHeight);
         // Set max height for list
-        if (mDeviceListLayout.getHeight() > mListMaxHeight) {
-            ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
-            params.height = mListMaxHeight;
+        if (correctHeight != params.height) {
+            params.height = correctHeight;
             mDeviceListLayout.setLayoutParams(params);
         }
     };
@@ -212,6 +215,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mLayoutManager = new LayoutManagerWrapper(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_max_height);
+        mItemHeight = context.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_list_item_height);
         mExecutor = Executors.newSingleThreadExecutor();
     }
 
@@ -246,8 +251,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDeviceListLayout.getViewTreeObserver().addOnGlobalLayoutListener(
                 mDeviceListLayoutListener);
         // Init device list
+        mLayoutManager.setAutoMeasureEnabled(true);
         mDevicesRecyclerView.setLayoutManager(mLayoutManager);
         mDevicesRecyclerView.setAdapter(mAdapter);
+        mDevicesRecyclerView.setHasFixedSize(false);
         // Init header icon
         mHeaderIcon.setOnClickListener(v -> onHeaderIconClick());
         // Init bottom buttons
