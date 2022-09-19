@@ -4515,7 +4515,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Clean-up disabled broadcast receivers.
         for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
             mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                    packageName, disabledClasses, userId, true);
+                    packageName, disabledClasses, userId);
         }
 
     }
@@ -4524,7 +4524,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean didSomething = false;
         for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
             didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                    null, null, userId, true);
+                    null, null, userId);
         }
         return didSomething;
     }
@@ -4660,7 +4660,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (doit) {
             for (i = mBroadcastQueues.length - 1; i >= 0; i--) {
                 didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                        packageName, null, userId, doit);
+                        packageName, null, userId);
             }
         }
 

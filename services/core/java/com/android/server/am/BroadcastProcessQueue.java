@@ -27,8 +27,11 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
+import com.android.server.am.BroadcastRecord.DeliveryState;
 
 import java.util.ArrayDeque;
+import java.util.Iterator;
+import java.util.function.BiPredicate;
 
 /**
  * Queue of pending {@link BroadcastRecord} entries intended for delivery to a
@@ -154,6 +157,33 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Skip any broadcasts matching the given predicate, marking them as
+     * {@link BroadcastRecord#DELIVERY_SKIPPED}. Typically used when a package
+     * or components have been disabled.
+     * <p>
+     * Note that we carefully preserve the broadcast in our queue to ensure that
+     * we follow our normal flow for "finishing" a broadcast, which is where we
+     * handle things like ordered broadcasts.
+     */
+    public boolean skipMatchingBroadcasts(@NonNull BiPredicate<BroadcastRecord, Object> predicate) {
+        boolean didSomething = false;
+        final Iterator<SomeArgs> it = mPending.iterator();
+        while (it.hasNext()) {
+            final SomeArgs args = it.next();
+            final BroadcastRecord record = (BroadcastRecord) args.arg1;
+            final int index = args.argi1;
+            final Object receiver = record.receivers.get(index);
+            if (predicate.test(record, receiver)) {
+                record.setDeliveryState(index, BroadcastRecord.DELIVERY_SKIPPED);
+                didSomething = true;
+            }
+        }
+        // TODO: also check any active broadcast once we have a better "nonce"
+        // representing each scheduled broadcast to avoid races
+        return didSomething;
+    }
+
+    /**
      * Update if this process is in the "cached" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
@@ -240,7 +270,12 @@ class BroadcastProcessQueue {
                 traceTrackName, hashCode());
     }
 
-    public void setActiveDeliveryState(int deliveryState) {
+    public @DeliveryState int getActiveDeliveryState() {
+        checkState(isActive(), "isActive");
+        return mActive.delivery[mActiveIndex];
+    }
+
+    public void setActiveDeliveryState(@DeliveryState int deliveryState) {
         checkState(isActive(), "isActive");
         mActive.setDeliveryState(mActiveIndex, deliveryState);
 

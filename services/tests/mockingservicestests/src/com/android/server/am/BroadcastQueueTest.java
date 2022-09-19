@@ -19,13 +19,16 @@ package com.android.server.am;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
@@ -58,6 +61,7 @@ import com.android.server.am.ActivityManagerService.Injector;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,11 +71,14 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -136,6 +143,9 @@ public class BroadcastQueueTest {
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
         doNothing().when(mPackageManagerInt).setPackageStoppedState(any(), anyBoolean(), anyInt());
+        doAnswer((invocation) -> {
+            return getUidForPackage(invocation.getArgument(0));
+        }).when(mPackageManagerInt).getPackageUid(any(), anyLong(), eq(UserHandle.USER_SYSTEM));
 
         final ActivityManagerService realAms = new ActivityManagerService(
                 new TestInjector(mContext), mServiceThreadRule.getThread());
@@ -187,6 +197,11 @@ public class BroadcastQueueTest {
         } else {
             throw new UnsupportedOperationException();
         }
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mHandlerThread.quit();
     }
 
     private class TestInjector extends Injector {
@@ -313,6 +328,12 @@ public class BroadcastQueueTest {
                 false, false, false, UserHandle.USER_SYSTEM, false, null, false, null);
     }
 
+    private ArgumentMatcher<Intent> filterEquals(Intent intent) {
+        return (test) -> {
+            return intent.filterEquals(test);
+        };
+    }
+
     private ArgumentMatcher<Intent> filterEqualsIgnoringComponent(Intent intent) {
         final Intent intentClean = new Intent(intent);
         intentClean.setComponent(null);
@@ -339,12 +360,23 @@ public class BroadcastQueueTest {
                 any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
     }
 
+    private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app, Intent intent,
+            ComponentName component) throws Exception {
+        final Intent targetedIntent = new Intent(intent);
+        targetedIntent.setComponent(component);
+        verify(app.getThread(), mode).scheduleReceiver(
+                argThat(filterEquals(targetedIntent)), any(), any(), anyInt(), any(),
+                any(), eq(false), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
     private void verifyScheduleRegisteredReceiver(ProcessRecord app, Intent intent)
             throws Exception {
         verify(app.getThread()).scheduleRegisteredReceiver(any(),
                 argThat(filterEqualsIgnoringComponent(intent)), anyInt(), any(), any(),
                 anyBoolean(), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
     }
+
+    private static final int USER_GUEST = 11;
 
     private static final String PACKAGE_RED = "com.example.red";
     private static final String PACKAGE_GREEN = "com.example.green";
@@ -528,5 +560,45 @@ public class BroadcastQueueTest {
 
         waitForIdle();
         verify(mAms).appNotResponding(eq(receiverApp), any());
+    }
+
+    /**
+     * Verify that we cleanup a disabled component, skipping a pending dispatch
+     * of broadcast to that component.
+     */
+    @Test
+    public void testCleanup() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        // Pause event processing until we can both enqueue and dequeue
+        final int token = mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE)))));
+
+        synchronized (mAms) {
+            mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_GREEN, Set.of(CLASS_GREEN),
+                    UserHandle.USER_SYSTEM);
+
+            // Also try clearing out other unrelated things that should leave
+            // the final receiver intact
+            mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_RED, null,
+                    UserHandle.USER_SYSTEM);
+            mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
+        }
+
+        mHandlerThread.getLooper().getQueue().removeSyncBarrier(token);
+
+        waitForIdle();
+        verifyScheduleReceiver(times(1), receiverApp, airplane,
+                new ComponentName(PACKAGE_GREEN, CLASS_RED));
+        verifyScheduleReceiver(never(), receiverApp, airplane,
+                new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
+        verifyScheduleReceiver(times(1), receiverApp, airplane,
+                new ComponentName(PACKAGE_GREEN, CLASS_BLUE));
     }
 }

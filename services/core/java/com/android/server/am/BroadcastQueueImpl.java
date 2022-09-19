@@ -1693,18 +1693,15 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     }
 
     public boolean cleanupDisabledPackageReceiversLocked(
-            String packageName, Set<String> filterByClasses, int userId, boolean doit) {
+            String packageName, Set<String> filterByClasses, int userId) {
         boolean didSomething = false;
         for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
             didSomething |= mParallelBroadcasts.get(i).cleanupDisabledPackageReceiversLocked(
-                    packageName, filterByClasses, userId, doit);
-            if (!doit && didSomething) {
-                return true;
-            }
+                    packageName, filterByClasses, userId, true);
         }
 
         didSomething |= mDispatcher.cleanupDisabledPackageReceiversLocked(packageName,
-                filterByClasses, userId, doit);
+                filterByClasses, userId, true);
 
         return didSomething;
     }

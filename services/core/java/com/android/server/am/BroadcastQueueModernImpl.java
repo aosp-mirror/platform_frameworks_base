@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,6 +44,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -60,6 +62,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Alternative {@link BroadcastQueue} implementation which pivots broadcasts to
@@ -466,6 +470,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
+
+        // If someone already skipped us, finish immediately; typically due to a
+        // component being disabled
+        if (queue.getActiveDeliveryState() == BroadcastRecord.DELIVERY_SKIPPED) {
+            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
+            return;
+        }
+
         queue.setActiveDeliveryState(BroadcastRecord.DELIVERY_SCHEDULED);
 
         final ProcessRecord app = queue.app;
@@ -579,11 +591,60 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    private static final Predicate<BroadcastProcessQueue> QUEUE_PREDICATE_ANY =
+            (q) -> true;
+    private static final BiPredicate<BroadcastRecord, Object> BROADCAST_PREDICATE_ANY =
+            (r, o) -> true;
+
     @Override
-    public boolean cleanupDisabledPackageReceiversLocked(String packageName,
-            Set<String> filterByClasses, int userId, boolean doit) {
-        // TODO: implement
-        return false;
+    public boolean cleanupDisabledPackageReceiversLocked(@Nullable String packageName,
+            @Nullable Set<String> filterByClasses, int userId) {
+        final Predicate<BroadcastProcessQueue> queuePredicate;
+        final BiPredicate<BroadcastRecord, Object> broadcastPredicate;
+        if (packageName != null) {
+            // Caller provided a package and user ID, so we're focused on queues
+            // belonging to a specific UID
+            final int uid = mService.mPackageManagerInt.getPackageUid(
+                    packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            queuePredicate = (q) -> {
+                return q.uid == uid;
+            };
+
+            // If caller provided a set of classes, filter to skip only those;
+            // otherwise we skip all broadcasts
+            if (filterByClasses != null) {
+                broadcastPredicate = (r, o) -> {
+                    if (o instanceof ResolveInfo) {
+                        return filterByClasses.contains(((ResolveInfo) o).activityInfo.name);
+                    } else {
+                        return false;
+                    }
+                };
+            } else {
+                broadcastPredicate = BROADCAST_PREDICATE_ANY;
+            }
+        } else {
+            // Caller is cleaning up an entire user ID; skip all broadcasts
+            queuePredicate = (q) -> {
+                return UserHandle.getUserId(q.uid) == userId;
+            };
+            broadcastPredicate = BROADCAST_PREDICATE_ANY;
+        }
+
+        // Note that we carefully preserve any "skipped" broadcasts in their
+        // queues so that we follow our normal flow for "finishing" a broadcast,
+        // which is where we handle things like ordered broadcasts.
+        boolean didSomething = false;
+        for (int i = 0; i < mProcessQueues.size(); i++) {
+            BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
+            while (leaf != null) {
+                if (queuePredicate.test(leaf)) {
+                    didSomething |= leaf.skipMatchingBroadcasts(broadcastPredicate);
+                }
+                leaf = leaf.processNameNext;
+            }
+        }
+        return didSomething;
     }
 
     @Override
