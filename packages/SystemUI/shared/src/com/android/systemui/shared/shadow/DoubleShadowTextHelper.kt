@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.complication
+package com.android.systemui.shared.shadow
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.widget.TextView
-import androidx.annotation.ColorInt
 
-class DoubleShadowTextHelper
-constructor(
-    private val keyShadowInfo: ShadowInfo,
-    private val ambientShadowInfo: ShadowInfo,
-) {
+object DoubleShadowTextHelper {
     data class ShadowInfo(
         val blur: Float,
         val offsetX: Float = 0f,
         val offsetY: Float = 0f,
-        @ColorInt val color: Int
+        val alpha: Float
     )
 
-    fun applyShadows(view: TextView, canvas: Canvas, onDrawCallback: () -> Unit) {
+    fun applyShadows(
+        keyShadowInfo: ShadowInfo,
+        ambientShadowInfo: ShadowInfo,
+        view: TextView,
+        canvas: Canvas,
+        onDrawCallback: () -> Unit
+    ) {
         // We enhance the shadow by drawing the shadow twice
         view.paint.setShadowLayer(
             ambientShadowInfo.blur,
             ambientShadowInfo.offsetX,
             ambientShadowInfo.offsetY,
-            ambientShadowInfo.color
+            Color.argb(ambientShadowInfo.alpha, 0f, 0f, 0f)
         )
         onDrawCallback()
         canvas.save()
@@ -53,7 +55,7 @@ constructor(
             keyShadowInfo.blur,
             keyShadowInfo.offsetX,
             keyShadowInfo.offsetY,
-            keyShadowInfo.color
+            Color.argb(keyShadowInfo.alpha, 0f, 0f, 0f)
         )
         onDrawCallback()
         canvas.restore()

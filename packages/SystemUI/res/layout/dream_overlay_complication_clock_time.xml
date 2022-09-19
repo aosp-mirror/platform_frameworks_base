@@ -14,8 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<com.android.systemui.dreams.complication.DoubleShadowTextClock
+<com.android.systemui.shared.shadow.DoubleShadowTextClock
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/time_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -25,4 +26,13 @@
     android:format24Hour="@string/dream_time_complication_24_hr_time_format"
     android:fontFeatureSettings="pnum, lnum"
     android:letterSpacing="0.02"
-    android:textSize="@dimen/dream_overlay_complication_clock_time_text_size"/>
+    android:textSize="@dimen/dream_overlay_complication_clock_time_text_size"
+    app:keyShadowBlur="@dimen/dream_overlay_clock_key_text_shadow_radius"
+    app:keyShadowOffsetX="@dimen/dream_overlay_clock_key_text_shadow_dx"
+    app:keyShadowOffsetY="@dimen/dream_overlay_clock_key_text_shadow_dy"
+    app:keyShadowAlpha="0.3"
+    app:ambientShadowBlur="@dimen/dream_overlay_clock_ambient_text_shadow_radius"
+    app:ambientShadowOffsetX="@dimen/dream_overlay_clock_ambient_text_shadow_dx"
+    app:ambientShadowOffsetY="@dimen/dream_overlay_clock_ambient_text_shadow_dy"
+    app:ambientShadowAlpha="0.3"
+/>
