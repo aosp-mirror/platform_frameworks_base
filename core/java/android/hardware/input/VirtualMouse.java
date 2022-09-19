@@ -25,8 +25,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.MotionEvent;
 
-import java.io.Closeable;
-
 /**
  * A virtual mouse representing a relative input mechanism on a remote device, such as a mouse or
  * trackpad.
@@ -37,25 +35,11 @@ import java.io.Closeable;
  * @hide
  */
 @SystemApi
-public class VirtualMouse implements Closeable {
-
-    private final IVirtualDevice mVirtualDevice;
-    private final IBinder mToken;
+public class VirtualMouse extends VirtualInputDevice {
 
     /** @hide */
     public VirtualMouse(IVirtualDevice virtualDevice, IBinder token) {
-        mVirtualDevice = virtualDevice;
-        mToken = token;
-    }
-
-    @Override
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void close() {
-        try {
-            mVirtualDevice.unregisterInputDevice(mToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        super(virtualDevice, token);
     }
 
     /**
