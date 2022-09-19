@@ -417,10 +417,4 @@ public interface InputMethod {
     default void removeStylusHandwritingWindow() {
         // intentionally empty
     }
-
-    /**
-     * Return {@code true} if the {@link InputMethodService} is destroyed.
-     * @hide
-     */
-    boolean isServiceDestroyed();
 }
