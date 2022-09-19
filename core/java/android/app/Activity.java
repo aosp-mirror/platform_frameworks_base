@@ -89,6 +89,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.text.Selection;
@@ -8304,13 +8305,15 @@ public class Activity extends ContextThemeWrapper
         mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
         mShouldDockBigOverlays = getResources().getBoolean(R.bool.config_dockBigOverlayWindows);
         restoreHasCurrentPermissionRequest(icicle);
+        final long startTime = SystemClock.uptimeMillis();
         if (persistentState != null) {
             onCreate(icicle, persistentState);
         } else {
             onCreate(icicle);
         }
+        final long duration = SystemClock.uptimeMillis() - startTime;
         EventLogTags.writeWmOnCreateCalled(mIdent, getComponentName().getClassName(),
-                "performCreate");
+                "performCreate", duration);
         mActivityTransitionState.readState(icicle);
 
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
@@ -8332,8 +8335,11 @@ public class Activity extends ContextThemeWrapper
         mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();
+        final long startTime = SystemClock.uptimeMillis();
         mInstrumentation.callActivityOnStart(this);
-        EventLogTags.writeWmOnStartCalled(mIdent, getComponentName().getClassName(), reason);
+        final long duration = SystemClock.uptimeMillis() - startTime;
+        EventLogTags.writeWmOnStartCalled(mIdent, getComponentName().getClassName(), reason,
+                duration);
 
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -8410,8 +8416,11 @@ public class Activity extends ContextThemeWrapper
             }
 
             mCalled = false;
+            final long startTime = SystemClock.uptimeMillis();
             mInstrumentation.callActivityOnRestart(this);
-            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(), reason);
+            final long duration = SystemClock.uptimeMillis() - startTime;
+            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(), reason,
+                    duration);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -8438,9 +8447,12 @@ public class Activity extends ContextThemeWrapper
         getAutofillClientController().onActivityPerformResume(followedByPause);
 
         mCalled = false;
+        final long startTime = SystemClock.uptimeMillis();
         // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
-        EventLogTags.writeWmOnResumeCalled(mIdent, getComponentName().getClassName(), reason);
+        final long duration = SystemClock.uptimeMillis() - startTime;
+        EventLogTags.writeWmOnResumeCalled(mIdent, getComponentName().getClassName(), reason,
+                duration);
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
@@ -8483,9 +8495,11 @@ public class Activity extends ContextThemeWrapper
         mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
         mCalled = false;
+        final long startTime = SystemClock.uptimeMillis();
         onPause();
+        final long duration = SystemClock.uptimeMillis() - startTime;
         EventLogTags.writeWmOnPausedCalled(mIdent, getComponentName().getClassName(),
-                "performPause");
+                "performPause", duration);
         mResumed = false;
         if (!mCalled && getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.GINGERBREAD) {
@@ -8529,8 +8543,11 @@ public class Activity extends ContextThemeWrapper
             mFragments.dispatchStop();
 
             mCalled = false;
+            final long startTime = SystemClock.uptimeMillis();
             mInstrumentation.callActivityOnStop(this);
-            EventLogTags.writeWmOnStopCalled(mIdent, getComponentName().getClassName(), reason);
+            final long duration = SystemClock.uptimeMillis() - startTime;
+            EventLogTags.writeWmOnStopCalled(mIdent, getComponentName().getClassName(), reason,
+                    duration);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -8564,9 +8581,11 @@ public class Activity extends ContextThemeWrapper
         mDestroyed = true;
         mWindow.destroy();
         mFragments.dispatchDestroy();
+        final long startTime = SystemClock.uptimeMillis();
         onDestroy();
+        final long duration = SystemClock.uptimeMillis() - startTime;
         EventLogTags.writeWmOnDestroyCalled(mIdent, getComponentName().getClassName(),
-                "performDestroy");
+                "performDestroy", duration);
         mFragments.doLoaderDestroy();
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
