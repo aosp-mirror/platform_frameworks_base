@@ -210,10 +210,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
 
         // After the orientation of activity is changed, the display is rotated, the aspect
-        // ratio should be the same (bounds=[100, 0 - 800, 583], appBounds=[100, 0 - 800, 583]).
+        // ratio should be the same (bounds=[0, 0 - 800, 583], appBounds=[100, 0 - 800, 583]).
         assertEquals(appBounds.width(), appBounds.height() * aspectRatio, 0.5f /* delta */);
-        // The notch is no longer on top.
-        assertEquals(appBounds, mActivity.getBounds());
         // Activity max bounds are sandboxed.
         assertActivityMaxBoundsSandboxed();
 
@@ -467,8 +465,6 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(ROTATION_270, mTask.getWindowConfiguration().getRotation());
 
         assertEquals(origBounds.width(), currentBounds.width());
-        // The notch is on horizontal side, so current height changes from 1460 to 1400.
-        assertEquals(origBounds.height() - notchHeight, currentBounds.height());
         // Make sure the app size is the same
         assertEquals(origAppBounds.width(), appBounds.width());
         assertEquals(origAppBounds.height(), appBounds.height());
@@ -2354,7 +2350,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
         Rect mBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
-        assertEquals(mBounds, new Rect(0, 750, 1000, 1950));
+        assertEquals(mBounds, new Rect(0, 900, 1000, 2000));
 
         DisplayPolicy displayPolicy = mActivity.getDisplayContent().getDisplayPolicy();
         LetterboxDetails[] expectedLetterboxDetails = {new LetterboxDetails(
@@ -2534,6 +2530,64 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyAspectRatio_activityAlignWithParentAppVertical() {
+        // The display's app bounds will be (0, 100, 1000, 2350)
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500)
+                .setCanRotate(false)
+                .setCutout(0, 100, 0, 150)
+                .build();
+
+        setUpApp(display);
+        prepareUnresizable(mActivity, 2.1f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
+        // The activity height is 2100 and the display's app bounds height is 2250, so the activity
+        // can be aligned inside parentAppBounds
+        assertEquals(mActivity.getBounds(), new Rect(0, 0, 1000, 2200));
+    }
+    @Test
+    public void testApplyAspectRatio_activityCannotAlignWithParentAppVertical() {
+        // The display's app bounds will be (0, 100, 1000, 2150)
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2300)
+                .setCanRotate(false)
+                .setCutout(0, 100, 0, 150)
+                .build();
+
+        setUpApp(display);
+        prepareUnresizable(mActivity, 2.1f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
+        // The activity height is 2100 and the display's app bounds height is 2050, so the activity
+        // cannot be aligned inside parentAppBounds and it will fill the parentBounds of the display
+        assertEquals(mActivity.getBounds(), display.getBounds());
+    }
+
+    @Test
+    public void testApplyAspectRatio_activityAlignWithParentAppHorizontal() {
+        // The display's app bounds will be (100, 0, 2350, 1000)
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 2500, 1000)
+                .setCanRotate(false)
+                .setCutout(100, 0, 150, 0)
+                .build();
+
+        setUpApp(display);
+        prepareUnresizable(mActivity, 2.1f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
+        // The activity width is 2100 and the display's app bounds width is 2250, so the activity
+        // can be aligned inside parentAppBounds
+        assertEquals(mActivity.getBounds(), new Rect(175, 0, 2275, 1000));
+    }
+    @Test
+    public void testApplyAspectRatio_activityCannotAlignWithParentAppHorizontal() {
+        // The display's app bounds will be (100, 0, 2150, 1000)
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 2300, 1000)
+                .setCanRotate(false)
+                .setCutout(100, 0, 150, 0)
+                .build();
+
+        setUpApp(display);
+        prepareUnresizable(mActivity, 2.1f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
+        // The activity width is 2100 and the display's app bounds width is 2050, so the activity
+        // cannot be aligned inside parentAppBounds and it will fill the parentBounds of the display
+        assertEquals(mActivity.getBounds(), display.getBounds());
+    }
+
+    @Test
     public void testUpdateResolvedBoundsHorizontalPosition_activityFillParentWidth() {
         // When activity width equals parent width, multiplier shouldn't have any effect.
         assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
@@ -2606,6 +2660,25 @@ public class SizeCompatTests extends WindowTestsBase {
                 /* sizeCompatUnscaled */ new Rect(700, 700, 2100, 1400),
                 // After the display is resized to (1400, 700).
                 /* sizeCompatScaled */ new Rect(0, 1050, 700, 1400));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsPosition_alignToTop() {
+        final int notchHeight = 100;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2800)
+                .setNotch(notchHeight)
+                .build();
+        setUpApp(display);
+
+        // Prepare unresizable activity with max aspect ratio
+        prepareUnresizable(mActivity, /* maxAspect */ 1.1f, SCREEN_ORIENTATION_UNSPECIFIED);
+
+        Rect mBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
+        Rect appBounds = new Rect(mActivity.getWindowConfiguration().getAppBounds());
+        // The insets should be cut for aspect ratio and then added back because the appBounds
+        // are aligned to the top of the parentAppBounds
+        assertEquals(mBounds, new Rect(0, 0, 1000, 1200));
+        assertEquals(appBounds, new Rect(0, notchHeight, 1000, 1200));
     }
 
     private void assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
