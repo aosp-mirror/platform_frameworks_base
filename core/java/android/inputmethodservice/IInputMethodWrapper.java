@@ -147,14 +147,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @MainThread
     @Override
     public void executeMessage(Message msg) {
-        final InputMethod inputMethod = mInputMethod.get();
+        InputMethod inputMethod = mInputMethod.get();
         // Need a valid reference to the inputMethod for everything except a dump.
         if (inputMethod == null && msg.what != DO_DUMP) {
             Log.w(TAG, "Input method reference was null, ignoring message: " + msg.what);
-            return;
-        }
-        if (inputMethod != null && inputMethod.isServiceDestroyed() && msg.what != DO_DUMP) {
-            Log.w(TAG, "InputMethodService was destroyed, ignoring message: " + msg.what);
             return;
         }
 
