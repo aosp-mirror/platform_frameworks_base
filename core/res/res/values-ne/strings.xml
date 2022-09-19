@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी राख्न आफ्नो स्क्रिन लक हाल्नुहोस्"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिन्ट पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिन्ट सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"अर्को फिंगरप्रिन्ट प्रयोग गरी हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ज्यादै उज्यालो छ"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"पावर बटन प्रेस गरेको कुरा पत्ता लाग्यो"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"सेन्सरमा सही तरिकाले औँला राखेर हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"हरेक पटक आफ्नो औँला थोरै यताउता सार्नुहोस्"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"अनुहार प्रमाणीकरण गरियो, कृपया पुष्टि गर्नुहोस् थिच्नुहोस्"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"औँठाछाप हार्डवेयर उपलब्ध छैन।"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिन्ट सेटअप गर्न सकिएन"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिन्ट सेट अप गर्ने समय सकियो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिन्ट सञ्चालन रद्द गरियो।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"प्रयोगकर्ताले फिंगरप्रिन्टसम्बन्धी कारबाही रद्द गर्नुभयो।"</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"निकै धेरै पटक प्रयास गरिसकिएको छ। बरु स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"निकै धेरै पटक प्रयास गरिसकिएको छ। बरु स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"फिंगरप्रिन्ट पहिचान गर्ने प्रक्रिया अघि बढाउन सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कुनै पनि फिंगरप्रिन्ट दर्ता गरिएको छैन।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"यो डिभाइसमा कुनै पनि फिंगरप्रिन्ट सेन्सर छैन।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"केही समयका लागि सेन्सर असक्षम पारियो।"</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"फिंगरप्रिन्ट सेन्सर मर्मत गर्ने सेवा प्रदायक कम्पनीमा सम्पर्क गर्नुहोस्।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"तपाईंको फेस मोडेल सिर्जना गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ज्यादै चम्किलो। अझ मधुरो प्रकाश प्रयोग गरी हेर्नु…"</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"पर्याप्त उज्यालो छैन"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"फोन अझै पर सार्नुहोस्"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"फोन अझै नजिक सार्नुहोस्"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"फोन अझ माथि उठाउनुहोस्"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"सुरुवात एपहरू।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बुट पुरा हुँदै।"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"तपाईंले पावर बटन थिच्नुभयो — सामान्यतया स्क्रिन अफ गर्न यो बटन थिच्ने गरिन्छ।\n\nफिंगरप्रिन्ट सेटअप भइन्जेल हल्का तरिकाले यो बटन ट्याप गर्नुहोस्।"</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेट अप गरिसक्न स्क्रिन अफ गर्नुहोस्"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"अफ गर्नुहोस्"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फिंगरप्रिन्ट पुष्टि गर्ने क्रम जारी राख्ने हो?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"तपाईंले पावर बटन थिच्नुभयो — सामान्यतया स्क्रिन अफ गर्न यो बटन थिच्ने गरिन्छ।\n\nतपाईं आफ्नो फिंगरप्रिन्ट पुष्टि गर्न चाहनुहुन्छ भने हल्का तरिकाले यो बटन ट्याप गरी हेर्नुहोस्।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"स्क्रिन अफ गर्नुहोस्"</string>

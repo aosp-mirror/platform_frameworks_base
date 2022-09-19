@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"కొనసాగించడానికి మీ స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"వేలిముద్రను గుర్తించడం సాధ్యపడదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"వేలిముద్ర సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"పవర్ బటన్ కనుగొనబడింది"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారీ మీ వేళ్ల స్థానాన్ని కొద్దిగా మార్చండి"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"వేలిముద్రను సెటప్ చేయడం సాధ్యం కాదు"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"వేలిముద్ర సెటప్ సమయం ముగిసింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర యాక్టివిటీ రద్దయింది."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేశారు."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
@@ -1256,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"యాప్‌లను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"బూట్‌ను ముగిస్తోంది."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు తేలికగా ట్యాప్ చేయడానికి ట్రై చేయండి."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్‌ను ఆఫ్ చేయి"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"మీ వేలిముద్ర వెరిఫై‌ను కొనసాగించాలా?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను వెరిఫై చేయడానికి తేలికగా ట్యాప్ చేయడం ట్రై చేయండి."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"స్క్రీన్‌ను ఆఫ్ చేయి"</string>

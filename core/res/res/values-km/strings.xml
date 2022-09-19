@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ប្រើ​ការ​ចាក់​សោ​អេក្រង់"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"បញ្ចូលការចាក់សោអេក្រង់របស់អ្នក ដើម្បីបន្ត"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"មិនអាចសម្គាល់​ស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"សម្អាត​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ រួចព្យាយាម​ម្ដងទៀត"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"សម្អាត​ឧបករណ៍​ចាប់សញ្ញា រួចព្យាយាម​ម្ដងទៀត"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"សាកល្បងប្រើ​ស្នាមម្រាមដៃផ្សេងទៀត"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ភ្លឺពេក"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ចាប់ដឹងថាចុចប៊ូតុងថាមពល"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"សាកល្បង​កែតម្រូវ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ប្ដូរទីតាំងម្រាមដៃ​របស់អ្នកតិចៗ​គ្រប់ពេល"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ផ្នែករឹងស្នាមម្រាមដៃមិនមានទេ។"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"មិនអាចរៀបចំ​ស្នាមម្រាមដៃបានទេ"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"កា​ររៀបចំ​ស្នាមម្រាមដៃបានអស់ម៉ោង។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ប្រតិបត្តិការ​ស្នាម​ម្រាម​ដៃ​ត្រូវ​បាន​បោះ​បង់​ដោយ​អ្នក​ប្រើប្រាស់។"</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ព្យាយាម​ច្រើនដងពេក។ សូមប្រើការចាក់សោ​អេក្រង់ជំនួសវិញ។"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ព្យាយាម​ច្រើនដងពេក។ សូមប្រើការចាក់សោ​អេក្រង់ជំនួសវិញ។"</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"មិន​មាន​ការ​ចុះឈ្មោះស្នាម​ម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ។"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"បានបិទ​ឧបករណ៍​ចាប់សញ្ញាជា​បណ្តោះអាសន្ន។"</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ទាក់ទងក្រុមហ៊ុន​ផ្ដល់ការជួសជុល។"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ភ្លឺពេក។ សូមសាកល្បង​ប្រើ​ពន្លឺស្រាលជាងនេះ។"</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"មិនមាន​ពន្លឺគ្រប់គ្រាន់"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ដាក់​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ដាក់​ទូរសព្ទ​ឱ្យជិត​ជាងមុន"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ដាក់​ទូរសព្ទ​ឱ្យខ្ពស់​ជាងមុន"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"អ្នកបានចុចប៊ូតុងថាមពល — ជាធម្មតាការធ្វើបែបនេះនឹងបិទអេក្រង់។\n\nសាកល្បងចុចថ្នមៗ ខណៈពេលកំពុងរៀបចំស្នាមម្រាមដៃរបស់អ្នក។"</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ដើម្បីបញ្ចប់ការរៀបចំ សូមបិទអេក្រង់"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"បិទ"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"បន្តផ្ទៀងផ្ទាត់ស្នាមម្រាមដៃរបស់អ្នកឬ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"អ្នកបានចុចប៊ូតុងថាមពល — ជាធម្មតាការធ្វើបែបនេះនឹងបិទអេក្រង់។\n\nសាកល្បងចុចថ្នមៗ ដើម្បីផ្ទៀងផ្ទាត់ស្នាមម្រាមដៃរបស់អ្នក។"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"បិទ​អេក្រង់"</string>

@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Displaysperre verwenden"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Displaysperre eingeben, um fortzufahren"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Drücke fest auf den Sensor"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingerabdruck wurde nicht erkannt. Versuch es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinige den Fingerabdrucksensor und versuch es noch einmal"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinige den Sensor und versuche es noch einmal"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Drücke fest auf den Sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Finger zu langsam bewegt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Anderen Fingerabdruck verwenden"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zu hell"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Drücken der Ein-/Aus-Taste erkannt"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Versuche, den Finger anders aufzulegen"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ändere jedes Mal leicht die Position deines Fingers"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gesicht authentifiziert, bitte bestätigen"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Fingerabdruckhardware nicht verfügbar"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Fingerabdruck konnte nicht eingerichtet werden"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Zeitüberschreitung bei Fingerabdruckeinrichtung. Versuch es noch einmal."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingerabdruckvorgang abgebrochen"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vorgang der Fingerabdruckauthentifizierung vom Nutzer abgebrochen."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Fingerabdruck kann nicht verarbeitet werden. Versuch es noch einmal."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Keine Fingerabdrücke erfasst."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dieses Gerät hat keinen Fingerabdrucksensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Der Sensor ist vorübergehend deaktiviert."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Suche einen Reparaturdienstleister auf."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kein Gesichtsmodell möglich. Versuche es erneut."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zu hell. Schwächere Beleuchtung ausprobieren."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nicht genug Licht"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Bewege das Smartphone weiter weg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Bewege das Smartphone näher heran"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Bewege das Smartphone nach oben"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden der Einrichtung Bildschirm deaktivieren"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktivieren"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ausschalten"</string>

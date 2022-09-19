@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্ৰীন ল\'ক ব্যৱহাৰ কৰক"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"অব্যাহত ৰাখিবলৈ আপোনাৰ স্ক্ৰীন লক দিয়ক"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ছেন্সৰটোত ভালকৈ টিপক"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰিব পৰা নাই। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো মচি পুনৰ চেষ্টা কৰক"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ছেন্সৰটো মচি পুনৰ চেষ্টা কৰক"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ছেন্সৰটোত ভালকৈ টিপক"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙুলিৰ গতি অতি মন্থৰ আছিল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য এটা ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰি চাওক"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অতি উজ্জ্বল"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"পাৱাৰ বুটাম টিপাটো চিনাক্ত কৰা হৈছে"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"মিলাই চাওক"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্ৰতিবাৰতে আপোনাৰ আঙুলিটোৰ স্থান সামান্য সলনি কৰক"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ফিংগাৰপ্ৰিণ্ট ছেট আপ কৰিব নোৱাৰি"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ফিংগাৰপ্ৰিণ্ট ছেটআপ কৰাৰ সময় উকলি গৈছে। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ফিংগাৰপ্ৰিণ্ট কাৰ্য বাতিল কৰা হ’ল।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্ট ক্ৰিয়া বাতিল কৰিছে।"</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"অতি বেছিসংখ্যক প্ৰয়াস। ইয়াৰ সলনি স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"অতি বেছিসংখ্যক প্ৰয়াস। ইয়াৰ সলনি স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ফিংগাৰপ্ৰিণ্ট চিনাক্তকৰণ প্ৰক্ৰিয়া কৰিব পৰা নাই। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে।"</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"মেৰামতি সেৱা প্ৰদানকাৰী কোনো প্ৰতিষ্ঠানলৈ যাওক।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"মুখাৱয়বৰ মডেল সৃষ্টি কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"অতি উজ্জ্বল। ইয়াতকৈ কম পোহৰৰ উৎস ব্যৱহাৰ কৰক।"</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"পৰ্যাপ্ত পোহৰ নাই"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ফ’নটো আৰু আঁতৰলৈ নিয়ক"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ফ’নটো ওচৰলৈ আনক"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ফ’নটো ওপৰলৈ নিয়ক"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"আৰম্ভ হৈ থকা এপসমূহ।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"বুট কাৰ্য সমাপ্ত কৰিছে।"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"আপুনি পাৱাৰ বুটামটো টিপিছে — এইটোৱে সাধাৰণতে স্ক্ৰীনখন অফ কৰে।\n\nআপোনাৰ ফিংগাৰপ্ৰিণ্টটো ছেট আপ কৰাৰ সময়ত লাহেকৈ টিপি চাওক।"</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ছেটআপ সমাপ্ত কৰিবলৈ স্ক্ৰীন অফ কৰক"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"অফ কৰক"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ফিংগাৰপ্ৰিণ্ট সত্যাপন কৰা জাৰি ৰাখিবনে?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"আপুনি পাৱাৰ বুটামটো টিপিছে — এইটোৱে সাধাৰণতে স্ক্ৰীনখন অফ কৰে।\n\nআপোনাৰ ফিংগাৰপ্ৰিণ্টটো সত্যাপন কৰিবলৈ লাহেকৈ টিপি চাওক।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"স্ক্ৰীন অফ কৰক"</string>

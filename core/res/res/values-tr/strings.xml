@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran kilidi kullan"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Devam etmek için ekran kilidinizi girin"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Sensöre sıkıca bastırın"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Parmak izi tanınamadı. Tekrar deneyin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Parmak izi sensörünü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Sensörü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Sensöre sıkıca bastırın"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Parmak hareketi çok yavaştı. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Başka bir parmak izi deneyin"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çok parlak"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Güç düğmesine basma algılandı"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ayarlamayı deneyin"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızın konumunu biraz değiştirin"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Parmak izi donanımı kullanılamıyor."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Parmak izi ayarlanamıyor"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Parmak izi kurulumu zaman aşımına uğradı. Tekrar deneyin."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Parmak izi işlemi iptal edildi."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Parmak izi işlenemiyor. Tekrar deneyin."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensör geçici olarak devre dışı bırakıldı."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bir onarım hizmeti sağlayıcıyı ziyaret edin."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Çok parlak. Parlaklığı daha az bir ışıklandırma deneyin."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Yeterli ışık yok"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonu uzaklaştırın"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonu yaklaştırın"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu daha yukarı kaldırın"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uygulamalar başlatılıyor"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Açılış tamamlanıyor."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Güç düğmesine bastınız. Bu düğmeye basıldığında genellikle ekran kapanır.\n\nParmak izinizi tanımlarken hafifçe dokunmayı deneyin."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Ekranı kapatarak kurulumu sonlandırın"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Kapat"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Parmak izi doğrulamaya devam edilsin mi?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Güç düğmesine bastınız. Bu düğmeye basıldığında genellikle ekran kapanır.\n\nParmak izinizi doğrulamak için hafifçe dokunmayı deneyin."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ekranı kapat"</string>

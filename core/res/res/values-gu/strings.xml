@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"આગળ વધવા માટે તમારું સ્ક્રીન લૉક દાખલ કરો"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"સેન્સર પર જોરથી દબાવો"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ફિંગરપ્રિન્ટ ઓળખી શકતા નથી. ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ફિંગરપ્રિન્ટ સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"સેન્સર પર જોરથી દબાવો"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"આંગળી બહુ જ ધીમેથી ખસેડી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"અન્ય ફિંગરપ્રિન્ટ અજમાવી જુઓ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"અતિશય પ્રકાશિત"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"પાવર બટન દબાવ્યું હોવાની જાણ થઈ છે"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ગોઠવણી કરી જુઓ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"દરેક વખતે સ્કૅનર પર તમારી આંગળીની સ્થિતિ સહેજ બદલતા રહો"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ફિંગરપ્રિન્ટ હાર્ડવેર ઉપલબ્ધ નથી."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ફિંગરપ્રિન્ટનું સેટઅપ કરી શકતા નથી"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ફિંગરપ્રિન્ટનું સેટઅપ કરવાનો સમય સમાપ્ત થઈ ગયો. ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ફિંગરપ્રિન્ટ ઓપરેશન રદ કર્યું."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ફિંગરપ્રિન્ટ ચકાસવાની પ્રક્રિયા વપરાશકર્તાએ રદ કરી."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ઘણા બધા પ્રયાસો. તેને બદલે સ્ક્રીન લૉકનો ઉપયોગ કરો."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ઘણા બધા પ્રયાસો. વિકલ્પ તરીકે સ્ક્રીન લૉકનો ઉપયોગ કરો."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ફિંગરપ્રિન્ટની પ્રક્રિયા કરી શકતા નથી. ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"કોઈ ફિંગરપ્રિન્ટની નોંધણી કરવામાં આવી નથી."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
@@ -1256,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ઍપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"બૂટ સમાપ્ત કરી રહ્યાં છે."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"તમે પાવર બટન દબાવ્યું છે — જેનાથી સામાન્ય રીતે સ્ક્રીન બંધ થઈ જાય છે.\n\nતમારી ફિંગરપ્રિન્ટનું સેટઅપ કરતી વખતે હળવેથી ટૅપ કરવાનો પ્રયાસ કરો."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"સેટઅપ સમાપ્ત કરવા માટે, સ્ક્રીન બંધ કરો"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"બંધ કરો"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"શું તમારી ફિંગરપ્રિન્ટની ચકાસણી કરીએ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"તમે પાવર બટન દબાવ્યું છે — જેનાથી સામાન્ય રીતે સ્ક્રીન બંધ થઈ જાય છે.\n\nતમારી ફિંગરપ્રિન્ટની ચકાસણી કરવા માટે, તેને હળવેથી ટૅપ કરવાનો પ્રયાસ કરો."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"સ્ક્રીન બંધ કરો"</string>
