@@ -591,14 +591,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindAlbumView_bitmapInLaterStates_setAfterExecutors() {
-        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        canvas.drawColor(Color.RED)
-        val albumArt = Icon.createWithBitmap(bmp)
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redCanvas = Canvas(redBmp)
+        redCanvas.drawColor(Color.RED)
+        val redArt = Icon.createWithBitmap(redBmp)
+
+        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val greenCanvas = Canvas(greenBmp)
+        greenCanvas.drawColor(Color.GREEN)
+        val greenArt = Icon.createWithBitmap(greenBmp)
 
         val state0 = mediaData.copy(artwork = null)
-        val state1 = mediaData.copy(artwork = albumArt)
-        val state2 = mediaData.copy(artwork = albumArt)
+        val state1 = mediaData.copy(artwork = redArt)
+        val state2 = mediaData.copy(artwork = redArt)
+        val state3 = mediaData.copy(artwork = greenArt)
         player.attachPlayer(viewHolder)
 
         // First binding sets (empty) drawable
@@ -627,6 +633,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
         verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+
+        // Fourth binding to new image runs transition due to color scheme change
+        player.bindPlayer(state3, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
     }
 
     @Test
