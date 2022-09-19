@@ -66,6 +66,7 @@ public abstract class CredentialProviderService extends Service {
         public void onGetCredentials(GetCredentialsRequest request, ICancellationSignal transport,
                 IGetCredentialsCallback callback) throws RemoteException {
             Objects.requireNonNull(request);
+            Objects.requireNonNull(transport);
             Objects.requireNonNull(callback);
 
             mHandler.sendMessage(obtainMessage(
@@ -73,6 +74,22 @@ public abstract class CredentialProviderService extends Service {
                     CredentialProviderService.this, request,
                     CancellationSignal.fromTransport(transport),
                     new GetCredentialsCallback(callback)
+            ));
+        }
+
+        @Override
+        public void onCreateCredential(CreateCredentialRequest request,
+                ICancellationSignal transport, ICreateCredentialCallback callback)
+                throws RemoteException {
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(transport);
+            Objects.requireNonNull(callback);
+
+            mHandler.sendMessage(obtainMessage(
+                    CredentialProviderService::onCreateCredential,
+                    CredentialProviderService.this, request,
+                    CancellationSignal.fromTransport(transport),
+                    new CreateCredentialCallback(callback)
             ));
         }
     };
@@ -88,4 +105,15 @@ public abstract class CredentialProviderService extends Service {
     public abstract void onGetCredentials(@NonNull GetCredentialsRequest request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull GetCredentialsCallback callback);
+
+    /**
+     * Called by the android system to create a credential.
+     * @param request The credential creation request for the provider to handle.
+     * @param cancellationSignal Signal for providers to listen to any cancellation requests from
+     *                           the android system.
+     * @param callback Object used to relay the response of the credential creation request.
+     */
+    public abstract void onCreateCredential(@NonNull CreateCredentialRequest request,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull CreateCredentialCallback callback);
 }
