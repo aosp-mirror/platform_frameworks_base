@@ -24,6 +24,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -40,3 +41,6 @@ internal fun materialColorScheme(isDarkTheme: Boolean): ColorScheme {
         }
     }
 }
+
+val ColorScheme.divider: Color
+    get() = onSurface.copy(SettingsOpacity.Divider)
