@@ -4453,10 +4453,11 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     Trace.beginSection("CentralSurfaces#updateDozing");
                     mDozing = isDozing;
 
-                    // Collapse the notification panel if open
                     boolean dozingAnimated = mDozeServiceHost.getDozingRequested()
                             && mDozeParameters.shouldControlScreenOff();
-                    mNotificationPanelViewController.resetViews(dozingAnimated);
+                    // resetting views is already done when going into doze, there's no need to
+                    // reset them again when we're waking up
+                    mNotificationPanelViewController.resetViews(dozingAnimated && isDozing);
 
                     updateQsExpansionEnabled();
                     mKeyguardViewMediator.setDozing(mDozing);

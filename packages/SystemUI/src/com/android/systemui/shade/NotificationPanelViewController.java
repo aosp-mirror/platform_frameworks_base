@@ -425,8 +425,6 @@ public final class NotificationPanelViewController extends PanelViewController {
             new KeyguardClockPositionAlgorithm.Result();
     private boolean mIsExpanding;
 
-    private boolean mBlockTouches;
-
     /**
      * Determines if QS should be already expanded when expanding shade.
      * Used for split shade, two finger gesture as well as accessibility shortcut to QS.
@@ -1692,7 +1690,6 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     public void resetViews(boolean animate) {
         mIsLaunchTransitionFinished = false;
-        mBlockTouches = false;
         mCentralSurfaces.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         if (animate && !isFullyCollapsed()) {
@@ -4186,7 +4183,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                             "NPVC onInterceptTouchEvent (" + event.getId() + "): (" + event.getX()
                                     + "," + event.getY() + ")");
                 }
-                if (mBlockTouches || mQs.disallowPanelTouches()) {
+                if (mQs.disallowPanelTouches()) {
                     return false;
                 }
                 initDownStates(event);
@@ -4229,8 +4226,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 }
 
 
-                if (mBlockTouches || (mQsFullyExpanded && mQs != null
-                        && mQs.disallowPanelTouches())) {
+                if (mQsFullyExpanded && mQs != null && mQs.disallowPanelTouches()) {
                     return false;
                 }
 
