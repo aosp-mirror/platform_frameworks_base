@@ -16,9 +16,6 @@
 
 package com.android.server.wm.flicker.testapp;
 
-import static com.android.server.wm.flicker.testapp.ActivityOptions.ACTIVITY_EMBEDDING_PLACEHOLDER_PRIMARY_ACTIVITY_COMPONENT_NAME;
-import static com.android.server.wm.flicker.testapp.ActivityOptions.ACTIVITY_EMBEDDING_PLACEHOLDER_SECONDARY_ACTIVITY_COMPONENT_NAME;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,8 +36,6 @@ public class ActivityEmbeddingMainActivity extends Activity {
     private static final String TAG = "ActivityEmbeddingMainActivity";
     private static final float DEFAULT_SPLIT_RATIO = 0.5f;
 
-    private ActivityEmbeddingComponent mEmbeddingComponent;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,20 +46,24 @@ public class ActivityEmbeddingMainActivity extends Activity {
 
     /** R.id.launch_placeholder_split_button onClick */
     public void launchPlaceholderSplit(View view) {
-        startActivity(new Intent().setComponent(
-                ACTIVITY_EMBEDDING_PLACEHOLDER_PRIMARY_ACTIVITY_COMPONENT_NAME));
+        startActivity(
+                new Intent().setComponent(
+                        ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT
+                )
+        );
     }
 
     private void initializeSplitRules() {
-        mEmbeddingComponent = ActivityEmbeddingAppHelper.getActivityEmbeddingComponent();
-        if (mEmbeddingComponent == null) {
+        ActivityEmbeddingComponent embeddingComponent =
+                ActivityEmbeddingAppHelper.getActivityEmbeddingComponent();
+        if (embeddingComponent == null) {
             // Embedding not supported
             Log.d(TAG, "ActivityEmbedding is not supported on this device");
             finish();
             return;
         }
 
-        mEmbeddingComponent.setEmbeddingRules(getSplitRules());
+        embeddingComponent.setEmbeddingRules(getSplitRules());
     }
 
     private Set<EmbeddingRule> getSplitRules() {
@@ -72,10 +71,10 @@ public class ActivityEmbeddingMainActivity extends Activity {
 
         final SplitPlaceholderRule placeholderRule = new SplitPlaceholderRule.Builder(
                 new Intent().setComponent(
-                        ACTIVITY_EMBEDDING_PLACEHOLDER_SECONDARY_ACTIVITY_COMPONENT_NAME),
+                        ActivityOptions.ActivityEmbedding.PlaceholderSecondaryActivity.COMPONENT),
                 activity -> activity instanceof ActivityEmbeddingPlaceholderPrimaryActivity,
                 intent -> intent.getComponent().equals(
-                        ACTIVITY_EMBEDDING_PLACEHOLDER_PRIMARY_ACTIVITY_COMPONENT_NAME),
+                        ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT),
                 windowMetrics -> true)
                 .setSplitRatio(DEFAULT_SPLIT_RATIO)
                 .build();

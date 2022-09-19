@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.Button;
 
-public class ButtonActivity extends Activity {
+public class LaunchNewActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,11 +30,11 @@ public class ButtonActivity extends Activity {
         p.layoutInDisplayCutoutMode = WindowManager.LayoutParams
                 .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         getWindow().setAttributes(p);
-        setContentView(R.layout.activity_button);
+        setContentView(R.layout.activity_launch_new);
 
         Button button = findViewById(R.id.launch_second_activity);
         button.setOnClickListener(v -> {
-            Intent intent = new Intent(ButtonActivity.this, SimpleActivity.class);
+            Intent intent = new Intent(LaunchNewActivity.this, SimpleActivity.class);
             startActivity(intent);
         });
     }
