@@ -137,6 +137,10 @@ open class ClockEventController @Inject constructor(
         override fun onThemeChanged() {
             updateFun.updateColors()
         }
+
+        override fun onDensityOrFontScaleChanged() {
+            clock?.events?.onFontSettingChanged()
+        }
     }
 
     private val batteryCallback = object : BatteryStateChangeCallback {

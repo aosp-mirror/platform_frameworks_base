@@ -143,6 +143,12 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void createInternetDialog_setAccessibilityPaneTitleToQuickSettings() {
+        assertThat(mDialogView.getAccessibilityPaneTitle())
+                .isEqualTo(mContext.getText(R.string.accessibility_desc_quick_settings));
+    }
+
+    @Test
     public void hideWifiViews_WifiViewsGone() {
         mInternetDialog.hideWifiViews();
 
