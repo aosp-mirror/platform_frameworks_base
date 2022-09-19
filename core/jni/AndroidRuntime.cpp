@@ -117,6 +117,7 @@ extern int register_android_util_MemoryIntArray(JNIEnv* env);
 extern int register_android_content_StringBlock(JNIEnv* env);
 extern int register_android_content_XmlBlock(JNIEnv* env);
 extern int register_android_content_res_ApkAssets(JNIEnv* env);
+extern int register_android_content_res_ResourceTimer(JNIEnv* env);
 extern int register_android_graphics_BLASTBufferQueue(JNIEnv* env);
 extern int register_android_graphics_SurfaceTexture(JNIEnv* env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
@@ -1506,6 +1507,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_content_StringBlock),
         REG_JNI(register_android_content_XmlBlock),
         REG_JNI(register_android_content_res_ApkAssets),
+        REG_JNI(register_android_content_res_ResourceTimer),
         REG_JNI(register_android_text_AndroidCharacter),
         REG_JNI(register_android_text_Hyphenator),
         REG_JNI(register_android_view_InputDevice),
