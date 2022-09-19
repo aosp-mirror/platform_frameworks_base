@@ -303,6 +303,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     mOverviewProxyService.notifyBackAction(false, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
                 }
+
+                @Override
+                public void setTriggerBack(boolean triggerBack) {
+                    if (mBackAnimation != null) {
+                        mBackAnimation.setTriggerBack(triggerBack);
+                    }
+                }
             };
 
     private final SysUiState.SysUiStateCallback mSysUiStateCallback =
