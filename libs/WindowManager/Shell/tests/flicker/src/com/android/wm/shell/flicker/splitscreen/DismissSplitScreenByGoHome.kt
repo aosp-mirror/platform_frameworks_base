@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -75,13 +76,13 @@ class DismissSplitScreenByGoHome(
     @Test
     fun primaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
-    @IwTest(focusArea = "sysui")
-    @Presubmit
+    // TODO(b/245472831): Move back to presubmit after shell transitions landing.
+    @FlakyTest(bugId = 245472831)
     @Test
     fun secondaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
-    @IwTest(focusArea = "sysui")
-    @Presubmit
+    // TODO(b/245472831): Move back to presubmit after shell transitions landing.
+    @FlakyTest(bugId = 245472831)
     @Test
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
         primaryApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
