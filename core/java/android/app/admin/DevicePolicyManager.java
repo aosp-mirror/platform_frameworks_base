@@ -14308,7 +14308,9 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner
      *
      * @see #getCrossProfileCalendarPackages(ComponentName)
+     * @deprecated Use {@link #setCrossProfilePackages(ComponentName, Set)}.
      */
+    @Deprecated
     public void setCrossProfileCalendarPackages(@NonNull ComponentName admin,
             @Nullable Set<String> packageNames) {
         throwIfParentInstance("setCrossProfileCalendarPackages");
@@ -14334,7 +14336,9 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner
      *
      * @see #setCrossProfileCalendarPackages(ComponentName, Set)
+     * @deprecated Use {@link #setCrossProfilePackages(ComponentName, Set)}.
      */
+    @Deprecated
     public @Nullable Set<String> getCrossProfileCalendarPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getCrossProfileCalendarPackages");
         if (mService != null) {
