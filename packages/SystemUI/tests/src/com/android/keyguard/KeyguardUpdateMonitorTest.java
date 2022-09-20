@@ -329,8 +329,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mMockitoSession.finishMocking();
-        mKeyguardUpdateMonitor.removeCallback(mTestCallback);
-        mKeyguardUpdateMonitor.destroy();
+        cleanupKeyguardUpdateMonitor();
     }
 
     @Test
@@ -352,6 +351,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testSimStateInitialized() {
+        cleanupKeyguardUpdateMonitor();
         final int subId = 3;
         final int state = TelephonyManager.SIM_STATE_ABSENT;
 
@@ -1206,7 +1206,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testShouldListenForFace_whenFaceManagerNotAvailable_returnsFalse() {
-        mFaceManager = null;
+        cleanupKeyguardUpdateMonitor();
+        mSpiedContext.addMockSystemService(FaceManager.class, null);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(false);
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
@@ -1259,6 +1261,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testShouldListenForFace_whenUserIsNotPrimary_returnsFalse() throws RemoteException {
+        cleanupKeyguardUpdateMonitor();
         // This disables face auth
         when(mUserManager.isPrimaryUser()).thenReturn(false);
         mKeyguardUpdateMonitor =
@@ -1588,9 +1591,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFingerAcquired_wakesUpPowerManager() {
-        mContext.getOrCreateTestableResources().addOverride(
+        cleanupKeyguardUpdateMonitor();
+        mSpiedContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.kg_wake_on_acquire_start, true);
-        mSpiedContext = spy(mContext);
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
         fingerprintAcquireStart();
 
@@ -1599,13 +1602,21 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFingerAcquired_doesNotWakeUpPowerManager() {
-        mContext.getOrCreateTestableResources().addOverride(
+        cleanupKeyguardUpdateMonitor();
+        mSpiedContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.kg_wake_on_acquire_start, false);
-        mSpiedContext = spy(mContext);
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
         fingerprintAcquireStart();
 
         verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    private void cleanupKeyguardUpdateMonitor() {
+        if (mKeyguardUpdateMonitor != null) {
+            mKeyguardUpdateMonitor.removeCallback(mTestCallback);
+            mKeyguardUpdateMonitor.destroy();
+            mKeyguardUpdateMonitor = null;
+        }
     }
 
     private void faceAuthLockedOut() {
