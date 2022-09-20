@@ -111,6 +111,7 @@ final class BroadcastRecord extends Binder {
     int anrCount;           // has this broadcast record hit any ANRs?
     int manifestCount;      // number of manifest receivers dispatched.
     int manifestSkipCount;  // number of manifest receivers skipped.
+    int finishedCount;      // number of receivers finished.
     BroadcastQueue queue;   // the outbound queue handling this broadcast
 
     // if set to true, app's process will be temporarily allowed to start activities from background

@@ -334,7 +334,7 @@ class BroadcastProcessQueue {
         return mRunnableAt;
     }
 
-    private void invalidateRunnableAt() {
+    public void invalidateRunnableAt() {
         mRunnableAtInvalidated = true;
     }
 
@@ -344,7 +344,17 @@ class BroadcastProcessQueue {
     private void updateRunnableAt() {
         final SomeArgs next = mPending.peekFirst();
         if (next != null) {
-            final long runnableAt = ((BroadcastRecord) next.arg1).enqueueTime;
+            final BroadcastRecord r = (BroadcastRecord) next.arg1;
+            final int index = next.argi1;
+
+            // If our next broadcast is ordered, and we're not the next receiver
+            // in line, then we're not runnable at all
+            if (r.ordered && r.finishedCount != index) {
+                mRunnableAt = Long.MAX_VALUE;
+                return;
+            }
+
+            final long runnableAt = r.enqueueTime;
             if (mCountForeground > 0) {
                 mRunnableAt = runnableAt;
             } else if (mCountOrdered > 0) {

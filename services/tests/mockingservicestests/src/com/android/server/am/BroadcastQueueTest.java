@@ -70,7 +70,6 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -718,9 +717,6 @@ public class BroadcastQueueTest {
      */
     @Test
     public void testOrdered() throws Exception {
-        // TODO: expand to modern stack once implemented
-        Assume.assumeTrue(mImpl == Impl.DEFAULT);
-
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
 
         // Purposefully warm-start the middle apps to make sure we dispatch to
@@ -789,9 +785,6 @@ public class BroadcastQueueTest {
      */
     @Test
     public void testOrdered_Abort() throws Exception {
-        // TODO: expand to modern stack once implemented
-        Assume.assumeTrue(mImpl == Impl.DEFAULT);
-
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
 
         // Create a process that aborts any ordered broadcasts
