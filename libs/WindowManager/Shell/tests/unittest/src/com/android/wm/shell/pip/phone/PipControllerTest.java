@@ -48,6 +48,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -85,6 +86,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private ShellCommandHandler mMockShellCommandHandler;
     @Mock private DisplayController mMockDisplayController;
     @Mock private PhonePipMenuController mMockPhonePipMenuController;
+    @Mock private PipAnimationController mMockPipAnimationController;
     @Mock private PipAppOpsListener mMockPipAppOpsListener;
     @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
     @Mock private PhonePipKeepClearAlgorithm mMockPipKeepClearAlgorithm;
@@ -117,8 +119,8 @@ public class PipControllerTest extends ShellTestCase {
         mShellController = spy(new ShellController(mShellInit, mMockShellCommandHandler,
                 mMockExecutor));
         mPipController = new PipController(mContext, mShellInit, mMockShellCommandHandler,
-                mShellController, mMockDisplayController, mMockPipAppOpsListener,
-                mMockPipBoundsAlgorithm, mMockPipKeepClearAlgorithm,
+                mShellController, mMockDisplayController, mMockPipAnimationController,
+                mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipKeepClearAlgorithm,
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTransitionState,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
@@ -183,8 +185,8 @@ public class PipControllerTest extends ShellTestCase {
 
         ShellInit shellInit = new ShellInit(mMockExecutor);
         assertNull(PipController.create(spyContext, shellInit, mMockShellCommandHandler,
-                mShellController, mMockDisplayController, mMockPipAppOpsListener,
-                mMockPipBoundsAlgorithm, mMockPipKeepClearAlgorithm,
+                mShellController, mMockDisplayController, mMockPipAnimationController,
+                mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipKeepClearAlgorithm,
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTransitionState,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
