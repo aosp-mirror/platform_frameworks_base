@@ -101,7 +101,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
-import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
@@ -122,14 +121,12 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.storage.StorageManagerInternal;
 import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -366,6 +363,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
     /** Interface for app-op modes.*/
     @VisibleForTesting AppOpsServiceInterface mAppOpsServiceInterface;
+
+    /** Interface for app-op restrictions.*/
+    @VisibleForTesting AppOpsRestrictions mAppOpsRestrictions;
 
     private AppOpsUidStateTracker mUidStateTracker;
 
@@ -1714,6 +1714,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
         mAppOpsServiceInterface =
                 new LegacyAppOpsServiceInterfaceImpl(this, this, handler, context, mSwitchedOps);
+        mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
+                mAppOpsServiceInterface);
 
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
@@ -6135,124 +6137,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 pw.println();
             }
 
-            final int globalRestrictionCount = mOpGlobalRestrictions.size();
-            for (int i = 0; i < globalRestrictionCount; i++) {
-                IBinder token = mOpGlobalRestrictions.keyAt(i);
-                ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.valueAt(i);
-                ArraySet<Integer> restrictedOps = restrictionState.mRestrictedOps;
-
-                pw.println("  Global restrictions for token " + token + ":");
-                StringBuilder restrictedOpsValue = new StringBuilder();
-                restrictedOpsValue.append("[");
-                final int restrictedOpCount = restrictedOps.size();
-                for (int j = 0; j < restrictedOpCount; j++) {
-                    if (restrictedOpsValue.length() > 1) {
-                        restrictedOpsValue.append(", ");
-                    }
-                    restrictedOpsValue.append(AppOpsManager.opToName(restrictedOps.valueAt(j)));
-                }
-                restrictedOpsValue.append("]");
-                pw.println("      Restricted ops: " + restrictedOpsValue);
-
-            }
-
-            final int userRestrictionCount = mOpUserRestrictions.size();
-            for (int i = 0; i < userRestrictionCount; i++) {
-                IBinder token = mOpUserRestrictions.keyAt(i);
-                ClientUserRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
-                boolean printedTokenHeader = false;
-
-                if (dumpMode >= 0 || dumpWatchers || dumpHistory) {
-                    continue;
-                }
-
-                final int restrictionCount = restrictionState.perUserRestrictions != null
-                        ? restrictionState.perUserRestrictions.size() : 0;
-                if (restrictionCount > 0 && dumpPackage == null) {
-                    boolean printedOpsHeader = false;
-                    for (int j = 0; j < restrictionCount; j++) {
-                        int userId = restrictionState.perUserRestrictions.keyAt(j);
-                        boolean[] restrictedOps = restrictionState.perUserRestrictions.valueAt(j);
-                        if (restrictedOps == null) {
-                            continue;
-                        }
-                        if (dumpOp >= 0 && (dumpOp >= restrictedOps.length
-                                || !restrictedOps[dumpOp])) {
-                            continue;
-                        }
-                        if (!printedTokenHeader) {
-                            pw.println("  User restrictions for token " + token + ":");
-                            printedTokenHeader = true;
-                        }
-                        if (!printedOpsHeader) {
-                            pw.println("      Restricted ops:");
-                            printedOpsHeader = true;
-                        }
-                        StringBuilder restrictedOpsValue = new StringBuilder();
-                        restrictedOpsValue.append("[");
-                        final int restrictedOpCount = restrictedOps.length;
-                        for (int k = 0; k < restrictedOpCount; k++) {
-                            if (restrictedOps[k]) {
-                                if (restrictedOpsValue.length() > 1) {
-                                    restrictedOpsValue.append(", ");
-                                }
-                                restrictedOpsValue.append(AppOpsManager.opToName(k));
-                            }
-                        }
-                        restrictedOpsValue.append("]");
-                        pw.print("        "); pw.print("user: "); pw.print(userId);
-                                pw.print(" restricted ops: "); pw.println(restrictedOpsValue);
-                    }
-                }
-
-                final int excludedPackageCount = restrictionState.perUserExcludedPackageTags != null
-                        ? restrictionState.perUserExcludedPackageTags.size() : 0;
-                if (excludedPackageCount > 0 && dumpOp < 0) {
-                    IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
-                    ipw.increaseIndent();
-                    boolean printedPackagesHeader = false;
-                    for (int j = 0; j < excludedPackageCount; j++) {
-                        int userId = restrictionState.perUserExcludedPackageTags.keyAt(j);
-                        PackageTagsList packageNames =
-                                restrictionState.perUserExcludedPackageTags.valueAt(j);
-                        if (packageNames == null) {
-                            continue;
-                        }
-                        boolean hasPackage;
-                        if (dumpPackage != null) {
-                            hasPackage = packageNames.includes(dumpPackage);
-                        } else {
-                            hasPackage = true;
-                        }
-                        if (!hasPackage) {
-                            continue;
-                        }
-                        if (!printedTokenHeader) {
-                            ipw.println("User restrictions for token " + token + ":");
-                            printedTokenHeader = true;
-                        }
-
-                        ipw.increaseIndent();
-                        if (!printedPackagesHeader) {
-                            ipw.println("Excluded packages:");
-                            printedPackagesHeader = true;
-                        }
-
-                        ipw.increaseIndent();
-                        ipw.print("user: ");
-                        ipw.print(userId);
-                        ipw.println(" packages: ");
-
-                        ipw.increaseIndent();
-                        packageNames.dump(ipw);
-
-                        ipw.decreaseIndent();
-                        ipw.decreaseIndent();
-                        ipw.decreaseIndent();
-                    }
-                    ipw.decreaseIndent();
-                }
-            }
+            boolean showUserRestrictions = !(dumpMode < 0 && !dumpWatchers && !dumpHistory);
+            mAppOpsRestrictions.dumpRestrictions(pw, dumpOp, dumpPackage, showUserRestrictions);
 
             if (!dumpHistory && !dumpWatchers) {
                 pw.println();
@@ -6872,8 +6758,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
     private final class ClientUserRestrictionState implements DeathRecipient {
         private final IBinder token;
-        SparseArray<boolean[]> perUserRestrictions;
-        SparseArray<PackageTagsList> perUserExcludedPackageTags;
 
         ClientUserRestrictionState(IBinder token)
                 throws RemoteException {
@@ -6883,134 +6767,29 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
         public boolean setRestriction(int code, boolean restricted,
                 PackageTagsList excludedPackageTags, int userId) {
-            boolean changed = false;
-
-            if (perUserRestrictions == null && restricted) {
-                perUserRestrictions = new SparseArray<>();
-            }
-
-            int[] users;
-            if (userId == UserHandle.USER_ALL) {
-                // TODO(b/162888972): this call is returning all users, not just live ones - we
-                // need to either fix the method called, or rename the variable
-                List<UserInfo> liveUsers = UserManager.get(mContext).getUsers();
-
-                users = new int[liveUsers.size()];
-                for (int i = 0; i < liveUsers.size(); i++) {
-                    users[i] = liveUsers.get(i).id;
-                }
-            } else {
-                users = new int[]{userId};
-            }
-
-            if (perUserRestrictions != null) {
-                int numUsers = users.length;
-
-                for (int i = 0; i < numUsers; i++) {
-                    int thisUserId = users[i];
-
-                    boolean[] userRestrictions = perUserRestrictions.get(thisUserId);
-                    if (userRestrictions == null && restricted) {
-                        userRestrictions = new boolean[AppOpsManager._NUM_OP];
-                        perUserRestrictions.put(thisUserId, userRestrictions);
-                    }
-                    if (userRestrictions != null && userRestrictions[code] != restricted) {
-                        userRestrictions[code] = restricted;
-                        if (!restricted && isDefault(userRestrictions)) {
-                            perUserRestrictions.remove(thisUserId);
-                            userRestrictions = null;
-                        }
-                        changed = true;
-                    }
-
-                    if (userRestrictions != null) {
-                        final boolean noExcludedPackages =
-                                excludedPackageTags == null || excludedPackageTags.isEmpty();
-                        if (perUserExcludedPackageTags == null && !noExcludedPackages) {
-                            perUserExcludedPackageTags = new SparseArray<>();
-                        }
-                        if (perUserExcludedPackageTags != null) {
-                            if (noExcludedPackages) {
-                                perUserExcludedPackageTags.remove(thisUserId);
-                                if (perUserExcludedPackageTags.size() <= 0) {
-                                    perUserExcludedPackageTags = null;
-                                }
-                            } else {
-                                perUserExcludedPackageTags.put(thisUserId, excludedPackageTags);
-                            }
-                            changed = true;
-                        }
-                    }
-                }
-            }
-
-            return changed;
+            return mAppOpsRestrictions.setUserRestriction(token, userId, code,
+                    restricted, excludedPackageTags);
         }
 
-        public boolean hasRestriction(int restriction, String packageName, String attributionTag,
+        public boolean hasRestriction(int code, String packageName, String attributionTag,
                 int userId, boolean isCheckOp) {
-            if (perUserRestrictions == null) {
-                return false;
-            }
-            boolean[] restrictions = perUserRestrictions.get(userId);
-            if (restrictions == null) {
-                return false;
-            }
-            if (!restrictions[restriction]) {
-                return false;
-            }
-            if (perUserExcludedPackageTags == null) {
-                return true;
-            }
-            PackageTagsList perUserExclusions = perUserExcludedPackageTags.get(userId);
-            if (perUserExclusions == null) {
-                return true;
-            }
-
-            // TODO (b/240617242) add overload for checkOp to support attribution tags
-            if (isCheckOp) {
-                return !perUserExclusions.includes(packageName);
-            }
-            return !perUserExclusions.contains(packageName, attributionTag);
+            return mAppOpsRestrictions.getUserRestriction(token, userId, code, packageName,
+                    attributionTag, isCheckOp);
         }
 
         public void removeUser(int userId) {
-            if (perUserExcludedPackageTags != null) {
-                perUserExcludedPackageTags.remove(userId);
-                if (perUserExcludedPackageTags.size() <= 0) {
-                    perUserExcludedPackageTags = null;
-                }
-            }
-            if (perUserRestrictions != null) {
-                perUserRestrictions.remove(userId);
-                if (perUserRestrictions.size() <= 0) {
-                    perUserRestrictions = null;
-                }
-            }
+            mAppOpsRestrictions.clearUserRestrictions(token, userId);
         }
 
         public boolean isDefault() {
-            return perUserRestrictions == null || perUserRestrictions.size() <= 0;
+            return !mAppOpsRestrictions.hasUserRestrictions(token);
         }
 
         @Override
         public void binderDied() {
             synchronized (AppOpsService.this) {
+                mAppOpsRestrictions.clearUserRestrictions(token);
                 mOpUserRestrictions.remove(token);
-                if (perUserRestrictions == null) {
-                    return;
-                }
-                final int userCount = perUserRestrictions.size();
-                for (int i = 0; i < userCount; i++) {
-                    final boolean[] restrictions = perUserRestrictions.valueAt(i);
-                    final int restrictionCount = restrictions.length;
-                    for (int j = 0; j < restrictionCount; j++) {
-                        if (restrictions[j]) {
-                            final int changedCode = j;
-                            mHandler.post(() -> notifyWatchersOfChange(changedCode, UID_ANY));
-                        }
-                    }
-                }
                 destroy();
             }
         }
@@ -7018,23 +6797,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         public void destroy() {
             token.unlinkToDeath(this, 0);
         }
-
-        private boolean isDefault(boolean[] array) {
-            if (ArrayUtils.isEmpty(array)) {
-                return true;
-            }
-            for (boolean value : array) {
-                if (value) {
-                    return false;
-                }
-            }
-            return true;
-        }
     }
 
     private final class ClientGlobalRestrictionState implements DeathRecipient {
         final IBinder mToken;
-        final ArraySet<Integer> mRestrictedOps = new ArraySet<>();
 
         ClientGlobalRestrictionState(IBinder token)
                 throws RemoteException {
@@ -7043,23 +6809,21 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
 
         boolean setRestriction(int code, boolean restricted) {
-            if (restricted) {
-                return mRestrictedOps.add(code);
-            } else {
-                return mRestrictedOps.remove(code);
-            }
+            return mAppOpsRestrictions.setGlobalRestriction(mToken, code, restricted);
         }
 
         boolean hasRestriction(int code) {
-            return mRestrictedOps.contains(code);
+            return mAppOpsRestrictions.getGlobalRestriction(mToken, code);
         }
 
         boolean isDefault() {
-            return mRestrictedOps.isEmpty();
+            return !mAppOpsRestrictions.hasGlobalRestrictions(mToken);
         }
 
         @Override
         public void binderDied() {
+            mAppOpsRestrictions.clearGlobalRestrictions(mToken);
+            mOpGlobalRestrictions.remove(mToken);
             destroy();
         }
 
