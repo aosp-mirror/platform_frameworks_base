@@ -54,13 +54,8 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithm {
                 ? pipBoundsAlgorithm.getEntryDestinationBoundsIgnoringKeepClearAreas()
                 : pipBoundsState.getBounds();
         float snapFraction = pipBoundsAlgorithm.getSnapFraction(startingBounds);
-        int verticalGravity;
+        int verticalGravity = Gravity.BOTTOM;
         int horizontalGravity;
-        if (snapFraction < 1.5f || snapFraction >= 3.5f) {
-            verticalGravity = Gravity.NO_GRAVITY;
-        } else {
-            verticalGravity = Gravity.BOTTOM;
-        }
         if (snapFraction >= 0.5f && snapFraction < 2.5f) {
             horizontalGravity = Gravity.RIGHT;
         } else {

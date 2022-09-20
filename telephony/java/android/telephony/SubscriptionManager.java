@@ -3426,9 +3426,19 @@ public class SubscriptionManager {
      * Get subscriptionInfo list of subscriptions that are in the same group of given subId.
      * See {@link #createSubscriptionGroup(List)} for more details.
      *
-     * Caller will either have {@link android.Manifest.permission#READ_PHONE_STATE}
-     * permission or had carrier privilege permission on the subscription.
+     * Caller must have {@link android.Manifest.permission#READ_PHONE_STATE}
+     * or carrier privilege permission on the subscription.
      * {@link TelephonyManager#hasCarrierPrivileges()}
+     *
+     * <p>Starting with API level 33, this method will return an empty List if the caller does
+     * not have access to device identifiers.
+     * This method can be invoked if one of the following requirements is met:
+     * <ul>
+     *     <li>If the app has carrier privilege permission.
+     *     {@link TelephonyManager#hasCarrierPrivileges()}
+     *     <li>If the app has {@link android.Manifest.permission#READ_PHONE_STATE} permission and
+     *     access to device identifiers.
+     * </ul>
      *
      * @throws IllegalStateException if Telephony service is in bad state.
      * @throws SecurityException if the caller doesn't meet the requirements
