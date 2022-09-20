@@ -23,7 +23,6 @@ import android.content.Context
 import android.graphics.Point
 import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricSourceType
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
@@ -95,7 +94,6 @@ class AuthRippleController @Inject constructor(
     public override fun onViewAttached() {
         authController.addCallback(authControllerCallback)
         updateRippleColor()
-        updateSensorLocation()
         updateUdfpsDependentParams()
         udfpsController?.addCallback(udfpsControllerCallback)
         configurationController.addCallback(configurationChangedListener)
@@ -237,7 +235,11 @@ class AuthRippleController @Inject constructor(
     }
 
     private fun showDwellRipple() {
-        mView.startDwellRipple(statusBarStateController.isDozing)
+        updateSensorLocation()
+        fingerprintSensorLocation?.let {
+            mView.setFingerprintSensorLocation(it, udfpsRadius)
+            mView.startDwellRipple(statusBarStateController.isDozing)
+        }
     }
 
     private val keyguardUpdateMonitorCallback =
@@ -291,13 +293,6 @@ class AuthRippleController @Inject constructor(
     private val udfpsControllerCallback =
         object : UdfpsController.Callback {
             override fun onFingerDown() {
-                if (fingerprintSensorLocation == null) {
-                    Log.e("AuthRipple", "fingerprintSensorLocation=null onFingerDown. " +
-                            "Skip showing dwell ripple")
-                    return
-                }
-
-                mView.setFingerprintSensorLocation(fingerprintSensorLocation!!, udfpsRadius)
                 showDwellRipple()
             }
 
@@ -310,12 +305,10 @@ class AuthRippleController @Inject constructor(
         object : AuthController.Callback {
             override fun onAllAuthenticatorsRegistered() {
                 updateUdfpsDependentParams()
-                updateSensorLocation()
             }
 
             override fun onUdfpsLocationChanged() {
                 updateUdfpsDependentParams()
-                updateSensorLocation()
             }
         }
 
@@ -345,13 +338,11 @@ class AuthRippleController @Inject constructor(
                                 "\n\tudfpsRadius=$udfpsRadius")
                     }
                     "fingerprint" -> {
-                        updateSensorLocation()
                         pw.println("fingerprint ripple sensorLocation=$fingerprintSensorLocation")
                         showUnlockRipple(BiometricSourceType.FINGERPRINT)
                     }
                     "face" -> {
                         // note: only shows when about to proceed to the home screen
-                        updateSensorLocation()
                         pw.println("face ripple sensorLocation=$faceSensorLocation")
                         showUnlockRipple(BiometricSourceType.FACE)
                     }
