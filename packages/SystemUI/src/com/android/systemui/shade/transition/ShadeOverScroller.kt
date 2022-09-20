@@ -1,6 +1,6 @@
 package com.android.systemui.shade.transition
 
-import com.android.systemui.statusbar.phone.panelstate.PanelState
+import com.android.systemui.shade.PanelState
 
 /** Represents an over scroller for the non-lockscreen shade. */
 interface ShadeOverScroller {

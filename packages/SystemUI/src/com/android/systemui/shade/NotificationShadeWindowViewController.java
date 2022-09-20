@@ -52,7 +52,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 
 import java.io.PrintWriter;
@@ -91,7 +90,7 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private final PanelExpansionStateManager mPanelExpansionStateManager;
+    private final ShadeExpansionStateManager mShadeExpansionStateManager;
 
     private boolean mIsTrackingBarGesture = false;
 
@@ -104,7 +103,7 @@ public class NotificationShadeWindowViewController {
             NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowStateController statusBarWindowStateController,
@@ -124,7 +123,7 @@ public class NotificationShadeWindowViewController {
         mView = notificationShadeWindowView;
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
-        mPanelExpansionStateManager = panelExpansionStateManager;
+        mShadeExpansionStateManager = shadeExpansionStateManager;
         mDepthController = depthController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -404,7 +403,7 @@ public class NotificationShadeWindowViewController {
         setDragDownHelper(mLockscreenShadeTransitionController.getTouchHelper());
 
         mDepthController.setRoot(mView);
-        mPanelExpansionStateManager.addExpansionListener(mDepthController);
+        mShadeExpansionStateManager.addExpansionListener(mDepthController);
     }
 
     public NotificationShadeWindowView getView() {

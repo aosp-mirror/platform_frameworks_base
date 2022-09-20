@@ -116,6 +116,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -150,7 +151,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -413,7 +413,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationGutsManager,
                 notificationLogger,
                 mNotificationInterruptStateProvider,
-                new PanelExpansionStateManager(),
+                new ShadeExpansionStateManager(),
                 mKeyguardViewMediator,
                 new DisplayMetrics(),
                 mMetricsLogger,
@@ -486,7 +486,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mKeyguardViewMediator.registerCentralSurfaces(
                 any(CentralSurfacesImpl.class),
                 any(NotificationPanelViewController.class),
-                any(PanelExpansionStateManager.class),
+                any(ShadeExpansionStateManager.class),
                 any(BiometricUnlockController.class),
                 any(ViewGroup.class),
                 any(KeyguardBypassController.class)))

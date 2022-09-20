@@ -65,6 +65,9 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.ShadeExpansionListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -74,9 +77,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
@@ -100,7 +100,7 @@ import dagger.Lazy;
 @SysUISingleton
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
-        PanelExpansionListener, NavigationModeController.ModeChangedListener,
+        ShadeExpansionListener, NavigationModeController.ModeChangedListener,
         KeyguardViewController, FoldAodAnimationController.FoldAodAnimationStatus {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
@@ -318,7 +318,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void registerCentralSurfaces(CentralSurfaces centralSurfaces,
             NotificationPanelViewController notificationPanelViewController,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
             KeyguardBypassController bypassController) {
@@ -332,8 +332,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncer = mKeyguardBouncerFactory.create(container, mExpansionCallback);
         }
         mNotificationPanelViewController = notificationPanelViewController;
-        if (panelExpansionStateManager != null) {
-            panelExpansionStateManager.addExpansionListener(this);
+        if (shadeExpansionStateManager != null) {
+            shadeExpansionStateManager.addExpansionListener(this);
         }
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
@@ -386,7 +386,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
-    public void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+    public void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         float fraction = event.getFraction();
         boolean tracking = event.getTracking();
         // Avoid having the shade and the bouncer open at the same time over a dream.
