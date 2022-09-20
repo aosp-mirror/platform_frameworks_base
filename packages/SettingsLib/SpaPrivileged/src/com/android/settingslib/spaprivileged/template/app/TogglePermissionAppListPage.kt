@@ -34,7 +34,10 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
+import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.framework.util.getStringArg
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
@@ -107,20 +110,29 @@ internal class TogglePermissionAppListPageProvider(
          *
          * Expose route to enable enter from non-SPA pages.
          */
-        internal fun getRoute(permissionType: String) = "$PAGE_NAME/$permissionType"
+        fun getRoute(permissionType: String) = "$PAGE_NAME/$permissionType"
 
-        @Composable
-        internal fun navigator(permissionType: String) = navigator(route = getRoute(permissionType))
-
-        internal fun buildInjectEntry(permissionType: String): SettingsEntryBuilder {
+        fun buildInjectEntry(
+            permissionType: String,
+            listModelSupplier: (Context) -> TogglePermissionAppListModel<out AppRecord>,
+        ): SettingsEntryBuilder {
             val appListPage = SettingsPage.create(
                 PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
             return SettingsEntryBuilder.createInject(owner = appListPage).setIsAllowSearch(false)
+                .setUiLayoutFn {
+                    val listModel = rememberContext(listModelSupplier)
+                    Preference(
+                        object : PreferenceModel {
+                            override val title = stringResource(listModel.pageTitleResId)
+                            override val onClick = navigator(route = getRoute(permissionType))
+                        }
+                    )
+                }
         }
     }
 }
 
-private class TogglePermissionInternalAppListModel<T : AppRecord>(
+internal class TogglePermissionInternalAppListModel<T : AppRecord>(
     private val context: Context,
     private val listModel: TogglePermissionAppListModel<T>,
 ) : AppListModel<T> {
@@ -132,6 +144,11 @@ private class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     override fun getSummary(option: Int, record: T): State<String> {
+        return getSummary(record)
+    }
+
+    @Composable
+    fun getSummary(record: T): State<String> {
         val restrictionsProvider = remember {
             val restrictions = Restrictions(
                 userId = record.app.userId,

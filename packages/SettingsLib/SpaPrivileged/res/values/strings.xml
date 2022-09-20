@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- [CHAR LIMIT=25] Text shown when there are no applications to display. -->
     <string name="no_applications">No apps.</string>
     <!-- [CHAR LIMIT=NONE] Menu for manage apps to control whether system processes are shown -->
@@ -25,4 +25,6 @@
     <string name="app_permission_summary_allowed">Allowed</string>
     <!-- Preference summary text for an app when it is disallowed for a permission. [CHAR LIMIT=45] -->
     <string name="app_permission_summary_not_allowed">Not allowed</string>
+    <!-- Manage applications, version string displayed in app snippet -->
+    <string name="version_text">version <xliff:g id="version_num">%1$s</xliff:g></string>
 </resources>
