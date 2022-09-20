@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
+import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -61,6 +62,7 @@ import kotlin.jvm.functions.Function1;
  */
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable{
+    private static final String TAG = "QSPanelControllerBase";
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
@@ -90,6 +92,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
                             LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    // Logging to aid the investigation of b/216244185.
+                    Log.d(TAG,
+                            "onConfigurationChange: "
+                                    + "mShouldUseSplitNotificationShade="
+                                    + mShouldUseSplitNotificationShade + ", "
+                                    + "newConfig.windowConfiguration="
+                                    + newConfig.windowConfiguration);
                     mQSLogger.logOnConfigurationChanged(mLastOrientation, newConfig.orientation,
                             mView.getDumpableTag());
                     onConfigurationChanged();
