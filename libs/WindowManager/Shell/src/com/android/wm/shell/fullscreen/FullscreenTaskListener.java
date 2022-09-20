@@ -173,16 +173,23 @@ public class FullscreenTaskListener<T extends AutoCloseable>
      *
      * @param change the change of this task transition that needs to have the task layer as the
      *               leash
+     * @return {@code true} if a decoration was actually created.
      */
-    public void createWindowDecoration(TransitionInfo.Change change,
+    public boolean createWindowDecoration(TransitionInfo.Change change,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT) {
         final State<T> state = createOrUpdateTaskState(change.getTaskInfo(), change.getLeash());
-        if (!mWindowDecorViewModelOptional.isPresent()) return;
+        if (!mWindowDecorViewModelOptional.isPresent()) return false;
+        if (state.mWindowDecoration != null) {
+            // Already has a decoration.
+            return false;
+        }
         T newWindowDecor = mWindowDecorViewModelOptional.get().createWindowDecoration(
                 state.mTaskInfo, state.mLeash, startT, finishT);
         if (newWindowDecor != null) {
             state.mWindowDecoration = newWindowDecor;
+            return true;
         }
+        return false;
     }
 
     /**

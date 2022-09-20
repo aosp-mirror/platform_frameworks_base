@@ -324,6 +324,19 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         return mPipTransitionController;
     }
 
+    /**
+     * Returns true if the PiP window is currently being animated.
+     */
+    public boolean isAnimating() {
+        // TODO(b/183746978) move this to PipAnimationController, and inject that in PipController
+        PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null && animator.isRunning()) {
+            return true;
+        }
+        return false;
+    }
+
     public Rect getCurrentOrAnimatingBounds() {
         PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();

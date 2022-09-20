@@ -496,7 +496,7 @@ public final class JobStatus {
         this.batteryName = this.sourceTag != null
                 ? this.sourceTag + ":" + job.getService().getPackageName()
                 : job.getService().flattenToShortString();
-        this.tag = "*job*/" + this.batteryName;
+        this.tag = "*job*/" + this.batteryName + "#" + job.getId();
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
