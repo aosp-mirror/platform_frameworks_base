@@ -149,7 +149,42 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private final Rect mTmpInsetBounds = new Rect();
     private final int mEnterAnimationDuration;
 
-    private final Runnable mMovePipInResponseToKeepClearAreasChangeCallback;
+    private final Runnable mMovePipInResponseToKeepClearAreasChangeCallback =
+            this::onKeepClearAreasChangedCallback;
+
+    private void onKeepClearAreasChangedCallback() {
+        if (!mEnablePipKeepClearAlgorithm) {
+            // early bail out if the keep clear areas feature is disabled
+            return;
+        }
+        // if there is another animation ongoing, wait for it to finish and try again
+        if (mPipTaskOrganizer.isAnimating()) {
+            mMainExecutor.removeCallbacks(
+                    mMovePipInResponseToKeepClearAreasChangeCallback);
+            mMainExecutor.executeDelayed(
+                    mMovePipInResponseToKeepClearAreasChangeCallback,
+                    PIP_KEEP_CLEAR_AREAS_DELAY);
+            return;
+        }
+        updatePipPositionForKeepClearAreas();
+    }
+
+    private void updatePipPositionForKeepClearAreas() {
+        if (!mEnablePipKeepClearAlgorithm) {
+            // early bail out if the keep clear areas feature is disabled
+            return;
+        }
+        // only move if already in pip, other transitions account for keep clear areas
+        if (mPipTransitionState.hasEnteredPip()) {
+            Rect destBounds = mPipKeepClearAlgorithm.adjust(mPipBoundsState,
+                    mPipBoundsAlgorithm);
+            // only move if the bounds are actually different
+            if (destBounds != mPipBoundsState.getBounds()) {
+                mPipTaskOrganizer.scheduleAnimateResizePip(destBounds,
+                        mEnterAnimationDuration, null);
+            }
+        }
+    }
 
     private boolean mIsInFixedRotation;
     private PipAnimationListener mPinnedStackAnimationRecentsCallback;
@@ -302,6 +337,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
             mTouchHandler.onImeVisibilityChanged(imeVisible, imeHeight);
+            if (imeVisible) {
+                updatePipPositionForKeepClearAreas();
+            }
         }
 
         @Override
@@ -414,15 +452,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         mEnterAnimationDuration = mContext.getResources()
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
-        mMovePipInResponseToKeepClearAreasChangeCallback = () -> {
-            // only move if already in pip, other transitions account for keep clear areas
-            if (mPipTransitionState.hasEnteredPip()) {
-                Rect destBounds = mPipKeepClearAlgorithm.adjust(mPipBoundsState,
-                        mPipBoundsAlgorithm);
-                mPipTaskOrganizer.scheduleAnimateResizePip(destBounds,
-                        mEnterAnimationDuration, null);
-            }
-        };
         mPipParamsChangedForwarder = pipParamsChangedForwarder;
         mDisplayInsetsController = displayInsetsController;
 
