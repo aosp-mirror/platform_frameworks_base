@@ -46,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * Base class for a remotable object, the core part of a lightweight
@@ -313,7 +314,7 @@ public class Binder implements IBinder {
     private IInterface mOwner;
     @Nullable
     private String mDescriptor;
-    private volatile String[] mTransactionTraceNames = null;
+    private volatile AtomicReferenceArray<String> mTransactionTraceNames = null;
     private volatile String mSimpleDescriptor = null;
     private static final int TRANSACTION_TRACE_NAME_ID_LIMIT = 1024;
 
@@ -917,28 +918,32 @@ public class Binder implements IBinder {
     @VisibleForTesting
     public final @NonNull String getTransactionTraceName(int transactionCode) {
         if (mTransactionTraceNames == null) {
-            final String descriptor = getSimpleDescriptor();
             final int highestId = Math.min(getMaxTransactionId(), TRANSACTION_TRACE_NAME_ID_LIMIT);
-            final String[] transactionNames = new String[highestId + 1];
-            final StringBuffer buf = new StringBuffer();
-            for (int i = 0; i <= highestId; i++) {
-                String transactionName = getTransactionName(i + FIRST_CALL_TRANSACTION);
-                if (transactionName != null) {
-                    buf.append(descriptor).append(':').append(transactionName);
-                } else {
-                    buf.append(descriptor).append('#').append(i + FIRST_CALL_TRANSACTION);
-                }
-                transactionNames[i] = buf.toString();
-                buf.setLength(0);
-            }
-            mSimpleDescriptor = descriptor;
-            mTransactionTraceNames = transactionNames;
+            mSimpleDescriptor = getSimpleDescriptor();
+            mTransactionTraceNames = new AtomicReferenceArray(highestId + 1);
         }
+
         final int index = transactionCode - FIRST_CALL_TRANSACTION;
-        if (index < 0 || index >= mTransactionTraceNames.length) {
+        if (index < 0 || index >= mTransactionTraceNames.length()) {
             return mSimpleDescriptor + "#" + transactionCode;
         }
-        return mTransactionTraceNames[index];
+
+        String transactionTraceName = mTransactionTraceNames.getAcquire(index);
+        if (transactionTraceName == null) {
+            final String transactionName = getTransactionName(transactionCode);
+            final StringBuffer buf = new StringBuffer();
+
+            if (transactionName != null) {
+                buf.append(mSimpleDescriptor).append(":").append(transactionName);
+            } else {
+                buf.append(mSimpleDescriptor).append("#").append(transactionCode);
+            }
+
+            transactionTraceName = buf.toString();
+            mTransactionTraceNames.setRelease(index, transactionTraceName);
+        }
+
+        return transactionTraceName;
     }
 
     private @NonNull String getSimpleDescriptor() {
