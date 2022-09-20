@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
@@ -76,7 +77,8 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                     // mCallback can be null if onSimStateChanged callback is called when keyguard
                     // isn't active.
                     if (mCallback != null) {
-                        mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                        mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser(),
+                            SecurityMode.SimPuk);
                     }
                     break;
                 }
@@ -422,8 +424,8 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                                 mRemainingAttempts = -1;
                                 mShowDefaultMessage = true;
                                 if (mCallback != null) {
-                                    mCallback.dismiss(true,
-                                            KeyguardUpdateMonitor.getCurrentUser());
+                                    mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser(),
+                                        SecurityMode.SimPuk);
                                 }
                             } else {
                                 mShowDefaultMessage = false;
@@ -478,6 +480,11 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     public CharSequence getTitle() {
         return getContext().getString(
                 com.android.internal.R.string.keyguard_accessibility_sim_puk_unlock);
+    }
+
+    @Override
+    public SecurityMode getSecurityMode() {
+        return SecurityMode.SimPuk;
     }
 }
 
