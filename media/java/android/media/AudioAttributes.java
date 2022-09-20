@@ -1433,6 +1433,8 @@ public final class AudioAttributes implements Parcelable {
         return new String("AudioAttributes:"
                 + " usage=" + usageToString()
                 + " content=" + contentTypeToString()
+                + (mSource != MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID
+                    ? " source=" + MediaRecorder.toLogFriendlyAudioSource(mSource) : "")
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
                 + " tags=" + mFormattedTags
                 + " bundle=" + (mBundle == null ? "null" : mBundle.toString()));
