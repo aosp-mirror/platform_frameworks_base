@@ -191,15 +191,19 @@ public class FreeformTaskListener<T extends AutoCloseable>
      *
      * @param change the change of this task transition that needs to have the task layer as the
      *               leash
-     * @return {@code true} if it adopts the window decoration; {@code false} otherwise
+     * @return {@code true} if it creates the window decoration; {@code false} otherwise
      */
-    void createWindowDecoration(
+    boolean createWindowDecoration(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
         final State<T> state = createOrUpdateTaskState(change.getTaskInfo(), change.getLeash());
+        if (state.mWindowDecoration != null) {
+            return false;
+        }
         state.mWindowDecoration = mWindowDecorationViewModel.createWindowDecoration(
                 state.mTaskInfo, state.mLeash, startT, finishT);
+        return true;
     }
 
     /**
@@ -221,6 +225,9 @@ public class FreeformTaskListener<T extends AutoCloseable>
         } else {
             windowDecor =
                     mWindowDecorOfVanishedTasks.removeReturnOld(taskInfo.taskId);
+        }
+        if (windowDecor == null) {
+            return null;
         }
         mWindowDecorationViewModel.setupWindowDecorationForTransition(
                 taskInfo, startT, finishT, windowDecor);
