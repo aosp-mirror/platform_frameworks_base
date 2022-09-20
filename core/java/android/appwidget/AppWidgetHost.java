@@ -329,6 +329,22 @@ public class AppWidgetHost {
     }
 
     /**
+     * Set the visibiity of all widgets associated with this host to hidden
+     *
+     * @hide
+     */
+    public void setAppWidgetHidden() {
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.setAppWidgetHidden(mContextOpPackageName, mHostId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("System server dead?", e);
+        }
+    }
+
+    /**
      * Set the host's interaction handler.
      *
      * @hide

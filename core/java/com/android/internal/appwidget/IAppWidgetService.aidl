@@ -45,6 +45,7 @@ interface IAppWidgetService {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId);
     int[] getAppWidgetIdsForHost(String callingPackage, int hostId);
+    void setAppWidgetHidden(in String callingPackage, int hostId);
     IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
             int intentFlags);
 
