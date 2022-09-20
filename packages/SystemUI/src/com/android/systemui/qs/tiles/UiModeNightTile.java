@@ -81,8 +81,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mBatteryController = batteryController;
-        mUiModeManager = (UiModeManager) host.getUserContext().getSystemService(
-                Context.UI_MODE_SERVICE);
+        mUiModeManager = host.getUserContext().getSystemService(UiModeManager.class);
         mLocationController = locationController;
         configurationController.observe(getLifecycle(), this);
         batteryController.observe(getLifecycle(), this);
