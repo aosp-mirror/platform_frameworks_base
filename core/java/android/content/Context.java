@@ -51,6 +51,7 @@ import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionMethod;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -6066,6 +6067,7 @@ public abstract class Context {
      */
     @CheckResult(suggest="#enforcePermission(String,int,int,String)")
     @PackageManager.PermissionResult
+    @PermissionMethod
     public abstract int checkPermission(@NonNull String permission, int pid, int uid);
 
     /** @hide */
@@ -6098,6 +6100,7 @@ public abstract class Context {
      */
     @CheckResult(suggest="#enforceCallingPermission(String,String)")
     @PackageManager.PermissionResult
+    @PermissionMethod
     public abstract int checkCallingPermission(@NonNull String permission);
 
     /**
@@ -6118,6 +6121,7 @@ public abstract class Context {
      */
     @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)")
     @PackageManager.PermissionResult
+    @PermissionMethod
     public abstract int checkCallingOrSelfPermission(@NonNull String permission);
 
     /**
@@ -6146,6 +6150,7 @@ public abstract class Context {
      *
      * @see #checkPermission(String, int, int)
      */
+    @PermissionMethod
     public abstract void enforcePermission(
             @NonNull String permission, int pid, int uid, @Nullable String message);
 
@@ -6167,6 +6172,7 @@ public abstract class Context {
      *
      * @see #checkCallingPermission(String)
      */
+    @PermissionMethod
     public abstract void enforceCallingPermission(
             @NonNull String permission, @Nullable String message);
 
@@ -6183,6 +6189,7 @@ public abstract class Context {
      *
      * @see #checkCallingOrSelfPermission(String)
      */
+    @PermissionMethod
     public abstract void enforceCallingOrSelfPermission(
             @NonNull String permission, @Nullable String message);
 
