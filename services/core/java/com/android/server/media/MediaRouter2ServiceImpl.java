@@ -601,6 +601,26 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "MediaRouter2ServiceImpl");
+
+        String indent = prefix + "  ";
+
+        synchronized (mLock) {
+            pw.println(indent + "mNextRouterOrManagerId=" + mNextRouterOrManagerId.get());
+            pw.println(indent + "mCurrentUserId=" + mCurrentUserId);
+
+            pw.println(indent + "UserRecords:");
+            if (mUserRecords.size() > 0) {
+                for (int i = 0; i < mUserRecords.size(); i++) {
+                    mUserRecords.get(i).dump(pw, indent + "  ");
+                }
+            } else {
+                pw.println(indent + "<no user records>");
+            }
+        }
+    }
+
     //TODO(b/136703681): Review this is handling multi-user properly.
     void switchUser() {
         synchronized (mLock) {
@@ -1197,6 +1217,41 @@ class MediaRouter2ServiceImpl {
             }
             return null;
         }
+
+        public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            pw.println(prefix + "UserRecord");
+
+            String indent = prefix + "  ";
+
+            pw.println(indent + "mUserId=" + mUserId);
+
+            pw.println(indent + "Router Records:");
+            if (!mRouterRecords.isEmpty()) {
+                for (RouterRecord routerRecord : mRouterRecords) {
+                    routerRecord.dump(pw, indent + "  ");
+                }
+            } else {
+                pw.println(indent + "<no router records>");
+            }
+
+            pw.println(indent + "Manager Records:");
+            if (!mManagerRecords.isEmpty()) {
+                for (ManagerRecord managerRecord : mManagerRecords) {
+                    managerRecord.dump(pw, indent + "  ");
+                }
+            } else {
+                pw.println(indent + "<no manager records>");
+            }
+
+            if (!mHandler.runWithScissors(new Runnable() {
+                @Override
+                public void run() {
+                    mHandler.dump(pw, indent);
+                }
+            }, 1000)) {
+                pw.println(indent + "<could not dump handler state>");
+            }
+        }
     }
 
     final class RouterRecord implements IBinder.DeathRecipient {
@@ -1236,6 +1291,22 @@ class MediaRouter2ServiceImpl {
         public void binderDied() {
             routerDied(this);
         }
+
+        public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            pw.println(prefix + "RouterRecord");
+
+            String indent = prefix + "  ";
+
+            pw.println(indent + "mPackageName=" + mPackageName);
+            pw.println(indent + "mSelectRouteSequenceNumbers=" + mSelectRouteSequenceNumbers);
+            pw.println(indent + "mUid=" + mUid);
+            pw.println(indent + "mPid=" + mPid);
+            pw.println(indent + "mHasConfigureWifiDisplayPermission="
+                    + mHasConfigureWifiDisplayPermission);
+            pw.println(indent + "mHasModifyAudioRoutingPermission="
+                    + mHasModifyAudioRoutingPermission);
+            pw.println(indent + "mRouterId=" + mRouterId);
+        }
     }
 
     final class ManagerRecord implements IBinder.DeathRecipient {
@@ -1267,8 +1338,20 @@ class MediaRouter2ServiceImpl {
             managerDied(this);
         }
 
-        public void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + this);
+        public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            pw.println(prefix + "ManagerRecord");
+
+            String indent = prefix + "  ";
+
+            pw.println(indent + "mPackageName=" + mPackageName);
+            pw.println(indent + "mManagerId=" + mManagerId);
+            pw.println(indent + "mUid=" + mUid);
+            pw.println(indent + "mPid=" + mPid);
+            pw.println(indent + "mIsScanning=" + mIsScanning);
+
+            if (mLastSessionCreationRequest != null) {
+                mLastSessionCreationRequest.dump(pw, indent);
+            }
         }
 
         public void startScan() {
@@ -1453,6 +1536,15 @@ class MediaRouter2ServiceImpl {
                 sendMessage(PooledLambda.obtainMessage(
                         UserHandler::updateDiscoveryPreferenceOnHandler, this));
             }
+        }
+
+        public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            pw.println(prefix + "UserHandler");
+
+            String indent = prefix + "  ";
+            pw.println(indent + "mRunning=" + mRunning);
+
+            mWatcher.dump(pw, prefix);
         }
 
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
@@ -2339,6 +2431,15 @@ class MediaRouter2ServiceImpl {
             mManagerRequestId = managerRequestId;
             mOldSession = oldSession;
             mRoute = route;
+        }
+
+        public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            pw.println(prefix + "SessionCreationRequest");
+
+            String indent = prefix + "  ";
+
+            pw.println(indent + "mUniqueRequestId=" + mUniqueRequestId);
+            pw.println(indent + "mManagerRequestId=" + mManagerRequestId);
         }
     }
 }
