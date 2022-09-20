@@ -16,6 +16,9 @@
 
 #include <jni.h>
 
+#include "nativehelper/JNIHelp.h"
+#include "core_jni_helpers.h"
+
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
 
 static void jintarrayArgumentNoop(JNIEnv*, jclass, jintArray, jint) {
@@ -48,11 +51,38 @@ static jint jintarrayBasicAccess(JNIEnv* env, jclass, jintArray jarray, jint ind
     return ret;
 }
 
+static jint jintFastNativeAccess(JNIEnv*, jclass, jint number) {
+    return number;
+}
+
+static jint jintCriticalNativeAccess(CRITICAL_JNI_PARAMS_COMMA jint number) {
+    return number;
+}
+
+static jint jintFastNativeCheckNullPointer(JNIEnv* env, jclass, jint number) {
+    if (number == 0) {
+        jniThrowNullPointerException(env, NULL);
+        return -1;
+    }
+    return number;
+}
+
+static jint jintCriticalNativeCheckNullPointer(CRITICAL_JNI_PARAMS_COMMA jint number) {
+    if (number == 0) {
+        return -1;
+    }
+    return number;
+}
+
 static const JNINativeMethod sMethods[] = {
     {"jintarrayArgumentNoop", "([II)V", (void *) jintarrayArgumentNoop},
     {"jintarrayGetLength", "([I)I", (void *) jintarrayGetLength},
     {"jintarrayCriticalAccess", "([II)I", (void *) jintarrayCriticalAccess},
     {"jintarrayBasicAccess", "([II)I", (void *) jintarrayBasicAccess},
+    {"jintFastNativeAccess", "(I)I", (void *) jintFastNativeAccess},
+    {"jintCriticalNativeAccess", "(I)I", (void *) jintCriticalNativeAccess},
+    {"jintFastNativeCheckNullPointer", "(I)I", (void *) jintFastNativeCheckNullPointer},
+    {"jintCriticalNativeCheckNullPointer", "(I)I", (void *) jintCriticalNativeCheckNullPointer},
 };
 
 static int registerNativeMethods(JNIEnv* env, const char* className,

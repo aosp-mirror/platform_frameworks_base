@@ -22,8 +22,10 @@ import android.perftests.utils.PerfStatusReporter;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,6 +108,93 @@ public class SystemPerfTest {
         }
     }
 
+    /** this result should be compared with {@link #testJniCriticalNativeAccess()}. */
+    @Test
+    public void testJniFastNativeAccess() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            jintFastNativeAccess(50);
+        }
+    }
+
+    /**
+     * This result should be compared with {@link #testJniFastNativeAccess()}.
+     *
+     * <p>In theory, the result should be better than {@link #testJniFastNativeAccess()}.
+     */
+    @Test
+    public void testJniCriticalNativeAccess() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            jintCriticalNativeAccess(50);
+        }
+    }
+
+    /** The result should be compared with {@link #testJniCriticalNativeCheckNullPointer()}. */
+    @Test
+    public void testJniFastNativeCheckNullPointer() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            final int echoNumber = jintFastNativeCheckNullPointer(50);
+        }
+    }
+
+    /**
+     * The result should be compared with {@link #testJniFastNativeCheckNullPointer()}.
+     *
+     * <p>CriticalNative can't reference JavaEnv in native layer. It means it should check the null
+     * pointer in java layer. It's a comparison between native layer and java layer.
+     */
+    @Test
+    public void testJniCriticalNativeCheckNullPointer() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            final int echoNumber = jintCriticalNativeCheckNullPointer(50);
+            if (echoNumber == -1) {
+                Assert.fail("It shouldn't be here");
+            }
+        }
+    }
+
+    /**
+     * The result should be compared with {@link #testJniCriticalNativeThrowNullPointerException()}.
+     */
+    @Test
+    public void testJniFastNativeThrowNullPointerException() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            try {
+                jintFastNativeCheckNullPointer(0);
+            } catch (NullPointerException e) {
+                continue;
+            }
+            Assert.fail("It shouldn't be here");
+        }
+    }
+
+    /**
+     * The result should be compared with {@link #testJniFastNativeThrowNullPointerException()}.
+     *
+     * <p>CriticalNative can't reference JavaEnv in native layer. It means it should check the null
+     * pointer in java layer. It's a comparison between native layer and java layer.
+     */
+    @Test
+    public void testJniCriticalNativeThrowNullPointerException() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            try {
+                final int echoNumber = jintCriticalNativeCheckNullPointer(0);
+                if (echoNumber == -1) {
+                    throw new NullPointerException();
+                }
+            } catch (NullPointerException e) {
+                continue;
+            }
+            Assert.fail("It shouldn't be here");
+        }
+    }
+
+    // ----------- @FastNative ------------------
     @FastNative
     private static native void jintarrayArgumentNoop(int[] array, int length);
     @FastNative
@@ -114,4 +203,17 @@ public class SystemPerfTest {
     private static native int jintarrayCriticalAccess(int[] array, int index);
     @FastNative
     private static native int jintarrayBasicAccess(int[] array, int index);
+
+    @FastNative
+    private static native int jintFastNativeAccess(int echoNumber);
+
+    @FastNative
+    private static native int jintFastNativeCheckNullPointer(int echoNumber);
+
+    // ----------- @CriticalNative ------------------
+    @CriticalNative
+    private static native int jintCriticalNativeAccess(int echoNumber);
+
+    @CriticalNative
+    private static native int jintCriticalNativeCheckNullPointer(int echoNumber);
 }
