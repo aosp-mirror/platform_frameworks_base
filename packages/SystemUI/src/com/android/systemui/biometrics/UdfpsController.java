@@ -342,8 +342,11 @@ public class UdfpsController implements DozeReceiver {
             if (mOverlay != null
                     && mOverlay.getRequestReason() != REASON_AUTH_KEYGUARD
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
-                        + mOverlay.getRequestReason());
+                String reason = intent.getStringExtra("reason");
+                reason = (reason != null) ? reason : "unknown";
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, reason: " + reason
+                        + ", mRequestReason: " + mOverlay.getRequestReason());
+
                 mOverlay.cancel();
                 hideUdfpsOverlay();
             }
