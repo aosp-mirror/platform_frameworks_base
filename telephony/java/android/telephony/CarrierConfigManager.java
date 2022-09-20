@@ -489,7 +489,10 @@ public class CarrierConfigManager {
     /**
      * Control whether users receive a simplified network settings UI and improved network
      * selection.
+     *
+     * @deprecated Never implemented. Has no behavior impact when override. DO NOT USE.
      */
+    @Deprecated
     public static final String
             KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL = "simplified_network_settings_bool";
 
