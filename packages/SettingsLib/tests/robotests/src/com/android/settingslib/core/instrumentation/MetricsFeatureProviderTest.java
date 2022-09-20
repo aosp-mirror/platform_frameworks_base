@@ -80,12 +80,7 @@ public class MetricsFeatureProviderTest {
                 MetricsEvent.SETTINGS_GESTURES);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                key,
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, key);
     }
 
     @Test
@@ -98,12 +93,7 @@ public class MetricsFeatureProviderTest {
                 MetricsEvent.SETTINGS_GESTURES);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                Intent.ACTION_ASSIST,
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, Intent.ACTION_ASSIST);
     }
 
     @Test
@@ -116,12 +106,7 @@ public class MetricsFeatureProviderTest {
                 MetricsEvent.SETTINGS_GESTURES);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                fragment,
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, fragment);
     }
 
     @Test
@@ -140,12 +125,7 @@ public class MetricsFeatureProviderTest {
         final boolean loggable = mProvider.logStartedIntent(intent, MetricsEvent.SETTINGS_GESTURES);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                Intent.ACTION_ASSIST,
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, Intent.ACTION_ASSIST);
     }
 
     @Test
@@ -155,12 +135,7 @@ public class MetricsFeatureProviderTest {
         final boolean loggable = mProvider.logStartedIntent(intent, MetricsEvent.SETTINGS_GESTURES);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                "pkg/cls",
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "pkg/cls");
     }
 
     @Test
@@ -171,12 +146,7 @@ public class MetricsFeatureProviderTest {
                 MetricsEvent.SETTINGS_GESTURES, false);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                "pkg/cls/personal",
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "pkg/cls/personal");
     }
 
     @Test
@@ -187,12 +157,7 @@ public class MetricsFeatureProviderTest {
                 MetricsEvent.SETTINGS_GESTURES, true);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                "pkg/cls/work",
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "pkg/cls/work");
     }
 
     @Test
@@ -226,12 +191,7 @@ public class MetricsFeatureProviderTest {
                 MetricsEvent.SETTINGS_GESTURES);
 
         assertThat(loggable).isTrue();
-        verify(mLogWriter).action(
-                MetricsEvent.SETTINGS_GESTURES,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                key,
-                0);
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, key);
     }
 
     @Test

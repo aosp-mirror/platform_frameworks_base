@@ -788,7 +788,7 @@ public final class InputMethodManager {
                 // we'll just do a window focus gain and call it a day.
                 View servedView = controller.getServedView();
                 boolean nextFocusHasConnection = servedView != null && servedView == focusedView
-                        && hasActiveConnection(focusedView);
+                        && hasActiveInputConnectionInternal(focusedView);
                 if (DEBUG) {
                     Log.v(TAG, "Reporting focus gain, without startInput"
                             + ", nextFocusIsServedView=" + nextFocusHasConnection);
@@ -861,22 +861,11 @@ public final class InputMethodManager {
         /**
          * Checks whether the active input connection (if any) is for the given view.
          *
-         * TODO(b/182259171): Clean-up hasActiveConnection to simplify the logic.
-         *
-         * Note that this method is only intended for restarting input after focus gain
-         * (e.g. b/160391516), DO NOT leverage this method to do another check.
+         * @see #hasActiveInputConnectionInternal(View)}
          */
         @Override
         public boolean hasActiveConnection(View view) {
-            synchronized (mH) {
-                if (!hasServedByInputMethodLocked(view) || !isImeSessionAvailableLocked()) {
-                    return false;
-                }
-
-                return mServedInputConnection != null
-                        && mServedInputConnection.isActive()
-                        && mServedInputConnection.getServedView() == view;
-            }
+            return hasActiveInputConnectionInternal(view);
         }
     }
 
@@ -889,11 +878,31 @@ public final class InputMethodManager {
      * Checks whether the active input connection (if any) is for the given view.
      *
      * @hide
-     * @see ImeFocusController#getImmDelegate()#hasActiveInputConnection(View)
+     * @see #hasActiveInputConnectionInternal(View)}
      */
     @TestApi
     public boolean hasActiveInputConnection(@Nullable View view) {
-        return mDelegate.hasActiveConnection(view);
+        return hasActiveInputConnectionInternal(view);
+    }
+
+    /**
+     * Checks whether the active input connection (if any) is for the given view.
+     *
+     * TODO(b/182259171): Clean-up hasActiveConnection to simplify the logic.
+     *
+     * Note that this method is only intended for restarting input after focus gain
+     * (e.g. b/160391516), DO NOT leverage this method to do another check.
+     */
+    private boolean hasActiveInputConnectionInternal(@Nullable View view) {
+        synchronized (mH) {
+            if (!hasServedByInputMethodLocked(view) || !isImeSessionAvailableLocked()) {
+                return false;
+            }
+
+            return mServedInputConnection != null
+                    && mServedInputConnection.isActive()
+                    && mServedInputConnection.getServedView() == view;
+        }
     }
 
     @GuardedBy("mH")

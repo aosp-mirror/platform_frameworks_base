@@ -56,7 +56,7 @@ import org.junit.runners.Parameterized
 @Group3
 class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true) {
+        get() = buildTransition {
             transitions {
                 pipApp.doubleClickPipWindow(wmHelper)
             }

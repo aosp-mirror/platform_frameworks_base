@@ -32,6 +32,7 @@ import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
+import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
@@ -48,6 +49,7 @@ object HomePageProvider : SettingsPageProvider {
             SettingsPagerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             FooterPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }
 

@@ -34,6 +34,11 @@ public interface LogWriter {
     void hidden(Context context, int category, int visibleTime);
 
     /**
+     * Logs a click event when user click item.
+     */
+    void clicked(int category, String key);
+
+    /**
      * Logs an user action.
      */
     void action(Context context, int category, Pair<Integer, Object>... taggedData);

@@ -421,7 +421,7 @@ public class InputManagerService extends IInputManager.Stub
         mContext = injector.getContext();
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
-        mBatteryController = new BatteryController(mContext, mNative);
+        mBatteryController = new BatteryController(mContext, mNative, injector.getLooper());
 
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
@@ -561,6 +561,8 @@ public class InputManagerService extends IInputManager.Stub
         if (mWiredAccessoryCallbacks != null) {
             mWiredAccessoryCallbacks.systemReady();
         }
+
+        mBatteryController.systemRunning();
     }
 
     private void reloadKeyboardLayouts() {

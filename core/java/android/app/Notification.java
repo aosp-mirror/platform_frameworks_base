@@ -1421,7 +1421,6 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: the type of call represented by the
      * {@link android.app.Notification.CallStyle} notification. This extra is an int.
-     * @hide
      */
     public static final String EXTRA_CALL_TYPE = "android.callType";
 
@@ -9301,11 +9300,43 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
-        /** @hide */
+
+        /**
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                CALL_TYPE_UNKNOWN,
+                CALL_TYPE_INCOMING,
+                CALL_TYPE_ONGOING,
+                CALL_TYPE_SCREENING
+        })
+        public @interface CallType {};
+
+        /**
+         * Unknown call type.
+         *
+         * See {@link #EXTRA_CALL_TYPE}.
+         */
+        public static final int CALL_TYPE_UNKNOWN = 0;
+
+        /**
+         *  Call type for incoming calls.
+         *
+         *  See {@link #EXTRA_CALL_TYPE}.
+         */
         public static final int CALL_TYPE_INCOMING = 1;
-        /** @hide */
+        /**
+         * Call type for ongoing calls.
+         *
+         * See {@link #EXTRA_CALL_TYPE}.
+         */
         public static final int CALL_TYPE_ONGOING = 2;
-        /** @hide */
+        /**
+         * Call type for calls that are being screened.
+         *
+         * See {@link #EXTRA_CALL_TYPE}.
+         */
         public static final int CALL_TYPE_SCREENING = 3;
 
         /**
@@ -9392,13 +9423,14 @@ public class Notification implements Parcelable
         }
 
         /**
+         * @param callType The type of the call
          * @param person The person displayed for the incoming call.
          *             The user also needs to have a non-empty name associated with it.
          * @param hangUpIntent The intent to be sent when the user taps the hang up action
          * @param declineIntent The intent to be sent when the user taps the decline action
          * @param answerIntent The intent to be sent when the user taps the answer action
          */
-        private CallStyle(int callType, @NonNull Person person,
+        private CallStyle(@CallType int callType, @NonNull Person person,
                 @Nullable PendingIntent hangUpIntent, @Nullable PendingIntent declineIntent,
                 @Nullable PendingIntent answerIntent) {
             if (person == null || TextUtils.isEmpty(person.getName())) {
