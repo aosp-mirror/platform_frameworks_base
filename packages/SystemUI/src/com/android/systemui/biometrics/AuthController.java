@@ -349,18 +349,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
     @Override
     public void onTryAgainPressed(long requestId) {
-        if (mReceiver == null) {
-            Log.e(TAG, "onTryAgainPressed: Receiver is null");
-            return;
-        }
-
-        if (requestId != mCurrentDialog.getRequestId()) {
-            Log.w(TAG, "requestId doesn't match, skip onTryAgainPressed");
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onTryAgainPressed");
             return;
         }
 
         try {
-            mReceiver.onTryAgainPressed();
+            receiver.onTryAgainPressed();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when handling try again", e);
         }
@@ -368,18 +364,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
     @Override
     public void onDeviceCredentialPressed(long requestId) {
-        if (mReceiver == null) {
-            Log.e(TAG, "onDeviceCredentialPressed: Receiver is null");
-            return;
-        }
-
-        if (requestId != mCurrentDialog.getRequestId()) {
-            Log.w(TAG, "requestId doesn't match, skip onDeviceCredentialPressed");
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onDeviceCredentialPressed");
             return;
         }
 
         try {
-            mReceiver.onDeviceCredentialPressed();
+            receiver.onDeviceCredentialPressed();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when handling credential button", e);
         }
@@ -387,18 +379,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
     @Override
     public void onSystemEvent(int event, long requestId) {
-        if (mReceiver == null) {
-            Log.e(TAG, "onSystemEvent(" + event + "): Receiver is null");
-            return;
-        }
-
-        if (requestId != mCurrentDialog.getRequestId()) {
-            Log.w(TAG, "requestId doesn't match, skip onSystemEvent");
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onSystemEvent");
             return;
         }
 
         try {
-            mReceiver.onSystemEvent(event);
+            receiver.onSystemEvent(event);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when sending system event", e);
         }
@@ -406,21 +394,44 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
     @Override
     public void onDialogAnimatedIn(long requestId) {
-        if (mReceiver == null) {
-            Log.e(TAG, "onDialogAnimatedIn: Receiver is null");
-            return;
-        }
-
-        if (requestId != mCurrentDialog.getRequestId()) {
-            Log.w(TAG, "requestId doesn't match, skip onDialogAnimatedIn");
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onDialogAnimatedIn");
             return;
         }
 
         try {
-            mReceiver.onDialogAnimatedIn();
+            receiver.onDialogAnimatedIn();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when sending onDialogAnimatedIn", e);
         }
+    }
+
+    @Nullable
+    private IBiometricSysuiReceiver getCurrentReceiver(long requestId) {
+        if (!isRequestIdValid(requestId)) {
+            return null;
+        }
+
+        if (mReceiver == null) {
+            Log.w(TAG, "getCurrentReceiver: Receiver is null");
+        }
+
+        return mReceiver;
+    }
+
+    private boolean isRequestIdValid(long requestId) {
+        if (mCurrentDialog == null) {
+            Log.w(TAG, "shouldNotifyReceiver: dialog already gone");
+            return false;
+        }
+
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "shouldNotifyReceiver: requestId doesn't match");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
