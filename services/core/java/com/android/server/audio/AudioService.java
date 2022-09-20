@@ -41,10 +41,12 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.bluetooth.BluetoothAdapter;
@@ -1190,6 +1192,8 @@ public class AudioService extends IAudioService.Stub
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_safe_media_volume_index) * 10;
 
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
 
@@ -1207,7 +1211,7 @@ public class AudioService extends IAudioService.Stub
         mPlaybackMonitor =
                 new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM],
                         device -> onMuteAwaitConnectionTimeout(device));
-        mPlaybackMonitor.registerPlaybackCallback(mVoicePlaybackActivityMonitor, true);
+        mPlaybackMonitor.registerPlaybackCallback(mPlaybackActivityMonitor, true);
 
         mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
@@ -1313,6 +1317,7 @@ public class AudioService extends IAudioService.Stub
 
         intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
         intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
+        intentFilter.addAction(ACTION_CHECK_MUSIC_ACTIVE);
 
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null,
                 Context.RECEIVER_EXPORTED);
@@ -1932,13 +1937,7 @@ public class AudioService extends IAudioService.Stub
         if (state == AudioService.CONNECTION_STATE_CONNECTED) {
             // DEVICE_OUT_HDMI is now connected
             if (mSafeMediaVolumeDevices.contains(AudioSystem.DEVICE_OUT_HDMI)) {
-                sendMsg(mAudioHandler,
-                        MSG_CHECK_MUSIC_ACTIVE,
-                        SENDMSG_REPLACE,
-                        0,
-                        0,
-                        caller,
-                        MUSIC_ACTIVE_POLL_PERIOD_MS);
+                scheduleMusicActiveCheck();
             }
 
             if (isPlatformTelevision()) {
@@ -3827,8 +3826,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
+    private AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
 
-    private final IPlaybackConfigDispatcher mVoicePlaybackActivityMonitor =
+    private final IPlaybackConfigDispatcher mPlaybackActivityMonitor =
             new IPlaybackConfigDispatcher.Stub() {
         @Override
         public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
@@ -3841,19 +3841,26 @@ public class AudioService extends IAudioService.Stub
 
     private void onPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
         boolean voiceActive = false;
+        boolean mediaActive = false;
         for (AudioPlaybackConfiguration config : configs) {
             final int usage = config.getAudioAttributes().getUsage();
-            if ((usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
-                    || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING)
-                    && config.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+            if (!config.isActive()) {
+                continue;
+            }
+            if (usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
+                    || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING) {
                 voiceActive = true;
-                break;
+            }
+            if (usage == AudioAttributes.USAGE_MEDIA || usage == AudioAttributes.USAGE_GAME) {
+                mediaActive = true;
             }
         }
         if (mVoicePlaybackActive.getAndSet(voiceActive) != voiceActive) {
             updateHearingAidVolumeOnVoiceActivityUpdate();
         }
-
+        if (mMediaPlaybackActive.getAndSet(mediaActive) != mediaActive && mediaActive) {
+            scheduleMusicActiveCheck();
+        }
         // Update playback active state for all apps in audio mode stack.
         // When the audio mode owner becomes active, replace any delayed MSG_UPDATE_AUDIO_MODE
         // and request an audio mode update immediately. Upon any other change, queue the message
@@ -6037,30 +6044,52 @@ public class AudioService extends IAudioService.Stub
         return mContentResolver;
     }
 
+    private void scheduleMusicActiveCheck() {
+        synchronized (mSafeMediaVolumeStateLock) {
+            cancelMusicActiveCheck();
+            mMusicActiveIntent = PendingIntent.getBroadcast(mContext,
+                REQUEST_CODE_CHECK_MUSIC_ACTIVE,
+                new Intent(ACTION_CHECK_MUSIC_ACTIVE),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime()
+                    + MUSIC_ACTIVE_POLL_PERIOD_MS, mMusicActiveIntent);
+        }
+    }
+
+    private void cancelMusicActiveCheck() {
+        synchronized (mSafeMediaVolumeStateLock) {
+            if (mMusicActiveIntent != null) {
+                mAlarmManager.cancel(mMusicActiveIntent);
+                mMusicActiveIntent = null;
+            }
+        }
+    }
     private void onCheckMusicActive(String caller) {
         synchronized (mSafeMediaVolumeStateLock) {
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE) {
                 int device = getDeviceForStream(AudioSystem.STREAM_MUSIC);
-
-                if (mSafeMediaVolumeDevices.contains(device)) {
-                    sendMsg(mAudioHandler,
-                            MSG_CHECK_MUSIC_ACTIVE,
-                            SENDMSG_REPLACE,
-                            0,
-                            0,
-                            caller,
-                            MUSIC_ACTIVE_POLL_PERIOD_MS);
+                if (mSafeMediaVolumeDevices.contains(device)
+                        && mAudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+                    scheduleMusicActiveCheck();
                     int index = mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(device);
-                    if (mAudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)
-                            && (index > safeMediaVolumeIndex(device))) {
+                    if (index > safeMediaVolumeIndex(device)) {
                         // Approximate cumulative active music time
-                        mMusicActiveMs += MUSIC_ACTIVE_POLL_PERIOD_MS;
+                        long curTimeMs = SystemClock.elapsedRealtime();
+                        if (mLastMusicActiveTimeMs != 0) {
+                            mMusicActiveMs += (int) (curTimeMs - mLastMusicActiveTimeMs);
+                        }
+                        mLastMusicActiveTimeMs = curTimeMs;
+                        Log.i(TAG, "onCheckMusicActive() mMusicActiveMs: " + mMusicActiveMs);
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
                             setSafeMediaVolumeEnabled(true, caller);
                             mMusicActiveMs = 0;
                         }
                         saveMusicActiveMs();
                     }
+                } else {
+                    cancelMusicActiveCheck();
+                    mLastMusicActiveTimeMs = 0;
                 }
             }
         }
@@ -6129,6 +6158,7 @@ public class AudioService extends IAudioService.Stub
                         } else {
                             // We have existing playback time recorded, already confirmed.
                             mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
+                            mLastMusicActiveTimeMs = 0;
                         }
                     }
                 } else {
@@ -8638,13 +8668,7 @@ public class AudioService extends IAudioService.Stub
     @VisibleForTesting
     public void checkMusicActive(int deviceType, String caller) {
         if (mSafeMediaVolumeDevices.contains(deviceType)) {
-            sendMsg(mAudioHandler,
-                    MSG_CHECK_MUSIC_ACTIVE,
-                    SENDMSG_REPLACE,
-                    0,
-                    0,
-                    caller,
-                    MUSIC_ACTIVE_POLL_PERIOD_MS);
+            scheduleMusicActiveCheck();
         }
     }
 
@@ -8769,6 +8793,8 @@ public class AudioService extends IAudioService.Stub
                                 suspendedPackages[i], suspendedUids[i]);
                     }
                 }
+            } else if (action.equals(ACTION_CHECK_MUSIC_ACTIVE)) {
+                onCheckMusicActive(ACTION_CHECK_MUSIC_ACTIVE);
             }
         }
     } // end class AudioServiceBroadcastReceiver
@@ -9714,11 +9740,19 @@ public class AudioService extends IAudioService.Stub
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
     // automatically. mMusicActiveMs is rounded to a multiple of MUSIC_ACTIVE_POLL_PERIOD_MS.
     private int mMusicActiveMs;
+    private long mLastMusicActiveTimeMs = 0;
+    private PendingIntent mMusicActiveIntent = null;
+    private AlarmManager mAlarmManager;
+
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
     // check playback or record activity every 6 seconds for UIDs owning mode IN_COMMUNICATION
     private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 6000;
+
+    private static final String ACTION_CHECK_MUSIC_ACTIVE =
+            AudioService.class.getSimpleName() + ".CHECK_MUSIC_ACTIVE";
+    private static final int REQUEST_CODE_CHECK_MUSIC_ACTIVE = 1;
 
     private int safeMediaVolumeIndex(int device) {
         if (!mSafeMediaVolumeDevices.contains(device)) {
@@ -9741,14 +9775,9 @@ public class AudioService extends IAudioService.Stub
                 } else if (!on && (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)) {
                     mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
                     mMusicActiveMs = 1;  // nonzero = confirmed
+                    mLastMusicActiveTimeMs = 0;
                     saveMusicActiveMs();
-                    sendMsg(mAudioHandler,
-                            MSG_CHECK_MUSIC_ACTIVE,
-                            SENDMSG_REPLACE,
-                            0,
-                            0,
-                            caller,
-                            MUSIC_ACTIVE_POLL_PERIOD_MS);
+                    scheduleMusicActiveCheck();
                 }
             }
         }
@@ -9790,7 +9819,9 @@ public class AudioService extends IAudioService.Stub
     public void disableSafeMediaVolume(String callingPackage) {
         enforceVolumeController("disable the safe media volume");
         synchronized (mSafeMediaVolumeStateLock) {
+            final long identity = Binder.clearCallingIdentity();
             setSafeMediaVolumeEnabled(false, callingPackage);
+            Binder.restoreCallingIdentity(identity);
             if (mPendingVolumeCommand != null) {
                 onSetStreamVolume(mPendingVolumeCommand.mStreamType,
                                   mPendingVolumeCommand.mIndex,
