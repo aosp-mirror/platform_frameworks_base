@@ -68,6 +68,8 @@ public final class KeymasterDefs {
 
     public static final int KM_TAG_RSA_PUBLIC_EXPONENT = Tag.RSA_PUBLIC_EXPONENT; // KM_ULONG | 200;
     public static final int KM_TAG_INCLUDE_UNIQUE_ID = Tag.INCLUDE_UNIQUE_ID; // KM_BOOL | 202;
+    public static final int KM_TAG_RSA_OAEP_MGF_DIGEST = Tag.RSA_OAEP_MGF_DIGEST;
+            // KM_ENUM_REP | 203;
 
     public static final int KM_TAG_ACTIVE_DATETIME = Tag.ACTIVE_DATETIME; // KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME =

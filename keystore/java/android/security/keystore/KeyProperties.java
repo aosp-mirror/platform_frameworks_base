@@ -29,6 +29,8 @@ import libcore.util.EmptyArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.MGF1ParameterSpec;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -672,6 +674,26 @@ public abstract class KeyProperties {
                     return DIGEST_SHA512;
                 default:
                     throw new IllegalArgumentException("Unsupported digest algorithm: " + digest);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull public static @DigestEnum
+                AlgorithmParameterSpec fromKeymasterToMGF1ParameterSpec(int digest) {
+            switch (digest) {
+                default:
+                case KeymasterDefs.KM_DIGEST_SHA1:
+                    return MGF1ParameterSpec.SHA1;
+                case KeymasterDefs.KM_DIGEST_SHA_2_224:
+                    return MGF1ParameterSpec.SHA224;
+                case KeymasterDefs.KM_DIGEST_SHA_2_256:
+                    return MGF1ParameterSpec.SHA256;
+                case KeymasterDefs.KM_DIGEST_SHA_2_384:
+                    return MGF1ParameterSpec.SHA384;
+                case KeymasterDefs.KM_DIGEST_SHA_2_512:
+                    return MGF1ParameterSpec.SHA512;
             }
         }
 
