@@ -583,13 +583,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gumamit ng lock ng screen"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Ilagay ang iyong lock ng screen para magpatuloy"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pumindot nang madiin sa sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Hindi makilala ang fingerprint. Subukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Linisin ang sensor para sa fingerprint at subukan ulit"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Linisin ang sensor at subukan ulit"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pumindot nang madiin sa sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Sumubok ng ibang fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Masyadong maliwanag"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"May na-detect na pagpindot sa Power"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Subukang isaayos"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Bahagyang baguhin ang posisyon ng iyong daliri sa bawat pagkakataon"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -601,12 +602,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Na-authenticate ang mukha, pakipindot ang kumpirmahin"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hindi available ang hardware na ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Hindi ma-set up ang fingerprint"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Nag-time out ang fingerprint. Subukang muli."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Nag-time out ang pag-set up ng fingerprint. Subukan ulit."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kinansela ng user ang operasyon sa fingerprint."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Napakaraming pagtatangka. Subukan ulit sa ibang pagkakataon."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Masyadong maraming pagsubok. Gamitin na lang ang lock ng screen."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Masyadong maraming pagsubok. Gamitin na lang ang lock ng screen."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Subukang muli."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Hindi maproseso ang fingerprint. Subukan ulit."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Walang naka-enroll na fingerprint."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Walang sensor ng fingerprint ang device na ito."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Pansamantalang na-disable ang sensor."</string>
@@ -634,8 +635,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bumisita sa provider ng pag-aayos."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Hindi magawa ang iyong face model. Subukan ulit."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Masyadong maliwanag. Subukang bawasan ang liwanag."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Hindi sapat ang liwanag"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Ilayo pa ang telepono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Ilapit pa ang telepono"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Itaas pa ang telepono"</string>
@@ -1249,8 +1249,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Sinisimulan ang apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Pagtatapos ng pag-boot."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pinindot mo ang power button — karaniwan nitong ino-off ang screen.\n\nSubukang i-tap habang sine-set up ang iyong fingerprint."</string>
-    <string name="fp_power_button_enrollment_title" msgid="8997641910928785172">"Mag-tap para i-off ang screen"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="8351290204990805109">"I-off ang screen"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"I-off ang screen para tapusin ang setup"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"I-off"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Magpatuloy sa pag-verify ng fingerprint?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pinindot mo ang power button — karaniwan nitong ino-off ang screen.\n\nSubukang i-tap para i-verify ang iyong fingerprint."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"I-off ang screen"</string>
@@ -1611,7 +1611,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telepono"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Mga speaker ng dock"</string>
-    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
+    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"External na Device"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Mga Headphone"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"System"</string>
