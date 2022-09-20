@@ -4593,9 +4593,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final PackageManager pm = mContext.getPackageManager();
                 final String supplementalPackageName = pm.getSdkSandboxPackageName();
                 if (Objects.equals(packageName, supplementalPackageName)) {
-                    int supplementalAppId = pm.getPackageUid(supplementalPackageName,
-                            PackageManager.PackageInfoFlags.of(0));
-                    uid = UserHandle.getUid(UserHandle.getUserId(uid), supplementalAppId);
+                    uid = pm.getPackageUidAsUser(supplementalPackageName,
+                            PackageManager.PackageInfoFlags.of(0), UserHandle.getUserId(uid));
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Shouldn't happen for the supplemental package
