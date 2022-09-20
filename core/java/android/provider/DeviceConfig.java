@@ -203,6 +203,15 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_TETHERING = "tethering";
 
+
+    /**
+     * Namespace for Nearby module.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_NEARBY = "nearby";
+
     /**
      * Namespace for content capture feature used by on-device machine intelligence
      * to provide suggestions in a privacy-safe manner.
