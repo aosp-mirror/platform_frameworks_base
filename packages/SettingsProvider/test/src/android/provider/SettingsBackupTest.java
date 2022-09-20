@@ -83,7 +83,6 @@ public class SettingsBackupTest {
                     Settings.System.SYSTEM_LOCALES, // bug?
                     Settings.System.USER_ROTATION, // backup candidate?
                     Settings.System.VIBRATE_IN_SILENT, // deprecated?
-                    Settings.System.VIBRATE_ON, // candidate for backup?
                     Settings.System.VOLUME_ACCESSIBILITY, // used internally, changing value will
                                                           // not change volume
                     Settings.System.VOLUME_ALARM, // deprecated since API 2?
