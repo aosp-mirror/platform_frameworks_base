@@ -700,11 +700,6 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public final void initializeInternal(@NonNull IInputMethod.InitParams params) {
-            if (mDestroyed) {
-                Log.i(TAG, "The InputMethodService has already onDestroyed()."
-                    + "Ignore the initialization.");
-                return;
-            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
             mConfigTracker.onInitialize(params.configChanges);
             mPrivOps.set(params.privilegedOperations);
@@ -3937,6 +3932,14 @@ public class InputMethodService extends AbstractInputMethodService {
             @Override
             public void triggerServiceDump(String where, @Nullable byte[] icProto) {
                 ImeTracing.getInstance().triggerServiceDump(where, mDumper, icProto);
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public boolean isServiceDestroyed() {
+                return mDestroyed;
             }
         };
     }
