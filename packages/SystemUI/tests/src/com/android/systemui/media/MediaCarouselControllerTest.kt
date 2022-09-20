@@ -26,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.TransitionLayout
@@ -78,6 +79,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaViewController: MediaViewController
     @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
+    @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -102,6 +104,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             debugLogger
         )
         verify(mediaDataManager).addListener(capture(listener))
+        verify(visualStabilityProvider)
+            .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(mediaPlayer)
         whenever(mediaPlayer.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
@@ -373,5 +377,29 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
         playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
         assertEquals(playerIndex, 0)
+    }
+
+    @Test
+    fun testRecommendationRemovedWhileNotVisible_updateHostVisibility() {
+        var result = false
+        mediaCarouselController.updateHostVisibility = { result = true }
+
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(true)
+        listener.value.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY, false)
+
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testRecommendationRemovedWhileVisible_thenReorders_updateHostVisibility() {
+        var result = false
+        mediaCarouselController.updateHostVisibility = { result = true }
+
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(false)
+        listener.value.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY, false)
+        assertEquals(false, result)
+
+        visualStabilityCallback.value.onReorderingAllowed()
+        assertEquals(true, result)
     }
 }
