@@ -190,6 +190,9 @@ public class TelephonyManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
+    // Null IMEI anomaly uuid
+    private static final UUID IMEI_ANOMALY_UUID = UUID.fromString(
+            "83905f14-6455-450c-be29-8206f0427fe9");
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
      * into the ResultReceiver Bundle.
@@ -2132,7 +2135,11 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     public String getImei() {
-        return getImei(getSlotIndex());
+        String imei = getImei(getSlotIndex());
+        if (imei == null) {
+            AnomalyReporter.reportAnomaly(IMEI_ANOMALY_UUID, "getImei: IMEI is null.");
+        }
+        return imei;
     }
 
     /**
@@ -2175,7 +2182,10 @@ public class TelephonyManager {
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_GSM)
     public String getImei(int slotIndex) {
         ITelephony telephony = getITelephony();
-        if (telephony == null) return null;
+        if (telephony == null) {
+            AnomalyReporter.reportAnomaly(IMEI_ANOMALY_UUID, "getImei: telephony is null");
+            return null;
+        }
 
         try {
             return telephony.getImeiForSlot(slotIndex, getOpPackageName(), getAttributionTag());
