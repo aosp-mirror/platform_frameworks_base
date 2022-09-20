@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -80,6 +81,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT) {
         final ArrayList<AutoCloseable> windowDecors = new ArrayList<>();
+        final ArrayList<WindowContainerToken> taskParents = new ArrayList<>();
         for (TransitionInfo.Change change : info.getChanges()) {
             if ((change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0) {
                 continue;
@@ -89,9 +91,22 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             if (taskInfo == null || taskInfo.taskId == -1) {
                 continue;
             }
+            // Filter out non-leaf tasks. Freeform/fullscreen don't nest tasks, but split-screen
+            // does, so this prevents adding duplicate captions in that scenario.
+            if (change.getParent() != null
+                    && info.getChange(change.getParent()).getTaskInfo() != null) {
+                // This logic relies on 2 assumptions: 1 is that child tasks will be visited before
+                // parents (due to how z-order works). 2 is that no non-tasks are interleaved
+                // between tasks (hierarchically).
+                taskParents.add(change.getContainer());
+            }
+            if (taskParents.contains(change.getContainer())) {
+                continue;
+            }
 
             switch (change.getMode()) {
                 case WindowManager.TRANSIT_OPEN:
+                case WindowManager.TRANSIT_TO_FRONT:
                     onOpenTransitionReady(change, startT, finishT);
                     break;
                 case WindowManager.TRANSIT_CLOSE: {
@@ -154,20 +169,28 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
 
         boolean adopted = false;
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-        if (type == Transitions.TRANSIT_MAXIMIZE
-                && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             windowDecor = mFreeformTaskListener.giveWindowDecoration(
                     change.getTaskInfo(), startT, finishT);
-            adopted = mFullscreenTaskListener.adoptWindowDecoration(
-                    change, startT, finishT, windowDecor);
+            if (windowDecor != null) {
+                adopted = mFullscreenTaskListener.adoptWindowDecoration(
+                        change, startT, finishT, windowDecor);
+            } else {
+                // will return false if it already has the window decor.
+                adopted = mFullscreenTaskListener.createWindowDecoration(change, startT, finishT);
+            }
         }
 
-        if (type == Transitions.TRANSIT_RESTORE_FROM_MAXIMIZE
-                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             windowDecor = mFullscreenTaskListener.giveWindowDecoration(
                     change.getTaskInfo(), startT, finishT);
-            adopted = mFreeformTaskListener.adoptWindowDecoration(
-                    change, startT, finishT, windowDecor);
+            if (windowDecor != null) {
+                adopted = mFreeformTaskListener.adoptWindowDecoration(
+                        change, startT, finishT, windowDecor);
+            } else {
+                // will return false if it already has the window decor.
+                adopted = mFreeformTaskListener.createWindowDecoration(change, startT, finishT);
+            }
         }
 
         if (!adopted) {
