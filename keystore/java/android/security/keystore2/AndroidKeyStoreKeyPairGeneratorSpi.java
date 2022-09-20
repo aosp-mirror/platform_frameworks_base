@@ -16,6 +16,8 @@
 
 package android.security.keystore2;
 
+import static android.security.keystore2.AndroidKeyStoreCipherSpiBase.DEFAULT_MGF1_DIGEST;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -908,6 +910,26 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             params.add(KeyStore2ParameterUtils.makeEnum(
                     KeymasterDefs.KM_TAG_PADDING, padding
             ));
+            if (padding == KeymasterDefs.KM_PAD_RSA_OAEP) {
+                final boolean[] hasDefaultMgf1DigestBeenAdded = {false};
+                ArrayUtils.forEach(mKeymasterDigests, (digest) -> {
+                    params.add(KeyStore2ParameterUtils.makeEnum(
+                            KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, digest
+                    ));
+                    hasDefaultMgf1DigestBeenAdded[0] |=
+                            digest.equals(KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST));
+                });
+                /* Because of default MGF1 digest is SHA-1. It has to be added in Key
+                 * characteristics. Otherwise, crypto operations will fail with Incompatible
+                 * MGF1 digest.
+                 */
+                if (!hasDefaultMgf1DigestBeenAdded[0]) {
+                    params.add(KeyStore2ParameterUtils.makeEnum(
+                            KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                            KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
+                    ));
+                }
+            }
         });
         ArrayUtils.forEach(mKeymasterSignaturePaddings, (padding) -> {
             params.add(KeyStore2ParameterUtils.makeEnum(
