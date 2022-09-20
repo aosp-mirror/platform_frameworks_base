@@ -1404,8 +1404,31 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         mChangedJobList.remove(cancelled);
         // Cancel if running.
-        mConcurrencyManager.stopJobOnServiceContextLocked(
+        final boolean wasRunning = mConcurrencyManager.stopJobOnServiceContextLocked(
                 cancelled, reason, internalReasonCode, debugReason);
+        // If the job was running, the JobServiceContext should log with state FINISHED.
+        if (!wasRunning) {
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                    cancelled.getSourceUid(), null, cancelled.getBatteryName(),
+                    FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__CANCELLED,
+                    internalReasonCode, cancelled.getStandbyBucket(),
+                    cancelled.getJobId(),
+                    cancelled.hasChargingConstraint(),
+                    cancelled.hasBatteryNotLowConstraint(),
+                    cancelled.hasStorageNotLowConstraint(),
+                    cancelled.hasTimingDelayConstraint(),
+                    cancelled.hasDeadlineConstraint(),
+                    cancelled.hasIdleConstraint(),
+                    cancelled.hasConnectivityConstraint(),
+                    cancelled.hasContentTriggerConstraint(),
+                    cancelled.isRequestedExpeditedJob(),
+                    /* isRunningAsExpeditedJob */ false,
+                    reason,
+                    cancelled.getJob().isPrefetch(),
+                    cancelled.getJob().getPriority(),
+                    cancelled.getEffectivePriority(),
+                    cancelled.getNumFailures());
+        }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
             if (DEBUG) Slog.i(TAG, "Tracking replacement job " + incomingJob.toShortString());
