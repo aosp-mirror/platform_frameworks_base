@@ -61,12 +61,12 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -89,7 +89,7 @@ import java.util.Optional;
 @TestableLooper.RunWithLooper
 public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
-    private static final PanelExpansionChangeEvent EXPANSION_EVENT =
+    private static final ShadeExpansionChangeEvent EXPANSION_EVENT =
             expansionEvent(/* fraction= */ 0.5f, /* expanded= */ false, /* tracking= */ true);
 
     @Mock private ViewMediatorCallback mViewMediatorCallback;
@@ -176,7 +176,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.registerCentralSurfaces(
                 mCentralSurfaces,
                 mNotificationPanelView,
-                new PanelExpansionStateManager(),
+                new ShadeExpansionStateManager(),
                 mBiometricUnlockController,
                 mNotificationContainer,
                 mBypassController);
@@ -520,9 +520,9 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         Truth.assertThat(mStatusBarKeyguardViewManager.isBouncerInTransit()).isFalse();
     }
 
-    private static PanelExpansionChangeEvent expansionEvent(
+    private static ShadeExpansionChangeEvent expansionEvent(
             float fraction, boolean expanded, boolean tracking) {
-        return new PanelExpansionChangeEvent(
+        return new ShadeExpansionChangeEvent(
                 fraction, expanded, tracking, /* dragDownPxAmount= */ 0f);
     }
 

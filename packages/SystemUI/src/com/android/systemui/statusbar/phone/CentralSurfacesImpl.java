@@ -183,6 +183,8 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
@@ -221,8 +223,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -514,7 +514,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
-    private final PanelExpansionStateManager mPanelExpansionStateManager;
+    private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
@@ -700,7 +700,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             KeyguardViewMediator keyguardViewMediator,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
@@ -786,7 +786,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mGutsManager = notificationGutsManager;
         mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
-        mPanelExpansionStateManager = panelExpansionStateManager;
+        mShadeExpansionStateManager = shadeExpansionStateManager;
         mKeyguardViewMediator = keyguardViewMediator;
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
@@ -851,7 +851,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
         mScreenOffAnimationController = screenOffAnimationController;
 
-        mPanelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
+        mShadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener = (isExpanding, key) ->
                 mContext.getMainExecutor().execute(this::updateScrimController);
@@ -1141,7 +1141,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationLogger.setUpWithContainer(mNotifListContainer);
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        mPanelExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
+        mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
         mUserSwitcherController.init(mNotificationShadeWindowView);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
@@ -1377,7 +1377,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         }
     }
 
-    private void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+    private void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         float fraction = event.getFraction();
         boolean tracking = event.getTracking();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
@@ -1561,7 +1561,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mKeyguardViewMediator.registerCentralSurfaces(
                 /* statusBar= */ this,
                 mNotificationPanelViewController,
-                mPanelExpansionStateManager,
+                mShadeExpansionStateManager,
                 mBiometricUnlockController,
                 mStackScroller,
                 mKeyguardBypassController);

@@ -21,6 +21,8 @@ import android.util.FloatProperty
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionChangeEvent
+import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -28,8 +30,6 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import javax.inject.Inject
@@ -42,7 +42,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val bypassController: KeyguardBypassController,
     private val dozeParameters: DozeParameters,
     private val screenOffAnimationController: ScreenOffAnimationController
-) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, PanelExpansionListener {
+) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, ShadeExpansionListener {
 
     private val mNotificationVisibility = object : FloatProperty<NotificationWakeUpCoordinator>(
         "notificationVisibility") {
@@ -293,7 +293,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         this.state = newState
     }
 
-    override fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+    override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
         val collapsedEnough = event.fraction <= 0.9f
         if (collapsedEnough != this.collapsedEnoughToHide) {
             val couldShowPulsingHuns = canShowPulsingHuns

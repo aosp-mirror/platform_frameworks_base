@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.panelstate
+package com.android.systemui.shade
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -23,26 +23,30 @@ import org.junit.Before
 import org.junit.Test
 
 @SmallTest
-class PanelExpansionStateManagerTest : SysuiTestCase() {
+class ShadeExpansionStateManagerTest : SysuiTestCase() {
 
-    private lateinit var panelExpansionStateManager: PanelExpansionStateManager
+    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
 
     @Before
     fun setUp() {
-        panelExpansionStateManager = PanelExpansionStateManager()
+        shadeExpansionStateManager = ShadeExpansionStateManager()
     }
 
     @Test
     fun onPanelExpansionChanged_listenerNotified() {
-        val listener = TestPanelExpansionListener()
-        panelExpansionStateManager.addExpansionListener(listener)
+        val listener = TestShadeExpansionListener()
+        shadeExpansionStateManager.addExpansionListener(listener)
         val fraction = 0.6f
         val expanded = true
         val tracking = true
         val dragDownAmount = 1234f
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction, expanded, tracking, dragDownAmount)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction,
+            expanded,
+            tracking,
+            dragDownAmount
+        )
 
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
@@ -56,11 +60,15 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         val expanded = true
         val tracking = true
         val dragDownAmount = 1234f
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction, expanded, tracking, dragDownAmount)
-        val listener = TestPanelExpansionListener()
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction,
+            expanded,
+            tracking,
+            dragDownAmount
+        )
+        val listener = TestShadeExpansionListener()
 
-        panelExpansionStateManager.addExpansionListener(listener)
+        shadeExpansionStateManager.addExpansionListener(listener)
 
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
@@ -70,10 +78,10 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
 
     @Test
     fun updateState_listenerNotified() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
 
-        panelExpansionStateManager.updateState(STATE_OPEN)
+        shadeExpansionStateManager.updateState(STATE_OPEN)
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
     }
@@ -84,48 +92,64 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
 
     @Test
     fun onPEC_fractionLessThanOne_expandedTrue_trackingFalse_becomesStateOpening() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = true, tracking = false, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f,
+            expanded = true,
+            tracking = false,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
     }
 
     @Test
     fun onPEC_fractionLessThanOne_expandedTrue_trackingTrue_becomesStateOpening() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = true, tracking = true, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f,
+            expanded = true,
+            tracking = true,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
     }
 
     @Test
     fun onPEC_fractionLessThanOne_expandedFalse_trackingFalse_becomesStateClosed() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
         // Start out on a different state
-        panelExpansionStateManager.updateState(STATE_OPEN)
+        shadeExpansionStateManager.updateState(STATE_OPEN)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = false, tracking = false, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f,
+            expanded = false,
+            tracking = false,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_CLOSED)
     }
 
     @Test
     fun onPEC_fractionLessThanOne_expandedFalse_trackingTrue_doesNotBecomeStateClosed() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
         // Start out on a different state
-        panelExpansionStateManager.updateState(STATE_OPEN)
+        shadeExpansionStateManager.updateState(STATE_OPEN)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = false, tracking = true, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 0.5f,
+            expanded = false,
+            tracking = true,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
     }
@@ -134,11 +158,15 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
 
     @Test
     fun onPEC_fractionOne_expandedTrue_trackingFalse_becomesStateOpeningThenStateOpen() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f,
+            expanded = true,
+            tracking = false,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.previousState).isEqualTo(STATE_OPENING)
         assertThat(listener.state).isEqualTo(STATE_OPEN)
@@ -146,50 +174,62 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
 
     @Test
     fun onPEC_fractionOne_expandedTrue_trackingTrue_becomesStateOpening() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = true, tracking = true, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f,
+            expanded = true,
+            tracking = true,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
     }
 
     @Test
     fun onPEC_fractionOne_expandedFalse_trackingFalse_becomesStateClosed() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
         // Start out on a different state
-        panelExpansionStateManager.updateState(STATE_OPEN)
+        shadeExpansionStateManager.updateState(STATE_OPEN)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = false, tracking = false, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f,
+            expanded = false,
+            tracking = false,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_CLOSED)
     }
 
     @Test
     fun onPEC_fractionOne_expandedFalse_trackingTrue_doesNotBecomeStateClosed() {
-        val listener = TestPanelStateListener()
-        panelExpansionStateManager.addStateListener(listener)
+        val listener = TestShadeStateListener()
+        shadeExpansionStateManager.addStateListener(listener)
         // Start out on a different state
-        panelExpansionStateManager.updateState(STATE_OPEN)
+        shadeExpansionStateManager.updateState(STATE_OPEN)
 
-        panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = false, tracking = true, dragDownPxAmount = 0f)
+        shadeExpansionStateManager.onPanelExpansionChanged(
+            fraction = 1f,
+            expanded = false,
+            tracking = true,
+            dragDownPxAmount = 0f
+        )
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
     }
 
     /* ***** end [PanelExpansionStateManager.onPanelExpansionChanged] test cases ******/
 
-    class TestPanelExpansionListener : PanelExpansionListener {
+    class TestShadeExpansionListener : ShadeExpansionListener {
         var fraction: Float = 0f
         var expanded: Boolean = false
         var tracking: Boolean = false
         var dragDownAmountPx: Float = 0f
 
-        override fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+        override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
             this.fraction = event.fraction
             this.expanded = event.expanded
             this.tracking = event.tracking
@@ -197,7 +237,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         }
     }
 
-    class TestPanelStateListener : PanelStateListener {
+    class TestShadeStateListener : ShadeStateListener {
         @PanelState var previousState: Int = STATE_CLOSED
         @PanelState var state: Int = STATE_CLOSED
 
