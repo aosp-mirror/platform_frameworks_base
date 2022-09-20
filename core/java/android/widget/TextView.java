@@ -12049,6 +12049,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    @Override
+    public boolean isAutoHandwritingEnabled() {
+        return super.isAutoHandwritingEnabled() && !isAnyPasswordInputType();
+    }
+
     /** @hide */
     @Override
     public boolean isStylusHandwritingAvailable() {
