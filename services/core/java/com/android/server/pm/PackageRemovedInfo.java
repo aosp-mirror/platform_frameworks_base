@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
@@ -42,8 +43,8 @@ final class PackageRemovedInfo {
     int[] mRemovedUsers = null;
     int[] mBroadcastUsers = null;
     int[] mInstantUserIds = null;
-    SparseArray<Integer> mInstallReasons;
-    SparseArray<Integer> mUninstallReasons;
+    SparseIntArray mInstallReasons;
+    SparseIntArray mUninstallReasons;
     boolean mIsRemovedPackageSystemUpdate = false;
     boolean mIsUpdate;
     boolean mDataRemoved;

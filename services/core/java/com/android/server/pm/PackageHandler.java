@@ -89,18 +89,14 @@ final class PackageHandler extends Handler {
             case POST_INSTALL: {
                 if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
 
-                PostInstallData data = mPm.mRunningInstalls.get(msg.arg1);
+                InstallRequest request = mPm.mRunningInstalls.get(msg.arg1);
                 final boolean didRestore = (msg.arg2 != 0);
                 mPm.mRunningInstalls.delete(msg.arg1);
 
-                if (data != null && data.res.mFreezer != null) {
-                    data.res.mFreezer.close();
-                }
-
-                if (data != null && data.mPostInstallRunnable != null) {
-                    data.mPostInstallRunnable.run();
-                } else if (data != null && data.args != null) {
-                    mInstallPackageHelper.handlePackagePostInstall(data.res, data.args, didRestore);
+                request.closeFreezer();
+                request.runPostInstallRunnable();
+                if (!request.isInstallForExistingUser()) {
+                    mInstallPackageHelper.handlePackagePostInstall(request, didRestore);
                 } else if (DEBUG_INSTALL) {
                     // No post-install when we run restore from installExistingPackageForUser
                     Slog.i(TAG, "Nothing to do for post-install token " + msg.arg1);
@@ -111,7 +107,7 @@ final class PackageHandler extends Handler {
             case DEFERRED_NO_KILL_POST_DELETE: {
                 InstallArgs args = (InstallArgs) msg.obj;
                 if (args != null) {
-                    mRemovePackageHelper.cleanUpResources(args);
+                    mRemovePackageHelper.cleanUpResources(args.mCodeFile, args.mInstructionSets);
                 }
             } break;
             case DEFERRED_NO_KILL_INSTALL_OBSERVER:

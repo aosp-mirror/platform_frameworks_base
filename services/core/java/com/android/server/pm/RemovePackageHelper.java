@@ -385,29 +385,29 @@ final class RemovePackageHelper {
         }
     }
 
-    void cleanUpResources(InstallArgs args) {
+    void cleanUpResources(File codeFile, String[] instructionSets) {
         synchronized (mPm.mInstallLock) {
-            cleanUpResourcesLI(args);
+            cleanUpResourcesLI(codeFile, instructionSets);
         }
     }
 
     // Need installer lock especially for dex file removal.
     @GuardedBy("mPm.mInstallLock")
-    private void cleanUpResourcesLI(InstallArgs args) {
+    private void cleanUpResourcesLI(File codeFile, String[] instructionSets) {
         // Try enumerating all code paths before deleting
         List<String> allCodePaths = Collections.EMPTY_LIST;
-        if (args.mCodeFile != null && args.mCodeFile.exists()) {
+        if (codeFile != null && codeFile.exists()) {
             final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
             final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
-                    input.reset(), args.mCodeFile, /* flags */ 0);
+                    input.reset(), codeFile, /* flags */ 0);
             if (result.isSuccess()) {
                 // Ignore error; we tried our best
                 allCodePaths = result.getResult().getAllApkPaths();
             }
         }
 
-        removeCodePathLI(args.mCodeFile);
-        removeDexFilesLI(allCodePaths, args.mInstructionSets);
+        removeCodePathLI(codeFile);
+        removeDexFilesLI(allCodePaths, instructionSets);
     }
 
     @GuardedBy("mPm.mInstallLock")
