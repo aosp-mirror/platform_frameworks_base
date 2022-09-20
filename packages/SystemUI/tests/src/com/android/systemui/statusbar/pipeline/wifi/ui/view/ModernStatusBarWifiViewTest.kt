@@ -20,6 +20,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.util.Assert
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -45,7 +46,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun constructAndBind_hasCorrectSlot() {
         val view = ModernStatusBarWifiView.constructAndBind(
-            context, "slotName", mock()
+            context, "slotName", mock(), StatusBarLocation.HOME
         )
 
         assertThat(view.slot).isEqualTo("slotName")

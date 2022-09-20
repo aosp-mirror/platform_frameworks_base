@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import com.android.systemui.R
 import com.android.systemui.statusbar.BaseStatusBarWifiView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 
@@ -72,21 +73,22 @@ class ModernStatusBarWifiView(
 
     companion object {
         /**
-         * Inflates a new instance of [ModernStatusBarWifiView], binds it to [viewModel], and
+         * Inflates a new instance of [ModernStatusBarWifiView], binds it to a view model, and
          * returns it.
          */
         @JvmStatic
         fun constructAndBind(
             context: Context,
             slot: String,
-            viewModel: WifiViewModel,
+            wifiViewModel: WifiViewModel,
+            location: StatusBarLocation,
         ): ModernStatusBarWifiView {
             return (
                 LayoutInflater.from(context).inflate(R.layout.new_status_bar_wifi_group, null)
                     as ModernStatusBarWifiView
                 ).also {
                     it.setSlot(slot)
-                    WifiViewBinder.bind(it, viewModel)
+                    WifiViewBinder.bind(it, wifiViewModel, location)
                 }
         }
     }

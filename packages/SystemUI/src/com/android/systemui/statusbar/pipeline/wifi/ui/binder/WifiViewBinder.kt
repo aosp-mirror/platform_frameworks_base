@@ -26,6 +26,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -41,11 +43,29 @@ import kotlinx.coroutines.launch
  */
 @OptIn(InternalCoroutinesApi::class)
 object WifiViewBinder {
-    /** Binds the view to the view-model, continuing to update the former based on the latter. */
+
+    /**
+     * Binds the view to the appropriate view-model based on the given location. The view will
+     * continue to be updated following updates from the view-model.
+     */
     @JvmStatic
     fun bind(
         view: ViewGroup,
-        viewModel: WifiViewModel,
+        wifiViewModel: WifiViewModel,
+        location: StatusBarLocation,
+    ) {
+        when (location) {
+            StatusBarLocation.HOME -> bind(view, wifiViewModel.home)
+            StatusBarLocation.KEYGUARD -> bind(view, wifiViewModel.keyguard)
+            StatusBarLocation.QS -> bind(view, wifiViewModel.qs)
+        }
+    }
+
+    /** Binds the view to the view-model, continuing to update the former based on the latter. */
+    @JvmStatic
+    private fun bind(
+        view: ViewGroup,
+        viewModel: LocationBasedWifiViewModel,
     ) {
         val iconView = view.requireViewById<ImageView>(R.id.wifi_signal)
         val activityInView = view.requireViewById<ImageView>(R.id.wifi_in)
