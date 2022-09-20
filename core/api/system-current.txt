@@ -11159,6 +11159,7 @@ package android.service.contentcapture {
 
   public final class ActivityEvent implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.app.assist.ActivityId getActivityId();
     method @NonNull public android.content.ComponentName getComponentName();
     method public int getEventType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

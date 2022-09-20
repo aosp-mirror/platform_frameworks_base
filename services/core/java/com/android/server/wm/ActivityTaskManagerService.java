@@ -152,6 +152,7 @@ import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.admin.DevicePolicyCache;
+import android.app.assist.ActivityId;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.compat.CompatChanges;
@@ -4859,17 +4860,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void updateActivityUsageStats(ActivityRecord activity, int event) {
         ComponentName taskRoot = null;
+        int taskId = INVALID_TASK_ID;
         final Task task = activity.getTask();
         if (task != null) {
             final ActivityRecord rootActivity = task.getRootActivity();
             if (rootActivity != null) {
                 taskRoot = rootActivity.mActivityComponent;
             }
+            taskId = task.mTaskId;
         }
-
         final Message m = PooledLambda.obtainMessage(
                 ActivityManagerInternal::updateActivityUsageStats, mAmInternal,
-                activity.mActivityComponent, activity.mUserId, event, activity.token, taskRoot);
+                activity.mActivityComponent, activity.mUserId, event, activity.token, taskRoot,
+                new ActivityId(taskId, activity.shareableActivityToken));
         mH.sendMessage(m);
     }
 

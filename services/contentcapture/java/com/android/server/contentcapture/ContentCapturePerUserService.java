@@ -548,12 +548,13 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
-    void onActivityEventLocked(@NonNull ComponentName componentName, @ActivityEventType int type) {
+    void onActivityEventLocked(@NonNull ActivityId activityId,
+            @NonNull ComponentName componentName, @ActivityEventType int type) {
         if (mRemoteService == null) {
             if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): no remote service");
             return;
         }
-        final ActivityEvent event = new ActivityEvent(componentName, type);
+        final ActivityEvent event = new ActivityEvent(activityId, componentName, type);
 
         if (mMaster.verbose) Slog.v(mTag, "onActivityEvent(): " + event);
 
