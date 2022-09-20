@@ -9286,6 +9286,12 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
+        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
+    }
+
+    @VisibleForTesting
+    ScreenCapture.LayerCaptureArgs getCaptureArgs(int displayId,
+            @Nullable ScreenCapture.CaptureArgs captureArgs) {
         final SurfaceControl displaySurfaceControl;
         synchronized (mGlobalLock) {
             DisplayContent displayContent = mRoot.getDisplayContent(displayId);
@@ -9297,18 +9303,20 @@ public class WindowManagerService extends IWindowManager.Stub
             displaySurfaceControl = displayContent.getSurfaceControl();
 
             if (captureArgs == null) {
+                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                        .build();
+            }
+
+            if (captureArgs.mSourceCrop.isEmpty()) {
                 displayContent.getBounds(mTmpRect);
                 mTmpRect.offsetTo(0, 0);
-                captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
-                        .setSourceCrop(mTmpRect)
-                        .build();
+            } else {
+                mTmpRect.set(captureArgs.mSourceCrop);
             }
         }
 
-        ScreenCapture.LayerCaptureArgs args =
-                new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
+        return new ScreenCapture.LayerCaptureArgs.Builder(displaySurfaceControl, captureArgs)
+                        .setSourceCrop(mTmpRect)
                         .build();
-
-        ScreenCapture.captureLayers(args, listener);
     }
 }
