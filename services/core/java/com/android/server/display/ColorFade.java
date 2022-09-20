@@ -31,7 +31,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.os.IBinder;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -170,15 +169,7 @@ final class ColorFade {
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
 
-        final IBinder token = SurfaceControl.getInternalDisplayToken();
-        if (token == null) {
-            Slog.e(TAG,
-                    "Failed to take screenshot because internal display is disconnected");
-            return false;
-        }
-        final boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
-                == Display.COLOR_MODE_DISPLAY_P3;
-
+        final boolean isWideColor = displayInfo.colorMode == Display.COLOR_MODE_DISPLAY_P3;
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
         mPrepared = true;
 
