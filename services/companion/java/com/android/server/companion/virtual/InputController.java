@@ -61,10 +61,12 @@ class InputController {
 
     private static final AtomicLong sNextPhysId = new AtomicLong(1);
 
+    static final String PHYS_TYPE_DPAD = "Dpad";
     static final String PHYS_TYPE_KEYBOARD = "Keyboard";
     static final String PHYS_TYPE_MOUSE = "Mouse";
     static final String PHYS_TYPE_TOUCHSCREEN = "Touchscreen";
     @StringDef(prefix = { "PHYS_TYPE_" }, value = {
+            PHYS_TYPE_DPAD,
             PHYS_TYPE_KEYBOARD,
             PHYS_TYPE_MOUSE,
             PHYS_TYPE_TOUCHSCREEN,
@@ -118,6 +120,22 @@ class InputController {
                 iterator.remove();
                 closeInputDeviceDescriptorLocked(token, inputDeviceDescriptor);
             }
+        }
+    }
+
+    void createDpad(@NonNull String deviceName,
+                        int vendorId,
+                        int productId,
+                        @NonNull IBinder deviceToken,
+                        int displayId) {
+        final String phys = createPhys(PHYS_TYPE_DPAD);
+        try {
+            createDeviceInternal(InputDeviceDescriptor.TYPE_DPAD, deviceName, vendorId,
+                    productId, deviceToken, displayId, phys,
+                    () -> mNativeWrapper.openUinputDpad(deviceName, vendorId, productId, phys));
+        } catch (DeviceCreationException e) {
+            throw new RuntimeException(
+                    "Failed to create virtual dpad device '" + deviceName + "'.", e);
         }
     }
 
@@ -253,6 +271,19 @@ class InputController {
         InputManager.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
     }
 
+    boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                throw new IllegalArgumentException(
+                        "Could not send key event to input device for given token");
+            }
+            return mNativeWrapper.writeDpadKeyEvent(inputDeviceDescriptor.getFileDescriptor(),
+                    event.getKeyCode(), event.getAction());
+        }
+    }
+
     boolean sendKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
         synchronized (mLock) {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
@@ -366,6 +397,8 @@ class InputController {
         }
     }
 
+    private static native int nativeOpenUinputDpad(String deviceName, int vendorId,
+            int productId, String phys);
     private static native int nativeOpenUinputKeyboard(String deviceName, int vendorId,
             int productId, String phys);
     private static native int nativeOpenUinputMouse(String deviceName, int vendorId, int productId,
@@ -373,6 +406,7 @@ class InputController {
     private static native int nativeOpenUinputTouchscreen(String deviceName, int vendorId,
             int productId, String phys, int height, int width);
     private static native boolean nativeCloseUinput(int fd);
+    private static native boolean nativeWriteDpadKeyEvent(int fd, int androidKeyCode, int action);
     private static native boolean nativeWriteKeyEvent(int fd, int androidKeyCode, int action);
     private static native boolean nativeWriteButtonEvent(int fd, int buttonCode, int action);
     private static native boolean nativeWriteTouchEvent(int fd, int pointerId, int toolType,
@@ -385,6 +419,10 @@ class InputController {
     /** Wrapper around the static native methods for tests. */
     @VisibleForTesting
     protected static class NativeWrapper {
+        public int openUinputDpad(String deviceName, int vendorId, int productId, String phys) {
+            return nativeOpenUinputDpad(deviceName, vendorId, productId, phys);
+        }
+
         public int openUinputKeyboard(String deviceName, int vendorId, int productId, String phys) {
             return nativeOpenUinputKeyboard(deviceName, vendorId, productId, phys);
         }
@@ -401,6 +439,10 @@ class InputController {
 
         public boolean closeUinput(int fd) {
             return nativeCloseUinput(fd);
+        }
+
+        public boolean writeDpadKeyEvent(int fd, int androidKeyCode, int action) {
+            return nativeWriteDpadKeyEvent(fd, androidKeyCode, action);
         }
 
         public boolean writeKeyEvent(int fd, int androidKeyCode, int action) {
@@ -433,10 +475,12 @@ class InputController {
         static final int TYPE_KEYBOARD = 1;
         static final int TYPE_MOUSE = 2;
         static final int TYPE_TOUCHSCREEN = 3;
+        static final int TYPE_DPAD = 4;
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_KEYBOARD,
                 TYPE_MOUSE,
                 TYPE_TOUCHSCREEN,
+                TYPE_DPAD,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Type {

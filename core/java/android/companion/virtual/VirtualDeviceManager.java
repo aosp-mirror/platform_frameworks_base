@@ -37,6 +37,7 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
+import android.hardware.input.VirtualDpad;
 import android.hardware.input.VirtualKeyboard;
 import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualTouchscreen;
@@ -311,6 +312,32 @@ public final class VirtualDeviceManager {
             if (mVirtualAudioDevice != null) {
                 mVirtualAudioDevice.close();
                 mVirtualAudioDevice = null;
+            }
+        }
+
+        /**
+         * Creates a virtual dpad.
+         *
+         * @param display the display that the events inputted through this device should target
+         * @param inputDeviceName the name to call this input device
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualDpad createVirtualDpad(
+                @NonNull VirtualDisplay display,
+                @NonNull String inputDeviceName,
+                int vendorId,
+                int productId) {
+            try {
+                final IBinder token = new Binder(
+                        "android.hardware.input.VirtualDpad:" + inputDeviceName);
+                mVirtualDevice.createVirtualDpad(display.getDisplay().getDisplayId(),
+                        inputDeviceName, vendorId, productId, token);
+                return new VirtualDpad(mVirtualDevice, token);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
 

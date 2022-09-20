@@ -158,6 +158,7 @@ public final class VirtualKeyEvent implements Parcelable {
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_RIGHT,
+            KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_MOVE_END,
             KeyEvent.KEYCODE_MOVE_HOME,
             KeyEvent.KEYCODE_PAGE_DOWN,
