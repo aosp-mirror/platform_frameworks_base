@@ -56,6 +56,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.util.DisplayUtils;
 import android.util.Log;
 import android.util.RotationUtils;
 import android.util.SparseBooleanArray;
@@ -117,8 +118,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
     private final Provider<SidefpsController> mSidefpsControllerFactory;
-
-    @NonNull private Point mStableDisplaySize = new Point();
 
     private final Display mDisplay;
     private float mScaleFactor = 1f;
@@ -508,10 +507,11 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
      */
     private void updateSensorLocations() {
         mDisplay.getDisplayInfo(mCachedDisplayInfo);
-
+        final Display.Mode maxDisplayMode =
+                DisplayUtils.getMaximumResolutionDisplayMode(mCachedDisplayInfo.supportedModes);
         final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                mStableDisplaySize.x, mStableDisplaySize.y, mCachedDisplayInfo.getNaturalWidth(),
-                mCachedDisplayInfo.getNaturalHeight());
+                maxDisplayMode.getPhysicalWidth(), maxDisplayMode.getPhysicalHeight(),
+                mCachedDisplayInfo.getNaturalWidth(), mCachedDisplayInfo.getNaturalHeight());
         if (scaleFactor == Float.POSITIVE_INFINITY) {
             mScaleFactor = 1f;
         } else {
@@ -768,7 +768,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     mFingerprintAuthenticatorsRegisteredCallback);
         }
 
-        mStableDisplaySize = mDisplayManager.getStableDisplaySize();
         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         mOrientationListener.enable();
         updateSensorLocations();
@@ -1148,7 +1147,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         final AuthDialog dialog = mCurrentDialog;
-        pw.println("  stableDisplaySize=" + mStableDisplaySize);
         pw.println("  mCachedDisplayInfo=" + mCachedDisplayInfo);
         pw.println("  mScaleFactor=" + mScaleFactor);
         pw.println("  faceAuthSensorLocationDefault=" + mFaceSensorLocationDefault);
