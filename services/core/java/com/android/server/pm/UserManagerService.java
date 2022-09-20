@@ -2048,8 +2048,8 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    @Override
-    public boolean isUserSwitcherEnabled(@UserIdInt int mUserId) {
+    @VisibleForTesting
+    boolean isUserSwitcherEnabled(@UserIdInt int mUserId) {
         boolean multiUserSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.USER_SWITCHER_ENABLED,
                 Resources.getSystem().getBoolean(com.android.internal
@@ -2059,6 +2059,33 @@ public class UserManagerService extends IUserManager.Stub {
                 && !hasUserRestriction(DISALLOW_USER_SWITCH, mUserId)
                 && !UserManager.isDeviceInDemoMode(mContext)
                 && multiUserSettingOn;
+    }
+
+    @Override
+    public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable,
+            @UserIdInt int mUserId) {
+        if (!isUserSwitcherEnabled(mUserId)) {
+            return false;
+        }
+        // The feature is enabled. But is it worth showing?
+        return showEvenIfNotActionable
+                || !hasUserRestriction(UserManager.DISALLOW_ADD_USER, mUserId) // Can add new user
+                || areThereMultipleSwitchableUsers(); // There are switchable users
+    }
+
+    /** Returns true if there is more than one user that can be switched to. */
+    private boolean areThereMultipleSwitchableUsers() {
+        List<UserInfo> aliveUsers = getUsers(true, true, true);
+        boolean isAnyAliveUser = false;
+        for (UserInfo userInfo : aliveUsers) {
+            if (userInfo.supportsSwitchToByUser()) {
+                if (isAnyAliveUser) {
+                    return true;
+                }
+                isAnyAliveUser = true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -7072,4 +7099,5 @@ public class UserManagerService extends IUserManager.Stub {
         }
         return mAmInternal;
     }
+
 }
