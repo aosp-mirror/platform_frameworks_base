@@ -9831,6 +9831,7 @@ package android.content {
     field public static final String FINGERPRINT_SERVICE = "fingerprint";
     field public static final String GAME_SERVICE = "game";
     field public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
+    field public static final String HEALTHCONNECT_SERVICE = "healthconnect";
     field public static final String INPUT_METHOD_SERVICE = "input_method";
     field public static final String INPUT_SERVICE = "input";
     field public static final String IPSEC_SERVICE = "ipsec";

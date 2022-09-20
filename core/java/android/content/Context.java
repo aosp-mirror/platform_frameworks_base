@@ -6050,6 +6050,15 @@ public abstract class Context {
     public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.healthconnect.HealthConnectManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.healthconnect.HealthConnectManager
+     */
+    public static final String HEALTHCONNECT_SERVICE = "healthconnect";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
