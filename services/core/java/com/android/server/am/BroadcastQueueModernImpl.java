@@ -32,6 +32,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.UidObserver;
+import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -97,7 +98,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     // TODO: record broadcast state change timing statistics
     // TODO: record historical broadcast statistics
 
-    // TODO: pause queues for apps involved in backup/restore
     // TODO: pause queues when background services are running
     // TODO: pause queues when processes are frozen
 
@@ -471,6 +471,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
 
+        final ProcessRecord app = queue.app;
+        final BroadcastRecord r = queue.getActive();
+        final Object receiver = queue.getActiveReceiver();
+
+        app.mReceivers.incrementCurReceivers();
+
         // If someone already skipped us, finish immediately; typically due to a
         // component being disabled
         if (queue.getActiveDeliveryState() == BroadcastRecord.DELIVERY_SKIPPED) {
@@ -478,11 +484,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        queue.setActiveDeliveryState(BroadcastRecord.DELIVERY_SCHEDULED);
-
-        final ProcessRecord app = queue.app;
-        final BroadcastRecord r = queue.getActive();
-        final Object receiver = queue.getActiveReceiver();
+        if (app.isInFullBackup()) {
+            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
+            return;
+        }
+        if (mSkipPolicy.shouldSkip(r, receiver)) {
+            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
+            return;
+        }
+        final Intent receiverIntent = r.getReceiverIntent(receiver);
+        if (receiverIntent == null) {
+            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
+            return;
+        }
 
         if (!r.timeoutExempt) {
             final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
@@ -493,18 +507,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // TODO: apply temp allowlist exemptions
         // TODO: apply background activity launch exemptions
 
-        if (mSkipPolicy.shouldSkip(r, receiver)) {
-            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
-            return;
-        }
-
-        final Intent receiverIntent = r.getReceiverIntent(receiver);
-        if (receiverIntent == null) {
-            finishReceiverLocked(queue, BroadcastRecord.DELIVERY_SKIPPED);
-            return;
-        }
-
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
+        queue.setActiveDeliveryState(BroadcastRecord.DELIVERY_SCHEDULED);
+
         final IApplicationThread thread = app.getThread();
         if (thread != null) {
             try {
@@ -513,6 +518,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             ((BroadcastFilter) receiver).receiverList.receiver, receiverIntent,
                             r.resultCode, r.resultData, r.resultExtras, r.ordered, r.initialSticky,
                             r.userId, app.mState.getReportedProcState());
+                    notifyScheduleRegisteredReceiver(app, r);
 
                     // TODO: consider making registered receivers of unordered
                     // broadcasts report results to detect ANRs
@@ -523,6 +529,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     thread.scheduleReceiver(receiverIntent, ((ResolveInfo) receiver).activityInfo,
                             null, r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
                             app.mState.getReportedProcState());
+                    notifyScheduleReceiver(app, r, receiverIntent);
                 }
             } catch (RemoteException e) {
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
@@ -546,6 +553,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState) {
         checkState(queue.isActive(), "isActive");
+
+        final ProcessRecord app = queue.app;
+        final BroadcastRecord r = queue.getActive();
+
+        if (app != null) {
+            app.mReceivers.decrementCurReceivers();
+        }
+
         queue.setActiveDeliveryState(deliveryState);
 
         if (deliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
@@ -554,7 +569,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
-            if (queue.app != null && !queue.app.isDebugging()) {
+            if (app != null && !app.isDebugging()) {
                 mService.appNotResponding(queue.app, TimeoutRecord
                         .forBroadcastReceiver("Broadcast of " + queue.getActive().toShortString()));
             }
@@ -725,6 +740,56 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (!queue.isProcessWarm()) {
             queue.app = mService.getProcessRecordLocked(queue.processName, queue.uid);
         }
+    }
+
+    /**
+     * Inform other parts of OS that the given broadcast was just scheduled for
+     * a registered receiver, typically for internal bookkeeping.
+     */
+    private void notifyScheduleRegisteredReceiver(@NonNull ProcessRecord app,
+            @NonNull BroadcastRecord r) {
+        reportUsageStatsBroadcastDispatched(app, r);
+    }
+
+    /**
+     * Inform other parts of OS that the given broadcast was just scheduled for
+     * a manifest receiver, typically for internal bookkeeping.
+     */
+    private void notifyScheduleReceiver(@NonNull ProcessRecord app,
+            @NonNull BroadcastRecord r, @NonNull Intent receiverIntent) {
+        reportUsageStatsBroadcastDispatched(app, r);
+
+        final boolean targetedBroadcast = r.intent.getComponent() != null;
+        final boolean targetedSelf = Objects.equals(r.callerPackage,
+                receiverIntent.getComponent().getPackageName());
+        if (targetedBroadcast && !targetedSelf) {
+            mService.mUsageStatsService.reportEvent(receiverIntent.getComponent().getPackageName(),
+                    r.userId, Event.APP_COMPONENT_USED);
+        }
+
+        mService.notifyPackageUse(receiverIntent.getComponent().getPackageName(),
+                PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
+    }
+
+    private void reportUsageStatsBroadcastDispatched(@NonNull ProcessRecord app,
+            @NonNull BroadcastRecord r) {
+        final long idForResponseEvent = (r.options != null)
+                ? r.options.getIdForResponseEvent() : 0L;
+        if (idForResponseEvent <= 0) return;
+
+        final String targetPackage;
+        if (r.intent.getPackage() != null) {
+            targetPackage = r.intent.getPackage();
+        } else if (r.intent.getComponent() != null) {
+            targetPackage = r.intent.getComponent().getPackageName();
+        } else {
+            targetPackage = null;
+        }
+        if (targetPackage == null) return;
+
+        mService.mUsageStatsService.reportBroadcastDispatched(r.callingUid, targetPackage,
+                UserHandle.of(r.userId), idForResponseEvent, SystemClock.elapsedRealtime(),
+                mService.getUidStateLocked(app.uid));
     }
 
     private @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull ProcessRecord app) {

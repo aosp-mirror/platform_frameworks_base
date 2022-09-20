@@ -277,7 +277,6 @@ class BroadcastProcessQueue {
 
     public void setActiveDeliveryState(@DeliveryState int deliveryState) {
         checkState(isActive(), "isActive");
-        mActive.setDeliveryState(mActiveIndex, deliveryState);
 
         // Emit tracing events for the broadcast we're dispatching; the cookie
         // here is unique within the track
@@ -291,10 +290,15 @@ class BroadcastProcessQueue {
             case BroadcastRecord.DELIVERY_SKIPPED:
             case BroadcastRecord.DELIVERY_TIMEOUT:
             case BroadcastRecord.DELIVERY_FAILURE:
-                Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                        traceTrackName, cookie);
+                // Only end trace events previously started by us
+                if (getActiveDeliveryState() == BroadcastRecord.DELIVERY_SCHEDULED) {
+                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                            traceTrackName, cookie);
+                }
                 break;
         }
+
+        mActive.setDeliveryState(mActiveIndex, deliveryState);
     }
 
     public @NonNull BroadcastRecord getActive() {

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,6 +36,8 @@ import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
+import android.app.usage.UsageEvents.Event;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -42,6 +45,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
@@ -111,6 +115,8 @@ public class BroadcastQueueTest {
     private ProcessList mProcessList;
     @Mock
     private PackageManagerInternal mPackageManagerInt;
+    @Mock
+    private UsageStatsManagerInternal mUsageStatsManagerInt;
 
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
@@ -119,6 +125,11 @@ public class BroadcastQueueTest {
      * Map from PID to registered registered runtime receivers.
      */
     private SparseArray<ReceiverList> mRegisteredReceivers = new SparseArray<>();
+
+    /**
+     * Collection of all active processes during current test run.
+     */
+    private List<ProcessRecord> mActiveProcesses = new ArrayList<>();
 
     @Parameters(name = "impl={0}")
     public static Collection<Object[]> data() {
@@ -153,6 +164,7 @@ public class BroadcastQueueTest {
         realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
         realAms.mPackageManagerInt = mPackageManagerInt;
+        realAms.mUsageStatsService = mUsageStatsManagerInt;
         realAms.mProcessesReady = true;
         mAms = spy(realAms);
         doAnswer((invocation) -> {
@@ -202,6 +214,11 @@ public class BroadcastQueueTest {
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quit();
+
+        // Verify that all processes have finished handling broadcasts
+        for (ProcessRecord app : mActiveProcesses) {
+            assertTrue(app.toShortString(), app.mReceivers.numberOfCurReceivers() == 0);
+        }
     }
 
     private class TestInjector extends Injector {
@@ -239,6 +256,7 @@ public class BroadcastQueueTest {
             boolean wedged) throws Exception {
         final ProcessRecord r = new ProcessRecord(mAms, ai, processName, ai.uid);
         r.setPid(mNextPid.getAndIncrement());
+        mActiveProcesses.add(r);
 
         final IApplicationThread thread = mock(IApplicationThread.class);
         final IBinder threadBinder = new Binder();
@@ -257,6 +275,7 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             if (!wedged) {
+                assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
                 mHandlerThread.getThreadHandler().post(() -> {
                     synchronized (mAms) {
                         mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
@@ -273,6 +292,7 @@ public class BroadcastQueueTest {
                     + Arrays.toString(invocation.getArguments()));
             final boolean ordered = invocation.getArgument(5);
             if (!wedged && ordered) {
+                assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
                 mHandlerThread.getThreadHandler().post(() -> {
                     synchronized (mAms) {
                         mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
@@ -533,7 +553,10 @@ public class BroadcastQueueTest {
                         makeRegisteredReceiver(receiverYellowApp))));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+        airplane.setComponent(new ComponentName(PACKAGE_YELLOW, CLASS_YELLOW));
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.recordResponseEventWhileInBackground(42L);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, options,
                 List.of(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
 
         waitForIdle();
@@ -544,6 +567,23 @@ public class BroadcastQueueTest {
         verifyScheduleReceiver(receiverBlueApp, timezone);
         verifyScheduleRegisteredReceiver(receiverYellowApp, timezone);
         verifyScheduleReceiver(receiverYellowApp, airplane);
+
+        // Confirm that we've reported relevant packages as being used, but
+        // only called for manifest receivers
+        verify(mAms, never()).notifyPackageUse(eq(PACKAGE_RED),
+                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
+        verify(mAms, times(1)).notifyPackageUse(eq(PACKAGE_GREEN),
+                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
+        verify(mAms, times(1)).notifyPackageUse(eq(PACKAGE_BLUE),
+                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
+        verify(mAms, times(1)).notifyPackageUse(eq(PACKAGE_YELLOW),
+                eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
+
+        // Confirm that we've reported expected usage events
+        verify(mAms.mUsageStatsService).reportBroadcastDispatched(eq(callerApp.uid),
+                eq(PACKAGE_YELLOW), eq(UserHandle.SYSTEM), eq(42L), anyLong(), anyInt());
+        verify(mAms.mUsageStatsService).reportEvent(eq(PACKAGE_YELLOW), eq(UserHandle.USER_SYSTEM),
+                eq(Event.APP_COMPONENT_USED));
     }
 
     /**
@@ -600,5 +640,23 @@ public class BroadcastQueueTest {
                 new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
         verifyScheduleReceiver(times(1), receiverApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_BLUE));
+    }
+
+    /**
+     * Verify that we skip broadcasts to an app being backed up.
+     */
+    @Test
+    public void testBackup() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        receiverApp.setInFullBackup(true);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+
+        waitForIdle();
+        verifyScheduleReceiver(never(), receiverApp, airplane,
+                new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
     }
 }

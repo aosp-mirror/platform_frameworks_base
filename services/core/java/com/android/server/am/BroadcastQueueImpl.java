@@ -46,7 +46,6 @@ import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
-import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.IIntentReceiver;
@@ -1509,17 +1508,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         if (targetPackage == null) {
             return;
         }
-        getUsageStatsManagerInternal().reportBroadcastDispatched(
+        mService.mUsageStatsService.reportBroadcastDispatched(
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
                 r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
                 mService.getUidStateLocked(targetUid));
-    }
-
-    @NonNull
-    private UsageStatsManagerInternal getUsageStatsManagerInternal() {
-        final UsageStatsManagerInternal usageStatsManagerInternal =
-                LocalServices.getService(UsageStatsManagerInternal.class);
-        return usageStatsManagerInternal;
     }
 
     private void maybeAddAllowBackgroundActivityStartsToken(ProcessRecord proc, BroadcastRecord r) {
