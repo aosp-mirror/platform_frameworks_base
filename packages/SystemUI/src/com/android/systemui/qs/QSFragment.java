@@ -60,6 +60,7 @@ import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -82,7 +83,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private static final String EXTRA_VISIBLE = "visible";
 
     private final Rect mQsBounds = new Rect();
-    private final StatusBarStateController mStatusBarStateController;
+    private final SysuiStatusBarStateController mStatusBarStateController;
     private final FalsingManager mFalsingManager;
     private final KeyguardBypassController mBypassController;
     private boolean mQsExpanded;
@@ -159,7 +160,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      * Progress of pull down from the center of the lock screen.
      * @see com.android.systemui.statusbar.LockscreenShadeTransitionController
      */
-    private float mFullShadeProgress;
+    private float mLockscreenToShadeProgress;
 
     private boolean mOverScrolling;
 
@@ -177,7 +178,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             QSTileHost qsTileHost,
-            StatusBarStateController statusBarStateController, CommandQueue commandQueue,
+            SysuiStatusBarStateController statusBarStateController, CommandQueue commandQueue,
             @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
@@ -586,7 +587,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             mTransitioningToFullShade = isTransitioningToFullShade;
             updateShowCollapsedOnKeyguard();
         }
-        mFullShadeProgress = qsTransitionFraction;
+        mLockscreenToShadeProgress = qsTransitionFraction;
         setQsExpansion(mLastQSExpansion, mLastPanelFraction, mLastHeaderTranslation,
                 isTransitioningToFullShade ? qsSquishinessFraction : mSquishinessFraction);
     }
@@ -710,10 +711,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         if (mInSplitShade) {
             // Large screens in landscape.
-            if (mTransitioningToFullShade || isKeyguardState()) {
+            // Need to check upcoming state as for unlocked -> AOD transition current state is
+            // not updated yet, but we're transitioning and UI should already follow KEYGUARD state
+            if (mTransitioningToFullShade || mStatusBarStateController.getCurrentOrUpcomingState()
+                    == StatusBarState.KEYGUARD) {
                 // Always use "mFullShadeProgress" on keyguard, because
                 // "panelExpansionFractions" is always 1 on keyguard split shade.
-                return mFullShadeProgress;
+                return mLockscreenToShadeProgress;
             } else {
                 return panelExpansionFraction;
             }
@@ -722,7 +726,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mTransitioningToFullShade) {
             // Only use this value during the standard lock screen shade expansion. During the
             // "quick" expansion from top, this value is 0.
-            return mFullShadeProgress;
+            return mLockscreenToShadeProgress;
         } else {
             return panelExpansionFraction;
         }
@@ -930,7 +934,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         indentingPw.println("mLastHeaderTranslation: " + mLastHeaderTranslation);
         indentingPw.println("mInSplitShade: " + mInSplitShade);
         indentingPw.println("mTransitioningToFullShade: " + mTransitioningToFullShade);
-        indentingPw.println("mFullShadeProgress: " + mFullShadeProgress);
+        indentingPw.println("mLockscreenToShadeProgress: " + mLockscreenToShadeProgress);
         indentingPw.println("mOverScrolling: " + mOverScrolling);
         indentingPw.println("isCustomizing: " + mQSCustomizerController.isCustomizing());
         View view = getView();
