@@ -353,7 +353,7 @@ class MediaViewController @Inject constructor(
         type: TYPE
     ) = traceSection("MediaViewController#attach") {
         updateMediaViewControllerType(type)
-        logger.logMediaLocation("attach", currentStartLocation, currentEndLocation)
+        logger.logMediaLocation("attach $type", currentStartLocation, currentEndLocation)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {

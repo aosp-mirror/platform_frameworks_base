@@ -40,6 +40,37 @@ class MediaCarouselControllerLogger @Inject constructor(
                     "Removing control panel for $str1 from map without calling #onDestroy"
         }
     )
+
+    fun logMediaLoaded(key: String) = buffer.log(
+        TAG,
+        LogLevel.DEBUG,
+        { str1 = key },
+        { "add player $str1" }
+    )
+
+    fun logMediaRemoved(key: String) = buffer.log(
+        TAG,
+        LogLevel.DEBUG,
+        { str1 = key },
+        { "removing player $str1" }
+    )
+
+    fun logRecommendationLoaded(key: String) = buffer.log(
+        TAG,
+        LogLevel.DEBUG,
+        { str1 = key },
+        { "add recommendation $str1" }
+    )
+
+    fun logRecommendationRemoved(key: String, immediately: Boolean) = buffer.log(
+        TAG,
+        LogLevel.DEBUG,
+        {
+            str1 = key
+            bool1 = immediately
+        },
+        { "removing recommendation $str1, immediate=$bool1" }
+    )
 }
 
 private const val TAG = "MediaCarouselCtlrLog"
