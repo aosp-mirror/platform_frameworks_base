@@ -144,6 +144,12 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
+        ArgumentCaptor<Boolean> boolCaptor = ArgumentCaptor.forClass(Boolean.class);
+        doAnswer(invocation ->
+                when(mHost.isPulsePending()).thenReturn(boolCaptor.getValue())
+        ).when(mHost).setPulsePending(boolCaptor.capture());
+
+        when(mHost.isPulsingBlocked()).thenReturn(false);
         mProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 1));
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
@@ -157,6 +163,29 @@ public class DozeTriggersTest extends SysuiTestCase {
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
 
         verify(mMachine).requestPulse(anyInt());
+    }
+
+    @Test
+    public void testOnNotification_noPulseIfPulseIsNotPendingAnymore() {
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        ArgumentCaptor<DozeHost.Callback> captor = ArgumentCaptor.forClass(DozeHost.Callback.class);
+        doAnswer(invocation -> null).when(mHost).addCallback(captor.capture());
+
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        clearInvocations(mMachine);
+        when(mHost.isPulsingBlocked()).thenReturn(false);
+
+        // GIVEN pulsePending = false
+        when(mHost.isPulsePending()).thenReturn(false);
+
+        // WHEN prox check returns FAR
+        mProximitySensor.setLastEvent(new ThresholdSensorEvent(false, 2));
+        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
+        mProximitySensor.alertListeners();
+
+        // THEN don't request pulse because the pending pulse was abandoned early
+        verify(mMachine, never()).requestPulse(anyInt());
     }
 
     @Test
@@ -236,6 +265,11 @@ public class DozeTriggersTest extends SysuiTestCase {
         InstanceId keyguardSessionId = InstanceId.fakeInstanceId(99);
         when(mSessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD))
                 .thenReturn(keyguardSessionId);
+
+        ArgumentCaptor<Boolean> boolCaptor = ArgumentCaptor.forClass(Boolean.class);
+        doAnswer(invocation ->
+                when(mHost.isPulsePending()).thenReturn(boolCaptor.getValue())
+        ).when(mHost).setPulsePending(boolCaptor.capture());
 
         // WHEN quick pick up is triggered
         mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
