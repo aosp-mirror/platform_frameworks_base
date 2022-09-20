@@ -222,7 +222,7 @@ std::unique_ptr<const IdmapData> IdmapData::FromBinaryStream(std::istream& strea
         || !Read32(stream, &entry_count)) {
       return nullptr;
     }
-    target_inline_entries.emplace_back(std::make_tuple(target_entry, entry_offset, entry_count));
+    target_inline_entries.emplace_back(target_entry, entry_offset, entry_count);
   }
 
   // Read the inline overlay resource values
@@ -241,7 +241,7 @@ std::unique_ptr<const IdmapData> IdmapData::FromBinaryStream(std::istream& strea
         || !Read32(stream, &value.data_value)) {
       return nullptr;
     }
-    target_values.emplace_back(std::make_pair(config_index, value));
+    target_values.emplace_back(config_index, value);
   }
 
   // Read the configurations
