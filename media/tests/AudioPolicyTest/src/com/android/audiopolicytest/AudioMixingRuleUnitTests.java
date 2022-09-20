@@ -17,9 +17,13 @@
 package com.android.audiopolicytest;
 
 import static android.media.AudioAttributes.USAGE_MEDIA;
+import static android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION;
+import static android.media.audiopolicy.AudioMixingRule.MIX_ROLE_INJECTOR;
 import static android.media.audiopolicy.AudioMixingRule.MIX_ROLE_PLAYERS;
+import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET;
 import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_USAGE;
 import static android.media.audiopolicy.AudioMixingRule.RULE_EXCLUDE_UID;
+import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_UID;
 
@@ -53,6 +57,8 @@ import org.junit.runner.RunWith;
 public class AudioMixingRuleUnitTests {
     private static final AudioAttributes USAGE_MEDIA_AUDIO_ATTRIBUTES =
             new AudioAttributes.Builder().setUsage(USAGE_MEDIA).build();
+    private static final AudioAttributes CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES =
+            new AudioAttributes.Builder().setCapturePreset(VOICE_RECOGNITION).build();
     private static final int TEST_UID = 42;
     private static final int OTHER_UID = 77;
 
@@ -137,6 +143,46 @@ public class AudioMixingRuleUnitTests {
                         .build());
     }
 
+    @Test
+    public void injectorMixTypeDeductionWithGenericRuleSucceeds() {
+        AudioMixingRule rule = new AudioMixingRule.Builder()
+                // UID rule can be used both with MIX_ROLE_PLAYERS and MIX_ROLE_INJECTOR.
+                .addMixRule(RULE_MATCH_UID, TEST_UID)
+                // Capture preset rule is only valid for injector, MIX_ROLE_INJECTOR should
+                // be deduced.
+                .addMixRule(RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                        CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES)
+                .build();
+
+        assertEquals(rule.getTargetMixRole(), MIX_ROLE_INJECTOR);
+        assertThat(rule.getCriteria(), containsInAnyOrder(
+                isAudioMixMatchUidCriterion(TEST_UID),
+                isAudioMixMatchCapturePresetCriterion(VOICE_RECOGNITION)));
+    }
+
+    @Test
+    public void settingTheMixTypeToIncompatibleInjectorMixFails() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new AudioMixingRule.Builder()
+                        .addMixRule(RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES)
+                        // Capture preset cannot be defined for MIX_ROLE_PLAYERS.
+                        .setTargetMixRole(MIX_ROLE_PLAYERS)
+                        .build());
+    }
+
+    @Test
+    public void addingPlayersOnlyRuleWithInjectorsOnlyRuleFails() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new AudioMixingRule.Builder()
+                        // MIX_ROLE_PLAYERS only rule.
+                        .addMixRule(RULE_MATCH_ATTRIBUTE_USAGE, USAGE_MEDIA_AUDIO_ATTRIBUTES)
+                        // MIX ROLE_INJECTOR only rule.
+                        .addMixRule(RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES)
+                        .build());
+    }
+
 
     private static Matcher isAudioMixUidCriterion(int uid, boolean exclude) {
         return new CustomTypeSafeMatcher<AudioMixMatchCriterion>("uid mix criterion") {
@@ -158,6 +204,32 @@ public class AudioMixingRuleUnitTests {
 
     private static Matcher isAudioMixMatchUidCriterion(int uid) {
         return isAudioMixUidCriterion(uid, /*exclude=*/ false);
+    }
+
+    private static Matcher isAudioMixCapturePresetCriterion(int audioSource, boolean exclude) {
+        return new CustomTypeSafeMatcher<AudioMixMatchCriterion>("uid mix criterion") {
+            @Override
+            public boolean matchesSafely(AudioMixMatchCriterion item) {
+                int expectedRule = exclude
+                        ? RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET
+                        : RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET;
+                AudioAttributes attributes = item.getAudioAttributes();
+                return item.getRule() == expectedRule
+                        && attributes != null && attributes.getCapturePreset() == audioSource;
+            }
+
+            @Override
+            public void describeMismatchSafely(
+                    AudioMixMatchCriterion item, Description mismatchDescription) {
+                mismatchDescription.appendText(
+                        String.format("is not %s criterion with capture preset %d",
+                                exclude ? "exclude" : "match", audioSource));
+            }
+        };
+    }
+
+    private static Matcher isAudioMixMatchCapturePresetCriterion(int audioSource) {
+        return isAudioMixCapturePresetCriterion(audioSource, /*exclude=*/ false);
     }
 
     private static Matcher isAudioMixUsageCriterion(int usage, boolean exclude) {

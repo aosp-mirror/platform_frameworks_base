@@ -554,7 +554,12 @@ public class AudioMixingRule {
                 throw new IllegalArgumentException("Illegal argument for mix role");
             }
 
-            Log.i("AudioMixingRule", "Builder setTargetMixRole " + mixRole);
+            if (mCriteria.stream().map(AudioMixMatchCriterion::getRule)
+                    .anyMatch(mixRole == MIX_ROLE_PLAYERS
+                            ? AudioMixingRule::isRecorderRule : AudioMixingRule::isPlayerRule)) {
+                throw new IllegalArgumentException(
+                        "Target mix role is not compatible with mix rules.");
+            }
             mTargetMixType = mixRole == MIX_ROLE_INJECTOR
                     ? AudioMix.MIX_TYPE_RECORDERS : AudioMix.MIX_TYPE_PLAYERS;
             return this;
@@ -611,17 +616,15 @@ public class AudioMixingRule {
          */
         private Builder addRuleInternal(AudioAttributes attrToMatch, Integer intProp, int rule)
                 throws IllegalArgumentException {
-            // as rules are added to the Builder, we verify they are consistent with the type
-            // of mix being built. When adding the first rule, the mix type is MIX_TYPE_INVALID.
+            // If mix type is invalid and added rule is valid only for the players / recorders,
+            // adjust the mix type accordingly.
+            // Otherwise, if the mix type was already deduced or set explicitly, verify the rule
+            // is valid for the mix type.
             if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
                 if (isPlayerRule(rule)) {
                     mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
                 } else if (isRecorderRule(rule)) {
                     mTargetMixType = AudioMix.MIX_TYPE_RECORDERS;
-                } else {
-                    // For rules which are not player or recorder specific (e.g. RULE_MATCH_UID),
-                    // the default mix type is MIX_TYPE_PLAYERS.
-                    mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
                 }
             } else if ((isPlayerRule(rule) && (mTargetMixType != AudioMix.MIX_TYPE_PLAYERS))
                     || (isRecorderRule(rule)) && (mTargetMixType != AudioMix.MIX_TYPE_RECORDERS))
@@ -679,8 +682,11 @@ public class AudioMixingRule {
          * @return a new {@link AudioMixingRule} object
          */
         public AudioMixingRule build() {
-            return new AudioMixingRule(mTargetMixType, mCriteria,
-                mAllowPrivilegedMediaPlaybackCapture, mVoiceCommunicationCaptureAllowed);
+            return new AudioMixingRule(
+                    mTargetMixType == AudioMix.MIX_TYPE_INVALID
+                            ? AudioMix.MIX_TYPE_PLAYERS : mTargetMixType,
+                    mCriteria, mAllowPrivilegedMediaPlaybackCapture,
+                    mVoiceCommunicationCaptureAllowed);
         }
     }
 }
