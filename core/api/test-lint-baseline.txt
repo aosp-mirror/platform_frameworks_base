@@ -873,6 +873,8 @@ NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_SHORTCUT_TARG
     New setting keys are not allowed (Field: ACCESSIBILITY_SHORTCUT_TARGET_SERVICE); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_SERVICE:
     New setting keys are not allowed (Field: AUTOFILL_SERVICE); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#BIOMETRIC_VIRTUAL_ENABLED:
+    New setting keys are not allowed (Field: BIOMETRIC_VIRTUAL_ENABLED); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Secure#CONTENT_CAPTURE_ENABLED:
     New setting keys are not allowed (Field: CONTENT_CAPTURE_ENABLED); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Secure#DISABLED_PRINT_SERVICES:
@@ -1011,7 +1013,7 @@ UserHandleName: android.content.ContentCaptureOptions:
     Classes holding a set of parameters should be called `FooParams`, was `ContentCaptureOptions`
 
 
-VisiblySynchronized: PsiThisExpression:this:
+VisiblySynchronized: PsiThisExpression:
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()
 VisiblySynchronized: android.content.res.AssetManager#getApkPaths():
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()

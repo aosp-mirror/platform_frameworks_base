@@ -62,7 +62,7 @@ class ExitPipViaExpandButtonClickTest(
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true) {
+        get() = buildTransition {
             setup {
                 // launch an app behind the pip one
                 testApp.launchViaIntent(wmHelper)

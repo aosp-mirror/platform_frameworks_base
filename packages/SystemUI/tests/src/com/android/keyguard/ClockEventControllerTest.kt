@@ -119,6 +119,20 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun fontChanged_verifyFontSizeUpdated() {
+        clockEventController.clock = clock
+        verify(events).onColorPaletteChanged(any(), any(), any())
+
+        clockEventController.registerListeners()
+
+        val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
+        verify(configurationController).addCallback(capture(captor))
+        captor.value.onDensityOrFontScaleChanged()
+
+        verify(events).onFontSettingChanged()
+    }
+
+    @Test
     fun batteryCallback_keyguardShowingCharging_verifyChargeAnimation() {
         clockEventController.clock = clock
         clockEventController.registerListeners()

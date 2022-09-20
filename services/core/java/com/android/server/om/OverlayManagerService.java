@@ -23,7 +23,9 @@ import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
+import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_REASON;
+import static android.content.Intent.EXTRA_USER_ID;
 import static android.content.om.OverlayManagerTransaction.Request.TYPE_REGISTER_FABRICATED;
 import static android.content.om.OverlayManagerTransaction.Request.TYPE_SET_DISABLED;
 import static android.content.om.OverlayManagerTransaction.Request.TYPE_SET_ENABLED;
@@ -39,6 +41,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -56,6 +59,7 @@ import android.content.pm.overlay.OverlayPaths;
 import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.FabricatedOverlayInternal;
 import android.os.HandlerThread;
@@ -1419,17 +1423,38 @@ public final class OverlayManagerService extends SystemService {
 
     private static void broadcastActionOverlayChanged(@NonNull final Set<String> targetPackages,
             final int userId) {
+        final ActivityManagerInternal amInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
         CollectionUtils.forEach(targetPackages, target -> {
             final Intent intent = new Intent(ACTION_OVERLAY_CHANGED,
                     Uri.fromParts("package", target, null));
             intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            try {
-                ActivityManager.getService().broadcastIntent(null, intent, null, null, 0, null,
-                        null, null, android.app.AppOpsManager.OP_NONE, null, false, false, userId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "broadcastActionOverlayChanged remote exception", e);
-            }
+            intent.putExtra(EXTRA_PACKAGE_NAME, target);
+            intent.putExtra(EXTRA_USER_ID, userId);
+            amInternal.broadcastIntent(intent, null /* resultTo */, null /* requiredPermissions */,
+                    false /* serialized */, userId, null /* appIdAllowList */,
+                    OverlayManagerService::filterReceiverAccess, null /* bOptions */);
         });
+    }
+
+    /**
+     * A callback from the broadcast queue to determine whether the intent
+     * {@link Intent#ACTION_OVERLAY_CHANGED} is visible to the receiver.
+     *
+     * @param callingUid The receiver's uid.
+     * @param extras The extras of intent that contains {@link Intent#EXTRA_PACKAGE_NAME} and
+     * {@link Intent#EXTRA_USER_ID} to check.
+     * @return {@code null} if the intent is not visible to the receiver.
+     */
+    @Nullable
+    private static Bundle filterReceiverAccess(int callingUid, @NonNull Bundle extras) {
+        final String packageName = extras.getString(EXTRA_PACKAGE_NAME);
+        final int userId = extras.getInt(EXTRA_USER_ID);
+        if (LocalServices.getService(PackageManagerInternal.class).filterAppAccess(
+                packageName, callingUid, userId, false /* filterUninstalled */)) {
+            return null;
+        }
+        return extras;
     }
 
     /**

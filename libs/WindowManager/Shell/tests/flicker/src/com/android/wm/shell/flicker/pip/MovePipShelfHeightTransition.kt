@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.traces.region.RegionSubject
+import com.android.wm.shell.flicker.Direction
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Test
 
@@ -29,11 +30,6 @@ abstract class MovePipShelfHeightTransition(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
     protected val testApp = FixedAppHelper(instrumentation)
-
-    /**
-     * Checks if the window movement direction is valid
-     */
-    protected abstract fun assertRegionMovement(previous: RegionSubject, current: RegionSubject)
 
     /**
      * Checks [pipApp] window remains visible throughout the animation
@@ -82,31 +78,46 @@ abstract class MovePipShelfHeightTransition(
     }
 
     /**
-     * Checks that the visible region of [pipApp] always moves in the correct direction
+     * Checks that the visible region of [pipApp] window always moves in the specified direction
      * during the animation.
      */
-    @Presubmit
-    @Test
-    open fun pipWindowMoves() {
+    protected fun pipWindowMoves(direction: Direction) {
         testSpec.assertWm {
-            val pipWindowList = this.windowStates { pipApp.windowMatchesAnyOf(it) && it.isVisible }
-            pipWindowList.zipWithNext { previous, current ->
-                assertRegionMovement(previous.frame, current.frame)
+            val pipWindowFrameList = this.windowStates {
+                pipApp.windowMatchesAnyOf(it) && it.isVisible
+            }.map { it.frame }
+            when (direction) {
+                Direction.UP -> assertRegionMovementUp(pipWindowFrameList)
+                Direction.DOWN -> assertRegionMovementDown(pipWindowFrameList)
+                else -> error("Unhandled direction")
             }
         }
     }
 
     /**
-     * Checks that the visible region of [pipApp] always moves up during the animation
+     * Checks that the visible region of [pipApp] layer always moves in the specified direction
+     * during the animation.
      */
-    @Presubmit
-    @Test
-    open fun pipLayerMoves() {
+    protected fun pipLayerMoves(direction: Direction) {
         testSpec.assertLayers {
-            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
-            pipLayerList.zipWithNext { previous, current ->
-                assertRegionMovement(previous.visibleRegion, current.visibleRegion)
+            val pipLayerRegionList = this.layers {
+                pipApp.layerMatchesAnyOf(it) && it.isVisible
+            }.map { it.visibleRegion }
+            when (direction) {
+                Direction.UP -> assertRegionMovementUp(pipLayerRegionList)
+                Direction.DOWN -> assertRegionMovementDown(pipLayerRegionList)
+                else -> error("Unhandled direction")
             }
         }
+    }
+
+    private fun assertRegionMovementDown(regions: List<RegionSubject>) {
+        regions.zipWithNext { previous, current -> current.isLowerOrEqual(previous) }
+        regions.last().isLower(regions.first())
+    }
+
+    private fun assertRegionMovementUp(regions: List<RegionSubject>) {
+        regions.zipWithNext { previous, current -> current.isHigherOrEqual(previous.region) }
+        regions.last().isHigher(regions.first())
     }
 }

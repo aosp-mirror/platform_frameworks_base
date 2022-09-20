@@ -9825,6 +9825,7 @@ public final class Settings {
          * Whether or not virtual sensors are enabled.
          * @hide
          */
+        @TestApi
         @Readable
         public static final String BIOMETRIC_VIRTUAL_ENABLED = "biometric_virtual_enabled";
 

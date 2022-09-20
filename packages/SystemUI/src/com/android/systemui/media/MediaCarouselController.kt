@@ -458,7 +458,7 @@ class MediaCarouselController @Inject constructor(
         val existingPlayer = MediaPlayerData.getMediaPlayer(key)
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
-        val isCurVisibleMediaPlaying = MediaPlayerData.getMediaData(curVisibleMediaKey)?.isPlaying
+        val isCurVisibleMediaPlaying = curVisibleMediaKey?.data?.isPlaying
         if (existingPlayer == null) {
             val newPlayer = mediaControlPanelFactory.get()
             newPlayer.attachPlayer(MediaViewHolder.create(
@@ -1044,15 +1044,6 @@ internal object MediaPlayerData {
             removedPlayer?.run { debugLogger?.logPotentialMemoryLeak(newKey) }
             mediaData.put(newKey, it)
         }
-    }
-
-    fun getMediaData(mediaSortKey: MediaSortKey?): MediaData? {
-        mediaData.forEach { (key, value) ->
-            if (value == mediaSortKey) {
-                return mediaData[key]?.data
-            }
-        }
-        return null
     }
 
     fun getMediaPlayer(key: String): MediaControlPanel? {

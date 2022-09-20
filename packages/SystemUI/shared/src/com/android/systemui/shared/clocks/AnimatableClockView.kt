@@ -23,6 +23,7 @@ import android.annotation.SuppressLint
 import android.app.compat.ChangeIdStateCache.invalidate
 import android.content.Context
 import android.graphics.Canvas
+import android.text.Layout
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
@@ -78,6 +79,8 @@ class AnimatableClockView @JvmOverloads constructor(
     private var textAnimator: TextAnimator? = null
     private var onTextAnimatorInitialized: Runnable? = null
 
+    @VisibleForTesting var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator =
+        { layout, invalidateCb -> TextAnimator(layout, invalidateCb) }
     @VisibleForTesting var isAnimationEnabled: Boolean = true
     @VisibleForTesting var timeOverrideInMillis: Long? = null
 
@@ -174,7 +177,7 @@ class AnimatableClockView @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val animator = textAnimator
         if (animator == null) {
-            textAnimator = TextAnimator(layout) { invalidate() }
+            textAnimator = textAnimatorFactory(layout, ::invalidate)
             onTextAnimatorInitialized?.run()
             onTextAnimatorInitialized = null
         } else {
@@ -219,9 +222,6 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateAppearOnLockscreen() {
-        if (isAnimationEnabled && textAnimator == null) {
-            return
-        }
         setTextStyle(
             weight = dozingWeight,
             textSize = -1f,

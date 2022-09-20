@@ -56,7 +56,7 @@ open class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testS
 
     /** {@inheritDoc}  */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = false) {
+        get() = buildTransition {
             setup {
                 imeApp.launchViaIntent(wmHelper)
                 setRotation(testSpec.startRotation)

@@ -1744,7 +1744,16 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Implement to return our standard {@link InputMethodImpl}.  Subclasses
      * can override to provide their own customized version.
+     *
+     * @deprecated IME developers don't need to override this method to get callbacks information.
+     * Most methods in {@link InputMethodImpl} have corresponding callbacks.
+     * Use {@link InputMethodService#onBindInput()}, {@link InputMethodService#onUnbindInput()},
+     * {@link InputMethodService#onWindowShown()}, {@link InputMethodService#onWindowHidden()}, etc.
+     *
+     * <p>Starting from Android U and later, override this method won't guarantee that IME works
+     * as previous platform behavior.</p>
      */
+    @Deprecated
     @Override
     public AbstractInputMethodImpl onCreateInputMethodInterface() {
         return new InputMethodImpl();
@@ -1753,7 +1762,15 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Implement to return our standard {@link InputMethodSessionImpl}.  Subclasses
      * can override to provide their own customized version.
+     *
+     * @deprecated IME developers don't need to override this method to get callbacks information.
+     * Most methods in {@link InputMethodSessionImpl} have corresponding callbacks.
+     * Use {@link InputMethodService#onFinishInput()},
+     * {@link InputMethodService#onDisplayCompletions(CompletionInfo[])},
+     * {@link InputMethodService#onUpdateExtractedText(int, ExtractedText)},
+     * {@link InputMethodService#onUpdateSelection(int, int, int, int, int, int)} instead.
      */
+    @Deprecated
     @Override
     public AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface() {
         return new InputMethodSessionImpl();

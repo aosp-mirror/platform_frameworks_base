@@ -143,10 +143,23 @@ class TestDisplayContent extends DisplayContent {
             mInfo.ownerUid = ownerUid;
             return this;
         }
-        Builder setNotch(int height) {
+        Builder setCutout(int left, int top, int right, int bottom) {
+            final int cutoutFillerSize = 80;
+            Rect boundLeft = left != 0 ? new Rect(0, 0, left, cutoutFillerSize) : null;
+            Rect boundTop = top != 0 ? new Rect(0, 0, cutoutFillerSize, top) : null;
+            Rect boundRight = right != 0 ? new Rect(mInfo.logicalWidth - right, 0,
+                    mInfo.logicalWidth, cutoutFillerSize) : null;
+            Rect boundBottom = bottom != 0
+                    ? new Rect(0, mInfo.logicalHeight - bottom, cutoutFillerSize,
+                    mInfo.logicalHeight) : null;
+
             mInfo.displayCutout = new DisplayCutout(
-                    Insets.of(0, height, 0, 0), null, new Rect(20, 0, 80, height), null, null);
+                    Insets.of(left, top, right, bottom),
+                    boundLeft, boundTop, boundRight, boundBottom);
             return this;
+        }
+        Builder setNotch(int height) {
+            return setCutout(0, height, 0, 0);
         }
         Builder setStatusBarHeight(int height) {
             mStatusBarHeight = height;
