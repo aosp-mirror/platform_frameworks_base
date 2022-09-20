@@ -6536,9 +6536,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** Called when the windows associated app window container are drawn. */
-    private void onWindowsDrawn(long timestampNs) {
+    private void onWindowsDrawn() {
         final TransitionInfoSnapshot info = mTaskSupervisor
-                .getActivityMetricsLogger().notifyWindowsDrawn(this, timestampNs);
+                .getActivityMetricsLogger().notifyWindowsDrawn(this);
         final boolean validInfo = info != null;
         final int windowsDrawnDelayMs = validInfo ? info.windowsDrawnDelayMs : INVALID_DELAY;
         final @WaitResult.LaunchState int launchState =
@@ -6665,7 +6665,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 + numInteresting + " visible=" + numVisible);
         if (nowDrawn != mReportedDrawn) {
             if (nowDrawn) {
-                onWindowsDrawn(SystemClock.elapsedRealtimeNanos());
+                onWindowsDrawn();
             }
             mReportedDrawn = nowDrawn;
         }
