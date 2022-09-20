@@ -26,12 +26,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -49,6 +52,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -66,6 +70,7 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,6 +78,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentMatcher;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
@@ -82,8 +88,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.UnaryOperator;
 
 /**
  * Common tests for {@link BroadcastQueue} implementations.
@@ -172,7 +180,8 @@ public class BroadcastQueueTest {
                     + Arrays.toString(invocation.getArguments()));
             final String processName = invocation.getArgument(0);
             final ApplicationInfo ai = invocation.getArgument(1);
-            final ProcessRecord res = makeActiveProcessRecord(ai, processName, false);
+            final ProcessRecord res = makeActiveProcessRecord(ai, processName, false,
+                    false, UnaryOperator.identity());
             mHandlerThread.getThreadHandler().post(() -> {
                 synchronized (mAms) {
                     mQueue.onApplicationAttachedLocked(res);
@@ -242,18 +251,37 @@ public class BroadcastQueueTest {
         }
     }
 
+    /**
+     * Helper that leverages try-with-resources to pause dispatch of
+     * {@link #mHandlerThread} until released.
+     */
+    private class SyncBarrier implements AutoCloseable {
+        private final int mToken;
+
+        public SyncBarrier() {
+            mToken = mHandlerThread.getLooper().getQueue().postSyncBarrier();
+        }
+
+        @Override
+        public void close() throws Exception {
+            mHandlerThread.getLooper().getQueue().removeSyncBarrier(mToken);
+        }
+    }
+
     private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
         final ApplicationInfo ai = makeApplicationInfo(packageName);
-        return makeActiveProcessRecord(ai, ai.processName, false);
+        return makeActiveProcessRecord(ai, ai.processName, false, false,
+                UnaryOperator.identity());
     }
 
     private ProcessRecord makeActiveProcessRecordWedged(String packageName) throws Exception {
         final ApplicationInfo ai = makeApplicationInfo(packageName);
-        return makeActiveProcessRecord(ai, ai.processName, true);
+        return makeActiveProcessRecord(ai, ai.processName, true, false,
+                UnaryOperator.identity());
     }
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, String processName,
-            boolean wedged) throws Exception {
+            boolean wedged, boolean abort, UnaryOperator<Bundle> extrasOperator) throws Exception {
         final ProcessRecord r = new ProcessRecord(mAms, ai, processName, ai.uid);
         r.setPid(mNextPid.getAndIncrement());
         mActiveProcesses.add(r);
@@ -274,12 +302,13 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
+            final Bundle extras = invocation.getArgument(5);
             if (!wedged) {
                 assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
                 mHandlerThread.getThreadHandler().post(() -> {
                     synchronized (mAms) {
                         mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
-                                null, null, false, false);
+                                null, extrasOperator.apply(extras), abort, false);
                     }
                 });
             }
@@ -290,13 +319,14 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
+            final Bundle extras = invocation.getArgument(4);
             final boolean ordered = invocation.getArgument(5);
             if (!wedged && ordered) {
                 assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
                 mHandlerThread.getThreadHandler().post(() -> {
                     synchronized (mAms) {
                         mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
-                                null, null, false, false);
+                                null, extrasOperator.apply(extras), abort, false);
                     }
                 });
             }
@@ -337,15 +367,29 @@ public class BroadcastQueueTest {
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             List receivers) {
-        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(), receivers);
+        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
+                receivers, false, null, null);
+    }
+
+    private BroadcastRecord makeOrderedBroadcastRecord(Intent intent, ProcessRecord callerApp,
+            List receivers, IIntentReceiver orderedResultTo, Bundle orderedExtras) {
+        return makeBroadcastRecord(intent, callerApp, BroadcastOptions.makeBasic(),
+                receivers, true, orderedResultTo, orderedExtras);
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
             BroadcastOptions options, List receivers) {
+        return makeBroadcastRecord(intent, callerApp, options, receivers, false, null, null);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
+            BroadcastOptions options, List receivers, boolean ordered,
+            IIntentReceiver orderedResultTo, Bundle orderedExtras) {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
-                AppOpsManager.OP_NONE, options, receivers, null, Activity.RESULT_OK, null, null,
-                false, false, false, UserHandle.USER_SYSTEM, false, null, false, null);
+                AppOpsManager.OP_NONE, options, receivers, orderedResultTo, Activity.RESULT_OK,
+                null, orderedExtras, ordered, false, false, UserHandle.USER_SYSTEM, false, null,
+                false, null);
     }
 
     private ArgumentMatcher<Intent> filterEquals(Intent intent) {
@@ -362,6 +406,17 @@ public class BroadcastQueueTest {
             testClean.setComponent(null);
             return intentClean.filterEquals(testClean);
         };
+    }
+
+    private ArgumentMatcher<Bundle> bundleEquals(Bundle bundle) {
+        return (test) -> {
+            // TODO: check values in addition to keys
+            return Objects.equals(test.keySet(), bundle.keySet());
+        };
+    }
+
+    private @NonNull Bundle clone(@Nullable Bundle b) {
+        return (b != null) ? new Bundle(b) : new Bundle();
     }
 
     private void enqueueBroadcast(BroadcastRecord r) {
@@ -611,27 +666,24 @@ public class BroadcastQueueTest {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
-        // Pause event processing until we can both enqueue and dequeue
-        final int token = mHandlerThread.getLooper().getQueue().postSyncBarrier();
-
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
-                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
-                        makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
-                        makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE)))));
+        try (SyncBarrier b = new SyncBarrier()) {
+            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
+                    List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
+                            makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                            makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE)))));
 
-        synchronized (mAms) {
-            mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_GREEN, Set.of(CLASS_GREEN),
-                    UserHandle.USER_SYSTEM);
+            synchronized (mAms) {
+                mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_GREEN, Set.of(CLASS_GREEN),
+                        UserHandle.USER_SYSTEM);
 
-            // Also try clearing out other unrelated things that should leave
-            // the final receiver intact
-            mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_RED, null,
-                    UserHandle.USER_SYSTEM);
-            mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
+                // Also try clearing out other unrelated things that should leave
+                // the final receiver intact
+                mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_RED, null,
+                        UserHandle.USER_SYSTEM);
+                mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
+            }
         }
-
-        mHandlerThread.getLooper().getQueue().removeSyncBarrier(token);
 
         waitForIdle();
         verifyScheduleReceiver(times(1), receiverApp, airplane,
@@ -658,5 +710,130 @@ public class BroadcastQueueTest {
         waitForIdle();
         verifyScheduleReceiver(never(), receiverApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
+    }
+
+    /**
+     * Verify that an ordered broadcast collects results from everyone along the
+     * chain, and is delivered to final destination.
+     */
+    @Test
+    public void testOrdered() throws Exception {
+        // TODO: expand to modern stack once implemented
+        Assume.assumeTrue(mImpl == Impl.DEFAULT);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        // Purposefully warm-start the middle apps to make sure we dispatch to
+        // both cold and warm apps in expected order
+        makeActiveProcessRecord(makeApplicationInfo(PACKAGE_BLUE), PACKAGE_BLUE,
+                false, false, (extras) -> {
+                    extras = clone(extras);
+                    extras.putBoolean(PACKAGE_BLUE, true);
+                    return extras;
+                });
+        makeActiveProcessRecord(makeApplicationInfo(PACKAGE_YELLOW), PACKAGE_YELLOW,
+                false, false, (extras) -> {
+                    extras = clone(extras);
+                    extras.putBoolean(PACKAGE_YELLOW, true);
+                    return extras;
+                });
+
+        final IIntentReceiver orderedResultTo = mock(IIntentReceiver.class);
+        final Bundle orderedExtras = new Bundle();
+        orderedExtras.putBoolean(PACKAGE_RED, true);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeOrderedBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW)),
+                orderedResultTo, orderedExtras));
+
+        waitForIdle();
+        final IApplicationThread greenThread = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN)).getThread();
+        final IApplicationThread blueThread = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE)).getThread();
+        final IApplicationThread yellowThread = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW)).getThread();
+        final IApplicationThread redThread = mAms.getProcessRecordLocked(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED)).getThread();
+
+        // Verify that we called everyone in specific order, and that each of
+        // them observed the expected extras at that stage
+        final InOrder inOrder = inOrder(greenThread, blueThread, yellowThread, redThread);
+        final Bundle expectedExtras = new Bundle();
+        expectedExtras.putBoolean(PACKAGE_RED, true);
+        inOrder.verify(greenThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)), eq(true),
+                eq(UserHandle.USER_SYSTEM), anyInt());
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)), eq(true),
+                eq(UserHandle.USER_SYSTEM), anyInt());
+        expectedExtras.putBoolean(PACKAGE_BLUE, true);
+        inOrder.verify(yellowThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)), eq(true),
+                eq(UserHandle.USER_SYSTEM), anyInt());
+        expectedExtras.putBoolean(PACKAGE_YELLOW, true);
+        inOrder.verify(redThread).scheduleRegisteredReceiver(any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)), eq(false),
+                anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
+    }
+
+    /**
+     * Verify that an ordered broadcast can be cancelled partially through
+     * dispatch, and is then delivered to final destination.
+     */
+    @Test
+    public void testOrdered_Abort() throws Exception {
+        // TODO: expand to modern stack once implemented
+        Assume.assumeTrue(mImpl == Impl.DEFAULT);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        // Create a process that aborts any ordered broadcasts
+        makeActiveProcessRecord(makeApplicationInfo(PACKAGE_GREEN), PACKAGE_GREEN,
+                false, true, (extras) -> {
+                    extras = clone(extras);
+                    extras.putBoolean(PACKAGE_GREEN, true);
+                    return extras;
+                });
+        makeActiveProcessRecord(PACKAGE_BLUE);
+
+        final IIntentReceiver orderedResultTo = mock(IIntentReceiver.class);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeOrderedBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE)),
+                orderedResultTo, null));
+
+        waitForIdle();
+        final IApplicationThread greenThread = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN)).getThread();
+        final IApplicationThread blueThread = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE)).getThread();
+        final IApplicationThread redThread = mAms.getProcessRecordLocked(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED)).getThread();
+
+        final Bundle expectedExtras = new Bundle();
+        expectedExtras.putBoolean(PACKAGE_GREEN, true);
+
+        // Verify that we called the first receiver, and that because it
+        // cancelled we never dispatched to the second receiver, and instead
+        // went straight to the final result
+        final InOrder inOrder = inOrder(greenThread, blueThread, redThread);
+        inOrder.verify(greenThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), any(), eq(true), eq(UserHandle.USER_SYSTEM),
+                anyInt());
+        inOrder.verify(blueThread, never()).scheduleReceiver(any(), any(), any(), anyInt(), any(),
+                any(), anyBoolean(), anyInt(), anyInt());
+        inOrder.verify(redThread).scheduleRegisteredReceiver(any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
+                eq(false), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
     }
 }
