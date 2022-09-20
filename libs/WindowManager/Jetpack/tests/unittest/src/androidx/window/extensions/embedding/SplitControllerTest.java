@@ -207,7 +207,7 @@ public class SplitControllerTest {
 
         verify(mSplitPresenter, never()).deleteTaskFragment(any(), any());
         verify(mSplitController).removeContainer(tf);
-        verify(mActivity, never()).finish();
+        verify(mTransaction, never()).finishActivity(any());
     }
 
     @Test
@@ -1004,9 +1004,9 @@ public class SplitControllerTest {
         assertTrue(primaryContainer.isFinished());
         assertTrue(secondaryContainer0.isFinished());
         assertTrue(secondaryContainer1.isFinished());
-        verify(mActivity).finish();
-        verify(secondaryActivity0).finish();
-        verify(secondaryActivity1).finish();
+        verify(mTransaction).finishActivity(mActivity.getActivityToken());
+        verify(mTransaction).finishActivity(secondaryActivity0.getActivityToken());
+        verify(mTransaction).finishActivity(secondaryActivity1.getActivityToken());
         assertTrue(taskContainer.mContainers.isEmpty());
         assertTrue(taskContainer.mSplitContainers.isEmpty());
     }

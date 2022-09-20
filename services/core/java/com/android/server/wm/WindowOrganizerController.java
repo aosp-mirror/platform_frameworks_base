@@ -25,6 +25,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_FINISH_ACTIVITY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
@@ -1007,6 +1008,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         isInLockTaskMode);
                 break;
             }
+            case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: {
+                final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
+                if (activity == null || activity.finishing) {
+                    break;
+                }
+                if (activity.isVisible()) {
+                    // Prevent the transition from being executed too early if the activity is
+                    // visible.
+                    activity.finishIfPossible("finish-activity-op", false /* oomAdj */);
+                } else {
+                    activity.destroyIfPossible("finish-activity-op");
+                }
+                break;
+            }
             case HIERARCHY_OP_TYPE_LAUNCH_TASK: {
                 mService.mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                         "launchTask HierarchyOp");
@@ -1619,6 +1634,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 WindowContainer.fromBinder(hop.getNewParent()),
                                 organizer);
                     }
+                    break;
+                case HIERARCHY_OP_TYPE_FINISH_ACTIVITY:
+                    // Allow finish activity if it has the activity token.
                     break;
                 default:
                     // Other types of hierarchy changes are not allowed.

@@ -3406,6 +3406,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction createTaskFragment(@NonNull android.window.TaskFragmentCreationParams);
     method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.window.WindowContainerToken);
     method public int describeContents();
+    method @NonNull public android.window.WindowContainerTransaction finishActivity(@NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction removeTask(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction reorder(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparent(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, boolean);

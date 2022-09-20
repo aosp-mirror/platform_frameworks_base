@@ -730,6 +730,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTransaction_finishActivity() {
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+
+        mTransaction.finishActivity(activity.token);
+        assertApplyTransactionAllowed(mTransaction);
+
+        assertTrue(activity.finishing);
+    }
+
+    @Test
     public void testApplyTransaction_skipTransactionForUnregisterOrganizer() {
         mController.unregisterOrganizer(mIOrganizer);
         final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);

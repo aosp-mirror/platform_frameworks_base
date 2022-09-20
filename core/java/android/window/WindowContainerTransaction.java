@@ -706,6 +706,23 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Finishes the Activity.
+     * Comparing to directly calling {@link android.app.Activity#finish()}, calling this can make
+     * sure the finishing happens in the same transaction with other operations.
+     * @param activityToken activity to be finished.
+     */
+    @NonNull
+    public WindowContainerTransaction finishActivity(@NonNull IBinder activityToken) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_FINISH_ACTIVITY)
+                        .setContainer(activityToken)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
      * Sets/removes the always on top flag for this {@code windowContainer}. See
      * {@link com.android.server.wm.ConfigurationContainer#setAlwaysOnTop(boolean)}.
      * Please note that this method is only intended to be used for a
@@ -1163,6 +1180,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT = 18;
         public static final int HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP = 19;
         public static final int HIERARCHY_OP_TYPE_REMOVE_TASK = 20;
+        public static final int HIERARCHY_OP_TYPE_FINISH_ACTIVITY = 21;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1484,6 +1502,8 @@ public final class WindowContainerTransaction implements Parcelable {
                             + " alwaysOnTop=" + mAlwaysOnTop + "}";
                 case HIERARCHY_OP_TYPE_REMOVE_TASK:
                     return "{RemoveTask: task=" + mContainer + "}";
+                case HIERARCHY_OP_TYPE_FINISH_ACTIVITY:
+                    return "{finishActivity: activity=" + mContainer + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop
