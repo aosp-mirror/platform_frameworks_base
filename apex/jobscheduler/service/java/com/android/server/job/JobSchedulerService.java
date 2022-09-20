@@ -882,6 +882,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                                             // a user-initiated action, it should be fine to just
                                             // put USER instead of UNINSTALL or DISABLED.
                                             cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
+                                                    /* includeSchedulingApp */ true,
+                                                    /* includeSourceApp */ true,
                                                     JobParameters.STOP_REASON_USER,
                                                     JobParameters.INTERNAL_STOP_REASON_UNINSTALL,
                                                     "app disabled");
@@ -932,6 +934,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // get here, but since this is generally a user-initiated action, it should
                     // be fine to just put USER instead of UNINSTALL or DISABLED.
                     cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
+                            /* includeSchedulingApp */ true, /* includeSourceApp */ true,
                             JobParameters.STOP_REASON_USER,
                             JobParameters.INTERNAL_STOP_REASON_UNINSTALL, "app uninstalled");
                     for (int c = 0; c < mControllers.size(); ++c) {
@@ -986,7 +989,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "Removing jobs for pkg " + pkgName + " at uid " + pkgUid);
                     }
                     synchronized (mLock) {
+                        // Exclude jobs scheduled on behalf of this app for now because SyncManager
+                        // and other job proxy agents may not know to reschedule the job properly
+                        // after force stop.
+                        // TODO(209852664): determine how to best handle syncs & other proxied jobs
                         cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
+                                /* includeSchedulingApp */ true, /* includeSourceApp */ false,
                                 JobParameters.STOP_REASON_USER,
                                 JobParameters.INTERNAL_STOP_REASON_CANCELED,
                                 "app force stopped");
@@ -1304,16 +1312,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private final Consumer<JobStatus> mCancelJobDueToUserRemovalConsumer = (toRemove) -> {
+        // There's no guarantee that the process has been stopped by the time we get
+        // here, but since this is a user-initiated action, it should be fine to just
+        // put USER instead of UNINSTALL or DISABLED.
+        cancelJobImplLocked(toRemove, null, JobParameters.STOP_REASON_USER,
+                JobParameters.INTERNAL_STOP_REASON_UNINSTALL, "user removed");
+    };
+
     private void cancelJobsForUserLocked(int userHandle) {
-        final List<JobStatus> jobsForUser = mJobs.getJobsByUser(userHandle);
-        for (int i = 0; i < jobsForUser.size(); i++) {
-            JobStatus toRemove = jobsForUser.get(i);
-            // There's no guarantee that the process has been stopped by the time we get here,
-            // but since this is a user-initiated action, it should be fine to just put USER
-            // instead of UNINSTALL or DISABLED.
-            cancelJobImplLocked(toRemove, null, JobParameters.STOP_REASON_USER,
-                    JobParameters.INTERNAL_STOP_REASON_UNINSTALL, "user removed");
-        }
+        mJobs.forEachJob(
+                (job) -> job.getUserId() == userHandle || job.getSourceUserId() == userHandle,
+                mCancelJobDueToUserRemovalConsumer);
     }
 
     private void cancelJobsForNonExistentUsers() {
@@ -1324,15 +1334,31 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void cancelJobsForPackageAndUidLocked(String pkgName, int uid,
+            boolean includeSchedulingApp, boolean includeSourceApp,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
+        if (!includeSchedulingApp && !includeSourceApp) {
+            Slog.wtfStack(TAG,
+                    "Didn't indicate whether to cancel jobs for scheduling and/or source app");
+            includeSourceApp = true;
+        }
         if ("android".equals(pkgName)) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system package");
             return;
         }
-        final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
+        final List<JobStatus> jobsForUid = new ArrayList<>();
+        if (includeSchedulingApp) {
+            mJobs.getJobsByUid(uid, jobsForUid);
+        }
+        if (includeSourceApp) {
+            mJobs.getJobsBySourceUid(uid, jobsForUid);
+        }
         for (int i = jobsForUid.size() - 1; i >= 0; i--) {
             final JobStatus job = jobsForUid.get(i);
-            if (job.getSourcePackageName().equals(pkgName)) {
+            final boolean shouldCancel =
+                    (includeSchedulingApp
+                            && job.getServiceComponent().getPackageName().equals(pkgName))
+                    || (includeSourceApp && job.getSourcePackageName().equals(pkgName));
+            if (shouldCancel) {
                 cancelJobImplLocked(job, null, reason, internalReasonCode, debugReason);
             }
         }
