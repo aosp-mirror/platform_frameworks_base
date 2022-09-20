@@ -14688,7 +14688,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     private boolean isUsageHistoryEnabled() {
-        return false;
+        return mConstants.RECORD_USAGE_HISTORY;
     }
 
     @GuardedBy("this")
@@ -14790,6 +14790,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public static final String KEY_MAX_HISTORY_BUFFER_KB = "max_history_buffer_kb";
         public static final String KEY_BATTERY_CHARGED_DELAY_MS =
                 "battery_charged_delay_ms";
+        public static final String KEY_RECORD_USAGE_HISTORY =
+                "record_usage_history";
 
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
         private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 1_000;
@@ -14802,6 +14804,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final int DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE = 64;
         private static final int DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB = 64; /*Kilo Bytes*/
         private static final int DEFAULT_BATTERY_CHARGED_DELAY_MS = 900000; /* 15 min */
+        private static final boolean DEFAULT_RECORD_USAGE_HISTORY = false;
 
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
         /* Do not set default value for KERNEL_UID_READERS_THROTTLE_TIME. Need to trigger an
@@ -14817,6 +14820,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public int MAX_HISTORY_FILES;
         public int MAX_HISTORY_BUFFER; /*Bytes*/
         public int BATTERY_CHARGED_DELAY_MS = DEFAULT_BATTERY_CHARGED_DELAY_MS;
+        public boolean RECORD_USAGE_HISTORY = DEFAULT_RECORD_USAGE_HISTORY;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -14892,6 +14896,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                 DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB
                                 : DEFAULT_MAX_HISTORY_BUFFER_KB)
                         * 1024;
+                RECORD_USAGE_HISTORY = mParser.getBoolean(
+                        KEY_RECORD_USAGE_HISTORY, DEFAULT_RECORD_USAGE_HISTORY);
+
                 updateBatteryChargedDelayMsLocked();
 
                 onChange();
@@ -14957,6 +14964,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(MAX_HISTORY_BUFFER/1024);
             pw.print(KEY_BATTERY_CHARGED_DELAY_MS); pw.print("=");
             pw.println(BATTERY_CHARGED_DELAY_MS);
+            pw.print(KEY_RECORD_USAGE_HISTORY); pw.print("=");
+            pw.println(RECORD_USAGE_HISTORY);
         }
     }
 
