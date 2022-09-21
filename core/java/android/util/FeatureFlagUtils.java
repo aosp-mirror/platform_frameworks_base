@@ -83,11 +83,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE =
             "settings_hide_second_layer_page_navigate_up_button_in_two_pane";
 
-    /** Support Clear Calling feature.
-     *  @hide
-     */
-    public static final String SETTINGS_ENABLE_CLEAR_CALLING = "settings_enable_clear_calling";
-
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -115,7 +110,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_CLEAR_CALLING, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
