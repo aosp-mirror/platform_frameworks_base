@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,6 +123,10 @@ object Flags {
      * will occur in stages. This is one stage of many to come.
      */
     @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213, teamfood = true)
+
+    @JvmField val NEW_ELLIPSE_DETECTION = UnreleasedFlag(214)
+
+    @JvmField val NEW_UDFPS_OVERLAY = UnreleasedFlag(215)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
