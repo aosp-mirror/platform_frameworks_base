@@ -22,19 +22,21 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.RootDisplayAreaOrganizer;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
@@ -47,18 +49,18 @@ public class DesktopModeController {
 
     private final Context mContext;
     private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final RootDisplayAreaOrganizer mRootDisplayAreaOrganizer;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final SettingsObserver mSettingsObserver;
     private final Transitions mTransitions;
 
     public DesktopModeController(Context context, ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @ShellMainThread Handler mainHandler,
             Transitions transitions) {
         mContext = context;
         mShellTaskOrganizer = shellTaskOrganizer;
-        mRootDisplayAreaOrganizer = rootDisplayAreaOrganizer;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSettingsObserver = new SettingsObserver(mContext, mainHandler);
         mTransitions = transitions;
         shellInit.addInitCallback(this::onInit, this);
@@ -92,13 +94,30 @@ public class DesktopModeController {
             wct.merge(mShellTaskOrganizer.prepareClearBoundsForStandardTasks(displayId),
                     true /* transfer */);
         }
-        wct.merge(mRootDisplayAreaOrganizer.prepareWindowingModeChange(displayId,
-                targetWindowingMode), true /* transfer */);
+        prepareWindowingModeChange(wct, displayId, targetWindowingMode);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
         } else {
-            mRootDisplayAreaOrganizer.applyTransaction(wct);
+            mRootTaskDisplayAreaOrganizer.applyTransaction(wct);
         }
+    }
+
+    private void prepareWindowingModeChange(WindowContainerTransaction wct,
+            int displayId, @WindowConfiguration.WindowingMode int windowingMode) {
+        DisplayAreaInfo displayAreaInfo = mRootTaskDisplayAreaOrganizer
+                .getDisplayAreaInfo(displayId);
+        if (displayAreaInfo == null) {
+            ProtoLog.e(WM_SHELL_DESKTOP_MODE,
+                    "unable to update windowing mode for display %d display not found", displayId);
+            return;
+        }
+
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                "setWindowingMode: displayId=%d current wmMode=%d new wmMode=%d", displayId,
+                displayAreaInfo.configuration.windowConfiguration.getWindowingMode(),
+                windowingMode);
+
+        wct.setWindowingMode(displayAreaInfo.token, windowingMode);
     }
 
     /**

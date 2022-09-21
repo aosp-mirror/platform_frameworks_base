@@ -32,13 +32,14 @@ import android.app.WindowConfiguration;
 import android.os.Handler;
 import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
+import android.window.DisplayAreaInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransaction.Change;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.RootDisplayAreaOrganizer;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
@@ -59,7 +60,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Mock
     private ShellTaskOrganizer mShellTaskOrganizer;
     @Mock
-    private RootDisplayAreaOrganizer mRootDisplayAreaOrganizer;
+    private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     @Mock
     private ShellExecutor mTestExecutor;
     @Mock
@@ -75,7 +76,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
         mShellInit = Mockito.spy(new ShellInit(mTestExecutor));
 
         mController = new DesktopModeController(mContext, mShellInit, mShellTaskOrganizer,
-                mRootDisplayAreaOrganizer, mMockHandler, mMockTransitions);
+                mRootTaskDisplayAreaOrganizer, mMockHandler, mMockTransitions);
 
         mShellInit.init();
     }
@@ -94,19 +95,19 @@ public class DesktopModeControllerTest extends ShellTestCase {
         when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(
                 mContext.getDisplayId())).thenReturn(taskWct);
 
-        // Create a fake WCT to simulate setting display windowing mode to freeform
-        WindowContainerTransaction displayWct = new WindowContainerTransaction();
+        // Create a fake DisplayAreaInfo to check if windowing mode change is set correctly
         MockToken displayMockToken = new MockToken();
-        displayWct.setWindowingMode(displayMockToken.token(), WINDOWING_MODE_FREEFORM);
-        when(mRootDisplayAreaOrganizer.prepareWindowingModeChange(mContext.getDisplayId(),
-                WINDOWING_MODE_FREEFORM)).thenReturn(displayWct);
+        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(displayMockToken.mToken,
+                mContext.getDisplayId(), 0);
+        when(mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(mContext.getDisplayId()))
+                .thenReturn(displayAreaInfo);
 
         // The test
         mController.updateDesktopModeActive(true);
 
         ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
-        verify(mRootDisplayAreaOrganizer).applyTransaction(arg.capture());
+        verify(mRootTaskDisplayAreaOrganizer).applyTransaction(arg.capture());
 
         // WCT should have 2 changes - clear task wm mode and set display wm mode
         WindowContainerTransaction wct = arg.getValue();
@@ -118,7 +119,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
         assertThat(taskWmModeChange.getWindowingMode()).isEqualTo(WINDOWING_MODE_UNDEFINED);
 
         // Verify executed WCT has a change for setting display windowing mode to freeform
-        Change displayWmModeChange = wct.getChanges().get(displayMockToken.binder());
+        Change displayWmModeChange = wct.getChanges().get(displayAreaInfo.token.asBinder());
         assertThat(displayWmModeChange).isNotNull();
         assertThat(displayWmModeChange.getWindowingMode()).isEqualTo(WINDOWING_MODE_FREEFORM);
     }
@@ -139,19 +140,19 @@ public class DesktopModeControllerTest extends ShellTestCase {
         when(mShellTaskOrganizer.prepareClearBoundsForStandardTasks(
                 mContext.getDisplayId())).thenReturn(taskBoundsWct);
 
-        // Create a fake WCT to simulate setting display windowing mode to fullscreen
-        WindowContainerTransaction displayWct = new WindowContainerTransaction();
+        // Create a fake DisplayAreaInfo to check if windowing mode change is set correctly
         MockToken displayMockToken = new MockToken();
-        displayWct.setWindowingMode(displayMockToken.token(), WINDOWING_MODE_FULLSCREEN);
-        when(mRootDisplayAreaOrganizer.prepareWindowingModeChange(mContext.getDisplayId(),
-                WINDOWING_MODE_FULLSCREEN)).thenReturn(displayWct);
+        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(displayMockToken.mToken,
+                mContext.getDisplayId(), 0);
+        when(mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(mContext.getDisplayId()))
+                .thenReturn(displayAreaInfo);
 
         // The test
         mController.updateDesktopModeActive(false);
 
         ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
-        verify(mRootDisplayAreaOrganizer).applyTransaction(arg.capture());
+        verify(mRootTaskDisplayAreaOrganizer).applyTransaction(arg.capture());
 
         // WCT should have 3 changes - clear task wm mode and bounds and set display wm mode
         WindowContainerTransaction wct = arg.getValue();
@@ -171,7 +172,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
                 .isTrue();
 
         // Verify executed WCT has a change for setting display windowing mode to fullscreen
-        Change displayWmModeChange = wct.getChanges().get(displayMockToken.binder());
+        Change displayWmModeChange = wct.getChanges().get(displayAreaInfo.token.asBinder());
         assertThat(displayWmModeChange).isNotNull();
         assertThat(displayWmModeChange.getWindowingMode()).isEqualTo(WINDOWING_MODE_FULLSCREEN);
     }
