@@ -56,7 +56,11 @@ android_library {
         "SettingsLibDeviceStateRotationLock",
         "setupdesign",
         "zxing-core-1.7",
+        "androidx.room_room-runtime",
+
     ],
+
+    plugins: ["androidx.room_room-compiler-plugin"],
 
     resource_dirs: ["res"],
 
