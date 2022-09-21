@@ -1099,6 +1099,10 @@ public final class ViewRootImpl implements ViewParent,
                 mInputQueueCallback.onInputQueueCreated(mInputQueue);
             }
         }
+
+        // Update the last resource config in case the resource configuration was changed while
+        // activity relaunched.
+        mLastConfigurationFromResources.setTo(getConfiguration());
     }
 
     private Configuration getConfiguration() {
