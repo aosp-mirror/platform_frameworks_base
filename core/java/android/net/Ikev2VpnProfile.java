@@ -483,9 +483,6 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         final VpnProfile profile = new VpnProfile("" /* Key; value unused by IKEv2VpnProfile(s) */,
                 mIsRestrictedToTestNetworks, mExcludeLocalRoutes, mRequiresInternetValidation,
                 mIkeTunConnParams);
-
-        profile.server = getServerAddr();
-        profile.ipsecIdentifier = getUserIdentity();
         profile.proxy = mProxyInfo;
         profile.isBypassable = mIsBypassable;
         profile.isMetered = mIsMetered;
@@ -499,6 +496,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         }
 
         profile.type = mType;
+        profile.server = getServerAddr();
+        profile.ipsecIdentifier = getUserIdentity();
         profile.setAllowedAlgorithms(mAllowedAlgorithms);
         switch (mType) {
             case TYPE_IKEV2_IPSEC_USER_PASS:

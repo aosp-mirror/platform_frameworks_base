@@ -264,29 +264,29 @@ public class TypedProperties extends HashMap<String, Object> {
             // Ensure that the type can hold this value, and return.
             int width = (type >> 8) & 0xff;
             switch (width) {
-            case 1:
-                if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
-                    throw new ParseException(st, "8-bit integer constant");
-                }
-                return new Byte((byte)value);
-            case 2:
-                if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
-                    throw new ParseException(st, "16-bit integer constant");
-                }
-                return new Short((short)value);
-            case 4:
-                if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-                    throw new ParseException(st, "32-bit integer constant");
-                }
-                return new Integer((int)value);
-            case 8:
-                if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
-                    throw new ParseException(st, "64-bit integer constant");
-                }
-                return new Long(value);
-            default:
-                throw new IllegalStateException(
-                    "Internal error; unexpected integer type width " + width);
+                case 1:
+                    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+                        throw new ParseException(st, "8-bit integer constant");
+                    }
+                    return Byte.valueOf((byte) value);
+                case 2:
+                    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+                        throw new ParseException(st, "16-bit integer constant");
+                    }
+                    return Short.valueOf((short) value);
+                case 4:
+                    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                        throw new ParseException(st, "32-bit integer constant");
+                    }
+                    return Integer.valueOf((int) value);
+                case 8:
+                    if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
+                        throw new ParseException(st, "64-bit integer constant");
+                    }
+                    return Long.valueOf(value);
+                default:
+                    throw new IllegalStateException(
+                            "Internal error; unexpected integer type width " + width);
             }
         } else if ((type & 0xff) == 'F') {
             if (token != StreamTokenizer.TT_WORD) {
@@ -317,10 +317,10 @@ public class TypedProperties extends HashMap<String, Object> {
                         throw new ParseException(st, "32-bit float constant");
                     }
                 }
-                return new Float((float)value);
+                return Float.valueOf((float) value);
             } else {
                 // This property is a double; no need to truncate.
-                return new Double(value);
+                return Double.valueOf(value);
             }
         } else if (type == TYPE_STRING) {
             // Expect a quoted string or the word "null".
