@@ -155,6 +155,29 @@ class WifiInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun isEnabled_matchesRepoIsEnabled() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .isEnabled
+            .onEach { latest = it }
+            .launchIn(this)
+
+        wifiRepository.setIsWifiEnabled(true)
+        yield()
+        assertThat(latest).isTrue()
+
+        wifiRepository.setIsWifiEnabled(false)
+        yield()
+        assertThat(latest).isFalse()
+
+        wifiRepository.setIsWifiEnabled(true)
+        yield()
+        assertThat(latest).isTrue()
+
+        job.cancel()
+    }
+
+    @Test
     fun wifiNetwork_matchesRepoWifiNetwork() = runBlocking(IMMEDIATE) {
         val wifiNetwork = WifiNetworkModel.Active(
             networkId = 45,

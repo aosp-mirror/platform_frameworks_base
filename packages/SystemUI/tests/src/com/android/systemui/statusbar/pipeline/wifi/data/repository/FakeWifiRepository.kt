@@ -24,12 +24,19 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Fake implementation of [WifiRepository] exposing set methods for all the flows. */
 class FakeWifiRepository : WifiRepository {
+    private val _isWifiEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isWifiEnabled: StateFlow<Boolean> = _isWifiEnabled
+
     private val _wifiNetwork: MutableStateFlow<WifiNetworkModel> =
         MutableStateFlow(WifiNetworkModel.Inactive)
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
 
     private val _wifiActivity = MutableStateFlow(ACTIVITY_DEFAULT)
     override val wifiActivity: StateFlow<WifiActivityModel> = _wifiActivity
+
+    fun setIsWifiEnabled(enabled: Boolean) {
+        _isWifiEnabled.value = enabled
+    }
 
     fun setWifiNetwork(wifiNetworkModel: WifiNetworkModel) {
         _wifiNetwork.value = wifiNetworkModel

@@ -70,6 +70,7 @@ class WifiViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
+        wifiRepository.setIsWifiEnabled(true)
         interactor = WifiInteractor(connectivityRepository, wifiRepository)
         scope = CoroutineScope(IMMEDIATE)
         createAndSetViewModel()
@@ -84,6 +85,26 @@ class WifiViewModelTest : SysuiTestCase() {
     // [LocationBasedWifiViewModel]. In practice, these 3 different instances will get the exact
     // same data for icon, activity, etc. flows. So, most of these tests will test just one of the
     // instances. There are also some tests that verify all 3 instances received the same data.
+
+    @Test
+    fun wifiIcon_notEnabled_outputsNull() = runBlocking(IMMEDIATE) {
+        wifiRepository.setIsWifiEnabled(false)
+
+        // Start as non-null so we can verify we got the update
+        var latest: Icon? = Icon.Resource(0, null)
+        val job = underTest
+            .home
+            .wifiIcon
+            .onEach { latest = it }
+            .launchIn(this)
+
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, level = 2))
+        yield()
+
+        assertThat(latest).isNull()
+
+        job.cancel()
+    }
 
     @Test
     fun wifiIcon_forceHidden_outputsNull() = runBlocking(IMMEDIATE) {

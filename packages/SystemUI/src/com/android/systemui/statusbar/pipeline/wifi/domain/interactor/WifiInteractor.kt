@@ -56,6 +56,9 @@ class WifiInteractor @Inject constructor(
         }
     }
 
+    /** Our current enabled status. */
+    val isEnabled: Flow<Boolean> = wifiRepository.isWifiEnabled
+
     /** Our current wifi network. See [WifiNetworkModel]. */
     val wifiNetwork: Flow<WifiNetworkModel> = wifiRepository.wifiNetwork
 

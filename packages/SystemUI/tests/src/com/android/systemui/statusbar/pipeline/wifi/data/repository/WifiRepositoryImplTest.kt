@@ -88,6 +88,78 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun isWifiEnabled_nullWifiManager_getsFalse() = runBlocking(IMMEDIATE) {
+        underTest = WifiRepositoryImpl(
+            connectivityManager,
+            logger,
+            executor,
+            scope,
+            wifiManager = null,
+        )
+
+        assertThat(underTest.isWifiEnabled.value).isFalse()
+    }
+
+    @Test
+    fun isWifiEnabled_initiallyGetsWifiManagerValue() = runBlocking(IMMEDIATE) {
+        whenever(wifiManager.isWifiEnabled).thenReturn(true)
+
+        underTest = WifiRepositoryImpl(
+            connectivityManager,
+            logger,
+            executor,
+            scope,
+            wifiManager
+        )
+
+        assertThat(underTest.isWifiEnabled.value).isTrue()
+    }
+
+    @Test
+    fun isWifiEnabled_networkCapabilitiesChanged_valueUpdated() = runBlocking(IMMEDIATE) {
+        // We need to call launch on the flows so that they start updating
+        val networkJob = underTest.wifiNetwork.launchIn(this)
+        val enabledJob = underTest.isWifiEnabled.launchIn(this)
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(true)
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO)
+        )
+
+        assertThat(underTest.isWifiEnabled.value).isTrue()
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(false)
+        getNetworkCallback().onCapabilitiesChanged(
+            NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO)
+        )
+
+        assertThat(underTest.isWifiEnabled.value).isFalse()
+
+        networkJob.cancel()
+        enabledJob.cancel()
+    }
+
+    @Test
+    fun isWifiEnabled_networkLost_valueUpdated() = runBlocking(IMMEDIATE) {
+        // We need to call launch on the flows so that they start updating
+        val networkJob = underTest.wifiNetwork.launchIn(this)
+        val enabledJob = underTest.isWifiEnabled.launchIn(this)
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(true)
+        getNetworkCallback().onLost(NETWORK)
+
+        assertThat(underTest.isWifiEnabled.value).isTrue()
+
+        whenever(wifiManager.isWifiEnabled).thenReturn(false)
+        getNetworkCallback().onLost(NETWORK)
+
+        assertThat(underTest.isWifiEnabled.value).isFalse()
+
+        networkJob.cancel()
+        enabledJob.cancel()
+    }
+
+    @Test
     fun wifiNetwork_initiallyGetsDefault() = runBlocking(IMMEDIATE) {
         var latest: WifiNetworkModel? = null
         val job = underTest

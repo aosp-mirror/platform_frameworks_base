@@ -122,12 +122,14 @@ constructor(
     /** The wifi icon that should be displayed. Null if we shouldn't display any icon. */
     private val wifiIcon: Flow<Icon?> =
         combine(
+            interactor.isEnabled,
             interactor.isForceHidden,
             iconResId,
             contentDescription,
-        ) { isForceHidden, iconResId, contentDescription ->
+        ) { isEnabled, isForceHidden, iconResId, contentDescription ->
             when {
-                isForceHidden ||
+                !isEnabled ||
+                    isForceHidden ||
                     iconResId == null ||
                     iconResId <= 0 -> null
                 else -> Icon.Resource(iconResId, contentDescription)

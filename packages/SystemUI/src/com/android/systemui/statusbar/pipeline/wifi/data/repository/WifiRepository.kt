@@ -36,6 +36,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import java.util.concurrent.Executor
@@ -43,13 +44,21 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /** Provides data related to the wifi state. */
 interface WifiRepository {
+    /** Observable for the current wifi enabled status. */
+    val isWifiEnabled: StateFlow<Boolean>
+
     /** Observable for the current wifi network. */
     val wifiNetwork: StateFlow<WifiNetworkModel>
 
@@ -68,6 +77,34 @@ class WifiRepositoryImpl @Inject constructor(
     @Application scope: CoroutineScope,
     wifiManager: WifiManager?,
 ) : WifiRepository {
+
+    /**
+     * A flow that emits [Unit] whenever the wifi state may have changed.
+     *
+     * Because [WifiManager] doesn't expose a wifi state change listener, we do it internally by
+     * emitting to this flow whenever we think the state may have changed.
+     *
+     * TODO(b/238425913): We also need to emit to this flow whenever the WIFI_STATE_CHANGED_ACTION
+     *   intent is triggered.
+     */
+    private val _wifiStateChangeEvents: MutableSharedFlow<Unit> =
+        MutableSharedFlow(extraBufferCapacity = 1)
+
+    override val isWifiEnabled: StateFlow<Boolean> =
+        if (wifiManager == null) {
+            MutableStateFlow(false).asStateFlow()
+        } else {
+            _wifiStateChangeEvents
+                .mapLatest { wifiManager.isWifiEnabled }
+                .distinctUntilChanged()
+                .logOutputChange(logger, "enabled")
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.WhileSubscribed(),
+                    initialValue = wifiManager.isWifiEnabled
+                )
+        }
+
     override val wifiNetwork: StateFlow<WifiNetworkModel> = conflatedCallbackFlow {
         var currentWifi: WifiNetworkModel = WIFI_NETWORK_DEFAULT
 
@@ -77,6 +114,8 @@ class WifiRepositoryImpl @Inject constructor(
                 networkCapabilities: NetworkCapabilities
             ) {
                 logger.logOnCapabilitiesChanged(network, networkCapabilities)
+
+                _wifiStateChangeEvents.tryEmit(Unit)
 
                 val wifiInfo = networkCapabilitiesToWifiInfo(networkCapabilities)
                 if (wifiInfo?.isPrimary == true) {
@@ -98,6 +137,9 @@ class WifiRepositoryImpl @Inject constructor(
 
             override fun onLost(network: Network) {
                 logger.logOnLost(network)
+
+                _wifiStateChangeEvents.tryEmit(Unit)
+
                 val wifi = currentWifi
                 if (wifi is WifiNetworkModel.Active && wifi.networkId == network.getNetId()) {
                     val newNetworkModel = WifiNetworkModel.Inactive
