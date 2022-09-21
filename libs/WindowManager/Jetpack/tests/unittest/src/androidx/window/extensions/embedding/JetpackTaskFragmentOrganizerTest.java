@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -26,12 +27,14 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentTransaction;
@@ -65,7 +68,10 @@ public class JetpackTaskFragmentOrganizerTest {
     private WindowContainerTransaction mTransaction;
     @Mock
     private JetpackTaskFragmentOrganizer.TaskFragmentCallback mCallback;
+    @Mock
     private SplitController mSplitController;
+    @Mock
+    private Handler mHandler;
     private JetpackTaskFragmentOrganizer mOrganizer;
 
     @Before
@@ -73,9 +79,8 @@ public class JetpackTaskFragmentOrganizerTest {
         MockitoAnnotations.initMocks(this);
         mOrganizer = new JetpackTaskFragmentOrganizer(Runnable::run, mCallback);
         mOrganizer.registerOrganizer();
-        mSplitController = new SplitController();
         spyOn(mOrganizer);
-        spyOn(mSplitController);
+        doReturn(mHandler).when(mSplitController).getHandler();
     }
 
     @Test
@@ -113,7 +118,7 @@ public class JetpackTaskFragmentOrganizerTest {
 
     @Test
     public void testExpandTaskFragment() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
                 new Intent(), taskContainer, mSplitController);
         final TaskFragmentInfo info = createMockInfo(container);
