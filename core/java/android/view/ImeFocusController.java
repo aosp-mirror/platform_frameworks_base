@@ -43,8 +43,21 @@ public final class ImeFocusController {
 
     private final ViewRootImpl mViewRootImpl;
     private boolean mHasImeFocus = false;
+
+    /**
+     * This is the view that should currently be served by an input method,
+     * regardless of the state of setting that up.
+     * @see InputMethodManagerDelegate#getLockObject()
+     */
     private View mServedView;
+
+    /**
+     * This is the next view that will be served by the input method, when
+     * we get around to updating things.
+     * @see InputMethodManagerDelegate#getLockObject()
+     */
     private View mNextServedView;
+
     private InputMethodManagerDelegate mDelegate;
 
     @UiThread
@@ -123,45 +136,52 @@ public final class ImeFocusController {
 
         boolean forceFocus = false;
         final InputMethodManagerDelegate immDelegate = getImmDelegate();
-        if (immDelegate.isRestartOnNextWindowFocus(true /* reset */)) {
-            if (DEBUG) Log.v(TAG, "Restarting due to isRestartOnNextWindowFocus as true");
-            forceFocus = true;
+        synchronized (immDelegate.getLockObject()) {
+            // Update mNextServedView when focusedView changed.
+            onViewFocusChanged(viewForWindowFocus, true);
+
+            // Starting new input when the next focused view is same as served view but the
+            // currently active connection (if any) is not associated with it.
+            final boolean nextFocusIsServedView = mServedView == viewForWindowFocus;
+
+            if (nextFocusIsServedView && !immDelegate.hasActiveConnection(viewForWindowFocus)) {
+                forceFocus = true;
+            }
         }
 
-        // Update mNextServedView when focusedView changed.
-        onViewFocusChanged(viewForWindowFocus, true);
-
-        // Starting new input when the next focused view is same as served view but the currently
-        // active connection (if any) is not associated with it.
-        final boolean nextFocusIsServedView = mServedView == viewForWindowFocus;
-        if (nextFocusIsServedView && !immDelegate.hasActiveConnection(viewForWindowFocus)) {
-            forceFocus = true;
-        }
-
-        immDelegate.startInputAsyncOnWindowFocusGain(viewForWindowFocus,
+        immDelegate.startInputOnWindowFocusGain(viewForWindowFocus,
                 windowAttribute.softInputMode, windowAttribute.flags, forceFocus);
     }
 
+    /**
+     * @see InputMethodManager#checkFocus()
+     */
     public boolean checkFocus(boolean forceNewFocus, boolean startInput) {
         final InputMethodManagerDelegate immDelegate = getImmDelegate();
-        if (!immDelegate.isCurrentRootView(mViewRootImpl)
-                || (mServedView == mNextServedView && !forceNewFocus)) {
-            return false;
+        synchronized (immDelegate.getLockObject()) {
+            if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
+                return false;
+            }
+            if (mServedView == mNextServedView && !forceNewFocus) {
+                return false;
+            }
+            if (DEBUG) {
+                Log.v(TAG, "checkFocus: view=" + mServedView
+                        + " next=" + mNextServedView
+                        + " force=" + forceNewFocus
+                        + " package="
+                        + (mServedView != null ? mServedView.getContext().getPackageName()
+                        : "<none>"));
+            }
+            // Close the connection when no next served view coming.
+            if (mNextServedView == null) {
+                immDelegate.finishInput();
+                immDelegate.closeCurrentIme();
+                return false;
+            }
+            mServedView = mNextServedView;
+            immDelegate.finishComposingText();
         }
-        if (DEBUG) Log.v(TAG, "checkFocus: view=" + mServedView
-                + " next=" + mNextServedView
-                + " force=" + forceNewFocus
-                + " package="
-                + (mServedView != null ? mServedView.getContext().getPackageName() : "<none>"));
-
-        // Close the connection when no next served view coming.
-        if (mNextServedView == null) {
-            immDelegate.finishInput();
-            immDelegate.closeCurrentIme();
-            return false;
-        }
-        mServedView = mNextServedView;
-        immDelegate.finishComposingText();
 
         if (startInput) {
             immDelegate.startInput(StartInputReason.CHECK_FOCUS, null /* focusedView */,
@@ -175,51 +195,61 @@ public final class ImeFocusController {
         if (view == null || view.isTemporarilyDetached()) {
             return;
         }
-        if (!getImmDelegate().isCurrentRootView(view.getViewRootImpl())) {
-            return;
-        }
-        if (!view.hasImeFocus() || !view.hasWindowFocus()) {
-            return;
-        }
-        if (DEBUG) Log.d(TAG, "onViewFocusChanged, view=" + InputMethodDebug.dumpViewInfo(view)
-                + ", mServedView=" + InputMethodDebug.dumpViewInfo(mServedView));
+        final InputMethodManagerDelegate immDelegate = getImmDelegate();
+        synchronized (immDelegate.getLockObject()) {
+            if (!immDelegate.isCurrentRootView(view.getViewRootImpl())) {
+                return;
+            }
+            if (!view.hasImeFocus() || !view.hasWindowFocus()) {
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onViewFocusChanged, view=" + InputMethodDebug.dumpViewInfo(view)
+                        + ", mServedView=" + InputMethodDebug.dumpViewInfo(mServedView));
+            }
 
-        // We don't need to track the next served view when the view lost focus here because:
-        // 1) The current view focus may be cleared temporary when in touch mode, closing input
-        //    at this moment isn't the right way.
-        // 2) We only care about the served view change when it focused, since changing input
-        //    connection when the focus target changed is reasonable.
-        // 3) Setting the next served view as null when no more served view should be handled in
-        //    other special events (e.g. view detached from window or the window dismissed).
-        if (hasFocus) {
-            mNextServedView = view;
+            // We don't need to track the next served view when the view lost focus here because:
+            // 1) The current view focus may be cleared temporary when in touch mode, closing input
+            //    at this moment isn't the right way.
+            // 2) We only care about the served view change when it focused, since changing input
+            //    connection when the focus target changed is reasonable.
+            // 3) Setting the next served view as null when no more served view should be handled in
+            //    other special events (e.g. view detached from window or the window dismissed).
+            if (hasFocus) {
+                mNextServedView = view;
+            }
         }
         mViewRootImpl.dispatchCheckFocus();
     }
 
     @UiThread
     void onViewDetachedFromWindow(View view) {
-        if (!getImmDelegate().isCurrentRootView(view.getViewRootImpl())) {
-            return;
-        }
-        if (mNextServedView == view) {
-            mNextServedView = null;
-        }
-        if (mServedView == view) {
-            mViewRootImpl.dispatchCheckFocus();
+        final InputMethodManagerDelegate immDelegate = getImmDelegate();
+        synchronized (immDelegate.getLockObject()) {
+            if (!immDelegate.isCurrentRootView(view.getViewRootImpl())) {
+                return;
+            }
+            if (mNextServedView == view) {
+                mNextServedView = null;
+            }
+            if (mServedView == view) {
+                mViewRootImpl.dispatchCheckFocus();
+            }
         }
     }
 
     @UiThread
     void onWindowDismissed() {
         final InputMethodManagerDelegate immDelegate = getImmDelegate();
-        if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
-            return;
+        synchronized (immDelegate.getLockObject()) {
+            if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
+                return;
+            }
+            if (mServedView != null) {
+                immDelegate.finishInput();
+            }
+            immDelegate.setCurrentRootView(null);
         }
-        if (mServedView != null) {
-            immDelegate.finishInput();
-        }
-        immDelegate.setCurrentRootView(null);
         mHasImeFocus = false;
     }
 
@@ -270,10 +300,22 @@ public final class ImeFocusController {
      * @hide
      */
     public interface InputMethodManagerDelegate {
+        /**
+         * Starts the input connection.
+         * Note that this method must not hold the {@link InputMethodManager} lock with
+         * {@link InputMethodManagerDelegate#getLockObject()} while {@link InputMethodManager}
+         * calling into app-code in different threads.
+         */
         boolean startInput(@StartInputReason int startInputReason, View focusedView,
                 @StartInputFlags int startInputFlags,
                 @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode, int windowFlags);
-        void startInputAsyncOnWindowFocusGain(View rootView,
+        /**
+         * Starts the input connection when gaining the window focus.
+         * Note that this method must not hold the {@link InputMethodManager} lock with
+         * {@link InputMethodManagerDelegate#getLockObject()} while {@link InputMethodManager}
+         * calling into app-code in different threads.
+         */
+        void startInputOnWindowFocusGain(View rootView,
                 @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode, int windowFlags,
                 boolean forceNewFocus);
         void finishInput();
@@ -282,24 +324,53 @@ public final class ImeFocusController {
         void finishComposingText();
         void setCurrentRootView(ViewRootImpl rootView);
         boolean isCurrentRootView(ViewRootImpl rootView);
-        boolean isRestartOnNextWindowFocus(boolean reset);
         boolean hasActiveConnection(View view);
+
+        /**
+         * Returns the {@code InputMethodManager#mH} lock object.
+         * Used for {@link ImeFocusController} to guard the served view being accessed by
+         * {@link InputMethodManager} in different threads.
+         */
+        Object getLockObject();
     }
 
-    public View getServedView() {
+    /**
+     * Returns The current IME served view for {@link InputMethodManager}.
+     * Used to start input connection or check the caller's validity when calling
+     * {@link InputMethodManager} APIs.
+     * Note that this method requires to be called inside {@code InputMethodManager#mH} lock for
+     * data consistency.
+     */
+    public View getServedViewLocked() {
         return mServedView;
     }
 
-    public View getNextServedView() {
+    /**
+     * Returns The next incoming IME served view for {@link InputMethodManager}.
+     * Note that this method requires to be called inside {@code InputMethodManager#mH} lock for
+     * data consistency.
+     */
+    public View getNextServedViewLocked() {
         return mNextServedView;
     }
 
-    public void setServedView(View view) {
-        mServedView = view;
-    }
-
-    public void setNextServedView(View view) {
-        mNextServedView = view;
+    /**
+     * Clears the served & the next served view when the controller triggers
+     * {@link InputMethodManagerDelegate#finishInput()} or
+     * {@link InputMethodManagerDelegate#finishInputAndReportToIme()}.
+     * Note that this method requires to be called inside {@code InputMethodManager#mH} lock for
+     * data consistency.
+     *
+     * @return The {@code mServedView} that has cleared, or {@code null} means nothing to clear.
+     */
+    public View clearServedViewsLocked() {
+        View clearedView = null;
+        mNextServedView = null;
+        if (mServedView != null) {
+            clearedView = mServedView;
+            mServedView = null;
+        }
+        return clearedView;
     }
 
     /**
