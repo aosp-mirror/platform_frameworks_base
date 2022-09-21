@@ -185,6 +185,7 @@ import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
+import android.window.TaskFragmentParentInfo;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
@@ -3516,6 +3517,14 @@ class Task extends TaskFragment {
             }
         }
         return info;
+    }
+
+    /**
+     * Returns the {@link TaskFragmentParentInfo} which will send to the client
+     * {@link android.window.TaskFragmentOrganizer}
+     */
+    TaskFragmentParentInfo getTaskFragmentParentInfo() {
+        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(), isVisibleRequested());
     }
 
     boolean isTaskId(int taskId) {
