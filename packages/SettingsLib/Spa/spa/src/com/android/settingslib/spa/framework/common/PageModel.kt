@@ -22,7 +22,7 @@ import androidx.lifecycle.ViewModel
 open class PageModel : ViewModel() {
     var initialized = false
 
-    fun initOnce(arguments: Bundle?) {
+    fun initOnce(arguments: Bundle? = null) {
         // Initialize only once
         if (initialized) return
         initialized = true

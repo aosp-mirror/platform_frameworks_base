@@ -18,132 +18,166 @@ package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.DisabledByDefault
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
+import com.android.settingslib.spa.gallery.createSettingsPage
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_TITLE
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.AUTO_UPDATE_PREFERENCE_TITLE
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.DISABLE_PREFERENCE_SUMMARY
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.DISABLE_PREFERENCE_TITLE
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.MANUAL_UPDATE_PREFERENCE_TITLE
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.PAGE_TITLE
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_KEYWORDS
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_SUMMARY
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_TITLE
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.logMsg
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.preference.SimplePreferenceMarco
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsIcon
-import kotlinx.coroutines.delay
-
-private const val TITLE = "Sample Preference"
 
 object PreferencePageProvider : SettingsPageProvider {
-    override val name = "Preference"
+    // Defines all entry name in this page.
+    // Note that entry name would be used in log. DO NOT change it once it is set.
+    // One can still change the display name for better readability if necessary.
+    enum class EntryEnum(val displayName: String) {
+        SIMPLE_PREFERENCE("preference"),
+        SUMMARY_PREFERENCE("preference_with_summary"),
+        DISABLED_PREFERENCE("preference_disable"),
+        ASYNC_SUMMARY_PREFERENCE("preference_with_async_summary"),
+        MANUAL_UPDATE_PREFERENCE("preference_actionable"),
+        AUTO_UPDATE_PREFERENCE("preference_auto_update"),
+    }
+
+    override val name = SettingsPageProviderEnum.PREFERENCE.name
+    private val owner = createSettingsPage(SettingsPageProviderEnum.PREFERENCE)
+
+    private fun createEntry(entry: EntryEnum): SettingsEntryBuilder {
+        return SettingsEntryBuilder.create(owner, entry.name, entry.displayName)
+    }
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = SettingsPage.create(name)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create("Preference", owner)
+            createEntry(EntryEnum.SIMPLE_PREFERENCE)
                 .setIsAllowSearch(true)
-                .setUiLayoutFn {
-                    Preference(object : PreferenceModel {
-                        override val title = "Preference"
-                    })
-                }.build()
+                .setMarco {
+                    logMsg("create marco for ${EntryEnum.SIMPLE_PREFERENCE}")
+                    SimplePreferenceMarco(title = SIMPLE_PREFERENCE_TITLE)
+                }
+                .build()
         )
         entryList.add(
-            SettingsEntryBuilder.create("Preference with summary", owner)
+            createEntry(EntryEnum.SUMMARY_PREFERENCE)
                 .setIsAllowSearch(true)
-                .setUiLayoutFn {
-                    Preference(object : PreferenceModel {
-                        override val title = "Preference"
-                        override val summary = "With summary".toState()
-                    })
-                }.build()
+                .setMarco {
+                    logMsg("create marco for ${EntryEnum.SUMMARY_PREFERENCE}")
+                    SimplePreferenceMarco(
+                        title = SIMPLE_PREFERENCE_TITLE,
+                        summary = SIMPLE_PREFERENCE_SUMMARY,
+                        searchKeywords = SIMPLE_PREFERENCE_KEYWORDS,
+                    )
+                }
+                .build()
         )
         entryList.add(
-            SettingsEntryBuilder.create("Preference with async summary", owner)
+            createEntry(EntryEnum.DISABLED_PREFERENCE)
                 .setIsAllowSearch(true)
+                .setMarco {
+                    logMsg("create marco for ${EntryEnum.DISABLED_PREFERENCE}")
+                    SimplePreferenceMarco(
+                        title = DISABLE_PREFERENCE_TITLE,
+                        summary = DISABLE_PREFERENCE_SUMMARY,
+                        disabled = true,
+                        icon = Icons.Outlined.DisabledByDefault,
+                    )
+                }
+                .build()
+        )
+        entryList.add(
+            createEntry(EntryEnum.ASYNC_SUMMARY_PREFERENCE)
+                .setIsAllowSearch(true)
+                .setSearchDataFn {
+                    EntrySearchData(title = ASYNC_PREFERENCE_TITLE)
+                }
                 .setUiLayoutFn {
-                    Preference(object : PreferenceModel {
-                        override val title = "Preference"
-                        override val summary = produceState(initialValue = " ") {
-                            delay(1000L)
-                            value = "Async summary"
+                    val model = PreferencePageModel.create()
+                    val asyncSummary = remember { model.getAsyncSummary() }
+                    Preference(
+                        object : PreferenceModel {
+                            override val title = ASYNC_PREFERENCE_TITLE
+                            override val summary = asyncSummary
                         }
-                    })
+                    )
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create("Click me", owner)
+            createEntry(EntryEnum.MANUAL_UPDATE_PREFERENCE)
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
-                    var count by rememberSaveable { mutableStateOf(0) }
-                    Preference(object : PreferenceModel {
-                        override val title = "Click me"
-                        override val summary = derivedStateOf { count.toString() }
-                        override val onClick: (() -> Unit) = { count++ }
-                        override val icon = @Composable {
-                            SettingsIcon(imageVector = Icons.Outlined.TouchApp)
+                    val model = PreferencePageModel.create()
+                    val manualUpdaterSummary = remember { model.getManualUpdaterSummary() }
+                    Preference(
+                        object : PreferenceModel {
+                            override val title = MANUAL_UPDATE_PREFERENCE_TITLE
+                            override val summary = manualUpdaterSummary
+                            override val onClick = { model.manualUpdaterOnClick() }
+                            override val icon = @Composable {
+                                SettingsIcon(imageVector = Icons.Outlined.TouchApp)
+                            }
                         }
-                    })
+                    )
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create("Ticker", owner)
+            createEntry(EntryEnum.AUTO_UPDATE_PREFERENCE)
                 .setIsAllowSearch(true)
                 .setUiLayoutFn {
-                    var ticks by rememberSaveable { mutableStateOf(0) }
-                    LaunchedEffect(ticks) {
-                        delay(1000L)
-                        ticks++
-                    }
-                    Preference(object : PreferenceModel {
-                        override val title = "Ticker"
-                        override val summary = derivedStateOf { ticks.toString() }
-                    })
-                }.build()
-        )
-        entryList.add(
-            SettingsEntryBuilder.create("Disabled", owner)
-                .setIsAllowSearch(true)
-                .setUiLayoutFn {
-                    Preference(object : PreferenceModel {
-                        override val title = "Disabled"
-                        override val summary = "Disabled".toState()
-                        override val enabled = false.toState()
-                        override val icon = @Composable {
-                            SettingsIcon(imageVector = Icons.Outlined.DisabledByDefault)
+                    val model = PreferencePageModel.create()
+                    val autoUpdaterSummary = remember { model.getAutoUpdaterSummary() }
+                    Preference(
+                        object : PreferenceModel {
+                            override val title = AUTO_UPDATE_PREFERENCE_TITLE
+                            override val summary = autoUpdaterSummary.observeAsState(" ")
+                            override val icon = @Composable {
+                                SettingsIcon(imageVector = Icons.Outlined.Autorenew)
+                            }
                         }
-                    })
-                }.build()
+                    )
+                }
+                .build()
         )
 
         return entryList
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner = owner)
             .setIsAllowSearch(true)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
+            .setMarco {
+                logMsg("create marco for INJECT entry")
+                SimplePreferenceMarco(
+                    title = PAGE_TITLE,
+                    clickRoute = SettingsPageProviderEnum.PREFERENCE.name
+                )
             }
     }
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = TITLE) {
+        RegularScaffold(title = PAGE_TITLE) {
             for (entry in buildEntry(arguments)) {
                 entry.UiLayout()
             }

@@ -23,22 +23,28 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.BrowseActivity
+import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.PageModel
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.getIntArg
 import com.android.settingslib.spa.framework.util.getStringArg
 import com.android.settingslib.spa.framework.util.navLink
+import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 
-private const val TITLE = "Sample page with arguments"
+// Defines all the resources for this page.
+// In real Settings App, resources data is defined in xml, rather than SPP.
+private const val PAGE_TITLE = "Sample page with arguments"
+private const val STRING_PARAM_TITLE = "String param value"
+private const val INT_PARAM_TITLE = "Int param value"
 private const val STRING_PARAM_NAME = "stringParam"
 private const val INT_PARAM_NAME = "intParam"
+private val ARGUMENT_PAGE_KEYWORDS = listOf("argument keyword1", "argument keyword2")
 
 class ArgumentPageModel : PageModel() {
 
     companion object {
-        const val name = "Argument"
         val parameter = listOf(
             navArgument(STRING_PARAM_NAME) { type = NavType.StringType },
             navArgument(INT_PARAM_NAME) { type = NavType.IntType },
@@ -62,6 +68,18 @@ class ArgumentPageModel : PageModel() {
             return (stringParam != null && listOf("foo", "bar").contains(stringParam))
         }
 
+        fun genStringParamSearchData(): EntrySearchData {
+            return EntrySearchData(title = STRING_PARAM_TITLE)
+        }
+
+        fun genIntParamSearchData(): EntrySearchData {
+            return EntrySearchData(title = INT_PARAM_TITLE)
+        }
+
+        fun genInjectSearchData(): EntrySearchData {
+            return EntrySearchData(title = PAGE_TITLE, keyword = ARGUMENT_PAGE_KEYWORDS)
+        }
+
         @Composable
         fun create(arguments: Bundle?): ArgumentPageModel {
             val pageModel: ArgumentPageModel = viewModel(key = arguments.toString())
@@ -70,7 +88,7 @@ class ArgumentPageModel : PageModel() {
         }
     }
 
-    private val title = TITLE
+    private val title = PAGE_TITLE
     private var arguments: Bundle? = null
     private var stringParam: String? = null
     private var intParam: Int? = null
@@ -92,7 +110,7 @@ class ArgumentPageModel : PageModel() {
     @Composable
     fun genStringParamPreferenceModel(): PreferenceModel {
         return object : PreferenceModel {
-            override val title = "String param value"
+            override val title = STRING_PARAM_TITLE
             override val summary = stateOf(stringParam!!)
         }
     }
@@ -100,7 +118,7 @@ class ArgumentPageModel : PageModel() {
     @Composable
     fun genIntParamPreferenceModel(): PreferenceModel {
         return object : PreferenceModel {
-            override val title = "Int param value"
+            override val title = INT_PARAM_TITLE
             override val summary = stateOf(intParam!!.toString())
         }
     }
@@ -114,7 +132,8 @@ class ArgumentPageModel : PageModel() {
         return object : PreferenceModel {
             override val title = genPageTitle()
             override val summary = stateOf(summaryArray.joinToString(", "))
-            override val onClick = navigator(name + parameter.navLink(arguments))
+            override val onClick = navigator(
+                SettingsPageProviderEnum.ARGUMENT.displayName + parameter.navLink(arguments))
         }
     }
 }

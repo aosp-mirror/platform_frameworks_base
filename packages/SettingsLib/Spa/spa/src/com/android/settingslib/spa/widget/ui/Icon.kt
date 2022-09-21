@@ -33,3 +33,8 @@ fun SettingsIcon(imageVector: ImageVector) {
         tint = MaterialTheme.colorScheme.onSurface,
     )
 }
+
+fun createSettingsIcon(imageVector: ImageVector?): (@Composable () -> Unit)? {
+    if (imageVector == null) return null
+    return { SettingsIcon(imageVector = imageVector) }
+}
