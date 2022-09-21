@@ -257,9 +257,11 @@ public final class PermissionHelper {
     private boolean packageRequestsNotificationPermission(String packageName,
             @UserIdInt int userId) {
         try {
-            String[] permissions = mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS,
-                    userId).requestedPermissions;
-            return ArrayUtils.contains(permissions, NOTIFICATION_PERMISSION);
+            PackageInfo pi = mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, userId);
+            if (pi != null) {
+                String[] permissions = pi.requestedPermissions;
+                return ArrayUtils.contains(permissions, NOTIFICATION_PERMISSION);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
         }
