@@ -970,10 +970,6 @@ interface IWindowManager
      */
     boolean isLetterboxBackgroundMultiColored();
 
-    /**
-     * Captures the entire display specified by the displayId using the args provided. If the args
-     * are null or if the sourceCrop is invalid or null, the entire display bounds will be captured.
-     */
     oneway void captureDisplay(int displayId, in @nullable ScreenCapture.CaptureArgs captureArgs,
             in ScreenCapture.ScreenCaptureListener listener);
 }

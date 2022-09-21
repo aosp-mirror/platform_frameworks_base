@@ -255,14 +255,14 @@ public class ScreenCapture {
      * @hide
      */
     public static class CaptureArgs implements Parcelable {
-        public final int mPixelFormat;
-        public final Rect mSourceCrop = new Rect();
-        public final float mFrameScaleX;
-        public final float mFrameScaleY;
-        public final boolean mCaptureSecureLayers;
-        public final boolean mAllowProtected;
-        public final long mUid;
-        public final boolean mGrayscale;
+        private final int mPixelFormat;
+        private final Rect mSourceCrop = new Rect();
+        private final float mFrameScaleX;
+        private final float mFrameScaleY;
+        private final boolean mCaptureSecureLayers;
+        private final boolean mAllowProtected;
+        private final long mUid;
+        private final boolean mGrayscale;
 
         private CaptureArgs(CaptureArgs.Builder<? extends CaptureArgs.Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
