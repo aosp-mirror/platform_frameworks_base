@@ -672,7 +672,7 @@
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"手機會自動嘗試降溫。您仍可以使用手機，但手機的運作速度可能較慢。\n\n手機降溫後便會恢復正常。"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看保養步驟"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"拔除裝置"</string>
-    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"裝置的充電埠附近越來越熱。如果裝置已連接充電器或 USB 配件，請立即拔除。此外，電線也可能會變熱，請特別留意。"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電埠附近的裝置溫度正在上升。如裝置正連接充電器或 USB 配件，請拔除裝置並小心安全，因為電線的溫度可能也偏高。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"查看保養步驟"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"向左捷徑"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"向右捷徑"</string>

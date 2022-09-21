@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය.\nතව තතු සඳහා තට්ටු කරන්න"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ඔබගේ දුරකථනය ස්වයංක්‍රියව සිසිල් වීමට උත්සාහ කරනු ඇත. ඔබට තවම ඔබේ දුරකථනය භාවිත කළ හැකිය, නමුත් එය සෙමින් ධාවනය විය හැකිය.\n\nඔබේ දුරකථනය සිසිල් වූ පසු, එය සාමාන්‍ය ලෙස ධාවනය වනු ඇත."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"රැකවරණ පියවර බලන්න"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"ඔබේ උපාංගය ගලවන්න"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"ඔබේ උපාංගය ආරෝපණ කවුළුව අවට උණුසුම් වෙමින් පවතී. එය චාජරයකට හෝ USB උපාංගයකට සම්බන්ධ කර ඇත්නම්, එය ගලවා, කේබලය උණුසුම් විය හැකි බැවින් ප්‍රවේශම් වන්න."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"රැකවරණ පියවර බලන්න"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"වම් කෙටි මග"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"දකුණු කෙටි මග"</string>
