@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -46,7 +45,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -92,7 +90,8 @@ public class BroadcastQueueTest {
     private final Impl mImpl;
 
     private enum Impl {
-        DEFAULT
+        DEFAULT,
+        MODERN,
     }
 
     private Context mContext;
@@ -116,7 +115,7 @@ public class BroadcastQueueTest {
 
     @Parameters(name = "impl={0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { {Impl.DEFAULT} });
+        return Arrays.asList(new Object[][] { {Impl.DEFAULT}, {Impl.MODERN} });
     }
 
     public BroadcastQueueTest(Impl impl) {
@@ -152,7 +151,9 @@ public class BroadcastQueueTest {
             final ApplicationInfo ai = invocation.getArgument(1);
             final ProcessRecord res = makeActiveProcessRecord(ai, processName);
             mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.onApplicationAttachedLocked(res);
+                synchronized (mAms) {
+                    mQueue.onApplicationAttachedLocked(res);
+                }
             });
             return res;
         }).when(mAms).startProcessLocked(any(), any(), anyBoolean(), anyInt(),
@@ -177,6 +178,9 @@ public class BroadcastQueueTest {
             mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
                     constants, emptySkipPolicy, emptyHistory, false,
                     ProcessList.SCHED_GROUP_DEFAULT);
+        } else if (mImpl == Impl.MODERN) {
+            mQueue = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
+                    constants, emptySkipPolicy, emptyHistory);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -230,8 +234,10 @@ public class BroadcastQueueTest {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
             mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
-                        null, null, false, false);
+                synchronized (mAms) {
+                    mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
+                            null, null, false, false);
+                }
             });
             return null;
         }).when(thread).scheduleReceiver(any(), any(), any(), anyInt(), any(), any(), anyBoolean(),
@@ -240,10 +246,15 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
-            mHandlerThread.getThreadHandler().post(() -> {
-                mQueue.finishReceiverLocked(r, Activity.RESULT_OK, null, null,
-                        false, false);
-            });
+            final boolean ordered = invocation.getArgument(5);
+            if (ordered) {
+                mHandlerThread.getThreadHandler().post(() -> {
+                    synchronized (mAms) {
+                        mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
+                                null, null, false, false);
+                    }
+                });
+            }
             return null;
         }).when(thread).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
                 anyBoolean(), anyBoolean(), anyInt(), anyInt());
@@ -302,6 +313,12 @@ public class BroadcastQueueTest {
         };
     }
 
+    private void enqueueBroadcast(BroadcastRecord r) {
+        synchronized (mAms) {
+            mQueue.enqueueBroadcastLocked(r);
+        }
+    }
+
     private void waitForIdle() throws Exception {
         mQueue.waitForIdle(null);
     }
@@ -349,7 +366,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(intent, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(intent, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
 
         waitForIdle();
@@ -368,12 +385,12 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
 
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
                         makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
 
         waitForIdle();
@@ -394,12 +411,12 @@ public class BroadcastQueueTest {
         // the second time it should already be running
 
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
                         makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
 
         waitForIdle();
@@ -407,7 +424,6 @@ public class BroadcastQueueTest {
                 getUidForPackage(PACKAGE_GREEN));
         final ProcessRecord receiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
                 getUidForPackage(PACKAGE_BLUE));
-        assertTrue(receiverBlueApp.getPid() > receiverGreenApp.getPid());
         verifyScheduleReceiver(receiverGreenApp, timezone);
         verifyScheduleReceiver(receiverGreenApp, airplane);
         verifyScheduleReceiver(receiverBlueApp, timezone);
@@ -423,7 +439,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(intent, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(intent, callerApp,
                 List.of(makeRegisteredReceiver(receiverApp))));
 
         waitForIdle();
@@ -442,12 +458,12 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
 
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                 List.of(makeRegisteredReceiver(receiverGreenApp),
                         makeRegisteredReceiver(receiverBlueApp))));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
                 List.of(makeRegisteredReceiver(receiverBlueApp))));
 
         waitForIdle();
@@ -468,14 +484,14 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
 
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(timezone, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
                         makeRegisteredReceiver(receiverGreenApp),
                         makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
                         makeRegisteredReceiver(receiverYellowApp))));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mQueue.enqueueBroadcastLocked(makeBroadcastRecord(airplane, callerApp,
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
 
         waitForIdle();

@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerService.checkComponentPermission;
 import static com.android.server.am.BroadcastQueue.TAG;
@@ -35,7 +34,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
-import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -55,6 +53,18 @@ public class BroadcastSkipPolicy {
 
     public BroadcastSkipPolicy(ActivityManagerService service) {
         mService = service;
+    }
+
+    /**
+     * Determine if the given {@link BroadcastRecord} is eligible to be sent to
+     * the given {@link BroadcastFilter} or {@link ResolveInfo}.
+     */
+    public boolean shouldSkip(@NonNull BroadcastRecord r, @NonNull Object target) {
+        if (target instanceof BroadcastFilter) {
+            return shouldSkip(r, (BroadcastFilter) target);
+        } else {
+            return shouldSkip(r, (ResolveInfo) target);
+        }
     }
 
     /**
