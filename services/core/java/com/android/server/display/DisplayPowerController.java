@@ -975,8 +975,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_screenBrighteningThresholds);
             int[] screenDarkeningThresholds = resources.getIntArray(
                     com.android.internal.R.array.config_screenDarkeningThresholds);
-            int[] screenThresholdLevels = resources.getIntArray(
-                    com.android.internal.R.array.config_screenThresholdLevels);
+            float[] screenThresholdLevels = BrightnessMappingStrategy.getFloatArray(resources
+                    .obtainTypedArray(com.android.internal.R.array.config_screenThresholdLevels));
             float screenDarkeningMinThreshold =
                     mDisplayDeviceConfig.getScreenDarkeningMinThreshold();
             float screenBrighteningMinThreshold =
