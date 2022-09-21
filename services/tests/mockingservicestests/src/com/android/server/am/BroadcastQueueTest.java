@@ -450,19 +450,19 @@ public class BroadcastQueueTest {
                 anyBoolean(), anyBoolean(), eq(UserHandle.USER_SYSTEM), anyInt());
     }
 
-    private static final int USER_GUEST = 11;
+    static final int USER_GUEST = 11;
 
-    private static final String PACKAGE_RED = "com.example.red";
-    private static final String PACKAGE_GREEN = "com.example.green";
-    private static final String PACKAGE_BLUE = "com.example.blue";
-    private static final String PACKAGE_YELLOW = "com.example.yellow";
+    static final String PACKAGE_RED = "com.example.red";
+    static final String PACKAGE_GREEN = "com.example.green";
+    static final String PACKAGE_BLUE = "com.example.blue";
+    static final String PACKAGE_YELLOW = "com.example.yellow";
 
-    private static final String CLASS_RED = "com.example.red.Red";
-    private static final String CLASS_GREEN = "com.example.green.Green";
-    private static final String CLASS_BLUE = "com.example.blue.Blue";
-    private static final String CLASS_YELLOW = "com.example.yellow.Yellow";
+    static final String CLASS_RED = "com.example.red.Red";
+    static final String CLASS_GREEN = "com.example.green.Green";
+    static final String CLASS_BLUE = "com.example.blue.Blue";
+    static final String CLASS_YELLOW = "com.example.yellow.Yellow";
 
-    private static int getUidForPackage(String packageName) {
+    static int getUidForPackage(@NonNull String packageName) {
         switch (packageName) {
             case PACKAGE_RED: return android.os.Process.FIRST_APPLICATION_UID + 1;
             case PACKAGE_GREEN: return android.os.Process.FIRST_APPLICATION_UID + 2;

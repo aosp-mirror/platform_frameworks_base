@@ -18,6 +18,10 @@ package com.android.server.am;
 
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
+import static com.android.server.am.BroadcastQueueTest.PACKAGE_BLUE;
+import static com.android.server.am.BroadcastQueueTest.PACKAGE_GREEN;
+import static com.android.server.am.BroadcastQueueTest.PACKAGE_RED;
+import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -41,6 +45,8 @@ import java.util.List;
 @SmallTest
 @RunWith(MockitoJUnitRunner.class)
 public class BroadcastQueueModernImplTest {
+    private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
+
     @Mock ActivityManagerService mAms;
 
     @Mock BroadcastProcessQueue mQueue1;
@@ -155,5 +161,44 @@ public class BroadcastQueueModernImplTest {
         assertOrphan(mQueue2);
         assertOrphan(mQueue3);
         assertOrphan(mQueue4);
+    }
+
+    @Test
+    public void testProcessQueue_Complex() {
+        BroadcastProcessQueue red = mImpl.getOrCreateProcessQueue(PACKAGE_RED, TEST_UID);
+        BroadcastProcessQueue green = mImpl.getOrCreateProcessQueue(PACKAGE_GREEN, TEST_UID);
+        BroadcastProcessQueue blue = mImpl.getOrCreateProcessQueue(PACKAGE_BLUE, TEST_UID);
+
+        assertEquals(PACKAGE_RED, red.processName);
+        assertEquals(PACKAGE_GREEN, green.processName);
+        assertEquals(PACKAGE_BLUE, blue.processName);
+
+        // Verify that removing middle queue works
+        mImpl.removeProcessQueue(PACKAGE_GREEN, TEST_UID);
+        assertEquals(red, mImpl.getProcessQueue(PACKAGE_RED, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_GREEN, TEST_UID));
+        assertEquals(blue, mImpl.getProcessQueue(PACKAGE_BLUE, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_YELLOW, TEST_UID));
+
+        // Verify that removing head queue works
+        mImpl.removeProcessQueue(PACKAGE_RED, TEST_UID);
+        assertNull(mImpl.getProcessQueue(PACKAGE_RED, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_GREEN, TEST_UID));
+        assertEquals(blue, mImpl.getProcessQueue(PACKAGE_BLUE, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_YELLOW, TEST_UID));
+
+        // Verify that removing last queue works
+        mImpl.removeProcessQueue(PACKAGE_BLUE, TEST_UID);
+        assertNull(mImpl.getProcessQueue(PACKAGE_RED, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_GREEN, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_BLUE, TEST_UID));
+        assertNull(mImpl.getProcessQueue(PACKAGE_YELLOW, TEST_UID));
+
+        // Verify that removing missing doesn't crash
+        mImpl.removeProcessQueue(PACKAGE_YELLOW, TEST_UID);
+
+        // Verify that we can start all over again safely
+        BroadcastProcessQueue yellow = mImpl.getOrCreateProcessQueue(PACKAGE_YELLOW, TEST_UID);
+        assertEquals(yellow, mImpl.getProcessQueue(PACKAGE_YELLOW, TEST_UID));
     }
 }

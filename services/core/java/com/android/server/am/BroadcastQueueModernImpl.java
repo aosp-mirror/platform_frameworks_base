@@ -53,6 +53,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.TimeoutRecord;
 import com.android.server.am.BroadcastRecord.DeliveryState;
 
@@ -113,8 +114,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     // TODO: pause queues when background services are running
     // TODO: pause queues when processes are frozen
-
-    // TODO: clean up queues for removed apps
 
     /**
      * Maximum number of process queues to dispatch broadcasts to
@@ -269,6 +268,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         } else if (inQueue) {
             mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
         }
+
+        // If app isn't running, and there's nothing in the queue, clean up
+        if (queue.isEmpty() && !queue.isProcessWarm()) {
+            removeProcessQueue(queue.processName, queue.uid);
+        }
     }
 
     /**
@@ -419,6 +423,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             if (queue.isActive()) {
                 finishReceiverLocked(queue, BroadcastRecord.DELIVERY_FAILURE);
                 didSomething = true;
+            }
+
+            // If queue has nothing else pending, consider cleaning it
+            if (queue.isEmpty()) {
+                updateRunnableList(queue);
             }
         }
 
@@ -873,11 +882,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 mService.getUidStateLocked(app.uid));
     }
 
-    private @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull ProcessRecord app) {
+    @VisibleForTesting
+    @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull ProcessRecord app) {
         return getOrCreateProcessQueue(app.processName, app.info.uid);
     }
 
-    private @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull String processName,
+    @VisibleForTesting
+    @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull String processName,
             int uid) {
         BroadcastProcessQueue leaf = mProcessQueues.get(uid);
         while (leaf != null) {
@@ -900,16 +911,47 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return created;
     }
 
-    private @Nullable BroadcastProcessQueue getProcessQueue(@NonNull ProcessRecord app) {
+    @VisibleForTesting
+    @Nullable BroadcastProcessQueue getProcessQueue(@NonNull ProcessRecord app) {
         return getProcessQueue(app.processName, app.info.uid);
     }
 
-    private @Nullable BroadcastProcessQueue getProcessQueue(@NonNull String processName, int uid) {
+    @VisibleForTesting
+    @Nullable BroadcastProcessQueue getProcessQueue(@NonNull String processName, int uid) {
         BroadcastProcessQueue leaf = mProcessQueues.get(uid);
         while (leaf != null) {
             if (Objects.equals(leaf.processName, processName)) {
                 return leaf;
             }
+            leaf = leaf.processNameNext;
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    @Nullable BroadcastProcessQueue removeProcessQueue(@NonNull ProcessRecord app) {
+        return removeProcessQueue(app.processName, app.info.uid);
+    }
+
+    @VisibleForTesting
+    @Nullable BroadcastProcessQueue removeProcessQueue(@NonNull String processName,
+            int uid) {
+        BroadcastProcessQueue prev = null;
+        BroadcastProcessQueue leaf = mProcessQueues.get(uid);
+        while (leaf != null) {
+            if (Objects.equals(leaf.processName, processName)) {
+                if (prev != null) {
+                    prev.processNameNext = leaf.processNameNext;
+                } else {
+                    if (leaf.processNameNext != null) {
+                        mProcessQueues.put(uid, leaf.processNameNext);
+                    } else {
+                        mProcessQueues.remove(uid);
+                    }
+                }
+                return leaf;
+            }
+            prev = leaf;
             leaf = leaf.processNameNext;
         }
         return null;

@@ -311,6 +311,10 @@ class BroadcastProcessQueue {
         return mActive.receivers.get(mActiveIndex);
     }
 
+    public boolean isEmpty() {
+        return (mActive != null) && mPending.isEmpty();
+    }
+
     public boolean isActive() {
         return mActive != null;
     }
