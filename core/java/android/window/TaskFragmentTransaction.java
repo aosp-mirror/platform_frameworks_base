@@ -173,10 +173,6 @@ public final class TaskFragmentTransaction implements Parcelable {
         /** @see #setTaskId(int) */
         private int mTaskId;
 
-        /** @see #setTaskConfiguration(Configuration) */
-        @Nullable
-        private Configuration mTaskConfiguration;
-
         /** @see #setErrorCallbackToken(IBinder) */
         @Nullable
         private IBinder mErrorCallbackToken;
@@ -193,6 +189,9 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         private IBinder mActivityToken;
 
+        @Nullable
+        private TaskFragmentParentInfo mTaskFragmentParentInfo;
+
         public Change(@ChangeType int type) {
             mType = type;
         }
@@ -202,11 +201,11 @@ public final class TaskFragmentTransaction implements Parcelable {
             mTaskFragmentToken = in.readStrongBinder();
             mTaskFragmentInfo = in.readTypedObject(TaskFragmentInfo.CREATOR);
             mTaskId = in.readInt();
-            mTaskConfiguration = in.readTypedObject(Configuration.CREATOR);
             mErrorCallbackToken = in.readStrongBinder();
             mErrorBundle = in.readBundle(TaskFragmentTransaction.class.getClassLoader());
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mActivityToken = in.readStrongBinder();
+            mTaskFragmentParentInfo = in.readTypedObject(TaskFragmentParentInfo.CREATOR);
         }
 
         @Override
@@ -215,11 +214,11 @@ public final class TaskFragmentTransaction implements Parcelable {
             dest.writeStrongBinder(mTaskFragmentToken);
             dest.writeTypedObject(mTaskFragmentInfo, flags);
             dest.writeInt(mTaskId);
-            dest.writeTypedObject(mTaskConfiguration, flags);
             dest.writeStrongBinder(mErrorCallbackToken);
             dest.writeBundle(mErrorBundle);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeStrongBinder(mActivityToken);
+            dest.writeTypedObject(mTaskFragmentParentInfo, flags);
         }
 
         /** The change is related to the TaskFragment created with this unique token. */
@@ -243,10 +242,10 @@ public final class TaskFragmentTransaction implements Parcelable {
             return this;
         }
 
+        // TODO(b/241043377): Keep this API to prevent @TestApi changes. Remove in the next release.
         /** Configuration of the parent Task. */
         @NonNull
         public Change setTaskConfiguration(@NonNull Configuration configuration) {
-            mTaskConfiguration = requireNonNull(configuration);
             return this;
         }
 
@@ -294,6 +293,19 @@ public final class TaskFragmentTransaction implements Parcelable {
             return this;
         }
 
+        // TODO(b/241043377): Hide this API to prevent @TestApi changes. Remove in the next release.
+        /**
+         * Sets info of the parent Task of the embedded TaskFragment.
+         * @see TaskFragmentParentInfo
+         *
+         * @hide pending unhide
+         */
+        @NonNull
+        public Change setTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
+            mTaskFragmentParentInfo = requireNonNull(info);
+            return this;
+        }
+
         @ChangeType
         public int getType() {
             return mType;
@@ -313,9 +325,10 @@ public final class TaskFragmentTransaction implements Parcelable {
             return mTaskId;
         }
 
+        // TODO(b/241043377): Keep this API to prevent @TestApi changes. Remove in the next release.
         @Nullable
         public Configuration getTaskConfiguration() {
-            return mTaskConfiguration;
+            return mTaskFragmentParentInfo.getConfiguration();
         }
 
         @Nullable
@@ -337,6 +350,13 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         public IBinder getActivityToken() {
             return mActivityToken;
+        }
+
+        // TODO(b/241043377): Hide this API to prevent @TestApi changes. Remove in the next release.
+        /** @hide pending unhide */
+        @Nullable
+        public TaskFragmentParentInfo getTaskFragmentParentInfo() {
+            return mTaskFragmentParentInfo;
         }
 
         @Override

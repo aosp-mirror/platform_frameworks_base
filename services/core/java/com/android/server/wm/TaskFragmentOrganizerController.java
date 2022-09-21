@@ -49,6 +49,7 @@ import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
@@ -118,10 +119,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         private final Map<TaskFragment, Integer> mTaskFragmentTaskIds = new WeakHashMap<>();
 
         /**
-         * Map from {@link Task#mTaskId} to the last Task {@link Configuration} sent to the
+         * Map from {@link Task#mTaskId} to the last {@link TaskFragmentParentInfo} sent to the
          * organizer.
          */
-        private final SparseArray<Configuration> mLastSentTaskFragmentParentConfigs =
+        private final SparseArray<TaskFragmentParentInfo> mLastSentTaskFragmentParentInfos =
                 new SparseArray<>();
 
         /**
@@ -225,7 +226,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 taskId = mTaskFragmentTaskIds.remove(tf);
                 if (!mTaskFragmentTaskIds.containsValue(taskId)) {
                     // No more TaskFragment in the Task.
-                    mLastSentTaskFragmentParentConfigs.remove(taskId);
+                    mLastSentTaskFragmentParentInfos.remove(taskId);
                 }
             } else {
                 // This can happen if the appeared wasn't sent before remove.
@@ -260,25 +261,27 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         @Nullable
-        TaskFragmentTransaction.Change prepareTaskFragmentParentInfoChanged(
-                @NonNull Task task) {
+        TaskFragmentTransaction.Change prepareTaskFragmentParentInfoChanged(@NonNull Task task) {
             final int taskId = task.mTaskId;
             // Check if the parent info is different from the last reported parent info.
-            final Configuration taskConfig = task.getConfiguration();
-            final Configuration lastParentConfig = mLastSentTaskFragmentParentConfigs.get(taskId);
-            if (configurationsAreEqualForOrganizer(taskConfig, lastParentConfig)
-                    && taskConfig.windowConfiguration.getWindowingMode()
-                    == lastParentConfig.windowConfiguration.getWindowingMode()) {
+            final TaskFragmentParentInfo parentInfo = task.getTaskFragmentParentInfo();
+            final TaskFragmentParentInfo lastParentInfo = mLastSentTaskFragmentParentInfos
+                    .get(taskId);
+            final Configuration lastParentConfig = lastParentInfo != null
+                    ? lastParentInfo.getConfiguration() : null;
+            if (parentInfo.equalsForTaskFragmentOrganizer(lastParentInfo)
+                    && configurationsAreEqualForOrganizer(parentInfo.getConfiguration(),
+                            lastParentConfig)) {
                 return null;
             }
 
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "TaskFragment parent info changed name=%s parentTaskId=%d",
                     task.getName(), taskId);
-            mLastSentTaskFragmentParentConfigs.put(taskId, new Configuration(taskConfig));
+            mLastSentTaskFragmentParentInfos.put(taskId, new TaskFragmentParentInfo(parentInfo));
             return new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED)
                     .setTaskId(taskId)
-                    .setTaskConfiguration(taskConfig);
+                    .setTaskFragmentParentInfo(parentInfo);
         }
 
         @NonNull

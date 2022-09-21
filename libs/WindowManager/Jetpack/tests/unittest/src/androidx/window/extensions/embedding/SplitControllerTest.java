@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.app.ActivityManager.START_CANCELED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
@@ -75,6 +76,7 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
+import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
@@ -1038,15 +1040,16 @@ public class SplitControllerTest {
     @Test
     public void testOnTransactionReady_taskFragmentParentInfoChanged() {
         final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
-        final Configuration taskConfig = new Configuration();
+        final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(Configuration.EMPTY,
+                DEFAULT_DISPLAY, true);
         transaction.addChange(new TaskFragmentTransaction.Change(
                 TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED)
                 .setTaskId(TASK_ID)
-                .setTaskConfiguration(taskConfig));
+                .setTaskFragmentParentInfo(parentInfo));
         mSplitController.onTransactionReady(transaction);
 
         verify(mSplitController).onTaskFragmentParentInfoChanged(any(), eq(TASK_ID),
-                eq(taskConfig));
+                eq(parentInfo));
         verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
                 anyInt(), anyBoolean());
     }
