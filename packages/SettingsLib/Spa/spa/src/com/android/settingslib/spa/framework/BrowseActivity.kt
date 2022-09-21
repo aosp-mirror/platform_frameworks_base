@@ -43,6 +43,7 @@ const val NULL_PAGE_NAME = "NULL"
  * One can open any SPA page by:
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination <SpaPageRoute>
  * For gallery, BrowseActivityComponent = com.android.settingslib.spa.gallery/.MainActivity
+ * For SettingsGoogle, BrowseActivityComponent = com.android.settings/.spa.SpaActivity
  * Some examples:
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination HOME
  *   $ adb shell am start -n <BrowseActivityComponent> -e spa:SpaActivity:destination ARGUMENT/bar/5
@@ -104,7 +105,7 @@ open class BrowseActivity(
     }
 
     companion object {
-        const val KEY_DESTINATION = "spa:SpaActivity:destination"
+        const val KEY_DESTINATION = "spaActivityDestination"
         const val HIGHLIGHT_ENTRY_PARAM_NAME = "highlightEntry"
     }
 }

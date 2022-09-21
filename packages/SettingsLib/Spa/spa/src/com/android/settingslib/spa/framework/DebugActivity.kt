@@ -59,6 +59,7 @@ private const val PARAM_NAME_ENTRY_ID = "eid"
  * One can open the debug activity by:
  *   $ adb shell am start -n <Activity>
  * For gallery, Activity = com.android.settingslib.spa.gallery/.GalleryDebugActivity
+ * For SettingsGoogle, Activity = com.android.settings/.spa.SpaDebugActivity
  */
 open class DebugActivity(
     private val entryRepository: SettingsEntryRepository,
@@ -88,7 +89,7 @@ open class DebugActivity(
             ).use { cursor ->
                 while (cursor != null && cursor.moveToNext()) {
                     val route = cursor.getString(query, EntryProvider.ColumnEnum.PAGE_ROUTE)
-                    val entryCount = cursor.getInt(query, EntryProvider.ColumnEnum.ENTRY_COUNT)
+                    val entryCount = cursor.getInt(query, EntryProvider.ColumnEnum.PAGE_ENTRY_COUNT)
                     val hasRuntimeParam =
                         cursor.getBoolean(query, EntryProvider.ColumnEnum.HAS_RUNTIME_PARAM)
                     Log.d(
@@ -171,7 +172,7 @@ open class DebugActivity(
         val id = arguments!!.getString(PARAM_NAME_PAGE_ID, "")
         val pageWithEntry = entryRepository.getPageWithEntry(id)!!
         RegularScaffold(title = "Page - ${pageWithEntry.page.displayName}") {
-            Text(text = pageWithEntry.page.id().toString())
+            Text(text = "id = ${pageWithEntry.page.id()}")
             Text(text = pageWithEntry.page.formatArguments())
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
@@ -213,8 +214,8 @@ open class DebugActivity(
     @Composable
     private fun openPage(page: SettingsPage): (() -> Unit)? {
         if (page.hasRuntimeParam()) return null
-        val route = page.buildRoute()
         val context = LocalContext.current
+        val route = page.buildRoute()
         val intent = Intent(context, browseActivityClass).apply {
             putExtra(KEY_DESTINATION, route)
         }
@@ -227,8 +228,8 @@ open class DebugActivity(
     @Composable
     private fun openEntry(entry: SettingsEntry): (() -> Unit)? {
         if (entry.hasRuntimeParam()) return null
-        val route = entry.buildRoute()
         val context = LocalContext.current
+        val route = entry.buildRoute()
         val intent = Intent(context, browseActivityClass).apply {
             putExtra(KEY_DESTINATION, route)
         }
