@@ -36,6 +36,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -223,6 +224,12 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 return new AppsFilterSnapshotImpl(AppsFilterImpl.this);
             }
         };
+        readCacheEnabledSysProp();
+        SystemProperties.addChangeCallback(this::readCacheEnabledSysProp);
+    }
+
+    private void readCacheEnabledSysProp() {
+        mCacheEnabled = SystemProperties.getBoolean("debug.pm.use_app_filter_cache", true);
     }
 
     /**

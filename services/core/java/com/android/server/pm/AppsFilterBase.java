@@ -28,7 +28,6 @@ import android.content.pm.SigningDetails;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -199,6 +198,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
     protected SnapshotCache<WatchedSparseBooleanMatrix> mShouldFilterCacheSnapshot;
 
     protected volatile boolean mCacheReady = false;
+    protected volatile boolean mCacheEnabled = true;
 
     protected static final boolean CACHE_VALID = true;
     protected static final boolean CACHE_INVALID = false;
@@ -342,8 +342,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                       && !isImplicitlyQueryable(callingAppId, targetPkgSetting.getAppId());
             }
             // use cache
-            if (mCacheReady && SystemProperties.getBoolean("debug.pm.use_app_filter_cache",
-                    true)) {
+            if (mCacheReady && mCacheEnabled) {
                 if (!shouldFilterApplicationUsingCache(callingUid,
                         targetPkgSetting.getAppId(),
                         userId)) {
