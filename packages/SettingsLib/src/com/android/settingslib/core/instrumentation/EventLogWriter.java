@@ -49,6 +49,10 @@ public class EventLogWriter implements LogWriter {
     }
 
     @Override
+    public void clicked(int sourceCategory, String key) {
+    }
+
+    @Override
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         final LogMaker logMaker = new LogMaker(category)
                 .setType(MetricsProto.MetricsEvent.TYPE_ACTION);

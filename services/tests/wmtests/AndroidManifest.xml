@@ -79,7 +79,10 @@
         <activity android:name="com.android.server.wm.ActivityOptionsTest$MainActivity"
                   android:turnScreenOn="true"
                   android:showWhenLocked="true" />
-        <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity" />
+        <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity"
+                  android:theme="@style/WhiteBackgroundTheme"
+                  android:turnScreenOn="true"
+                  android:showWhenLocked="true"/>
         <activity android:name="android.view.cts.surfacevalidator.CapturedActivity"/>
 
         <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"

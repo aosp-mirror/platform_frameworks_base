@@ -69,6 +69,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStoreCryptoOperation {
     private static final String TAG = "AndroidKeyStoreCipherSpiBase";
+    public static final String DEFAULT_MGF1_DIGEST = "SHA-1";
 
     // Fields below are populated by Cipher.init and KeyStore.begin and should be preserved after
     // doFinal finishes.
@@ -133,24 +134,28 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
                 if ("RSA/ECB/OAEPWithSHA-224AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-224", "MGF1",
-                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
+                                    PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
                 } else if ("RSA/ECB/OAEPWithSHA-256AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-256", "MGF1",
-                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
+                                    PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
 
                 } else if ("RSA/ECB/OAEPWithSHA-384AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-384", "MGF1",
-                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
+                                    PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
 
                 } else if ("RSA/ECB/OAEPWithSHA-512AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-512", "MGF1",
-                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
+                                    PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
                 } else {
                     mCipher.init(opmode, key, random);

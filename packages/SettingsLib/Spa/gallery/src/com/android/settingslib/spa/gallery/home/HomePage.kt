@@ -25,6 +25,7 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
+import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
@@ -50,6 +51,7 @@ object HomePageProvider : SettingsPageProvider {
             FooterPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            ActionButtonPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }
 

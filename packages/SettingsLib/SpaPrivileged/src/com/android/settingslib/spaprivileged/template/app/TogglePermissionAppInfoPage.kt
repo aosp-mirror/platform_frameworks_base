@@ -34,6 +34,8 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
@@ -80,10 +82,31 @@ internal class TogglePermissionAppInfoPageProvider(
 
     companion object {
         @Composable
-        internal fun navigator(permissionType: String, app: ApplicationInfo) =
+        fun navigator(permissionType: String, app: ApplicationInfo) =
             navigator(route = "$PAGE_NAME/$permissionType/${app.toRoute()}")
 
-        internal fun buildPageData(permissionType: String): SettingsPage {
+        @Composable
+        fun <T : AppRecord> EntryItem(
+            permissionType: String,
+            app: ApplicationInfo,
+            listModel: TogglePermissionAppListModel<T>,
+        ) {
+            val context = LocalContext.current
+            val internalListModel = remember {
+                TogglePermissionInternalAppListModel(context, listModel)
+            }
+            val record = remember { listModel.transformItem(app) }
+            if (!remember { listModel.isChangeable(record) }) return
+            Preference(
+                object : PreferenceModel {
+                    override val title = stringResource(listModel.pageTitleResId)
+                    override val summary = internalListModel.getSummary(record)
+                    override val onClick = navigator(permissionType, app)
+                }
+            )
+        }
+
+        fun buildPageData(permissionType: String): SettingsPage {
             return SettingsPage.create(
                 PAGE_NAME, PAGE_PARAMETER, bundleOf(PERMISSION to permissionType))
         }

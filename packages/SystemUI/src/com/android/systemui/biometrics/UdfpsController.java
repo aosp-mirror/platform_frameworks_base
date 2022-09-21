@@ -86,7 +86,7 @@ import kotlin.Unit;
 
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
- * and coordinates triggering of the high-brightness mode (HBM).
+ * and toggles the UDFPS display mode.
  *
  * Note that the current architecture is designed so that a single {@link UdfpsController}
  * controls/manages all UDFPS sensors. In other words, a single controller is registered with
@@ -123,7 +123,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    @Nullable private final UdfpsHbmProvider mHbmProvider;
+    @Nullable private final UdfpsDisplayModeProvider mUdfpsDisplayMode;
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final SystemClock mSystemClock;
     @NonNull private final UnlockedScreenOffAnimationController
@@ -135,7 +135,6 @@ public class UdfpsController implements DozeReceiver {
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting int mSensorId;
-    private boolean mHalControlsIllumination;
     @VisibleForTesting @NonNull UdfpsOverlayParams mOverlayParams = new UdfpsOverlayParams();
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
     @Nullable private Runnable mAuthControllerUpdateUdfpsLocation;
@@ -147,10 +146,9 @@ public class UdfpsController implements DozeReceiver {
     private int mActivePointerId = -1;
     // The timestamp of the most recent touch log.
     private long mTouchLogTime;
-    // Sensor has a capture (good or bad) for this touch. Do not need to illuminate for this
-    // particular touch event anymore. In other words, do not illuminate until user lifts and
-    // touches the sensor area again.
-    // TODO: We should probably try to make touch/illumination things more of a FSM
+    // Sensor has a capture (good or bad) for this touch. No need to enable the UDFPS display mode
+    // anymore for this particular touch event. In other words, do not enable the UDFPS mode until
+    // the user touches the sensor area again.
     private boolean mAcquiredReceived;
 
     // The current request from FingerprintService. Null if no current request.
@@ -211,8 +209,8 @@ public class UdfpsController implements DozeReceiver {
                             mKeyguardUpdateMonitor, mDialogManager, mDumpManager,
                             mLockscreenShadeTransitionController, mConfigurationController,
                             mSystemClock, mKeyguardStateController,
-                            mUnlockedScreenOffAnimationController, mHalControlsIllumination,
-                            mHbmProvider, requestId, reason, callback,
+                            mUnlockedScreenOffAnimationController,
+                            mUdfpsDisplayMode, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator)));
         }
@@ -236,7 +234,7 @@ public class UdfpsController implements DozeReceiver {
                 int sensorId,
                 @BiometricFingerprintConstants.FingerprintAcquired int acquiredInfo
         ) {
-            if (BiometricFingerprintConstants.shouldTurnOffHbm(acquiredInfo)) {
+            if (BiometricFingerprintConstants.shouldDisableUdfpsDisplayMode(acquiredInfo)) {
                 boolean acquiredGood = acquiredInfo == FINGERPRINT_ACQUIRED_GOOD;
                 mFgExecutor.execute(() -> {
                     if (mOverlay == null) {
@@ -247,7 +245,7 @@ public class UdfpsController implements DozeReceiver {
                     mAcquiredReceived = true;
                     final UdfpsView view = mOverlay.getOverlayView();
                     if (view != null) {
-                        view.stopIllumination(); // turn off HBM
+                        view.unconfigureDisplay();
                     }
                     if (acquiredGood) {
                         mOverlay.onAcquiredGood();
@@ -292,7 +290,7 @@ public class UdfpsController implements DozeReceiver {
     /**
      * Updates the overlay parameters and reconstructs or redraws the overlay, if necessary.
      *
-     * @param sensorId sensor for which the overlay is getting updated.
+     * @param sensorId      sensor for which the overlay is getting updated.
      * @param overlayParams See {@link UdfpsOverlayParams}.
      */
     public void updateOverlayParams(int sensorId, @NonNull UdfpsOverlayParams overlayParams) {
@@ -319,11 +317,6 @@ public class UdfpsController implements DozeReceiver {
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
     public void setAuthControllerUpdateUdfpsLocation(@Nullable Runnable r) {
         mAuthControllerUpdateUdfpsLocation = r;
-    }
-
-    // TODO(b/229290039): UDFPS controller should manage its properties on its own. Remove this.
-    public void setHalControlsIllumination(boolean value) {
-        mHalControlsIllumination = value;
     }
 
     /**
@@ -369,8 +362,8 @@ public class UdfpsController implements DozeReceiver {
     }
 
     /**
-     * @param x coordinate
-     * @param y coordinate
+     * @param x                   coordinate
+     * @param y                   coordinate
      * @param relativeToUdfpsView true if the coordinates are relative to the udfps view; else,
      *                            calculate from the display dimensions in portrait orientation
      */
@@ -423,7 +416,7 @@ public class UdfpsController implements DozeReceiver {
         }
 
         final UdfpsView udfpsView = mOverlay.getOverlayView();
-        final boolean isIlluminationRequested = udfpsView.isIlluminationRequested();
+        final boolean isDisplayConfigured = udfpsView.isDisplayConfigured();
         boolean handled = false;
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_OUTSIDE:
@@ -507,7 +500,7 @@ public class UdfpsController implements DozeReceiver {
                                 "minor: %.1f, major: %.1f, v: %.1f, exceedsVelocityThreshold: %b",
                                 minor, major, v, exceedsVelocityThreshold);
                         final long sinceLastLog = mSystemClock.elapsedRealtime() - mTouchLogTime;
-                        if (!isIlluminationRequested && !mAcquiredReceived
+                        if (!isDisplayConfigured && !mAcquiredReceived
                                 && !exceedsVelocityThreshold) {
 
                             final float scale = mOverlayParams.getScaleFactor();
@@ -598,7 +591,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull VibratorHelper vibrator,
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull UdfpsShell udfpsShell,
-            @NonNull Optional<UdfpsHbmProvider> hbmProvider,
+            @NonNull Optional<UdfpsDisplayModeProvider> udfpsDisplayMode,
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull DisplayManager displayManager,
             @Main Handler mainHandler,
@@ -630,7 +623,7 @@ public class UdfpsController implements DozeReceiver {
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
-        mHbmProvider = hbmProvider.orElse(null);
+        mUdfpsDisplayMode = udfpsDisplayMode.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
         mConfigurationController = configurationController;
@@ -804,15 +797,14 @@ public class UdfpsController implements DozeReceiver {
     }
 
     /**
-     * Cancel updfs scan affordances - ability to hide the HbmSurfaceView (white circle) before
-     * user explicitly lifts their finger. Generally, this should be called whenever udfps fails
-     * or errors.
+     * Cancel UDFPS affordances - ability to hide the UDFPS overlay before the user explicitly
+     * lifts their finger. Generally, this should be called on errors in the authentication flow.
      *
      * The sensor that triggers an AOD fingerprint interrupt (see onAodInterrupt) doesn't give
      * ACTION_UP/ACTION_CANCEL events, so and AOD interrupt scan needs to be cancelled manually.
      * This should be called when authentication either succeeds or fails. Failing to cancel the
-     * scan will leave the screen in high brightness mode and will show the HbmSurfaceView until
-     * the user lifts their finger.
+     * scan will leave the display in the UDFPS mode until the user lifts their finger. On optical
+     * sensors, this can result in illumination persisting for longer than necessary.
      */
     void onCancelUdfps() {
         if (mOverlay != null && mOverlay.getOverlayView() != null) {
@@ -874,7 +866,7 @@ public class UdfpsController implements DozeReceiver {
         Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
         final UdfpsView view = mOverlay.getOverlayView();
         if (view != null) {
-            view.startIllumination(() -> {
+            view.configureDisplay(() -> {
                 if (mAlternateTouchProvider != null) {
                     mBiometricExecutor.execute(() -> {
                         mAlternateTouchProvider.onUiReady();
@@ -914,8 +906,8 @@ public class UdfpsController implements DozeReceiver {
             }
         }
         mOnFingerDown = false;
-        if (view.isIlluminationRequested()) {
-            view.stopIllumination();
+        if (view.isDisplayConfigured()) {
+            view.unconfigureDisplay();
         }
     }
 

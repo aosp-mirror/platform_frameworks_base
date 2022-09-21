@@ -96,6 +96,18 @@ public class MetricsFeatureProvider {
     }
 
     /**
+     * Logs an event when user click item.
+     *
+     * @param category the target page id
+     * @param key the key id that user clicked
+     */
+    public void clicked(int category, String key) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.clicked(category, key);
+        }
+    }
+
+    /**
      * Logs a simple action without page id or attribution
      *
      * @param category the target page
@@ -138,7 +150,7 @@ public class MetricsFeatureProvider {
     }
 
     public int getMetricsCategory(Object object) {
-        if (object == null || !(object instanceof Instrumentable)) {
+        if (!(object instanceof Instrumentable)) {
             return MetricsEvent.VIEW_UNKNOWN;
         }
         return ((Instrumentable) object).getMetricsCategory();
@@ -198,11 +210,7 @@ public class MetricsFeatureProvider {
             // Not loggable
             return false;
         }
-        action(sourceMetricsCategory,
-                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                SettingsEnums.PAGE_UNKNOWN,
-                logKey,
-                0);
+        clicked(sourceMetricsCategory, logKey);
         return true;
     }
 }

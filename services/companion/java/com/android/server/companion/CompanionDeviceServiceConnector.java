@@ -46,6 +46,9 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
     private static final String TAG = "CDM_CompanionServiceConnector";
     private static final boolean DEBUG = false;
 
+    /* Unbinding before executing the callbacks can cause problems. Wait 5-seconds before unbind. */
+    private static final long UNBIND_POST_DELAY_MS = 5_000;
+
     /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */
     interface Listener {
         void onBindingDied(@UserIdInt int userId, @NonNull String packageName,
@@ -110,9 +113,15 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * IMPORTANT: use this method instead of invoking {@link ServiceConnector#unbind()} directly,
      * because the latter may cause previously posted callback, such as
      * {@link ICompanionDeviceService#onDeviceDisappeared(AssociationInfo)} to be dropped.
+     *
+     * {@link ICompanionDeviceService} is a non-blocking interface and doesn't wait for job
+     * completion, which makes {@link ServiceConnector#post(VoidJob)} obsolete for ensuring the
+     * order of execution. Give 5 seconds for all the callbacks to finish before unbinding. They
+     * may or may not have finished executing, but we shouldn't let user-overridden methods block
+     * the service from unbinding indefinitely.
      */
     void postUnbind() {
-        post(it -> unbind());
+        getJobHandler().postDelayed(this::unbind, UNBIND_POST_DELAY_MS);
     }
 
     boolean isPrimary() {

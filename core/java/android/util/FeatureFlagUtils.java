@@ -96,13 +96,6 @@ public class FeatureFlagUtils {
     /** @hide */
     public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
 
-
-    /** Support Clear Calling feature.
-     *  @hide
-     */
-    public static final String SETTINGS_ENABLE_CLEAR_CALLING = "settings_enable_clear_calling";
-
-
     /** Flag to enable / disable the Simple Cursor accessibility feature in
      *  Settings.
      * @hide
@@ -121,6 +114,11 @@ public class FeatureFlagUtils {
      * @hide
      */
     public static final String SETTINGS_ENABLE_SPA = "settings_enable_spa";
+
+    /** Flag to enable/disable adb log metrics
+     *  @hide
+     */
+    public static final String SETTINGS_ADB_METRICS_WRITER = "settings_adb_metrics_writer";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -151,10 +149,10 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_CLEAR_CALLING, "false");
         DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

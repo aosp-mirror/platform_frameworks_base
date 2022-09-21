@@ -204,19 +204,6 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
         assertEquals(100, Color.alpha(bitmap.getPixel(50, 50)));
     }
 
-    @Test
-    public void testSetBounds() throws Exception {
-        mIconDrawable = new AdaptiveIconDrawable(mBackgroundDrawable, mForegroundDrawable);
-        mIconDrawable.setBounds(0, 0, 100, 100);
-
-        assertEquals(new Rect(-25, -25, 125, 125), mBackgroundDrawable.getBounds());
-        assertEquals(new Rect(-25, -25, 125, 125), mForegroundDrawable.getBounds());
-
-        mIconDrawable.setBounds(10, 10, 110, 110);
-        assertEquals(new Rect(-15, -15, 135, 135), mBackgroundDrawable.getBounds());
-        assertEquals(new Rect(-15, -15, 135, 135), mForegroundDrawable.getBounds());
-    }
-
     //
     // Utils
     //

@@ -37,6 +37,7 @@ enum class DeviceType {
     KEYBOARD,
     MOUSE,
     TOUCHSCREEN,
+    DPAD,
 };
 
 enum class UinputAction {
@@ -74,6 +75,13 @@ static std::map<int, int> BUTTON_CODE_MAPPING = {
 static std::map<int, int> TOOL_TYPE_MAPPING = {
         {AMOTION_EVENT_TOOL_TYPE_FINGER, MT_TOOL_FINGER},
         {AMOTION_EVENT_TOOL_TYPE_PALM, MT_TOOL_PALM},
+};
+
+// Dpad keycode mapping from https://source.android.com/devices/input/keyboard-devices
+static std::map<int, int> DPAD_KEY_CODE_MAPPING = {
+        {AKEYCODE_DPAD_DOWN, KEY_DOWN},     {AKEYCODE_DPAD_UP, KEY_UP},
+        {AKEYCODE_DPAD_LEFT, KEY_LEFT},     {AKEYCODE_DPAD_RIGHT, KEY_RIGHT},
+        {AKEYCODE_DPAD_CENTER, KEY_SELECT},
 };
 
 // Keycode mapping from https://source.android.com/devices/input/keyboard-devices
@@ -200,8 +208,13 @@ static int openUinput(const char* readableName, jint vendorId, jint productId, c
     ioctl(fd, UI_SET_EVBIT, EV_KEY);
     ioctl(fd, UI_SET_EVBIT, EV_SYN);
     switch (deviceType) {
+        case DeviceType::DPAD:
+            for (const auto& [_, keyCode] : DPAD_KEY_CODE_MAPPING) {
+                ioctl(fd, UI_SET_KEYBIT, keyCode);
+            }
+            break;
         case DeviceType::KEYBOARD:
-            for (const auto& [ignored, keyCode] : KEY_CODE_MAPPING) {
+            for (const auto& [_, keyCode] : KEY_CODE_MAPPING) {
                 ioctl(fd, UI_SET_KEYBIT, keyCode);
             }
             break;
@@ -327,6 +340,12 @@ static int openUinputJni(JNIEnv* env, jstring name, jint vendorId, jint productI
                       screenHeight, screenWidth);
 }
 
+static int nativeOpenUinputDpad(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
+                                jint productId, jstring phys) {
+    return openUinputJni(env, name, vendorId, productId, phys, DeviceType::DPAD,
+                         /* screenHeight */ 0, /* screenWidth */ 0);
+}
+
 static int nativeOpenUinputKeyboard(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
                                     jint productId, jstring phys) {
     return openUinputJni(env, name, vendorId, productId, phys, DeviceType::KEYBOARD,
@@ -355,10 +374,10 @@ static bool writeInputEvent(int fd, uint16_t type, uint16_t code, int32_t value)
     return TEMP_FAILURE_RETRY(write(fd, &ev, sizeof(struct input_event))) == sizeof(ev);
 }
 
-static bool nativeWriteKeyEvent(JNIEnv* env, jobject thiz, jint fd, jint androidKeyCode,
-                                jint action) {
-    auto keyCodeIterator = KEY_CODE_MAPPING.find(androidKeyCode);
-    if (keyCodeIterator == KEY_CODE_MAPPING.end()) {
+static bool writeKeyEvent(jint fd, jint androidKeyCode, jint action,
+                          const std::map<int, int>& keyCodeMapping) {
+    auto keyCodeIterator = keyCodeMapping.find(androidKeyCode);
+    if (keyCodeIterator == keyCodeMapping.end()) {
         ALOGE("No supportive native keycode for androidKeyCode %d", androidKeyCode);
         return false;
     }
@@ -374,6 +393,16 @@ static bool nativeWriteKeyEvent(JNIEnv* env, jobject thiz, jint fd, jint android
         return false;
     }
     return true;
+}
+
+static bool nativeWriteDpadKeyEvent(JNIEnv* env, jobject thiz, jint fd, jint androidKeyCode,
+                                    jint action) {
+    return writeKeyEvent(fd, androidKeyCode, action, DPAD_KEY_CODE_MAPPING);
+}
+
+static bool nativeWriteKeyEvent(JNIEnv* env, jobject thiz, jint fd, jint androidKeyCode,
+                                jint action) {
+    return writeKeyEvent(fd, androidKeyCode, action, KEY_CODE_MAPPING);
 }
 
 static bool nativeWriteButtonEvent(JNIEnv* env, jobject thiz, jint fd, jint buttonCode,
@@ -461,6 +490,8 @@ static bool nativeWriteScrollEvent(JNIEnv* env, jobject thiz, jint fd, jfloat xA
 }
 
 static JNINativeMethod methods[] = {
+        {"nativeOpenUinputDpad", "(Ljava/lang/String;IILjava/lang/String;)I",
+         (void*)nativeOpenUinputDpad},
         {"nativeOpenUinputKeyboard", "(Ljava/lang/String;IILjava/lang/String;)I",
          (void*)nativeOpenUinputKeyboard},
         {"nativeOpenUinputMouse", "(Ljava/lang/String;IILjava/lang/String;)I",
@@ -468,6 +499,7 @@ static JNINativeMethod methods[] = {
         {"nativeOpenUinputTouchscreen", "(Ljava/lang/String;IILjava/lang/String;II)I",
          (void*)nativeOpenUinputTouchscreen},
         {"nativeCloseUinput", "(I)Z", (void*)nativeCloseUinput},
+        {"nativeWriteDpadKeyEvent", "(III)Z", (void*)nativeWriteDpadKeyEvent},
         {"nativeWriteKeyEvent", "(III)Z", (void*)nativeWriteKeyEvent},
         {"nativeWriteButtonEvent", "(III)Z", (void*)nativeWriteButtonEvent},
         {"nativeWriteTouchEvent", "(IIIIFFFF)Z", (void*)nativeWriteTouchEvent},

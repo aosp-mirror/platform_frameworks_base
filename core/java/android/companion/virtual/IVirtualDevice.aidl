@@ -57,6 +57,12 @@ interface IVirtualDevice {
 
     void onAudioSessionEnded();
 
+    void createVirtualDpad(
+            int displayId,
+            String inputDeviceName,
+            int vendorId,
+            int productId,
+            IBinder token);
     void createVirtualKeyboard(
             int displayId,
             String inputDeviceName,
@@ -77,6 +83,7 @@ interface IVirtualDevice {
             IBinder token,
             in Point screenSize);
     void unregisterInputDevice(IBinder token);
+    boolean sendDpadKeyEvent(IBinder token, in VirtualKeyEvent event);
     boolean sendKeyEvent(IBinder token, in VirtualKeyEvent event);
     boolean sendButtonEvent(IBinder token, in VirtualMouseButtonEvent event);
     boolean sendRelativeEvent(IBinder token, in VirtualMouseRelativeEvent event);

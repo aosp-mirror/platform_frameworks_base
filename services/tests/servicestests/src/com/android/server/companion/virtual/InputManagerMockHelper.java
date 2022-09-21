@@ -57,6 +57,8 @@ class InputManagerMockHelper {
 
         doAnswer(this::handleNativeOpenInputDevice).when(mNativeWrapperMock).openUinputMouse(
                 anyString(), anyInt(), anyInt(), anyString());
+        doAnswer(this::handleNativeOpenInputDevice).when(mNativeWrapperMock).openUinputDpad(
+                anyString(), anyInt(), anyInt(), anyString());
         doAnswer(this::handleNativeOpenInputDevice).when(mNativeWrapperMock).openUinputKeyboard(
                 anyString(), anyInt(), anyInt(), anyString());
         doAnswer(this::handleNativeOpenInputDevice).when(mNativeWrapperMock).openUinputTouchscreen(

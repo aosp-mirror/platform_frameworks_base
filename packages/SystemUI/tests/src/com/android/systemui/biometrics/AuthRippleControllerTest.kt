@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -76,6 +77,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var lightRevealScrim: LightRevealScrim
+    @Mock private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
 
     @Before
     fun setUp() {
@@ -86,6 +88,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
                 .startMocking()
 
         `when`(RotationUtils.getRotation(context)).thenReturn(RotationUtils.ROTATION_NONE)
+        `when`(authController.udfpsProps).thenReturn(listOf(fpSensorProp))
         `when`(udfpsControllerProvider.get()).thenReturn(udfpsController)
 
         controller = AuthRippleController(
@@ -132,7 +135,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             false /* isStrongBiometric */)
 
         // THEN update sensor location and show ripple
-        verify(rippleView).setFingerprintSensorLocation(fpsLocation, -1f)
+        verify(rippleView).setFingerprintSensorLocation(fpsLocation, 0f)
         verify(rippleView).startUnlockedRipple(any())
     }
 
@@ -155,7 +158,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
                 false /* isStrongBiometric */)
 
         // THEN update sensor location and show ripple
-        verify(rippleView).setFingerprintSensorLocation(fpsLocation, -1f)
+        verify(rippleView).setFingerprintSensorLocation(fpsLocation, 0f)
         verify(rippleView).startUnlockedRipple(any())
     }
 
@@ -341,5 +344,24 @@ class AuthRippleControllerTest : SysuiTestCase() {
         reset(rippleView)
         captor.value.onUiModeChanged()
         verify(rippleView).setLockScreenColor(ArgumentMatchers.anyInt())
+    }
+
+    @Test
+    fun testUdfps_onFingerDown_showDwellRipple() {
+        // GIVEN view is already attached
+        controller.onViewAttached()
+        val captor = ArgumentCaptor.forClass(UdfpsController.Callback::class.java)
+        verify(udfpsController).addCallback(captor.capture())
+
+        // GIVEN fp is updated to Point(5, 5)
+        val fpsLocation = Point(5, 5)
+        `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
+
+        // WHEN finger is down
+        captor.value.onFingerDown()
+
+        // THEN update sensor location and show ripple
+        verify(rippleView).setFingerprintSensorLocation(fpsLocation, 0f)
+        verify(rippleView).startDwellRipple(false)
     }
 }

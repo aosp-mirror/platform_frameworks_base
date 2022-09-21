@@ -387,6 +387,14 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualDpad_noDisplay_failsSecurityException() {
+        assertThrows(
+                SecurityException.class,
+                () -> mDeviceImpl.createVirtualDpad(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
+                        PRODUCT_ID, BINDER));
+    }
+
+    @Test
     public void createVirtualKeyboard_noDisplay_failsSecurityException() {
         assertThrows(
                 SecurityException.class,
@@ -415,6 +423,17 @@ public class VirtualDeviceManagerServiceTest {
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.onAudioSessionStarting(
                         DISPLAY_ID, mRoutingCallback, mConfigChangedCallback));
+    }
+
+    @Test
+    public void createVirtualDpad_noPermission_failsSecurityException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
+                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
+        assertThrows(
+                SecurityException.class,
+                () -> mDeviceImpl.createVirtualDpad(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
+                        PRODUCT_ID, BINDER));
     }
 
     @Test
@@ -468,6 +487,17 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualDpad_hasDisplay_obtainFileDescriptor() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        mDeviceImpl.createVirtualDpad(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
+                BINDER);
+        assertWithMessage("Virtual dpad should register fd when the display matches")
+          	.that(mInputController.mInputDeviceDescriptors).isNotEmpty();
+        verify(mNativeWrapperMock).openUinputDpad(eq(DEVICE_NAME), eq(VENDOR_ID),
+                eq(PRODUCT_ID), anyString());
+    }
+
+    @Test
     public void createVirtualKeyboard_hasDisplay_obtainFileDescriptor() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         mDeviceImpl.createVirtualKeyboard(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
@@ -483,7 +513,7 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         mDeviceImpl.createVirtualMouse(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
                 BINDER);
-        assertWithMessage("Virtual keyboard should register fd when the display matches")
+        assertWithMessage("Virtual mouse should register fd when the display matches")
                 .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
         verify(mNativeWrapperMock).openUinputMouse(eq(DEVICE_NAME), eq(VENDOR_ID), eq(PRODUCT_ID),
                 anyString());
@@ -494,7 +524,7 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
                 BINDER, new Point(WIDTH, HEIGHT));
-        assertWithMessage("Virtual keyboard should register fd when the display matches")
+        assertWithMessage("Virtual touchscreen should register fd when the display matches")
                 .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
         verify(mNativeWrapperMock).openUinputTouchscreen(eq(DEVICE_NAME), eq(VENDOR_ID),
                 eq(PRODUCT_ID), anyString(), eq(HEIGHT), eq(WIDTH));

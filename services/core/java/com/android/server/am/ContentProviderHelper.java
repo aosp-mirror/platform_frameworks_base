@@ -29,6 +29,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
 import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_PROVIDER;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -48,7 +49,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
@@ -960,20 +960,22 @@ public class ContentProviderHelper {
     String getProviderMimeType(Uri uri, int userId) {
         mService.enforceNotIsolatedCaller("getProviderMimeType");
         final String name = uri.getAuthority();
-        int callingUid = Binder.getCallingUid();
-        int callingPid = Binder.getCallingPid();
-        long ident = 0;
-        boolean clearedIdentity = false;
-        userId = mService.mUserController.unsafeConvertIncomingUser(userId);
-        if (canClearIdentity(callingPid, callingUid, userId)) {
-            clearedIdentity = true;
-            ident = Binder.clearCallingIdentity();
-        }
-        ContentProviderHolder holder = null;
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int safeUserId = mService.mUserController.unsafeConvertIncomingUser(userId);
+        final long ident = canClearIdentity(callingPid, callingUid, safeUserId)
+                ? Binder.clearCallingIdentity() : 0;
+        final ContentProviderHolder holder;
         try {
-            holder = getContentProviderExternalUnchecked(name, null, callingUid,
-                    "*getmimetype*", userId);
-            if (holder != null) {
+            holder = getContentProviderExternalUnchecked(name, null /* token */, callingUid,
+                    "*getmimetype*", safeUserId);
+        } finally {
+            if (ident != 0) {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        try {
+            if (isHolderVisibleToCaller(holder, callingUid, safeUserId)) {
                 final IBinder providerConnection = holder.connection;
                 final ComponentName providerName = holder.info.getComponentName();
                 // Note: creating a new Runnable instead of using a lambda here since lambdas in
@@ -992,6 +994,13 @@ public class ContentProviderHelper {
                     return holder.provider.getType(uri);
                 } finally {
                     mService.mHandler.removeCallbacks(providerNotResponding);
+                    // We need to clear the identity to call removeContentProviderExternalUnchecked
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        removeContentProviderExternalUnchecked(name, null /* token */, safeUserId);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -1000,18 +1009,6 @@ public class ContentProviderHelper {
         } catch (Exception e) {
             Log.w(TAG, "Exception while determining type of " + uri, e);
             return null;
-        } finally {
-            // We need to clear the identity to call removeContentProviderExternalUnchecked
-            if (!clearedIdentity) {
-                ident = Binder.clearCallingIdentity();
-            }
-            try {
-                if (holder != null) {
-                    removeContentProviderExternalUnchecked(name, null, userId);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
         }
 
         return null;
@@ -1029,12 +1026,20 @@ public class ContentProviderHelper {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final int safeUserId = mService.mUserController.unsafeConvertIncomingUser(userId);
-        final long ident = canClearIdentity(callingPid, callingUid, userId)
+        final long ident = canClearIdentity(callingPid, callingUid, safeUserId)
                 ? Binder.clearCallingIdentity() : 0;
+        final ContentProviderHolder holder;
         try {
-            final ContentProviderHolder holder = getContentProviderExternalUnchecked(name, null,
-                    callingUid, "*getmimetype*", safeUserId);
-            if (holder != null) {
+            holder = getContentProviderExternalUnchecked(name, null /* token */, callingUid,
+                    "*getmimetype*", safeUserId);
+        } finally {
+            if (ident != 0) {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        try {
+            if (isHolderVisibleToCaller(holder, callingUid, safeUserId)) {
                 holder.provider.getTypeAsync(uri, new RemoteCallback(result -> {
                     final long identity = Binder.clearCallingIdentity();
                     try {
@@ -1050,8 +1055,6 @@ public class ContentProviderHelper {
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
             resultCallback.sendResult(Bundle.EMPTY);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1065,6 +1068,35 @@ public class ContentProviderHelper {
                 || ActivityManagerService.checkComponentPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingPid,
                         callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isHolderVisibleToCaller(@Nullable ContentProviderHolder holder, int callingUid,
+            @UserIdInt int userId) {
+        if (holder == null || holder.info == null) {
+            return false;
+        }
+
+        if (isAuthorityRedirectedForCloneProfile(holder.info.authority)
+                && resolveParentUserIdForCloneProfile(userId) != userId) {
+            // Since clone profile shares certain providers with its parent and the access is
+            // re-directed as well, the holder may not actually be installed on the clone profile.
+            return !mService.getPackageManagerInternal().filterAppAccess(holder.info.packageName,
+                    callingUid, userId, false /* filterUninstalled */);
+        }
+
+        return !mService.getPackageManagerInternal().filterAppAccess(holder.info.packageName,
+                callingUid, userId);
+    }
+
+    private static @UserIdInt int resolveParentUserIdForCloneProfile(@UserIdInt int userId) {
+        final UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+        final UserInfo userInfo = umInternal.getUserInfo(userId);
+
+        if (userInfo == null || !userInfo.isCloneProfile()) {
+            return userId;
+        }
+
+        return umInternal.getProfileParentId(userId);
     }
 
     /**
@@ -1135,9 +1167,7 @@ public class ContentProviderHelper {
                     "*checkContentProviderUriPermission*", userId);
             if (holder != null) {
 
-                final PackageManagerInternal packageManagerInt = LocalServices.getService(
-                        PackageManagerInternal.class);
-                final AndroidPackage androidPackage = packageManagerInt
+                final AndroidPackage androidPackage = mService.getPackageManagerInternal()
                         .getPackage(Binder.getCallingUid());
                 if (androidPackage == null) {
                     return PackageManager.PERMISSION_DENIED;
