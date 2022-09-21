@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.android.settingslib.spa.framework.BrowseActivity
 import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.PageModel
 import com.android.settingslib.spa.framework.compose.navigator
@@ -92,14 +91,12 @@ class ArgumentPageModel : PageModel() {
     private var arguments: Bundle? = null
     private var stringParam: String? = null
     private var intParam: Int? = null
-    private var highlightName: String? = null
 
     override fun initialize(arguments: Bundle?) {
         logMsg("init with args " + arguments.toString())
         this.arguments = arguments
         stringParam = parameter.getStringArg(STRING_PARAM_NAME, arguments)
         intParam = parameter.getIntArg(INT_PARAM_NAME, arguments)
-        highlightName = arguments?.getString(BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME)
     }
 
     @Composable
@@ -133,7 +130,8 @@ class ArgumentPageModel : PageModel() {
             override val title = genPageTitle()
             override val summary = stateOf(summaryArray.joinToString(", "))
             override val onClick = navigator(
-                SettingsPageProviderEnum.ARGUMENT.displayName + parameter.navLink(arguments))
+                SettingsPageProviderEnum.ARGUMENT.displayName + parameter.navLink(arguments)
+            )
         }
     }
 }

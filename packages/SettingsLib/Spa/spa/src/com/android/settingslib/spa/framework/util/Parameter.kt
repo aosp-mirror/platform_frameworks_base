@@ -19,6 +19,7 @@ package com.android.settingslib.spa.framework.util
 import android.os.Bundle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
+import com.android.settingslib.spa.framework.BrowseActivity
 
 fun List<NamedNavArgument>.navRoute(): String {
     return this.joinToString("") { argument -> "/{${argument.name}}" }
@@ -69,4 +70,22 @@ fun List<NamedNavArgument>.containsIntArg(name: String): Boolean {
         if (navArg.argument.type == NavType.IntType && navArg.name == name) return true
     }
     return false
+}
+
+fun getRuntimeArguments(arguments: Bundle? = null): Bundle {
+    val res = Bundle()
+    val highlightEntry = arguments?.getString(BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME)
+    if (highlightEntry != null) {
+        res.putString(BrowseActivity.HIGHLIGHT_ENTRY_PARAM_NAME, highlightEntry)
+    }
+    // Append more general runtime arguments here
+    return res
+}
+
+fun mergeArguments(argsList: List<Bundle?>): Bundle {
+    val res = Bundle()
+    for (args in argsList) {
+        if (args != null) res.putAll(args)
+    }
+    return res
 }

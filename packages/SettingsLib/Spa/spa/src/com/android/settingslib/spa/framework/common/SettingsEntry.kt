@@ -17,8 +17,13 @@
 package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
+import com.android.settingslib.spa.framework.BrowseActivity.Companion.HIGHLIGHT_ENTRY_PARAM_NAME
 
 const val INJECT_ENTRY_NAME = "INJECT"
 const val ROOT_ENTRY_NAME = "ROOT"
@@ -104,6 +109,7 @@ data class SettingsEntry(
     private fun fullArgument(runtimeArguments: Bundle? = null): Bundle {
         val arguments = Bundle()
         if (owner.arguments != null) arguments.putAll(owner.arguments)
+        // Put runtime args later, which can override page args.
         if (runtimeArguments != null) arguments.putAll(runtimeArguments)
         return arguments
     }
@@ -114,6 +120,16 @@ data class SettingsEntry(
 
     @Composable
     fun UiLayout(runtimeArguments: Bundle? = null) {
+        val context = LocalContext.current
+        val entryId = remember { id() }
+        val highlight = rememberSaveable {
+            mutableStateOf(runtimeArguments?.getString(HIGHLIGHT_ENTRY_PARAM_NAME) == entryId)
+        }
+        if (highlight.value) {
+            highlight.value = false
+            // TODO: Add highlight entry logic
+            Toast.makeText(context, "entry $entryId highlighted", Toast.LENGTH_SHORT).show()
+        }
         uiLayoutImpl(fullArgument(runtimeArguments))
     }
 }
