@@ -54,5 +54,14 @@ java_test_host {
         "ImmutabilityAnnotationProcessorHostLibrary",
     ],
 
+    // Bundle the source file so it can be loaded into the test compiler
+    java_resources: [":ImmutabilityAnnotationJavaSource"],
+
     test_suites: ["general-tests"],
+}
+
+filegroup {
+    name: "ImmutabilityAnnotationJavaSource",
+    srcs: ["src/android/processor/immutability/Immutable.java"],
+    path: "src/android/processor/immutability/",
 }

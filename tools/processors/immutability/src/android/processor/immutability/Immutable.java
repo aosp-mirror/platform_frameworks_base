@@ -48,4 +48,27 @@ public @interface Immutable {
     @interface Ignore {
         String reason() default "";
     }
+
+    /**
+     * Marks an element and its reachable children with a specific policy.
+     */
+    @Retention(RetentionPolicy.CLASS)
+    @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
+    @interface Policy {
+        Exception[] exceptions() default {};
+
+        enum Exception {
+            /**
+             * Allow final classes with only final fields. By default these are not allowed because
+             * direct field access disallows hard removal of APIs (by having their getters return
+             * mocks/stubs) and also prevents field compaction, which can occur with booleans
+             * stuffed into a number as flags.
+             *
+             * This exception is allowed though because several framework classes are built around
+             * the final field access model and it would be unnecessarily difficult to migrate or
+             * wrap each type.
+             */
+            FINAL_CLASSES_WITH_FINAL_FIELDS,
+        }
+    }
 }
