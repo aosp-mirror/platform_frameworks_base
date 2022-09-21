@@ -18,13 +18,16 @@ package com.android.server.display.color;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import androidx.test.InstrumentationRegistry;
+import static org.mockito.Mockito.mock;
 
-import java.lang.System;
-import java.util.Arrays;
+import android.hardware.display.DisplayManagerInternal;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class DisplayWhiteBalanceTintControllerTest {
 
@@ -32,7 +35,9 @@ public class DisplayWhiteBalanceTintControllerTest {
 
     @Before
     public void setUp() {
-        mDisplayWhiteBalanceTintController = new DisplayWhiteBalanceTintController();
+        DisplayManagerInternal displayManagerInternal = mock(DisplayManagerInternal.class);
+        mDisplayWhiteBalanceTintController =
+                new DisplayWhiteBalanceTintController(displayManagerInternal);
         mDisplayWhiteBalanceTintController.setUp(InstrumentationRegistry.getContext(), true);
         mDisplayWhiteBalanceTintController.setActivated(true);
     }
