@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"තිර අගුල භාවිත කරන්න"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"සංවේදකය මත තදින් ඔබන්න"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ඇඟිලි සලකුණ හඳුනා ගත නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ඇඟිලි සලකුණු සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"සංවේදකය මත තදින් ඔබන්න"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"බල එබීම අනාවරණය විය"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"සීරුමාරු කිරීම උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"එක් එක් අවස්ථාවේ ඔබගේ ඇඟිල්ලේ පිහිටීම මදක් වෙනස් කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ඇඟිලි සලකුණු දෘඪාංගය ලද නොහැකිය."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ඇඟිලි සලකුණ පිහිටුවිය නොහැකිය"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ඇඟිලි සලකුණු පිහිටුවීම කාලය නිමා විය. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"පරිශීලක විසින් ඇඟිලි සලකුණු මෙහෙයුම අවසන් කරන ලදී."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"උත්සාහ ගණන ඉතා වැඩියි. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"උත්සාහ ගණන ඉතා වැඩියි. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ඇඟිලි සලකුණ සැකසීමට නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ඔබගේ මුහුණු ආකෘතිය තැනිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"දීප්තිය වැඩියි. තවත් මඳ ආලෝකය උත්සාහ කරන්න."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"ප්‍රමාණවත් ආලෝකයක් නැත"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"දුරකථනය තවත් ඈතට ගෙන යන්න"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"දුරකථනය තවත් සමීපයට ගෙන එන්න"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"දුරකථනය තවත් ඉහළට ගෙන යන්න"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ඇරඹුම අවසාන කරමින්."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ඔබ බල බොත්තම එබුවේය — සාමාන්‍යයෙන් මෙය තිරය ක්‍රියාවිරහිත කරයි.\n\nඔබගේ ඇඟිලි සලකුණ පිහිටුවන අතරතුර සැහැල්ලුවෙන් තට්ටු කිරීමට උත්සාහ කරන්න."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"පිහිටුවීම නිම කිරීමට, තිරය අක්‍රිය කරන්න"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ක්‍රියාවිරහිත කරන්න"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ඔබගේ ඇඟිලි සලකුණ සත්‍යාපනය දිගටම කරන්නද?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ඔබ බල බොත්තම එබුවේය — සාමාන්‍යයෙන් මෙය තිරය ක්‍රියාවිරහිත කරයි.\n\nඔබගේ ඇඟිලි සලකුණ සත්‍යාපනය කිරීමට සැහැල්ලුවෙන් තට්ටු කිරීමට උත්සාහ කරන්න."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"තිරය අක්‍රිය කරන්න"</string>

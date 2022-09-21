@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Përdor kyçjen e ekranit"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fut kyçjen e ekranit për të vazhduar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Shtyp fort te sensori"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nuk mund ta dallojë gjurmën e gishtit. Provo përsëri."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Pastro sensorin e gjurmës së gishtit dhe provo sërish"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Pastro sensorin dhe provo sërish"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Shtyp fort te sensori"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Gishti lëvizi shumë ngadalë. Provo përsëri."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Provo një gjurmë gishti tjetër"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Me shumë ndriçim"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"U zbulua shtypja e \"Energjisë\""</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Provo ta rregullosh"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ndrysho pak pozicionin e gishtit çdo herë"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Fytyra u vërtetua, shtyp \"Konfirmo\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardueri i gjurmës së gishtit nuk mundësohet."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nuk mund të konfigurohet gjurma e gishtit"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Konfigurimi i gjurmës së gishtit skadoi. Provo përsëri."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operacioni i gjurmës së gishtit u anulua."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Veprimi i gjurmës së gishtit u anulua nga përdoruesi."</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Shumë përpjekje. Përdor më mirë kyçjen e ekranit."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Shumë përpjekje. Përdor më mirë kyçjen e ekranit."</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Gjurma e gishtit nuk mund të përpunohet. Provo përsëri."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nuk ka asnjë gjurmë gishti të regjistruar."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kjo pajisje nuk ka sensor të gjurmës së gishtit."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensori është çaktivizuar përkohësisht."</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vizito një ofrues të shërbimit të riparimit."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Me shumë ndriçim. Provo një ndriçim më të butë."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nuk ka dritë të mjaftueshme"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Lëvize telefonin më larg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Lëvize telefonin më afër"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Lëvize telefonin më lart"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Aplikacionet e fillimit."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Po përfundon nisjen."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Shtype butonin e energjisë — zakonisht, kjo e fik ekranin.\n\nProvo të trokasësh lehtë ndërkohë që konfiguron gjurmën e gishtit."</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Përfundo konfigurimin; fik ekranin"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Çaktivizo"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Të vazhdohet verifikimi i gjurmës?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Shtype butonin e energjisë — zakonisht, kjo e fik ekranin.\n\nProvo të trokasësh lehtë për të verifikuar gjurmën e gishtit."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Fik ekranin"</string>
