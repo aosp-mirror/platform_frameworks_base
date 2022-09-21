@@ -134,6 +134,7 @@ java_library_static {
         "service-permission.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
     ],
+    plugins: ["ImmutabilityAnnotationProcessor"],
 
     required: [
         "default_television.xml",
@@ -172,6 +173,7 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
+        "ImmutabilityAnnotation",
     ],
     javac_shard_size: 50,
 }
