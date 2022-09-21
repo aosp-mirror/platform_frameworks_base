@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ফ’নটো ঠাণ্ডা হৈ থকাৰ সময়ত কিছুমান সুবিধা উপলব্ধ নহয়।\nঅধিক তথ্যৰ বাবে টিপক"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপোনাৰ ফ\'নটোৱে নিজে নিজে ঠাণ্ডা হ\'বলৈ স্বয়ংক্ৰিয়ভাৱে চেষ্টা কৰিব। আপুনি ফ\'নটো ব্যৱহাৰ কৰি থাকিব পাৰে কিন্তু ই লাহে লাহে চলিব পাৰে।\n\nফ\'নটো সম্পূৰ্ণভাৱে ঠাণ্ডা হোৱাৰ পিছত ই আগৰ নিচিনাকৈয়েই চলিব।"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"আপোনাৰ ডিভাইচটো আনপ্লাগ কৰক"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"আপোনাৰ ডিভাইচটো চাৰ্জিং প’ৰ্টৰ ওচৰত গৰম হৈছে। যদি এইটো কোনো চার্জাৰ অথবা ইউএছবিৰ সহায়ক সামগ্ৰীৰ সৈতে সংযুক্ত হৈ আছে, ইয়াক আনপ্লাগ কৰক আৰু কে’বলডালো গৰম হ\'ব পাৰে, গতিকে যত্ন লওক।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"বাওঁ শ্বৰ্টকাট"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"সোঁ শ্বৰ্টকাট"</string>

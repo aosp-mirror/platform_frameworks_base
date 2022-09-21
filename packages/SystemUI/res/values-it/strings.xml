@@ -671,10 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Alcune funzionalità limitate durante il raffreddamento del telefono.\nTocca per ulteriori informazioni"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Il telefono cercherà automaticamente di raffreddarsi. Puoi comunque usarlo, ma potrebbe essere più lento.\n\nUna volta raffreddato, il telefono funzionerà normalmente."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Leggi le misure da adottare"</string>
-    <!-- no translation found for high_temp_alarm_title (8654754369605452169) -->
-    <skip />
-    <!-- no translation found for high_temp_alarm_notify_message (3917622943609118956) -->
-    <skip />
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Scollega il dispositivo"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Il tuo dispositivo si sta scaldando vicino alla porta di ricarica. Se è collegato a un caricabatterie o a un accessorio USB, scollegalo e fai attenzione perché il cavo potrebbe essere caldo."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Leggi le misure da adottare"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Scorciatoia sinistra"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Scorciatoia destra"</string>
