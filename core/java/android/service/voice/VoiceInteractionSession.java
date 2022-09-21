@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DirectAction;
@@ -2311,11 +2312,15 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             mAssistToken = assistToken;
         }
 
-        int getTaskId() {
+        /** @hide */
+        @TestApi
+        public int getTaskId() {
             return mTaskId;
         }
 
-        IBinder getAssistToken() {
+        /** @hide */
+        @TestApi
+        @NonNull public IBinder getAssistToken() {
             return mAssistToken;
         }
 

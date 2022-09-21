@@ -2481,6 +2481,11 @@ package android.service.voice {
     ctor public VisibleActivityInfo(int, @NonNull android.os.IBinder);
   }
 
+  public static class VoiceInteractionSession.ActivityId {
+    method @NonNull public android.os.IBinder getAssistToken();
+    method public int getTaskId();
+  }
+
 }
 
 package android.service.watchdog {
