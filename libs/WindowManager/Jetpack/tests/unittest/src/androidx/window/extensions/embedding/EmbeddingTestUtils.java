@@ -16,9 +16,12 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static androidx.window.extensions.embedding.SplitRule.FINISH_ALWAYS;
 import static androidx.window.extensions.embedding.SplitRule.FINISH_NEVER;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
@@ -26,6 +29,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Pair;
@@ -129,5 +133,15 @@ public class EmbeddingTestUtils {
         aInfo.windowLayout = new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
                 primaryBounds.width() + 1, primaryBounds.height() + 1);
         return aInfo;
+    }
+
+    static TaskContainer createTestTaskContainer() {
+        Resources resources = mock(Resources.class);
+        doReturn(new Configuration()).when(resources).getConfiguration();
+        Activity activity = mock(Activity.class);
+        doReturn(resources).when(activity).getResources();
+        doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();
+
+        return new TaskContainer(TASK_ID, activity);
     }
 }

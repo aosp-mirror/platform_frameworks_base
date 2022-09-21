@@ -34,9 +34,11 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
 import static androidx.window.extensions.embedding.SplitRule.FINISH_ALWAYS;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -140,7 +142,7 @@ public class SplitControllerTest {
 
     @Test
     public void testGetTopActiveContainer() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
         // tf1 has no running activity so is not active.
         final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
                 new Intent(), taskContainer, mSplitController);
@@ -200,6 +202,7 @@ public class SplitControllerTest {
     @Test
     public void testOnTaskFragmentAppearEmptyTimeout() {
         final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+        doCallRealMethod().when(mSplitController).onTaskFragmentAppearEmptyTimeout(any(), any());
         mSplitController.onTaskFragmentAppearEmptyTimeout(mTransaction, tf);
 
         verify(mSplitPresenter).cleanupContainer(mTransaction, tf,
@@ -310,7 +313,7 @@ public class SplitControllerTest {
     @Test
     public void testOnStartActivityResultError() {
         final Intent intent = new Intent();
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
                 intent, taskContainer, mSplitController);
         final SplitController.ActivityStartMonitor monitor =
