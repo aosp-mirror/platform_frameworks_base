@@ -58,7 +58,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerExemptionManager.ReasonCode;
@@ -1566,110 +1565,116 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         if (mDispatcher.isEmpty() || mDispatcher.getActiveBroadcastLocked() == null) {
             return;
         }
-
-        long now = SystemClock.uptimeMillis();
-        BroadcastRecord r = mDispatcher.getActiveBroadcastLocked();
-        if (fromMsg) {
-            if (!mService.mProcessesReady) {
-                // Only process broadcast timeouts if the system is ready; some early
-                // broadcasts do heavy work setting up system facilities
-                return;
-            }
-
-            // If the broadcast is generally exempt from timeout tracking, we're done
-            if (r.timeoutExempt) {
-                if (DEBUG_BROADCAST) {
-                    Slog.i(TAG_BROADCAST, "Broadcast timeout but it's exempt: "
-                            + r.intent.getAction());
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastTimeoutLocked()");
+        try {
+            long now = SystemClock.uptimeMillis();
+            BroadcastRecord r = mDispatcher.getActiveBroadcastLocked();
+            if (fromMsg) {
+                if (!mService.mProcessesReady) {
+                    // Only process broadcast timeouts if the system is ready; some early
+                    // broadcasts do heavy work setting up system facilities
+                    return;
                 }
-                return;
-            }
 
-            long timeoutTime = r.receiverTime + mConstants.TIMEOUT;
-            if (timeoutTime > now) {
-                // We can observe premature timeouts because we do not cancel and reset the
-                // broadcast timeout message after each receiver finishes.  Instead, we set up
-                // an initial timeout then kick it down the road a little further as needed
-                // when it expires.
-                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
-                        "Premature timeout ["
-                        + mQueueName + "] @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
-                        + timeoutTime);
-                setBroadcastTimeoutLocked(timeoutTime);
-                return;
-            }
-        }
-
-        if (r.state == BroadcastRecord.WAITING_SERVICES) {
-            // In this case the broadcast had already finished, but we had decided to wait
-            // for started services to finish as well before going on.  So if we have actually
-            // waited long enough time timeout the broadcast, let's give up on the whole thing
-            // and just move on to the next.
-            Slog.i(TAG, "Waited long enough for: " + (r.curComponent != null
-                    ? r.curComponent.flattenToShortString() : "(null)"));
-            r.curComponent = null;
-            r.state = BroadcastRecord.IDLE;
-            processNextBroadcastLocked(false, false);
-            return;
-        }
-
-        // If the receiver app is being debugged we quietly ignore unresponsiveness, just
-        // tidying up and moving on to the next broadcast without crashing or ANRing this
-        // app just because it's stopped at a breakpoint.
-        final boolean debugging = (r.curApp != null && r.curApp.isDebugging());
-
-        long timeoutDurationMs = now - r.receiverTime;
-        Slog.w(TAG, "Timeout of broadcast " + r + " - curFilter=" + r.curFilter + " curReceiver="
-                + r.curReceiver + ", started " + timeoutDurationMs + "ms ago");
-        r.receiverTime = now;
-        if (!debugging) {
-            r.anrCount++;
-        }
-
-        ProcessRecord app = null;
-        TimeoutRecord timeoutRecord = null;
-
-        Object curReceiver;
-        if (r.nextReceiver > 0) {
-            curReceiver = r.receivers.get(r.nextReceiver-1);
-            r.delivery[r.nextReceiver-1] = BroadcastRecord.DELIVERY_TIMEOUT;
-        } else {
-            curReceiver = r.curReceiver;
-        }
-        Slog.w(TAG, "Receiver during timeout of " + r + " : " + curReceiver);
-        logBroadcastReceiverDiscardLocked(r);
-        if (curReceiver != null && curReceiver instanceof BroadcastFilter) {
-            BroadcastFilter bf = (BroadcastFilter)curReceiver;
-            if (bf.receiverList.pid != 0
-                    && bf.receiverList.pid != ActivityManagerService.MY_PID) {
-                synchronized (mService.mPidsSelfLocked) {
-                    app = mService.mPidsSelfLocked.get(
-                            bf.receiverList.pid);
+                // If the broadcast is generally exempt from timeout tracking, we're done
+                if (r.timeoutExempt) {
+                    if (DEBUG_BROADCAST) {
+                        Slog.i(TAG_BROADCAST, "Broadcast timeout but it's exempt: "
+                                + r.intent.getAction());
+                    }
+                    return;
+                }
+                long timeoutTime = r.receiverTime + mConstants.TIMEOUT;
+                if (timeoutTime > now) {
+                    // We can observe premature timeouts because we do not cancel and reset the
+                    // broadcast timeout message after each receiver finishes.  Instead, we set up
+                    // an initial timeout then kick it down the road a little further as needed
+                    // when it expires.
+                    if (DEBUG_BROADCAST) {
+                        Slog.v(TAG_BROADCAST,
+                                "Premature timeout ["
+                                + mQueueName + "] @ " + now
+                                + ": resetting BROADCAST_TIMEOUT_MSG for "
+                                + timeoutTime);
+                    }
+                    setBroadcastTimeoutLocked(timeoutTime);
+                    return;
                 }
             }
-        } else {
-            app = r.curApp;
-        }
 
-        if (app != null) {
+            if (r.state == BroadcastRecord.WAITING_SERVICES) {
+                // In this case the broadcast had already finished, but we had decided to wait
+                // for started services to finish as well before going on.  So if we have actually
+                // waited long enough time timeout the broadcast, let's give up on the whole thing
+                // and just move on to the next.
+                Slog.i(TAG, "Waited long enough for: " + (r.curComponent != null
+                        ? r.curComponent.flattenToShortString() : "(null)"));
+                r.curComponent = null;
+                r.state = BroadcastRecord.IDLE;
+                processNextBroadcastLocked(false, false);
+                return;
+            }
+
+            // If the receiver app is being debugged we quietly ignore unresponsiveness, just
+            // tidying up and moving on to the next broadcast without crashing or ANRing this
+            // app just because it's stopped at a breakpoint.
+            final boolean debugging = (r.curApp != null && r.curApp.isDebugging());
+
+            long timeoutDurationMs = now - r.receiverTime;
+            Slog.w(TAG, "Timeout of broadcast " + r + " - curFilter=" + r.curFilter
+                    + " curReceiver=" + r.curReceiver + ", started " + timeoutDurationMs
+                    + "ms ago");
+            r.receiverTime = now;
+            if (!debugging) {
+                r.anrCount++;
+            }
+
+            ProcessRecord app = null;
+            Object curReceiver;
+            if (r.nextReceiver > 0) {
+                curReceiver = r.receivers.get(r.nextReceiver - 1);
+                r.delivery[r.nextReceiver - 1] = BroadcastRecord.DELIVERY_TIMEOUT;
+            } else {
+                curReceiver = r.curReceiver;
+            }
+            Slog.w(TAG, "Receiver during timeout of " + r + " : " + curReceiver);
+            logBroadcastReceiverDiscardLocked(r);
             String anrMessage =
-                    "Broadcast of " + r.intent.toString() + ", waited " + timeoutDurationMs
-                            + "ms";
-            timeoutRecord = TimeoutRecord.forBroadcastReceiver(anrMessage);
+                    "Broadcast of " + r.intent.toString() + ", waited " + timeoutDurationMs + "ms";
+            TimeoutRecord timeoutRecord = TimeoutRecord.forBroadcastReceiver(anrMessage);
+            if (curReceiver != null && curReceiver instanceof BroadcastFilter) {
+                BroadcastFilter bf = (BroadcastFilter) curReceiver;
+                if (bf.receiverList.pid != 0
+                        && bf.receiverList.pid != ActivityManagerService.MY_PID) {
+                    timeoutRecord.mLatencyTracker.waitingOnPidLockStarted();
+                    synchronized (mService.mPidsSelfLocked) {
+                        timeoutRecord.mLatencyTracker.waitingOnPidLockEnded();
+                        app = mService.mPidsSelfLocked.get(
+                                bf.receiverList.pid);
+                    }
+                }
+            } else {
+                app = r.curApp;
+            }
+
+            if (mPendingBroadcast == r) {
+                mPendingBroadcast = null;
+            }
+
+            // Move on to the next receiver.
+            finishReceiverLocked(r, r.resultCode, r.resultData,
+                    r.resultExtras, r.resultAbort, false);
+            scheduleBroadcastsLocked();
+
+            // The ANR should only be triggered if we have a process record (app is non-null)
+            if (!debugging && app != null) {
+                mService.mAnrHelper.appNotResponding(app, timeoutRecord);
+            }
+
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
 
-        if (mPendingBroadcast == r) {
-            mPendingBroadcast = null;
-        }
-
-        // Move on to the next receiver.
-        finishReceiverLocked(r, r.resultCode, r.resultData,
-                r.resultExtras, r.resultAbort, false);
-        scheduleBroadcastsLocked();
-
-        if (!debugging && timeoutRecord != null) {
-            mService.mAnrHelper.appNotResponding(app, timeoutRecord);
-        }
     }
 
     private final void addBroadcastToHistoryLocked(BroadcastRecord original) {

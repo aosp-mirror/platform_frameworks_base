@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.SystemClock;
 
+import com.android.internal.os.anr.AnrLatencyTracker;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -40,7 +42,7 @@ public class TimeoutRecord {
             TimeoutKind.APP_REGISTERED})
 
     @Retention(RetentionPolicy.SOURCE)
-    private @interface TimeoutKind {
+    public @interface TimeoutKind {
         int INPUT_DISPATCH_NO_FOCUSED_WINDOW = 1;
         int INPUT_DISPATCH_WINDOW_UNRESPONSIVE = 2;
         int BROADCAST_RECEIVER = 3;
@@ -66,12 +68,16 @@ public class TimeoutRecord {
      */
     public final boolean mEndTakenBeforeLocks;
 
+    /** Latency tracker associated with this instance. */
+    public final AnrLatencyTracker mLatencyTracker;
+
     private TimeoutRecord(@TimeoutKind int kind, @NonNull String reason, long endUptimeMillis,
             boolean endTakenBeforeLocks) {
         this.mKind = kind;
         this.mReason = reason;
         this.mEndUptimeMillis = endUptimeMillis;
         this.mEndTakenBeforeLocks = endTakenBeforeLocks;
+        this.mLatencyTracker = new AnrLatencyTracker(kind, endUptimeMillis);
     }
 
     private static TimeoutRecord endingNow(@TimeoutKind int kind, String reason) {
