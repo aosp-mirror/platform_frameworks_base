@@ -132,6 +132,11 @@ class TaskContainer {
         return new Configuration(mConfiguration);
     }
 
+    @NonNull
+    TaskProperties getTaskProperties() {
+        return new TaskProperties(mDisplayId, mConfiguration);
+    }
+
     void updateTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.getDisplayId();
@@ -214,5 +219,29 @@ class TaskContainer {
 
     int indexOf(@NonNull TaskFragmentContainer child) {
         return mContainers.indexOf(child);
+    }
+
+    /**
+     * A wrapper class which contains the display ID and {@link Configuration} of a
+     * {@link TaskContainer}
+     */
+    static final class TaskProperties {
+        private final int mDisplayId;
+        @NonNull
+        private final Configuration mConfiguration;
+
+        TaskProperties(int displayId, @NonNull Configuration configuration) {
+            mDisplayId = displayId;
+            mConfiguration = configuration;
+        }
+
+        int getDisplayId() {
+            return mDisplayId;
+        }
+
+        @NonNull
+        Configuration getConfiguration() {
+            return mConfiguration;
+        }
     }
 }
