@@ -512,9 +512,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
+        public void onKeyguardVisibilityChanged(boolean visible) {
             synchronized (KeyguardViewMediator.this) {
-                if (!showing && mPendingPinLock) {
+                if (!visible && mPendingPinLock) {
                     Log.i(TAG, "PIN lock requested, starting keyguard");
 
                     // Bring the keyguard back in order to show the PIN lock
@@ -1808,7 +1808,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
-                mUpdateMonitor.setKeyguardOccluded(isOccluded);
                 mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
                         && mDeviceInteractive);
                 adjustStatusBarLocked();
