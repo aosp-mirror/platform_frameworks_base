@@ -384,7 +384,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     private ActivityMetricsLogger.TransitionInfoSnapshot notifyWindowsDrawn(ActivityRecord r) {
-        return mActivityMetricsLogger.notifyWindowsDrawn(r, SystemClock.elapsedRealtimeNanos());
+        return mActivityMetricsLogger.notifyWindowsDrawn(r);
     }
 
     @Test
