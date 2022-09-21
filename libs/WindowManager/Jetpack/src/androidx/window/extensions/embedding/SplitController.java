@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
@@ -46,6 +47,7 @@ import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.content.Context;
@@ -70,12 +72,16 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
+import androidx.window.extensions.WindowExtensionsProvider;
+import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -106,26 +112,65 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     final SparseArray<TaskContainer> mTaskContainers = new SparseArray<>();
 
-    // Callback to Jetpack to notify about changes to split states.
-    @NonNull
+    /** Callback to Jetpack to notify about changes to split states. */
+    @Nullable
     private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
     private final Handler mHandler;
     final Object mLock = new Object();
     private final ActivityStartMonitor mActivityStartMonitor;
+    @NonNull
+    final WindowLayoutComponentImpl mWindowLayoutComponent;
 
     public SplitController() {
+        this((WindowLayoutComponentImpl) Objects.requireNonNull(WindowExtensionsProvider
+                .getWindowExtensions().getWindowLayoutComponent()));
+    }
+
+    @VisibleForTesting
+    SplitController(@NonNull WindowLayoutComponentImpl windowLayoutComponent) {
         final MainThreadExecutor executor = new MainThreadExecutor();
         mHandler = executor.mHandler;
         mPresenter = new SplitPresenter(executor, this);
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        final Application application = activityThread.getApplication();
         // Register a callback to be notified about activities being created.
-        activityThread.getApplication().registerActivityLifecycleCallbacks(
-                new LifecycleCallbacks());
+        application.registerActivityLifecycleCallbacks(new LifecycleCallbacks());
         // Intercept activity starts to route activities to new containers if necessary.
         Instrumentation instrumentation = activityThread.getInstrumentation();
+
         mActivityStartMonitor = new ActivityStartMonitor();
         instrumentation.addMonitor(mActivityStartMonitor);
+        mWindowLayoutComponent = windowLayoutComponent;
+        mWindowLayoutComponent.addFoldingStateChangedCallback(new FoldingFeatureListener());
+    }
+
+    private class FoldingFeatureListener implements Consumer<List<CommonFoldingFeature>> {
+        @Override
+        public void accept(List<CommonFoldingFeature> foldingFeatures) {
+            synchronized (mLock) {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                for (int i = 0; i < mTaskContainers.size(); i++) {
+                    final TaskContainer taskContainer = mTaskContainers.valueAt(i);
+                    if (!taskContainer.isVisible()) {
+                        continue;
+                    }
+                    if (taskContainer.getDisplayId() != DEFAULT_DISPLAY) {
+                        continue;
+                    }
+                    // TODO(b/238948678): Support reporting display features in all windowing modes.
+                    if (taskContainer.isInMultiWindow()) {
+                        continue;
+                    }
+                    if (taskContainer.isEmpty()) {
+                        continue;
+                    }
+                    updateContainersInTask(wct, taskContainer);
+                    updateAnimationOverride(taskContainer);
+                }
+                mPresenter.applyTransaction(wct);
+            }
+        }
     }
 
     /** Updates the embedding rules applied to future activity launches. */
