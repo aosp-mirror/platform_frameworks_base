@@ -24,16 +24,11 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.SurfaceControl;
 
-import libcore.util.NativeAllocationRegistry;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * Handles display and layer captures for the system.
@@ -44,23 +39,18 @@ public class ScreenCapture {
     private static final String TAG = "ScreenCapture";
 
     private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
-            long captureListener);
+            ScreenCaptureListener captureListener);
     private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
-            long captureListener);
-    private static native long nativeCreateScreenCaptureListener(
-            Consumer<ScreenshotHardwareBuffer> consumer);
-    private static native void nativeWriteListenerToParcel(long nativeObject, Parcel out);
-    private static native long nativeReadListenerFromParcel(Parcel in);
-    private static native long getNativeListenerFinalizer();
+            ScreenCaptureListener captureListener);
 
     /**
-     * @param captureArgs     Arguments about how to take the screenshot
+     * @param captureArgs Arguments about how to take the screenshot
      * @param captureListener A listener to receive the screenshot callback
      * @hide
      */
     public static int captureDisplay(@NonNull DisplayCaptureArgs captureArgs,
             @NonNull ScreenCaptureListener captureListener) {
-        return nativeCaptureDisplay(captureArgs, captureListener.mNativeObject);
+        return nativeCaptureDisplay(captureArgs, captureListener);
     }
 
     /**
@@ -71,8 +61,10 @@ public class ScreenCapture {
      */
     public static ScreenshotHardwareBuffer captureDisplay(
             DisplayCaptureArgs captureArgs) {
-        SyncScreenCaptureListener screenCaptureListener = new SyncScreenCaptureListener();
-        int status = captureDisplay(captureArgs, screenCaptureListener.getScreenCaptureListener());
+        SyncScreenCaptureListener
+                screenCaptureListener = new SyncScreenCaptureListener();
+
+        int status = captureDisplay(captureArgs, screenCaptureListener);
         if (status != 0) {
             return null;
         }
@@ -83,13 +75,14 @@ public class ScreenCapture {
     /**
      * Captures a layer and its children and returns a {@link HardwareBuffer} with the content.
      *
-     * @param layer      The root layer to capture.
-     * @param sourceCrop The portion of the root surface to capture; caller may pass in 'new
-     *                   Rect()' or null if no cropping is desired. If the root layer does not
-     *                   have a buffer or a crop set, then a non-empty source crop must be
-     *                   specified.
-     * @param frameScale The desired scale of the returned buffer; the raw screen will be scaled
-     *                   up/down.
+     * @param layer            The root layer to capture.
+     * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
+     *                         Rect()' or null if no cropping is desired. If the root layer does not
+     *                         have a buffer or a crop set, then a non-empty source crop must be
+     *                         specified.
+     * @param frameScale       The desired scale of the returned buffer; the raw
+     *                         screen will be scaled up/down.
+     *
      * @return Returns a HardwareBuffer that contains the layer capture.
      * @hide
      */
@@ -101,14 +94,15 @@ public class ScreenCapture {
     /**
      * Captures a layer and its children and returns a {@link HardwareBuffer} with the content.
      *
-     * @param layer      The root layer to capture.
-     * @param sourceCrop The portion of the root surface to capture; caller may pass in 'new
-     *                   Rect()' or null if no cropping is desired. If the root layer does not
-     *                   have a buffer or a crop set, then a non-empty source crop must be
-     *                   specified.
-     * @param frameScale The desired scale of the returned buffer; the raw screen will be scaled
-     *                   up/down.
-     * @param format     The desired pixel format of the returned buffer.
+     * @param layer            The root layer to capture.
+     * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
+     *                         Rect()' or null if no cropping is desired. If the root layer does not
+     *                         have a buffer or a crop set, then a non-empty source crop must be
+     *                         specified.
+     * @param frameScale       The desired scale of the returned buffer; the raw
+     *                         screen will be scaled up/down.
+     * @param format           The desired pixel format of the returned buffer.
+     *
      * @return Returns a HardwareBuffer that contains the layer capture.
      * @hide
      */
@@ -130,7 +124,7 @@ public class ScreenCapture {
             LayerCaptureArgs captureArgs) {
         SyncScreenCaptureListener screenCaptureListener = new SyncScreenCaptureListener();
 
-        int status = captureLayers(captureArgs, screenCaptureListener.getScreenCaptureListener());
+        int status = captureLayers(captureArgs, screenCaptureListener);
         if (status != 0) {
             return null;
         }
@@ -141,7 +135,6 @@ public class ScreenCapture {
     /**
      * Like {@link #captureLayers(SurfaceControl, Rect, float, int)} but with an array of layer
      * handles to exclude.
-     *
      * @hide
      */
     public static ScreenshotHardwareBuffer captureLayersExcluding(SurfaceControl layer,
@@ -157,13 +150,24 @@ public class ScreenCapture {
     }
 
     /**
-     * @param captureArgs     Arguments about how to take the screenshot
+     * @param captureArgs Arguments about how to take the screenshot
      * @param captureListener A listener to receive the screenshot callback
      * @hide
      */
     public static int captureLayers(@NonNull LayerCaptureArgs captureArgs,
             @NonNull ScreenCaptureListener captureListener) {
-        return nativeCaptureLayers(captureArgs, captureListener.mNativeObject);
+        return nativeCaptureLayers(captureArgs, captureListener);
+    }
+
+    /**
+     * @hide
+     */
+    public interface ScreenCaptureListener {
+        /**
+         * The callback invoked when the screen capture is complete.
+         * @param hardwareBuffer Data containing info about the screen capture.
+         */
+        void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer);
     }
 
     /**
@@ -186,16 +190,15 @@ public class ScreenCapture {
             mContainsHdrLayers = containsHdrLayers;
         }
 
-        /**
-         * Create ScreenshotHardwareBuffer from an existing HardwareBuffer object.
-         *
-         * @param hardwareBuffer       The existing HardwareBuffer object
-         * @param namedColorSpace      Integer value of a named color space {@link ColorSpace.Named}
-         * @param containsSecureLayers Indicates whether this graphic buffer contains captured
-         *                             contents of secure layers, in which case the screenshot
-         *                             should not be persisted.
-         * @param containsHdrLayers    Indicates whether this graphic buffer contains HDR content.
-         */
+       /**
+        * Create ScreenshotHardwareBuffer from an existing HardwareBuffer object.
+        * @param hardwareBuffer The existing HardwareBuffer object
+        * @param namedColorSpace Integer value of a named color space {@link ColorSpace.Named}
+        * @param containsSecureLayers Indicates whether this graphic buffer contains captured
+        *                             contents of secure layers, in which case the screenshot
+        *                             should not be persisted.
+        * @param containsHdrLayers Indicates whether this graphic buffer contains HDR content.
+        */
         private static ScreenshotHardwareBuffer createFromNative(HardwareBuffer hardwareBuffer,
                 int namedColorSpace, boolean containsSecureLayers, boolean containsHdrLayers) {
             ColorSpace colorSpace = ColorSpace.get(ColorSpace.Named.values()[namedColorSpace]);
@@ -217,7 +220,6 @@ public class ScreenCapture {
         public boolean containsSecureLayers() {
             return mContainsSecureLayers;
         }
-
         /**
          * Returns whether the screenshot contains at least one HDR layer.
          * This information may be useful for informing the display whether this screenshot
@@ -232,7 +234,7 @@ public class ScreenCapture {
          * Note: If you want to modify the Bitmap in software, you will need to copy the Bitmap
          * into
          * a software Bitmap using {@link Bitmap#copy(Bitmap.Config, boolean)}
-         * <p>
+         *
          * CAVEAT: This can be extremely slow; avoid use unless absolutely necessary; prefer to
          * directly
          * use the {@link HardwareBuffer} directly.
@@ -248,13 +250,34 @@ public class ScreenCapture {
         }
     }
 
+    private static class SyncScreenCaptureListener implements ScreenCaptureListener {
+        private static final int SCREENSHOT_WAIT_TIME_S = 1;
+        private ScreenshotHardwareBuffer mScreenshotHardwareBuffer;
+        private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
+
+        @Override
+        public void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer) {
+            mScreenshotHardwareBuffer = hardwareBuffer;
+            mCountDownLatch.countDown();
+        }
+
+        private ScreenshotHardwareBuffer waitForScreenshot() {
+            try {
+                mCountDownLatch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to wait for screen capture result", e);
+            }
+
+            return mScreenshotHardwareBuffer;
+        }
+    }
+
     /**
      * A common arguments class used for various screenshot requests. This contains arguments that
      * are shared between {@link DisplayCaptureArgs} and {@link LayerCaptureArgs}
-     *
      * @hide
      */
-    public static class CaptureArgs implements Parcelable {
+    private abstract static class CaptureArgs {
         private final int mPixelFormat;
         private final Rect mSourceCrop = new Rect();
         private final float mFrameScaleX;
@@ -264,7 +287,7 @@ public class ScreenCapture {
         private final long mUid;
         private final boolean mGrayscale;
 
-        private CaptureArgs(CaptureArgs.Builder<? extends CaptureArgs.Builder<?>> builder) {
+        private CaptureArgs(Builder<? extends Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
             mSourceCrop.set(builder.mSourceCrop);
             mFrameScaleX = builder.mFrameScaleX;
@@ -275,23 +298,12 @@ public class ScreenCapture {
             mGrayscale = builder.mGrayscale;
         }
 
-        private CaptureArgs(Parcel in) {
-            mPixelFormat = in.readInt();
-            mSourceCrop.readFromParcel(in);
-            mFrameScaleX = in.readFloat();
-            mFrameScaleY = in.readFloat();
-            mCaptureSecureLayers = in.readBoolean();
-            mAllowProtected = in.readBoolean();
-            mUid = in.readLong();
-            mGrayscale = in.readBoolean();
-        }
-
         /**
          * The Builder class used to construct {@link CaptureArgs}
          *
-         * @param <T> A builder that extends {@link CaptureArgs.Builder}
+         * @param <T> A builder that extends {@link Builder}
          */
-        public static class Builder<T extends CaptureArgs.Builder<T>> {
+        abstract static class Builder<T extends Builder<T>> {
             private int mPixelFormat = PixelFormat.RGBA_8888;
             private final Rect mSourceCrop = new Rect();
             private float mFrameScaleX = 1;
@@ -300,14 +312,6 @@ public class ScreenCapture {
             private boolean mAllowProtected;
             private long mUid = -1;
             private boolean mGrayscale;
-
-            /**
-             * Construct a new {@link CaptureArgs} with the set parameters. The builder remains
-             * valid.
-             */
-            public CaptureArgs build() {
-                return new CaptureArgs(this);
-            }
 
             /**
              * The desired pixel format of the returned buffer.
@@ -391,47 +395,15 @@ public class ScreenCapture {
             /**
              * Each sub class should return itself to allow the builder to chain properly
              */
-            T getThis() {
-                return (T) this;
-            }
+            abstract T getThis();
         }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeInt(mPixelFormat);
-            mSourceCrop.writeToParcel(dest, flags);
-            dest.writeFloat(mFrameScaleX);
-            dest.writeFloat(mFrameScaleY);
-            dest.writeBoolean(mCaptureSecureLayers);
-            dest.writeBoolean(mAllowProtected);
-            dest.writeLong(mUid);
-            dest.writeBoolean(mGrayscale);
-        }
-
-        public static final Parcelable.Creator<CaptureArgs> CREATOR =
-                new Parcelable.Creator<CaptureArgs>() {
-                    @Override
-                    public CaptureArgs createFromParcel(Parcel in) {
-                        return new CaptureArgs(in);
-                    }
-
-                    @Override
-                    public CaptureArgs[] newArray(int size) {
-                        return new CaptureArgs[size];
-                    }
-                };
     }
 
     /**
      * The arguments class used to make display capture requests.
      *
+     * @see #nativeCaptureDisplay(DisplayCaptureArgs, ScreenCaptureListener)
      * @hide
-     * @see #nativeCaptureDisplay(DisplayCaptureArgs, long)
      */
     public static class DisplayCaptureArgs extends CaptureArgs {
         private final IBinder mDisplayToken;
@@ -516,8 +488,8 @@ public class ScreenCapture {
     /**
      * The arguments class used to make layer capture requests.
      *
+     * @see #nativeCaptureLayers(LayerCaptureArgs, ScreenCaptureListener)
      * @hide
-     * @see #nativeCaptureLayers(LayerCaptureArgs, long)
      */
     public static class LayerCaptureArgs extends CaptureArgs {
         private final long mNativeLayer;
@@ -558,17 +530,6 @@ public class ScreenCapture {
                 return new LayerCaptureArgs(this);
             }
 
-            public Builder(SurfaceControl layer, CaptureArgs args) {
-                setLayer(layer);
-                setPixelFormat(args.mPixelFormat);
-                setSourceCrop(args.mSourceCrop);
-                setFrameScale(args.mFrameScaleX, args.mFrameScaleY);
-                setCaptureSecureLayers(args.mCaptureSecureLayers);
-                setAllowProtected(args.mAllowProtected);
-                setUid(args.mUid);
-                setGrayscale(args.mGrayscale);
-            }
-
             public Builder(SurfaceControl layer) {
                 setLayer(layer);
             }
@@ -580,6 +541,7 @@ public class ScreenCapture {
                 mLayer = layer;
                 return this;
             }
+
 
             /**
              * An array of layer handles to exclude.
@@ -602,106 +564,8 @@ public class ScreenCapture {
             Builder getThis() {
                 return this;
             }
+
         }
     }
 
-    /**
-     * The object used to receive the results when invoking screen capture requests via
-     * {@link #captureDisplay(DisplayCaptureArgs, ScreenCaptureListener)} or
-     * {@link #captureLayers(LayerCaptureArgs, ScreenCaptureListener)}
-     */
-    public static class ScreenCaptureListener implements Parcelable {
-        private final long mNativeObject;
-        private static final NativeAllocationRegistry sRegistry =
-                NativeAllocationRegistry.createMalloced(
-                        ScreenCaptureListener.class.getClassLoader(), getNativeListenerFinalizer());
-
-        /**
-         * @param consumer The callback invoked when the screen capture is complete.
-         */
-        public ScreenCaptureListener(Consumer<ScreenshotHardwareBuffer> consumer) {
-            mNativeObject = nativeCreateScreenCaptureListener(consumer);
-            sRegistry.registerNativeAllocation(this, mNativeObject);
-        }
-
-        private ScreenCaptureListener(Parcel in) {
-            if (in.readBoolean()) {
-                mNativeObject = nativeReadListenerFromParcel(in);
-                sRegistry.registerNativeAllocation(this, mNativeObject);
-            } else {
-                mNativeObject = 0;
-            }
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            if (mNativeObject == 0) {
-                dest.writeBoolean(false);
-            } else {
-                dest.writeBoolean(true);
-                nativeWriteListenerToParcel(mNativeObject, dest);
-            }
-        }
-
-        public static final Parcelable.Creator<ScreenCaptureListener> CREATOR =
-                new Parcelable.Creator<ScreenCaptureListener>() {
-                    @Override
-                    public ScreenCaptureListener createFromParcel(Parcel in) {
-                        return new ScreenCaptureListener(in);
-                    }
-
-                    @Override
-                    public ScreenCaptureListener[] newArray(int size) {
-                        return new ScreenCaptureListener[0];
-                    }
-                };
-    }
-
-    /**
-     * A helper class to handle the async screencapture callbacks synchronously. This should only
-     * be used if the screencapture caller doesn't care that it blocks waiting for a screenshot.
-     */
-    public static class SyncScreenCaptureListener {
-        private static final int SCREENSHOT_WAIT_TIME_S = 1;
-        private ScreenshotHardwareBuffer mScreenshotHardwareBuffer;
-        private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
-        private final ScreenCaptureListener mScreenCaptureListener;
-
-        public SyncScreenCaptureListener() {
-            mScreenCaptureListener = new ScreenCaptureListener(screenshotHardwareBuffer -> {
-                mScreenshotHardwareBuffer = screenshotHardwareBuffer;
-                mCountDownLatch.countDown();
-            });
-        }
-
-        /**
-         * @return The underlying {@link ScreenCaptureListener}
-         */
-        public ScreenCaptureListener getScreenCaptureListener() {
-            return mScreenCaptureListener;
-        }
-
-        /**
-         * Waits until the screenshot callback has been invoked and the screenshot is ready. This
-         * can return {@code null} if the screenshot callback wasn't invoked after
-         * {@link #SCREENSHOT_WAIT_TIME_S} or the screencapture request resulted in an error
-         *
-         * @return A ScreenshotHardwareBuffer for the content that was captured.
-         */
-        @Nullable
-        public ScreenshotHardwareBuffer waitForScreenshot() {
-            try {
-                mCountDownLatch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to wait for screen capture result", e);
-            }
-
-            return mScreenshotHardwareBuffer;
-        }
-    }
 }
