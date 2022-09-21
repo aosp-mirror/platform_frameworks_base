@@ -18,6 +18,8 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -1107,6 +1109,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void addActivityOptions(Bundle opts, StageTaskListener stage) {
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
+        // Put BAL flags to avoid activity start aborted. Otherwise, flows like shortcut to split
+        // will be canceled.
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
     }
 
     void updateActivityOptions(Bundle opts, @SplitPosition int position) {
