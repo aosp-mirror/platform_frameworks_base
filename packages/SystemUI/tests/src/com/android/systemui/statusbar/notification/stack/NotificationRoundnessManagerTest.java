@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,8 +34,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationRoundnessLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -57,6 +61,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     private Runnable mRoundnessCallback = mock(Runnable.class);
     private ExpandableNotificationRow mFirst;
     private ExpandableNotificationRow mSecond;
+    private NotificationRoundnessLogger mLogger = mock(NotificationRoundnessLogger.class);
     private float mSmallRadiusRatio;
 
     @Before
@@ -66,7 +71,9 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mSmallRadiusRatio = resources.getDimension(R.dimen.notification_corner_radius_small)
                 / resources.getDimension(R.dimen.notification_corner_radius);
         mRoundnessManager = new NotificationRoundnessManager(
-                new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
+                new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext),
+                mLogger,
+                mock(DumpManager.class));
         allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(
                 mContext,
@@ -335,6 +342,20 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         Assert.assertTrue(mFirst.isLastInSection());
         Assert.assertTrue(mSecond.isFirstInSection());
         Assert.assertTrue(mSecond.isLastInSection());
+    }
+
+    @Test
+    public void testLoggingOnRoundingUpdate() {
+        NotificationSection[] sections = new NotificationSection[]{
+                createSection(mFirst, mSecond),
+                createSection(null, null)
+        };
+        mRoundnessManager.updateRoundedChildren(sections);
+        verify(mLogger).onSectionCornersUpdated(sections, /*anyChanged=*/ true);
+        verify(mLogger, atLeast(1)).onCornersUpdated(eq(mFirst), anyBoolean(),
+                anyBoolean(), anyBoolean(), anyBoolean());
+        verify(mLogger, atLeast(1)).onCornersUpdated(eq(mSecond), anyBoolean(),
+                anyBoolean(), anyBoolean(), anyBoolean());
     }
 
     private NotificationSection createSection(ExpandableNotificationRow first,
