@@ -2680,6 +2680,7 @@ class Task extends TaskFragment {
         if (isRootTask()) {
             updateSurfaceBounds();
         }
+        sendTaskFragmentParentInfoChangedIfNeeded();
     }
 
     boolean isResizeable() {
@@ -3520,6 +3521,25 @@ class Task extends TaskFragment {
      */
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
         return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(), isVisibleRequested());
+    }
+
+    @Override
+    void onActivityVisibleRequestedChanged() {
+        if (mVisibleRequested != isVisibleRequested()) {
+            sendTaskFragmentParentInfoChangedIfNeeded();
+        }
+    }
+
+    void sendTaskFragmentParentInfoChangedIfNeeded() {
+        if (!isLeafTask()) {
+            // Only send parent info changed event for leaf task.
+            return;
+        }
+        final TaskFragment childOrganizedTf =
+                getTaskFragment(TaskFragment::isOrganizedTaskFragment);
+        if (childOrganizedTf != null) {
+            childOrganizedTf.sendTaskFragmentParentInfoChanged();
+        }
     }
 
     boolean isTaskId(int taskId) {

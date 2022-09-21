@@ -97,6 +97,34 @@ public class TaskFragmentParentInfo implements Parcelable {
                 + "}";
     }
 
+    /**
+     * Indicates that whether this {@link TaskFragmentParentInfo} equals to {@code obj}.
+     * Note that {@link #equalsForTaskFragmentOrganizer(TaskFragmentParentInfo)} should be used
+     * for most cases because not all {@link Configuration} properties are interested for
+     * {@link TaskFragmentOrganizer}.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof TaskFragmentParentInfo)) {
+            return false;
+        }
+        final TaskFragmentParentInfo that = (TaskFragmentParentInfo) obj;
+        return mConfiguration.equals(that.mConfiguration)
+                && mDisplayId == that.mDisplayId
+                && mVisibleRequested == that.mVisibleRequested;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mConfiguration.hashCode();
+        result = 31 * result + mDisplayId;
+        result = 31 * result + (mVisibleRequested ? 1 : 0);
+        return result;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         mConfiguration.writeToParcel(dest, flags);
