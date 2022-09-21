@@ -546,6 +546,11 @@ class MediaHierarchyManager @Inject constructor(
         mediaCarouselController.updateUserVisibility = {
             mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
         }
+        mediaCarouselController.updateHostVisibility = {
+            mediaHosts.forEach {
+                it?.updateViewVisibility()
+            }
+        }
 
         panelEventsEvents.registerListener(object : NotifPanelEvents.Listener {
             override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
