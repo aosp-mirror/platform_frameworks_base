@@ -54,9 +54,7 @@ import java.util.List;
  * </ul>
  *
  * @see OverlayManagerTransaction
- * @hide
  */
-@SystemApi
 @SystemService(Context.OVERLAY_SERVICE)
 public class OverlayManager {
 
@@ -392,7 +390,6 @@ public class OverlayManager {
      *
      * @param targetPackageName the target package name
      * @return a list of overlay information
-     * @hide
      */
     @NonNull
     @NonUiContext

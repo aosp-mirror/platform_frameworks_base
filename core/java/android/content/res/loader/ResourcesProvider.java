@@ -83,7 +83,6 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
      * @return the resources provider instance for the {@code overlayInfo}
      * @throws IOException when the files can't be loaded.
      * @see OverlayManager#getOverlayInfosForTarget(String) to get the list of overlay info.
-     * @hide
      */
     @SuppressLint("WrongConstant") // TODO(b/238713267): ApkAssets blocks PROPERTY_LOADER
     @NonNull
