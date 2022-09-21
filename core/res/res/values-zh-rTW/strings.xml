@@ -586,16 +586,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用螢幕鎖定功能"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"如要繼續操作，請輸入螢幕鎖定憑證"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"請確實按住感應器"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (623888149088216458) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"無法辨識指紋，請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"請清潔指紋感應器，然後再試一次"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"清潔感應器，然後再試一次"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"請確實按住感應器"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移動速度過慢，請再試一次。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"改用其他指紋"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"太亮"</string>
-    <!-- no translation found for fingerprint_acquired_power_press (3107864151278434961) -->
-    <skip />
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"偵測到按下電源鍵"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"請試著調整"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"每次掃描時請稍微改變手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -607,15 +605,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"臉孔驗證成功，請按下 [確認] 按鈕"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋硬體無法使用。"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"無法設定指紋"</string>
-    <!-- no translation found for fingerprint_error_timeout (7361192266621252164) -->
-    <skip />
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"指紋設定逾時，請再試一次。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋作業已取消。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"使用者已取消指紋驗證作業。"</string>
-    <!-- no translation found for fingerprint_error_lockout (6626753679019351368) -->
-    <skip />
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"嘗試次數過多，請改用螢幕鎖定功能。"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"嘗試次數過多，請改用螢幕鎖定功能。"</string>
-    <!-- no translation found for fingerprint_error_unable_to_process (2446280592818621224) -->
-    <skip />
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"無法處理指紋，請再試一次。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"未登錄任何指紋。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"這個裝置沒有指紋感應器。"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"感應器已暫時停用。"</string>
@@ -643,8 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"請洽詢維修供應商。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"無法建立臉部模型，請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度過高，請嘗試使用較柔和的照明方式。"</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"光線不足"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"請將手機拿遠一點"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"請將手機拿近一點"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"請將手機舉高一點"</string>
@@ -1257,10 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"啟動完成。"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"你已按下電源鍵，這麼做通常會關閉螢幕。\n\n設定指紋時請試著減輕觸碰電源鍵的力道。"</string>
-    <!-- no translation found for fp_power_button_enrollment_title (6976841690455338563) -->
-    <skip />
-    <!-- no translation found for fp_power_button_enrollment_button_text (3199783266386029200) -->
-    <skip />
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"如要結束設定，請關閉螢幕"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"關閉"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"要繼續驗證指紋嗎？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"你已按下電源鍵，這麼做通常會關閉螢幕。\n\n驗證指紋時，請試著減輕觸碰電源鍵的力道。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"關閉螢幕"</string>

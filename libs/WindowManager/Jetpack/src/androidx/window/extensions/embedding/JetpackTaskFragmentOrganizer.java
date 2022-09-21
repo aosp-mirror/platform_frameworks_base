@@ -31,6 +31,7 @@ import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -93,6 +94,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     }
 
     /** No longer overrides the animation if the transition is on the given Task. */
+    @GuardedBy("mLock")
     void stopOverrideSplitAnimation(int taskId) {
         if (mAnimationController != null) {
             mAnimationController.unregisterRemoteAnimations(taskId);

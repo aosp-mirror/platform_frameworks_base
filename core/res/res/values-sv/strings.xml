@@ -643,8 +643,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besök ett reparationsställe."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
-    <!-- no translation found for face_acquired_too_dark (8539853432479385326) -->
-    <skip />
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"För lite ljus"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Flytta telefonen längre bort"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"För telefonen närmare"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Höj telefonen"</string>
