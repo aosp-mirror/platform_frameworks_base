@@ -231,9 +231,21 @@ class ActivityMetricsLogger {
             if (mAssociatedTransitionInfo == null) {
                 launchResult = ":failed";
             } else {
-                launchResult = (abort ? ":canceled:" : mAssociatedTransitionInfo.mProcessSwitch
-                        ? ":completed:" : ":completed-same-process:")
-                        + mAssociatedTransitionInfo.mLastLaunchedActivity.packageName;
+                final String status;
+                if (abort) {
+                    status = ":canceled:";
+                } else if (!mAssociatedTransitionInfo.mProcessSwitch) {
+                    status = ":completed-same-process:";
+                } else {
+                    if (endInfo.mTransitionType == TYPE_TRANSITION_HOT_LAUNCH) {
+                        status = ":completed-hot:";
+                    } else if (endInfo.mTransitionType == TYPE_TRANSITION_WARM_LAUNCH) {
+                        status = ":completed-warm:";
+                    } else {
+                        status = ":completed-cold:";
+                    }
+                }
+                launchResult = status + mAssociatedTransitionInfo.mLastLaunchedActivity.packageName;
             }
             // Put a supplement trace as the description of the async trace with the same id.
             Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, mTraceName + launchResult);
