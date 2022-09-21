@@ -210,13 +210,15 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     LocalBluetoothLeBroadcast(Context context) {
         mExecutor = Executors.newSingleThreadExecutor();
-        BluetoothAdapter.getDefaultAdapter().
-                getProfileProxy(context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST);
         mBuilder = new BluetoothLeAudioContentMetadata.Builder();
         mContentResolver = context.getContentResolver();
         Handler handler = new Handler(Looper.getMainLooper());
         mSettingsObserver = new BroadcastSettingsObserver(handler);
         updateBroadcastInfoFromContentProvider();
+
+        // Before registering callback, the constructor should finish creating the all of variables.
+        BluetoothAdapter.getDefaultAdapter()
+                .getProfileProxy(context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST);
     }
 
     /**
