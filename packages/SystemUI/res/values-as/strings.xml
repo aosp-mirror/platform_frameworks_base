@@ -678,7 +678,7 @@
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপোনাৰ ফ\'নটোৱে নিজে নিজে ঠাণ্ডা হ\'বলৈ স্বয়ংক্ৰিয়ভাৱে চেষ্টা কৰিব। আপুনি ফ\'নটো ব্যৱহাৰ কৰি থাকিব পাৰে কিন্তু ই লাহে লাহে চলিব পাৰে।\n\nফ\'নটো সম্পূৰ্ণভাৱে ঠাণ্ডা হোৱাৰ পিছত ই আগৰ নিচিনাকৈয়েই চলিব।"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"চ্চার্জাৰ আনপ্লাগ কৰক"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"এই ডিভাইচটো চ্চার্জ কৰোঁতে কিবা সমস্যা হৈছে। পাৱাৰ এডাপ্টাৰটো আনপ্লাগ কৰক, কেব’লডাল গৰম হ’ব পাৰে গতিকে সাবধান হ’ব।"</string>
+    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"এই ডিভাইচটো চাৰ্জ কৰোঁতে কিবা সমস্যা হৈছে। পাৱাৰ এডাপ্টাৰটো আনপ্লাগ কৰক আৰু কে’বলডাল গৰম হ’ব পাৰে; গতিকে সাবধান হ’ব।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"বাওঁ শ্বৰ্টকাট"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"সোঁ শ্বৰ্টকাট"</string>
